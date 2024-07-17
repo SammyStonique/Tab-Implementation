@@ -1,0 +1,34 @@
+<template>
+    <div class="fixed bottom-0 h-6 bg-gray-200 w-full flex">
+        <div v-for="tab,index in tabArray" :key="index" class="bg-white rounded border border-slate-300 px-2">
+            <button class="mr-2" @click="openTab(tab)">{{ tab }}</button>
+        </div>
+    </div>
+    
+</template>
+
+<script>
+import { computed, ref } from 'vue';
+import { useStore } from 'vuex';
+
+
+export default{
+    setup(){
+        const store = useStore();
+        
+        const tabArray = computed({
+            get: () => store.state.modulesTab.tabArray,
+            set: (value) => store.commit('modulesTab/ADD_TAB', value),
+        });
+        const openTab = (tab) =>{
+            store.commit('modulesTab/MAXIMIZE_TAB', tab)
+        }
+
+        return{
+            tabArray,
+            openTab
+        }
+    }
+    
+}
+</script>
