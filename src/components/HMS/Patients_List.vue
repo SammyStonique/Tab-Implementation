@@ -1,38 +1,63 @@
 <template>
-    <PageComponent 
-        :addButtonLabel="addButtonLabel"
-        :searchFilters="searchFilters"
-        @searchPage="searchPatients"
-        @resetFilters="resetFilters"
-        :columns="tableColumns"
-        :rows="patientList"
-        :count="depCount"
-        :currentPage="currentPage"
-        :result="depArrLen"
-        @loadPrev="loadPrev"
-        @loadNext="loadNext"
-        @firstPage="firstPage"
-        @lastPage="lastPage"
-        :showNextBtn="showNextBtn"
-        :showPreviousBtn="showPreviousBtn"
-    />
+    <div class="z-10">
+        <PageComponent 
+            :addButtonLabel="addButtonLabel"
+            @handleAddNew="addNewPatient"
+            :searchFilters="searchFilters"
+            @searchPage="searchPatients"
+            @resetFilters="resetFilters"
+            :columns="tableColumns"
+            :rows="patientList"
+            :actions="actions"
+            :idField="idField"
+            @handleActionClick="handleActionClick"
+            :count="depCount"
+            :currentPage="currentPage"
+            :result="depArrLen"
+            @loadPrev="loadPrev"
+            @loadNext="loadNext"
+            @firstPage="firstPage"
+            @lastPage="lastPage"
+            :showNextBtn="showNextBtn"
+            :showPreviousBtn="showPreviousBtn"
+        />
+    </div>
+    <!-- <Modal v-show="patModalVisible" @close="closeModal" 
+        :index="index" :fields="formFields" 
+        :submitButtonLabel="submitButtonLabel"
+    /> -->
+    <MovableModal v-model:visible="showModal">
+        <p class="font-semibold">Do you wish to continue?</p>
+    </MovableModal>
+    <MovableModal v-model:visible="patModalVisible">
+        <div>
+            <label for="">Email</label><br />
+            <input type="email" name="" id="" class="rounded border border-gray-600 text-lg pl-2 focus:outline-none"><br />
+            <label for="">Name</label><br />
+            <input type="text" name="" id="" class="rounded border border-gray-600 text-lg pl-2 focus:outline-none">
+        </div>
+    </MovableModal>
 </template>
 
 <script>
 import axios from "axios";
-import { ref, computed, onMounted, defineComponent } from 'vue';
+import { ref, computed, onMounted, onBeforeMount , defineComponent } from 'vue';
 import PageComponent from '@/components/PageComponent.vue'
 import { useStore } from "vuex";
 import patientsData from '@/composables/HMS/patientsDropdown'
+import Modal from '@/components/Modal.vue'
+import MovableModal from '@/components/MovableModal.vue'
 
 export default defineComponent({
     components:{
-        PageComponent
+        PageComponent, Modal, MovableModal
     },
     setup(){
         const { data, fetchData } = patientsData();
         const store = useStore();
+        const idField = 'patient_id';
         const addButtonLabel = ref('New Patient');
+        const submitButtonLabel = ref('Add');
         const patientList = ref([]);
         const depResults = ref([]);
         const depArrLen = ref(0);
@@ -41,7 +66,10 @@ export default defineComponent({
         const currentPage = ref(1);
         const showNextBtn = ref(false);
         const showPreviousBtn = ref(false);
+        const patModalVisible = ref(false);
+        const showModal = ref(false);
         const tableColumns = ref([
+            {type: "checkbox"},
             {label: "F. Name", key:"first_name"},
             {label: "L. Name", key: "last_name"},
             {label: "Email", key:"email"},
@@ -49,6 +77,11 @@ export default defineComponent({
             {label: "Phone No", key:"phone_number"},
             {label: "DOB", key:"birth_date"},
             {label: "City", key:"city"},
+        ])
+        const actions = ref([
+            {name: 'edit', icon: 'fa fa-edit', title: 'Edit Patient'},
+            {name: 'view', icon: 'fa fa-file-pdf-o', title: 'View Statement'},
+            {name: 'delete', icon: 'fa fa-trash', title: 'Delete Patient'},
         ])
         const hospitalID = ref('9e14bcef-d3c1-400c-a8c0-66d7b25cc5ff');
         const first_name_search = computed({
@@ -77,9 +110,6 @@ export default defineComponent({
         });
         const kin_dropdown_array = computed({
             get: () => store.state.Patients_List.patientsArr,
-            set: (value) => store.dispatch('Patients_List/fetchPatients', {"hospital":hospitalID}),
-            // get: () => data,
-            // set: (value) => fetchData({"hospital":hospitalID}),
         });
         const searchFilters = ref([
             {type:'text', placeholder:"First Name...", value: first_name_search, width:48,},
@@ -99,15 +129,14 @@ export default defineComponent({
                 type:'search-dropdown', value: gender_search, width:60,
                 selectOptions: kin_dropdown_array,
                 searchPlaceholder: 'Next Of Kin...', dropdownWidth: '380px',
-                // fetchData: store.dispatch('Patients_List/fetchPatients', {"hospital":hospitalID})
+                fetchData: store.dispatch('Patients_List/fetchPatients', {hospital:hospitalID.value})
             },
         ])
-        const getPatients = () =>{
-            let formData = {
-                hospital: hospitalID.value
-            }
-            store.dispatch('Patients_List/fetchPatients',formData)
-        }
+        const formFields = [
+            { row: 0, name: 'firstName', label: 'First Name', type: 'text', size: 2 },
+            { row: 0, name: 'lastName', label: 'Last Name', type: 'text', size: 2 },
+
+        ];
         const searchPatients = () =>{
             // getPatients();
             showNextBtn.value = false;
@@ -133,7 +162,7 @@ export default defineComponent({
                 depResults.value = response.data;
                 depArrLen.value = patientList.value.length;
                 depCount.value = depResults.value.count;
-                pageCount.value = Math.ceil(depCount.value / 10);
+                pageCount.value = Math.ceil(depCount.value / 50);
                 if(response.data.next){
                     showNextBtn.value = true;
                 }
@@ -173,17 +202,37 @@ export default defineComponent({
         }
         const lastPage = () =>{
             currentPage.value = pageCount.value;
+            console.log("THE PAGE COUNT VALUE IS ",pageCount.value);
             searchPatients();
             // scrollToTop();
         }
-        onMounted(()=>{
+        const addNewPatient = () =>{
+            showModal.value = true;
+            store.commit('pageTab/ADD_PAGE', {'HMS':'AddPatient'})
+            store.state.pageTab.hmsActiveTab = 'AddPatient';
+        }
+        const handleActionClick = (action) =>{
+            if( action == 'edit'){
+                console.log("EDITING TAKING PLACE"); 
+                patModalVisible.value = true;
+            }else if(action == 'delete'){
+                console.log("DELETING TAKING PLACE");
+            }else if(action == 'view'){
+                console.log("VIEWING TAKING PLACE");
+            }
+        }
+        const closeModal = () =>{
+            patModalVisible.value = false;
+        }
+        onBeforeMount(()=>{
             searchPatients();
-            getPatients();
+            
         })
         return{
             searchPatients,resetFilters, addButtonLabel, searchFilters, tableColumns, patientList,
             depResults, depArrLen, depCount, pageCount, showNextBtn, showPreviousBtn,
-            loadPrev, loadNext, firstPage, lastPage 
+            loadPrev, loadNext, firstPage, lastPage, idField, actions, handleActionClick, patModalVisible, closeModal,
+            formFields, submitButtonLabel, showModal, addNewPatient
         }
     }
 })

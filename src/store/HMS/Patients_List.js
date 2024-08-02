@@ -1,20 +1,31 @@
 import axios from "axios";
 
 const state = {
-    patientList: [],
+    patientList: [], 
     patientsArr: [],
+    hospital_id: '',
     first_name_search: '',
     last_name_search: '',
     phone_number_search: '',
     id_number_search: '',
     gender_search: '',
-    birth_date_search: ''
+    birth_date_search: '',
+    first_name: '', last_name: '', email: '', birth_date: '', id_number: '', phone_number: '', city: '', gender: '',
+    address: '', country: '', contact_person_first_name: '', contact_person_last_name: '', contact_person_email: '', contact_person_phone_number: '',
+    visit_notes: ''
   };
   
   const mutations = {
     LIST_PATIENTS(state, patients) {
       state.patientList = patients;
       console.log("THE PATIENTS LIST IS ",state.patientList)
+    },
+    SET_STATE(state, payload) {
+      for (const key in payload) {
+          if (payload.hasOwnProperty(key) && key in state) {
+              state[key] = payload[key];
+          }
+      }
     },
     SET_SEARCH_FILTERS(state, search_filter){
       for(const [key, value] of Object.entries(search_filter)){
@@ -46,7 +57,10 @@ const state = {
   };
   
   const actions = {
-    fetchPatients({ commit }, formData) {
+    updateState({ commit }, newState) {
+      commit('SET_STATE', newState);
+    },
+    fetchPatients({ commit,state }, formData) {
       state.patientsArr = [];
       axios.post(`api/v1/get-patients/`,formData)
       .then((response)=>{
@@ -55,22 +69,23 @@ const state = {
           state.patientsArr.push((response.data[i].first_name + ' ' + response.data[i].last_name))
         }
         commit('LIST_PATIENTS', response.data);
-        console.log("THE PAT ARRAY IS ",state.patientsArr)
       })
       .catch((error)=>{
         console.log(error.message);
       })
       
     },
-    // setCurrentUser({ commit }, user) {
-    //   commit('SET_CURRENT_USER', user);
-    // },
-    // addUser({ commit }, user) {
-    //   commit('ADD_USER', user);
-    // },
-    // updateUser({ commit }, user) {
-    //   commit('UPDATE_USER', user);
-    // },
+    createPatient({ commit,state }, formData) {
+      axios.post('api/v1/create-patient-with-visit/', formData)
+      .then((response)=>{
+        console.log("SUCCESS", response.data);
+        window.alert('SUCCESS')
+      })
+      .catch((error)=>{
+        console.log(error.message);
+        window.alert(error.message)
+      })
+    }
   };
   
   const getters = {

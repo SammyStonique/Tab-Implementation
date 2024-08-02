@@ -94,7 +94,7 @@
     
                     </div>
                     <div class="py-2 px-3 pl-4 w-full hover:bg-slate-500 hover:w-full">
-                        <button class="flex text-sm">
+                        <button class="flex text-sm" @click="openPage({'HMS':'AddPatient'})">
                             <i class="fa fa-address-book-o pt-2 mr-2" aria-hidden="true"></i>
                             <p class="">Patient Visits</p>
                         </button>

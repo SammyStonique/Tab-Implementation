@@ -6,6 +6,8 @@
         @resetFilters="resetFilters"
         :columns="tableColumns"
         :rows="depList"
+        :actions="actions"
+        :idField="idField"
         :count="depCount"
         :currentPage="currentPage"
         :result="depArrLen"
@@ -42,6 +44,9 @@ export default{
         const tableColumns = ref([
             {label: "Code", key:"code"},
             {label: "Name", key: "name"}
+        ])
+        const actions = ref([
+            {name: 'edit', icon: 'fa fa-edit', title: 'Edit Department'}
         ])
         const companyID = ref('9e14bcef-d3c1-400c-a8c0-66d7b25cc5ff');
         const code_search = computed({
@@ -123,7 +128,7 @@ export default{
         return{
             searchDepartments, addButtonLabel, searchFilters, resetFilters, tableColumns, depList,
             depResults, depArrLen, depCount, pageCount, showNextBtn, showPreviousBtn,
-            loadPrev, loadNext, firstPage, lastPage 
+            loadPrev, loadNext, firstPage, lastPage, actions
         }
     }
 }

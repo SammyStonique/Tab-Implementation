@@ -1,48 +1,55 @@
 <template>
-    <div class="main-content z-10 bg-gray-100 px-4 py-4 text-sm">
-        <div class="subsection fixed w-[97%] rounded bg-white">
-            <div class="md:px-8 w-full">
-                <div class="fixed bg-white w-[93%] z-50">
-                    <FilterBar 
-                        :addButtonLabel="addButtonLabel" 
-                        :filters="searchFilters" 
-                        @search="searchPage"
-                        @reset="resetFilters"
-                        :options="options"
-                        :dropdownWidth="dropdownWidth"
-                        :selectOptions="selectOptions"
-                        :updateValue="updateValue"
-                        :searchPlaceholder="searchPlaceholder"
-                        />
-                </div>
-                <div class="fixed table w-[93%] top-60 z-20">
-                    <DynamicTable :columns="columns" :rows="rows"/>
-                </div>
-                <div class="fixed w-[93%] z-30 bottom-6 pb-2 bg-white">
-                    <MyPagination 
-                    :count="count"
-                    :currentPage="currentPage"
-                    :result="result"
-                    @loadPrev="loadPrev"
-                    @loadNext="loadNext"
-                    @firstPage="firstPage"
-                    @lastPage="lastPage"
-                    :showNextBtn="showNextBtn"
-                    :showPreviousBtn="showPreviousBtn"
-                
-                />
-                </div>
+    <PageStyleComponent>
+        <template v-slot:body>
+            <div class="fixed bg-white w-[93%] z-50">
+                <FilterBar 
+                    :addButtonLabel="addButtonLabel" 
+                    :filters="searchFilters" 
+                    @add-new="handleAddNew"
+                    @search="searchPage"
+                    @reset="resetFilters"
+                    :options="options"
+                    :dropdownWidth="dropdownWidth"
+                    :selectOptions="selectOptions"
+                    :updateValue="updateValue"
+                    :searchPlaceholder="searchPlaceholder"
+                    />
             </div>
-        </div>
-    </div>
+            <div class="fixed table w-[93%] top-60 z-20">
+                <DynamicTable 
+                    :columns="columns" 
+                    :rows="rows"
+                    :idField="idField"
+                    :actions="actions"
+                    @action-click="handleActionClick"
+                />
+            </div>
+            <div class="fixed w-[93%] z-30 bottom-6 pb-2 bg-white">
+                <MyPagination 
+                :count="count"
+                :currentPage="currentPage"
+                :result="result"
+                @loadPrev="loadPrev"
+                @loadNext="loadNext"
+                @firstPage="firstPage"
+                @lastPage="lastPage"
+                :showNextBtn="showNextBtn"
+                :showPreviousBtn="showPreviousBtn"
+            
+            />
+            </div>
+        </template>
+    </PageStyleComponent>
 
 </template>
 
 <script>
 import { defineComponent, ref } from 'vue';
 import FilterBar from '@/components/FilterBar.vue'
+import Loader from '@/components/Loader.vue'
 import DynamicTable from '@/components/DynamicTable.vue'
 import MyPagination from '@/components/MyPagination.vue'
+import PageStyleComponent from './PageStyleComponent.vue';
 
 export default defineComponent({
     props:{
@@ -61,6 +68,14 @@ export default defineComponent({
         rows:{
             type: Array,
             default: () => []   
+        },
+        actions:{
+            type: Array,
+            default: () => []   
+        },
+        idField: {
+            type: String,
+            default: () => ''
         },
         count:{
             type: Number,
@@ -105,7 +120,7 @@ export default defineComponent({
 
     },
     components:{
-        FilterBar, DynamicTable, MyPagination
+        FilterBar, DynamicTable, MyPagination, Loader, PageStyleComponent
     },
     setup(props, { emit }){
         const searchPage = () =>{
@@ -126,8 +141,14 @@ export default defineComponent({
         const lastPage = () =>{
             emit('lastPage')
         }
+        const handleActionClick = (action) =>{
+            emit('handleActionClick', action)
+        }
+        const handleAddNew = () =>{
+            emit('handleAddNew')
+        }
         return{
-            searchPage, resetFilters, loadPrev, loadNext, firstPage, lastPage
+            searchPage, resetFilters, loadPrev, loadNext, firstPage, lastPage, handleActionClick, handleAddNew
         }
     }
 })

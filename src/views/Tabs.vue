@@ -25,17 +25,19 @@
   import { ref, computed } from 'vue';
   import Tab1 from '@/components/Tab1.vue'
   import Tab2 from '@/components/Tab2.vue';
+  import AddPatient from '@/components/HMS/AddPatient.vue';
   
   export default {
     components: {
       Tab1,
-      Tab2,
+      Tab2, AddPatient
     },
     setup() {
       const activeTab = ref(0);
       const tabs = [
         { name: 'Tab 1', component: 'Tab1' },
         { name: 'Tab 2', component: 'Tab2' },
+        { name: 'Tab 3', component: 'AddPatient' },
       ];
   
       const activeComponent = computed(() => tabs[activeTab.value].component);

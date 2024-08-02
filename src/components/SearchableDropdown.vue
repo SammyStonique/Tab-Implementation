@@ -85,8 +85,7 @@
           emit('fetchData');
         }
         onMounted(()=>{
-          // fetchData();
-          console.log("THE SEARCHABLE DROPDOWN HAS BEEN MOUNTED")
+          fetchData();
         })
         return{
             isOpen, searchQuery, dropdown_active, filteredOptions, selectOption, filterOptions, resetDropdown, toggleDropdown
@@ -104,7 +103,7 @@
   .searchable-dropdown input[type="text"] {
       width: 100%;
       padding: 2px;
-      border: 2px solid #C8C8C8;
+      border: 1px solid rgb(156 163 175);
       border-radius: 4px;
   }
   .dropdown-list {
@@ -138,7 +137,7 @@
     margin-top: 3px;
     margin-left: -20px;
     position: absolute;
-    z-index: 1;
+    /* z-index: 1; */
     cursor:pointer;
     border:0px;
     background-color: inherit;

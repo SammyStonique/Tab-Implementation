@@ -1,5 +1,5 @@
 <template>
-    <div class=" w-full min-h-[98vh] bottom-8 overflow-y-hidden">
+    <div class="main-container w-full min-h-[90vh] bottom-8">
         <div class="fixed top-0 w-full z-50">
             <TopBar @minimize="minimize" @close="close" />
             <NavBar :title="title"/>
@@ -8,7 +8,9 @@
         </div>
         <div class="tab-content z-10 overflow-y-hidden">
             <keep-alive>
-                <component :is="activeComponent" />
+                <component 
+                    :is="activeComponent"
+                 />
             </keep-alive>
         </div>
         
@@ -25,6 +27,7 @@ import Appointments from '@/components/HMS/Appointments.vue'
 import Doctors from '@/components/HMS/Doctors.vue'
 import Departments from '@/components/HMS/Departments.vue'
 import Patients_List from '@/components/HMS/Patients_List.vue'
+import AddPatient from '@/components/HMS/AddPatient.vue'
 import Emergency_Contacts from '@/components/HMS/Emergency_Contacts.vue'
 import { useStore } from 'vuex';
 import { ref, computed } from 'vue';
@@ -34,7 +37,7 @@ export default{
         NavBar,
         NavBarHMS,
         PagesTab,
-        Dashboard, Appointments, Departments, Doctors, Patients_List, Emergency_Contacts
+        Dashboard, Appointments, Departments, Doctors, Patients_List, Emergency_Contacts, AddPatient
     },
     props: {
         title: {
@@ -45,10 +48,12 @@ export default{
     setup(){
         const store = useStore();
         const title = ref('Hospital Management')
-        const activeTab = ref('Dashboard');
+        // const activeTab = ref('Dashboard');
         const tabs = computed({
             get: ()=> store.state.pageTab.hmsArray,
         });
+
+        const activeTab = computed(() => store.state.pageTab.hmsActiveTab);
     
         const activeComponent = computed(() => activeTab.value);
     
@@ -100,5 +105,8 @@ export default{
 <style>
 .tab-content{
     margin-top: 40px;
+}
+.main-container{
+    overflow: hidden;
 }
 </style>
