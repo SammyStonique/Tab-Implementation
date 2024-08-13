@@ -141,8 +141,8 @@ export default defineComponent({
         const lastPage = () =>{
             emit('lastPage')
         }
-        const handleActionClick = (action) =>{
-            emit('handleActionClick', action)
+        const handleActionClick = (rowIndex, action, row) =>{
+            emit('handleActionClick',rowIndex, action, row)
         }
         const handleAddNew = () =>{
             emit('handleAddNew')

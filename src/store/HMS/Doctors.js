@@ -69,13 +69,14 @@ const state = {
       
     },
     handleSelectedDoctor({ commit, state }, option){
-        const selectedDoc = state.doctList.find(doc => (doc.first_name + ' ' + doc.last_name + ' - ' + doc.email) === option);
-        if (selectedDoc) {
-            state.doctID = selectedDoc.user;
-            state.doctName = selectedDoc.first_name + ' ' + selectedDoc.last_name;
-            state.doctArray = [...state.doctArray, selectedDoc];
-        }
-        commit('DOCTORS_ARRAY', state.doctArray);
+      state.doctArray = [];
+      const selectedDoc = state.doctList.find(doc => (doc.first_name + ' ' + doc.last_name + ' - ' + doc.email) === option);
+      if (selectedDoc) {
+          state.doctID = selectedDoc.user;
+          state.doctName = selectedDoc.first_name + ' ' + selectedDoc.last_name;
+          state.doctArray = [...state.doctArray, selectedDoc];
+      }
+      commit('DOCTORS_ARRAY', state.doctArray);
         
     }
   };

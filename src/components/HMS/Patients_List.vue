@@ -49,6 +49,7 @@ import Modal from '@/components/Modal.vue'
 import MovableModal from '@/components/MovableModal.vue'
 
 export default defineComponent({
+    name: 'Patients_List',
     components:{
         PageComponent, Modal, MovableModal
     },
@@ -208,15 +209,35 @@ export default defineComponent({
         }
         const addNewPatient = () =>{
             showModal.value = true;
-            store.commit('pageTab/ADD_PAGE', {'HMS':'AddPatient'})
-            store.state.pageTab.hmsActiveTab = 'AddPatient';
+            store.commit('pageTab/ADD_PAGE', {'HMS':'Patient_Details'})
+            store.state.pageTab.hmsActiveTab = 'Patient_Details';
+            store.dispatch('Patients_List/updateState', {isEditing: false});
+            store.dispatch('Patients_List/updateState', {selectedPatient: null});
         }
-        const handleActionClick = (action) =>{
+        const handleActionClick = async(rowIndex, action, row) =>{
             if( action == 'edit'){
-                console.log("EDITING TAKING PLACE"); 
-                patModalVisible.value = true;
+                const patientID = row[idField];
+                let formData = {
+                    hospital: hospitalID.value,
+                    patient: patientID
+                }
+                await store.dispatch('Patients_List/fetchPatient',formData).
+                then(()=>{
+                    store.commit('pageTab/ADD_PAGE', {'HMS':'Patient_Details'})
+                    store.state.pageTab.hmsActiveTab = 'Patient_Details';
+                })
+                
+                // patModalVisible.value = true;
             }else if(action == 'delete'){
-                console.log("DELETING TAKING PLACE");
+                const patientID = row[idField];
+                let formData = {
+                    hospital: hospitalID.value,
+                    patient: patientID
+                }
+                await store.dispatch('Patients_List/deletePatient',formData).
+                then(()=>{
+                    searchPatients();
+                })
             }else if(action == 'view'){
                 console.log("VIEWING TAKING PLACE");
             }

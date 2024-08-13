@@ -26,7 +26,7 @@
             <div v-else>
               <label for="">{{ field.label }}:</label><br />
             </div>
-            <select v-model="field.value" :class="`rounded border border-gray-400 bg-white text-sm pl-2 pt-2 w-full`">
+            <select v-model="field.value" class="rounded border border-gray-400 bg-white text-sm pl-2 pt-2 w-full">
               <option value="" selected disabled>{{ field.placeholder }}</option>
               <option v-for="(option, index) in field.options" :key="index" :value="option.value">{{ option.text }}</option>
             </select>
@@ -56,7 +56,7 @@
             <div v-else>
               <label for="">{{ field.label }}:</label><br />
             </div>
-            <textarea class="rounded border border-gray-400 bg-white text-base pl-2 pt-2" v-model="field.value" :rows="field.textarea_rows" :cols="field.textarea_cols"></textarea>
+            <textarea v-model="field.value" class="rounded border border-gray-400 bg-white text-base pl-2 pt-2" :rows="field.textarea_rows" :cols="field.textarea_cols"></textarea>
           </div>
         </div>
         <div class="flex-1 basis-full p-2">
@@ -75,6 +75,7 @@
 <script>
 import { ref } from 'vue';
 import SearchableDropdown from './SearchableDropdown.vue';
+
 export default{
     props:{
         fields:{

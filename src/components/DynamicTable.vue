@@ -23,13 +23,18 @@
               <input type="checkbox" v-model="row.selected" class="checkbox" @change="updateSelectedIds(row)"/>
             </template>
             <template v-else>
-              <input type="text" pattern="[0-9]*" oninput="this.value = this.value.replace(/[^0-9]/g, '')" class="w-full text-xs uppercase" v-model="row[column.key]" />             
+              <div v-if="column.editable === true">
+                <input :type="column.type" pattern="[0-9]*" oninput="this.value = this.value.replace(/[^0-9]/g, '')" class="w-full text-xs uppercase" v-model="row[column.key]" />             
+              </div>
+              <div v-else>
+                {{ row[column.key] }}
+              </div>
             </template>
             <!-- {{ row[column.key] }} -->
           </td>
           <td class="actions flex gap-2 border-0">
             <div v-for="action in actions" >
-              <button @click.stop="handleAction(action.name, row)" :title="action.title"><i :class="action.icon"></i></button>
+              <button @click.stop="handleAction(rowIndex,action.name, row)" :title="action.title"><i :class="action.icon"></i></button>
             </div>
           </td>
         </tr>
@@ -39,7 +44,7 @@
 </template>
 
 <script>
-import { defineComponent, ref, onMounted, computed } from 'vue';
+import { defineComponent, ref, onMounted, computed} from 'vue';
 
 export default defineComponent({
   name: 'DynamicTable',
@@ -76,11 +81,12 @@ export default defineComponent({
       emit('row-click', row);
     };
 
-    const handleAction = (action, row) => {
+    const handleAction = (rowIndex, action, row) => {
       const rowId = row[props.idField];
       console.log("THE ROW ID TO PERFORM ACTION IS ",rowId)
       console.log("THE ACTION TO PERFORM IS ",action)
-      emit('action-click', action);
+      console.log("THE ROW INDEX IS ",rowIndex)
+      emit('action-click', rowIndex, action, row);
     }
 
     const toggleSelectAll = (event) => {
@@ -127,6 +133,10 @@ export default defineComponent({
 </script>
 
 <style scoped>
+input {
+  width: 100%;
+  box-sizing: border-box;
+}
 .table-container {
   position: relative;
   max-height: 52vh;
@@ -143,21 +153,17 @@ export default defineComponent({
 .dynamic-table th,
 .dynamic-table td {
   border: 1px solid #ccc;
-  /* padding: 8px; */
+  padding: 8px;
   text-align: left;
 }
-.dynamic-table th{
-  padding: 8px;
-}
+
 .dynamic-table input{
   text-align: left;
-  padding: 8px;
+  outline: none;
+  background-color: inherit;
 }
 .actions{
   padding: 8px;
-}
-.checkbox{
-  text-align: center !important;
 }
 
 /* Style for fixed header */

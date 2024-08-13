@@ -58,10 +58,6 @@ const state = {
           }
         }
       }
-      // state.tabArray.delete(tab);
-      // state.homePage = true;
-      // state.modulePage = false;
-      // state.selectedModule = '';
     },
 
   };

@@ -20,10 +20,9 @@
             </div>
         </div>
     </div>
+
+    <modules-tab />
     
-    <keep-alive>
-        <modules-tab />
-    </keep-alive>
 </template>
 
 <script>

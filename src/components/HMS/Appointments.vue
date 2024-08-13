@@ -128,7 +128,7 @@ import { useStore } from "vuex";
 import FilterBar from '@/components/FilterBar.vue';
 
 export default{
-    name: 'AppointmentsView',
+    name: 'Appointments',
     props: ['scrollToTop','loader','showLoader','hideLoader',],
     components:{
         FilterBar

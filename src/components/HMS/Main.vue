@@ -7,7 +7,7 @@
             <PagesTab @openPage="selectedTab" @closePage="closeTab"/>
         </div>
         <div class="tab-content z-10 overflow-y-hidden">
-            <keep-alive>
+            <keep-alive :include="cachedComponents">
                 <component 
                     :is="activeComponent"
                  />
@@ -27,17 +27,17 @@ import Appointments from '@/components/HMS/Appointments.vue'
 import Doctors from '@/components/HMS/Doctors.vue'
 import Departments from '@/components/HMS/Departments.vue'
 import Patients_List from '@/components/HMS/Patients_List.vue'
-import AddPatient from '@/components/HMS/AddPatient.vue'
+import Patient_Details from '@/components/HMS/Patient_Details.vue'
 import Emergency_Contacts from '@/components/HMS/Emergency_Contacts.vue'
 import { useStore } from 'vuex';
-import { ref, computed } from 'vue';
+import { ref, computed, watch } from 'vue';
 export default{
     components:{
         TopBar,
         NavBar,
         NavBarHMS,
         PagesTab,
-        Dashboard, Appointments, Departments, Doctors, Patients_List, Emergency_Contacts, AddPatient
+        Dashboard, Appointments, Departments, Doctors, Patients_List, Emergency_Contacts, Patient_Details
     },
     props: {
         title: {
@@ -47,8 +47,9 @@ export default{
     },
     setup(){
         const store = useStore();
-        const title = ref('Hospital Management')
-        // const activeTab = ref('Dashboard');
+        const title = ref('Hospital Management');
+        // const cachedComponents = ref([]);
+        const cachedComponents = computed(() =>  Array.from(store.state.pageTab.hmsArray));
         const tabs = computed({
             get: ()=> store.state.pageTab.hmsArray,
         });
@@ -59,11 +60,14 @@ export default{
     
         const selectTab = (pageName) => {
             for(const [key, value] of Object.entries(pageName)){
-                activeTab.value = value;
+                store.state.pageTab.hmsActiveTab = value;
+                // if (!cachedComponents.value.includes(value)) {
+                //     cachedComponents.value.push(value);
+                // }
             }
+            console.log("THE CACHED COMPONENTS VALUE IS ",cachedComponents.value);
         };
         const selectedTab = (pageName) => {
-            activeTab.value = pageName;
             store.state.pageTab.hmsActiveTab = pageName;
         };
         const closeTab = (pageName) =>{
@@ -71,6 +75,9 @@ export default{
             store.commit('pageTab/REMOVE_PAGE', page)
             store.commit(`${pageName}/RESET_SEARCH_FILTERS`)
             activeTab.value = store.state.pageTab.hmsActiveTab;
+            store.commit(`${pageName}/initializeStore`);
+            // cachedComponents.value = cachedComponents.value.filter(c => c !== pageName);
+            console.log("THE CACHED COMPONENTS VALUE IS ",cachedComponents.value);
         }
         const minimize = () =>{
             store.commit('modulesTab/MINIMIZE_TAB')
@@ -80,9 +87,10 @@ export default{
             console.log("THE VALUE OF TAB IS ",myArray);
             for(let i=0; i<myArray.length; i++){
                 store.commit(`${myArray[i]}/RESET_SEARCH_FILTERS`)
+                store.commit(`${myArray[i]}/initializeStore`)
             }
             store.commit('modulesTab/REMOVE_TAB', {'HMS':'Hospital Management'}),
-            store.commit('pageTab/CLEAR_PAGE_TAB', 'Hospital Management')
+            store.commit('pageTab/CLEAR_PAGE_TAB', 'Hospital Management');
             activeTab.value = store.state.pageTab.hmsActiveTab;
         }
         return{
@@ -91,7 +99,7 @@ export default{
             title,
             activeComponent,
             selectTab, selectedTab, closeTab,
-            activeTab
+            activeTab, cachedComponents
         }
     },
     mounted(){

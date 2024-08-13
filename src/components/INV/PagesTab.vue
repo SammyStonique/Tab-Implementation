@@ -24,7 +24,7 @@ export default{
         });
         
         const openPage = (page) =>{
-            store.commit('pageTab/MAXIMIZE_TAB', page)
+            store.commit('pageTab/MAXIMIZE_PAGE', page)
         }
         const removePage = (page) =>{
             store.commit('pageTab/REMOVE_PAGE', page)

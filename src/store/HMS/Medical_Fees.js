@@ -67,6 +67,12 @@ const state = {
       }
       commit('MEDICAL_FEES_ARRAY', state.feesArray); 
     },
+    deleteFee({commit, state}, index){
+      console.log("THE INDEX IS ",index)
+      state.feesArray.splice(index, 1); 
+      console.log("THE FEESSSS ARR IS ",state.feesArray)
+      // commit('MEDICAL_FEES_ARRAY', newArray)
+    },
     resetFees({ commit }){
       const feesArray = [];
       commit('MEDICAL_FEES_ARRAY', feesArray)

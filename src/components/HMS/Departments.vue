@@ -27,6 +27,7 @@ import PageComponent from '@/components/PageComponent.vue'
 import { useStore } from "vuex";
 
 export default{
+    name: 'Departments',
     components:{
         PageComponent
     },

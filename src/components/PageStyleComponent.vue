@@ -16,7 +16,7 @@
 </template>
 
 <script>
-import { defineComponent, ref } from 'vue';
+import { defineComponent, ref} from 'vue';
 import Loader from '@/components/Loader.vue'
 
 export default defineComponent({
@@ -28,9 +28,6 @@ export default defineComponent({
     },
     setup(props, { emit }){
 
-        return{
-
-        }
     }
 })
 </script>

@@ -1,5 +1,3 @@
-// src/composables/useDateFormatter.js
-
 import { ref } from 'vue';
 
 // Function to format date to YYYY-MM-DD

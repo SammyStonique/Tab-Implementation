@@ -25,12 +25,11 @@
   import { ref, computed } from 'vue';
   import Tab1 from '@/components/Tab1.vue'
   import Tab2 from '@/components/Tab2.vue';
-  import AddPatient from '@/components/HMS/AddPatient.vue';
   
   export default {
     components: {
       Tab1,
-      Tab2, AddPatient
+      Tab2
     },
     setup() {
       const activeTab = ref(0);
