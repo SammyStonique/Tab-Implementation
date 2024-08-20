@@ -1,30 +1,57 @@
 <template> 
-    <div class="container fixed h-screen w-full bg-gray-200" :style="{display: this.loader}">
+    <div class="container bg-gray-200" :style="{display: loader, width: containerWidth, height: containerHeight }">
         <div class="loader"></div>
     </div>
 </template>
 
 
 <script>
-export default{
-
-    props:['loader','showLoader','hideLoader'],
+import { defineComponent, ref } from 'vue';
+export default defineComponent({
+    props:{
+        loader:{
+            type: String,
+            default: "none"
+        },
+        containerWidth: {
+            type: String,
+            default: '100vw' 
+        },
+        containerHeight: {
+            type: String,
+            default: '100vh' 
+        }
+    },
+    setup(props, {emit}){
+        const loaderIndex = ref(1);
+        const showLoader = () =>{
+            props.loader = "block";
+            loaderIndex.value = -1;
+            emit('showLoader');
+        }
+        const hideLoader = () =>{
+            props.loader = "none";
+            loaderIndex.value = 1;
+            emit('hideLoader');
+        }
+        return{
+            showLoader, hideLoader
+        }
+    }
     
-}
+})
 </script>
 
 
 <style scoped>
 .container{
     opacity: 50%;
-    top: 0;
-    left: 0;
-    bottom: 0;
-    right: 0;
-    width: 100%;
-    /* z-index: 1020; */
-    min-width: 100vw;
-    min-height: 100vh;
+    position: absolute;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 100;
+    overflow: hidden;
 }
  .loader {
     position: absolute;

@@ -1,6 +1,6 @@
 <template>
     <div class="searchable-dropdown">
-      <input type="text" v-model="searchQuery" @input="filterOptions" :placeholder="searchPlaceholder" class="rounded bg-white pl-2" :style="{width: this.dropdownWidth, height:this.dropdownHeight}">
+      <input type="text" v-model="searchQuery" @input="filterOptions" :placeholder="searchPlaceholder" class="rounded bg-white pl-3" :style="{width: this.dropdownWidth, height:this.dropdownHeight}">
       <button type="button" class="show-dropdown" @click="toggleDropdown" v-if="!dropdown_active"><i class="fa fa-caret-down" aria-hidden="true"></i></button>
       <button type="button" class="show-dropdown" @click="resetDropdown" v-else><i class="fa fa-times" aria-hidden="true"></i></button>
       <ul v-if="isOpen" class="dropdown-list">
@@ -12,7 +12,7 @@
   </template>
   
   <script>
-  import { defineComponent, ref, onMounted  } from 'vue';
+  import { defineComponent, ref, onMounted, onBeforeMount  } from 'vue';
   import { getCurrentInstance } from 'vue';
   export default defineComponent({
     props:{
@@ -86,6 +86,10 @@
         }
         onMounted(()=>{
           fetchData();
+        })
+        onBeforeMount(()=>{
+          dropdown_active.value = false;
+          searchQuery.value = proxy.updateValue;
         })
         return{
             isOpen, searchQuery, dropdown_active, filteredOptions, selectOption, filterOptions, resetDropdown, toggleDropdown

@@ -1,5 +1,5 @@
 <template>
-    <PageStyleComponent :key="mainComponentKey">
+    <PageStyleComponent :key="mainComponentKey" :loader="loader" @showLoader="showLoader" @hideLoader="hideLoader">
         <template v-slot:body>
             <div class="mt-6">
                 <DynamicForm  :fields="formFields" :flex_basis="flex_basis" :flex_basis_percentage="flex_basis_percentage" :displayButtons="displayButtons" @handleSubmit="savePatient" @handleReset="handleReset">
@@ -27,7 +27,7 @@
                                         @fetchData="fetchData"
                                     />
                                 </div>                      
-                                <DynamicTable :key="tableKey" :columns="columns" :rows="rows" :idField="idField" :actions="actions" @action-click="deleteFee()" />
+                                <DynamicTable :key="tableKey" :columns="columns" :rows="rows" :idField="idField" :actions="actions" @action-click="deleteFee" />
                             </div>
                         </div>
                     </template>
@@ -45,7 +45,7 @@ import PageStyleComponent from '../PageStyleComponent.vue';
 import SearchableDropdown from '../SearchableDropdown.vue';
 import { useStore } from "vuex";
 import { useDateFormatter } from '@/composables/DateFormatter';
-
+import { useToast } from "vue-toastification";
 
 export default defineComponent({
     name: 'Patient_Details',
@@ -53,13 +53,15 @@ export default defineComponent({
         PageStyleComponent, DynamicForm, DynamicTable, SearchableDropdown
     },
     setup(){
+        const store = useStore();
+        const toast = useToast();
+        const loader = ref('none');
         const mainComponentKey = ref(0);
         const componentKey = ref(0);
         const tableKey = ref(0);
         const doctComponentKey = ref(0);
-        const store = useStore();
         const errors = ref([]);
-        const hospitalID = ref('9e14bcef-d3c1-400c-a8c0-66d7b25cc5ff');
+        const hospitalID = computed(()=> store.state.userData.company_id);
         const { formatDate } = useDateFormatter();
         const displayButtons = ref(true);
         const isEditing = computed(()=> store.state.Patients_List.isEditing);
@@ -70,20 +72,7 @@ export default defineComponent({
         const additional1_flex_basis = ref('');
         const additional1_flex_basis_percentage = ref('');
         const selectedPatient = computed(()=> store.state.Patients_List.selectedPatient);
-        const first_name = ref('');
-        const last_name = ref('');
-        const phone_number = ref('');
-        const gender = ref('');
-        const email = ref('');
-        const birth_date = ref('');
-        const id_number = ref('');
-        const city = ref('');
-        const address = ref('');
         const country = ref('Kenya');
-        const contact_person_first_name = ref('');
-        const contact_person_last_name = ref('');
-        const contact_person_email = ref('');
-        const contact_person_phone_number = ref('');
         const today_date = new Date();
         const visit_notes = ref('');
         const visit_status = ref('Arrived');
@@ -117,49 +106,26 @@ export default defineComponent({
             {name: 'delete', icon: 'fa fa-minus-circle', title: 'Delete Fee'},
         ])
 
-        const formFields = ref([
-            {type:'text', label:"First Name", value: first_name, required: true},
-            {type:'text', label:"Last Name", value: last_name, required: true},
-            {type:'text', label:"Phone No", value: phone_number, required: true, placeholder: '+2547XXX...'},
-            {type:'text', label:"ID No", value: id_number, required: true},
-            {type:'text', label:"Email", value: email, required: true},
-            {
-                type:'dropdown', label:"Gender", value: gender, placeholder:"Select Gender", required: true,
-                options: [{text:'Male',value:'Male'},{text:'Female',value:'Female'},{text:'Others',value:'Others'}]
-            },
-            {type:'date', label:"Date Of Birth", value: birth_date, required: true},
-            {
-                type:'dropdown', label:"City", value: city, birth_date, placeholder:"Select City", required: true,
-                options: [{text:'Nairobi',value:'Nairobi'},{text:'Mombasa',value:'Mombasa'},{text:'Kisumu',value:'Kisumu'},{text:'Nakuru',value:'Nakuru'}]
-            },
-            {type:'text', label:"Country", value: country, required: true},
-            {type:'text', label:"Address", value: address, required: true},
-        
-        ])
+        const formFields = ref([]);
         const updateFormFields = (patient) => {
             formFields.value = [
-                { type: 'text', label: "First Name", value: patient?.first_name || '', required: true },
-                { type: 'text', label: "Last Name", value: patient?.last_name || '', required: true },
-                { type: 'text', label: "Phone Number", value: patient?.phone_number || '', required: true, placeholder: '+2547XXX...' },
-                { type: 'text', label: "ID Number", value: patient?.id_number || '', required: true },
-                { type: 'text', label: "Email", value: patient?.email || '', required: true },
-                { type: 'dropdown', label: "Gender", value: patient?.gender || '', placeholder: "Select Gender", required: true, options: [{ text: 'Male', value: 'Male' }, { text: 'Female', value: 'Female' }, { text: 'Others', value: 'Others' }] },
-                { type: 'date', label: "Birth Date", value: patient?.birth_date || '', required: true },
-                { type: 'dropdown', label: "City", value: patient?.city || '', placeholder: "Select City", required: true, options: [{ text: 'Nairobi', value: 'Nairobi' }, { text: 'Mombasa', value: 'Mombasa' }, { text: 'Kisumu', value: 'Kisumu' }, { text: 'Nakuru', value: 'Nakuru' }] },
-                { type: 'text', label: "Country", value: patient?.country || 'Kenya', required: true },
-                { type: 'text', label: "Address", value: patient?.address || '', required: true },
+                { type: 'text', name: 'first_name',label: "First Name", value: patient?.first_name || '', required: true },
+                { type: 'text', name: 'last_name',label: "Last Name", value: patient?.last_name || '', required: true },
+                { type: 'text', name: 'phone_number',label: "Phone Number", value: patient?.phone_number || '', required: true, placeholder: '+2547XXX...' },
+                { type: 'text', name: 'id_number',label: "ID Number", value: patient?.id_number || '', required: true },
+                { type: 'text', name: 'email',label: "Email", value: patient?.email || '', required: true },
+                { type: 'dropdown', name: 'gender',label: "Gender", value: patient?.gender || '', placeholder: "Select Gender", required: true, options: [{ text: 'Male', value: 'Male' }, { text: 'Female', value: 'Female' }, { text: 'Others', value: 'Others' }] },
+                { type: 'date', name: 'birth_date',label: "Birth Date", value: patient?.birth_date || '', required: true },
+                { type: 'dropdown', name: 'city',label: "City", value: patient?.city || '', placeholder: "Select City", required: true, options: [{ text: 'Nairobi', value: 'Nairobi' }, { text: 'Mombasa', value: 'Mombasa' }, { text: 'Kisumu', value: 'Kisumu' }, { text: 'Nakuru', value: 'Nakuru' }] },
+                { type: 'text', name: 'country',label: "Country", value: patient?.country || 'Kenya', required: true },
+                { type: 'text', name: 'address',label: "Address", value: patient?.address || '', required: true },
             ];
         };
         watch(selectedPatient, (newPatient) => {
             updateFormFields(newPatient);
         }, { immediate: true });
 
-        const additionalFields = ref([
-            {type:'text', label:"First Name", value: contact_person_first_name, required: true},
-            {type:'text', label:"Last Name", value: contact_person_last_name, required: true},
-            {type:'text', label:"Email", value: contact_person_email, required: true},
-            {type:'text', label:"Phone No", value: contact_person_phone_number, required: true},
-        ])
+        const additionalFields = ref([]);
         const updateAdditionalFormFields = (patient) => {
             additionalFields.value = [
                 {type:'text', label:"First Name", value: patient?.emergency_contact_person.first_name || '', required: true},
@@ -184,18 +150,15 @@ export default defineComponent({
             .then(() => {
                 componentKey.value += 1;
             });
-
         }
         const handleSelectedDoctor = (option) =>{
             store.dispatch('Doctors/handleSelectedDoctor', option)
             .then(() => {
                 doctorID.value = store.state.Doctors.doctID;
             })
-
         }
-        const deleteFee = (index) =>{
-            console.log("THE INDEEEEEEEEX IS ", index);
-            store.dispatch('Medical_Fees/deleteFee', index);
+        const deleteFee = (rowIndex, action, row) =>{
+            store.dispatch('Medical_Fees/deleteFee', rowIndex);
         }
         const additional1Fields = ref([
             {  
@@ -230,8 +193,15 @@ export default defineComponent({
             }
             store.dispatch('Medical_Fees/fetchFees', formData);
             country.value = 'Kenya';
-        }   
-        const createPatient = () =>{
+        }  
+        const showLoader = () =>{
+            loader.value = "block";
+        }
+        const hideLoader = () =>{
+            loader.value = "none";
+        } 
+        const createPatient = async() =>{
+            showLoader();
             let formData = {
                 hospital: hospitalID.value,
                 contact_first_name: additionalFields.value[0].value,
@@ -268,17 +238,30 @@ export default defineComponent({
                 }
             }
             if(errors.value.length){
-                window.alert('Please Fill in The Required Information');
-                doctComponentKey.value += 1;
-                componentKey.value += 1;
-                mainComponentKey.value += 1;                 
+                toast.error('Fill In Required Fields');
+                hideLoader();                 
             }else if(!rows){            
-                store.dispatch('Patients_List/createPatient', formData);
-                mainComponentKey.value += 1;
+                try {
+                    const response = await store.dispatch('Patients_List/createPatient', formData);
+                    if (response && response.status === 200) {
+                        hideLoader();
+                        toast.success('Patient created successfully!');
+                        handleReset();
+                        mainComponentKey.value += 1;
+                    } else {
+                        toast.error('An error occurred while creating the patient.');
+                        hideLoader();
+                    }
+                } catch (error) {
+                    console.error(error.message);
+                    toast.error('Failed to create patient: ' + error.message);
+                } finally {
+                    hideLoader();
+                }
                 
             }else{
-                if(visit_notes.value == '')   {
-                    window.alert('Please Fill in The Required Information');
+                if(additional1Fields.value[2].value == '')   {
+                    toast.error('Fill In Required Fields');
                 }else{
                     for(let i=0; i < rows.value.length; i++){
                         invoice_totals.value += rows.value[i].fees_amount;
@@ -293,7 +276,7 @@ export default defineComponent({
                         }
                         let jnlEntry2 = {
                             "date": formatDate(today_date),
-                            "description": rows.value[i].fees_name +" for "+first_name.value+" "+last_name.value,
+                            "description": rows.value[i].fees_name +" for "+formFields.value[0].value+" "+formFields.value[1].value,
                             "txn_type": txn_type.value,
                             "posting_account": rows.value[i].posting_account_id,
                             "debit_amount": 0,
@@ -311,20 +294,35 @@ export default defineComponent({
                     }
 
                     formData['company'] = hospitalID.value;
-                    formData['client'] = first_name.value+" "+last_name.value;
+                    formData['client'] = formFields.value[0].value+" "+formFields.value[1].value;
                     formData['description'] = invDescr.value;
                     formData['txn_type'] = txn_type.value;
                     formData['total_amount'] = invoice_totals.value;
                     formData['journal_entry_array'] = journalEntryArr.value;
-                    store.dispatch('Patients_List/createPatient', formData);
-                    handleReset();
-                    mainComponentKey.value += 1;
+                    try {
+                        const response = await store.dispatch('Patients_List/createPatient', formData);
+                        if (response && response.status === 200) {
+                            hideLoader();
+                            toast.success('Patient created successfully!');
+                            handleReset();
+                            mainComponentKey.value += 1;
+                        } else {
+                            toast.error('An error occurred while creating the patient.');
+                            hideLoader();
+                        }
+                    } catch (error) {
+                        console.error(error.message);
+                        toast.error('Failed to create patient: ' + error.message);
+                    } finally {
+                        hideLoader();
+                    }
                 }         
                 
             }
         }
 
-        const updatePatient = () => {
+        const updatePatient = async() => {
+            showLoader();
             errors.value = [];
             for(let i=0; i < formFields.value.length; i++){
                 if(formFields.value[i].value ==''){
@@ -337,7 +335,8 @@ export default defineComponent({
                 }
             }
             if(errors.value.length){
-                    window.alert('Fill In Required Fields');
+                    toast.error('Fill In Required Fields');
+                    hideLoader();
             }else{
                 const updatedPatient = {
                     first_name: formFields.value[0].value,
@@ -361,11 +360,24 @@ export default defineComponent({
                     patient_code: selectedPatient.value.patient_code,
                     hospital: hospitalID.value
                 };
-                store.dispatch('Patients_List/updatePatient', updatedPatient);
-                handleReset();
-            }
-            
-            
+                try {
+                        const response = await store.dispatch('Patients_List/updatePatient', updatedPatient);
+                        if (response && response.status === 200) {
+                            hideLoader();
+                            toast.success('Patient updated successfully!');
+                            handleReset();
+                            mainComponentKey.value += 1;
+                        } else {
+                            toast.error('An error occurred while updating the patient.');
+                            hideLoader();
+                        }
+                    } catch (error) {
+                        console.error(error.message);
+                        toast.error('Failed to update patient: ' + error.message);
+                    } finally {
+                        hideLoader();
+                    }
+            }                    
         };
 
         const savePatient = () =>{
@@ -395,7 +407,7 @@ export default defineComponent({
             additional_flex_basis_percentage, displayButtons, columns, rows, idField, actions, feesArr,
             feesDropdownWidth, feesSearchPlaceholder, selectedFees, handleSelectedFees, feesID, feesName,
             additional1Fields, additional1_flex_basis, additional1_flex_basis_percentage, savePatient, mainComponentKey,
-            handleReset, deleteFee, isEditing
+            handleReset, deleteFee, isEditing, loader, showLoader, hideLoader
         }
     }
 })

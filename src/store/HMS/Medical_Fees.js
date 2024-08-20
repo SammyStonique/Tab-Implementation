@@ -47,7 +47,6 @@ const state = {
       state.feesArr = [];
       axios.post(`api/v1/medical-fees-search/`,formData)
       .then((response)=>{
-        console.log("THE MEDICAL FEES LIST IS ",response.data.results);
         for(let i=0; i< response.data.results.length; i++){
           state.feesArr.push((response.data.results[i].posting_account_code  + ' - ' + response.data.results[i].fees_name))
         }
@@ -68,10 +67,7 @@ const state = {
       commit('MEDICAL_FEES_ARRAY', state.feesArray); 
     },
     deleteFee({commit, state}, index){
-      console.log("THE INDEX IS ",index)
       state.feesArray.splice(index, 1); 
-      console.log("THE FEESSSS ARR IS ",state.feesArray)
-      // commit('MEDICAL_FEES_ARRAY', newArray)
     },
     resetFees({ commit }){
       const feesArray = [];

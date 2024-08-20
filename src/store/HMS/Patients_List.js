@@ -1,8 +1,12 @@
 import axios from "axios";
+import Swal from 'sweetalert2';
 
 const state = {
   patientList: [], 
   patientsArr: [],
+  patArray: [],
+  patientID: '',
+  patientName: '',
   hospital_id: '',
   first_name_search: '',
   last_name_search: '',
@@ -29,14 +33,14 @@ const mutations = {
   SET_SELECTED_PATIENT(state, patient) {
     state.selectedPatient = patient;
     state.isEditing = true;
-    console.log("THE SELECTED PATIENT IS ",state.selectedPatient)
   },
   LIST_PATIENTS(state, patients) {
     state.patientList = patients;
-    console.log("THE PATIENTS LIST IS ",state.patientList)
+  },
+  PATIENTS_ARRAY(state, patients){
+    state.patArray = patients;
   },
   SET_STATE(state, payload) {
-    console.log("HAPPENNNING")
     for (const key in payload) {
         if (payload.hasOwnProperty(key) && key in state) {
             state[key] = payload[key];
@@ -77,15 +81,14 @@ const actions = {
     commit('SET_STATE', newState);
   },
   
-  createPatient({ commit,state }, formData) {
-    axios.post('api/v1/create-patient-with-visit/', formData)
+  async createPatient({ commit,state }, formData) {
+    return axios.post('api/v1/create-patient-with-visit/', formData)
     .then((response)=>{
-      console.log("SUCCESS", response.data);
-      window.alert('SUCCESS')
+      return response;
     })
     .catch((error)=>{
       console.log(error.message);
-      window.alert(error.message)
+      throw error;
     })
   },
 
@@ -93,9 +96,8 @@ const actions = {
     state.patientsArr = [];
     axios.post(`api/v1/get-patients/`,formData)
     .then((response)=>{
-      // patients.value = response.data;
       for(let i=0; i< response.data.length; i++){
-        state.patientsArr.push((response.data[i].first_name + ' ' + response.data[i].last_name))
+        state.patientsArr.push((response.data[i].first_name + ' ' + response.data[i].last_name+ ' - (' + response.data[i].patient_code + ')'))
       }
       commit('LIST_PATIENTS', response.data);
     })
@@ -115,36 +117,69 @@ const actions = {
     })
     
   },
-  updatePatient({ commit,state }, formData) {
-    axios.put(`api/v1/update-patient/`,formData)
-    .then((response)=>{
-      if(response.status === 200){
-        window.alert("UPDATE SUCCESS")
-      }else{
-        window.alert("NOT SUCCESSFUL")
-      }
+  handleSelectedPatient({ commit, state }, option){
+    state.patArray = [];
+    const selectedPat = state.patientList.find(pat => (pat.first_name + ' ' + pat.last_name + ' - (' + pat.patient_code + ')') === option);
+    if (selectedPat) {
+        state.patientID = selectedPat.patient_id;
+        state.patientName = selectedPat.first_name + ' ' + selectedPat.last_name;
+        state.patArray = [...state.patArray, selectedPat];
+    }
+    commit('PATIENTS_ARRAY', state.patArray);
       
-    })
-    .catch((error)=>{
-      console.log(error.message);
-    })
-    
   },
-  deletePatient({ commit,state }, formData) {
-    axios.post(`api/v1/delete-patient/`,formData)
+
+  async updatePatient({ commit,state }, formData) {
+    return axios.put(`api/v1/update-patient/`,formData)
     .then((response)=>{
-      if(response.data.msg === 'Success'){
-        window.alert("DELETE SUCCESS")
-      }else{
-        window.alert("NOT SUCCESSFUL")
-      }
-      
+      return response;
     })
     .catch((error)=>{
       console.log(error.message);
-      window.alert(error.message)
+      throw error;
+    })  
+  },
+
+  deletePatient({ commit,state }, formData) {
+    Swal.fire({
+      title: "Are you sure?",
+      text: `Do you wish to delete Patient?`,
+      type: 'warning',
+      showCloseButton: true,
+      showCancelButton: true,
+      confirmButtonText: 'Yes Delete Patient!',
+      cancelButtonText: 'Cancel!',
+      customClass: {
+          confirmButton: 'swal2-confirm-custom',
+          cancelButton: 'swal2-cancel-custom',
+      },
+      showLoaderOnConfirm: true,
+    }).then((result) => {
+      if (result.value) {
+        axios.post(`api/v1/delete-patient/`,formData)
+        .then((response)=>{
+          if(response.status == 200){
+              Swal.fire("Poof! Patient removed succesfully!", {
+                icon: "success",
+              }); 
+          }else{
+            Swal.fire({
+              title: "Error Deleting Patient",
+              icon: "warning",
+            });
+          }                   
+        })
+        .catch((error)=>{
+          console.log(error.message);
+          Swal.fire({
+            title: error.message,
+            icon: "warning",
+          });
+        })
+      }else{
+        Swal.fire(`Patient has not been deleted!`);
+      }
     })
-    
   },
 };
   

@@ -5,7 +5,49 @@ import store from './store'
 import './index.css'
 import axios from 'axios'
 import VueAxios from 'vue-axios'
+import VueSweetalert2 from 'vue-sweetalert2';
+import 'sweetalert2/dist/sweetalert2.min.css';
+import Toast from "vue-toastification";
+import "vue-toastification/dist/index.css";
+
+//SweetAlert Options
+const options = {
+  confirmButtonColor: '#68D391',
+  cancelButtonColor: '#ff7674',
+};
+
+//Toast options
+const toastOptions = {
+  position: 'top-right',
+  timeout: 2000,
+  closeOnClick: true,
+  pauseOnHover: true,
+  draggable: true,
+  progress: 'auto', // 'auto' shows the progress bar automatically
+};
+
+
+//Axios settings
+function getCSRFToken() {
+    const value = `; ${document.cookie}`;
+    const parts = value.split(`; csrftoken=`);
+    if (parts.length === 2) return parts.pop().split(';').shift();
+  }
+
 
 axios.defaults.baseURL = 'http://127.0.0.1:8000/'
+axios.defaults.withCredentials = true
+// axios.defaults.headers.common['X-CSRFToken'] = getCookie('csrftoken');
 
-createApp(App).use(store).use(router).use(VueAxios, axios).mount('#app')
+// Add a request interceptor to include CSRF token
+axios.interceptors.request.use(config => {
+    const csrfToken = getCSRFToken();
+    if (csrfToken) {
+      config.headers['X-CSRFToken'] = csrfToken;
+    }
+    return config;
+  }, error => {
+    return Promise.reject(error);
+  });
+
+createApp(App).use(store).use(router).use(VueAxios, axios).use(Toast,toastOptions).use(VueSweetalert2, options).mount('#app')

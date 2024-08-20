@@ -1,6 +1,7 @@
 <template>
     <div class="z-10">
         <PageComponent 
+            :loader="loader" @showLoader="showLoader" @hideLoader="hideLoader"
             :addButtonLabel="addButtonLabel"
             @handleAddNew="addNewPatient"
             :searchFilters="searchFilters"
@@ -22,21 +23,6 @@
             :showPreviousBtn="showPreviousBtn"
         />
     </div>
-    <!-- <Modal v-show="patModalVisible" @close="closeModal" 
-        :index="index" :fields="formFields" 
-        :submitButtonLabel="submitButtonLabel"
-    /> -->
-    <MovableModal v-model:visible="showModal">
-        <p class="font-semibold">Do you wish to continue?</p>
-    </MovableModal>
-    <MovableModal v-model:visible="patModalVisible">
-        <div>
-            <label for="">Email</label><br />
-            <input type="email" name="" id="" class="rounded border border-gray-600 text-lg pl-2 focus:outline-none"><br />
-            <label for="">Name</label><br />
-            <input type="text" name="" id="" class="rounded border border-gray-600 text-lg pl-2 focus:outline-none">
-        </div>
-    </MovableModal>
 </template>
 
 <script>
@@ -45,15 +31,14 @@ import { ref, computed, onMounted, onBeforeMount , defineComponent } from 'vue';
 import PageComponent from '@/components/PageComponent.vue'
 import { useStore } from "vuex";
 import patientsData from '@/composables/HMS/patientsDropdown'
-import Modal from '@/components/Modal.vue'
-import MovableModal from '@/components/MovableModal.vue'
 
 export default defineComponent({
     name: 'Patients_List',
     components:{
-        PageComponent, Modal, MovableModal
+        PageComponent
     },
     setup(){
+        const loader = ref('');
         const { data, fetchData } = patientsData();
         const store = useStore();
         const idField = 'patient_id';
@@ -84,7 +69,7 @@ export default defineComponent({
             {name: 'view', icon: 'fa fa-file-pdf-o', title: 'View Statement'},
             {name: 'delete', icon: 'fa fa-trash', title: 'Delete Patient'},
         ])
-        const hospitalID = ref('9e14bcef-d3c1-400c-a8c0-66d7b25cc5ff');
+        const hospitalID = computed(()=> store.state.userData.company_id);
         const first_name_search = computed({
             get: () => store.state.Patients_List.first_name_search,
             set: (value) => store.commit('Patients_List/SET_SEARCH_FILTERS', {"first_name_search":value}),
@@ -138,8 +123,14 @@ export default defineComponent({
             { row: 0, name: 'lastName', label: 'Last Name', type: 'text', size: 2 },
 
         ];
+        const showLoader = () =>{
+            loader.value = "block";
+        }
+        const hideLoader = () =>{
+            loader.value = "none";
+        }
         const searchPatients = () =>{
-            // getPatients();
+            showLoader();
             showNextBtn.value = false;
             showPreviousBtn.value = false;
             let formData = new FormData();
@@ -170,6 +161,12 @@ export default defineComponent({
                 if(response.data.previous){
                     showPreviousBtn.value = true;
                 }
+            })
+            .catch((error)=>{
+                console.log(error.message);
+            })
+            .finally(()=>{
+                hideLoader();
             })
         }
         const resetFilters = () =>{
@@ -253,7 +250,7 @@ export default defineComponent({
             searchPatients,resetFilters, addButtonLabel, searchFilters, tableColumns, patientList,
             depResults, depArrLen, depCount, pageCount, showNextBtn, showPreviousBtn,
             loadPrev, loadNext, firstPage, lastPage, idField, actions, handleActionClick, patModalVisible, closeModal,
-            formFields, submitButtonLabel, showModal, addNewPatient
+            formFields, submitButtonLabel, showModal, addNewPatient, showLoader, loader, hideLoader
         }
     }
 })

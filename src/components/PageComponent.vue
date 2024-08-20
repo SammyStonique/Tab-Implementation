@@ -1,5 +1,5 @@
 <template>
-    <PageStyleComponent>
+    <PageStyleComponent :loader="loader" @showLoader="showLoader" @hideLoader="hideLoader">
         <template v-slot:body>
             <div class="fixed bg-white w-[93%] z-50">
                 <FilterBar 
@@ -15,7 +15,7 @@
                     :searchPlaceholder="searchPlaceholder"
                     />
             </div>
-            <div class="fixed table w-[93%] top-60 z-20">
+            <div class="fixed table w-[93%] top-[12rem] z-20">
                 <DynamicTable 
                     :columns="columns" 
                     :rows="rows"
@@ -24,7 +24,7 @@
                     @action-click="handleActionClick"
                 />
             </div>
-            <div class="fixed w-[93%] z-30 bottom-6 pb-2 bg-white">
+            <div class="fixed w-[93%] z-30 bottom-5 pb-2 bg-white">
                 <MyPagination 
                 :count="count"
                 :currentPage="currentPage"
@@ -117,6 +117,10 @@ export default defineComponent({
             type: String,
             default: () => 'Select Option...'
         },
+        loader:{
+            type: String,
+            default: 'none'
+        }
 
     },
     components:{
@@ -147,20 +151,21 @@ export default defineComponent({
         const handleAddNew = () =>{
             emit('handleAddNew')
         }
+        const showLoader = () =>{
+            emit('showLoader');
+        }
+        const hideLoader = () =>{
+            emit('hideLoader');
+        }
         return{
-            searchPage, resetFilters, loadPrev, loadNext, firstPage, lastPage, handleActionClick, handleAddNew
+            searchPage, resetFilters, loadPrev, loadNext, firstPage, lastPage, handleActionClick, handleAddNew,
+            showLoader, hideLoader
         }
     }
 })
 </script>
 
 <style>
-.main-content{
-    z-index: -1;
-    margin-left: 1px;
-    margin-top: 90px;
-    min-height: 100vh;
-}
 .subsection{
     min-height: 100vh;
 }

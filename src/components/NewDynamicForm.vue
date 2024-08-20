@@ -8,7 +8,7 @@
             <div v-else>
               <label for="">{{ field.label }}:</label><br />
             </div>
-            <input v-model="field.value" type="text" :class="`rounded pl-3 border border-gray-400 text-base w-full`" :placeholder="field.placeholder"/>
+            <input v-model="field.value" :name="field.name" type="text" :class="`rounded pl-3 border border-gray-400 text-base w-full`" :placeholder="field.placeholder"/>
           </div>
           <div v-if="field.type === 'date'" class="mr-2 text-left">
             <div v-if="field.required">
@@ -17,7 +17,16 @@
             <div v-else>
               <label for="">{{ field.label }}:</label><br />
             </div>
-            <input v-model="field.value" type="date" :class="`rounded pl-3 border border-gray-400 text-base w-full`" :placeholder="field.placeholder"/>
+            <input v-model="field.value" :name="field.name" type="date" :class="`rounded pl-3 border border-gray-400 text-base w-full`" :placeholder="field.placeholder"/>
+          </div>
+          <div v-if="field.type === 'time'" class="mr-2 text-left">
+            <div v-if="field.required">
+              <label for="">{{ field.label }} : <em>*</em></label><br />
+            </div>
+            <div v-else>
+              <label for="">{{ field.label }}:</label><br />
+            </div>
+            <input v-model="field.value" :name="field.name" type="time" :class="`rounded pl-3 border border-gray-400 text-base w-full`" :placeholder="field.placeholder"/>
           </div>
           <div v-else-if="field.type === 'dropdown'" class="mr-2 text-left">
             <div v-if="field.required">
@@ -26,7 +35,7 @@
             <div v-else>
               <label for="">{{ field.label }}:</label><br />
             </div>
-            <select v-model="field.value" class="rounded border border-gray-400 bg-white text-sm pl-2 pt-2 w-full">
+            <select v-model="field.value" :name="field.name" class="rounded border border-gray-400 bg-white text-sm pl-2 pt-2 w-full">
               <option value="" selected disabled>{{ field.placeholder }}</option>
               <option v-for="(option, index) in field.options" :key="index" :value="option.value">{{ option.text }}</option>
             </select>
@@ -56,7 +65,7 @@
             <div v-else>
               <label for="">{{ field.label }}:</label><br />
             </div>
-            <textarea v-model="field.value" class="rounded border border-gray-400 bg-white text-base pl-2 pt-2" :rows="field.textarea_rows" :cols="field.textarea_cols"></textarea>
+            <textarea v-model="field.value" :name="field.name" class="rounded border border-gray-400 bg-white text-base pl-2 pt-2" :rows="field.textarea_rows" :cols="field.textarea_cols"></textarea>
           </div>
         </div>
         <div class="flex-1 basis-full p-2">
@@ -66,7 +75,7 @@
           <slot name="additional-content1"></slot>
         </div>
     </div>
-    <div class="flex-1 basis-full p-2" v-if="displayButtons">
+    <div class="flex-1 basis-full px-2" v-if="displayButtons">
       <button @click="handleSubmit" class="rounded bg-green-400 text-sm mr-2  text-white px-2 py-1.5"><i class="fa fa-check-circle text-xs mr-1.5" aria-hidden="true"></i>Save</button>
       <button @click="handleReset" class="rounded bg-green-400 text-sm mr-2  text-white px-2 py-1.5"><i class="fa fa-refresh text-xs mr-1.5" aria-hidden="true"></i>Reset</button>
     </div>

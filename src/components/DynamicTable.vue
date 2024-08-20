@@ -4,7 +4,7 @@
       <thead class="bg-gray-800 text-white">
         <tr class="rounded bg-slate-800 text-white font-semibold text-sm uppercase">
           <th v-for="(column, index) in columns" :key="index">
-            <template v-if="column.type === 'checkbox'">
+            <template v-if="column.type === 'checkbox'" >
               <input type="checkbox" @change="toggleSelectAll" :checked="allSelected" />
             </template>
             <template v-else>
@@ -33,7 +33,7 @@
             <!-- {{ row[column.key] }} -->
           </td>
           <td class="actions flex gap-2 border-0">
-            <div v-for="action in actions" >
+            <div v-for="action in actions">
               <button @click.stop="handleAction(rowIndex,action.name, row)" :title="action.title"><i :class="action.icon"></i></button>
             </div>
           </td>
@@ -82,10 +82,6 @@ export default defineComponent({
     };
 
     const handleAction = (rowIndex, action, row) => {
-      const rowId = row[props.idField];
-      console.log("THE ROW ID TO PERFORM ACTION IS ",rowId)
-      console.log("THE ACTION TO PERFORM IS ",action)
-      console.log("THE ROW INDEX IS ",rowIndex)
       emit('action-click', rowIndex, action, row);
     }
 
@@ -139,7 +135,7 @@ input {
 }
 .table-container {
   position: relative;
-  max-height: 52vh;
+  max-height: 59vh;
   min-height: 20vh;
   overflow-y: auto;
   overflow-x: auto;

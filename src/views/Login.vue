@@ -44,11 +44,24 @@
 
 <script>
 import axios from "axios";
-import { ref } from 'vue';
+import { ref, defineComponent } from 'vue';
+import { useStore } from "vuex";
 
-export default {
+export default defineComponent({
   name: 'LoginView',
-  setup(){
+  props: {
+    // email:{
+    //     type: String,
+    //     required: true
+    // },
+    // password:{
+    //     type: String,
+    //     required: true
+    // },
+    
+  },
+  setup(_,{emit}){
+    const store = useStore();
     const email = ref('');
     const password = ref('');
     const errors = ref([]);
@@ -59,10 +72,27 @@ export default {
             password: password.value
         }
         axios
-        .post('api/v1/token/login', formData)
+        .post('api/v1/auth-token/login/', formData)
         .then((response)=>{
             console.log(response.data);
-            window.location.assign('/')
+            if(response.status == 200){
+                window.alert("LOGIN SUCCESS")
+                const userData = {
+                    user_id: response.data.user_id,
+                    company_id: response.data.company_id,
+                    user_names: response.data.user_names,
+                    user_profile: response.data.user_profile,
+                    company_name: response.data.company_name,
+                    token: response.data.token,
+                    isAuthenticated: true,
+                    activeComponent: "Main"
+                }
+                store.dispatch('userData/updateState',userData)
+                // window.location.href = '/';
+            }else{
+                window.alert("Invalid Credentials")
+            }
+            
         })
         .catch((error)=>{
             console.log(error.message)
@@ -76,5 +106,5 @@ export default {
     }
   }
 
-}
+})
 </script>

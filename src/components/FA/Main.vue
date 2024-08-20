@@ -1,8 +1,7 @@
 <template>
     <div class="bg-blue-200 w-full min-h-[98vh] bottom-8">
         <div class="fixed top-0 w-full z-50">
-            <TopBar @minimize="minimize" @close="close" />
-            <NavBar :title="title"/>
+            <NavBar :title="title" @minimize="minimize" @close="close"/>
             <NavBarFA  @openPage="selectTab"/>
             <PagesTab @openPage="selectedTab" @closePage="closeTab"/>
         </div>
@@ -16,17 +15,15 @@
 </template>
 
 <script>
-import TopBar from '@/components/TopBar.vue'
-import NavBar from '@/components/NavBar.vue'
-import NavBarFA from '@/components/NavBarFA.vue'
-import PagesTab from '@/components/FA/PagesTab.vue'
-import Dashboard from '@/components/FA/Dashboard.vue'
-import Client_Categories from '@/components/FA/Client_Categories.vue'
+import NavBar from '@/components/NavBar.vue';
+import NavBarFA from '@/components/NavBarFA.vue';
+import PagesTab from '@/components/FA/PagesTab.vue';
+import Dashboard from '@/components/FA/Dashboard.vue';
+import Client_Categories from '@/components/FA/Client_Categories.vue';
 import { useStore } from 'vuex';
 import { ref, computed } from 'vue';
 export default{
     components:{
-        TopBar,
         NavBar, Dashboard,
         NavBarFA, PagesTab, Client_Categories
     },

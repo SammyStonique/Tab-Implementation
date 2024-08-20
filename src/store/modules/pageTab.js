@@ -15,7 +15,6 @@ const state = {
         if(key == 'HMS'){
           state.hmsArray.add(value);
           state.hmsActiveTab = value;
-          console.log("THE hmsArray IS ",state.hmsArray)
         }else if(key == 'INV'){
           state.invArray.add(value);
           state.invActiveTab = value;

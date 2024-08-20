@@ -22,13 +22,14 @@
     </div>
 
     <modules-tab />
-    
+
 </template>
 
 <script>
+import { useFetchSessionData } from '@/composables/SessionData';
 import ModulesTab from '@/components/ModulesTab.vue'
 import { useStore } from 'vuex';
-import { ref, computed } from 'vue';
+import { ref, computed,onBeforeMount } from 'vue';
 import HMS from '@/components/HMS/Main.vue'
 import FA from '@/components/FA/Main.vue'
 import INV from '@/components/INV/Main.vue'
@@ -59,6 +60,10 @@ export default{
             selectedModule.value = mod;
             mainOpen.value = false;
         }
+        onBeforeMount(()=>{
+            const { fetchSessionData } = useFetchSessionData()
+            fetchSessionData();
+        })
         return{
             openModule,
             hmsOpen,

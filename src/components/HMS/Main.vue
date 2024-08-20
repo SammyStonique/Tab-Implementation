@@ -1,8 +1,7 @@
 <template>
     <div class="main-container w-full min-h-[90vh] bottom-8">
         <div class="fixed top-0 w-full z-50">
-            <TopBar @minimize="minimize" @close="close" />
-            <NavBar :title="title"/>
+            <NavBar :title="title" @minimize="minimize" @close="close"/>
             <NavBarHMS @openPage="selectTab"/>
             <PagesTab @openPage="selectedTab" @closePage="closeTab"/>
         </div>
@@ -18,7 +17,6 @@
 </template>
 
 <script>
-import TopBar from '@/components/TopBar.vue'
 import NavBar from '@/components/NavBar.vue'
 import NavBarHMS from '@/components/NavBarHMS.vue'
 import PagesTab from '@/components/HMS/PagesTab.vue'
@@ -33,7 +31,6 @@ import { useStore } from 'vuex';
 import { ref, computed, watch } from 'vue';
 export default{
     components:{
-        TopBar,
         NavBar,
         NavBarHMS,
         PagesTab,
@@ -105,16 +102,16 @@ export default{
     mounted(){
         const store = useStore();
         this.activeTab = store.state.pageTab.hmsActiveTab;
-        // console.log("HMS MOUNTED");
     }
 }
 </script>
 
 <style>
 .tab-content{
-    margin-top: 40px;
+    margin-top: 20px;
 }
 .main-container{
+    max-height: 100vh;
     overflow: hidden;
 }
 </style>
