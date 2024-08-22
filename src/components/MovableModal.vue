@@ -12,7 +12,7 @@
                     <div class="basis-1/2 flex justify-end gap-3">
                       <button @click="minimize"><i class="fa fa-window-minimize" aria-hidden="true"></i>
                       </button>
-                      <button @click="close"><i class="fa fa-window-close" aria-hidden="true"></i>
+                      <button @click="closeModal"><i class="fa fa-window-close" aria-hidden="true"></i>
                       </button>
                     </div>
                   </div>
@@ -90,6 +90,11 @@
   const close = () => {
     emit('update:visible', false);
   };
+
+  const closeModal = () =>{
+    close();
+    emit('closeModal');
+  }
   
   const minimize = () => {
     isMinimized.value = !isMinimized.value;

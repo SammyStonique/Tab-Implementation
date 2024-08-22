@@ -1,6 +1,5 @@
 <template>
     <PageComponent 
-        :key="pageComponentKey"
         :loader="loader" @showLoader="showLoader" @hideLoader="hideLoader"
         :addButtonLabel="addButtonLabel"
         @handleAddNew="addNewAppointment"
@@ -23,7 +22,7 @@
         :showPreviousBtn="showPreviousBtn"
     />
     <MovableModal v-model:visible="appModalVisible" :title="title" :modal_top="modal_top" :modal_left="modal_left" :modal_width="modal_width"
-        :loader="modal_loader" @showLoader="showModalLoader" @hideLoader="hideModalLoader"
+        :loader="modal_loader" @showLoader="showModalLoader" @hideLoader="hideModalLoader" @closeModal="closeModal"
     >
         <DynamicForm 
             :fields="formFields" :flex_basis="flex_basis" :flex_basis_percentage="flex_basis_percentage" 
@@ -51,7 +50,6 @@ export default{
     setup(){
         const store = useStore();
         const toast = useToast();
-        const pageComponentKey = ref(0);
         const loader = ref('');
         const modal_loader = ref('none');
         const { formatDate } = useDateFormatter();
@@ -121,50 +119,64 @@ export default{
             {type:'text', placeholder:"Search Doctor...", value: doctor_name_search},
             {type:'text', placeholder:"Search Patient...", value: patient_name_search}
         ]);
-        const handleSelectedPatient = (option) =>{
-            store.dispatch('Patients_List/handleSelectedPatient', option)
-            .then(() => {
-                patientID.value = store.state.Patients_List.patientID;
-                patientName.value = store.state.Patients_List.patientName;
-            })
+        const handleSelectedPatient = async(option) =>{
+            await store.dispatch('Patients_List/handleSelectedPatient', option);
+            patientID.value = store.state.Patients_List.patientID;
+            patientName.value = store.state.Patients_List.patientName;
+            if(selectedAppointment.value){
+                selectedAppointment.value.patient.patientID = patientID.value;
+                patientValue.value = patientID.value
+            }
         }
-        const handleSelectedDoctor = (option) =>{
-            store.dispatch('Doctors/handleSelectedDoctor', option)
-            .then(() => {
-                doctorID.value = store.state.Doctors.doctorID;
-                doctName.value = store.state.Doctors.doctName;
-            })
+        const handleSelectedDoctor = async(option) =>{
+            await store.dispatch('Doctors/handleSelectedDoctor', option)
+            doctorID.value = store.state.Doctors.doctorID;
+            doctName.value = store.state.Doctors.doctName;
+            if(selectedAppointment.value){
+                selectedAppointment.value.doctor.doctorID = doctorID.value;
+                doctorValue.value = doctorID.value
+            }
         }
         const formFields = ref([]);
-        const updateFormFields = (appointment) => {
+        const patientValue = computed(() => {
+           return (selectedAppointment.value && selectedAppointment.value.patient && !patientID.value) ? selectedAppointment.value.patient.patient_id : patientID.value;
+
+        });
+        const doctorValue = computed(() => {
+            return (selectedAppointment.value && selectedAppointment.value.doctor && !doctorID.value) ? selectedAppointment.value.doctor.doctor_id : doctorID.value;
+        });
+        const updateFormFields = () => {
             formFields.value = [
             {  
-                type:'search-dropdown', label:"Patient", value:  patientID.value || appointment?.patient.patient_id || '', componentKey: patComponentKey,
+                type:'search-dropdown', label:"Patient", value: patientValue.value, componentKey: patComponentKey,
                 selectOptions: patArray, optionSelected: handleSelectedPatient, required: true,
                 searchPlaceholder: 'Select Patient...', dropdownWidth: '400px', updateValue: selectedPatient.value,
                 fetchData: store.dispatch('Patients_List/fetchPatients', {hospital:hospitalID.value})
             },
             {  
-                type:'search-dropdown', label:"Doctor", value: doctorID.value || appointment?.doctor.doctor_id || '', componentKey: doctComponentKey,
+                type:'search-dropdown', label:"Doctor", value: doctorValue.value, componentKey: doctComponentKey,
                 selectOptions: doctArray, optionSelected: handleSelectedDoctor, required: true,
                 searchPlaceholder: 'Select Doctor...', dropdownWidth: '400px', updateValue: selectedDoctor.value,
                 fetchData: store.dispatch('Doctors/fetchDoctors', {hospital:hospitalID.value})
             },
-            { type: 'date', name: 'date',label: "Date", value: appointment?.date || '', required: true },
-            { type: 'time', name: 'time',label: "Time", value: appointment?.time || '', required: true },
-            {type:'text-area', label:"Notes", value: appointment?.notes || '', textarea_rows: '2', textarea_cols: '40', required: true},
+            { type: 'date', name: 'date',label: "Date", value: selectedAppointment.value?.date || '', required: true },
+            { type: 'time', name: 'time',label: "Time", value: selectedAppointment.value?.time || '', required: true },
+            {type:'text-area', label:"Notes", value: selectedAppointment.value?.notes || '', textarea_rows: '2', textarea_cols: '40', required: true},
             ];
         };
         const handleReset = () =>{
             for(let i=0; i < formFields.value.length; i++){
                 formFields.value[i].value = '';
             }
+            patientID.value = '';
+            doctorID.value = '';
         }
-        watch([selectedAppointment, selectedPatient, selectedDoctor], ([newAppointment, newPatient, newDoctor]) => {
-            if (newAppointment && newPatient && newDoctor) {
+
+        watch([selectedAppointment, selectedPatient, selectedDoctor], () => {
+            if (selectedAppointment.value && selectedPatient.value && selectedDoctor.value) {
                 doctComponentKey.value += 1;
                 patComponentKey.value += 1;
-                updateFormFields(newAppointment);
+                updateFormFields();
             }else{
                 updateFormFields();
             }
@@ -172,9 +184,7 @@ export default{
         }, { immediate: true });
         
         const addNewAppointment = () =>{
-            store.dispatch("Appointments/updateState",{selectedDoctor:'',selectedPatient:''})
-            store.dispatch("Patients_List/fetchPatients",{hospital: hospitalID.value});
-            store.dispatch("Doctors/fetchDoctors",{hospital: hospitalID.value});
+            store.dispatch("Appointments/updateState",{selectedAppointment:null,selectedDoctor:null,selectedPatient:null})
             patientID.value = "";
             doctorID.value = "";
             appModalVisible.value = true;
@@ -208,7 +218,6 @@ export default{
                 }
                 await store.dispatch('Appointments/deleteAppointment',formData).
                 then(()=>{
-                    pageComponentKey.value += 1;
                     searchAppointments();
                 })
             }
@@ -233,12 +242,15 @@ export default{
                 time: formFields.value[3].value,
                 hospital: hospitalID.value
             }
-            console.log("THE FORM DATA IS ",formData);
+  
             errors.value = [];
-            for(let i=0; i < formFields.value.length; i++){
+            for(let i=2; i < formFields.value.length; i++){
                 if(formFields.value[i].value =='' && formFields.value[i].required == true){
                     errors.value.push(formFields.value[i].label);
                 }
+            }
+            if(patientValue.value == '' || doctorValue.value == ''){
+                errors.value.push('error')
             }
 
             if(errors.value.length){
@@ -261,6 +273,9 @@ export default{
                     toast.error('Failed to create appointment: ' + error.message);
                 } finally {
                     hideModalLoader();
+                    store.dispatch('Patients_List/updateState',{patientID:''})
+                    store.dispatch('Doctors/updateState',{doctorID:''})
+                    searchAppointments();
                 }
             }
         }
@@ -268,21 +283,24 @@ export default{
             showModalLoader();
             errors.value = [];
             let formData = {
-                patient: formFields.value[0].value,
-                patient_id: formFields.value[0].value,
-                doctor: formFields.value[1].value,
-                doctor_id: formFields.value[1].value,
+                patient: patientValue.value,
+                patient_id: patientValue.value,
+                doctor: doctorValue.value,
+                doctor_id: doctorValue.value,
                 appointment: selectedAppointment.value.appointment_id,
                 date: formFields.value[2].value,
                 notes: formFields.value[4].value,
                 time: formFields.value[3].value,
                 hospital: hospitalID.value,
             }
-            console.log("THE FOOOORM DATA IS ",formData);
-            for(let i=0; i < formFields.value.length; i++){
+
+            for(let i=2; i < formFields.value.length; i++){
                 if(formFields.value[i].value ==''){
                     errors.value.push('Error');
                 }
+            }
+            if(patientValue.value == '' || doctorValue.value == ''){
+                errors.value.push('error')
             }
             if(errors.value.length){
                 toast.error('Fill In Required Fields');
@@ -292,8 +310,8 @@ export default{
                     const response = await store.dispatch('Appointments/updateAppointment', formData);
                     if (response && response.status === 200) {
                         hideModalLoader();
-                        toast.success("Appointment updated successfully!");
-                        handleReset();                 
+                        handleReset();
+                        toast.success("Appointment updated successfully!");              
                         patComponentKey.value += 1;
                         doctComponentKey.value += 1;
                     } else {
@@ -305,6 +323,10 @@ export default{
                 } finally {
                     hideModalLoader();
                     appModalVisible.value = false;
+                    store.dispatch('Patients_List/updateState',{patientID:''})
+                    store.dispatch('Doctors/updateState',{doctorID:''})
+                    store.dispatch("Appointments/updateState",{selectedAppointment:null,selectedDoctor:null,selectedPatient:null})
+                    searchAppointments();
                 }             
             }
         }
@@ -395,14 +417,21 @@ export default{
             store.commit('Appointments/RESET_SEARCH_FILTERS')
             searchAppointments();
         }
+        const closeModal = () =>{
+            appModalVisible.value = false;
+            store.dispatch('Patients_List/updateState',{patientID:''})
+            store.dispatch('Doctors/updateState',{doctorID:''})
+            store.dispatch("Appointments/updateState",{selectedAppointment:null,selectedDoctor:null,selectedPatient:null})
+        }
         onMounted(() =>{
             searchAppointments();
         })
         return{
-            title, pageComponentKey, searchAppointments,idField,actions,appList,appArrLen,appCount,appResults,appModalVisible,formFields,
+            title, searchAppointments,idField,actions,appList,appArrLen,appCount,appResults,appModalVisible,formFields,
             appointmentsList, addButtonLabel, searchFilters,tableColumns,resetFilters,loadPrev,loadNext,firstPage,lastPage,
             showNextBtn,showPreviousBtn,addNewAppointment, handleActionClick,saveAppointment,displayButtons,handleReset,
-            modal_top, modal_left, modal_width, showLoader, loader, hideLoader, modal_loader, showModalLoader, hideModalLoader
+            modal_top, modal_left, modal_width, showLoader, loader, hideLoader, modal_loader, showModalLoader, hideModalLoader,
+            closeModal
         }
     }
 }

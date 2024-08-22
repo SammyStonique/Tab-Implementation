@@ -71,7 +71,6 @@ const state = {
         commit('SET_SELECTED_DOCTOR',selectedDoctor);
         commit('SET_SELECTED_PATIENT',selectedPatient);
         commit('SET_SELECTED_APPOINTMENT',response.data);
-        console.log("THE RESPONSE DATA IS ",response.data)
       })
       .catch((error)=>{
         console.log(error.message);

@@ -17,7 +17,6 @@ const state = {
       for(const [key, value] of Object.entries(search_filter)){
         if(key == 'code_search'){
           state.code_search = value;
-          console.log("THE SEARCH IS ", state.code_search)
         }else if(key == 'name_search'){
           state.name_search = value;
         } 
