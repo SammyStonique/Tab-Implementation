@@ -8,6 +8,12 @@
                     @add-new="handleAddNew"
                     @search="searchPage"
                     @reset="resetFilters"
+                    @importData="importData"
+                    @removeItem="removeItem"
+                    @removeSelectedItems="removeSelectedItems"
+                    @printList="printList"
+                    :dropdownOptions="dropdownOptions"
+                    @handleDynamicOption="handleDynamicOption"
                     :options="options"
                     :dropdownWidth="dropdownWidth"
                     :selectOptions="selectOptions"
@@ -22,6 +28,7 @@
                     :idField="idField"
                     :actions="actions"
                     @action-click="handleActionClick"
+                    @selection-changed="handleSelectionChange"
                 />
             </div>
             <div class="fixed w-[93%] z-30 bottom-5 pb-2 bg-white">
@@ -44,7 +51,7 @@
 </template>
 
 <script>
-import { defineComponent, ref } from 'vue';
+import { defineComponent} from 'vue';
 import FilterBar from '@/components/FilterBar.vue'
 import Loader from '@/components/Loader.vue'
 import DynamicTable from '@/components/DynamicTable.vue'
@@ -56,6 +63,10 @@ export default defineComponent({
         addButtonLabel:{
             type: String,
             required: true
+        },
+        dropdownOptions: {
+            type: Array,
+            default: () => []
         },
         searchFilters:{
             type: Array,
@@ -133,6 +144,21 @@ export default defineComponent({
         const resetFilters = () =>{
             emit('resetFilters')
         }
+        const importData = () =>{
+            emit('importData');
+        }
+        const removeItem = () =>{
+            emit('removeItem');
+        }
+        const removeSelectedItems = () =>{
+            emit('removeSelectedItems');
+        }
+        const handleDynamicOption = (option) =>{
+            emit('handleDynamicOption');
+        }
+        const printList = () =>{
+            emit('printList');
+        }
         const loadPrev = () =>{
             emit('loadPrev')
         }
@@ -149,7 +175,7 @@ export default defineComponent({
             emit('handleActionClick',rowIndex, action, row)
         }
         const handleAddNew = () =>{
-            emit('handleAddNew')
+            emit('handleAddNew');
         }
         const showLoader = () =>{
             emit('showLoader');
@@ -157,9 +183,13 @@ export default defineComponent({
         const hideLoader = () =>{
             emit('hideLoader');
         }
+        const handleSelectionChange = (selectedIds) =>{
+            emit('handleSelectionChange', selectedIds);
+        }
         return{
             searchPage, resetFilters, loadPrev, loadNext, firstPage, lastPage, handleActionClick, handleAddNew,
-            showLoader, hideLoader
+            showLoader, hideLoader, importData, removeItem, removeSelectedItems, printList, handleDynamicOption,
+            handleSelectionChange
         }
     }
 })

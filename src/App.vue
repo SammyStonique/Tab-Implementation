@@ -1,10 +1,7 @@
 <template>
-  <!-- <keep-alive>
-    <router-view/>
-  </keep-alive> -->
-  <component 
-    :is="activeComponent"
-  />
+    <component 
+      :is="activeComponent"
+    />
 </template>
 
 <script>
@@ -23,6 +20,7 @@ export default{
     const activeComponent = computed(() => store.state.userData.activeComponent)
 
     onBeforeMount(()=>{
+      store.dispatch('userData/reloadPage');
       axios.get('api/v1/get-session-data')
       .then((response)=>{
         if(response.status == 200){

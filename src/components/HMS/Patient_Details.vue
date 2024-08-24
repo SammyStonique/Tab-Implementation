@@ -39,10 +39,10 @@
 
 <script>
 import { defineComponent, ref, onBeforeMount, onMounted, computed, watch } from 'vue';
-import DynamicForm from '../NewDynamicForm.vue';
-import DynamicTable from '../DynamicTable.vue';
-import PageStyleComponent from '../PageStyleComponent.vue';
-import SearchableDropdown from '../SearchableDropdown.vue';
+import DynamicForm from '@/components/NewDynamicForm.vue';
+import DynamicTable from '@/components/DynamicTable.vue';
+import PageStyleComponent from '@/components/PageStyleComponent.vue';
+import SearchableDropdown from '@/components/SearchableDropdown.vue';
 import { useStore } from "vuex";
 import { useDateFormatter } from '@/composables/DateFormatter';
 import { useToast } from "vue-toastification";

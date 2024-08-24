@@ -14,10 +14,24 @@ const state = {
     token: '',
     activeComponent: 'Main',
     userDetails: null,
-    isAuthenticated: false
+    isAuthenticated: false,
+    company_modules: [],
+    user_companies: [],
+    reloaded: false,
 };
 
 const mutations = {
+    reloadingPage(state){
+        if (localStorage.getItem('reloaded')) {
+          localStorage.removeItem('reloaded', 'false');
+          console.log('Value of reload in store set to false')
+        }else {
+            // Set a flag so that we know not to reload the page twice.
+            localStorage.setItem('reloaded', 'true');
+            console.log(state.reloaded,'Reload')
+            window.location.reload();
+        }
+    },
     SET_STATE(state, payload){
         for (const key in payload) {
             if (payload.hasOwnProperty(key) && key in state) {
@@ -25,9 +39,9 @@ const mutations = {
             }
         }
         console.log("THE USER IN STORE IS ",state.user_id)
-        console.log("THE COMPANY IN STORE IS ",state.company_id)
-        console.log("THE TOKEN IN STORE IS ",state.token)
         console.log("THE VALUE OF IS AUTHENTICATED IS ",state.isAuthenticated)
+        console.log("THE VALUE OF IS COMPANY MODULES IS ",state.company_modules)
+        console.log("THE VALUE OF ALLOWED COMPANIES  IS ",state.user_companies)
     },
     SET_USER_DETAILS(state, user){
         state.userDetails = user;
@@ -44,6 +58,9 @@ const mutations = {
 const actions = {
     updateState({ commit }, newState) {
       commit('SET_STATE', newState);
+    },
+    reloadPage({ commit }){
+        commit('reloadingPage');
     },
     fetchUsers({ commit, state}, formData) {
         state.userArr = [];

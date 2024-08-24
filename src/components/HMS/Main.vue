@@ -26,6 +26,7 @@ import Doctors from '@/components/HMS/Doctors.vue'
 import Departments from '@/components/HMS/Departments.vue'
 import Patients_List from '@/components/HMS/Patients_List.vue'
 import Patient_Details from '@/components/HMS/Patient_Details.vue'
+import Import_Appointments from '@/components/HMS/Import_Appointments.vue'
 import Emergency_Contacts from '@/components/HMS/Emergency_Contacts.vue'
 import { useStore } from 'vuex';
 import { ref, computed, watch } from 'vue';
@@ -34,7 +35,7 @@ export default{
         NavBar,
         NavBarHMS,
         PagesTab,
-        Dashboard, Appointments, Departments, Doctors, Patients_List, Emergency_Contacts, Patient_Details
+        Dashboard, Appointments, Departments, Doctors, Patients_List, Emergency_Contacts, Patient_Details, Import_Appointments
     },
     props: {
         title: {

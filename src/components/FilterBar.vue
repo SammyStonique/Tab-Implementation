@@ -6,6 +6,9 @@
           <div v-if="filter.type === 'text'" class="mr-2">
             <input v-model="filter.value" type="text" :class="`rounded pl-3 border border-gray-400 text-base w-${filter.width}`" :placeholder="filter.placeholder"/>
           </div>
+          <div v-if="filter.type === 'date'" class="mr-2">
+            <input v-model="filter.value" type="date" :class="`rounded pl-3 border border-gray-400 text-base w-${filter.width}`" :placeholder="filter.placeholder" :title="filter.title"/>
+          </div>
           <div v-else-if="filter.type === 'dropdown'">
             <select v-model="filter.value" :class="`rounded border border-gray-400 bg-white text-sm pl-2 pt-2 w-${filter.width}`">
               <option value="" selected disabled>{{ filter.placeholder }}</option>
@@ -30,13 +33,29 @@
         <button @click="handleSearch" class="rounded bg-green-400 text-sm mr-2  text-white px-2 py-1.5"><i class="fa fa-binoculars" aria-hidden="true"></i> Search</button>
         <button @click="handleReset" class="rounded bg-green-400 text-sm  text-white px-2 py-1.5"><i class="fa fa-refresh" aria-hidden="true"></i> Reset</button>
       </div>
-      <button @click="handleActions" class="rounded bg-green-400 text-sm  text-white px-2 py-1.5">{{ actionsButtonLabel }} <i class="fa fa-caret-down pl-2" aria-hidden="true"></i></button>
+      <div>
+        <button @click="showDropdown" class="rounded bg-green-400 text-sm  text-white px-2 py-1.5">{{ actionsButtonLabel }} <i class="fa fa-caret-down pl-2" aria-hidden="true"></i></button>
+        <button class="fixed inset-0 bg-gray-50 opacity-25 cursor-default w-full" v-if="dropdown" @click="dropdown = !dropdown"></button>
+        <div class=" text-left text-sm mt-1.5 absolute rounded bg-white w-36 py-1.5 px-1.5 shadow-md shadow-slate-500" v-if="dropdown">
+          <div>
+            <button @click="importData">Import</button><br />
+            <button @click="removeItem">Remove</button><br />
+            <button @click="removeSelectedItems">Remove Multiple</button><br />
+            <button @click="printList">Print List</button><br />
+          </div>
+          <div v-for="(option, index) in dropdownOptions" :key="index">
+            <button @click="handleDynamicOption(option.action)">{{ option.label }}</button><br />
+          </div>
+        </div>
+      </div>
     </div>
   </template>
   
   <script>
   import SearchableDropdown from '@/components/SearchableDropdown.vue'
-  export default {
+  import { defineComponent,ref } from 'vue';
+  export default defineComponent({
+    name: 'FilterBar',
     props: {
       filters: {
         type: Array,
@@ -70,31 +89,56 @@
         type: String,
         default: () => 'Select Option...'
       },
+      dropdownOptions: {
+        type: Array,
+        default: () => []
+      }
     },
     components:{
       SearchableDropdown
     },
-    methods: {
-      handleAddNew() {
-        this.$emit('add-new');
-      },
-      handleSearch() {
-        this.$emit('search');
-      },
-      handleReset() {
-        this.$emit('reset');
-      },
-      handleActions() {
-        this.$emit('actions');
-      },
-      optionSelected(){
-        this.$emit('option-selected');
-      },
-      clearSearch(){
-        this.$emit('clearSearch');
+    setup(_,{emit}){
+      const dropdown = ref(false);
+      const handleAddNew = () =>{
+        emit('add-new');
       }
-    }
-  };
+      const handleReset = () =>{
+        emit('reset');
+      }
+      const handleSearch = () =>{
+        emit('search');
+      }
+      const showDropdown = () =>{
+        dropdown.value = !dropdown.value;
+      }
+      const importData = () =>{
+        emit('importData');
+      }
+      const removeItem = () =>{
+        emit('removeItem');
+      }
+      const removeSelectedItems = () =>{
+        emit('removeSelectedItems');
+      }
+      const printList = () =>{
+        emit('printList');
+      }
+      const handleDynamicOption = (option) =>{
+        emit('handleDynamicOption');
+      }
+      const optionSelected = () =>{
+        emit('option-selected');
+      }
+      const clearSearch = () =>{
+        emit('clearSearch');
+      }
+
+      return{
+        dropdown, handleAddNew, handleReset, showDropdown, optionSelected, handleSearch, clearSearch,
+        importData, removeItem, removeSelectedItems, printList, handleDynamicOption
+      }
+    },
+  });
   </script>
   
   <style scoped>

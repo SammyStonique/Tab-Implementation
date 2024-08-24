@@ -1,15 +1,21 @@
 <template>
     <PageComponent 
+        :key="pageComponentKey"
         :loader="loader" @showLoader="showLoader" @hideLoader="hideLoader"
         :addButtonLabel="addButtonLabel"
         @handleAddNew="addNewAppointment"
         :searchFilters="searchFilters"
         @searchPage="searchAppointments"
         @resetFilters="resetFilters"
+        @importData="importAppointments"
+        @removeItem="removeAppointment"
+        @removeSelectedItems="removeAppointments"
+        @printList="printList"
         :columns="tableColumns"
         :rows="appList"
         :actions="actions"
         :idField="idField"
+        @handleSelectionChange="handleSelectionChange"
         @handleActionClick="handleActionClick"
         :count="appCount"
         :currentPage="currentPage"
@@ -54,11 +60,10 @@ export default{
         const modal_loader = ref('none');
         const { formatDate } = useDateFormatter();
         const addButtonLabel = ref('New Appointment');
+        const pageComponentKey = ref(0);
         const patComponentKey = ref(0);
         const doctComponentKey = ref(0);
         const title = ref('Apointment Details');
-        const from_date = ref('');
-        const to_date = ref('');
         const doctor_search = ref('');
         const appointment_date = new Date();
         const hospitalID = computed(()=> store.state.userData.company_id);
@@ -69,6 +74,7 @@ export default{
         const doctName = ref('');
         const doctArray = computed(() => store.state.Doctors.doctArr);
         const idField = 'appointment_id';
+        const selectedIds = ref([]);
         const appModalVisible = ref(false);
         const appList = ref([]);
         const appResults = ref([]);
@@ -103,10 +109,6 @@ export default{
             {name: 'edit', icon: 'fa fa-edit', title: 'Edit Appointement'},
             {name: 'delete', icon: 'fa fa-trash', title: 'Delete Appointement'},
         ])
-        const appointmentsList = computed({
-            get: () => store.state.Appointments.appointmentsList,
-            set: (value) => store.commit('Appointments/LIST_APPOINTMENTS', value),
-        });
         const doctor_name_search = computed({
             get: () => store.state.Appointments.doctor_name_search,
             set: (value) => store.commit('Appointments/SET_SEARCH_FILTERS', {"doctor_name_search":value}),
@@ -115,10 +117,23 @@ export default{
             get: () => store.state.Appointments.patient_name_search,
             set: (value) => store.commit('Appointments/SET_SEARCH_FILTERS', {"patient_name_search":value}),
         });
+        const from_date = computed({
+            get: () => store.state.Appointments.from_date,
+            set: (value) => store.commit('Appointments/SET_SEARCH_FILTERS', {"from_date":value}),
+        });
+        const to_date = computed({
+            get: () => store.state.Appointments.to_date,
+            set: (value) => store.commit('Appointments/SET_SEARCH_FILTERS', {"to_date":value}),
+        });
         const searchFilters = ref([
-            {type:'text', placeholder:"Search Doctor...", value: doctor_name_search},
-            {type:'text', placeholder:"Search Patient...", value: patient_name_search}
+            {type:'text', placeholder:"Search Doctor...", value: doctor_name_search, width:44},
+            {type:'text', placeholder:"Search Patient...", value: patient_name_search, width:44},
+            {type:'date', placeholder:"From Date...", value: from_date, width:36, title: "Date From Search"},
+            {type:'date', placeholder:"To Date...", value: to_date, width:36, title: "Date To Search"},
         ]);
+        const handleSelectionChange = (ids) => {
+            selectedIds.value = ids;
+        };
         const handleSelectedPatient = async(option) =>{
             await store.dispatch('Patients_List/handleSelectedPatient', option);
             patientID.value = store.state.Patients_List.patientID;
@@ -201,14 +216,12 @@ export default{
                     patient: row['patient_id'],
                     appointment: appID
                 }
-
-                await store.dispatch('Appointments/fetchAppointment',formData).
-                then(()=>{
-                    appModalVisible.value = true;
-                    flex_basis.value = '1/2';
-                    flex_basis_percentage.value = '50';
-                    doctComponentKey.value += 1;
-                })
+                
+                await store.dispatch('Appointments/fetchAppointment',formData)
+                appModalVisible.value = true;
+                flex_basis.value = '1/2';
+                flex_basis_percentage.value = '50';
+                doctComponentKey.value += 1;
                 
             }else if(action == 'delete'){
                 const appID = row[idField];
@@ -216,10 +229,9 @@ export default{
                     hospital: hospitalID.value,
                     appointment: appID
                 }
-                await store.dispatch('Appointments/deleteAppointment',formData).
-                then(()=>{
-                    searchAppointments();
-                })
+
+                await store.dispatch('Appointments/deleteAppointment',formData)
+                searchAppointments();         
             }
         } 
         const showModalLoader = () =>{
@@ -337,6 +349,62 @@ export default{
                 createAppointment();
             }
         }
+        const importAppointments = () =>{
+            store.commit('pageTab/ADD_PAGE', {'HMS':'Import_Appointments'})
+            store.state.pageTab.hmsActiveTab = 'Import_Appointments';
+        }
+        const removeAppointment = async() =>{
+            if(selectedIds.value.length == 1){
+                let formData = {
+                    hospital: hospitalID.value,
+                    appointment: selectedIds.value
+                }
+                try{
+                    const response = await store.dispatch('Appointments/deleteAppointment',formData)
+                    if(response && response.status == 200){
+                        toast.success("Appointment Removed Succesfully");
+                        searchAppointments();
+                    }
+                }
+                catch(error){
+                    console.error(error.message);
+                    toast.error('Failed to remove appointment: ' + error.message);
+                }
+                finally{
+                    selectedIds.value = [];
+                    pageComponentKey.value += 1;
+                }
+            }else if(selectedIds.value.length > 1){
+                toast.error("You have selected more than 1 appointment") 
+            }else{
+                toast.error("Please Select An Appointment To Remove")
+            }
+        }
+        const removeAppointments = async() =>{
+            if(selectedIds.value.length){
+                let formData = {
+                    hospital: hospitalID.value,
+                    appointment: selectedIds.value
+                }
+                try{
+                    const response = await store.dispatch('Appointments/deleteAppointment',formData)
+                    if(response && response.status == 200){
+                        toast.success("Appointments Removed Succesfully");
+                        searchAppointments();
+                    }
+                }
+                catch(error){
+                    console.error(error.message);
+                    toast.error('Failed to remove appointment: ' + error.message);
+                }
+                finally{
+                    selectedIds.value = [];
+                    pageComponentKey.value += 1;
+                }
+            }else{
+                toast.error("Please Select An Appointment To Remove")
+            }
+        }
         const showLoader = () =>{
             loader.value = "block";
         }
@@ -345,23 +413,14 @@ export default{
         }
         const searchAppointments = () =>{
             showLoader();
-            let formData = new FormData();
-            formData.append('patient_name', patient_name_search.value);
-            if((from_date.value !=null) && (typeof(from_date.value) == "object")){
-                formData.append('from_date', formatDate(from_date.value));
-            }else{
-                from_date.value = "";
-                formData.append('from_date', from_date.value);
-            }   
-            if((to_date.value !=null) && (typeof(to_date.value) == "object")){
-                formData.append('to_date', formatDate(to_date.value));
-            }else{
-                to_date.value = "";
-                formData.append('to_date', to_date.value);
-            } 
-            formData.append('doctor_name', doctor_name_search.value);
-            formData.append('doctor', doctor_search.value);
-            formData.append('hospital', hospitalID.value); 
+            let formData = {
+                patient_name: patient_name_search.value,
+                from_date: from_date.value,
+                to_date: to_date.value,
+                doctor_name: doctor_name_search.value,
+                doctor: doctor_search.value,
+                hospital: hospitalID.value
+            }
 
             axios
             .post(`api/v1/appointments-search/?page=${currentPage.value}`,formData)
@@ -427,11 +486,11 @@ export default{
             searchAppointments();
         })
         return{
-            title, searchAppointments,idField,actions,appList,appArrLen,appCount,appResults,appModalVisible,formFields,
-            appointmentsList, addButtonLabel, searchFilters,tableColumns,resetFilters,loadPrev,loadNext,firstPage,lastPage,
+            title, searchAppointments, idField, selectedIds, actions, appList, appArrLen,appCount,appResults,appModalVisible,formFields,
+            addButtonLabel, searchFilters,tableColumns,resetFilters,loadPrev,loadNext,firstPage,lastPage,
             showNextBtn,showPreviousBtn,addNewAppointment, handleActionClick,saveAppointment,displayButtons,handleReset,
             modal_top, modal_left, modal_width, showLoader, loader, hideLoader, modal_loader, showModalLoader, hideModalLoader,
-            closeModal
+            closeModal, handleSelectionChange, removeAppointment, removeAppointments, pageComponentKey, importAppointments
         }
     }
 }

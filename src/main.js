@@ -9,6 +9,8 @@ import VueSweetalert2 from 'vue-sweetalert2';
 import 'sweetalert2/dist/sweetalert2.min.css';
 import Toast from "vue-toastification";
 import "vue-toastification/dist/index.css";
+import DropZone from 'dropzone-vue';
+import 'dropzone-vue/dist/dropzone-vue.common.css';
 
 //SweetAlert Options
 const options = {
@@ -34,8 +36,8 @@ function getCSRFToken() {
     if (parts.length === 2) return parts.pop().split(';').shift();
   }
 
-
-axios.defaults.baseURL = 'http://127.0.0.1:8000/'
+axios.defaults.baseURL = 'https://a155-102-0-11-197.ngrok-free.app/'
+// axios.defaults.baseURL = 'http://127.0.0.1:8000/'
 axios.defaults.withCredentials = true
 // axios.defaults.headers.common['X-CSRFToken'] = getCookie('csrftoken');
 
@@ -50,4 +52,4 @@ axios.interceptors.request.use(config => {
     return Promise.reject(error);
   });
 
-createApp(App).use(store).use(router).use(VueAxios, axios).use(Toast,toastOptions).use(VueSweetalert2, options).mount('#app')
+createApp(App).use(store).use(router).use(VueAxios, axios).use(Toast,toastOptions).use(VueSweetalert2, options).use(DropZone).mount('#app')

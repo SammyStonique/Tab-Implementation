@@ -5,6 +5,8 @@ const state = {
     appointmentsList: [],
     doctor_name_search: '',
     patient_name_search: '',
+    from_date: '',
+    to_date: '',
     selectedAppointment: null,
     selectedDoctor: null,
     selectedPatient: null,
@@ -21,6 +23,12 @@ const state = {
           state.doctor_name_search = value;
         }else if(key == 'patient_name_search'){
           state.patient_name_search = value;
+        } 
+        else if(key == 'from_date'){
+          state.from_date = value;
+        } 
+        else if(key == 'to_date'){
+          state.to_date = value;
         } 
       }
     },
@@ -44,6 +52,8 @@ const state = {
     RESET_SEARCH_FILTERS(state){
       state.doctor_name_search = '';
       state.patient_name_search = '';
+      state.from_date = '';
+      state.to_date = '';
     }
   };
   
@@ -93,11 +103,11 @@ const state = {
     deleteAppointment({ commit,state }, formData) {
       Swal.fire({
         title: "Are you sure?",
-        text: `Do you wish to delete Appointment?`,
+        text: `Do you wish to delete Appointment(s)?`,
         type: 'warning',
         showCloseButton: true,
         showCancelButton: true,
-        confirmButtonText: 'Yes Delete Appointment!',
+        confirmButtonText: 'Yes Delete!',
         cancelButtonText: 'Cancel!',
         customClass: {
             confirmButton: 'swal2-confirm-custom',
@@ -109,12 +119,12 @@ const state = {
           axios.post(`api/v1/delete-appointment/`,formData)
           .then((response)=>{
             if(response.status == 200){
-                Swal.fire("Poof! Appointment removed succesfully!", {
+                Swal.fire("Poof! Appointment(s) removed succesfully!", {
                   icon: "success",
                 }); 
             }else{
               Swal.fire({
-                title: "Error Deleting Appointment",
+                title: "Error Deleting Appointment(s)",
                 icon: "warning",
               });
             }                   
@@ -127,7 +137,7 @@ const state = {
             });
           })
         }else{
-          Swal.fire(`Appointment has not been deleted!`);
+          Swal.fire(`Appointment(s) not deleted!`);
         }
       })
     },

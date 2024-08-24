@@ -1,4 +1,9 @@
 <template>
+    <Loader 
+        :loader="loader"
+        @showLoader="showLoader"
+        @hideLoader="hideLoader"
+    />
     <div class="login">
         <div class="w-full h-screen bg-slate-700 grid place-items-center">
             <div class="w-1/2 h-100 bg-white p-4 rounded-lg">
@@ -46,27 +51,32 @@
 import axios from "axios";
 import { ref, defineComponent } from 'vue';
 import { useStore } from "vuex";
+import { useToast } from "vue-toastification";
+import Loader from "@/components/Loader.vue";
 
 export default defineComponent({
   name: 'LoginView',
-  props: {
-    // email:{
-    //     type: String,
-    //     required: true
-    // },
-    // password:{
-    //     type: String,
-    //     required: true
-    // },
-    
+  components:{
+    Loader
   },
   setup(_,{emit}){
     const store = useStore();
+    const toast = useToast();
     const email = ref('');
     const password = ref('');
     const errors = ref([]);
+    const loader = ref('none');
+
+    const showLoader = () =>{
+        loader.value = "block";
+    }
+
+    const hideLoader = () =>{
+        loader.value = "none";
+    }
 
     const login = () =>{
+        showLoader();
         let formData = {
             email: email.value,
             password: password.value
@@ -76,7 +86,7 @@ export default defineComponent({
         .then((response)=>{
             console.log(response.data);
             if(response.status == 200){
-                window.alert("LOGIN SUCCESS")
+                toast.success(`Welcome Back ${response.data.user_names}`)
                 const userData = {
                     user_id: response.data.user_id,
                     company_id: response.data.company_id,
@@ -88,21 +98,26 @@ export default defineComponent({
                     activeComponent: "Main"
                 }
                 store.dispatch('userData/updateState',userData)
-                // window.location.href = '/';
             }else{
-                window.alert("Invalid Credentials")
+                toast.error("Invalid Login Credentials")
             }
             
         })
         .catch((error)=>{
-            console.log(error.message)
+            console.log(error.message);
+            if(error.response.status == 400){
+                toast.error("Invalid Login Credentials") 
+            }else{
+                toast.error(error.message);
+            }
+            
+        })
+        .finally(()=>{
+            hideLoader();
         })
     }
     return{
-        email,
-        password,
-        errors,
-        login
+        email, password, errors, login, loader, showLoader, hideLoader
     }
   }
 

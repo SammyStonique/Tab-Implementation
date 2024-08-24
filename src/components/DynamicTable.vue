@@ -30,7 +30,6 @@
                 {{ row[column.key] }}
               </div>
             </template>
-            <!-- {{ row[column.key] }} -->
           </td>
           <td class="actions flex gap-2 border-0">
             <div v-for="action in actions">
@@ -63,10 +62,11 @@ export default defineComponent({
     },
     actions: {
       type: Array,
-      required: true
+      default: () => [],
+      required: false
     },
   },
-  emits: ['row-click'],
+  emits : ['row-click', 'action-click','selection-changed'],
   setup(props, { emit }) {
 
     const tableRef = ref(null);
@@ -91,7 +91,8 @@ export default defineComponent({
         row.selected = isSelected;
       });
       selectedIds.value = isSelected ? props.rows.map(row => row[props.idField]) : [];
-      console.log("THE SELECTED IDs ARE ",selectedIds.value)
+      console.log("THE SELECTED IDs ARE ",selectedIds.value);
+      emit('selection-changed', selectedIds.value);
     };
 
     const updateSelectedIds = (row) => {
@@ -105,7 +106,8 @@ export default defineComponent({
           selectedIds.value.splice(index, 1);
         }
       }
-    }
+      emit('selection-changed', selectedIds.value);
+    };
     const allSelected = computed(() => {
       return selectedIds.value.length === props.rows.length;
     });
