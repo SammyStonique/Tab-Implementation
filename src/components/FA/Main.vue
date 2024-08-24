@@ -16,7 +16,7 @@
 
 <script>
 import NavBar from '@/components/NavBar.vue';
-import NavBarFA from '@/components/NavBarFA.vue';
+import NavBarFA from '@/components/FA/NavBarFA.vue';
 import PagesTab from '@/components/FA/PagesTab.vue';
 import Dashboard from '@/components/FA/Dashboard.vue';
 import Client_Categories from '@/components/FA/Client_Categories.vue';

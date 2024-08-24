@@ -141,26 +141,6 @@ const actions = {
             }
         })
     },
-    getUserDetails({ commit }){
-        axios.get("api/v1/users/me/")
-        .then((response)=>{
-            commit('SET_USER_DETAILS', response.data);
-        })
-        .catch((error)=>{
-            console.log(error.message)
-        })
-    },
-    fetchCompanyName({ commit,state }, company_id){
-        axios
-        .get(`api/v1/companies/${company_id}/`)
-        .then((response)=>{
-          state.company_name = response.data.name;
-          state.company_logo = response.data.logo;
-        })
-        .catch((error)=>{
-          console.log(error.message);
-        })
-    },
     logout({ commit,state }){
         axios.post('api/v1/auth-token/logout/',{headers: {'Authorization': `Token ${state.token}`}})
         .then((response)=>{

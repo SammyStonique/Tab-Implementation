@@ -91,7 +91,7 @@ export default{
         const modal_top = ref('150px');
         const modal_left = ref('400px');
         const modal_width = ref('35vw');
-        const isEditing = computed(()=> store.state.Appointments.isEditing)
+        const isEditing = computed(()=> store.state.Appointments.isEditing);
         const selectedAppointment = computed(()=> store.state.Appointments.selectedAppointment);
         const selectedDoctor = computed(()=> store.state.Appointments.selectedDoctor);
         const selectedPatient = computed(()=> store.state.Appointments.selectedPatient);

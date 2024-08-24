@@ -2,9 +2,11 @@ import { useStore } from 'vuex';
 
 const state = {
     hmsArray: new Set(["Dashboard"]),
+    pmsArray: new Set(["Dashboard"]),
     faArray: new Set(["Dashboard"]),
     invArray: new Set(["Dashboard"]),
     hmsActiveTab: 'Dashboard',
+    pmsActiveTab: 'Dashboard',
     faActiveTab: 'Dashboard',
     invActiveTab: 'Dashboard',
   };
@@ -21,6 +23,9 @@ const state = {
         }else if(key == 'FA'){
           state.faArray.add(value);
           state.faActiveTab = value;
+        }else if(key == 'PMS'){
+          state.pmsArray.add(value);
+          state.pmsActiveTab = value;
         }
       } 
     },
@@ -46,20 +51,27 @@ const state = {
           let myArray = Array.from(state.faArray);
           state.faActiveTab = myArray[myArray.length - 1];
         }
+        else if(key == 'PMS'){
+          state.pmsArray.delete(value);
+          let myArray = Array.from(state.pmsArray);
+          state.pmsActiveTab = myArray[myArray.length - 1];
+        }
       } 
     },
     CLEAR_PAGE_TAB(state, module){
       if(module == 'Hospital Management'){
         state.hmsArray = new Set(["Dashboard"]);
         state.hmsActiveTab = "Dashboard"; 
-        // console.log("I SHOULD BE RUNNING");
       }else if(module == 'Inventory Management'){
         state.invArray = new Set(["Dashboard"]);
         state.invActiveTab = "Dashboard"; 
       }else if(module == 'Financial Accounts'){
         state.faArray = new Set(["Dashboard"]);
         state.faActiveTab = "Dashboard"; 
-      } 
+      }else if(module == 'Property Management'){
+        state.pmsArray = new Set(["Dashboard"]);
+        state.pmsActiveTab = "Dashboard"; 
+      }
     }
 
   };

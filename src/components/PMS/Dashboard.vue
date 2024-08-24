@@ -13,7 +13,7 @@
                     </div>
                     <div class="w-3/4 px-2">
                       <p class="font-bold">{{appointmentCount}}</p>
-                      <p class="font-light text-sm">Appointments</p>
+                      <p class="font-light text-sm">Properties</p>
                     </div>
                   </div>
                 </div>
@@ -24,7 +24,7 @@
                     </div>
                     <div class="w-3/4 px-2">
                       <p class="font-bold">{{operationsCount}}</p>
-                      <p class="font-light text-sm">Operations</p>
+                      <p class="font-light text-sm">Units</p>
                     </div>
                   </div>
                 </div>
@@ -37,7 +37,7 @@
                     </div>
                     <div class="w-3/4 px-2">
                       <p class="font-bold">{{patientCount}}</p>
-                      <p class="font-light text-sm">New Patients</p>
+                      <p class="font-light text-sm">New Tenants</p>
                     </div>
                   </div>
                 </div>
@@ -48,14 +48,14 @@
                     </div>
                     <div class="w-3/4 px-2">
                       <p class="font-bold">{{ doctorCount }}</p>
-                      <p class="font-light text-sm">Doctors</p>
+                      <p class="font-light text-sm">Statements</p>
                     </div>
                   </div>
                 </div>
               </div>
             </div>
             <div class="w-1/2 rounded-lg py-3 px-2 bg-white">
-              <h1 class="font-bold mb-2">Patient Visit By Department</h1>
+              <h1 class="font-bold mb-2">Deliquent Tenants</h1>
               <div class="">
 
               </div>
@@ -109,7 +109,7 @@
             </table>
           </div>
           <div class="rounded-lg bg-white h-56 p-2 mb-3">
-            <h1 class="font-bold">Average Patient Visits</h1>
+            <h1 class="font-bold">Terminated Tenants</h1>
           </div>
         </div>
       </div>
@@ -134,7 +134,7 @@
       }
     },
     mounted(){
-    
+        
     }
   }
   </script>

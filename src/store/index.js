@@ -10,6 +10,11 @@ import Patients_List from './HMS/Patients_List';
 import Medical_Fees from './HMS/Medical_Fees';
 import Doctors from './HMS/Doctors';
 import userData from './userData';
+import Properties_List from './PMS/Properties_List';
+import Zones from './PMS/Zones';
+import Landlords_List from './PMS/Landlords_List';
+import Units_List from './PMS/Units_List';
+import Tenants_List from './PMS/Tenants_List';
 
 export default createStore({
   modules: {
@@ -18,7 +23,7 @@ export default createStore({
     modulesTab,
     pageTab,
     userData,
-    Appointments,Client_Categories,Departments,Patients_List,Medical_Fees,Doctors
-
+    Appointments,Client_Categories,Departments,Patients_List,Medical_Fees,Doctors,
+    Properties_List, Zones, Landlords_List, Units_List, Tenants_List
   },
 });

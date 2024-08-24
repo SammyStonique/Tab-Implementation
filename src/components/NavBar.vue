@@ -71,12 +71,6 @@ export default defineComponent({
       const user_names = computed(()=> store.state.userData.user_names);
       const user_profile = computed(()=> store.state.userData.user_profile);
 
-      const getUserDetails = () =>{
-          store.dispatch('userData/getUserDetails');
-      }
-      const fetchCompanyName = () =>{
-          store.dispatch('userData/fetchCompanyName',companyID.value );
-      }
       const showDropdown = () =>{
           dropdown.value = !dropdown.value;
       }
@@ -90,8 +84,7 @@ export default defineComponent({
           emit('close')
       }
       onBeforeMount(()=>{
-        //   getUserDetails();
-        //   fetchCompanyName();
+  
       })
       return{
           showDropdown,dropdown,isAuthenticated,userDetails,company_name,user_names,user_profile,logout,

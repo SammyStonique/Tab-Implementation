@@ -7,12 +7,21 @@
         <div v-if="hmsOpen && selectedModule =='Hospital Management'">
             <HMS />
         </div>
+        <div v-if="hmsOpen && selectedModule =='Property Management'">
+            <PMS />
+        </div>
         <div v-if="hmsOpen && selectedModule =='Financial Accounts'">
             <FA />
         </div>
         <div v-if="hmsOpen && selectedModule =='Inventory Management'">
             <INV />
         </div>
+        <!-- <div v-if="hmsOpen && selectedModule =='Human Resource'">
+            <HR />
+        </div>
+        <div v-if="hmsOpen && selectedModule =='Settings'">
+            <SET />
+        </div> -->
         <div v-if="mainOpen" class="text-black h-screen bg-slate-500 px-12 w-full">
             <div class="border-b border-gray-300 py-2 w-full flex pl-6">
                 <p class="text-left basis-3/6">Welcome, {{ username }}</p>
@@ -51,15 +60,16 @@ import { useFetchSessionData } from '@/composables/SessionData';
 import ModulesTab from '@/components/ModulesTab.vue'
 import { useStore } from 'vuex';
 import { ref, reactive, computed,onBeforeMount } from 'vue';
-import HMS from '@/components/HMS/Main.vue'
-import FA from '@/components/FA/Main.vue'
-import INV from '@/components/INV/Main.vue'
+import HMS from '@/components/HMS/Main.vue';
+import PMS from '@/components/PMS/Main.vue'
+import FA from '@/components/FA/Main.vue';
+import INV from '@/components/INV/Main.vue';
 import Loader from '@/components/Loader.vue';
 
 export default{
     components:{
         ModulesTab, Loader,
-        HMS, FA, INV
+        HMS, FA, INV, PMS
     },
     setup(){
         const store = useStore();
@@ -76,9 +86,6 @@ export default{
         const showOptions = ref(false);
         const company_modules = computed(()=> store.state.userData.company_modules);
 
-        const modules = ref([
-            "Hospital Management","Financial Accounts","Inventory Management"
-        ])
         const selectedModule = computed(() =>{
             return store.state.modulesTab.selectedModule
         })
@@ -137,7 +144,7 @@ export default{
             fetchSessionData();
         })
         return{
-            openModule, hmsOpen, mainOpen, modules, selectedModule, company_modules, getImagePath, username, company_name, logout,
+            openModule, hmsOpen, mainOpen, selectedModule, company_modules, getImagePath, username, company_name, logout,
             showOptions, showDropdown, companyList, switchCompany, loader, showLoader, hideLoader
         }
     }
