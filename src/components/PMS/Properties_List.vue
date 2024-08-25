@@ -7,14 +7,19 @@
             :searchFilters="searchFilters"
             @searchPage="searchProperties"
             @resetFilters="resetFilters"
+            @importData="importProperties"
+            @removeItem="removeProperty"
+            @removeSelectedItems="removeProperties"
+            @printList="printList"
             :columns="tableColumns"
             :rows="propertyList"
             :actions="actions"
             :idField="idField"
+            @handleSelectionChange="handleSelectionChange"
             @handleActionClick="handleActionClick"
             :count="propCount"
             :currentPage="currentPage"
-            :result="depArrLen"
+            :result="propArrLen"
             @loadPrev="loadPrev"
             @loadNext="loadNext"
             @firstPage="firstPage"
@@ -27,21 +32,24 @@
 
 <script>
 import axios from "axios";
-import { ref, computed, onMounted, onBeforeMount , defineComponent } from 'vue';
+import { ref, computed, onMounted, onBeforeMount} from 'vue';
 import PageComponent from '@/components/PageComponent.vue'
 import { useStore } from "vuex";
+import { useToast } from "vue-toastification";
 
-export default defineComponent({
+export default{
     name: 'Properties_List',
     components:{
         PageComponent
     },
     setup(){
-        const loader = ref('');
         const store = useStore();
+        const toast = useToast();
+        const loader = ref('');
         const idField = 'property_id';
         const addButtonLabel = ref('New Property');
         const submitButtonLabel = ref('Add');
+        const selectedIds = ref([]);
         const propertyList = ref([]);
         const propResults = ref([]);
         const propArrLen = ref(0);
@@ -59,7 +67,7 @@ export default defineComponent({
             {label: "Category", key: "property_type"},
             {label: "Zone", key:"zone_name"},
             {label: "Landlord", key:"landlord_name"},
-            {label: "Vacancy", key:"vacancy_status"},
+            {label: "Units", key:"units_count"},
         ])
         const actions = ref([
             {name: 'edit', icon: 'fa fa-edit', title: 'Edit Property'},
@@ -70,23 +78,23 @@ export default defineComponent({
         const landlordID = ref(null);
         const zoneID = ref(null);
         const name_search = computed({
-            get: () => store.state.Patients_List.first_name_search,
-            set: (value) => store.commit('Patients_List/SET_SEARCH_FILTERS', {"first_name_search":value}),
+            get: () => store.state.Properties_List.name_search,
+            set: (value) => store.commit('Properties_List/SET_SEARCH_FILTERS', {"name_search":value}),
         });
         const property_code_search = computed({
-            get: () => store.state.Patients_List.last_name_search,
-            set: (value) => store.commit('Patients_List/SET_SEARCH_FILTERS', {"last_name_search":value}),
+            get: () => store.state.Properties_List.property_code_search,
+            set: (value) => store.commit('Properties_List/SET_SEARCH_FILTERS', {"property_code_search":value}),
         });
         const status_search = computed({
-            get: () => store.state.Patients_List.phone_number_search,
-            set: (value) => store.commit('Patients_List/SET_SEARCH_FILTERS', {"phone_number_search":value}),
+            get: () => store.state.Properties_List.status_search,
+            set: (value) => store.commit('Properties_List/SET_SEARCH_FILTERS', {"status_search":value}),
         });
-        const vacancy_status_search = computed({
-            get: () => store.state.Patients_List.phone_number_search,
-            set: (value) => store.commit('Patients_List/SET_SEARCH_FILTERS', {"phone_number_search":value}),
+        const property_type_search = computed({
+            get: () => store.state.Properties_List.property_type_search,
+            set: (value) => store.commit('Properties_List/SET_SEARCH_FILTERS', {"property_type_search":value}),
         });
         const landlords_array = computed({
-            get: () => store.state.Patients_List.patientsArr,
+            get: () => store.state.Landlords_List.landlordArr,
         });
         const zones_array = computed({
             get: () => store.state.Zones.zoneArr,
@@ -105,8 +113,8 @@ export default defineComponent({
                 options: [{text:'Active',value:'Active'},{text:'Inactive',value:'Inactive'}]
             },
             {
-                type:'dropdown', placeholder:"Vacancy", value: vacancy_status_search, width:48,
-                options: [{text:'Vacant',value:'Vacant'},{text:'Occupied',value:'Occupied'}]
+                type:'dropdown', placeholder:"Property Type", value: property_type_search, width:48,
+                options: [{text:'Residential',value:'Residential'},{text:'Commercial',value:'Commercial'}]
             },
             
             {
@@ -115,13 +123,72 @@ export default defineComponent({
                 searchPlaceholder: 'Zone...', dropdownWidth: '300px',
                 fetchData: store.dispatch('Zones/fetchZones', {company:companyID.value})
             },
-        ])
+        ]);
+        const handleSelectionChange = (ids) => {
+            selectedIds.value = ids;
+        };
+        const importProperties = () =>{
+            store.commit('pageTab/ADD_PAGE', {'PMS':'Import_Properties'})
+            store.state.pageTab.pmsActiveTab = 'Import_Properties';
+        }
+        const removeProperty = async() =>{
+            if(selectedIds.value.length == 1){
+                let formData = {
+                    company: companyID.value,
+                    property: selectedIds.value
+                }
+                try{
+                    const response = await store.dispatch('Properties_List/deleteProperty',formData)
+                    if(response && response.status == 200){
+                        toast.success("Property Removed Succesfully");
+                        searchProperties();
+                    }
+                }
+                catch(error){
+                    console.error(error.message);
+                    toast.error('Failed to remove property: ' + error.message);
+                }
+                finally{
+                    selectedIds.value = [];
+                }
+            }else if(selectedIds.value.length > 1){
+                toast.error("You have selected more than 1 property") 
+            }else{
+                toast.error("Please Select A Property To Remove")
+            }
+        }
+        const removeProperties = async() =>{
+            if(selectedIds.value.length){
+                let formData = {
+                    company: companyID.value,
+                    property: selectedIds.value
+                }
+                try{
+                    const response = await store.dispatch('Properties_List/deleteProperty',formData)
+                    if(response && response.status == 200){
+                        toast.success("Property(s) Removed Succesfully");
+                        searchPropertys();
+                    }
+                }
+                catch(error){
+                    console.error(error.message);
+                    toast.error('Failed to remove property: ' + error.message);
+                }
+                finally{
+                    selectedIds.value = [];
+
+                }
+            }else{
+                toast.error("Please Select A Property To Remove")
+            }
+        }
         const showLoader = () =>{
             loader.value = "block";
         }
         const hideLoader = () =>{
             loader.value = "none";
         }
+       
         const searchProperties = () =>{
             showLoader();
             showNextBtn.value = false;
@@ -132,7 +199,7 @@ export default defineComponent({
                 status: status_search.value,
                 landlord: landlordID.value,
                 zone: zoneID.value,
-                vacancy: vacancy_status_search.value,
+                property_type: property_type_search.value,
                 company_id: companyID.value
             } 
             axios
@@ -192,34 +259,31 @@ export default defineComponent({
             searchProperties();
             // scrollToTop();
         }
-        const addNewProperty = () =>{
-            showModal.value = true;
-            store.commit('pageTab/ADD_PAGE', {'HMS':'Patient_Details'})
-            store.state.pageTab.hmsActiveTab = 'Patient_Details';
-            store.dispatch('Patients_List/updateState', {isEditing: false});
-            store.dispatch('Patients_List/updateState', {selectedPatient: null});
+        const addNewProperty = async() =>{
+            store.commit('Properties_List/initializeStore');
+            await store.dispatch('Properties_List/updateState', {selectedProperty: null,selectedLandlord:null,selectedZone:null, isEditing: false});
+            store.commit('pageTab/ADD_PAGE', {'PMS':'Property_Details'});
+            store.state.pageTab.pmsActiveTab = 'Property_Details';          
         }
         const handleActionClick = async(rowIndex, action, row) =>{
             if( action == 'edit'){
-                const patientID = row[idField];
+                const propertyID = row[idField];
                 let formData = {
-                    hospital: companyID.value,
-                    patient: patientID
+                    company: companyID.value,
+                    property: propertyID
                 }
-                await store.dispatch('Patients_List/fetchPatient',formData).
+                await store.dispatch('Properties_List/fetchProperty',formData).
                 then(()=>{
-                    store.commit('pageTab/ADD_PAGE', {'HMS':'Patient_Details'})
-                    store.state.pageTab.hmsActiveTab = 'Patient_Details';
+                    store.commit('pageTab/ADD_PAGE', {'PMS':'Property_Details'})
+                    store.state.pageTab.pmsActiveTab = 'Property_Details';
                 })
-                
-                // patModalVisible.value = true;
             }else if(action == 'delete'){
-                const patientID = row[idField];
+                const propertyID = row[idField];
                 let formData = {
-                    hospital: companyID.value,
-                    patient: patientID
+                    company: companyID.value,
+                    property: propertyID
                 }
-                await store.dispatch('Patients_List/deletePatient',formData).
+                await store.dispatch('Properties_List/deleteProperty',formData).
                 then(()=>{
                     searchProperties();
                 })
@@ -238,8 +302,9 @@ export default defineComponent({
             searchProperties,resetFilters, addButtonLabel, searchFilters, tableColumns, propertyList,
             propResults, propArrLen, propCount, pageCount, showNextBtn, showPreviousBtn,
             loadPrev, loadNext, firstPage, lastPage, idField, actions, handleActionClick, propModalVisible, closeModal,
-            submitButtonLabel, showModal, addNewProperty, showLoader, loader, hideLoader
+            submitButtonLabel, showModal, addNewProperty, showLoader, loader, hideLoader, importProperties, removeProperty, removeProperties,
+            handleSelectionChange
         }
     }
-})
+};
 </script>

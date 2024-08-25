@@ -28,27 +28,26 @@
             :showPreviousBtn="showPreviousBtn"
         />
         <MovableModal v-model:visible="zoneModalVisible" :title="title" :modal_top="modal_top" :modal_left="modal_left" :modal_width="modal_width"
-        :loader="modal_loader" @showLoader="showModalLoader" @hideLoader="hideModalLoader" @closeModal="closeModal"
-    >
-        <DynamicForm 
-            :fields="formFields" :flex_basis="flex_basis" :flex_basis_percentage="flex_basis_percentage" 
-            :displayButtons="displayButtons" @handleSubmit="saveZone" @handleReset="handleReset"
-        />
-    </MovableModal>
+            :loader="modal_loader" @showLoader="showModalLoader" @hideLoader="hideModalLoader" @closeModal="closeModal">
+            <DynamicForm 
+                :fields="formFields" :flex_basis="flex_basis" :flex_basis_percentage="flex_basis_percentage" 
+                :displayButtons="displayButtons" @handleSubmit="saveZone" @handleReset="handleReset"
+            />
+        </MovableModal>
     </div>
     
 </template>
 
 <script>
 import axios from "axios";
-import { ref, computed, watch, onBeforeMount , defineComponent } from 'vue';
+import { ref, computed, watch, onBeforeMount } from 'vue';
 import PageComponent from '@/components/PageComponent.vue';
 import MovableModal from '@/components/MovableModal.vue'
 import DynamicForm from '../NewDynamicForm.vue';
 import { useStore } from "vuex";
 import { useToast } from "vue-toastification";
 
-export default defineComponent({
+export default{
     name: 'Zones',
     components:{
         PageComponent, MovableModal,DynamicForm
@@ -100,7 +99,7 @@ export default defineComponent({
             set: (value) => store.commit('Zones/SET_SEARCH_FILTERS', {"name_search":value}),
         });
         const searchFilters = ref([
-            {type:'text', placeholder:"Name...", value: name_search, width:48,},
+            {type:'text', placeholder:"Name...", value: name_search, width:60,},
         ]);
         const handleSelectionChange = (ids) => {
             selectedIds.value = ids;
@@ -392,5 +391,5 @@ export default defineComponent({
             importZones, removeZone, removeZones
         }
     }
-})
+};
 </script>

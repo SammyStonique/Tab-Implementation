@@ -11,8 +11,10 @@ const state = {
   name_search: '',
   property_code_search: '',
   status_search: '',
-  vacancy_status_search: '',
+  property_type_search: '',
   selectedProperty: null,
+  selectedLandlord: null,
+  selectedZone: null,
   isEditing: false
 };
   
@@ -25,8 +27,10 @@ const mutations = {
     state.name_search = '';
     state.property_code_search = '';
     state.status_search = '';
-    state.vacancy_status_search = '';
+    state.property_type_search = '';
     state.isEditing = false;
+    state.selectedLandlord = null;
+    state.selectedZone = null;
   },
   SET_SELECTED_PROPERTY(state, property) {
     state.selectedProperty = property;
@@ -37,6 +41,12 @@ const mutations = {
   },
   PROPERTIES_ARRAY(state, properties){
     state.propArray = properties;
+  },
+  SET_SELECTED_LANDLORD(state, landlord) {
+    state.selectedLandlord = landlord;
+  },
+  SET_SELECTED_ZONE(state, zone) {
+    state.selectedZone = zone;
   },
   SET_STATE(state, payload) {
     for (const key in payload) {
@@ -53,8 +63,8 @@ const mutations = {
         state.property_code_search = value;
       }else if(key == 'status_search'){
           state.status_search = value;
-      }else if(key == 'vacancy_status_search'){
-          state.vacancy_status_search = value;
+      }else if(key == 'property_type_search'){
+          state.property_type_search = value;
       }   
     }
   },
@@ -62,8 +72,7 @@ const mutations = {
     state.name_search = '';
     state.property_code_search = '';
     state.status_search = '';
-    state.id_number_search = '';
-    state.vacancy_status_search = '';
+    state.property_type_search = '';
   }
 };
   
@@ -100,6 +109,10 @@ const actions = {
   fetchProperty({ commit,state }, formData) {
     axios.post(`api/v1/get-properties/`,formData)
     .then((response)=>{
+      const selectedLandlord =response.data.landlord.landlord_code + " - " + response.data.landlord.name;
+      const selectedZone = response.data.zone.name;
+      commit('SET_SELECTED_LANDLORD',selectedLandlord);
+      commit('SET_SELECTED_ZONE',selectedZone);
       state.selectedProperty = response.data;
       commit('SET_SELECTED_PROPERTY',response.data);
     })

@@ -21,7 +21,8 @@ import NavBar from '@/components/NavBar.vue'
 import NavBarPMS from '@/components/PMS/NavBarPMS.vue'
 import PagesTab from '@/components/PMS/PagesTab.vue'
 import Dashboard from '@/components/PMS/Dashboard.vue'
-import Properties_List from '@/components/PMS/Properties_List.vue'
+import Properties_List from '@/components/PMS/Properties_List.vue';
+import Property_Details from '@/components/PMS/Property_Details.vue';
 import Zones from '@/components/PMS/Zones.vue';
 import Landlords_List from '@/components/PMS/Landlords_List.vue'
 import Units_List from '@/components/PMS/Units_List.vue'
@@ -32,7 +33,7 @@ export default{
         NavBar,
         NavBarPMS,
         PagesTab,
-        Dashboard, Properties_List, Zones, Landlords_List, Units_List
+        Dashboard, Properties_List, Zones, Landlords_List, Units_List, Property_Details
     },
     props: {
         title: {

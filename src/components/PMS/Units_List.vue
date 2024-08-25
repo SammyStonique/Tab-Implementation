@@ -32,8 +32,8 @@ import PageComponent from '@/components/PageComponent.vue'
 import { useStore } from "vuex";
 import patientsData from '@/composables/HMS/patientsDropdown'
 
-export default defineComponent({
-    name: 'Properties_List',
+export default{
+    name: 'Units_List',
     components:{
         PageComponent
     },
@@ -244,5 +244,5 @@ export default defineComponent({
             submitButtonLabel, showModal, addNewProperty, showLoader, loader, hideLoader
         }
     }
-})
+};
 </script>
