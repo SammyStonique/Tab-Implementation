@@ -224,7 +224,7 @@ export default{
                 doctComponentKey.value += 1;
                 
             }else if(action == 'delete'){
-                const appID = row[idField];
+                const appID = [row[idField]];
                 let formData = {
                     hospital: hospitalID.value,
                     appointment: appID

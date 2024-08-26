@@ -72,9 +72,9 @@ const actions = {
     })
   },
 
-  fetchLandlords({ commit,state }, formData) {
+  async fetchLandlords({ commit,state }, formData) {
     state.landlordArr = [];
-    axios.post(`api/v1/get-landlords/`,formData)
+    await axios.post(`api/v1/get-landlords/`,formData)
     .then((response)=>{
       for(let i=0; i< response.data.length; i++){
         state.landlordArr.push((response.data[i].landlord_code + " - " +response.data[i].name))

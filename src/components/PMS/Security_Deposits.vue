@@ -3,23 +3,22 @@
         <PageComponent 
             :loader="loader" @showLoader="showLoader" @hideLoader="hideLoader"
             :addButtonLabel="addButtonLabel"
-            @handleAddNew="addNewZone"
+            @handleAddNew="addNewDeposit"
             :searchFilters="searchFilters"
-            @searchPage="searchZones"
+            @searchPage="searchDeposits"
             @resetFilters="resetFilters"
-            @importData="importZones"
-            @removeItem="removeZone"
-            @removeSelectedItems="removeZones"
+            @removeItem="removeDeposit"
+            @removeSelectedItems="removeDeposits"
             @printList="printList"
             :columns="tableColumns"
-            :rows="zonesList"
+            :rows="depositList"
             :actions="actions"
             :idField="idField"
             @handleSelectionChange="handleSelectionChange"
             @handleActionClick="handleActionClick"
-            :count="zoneCount"
+            :count="propCount"
             :currentPage="currentPage"
-            :result="zoneArrLen"
+            :result="propArrLen"
             @loadPrev="loadPrev"
             @loadNext="loadNext"
             @firstPage="firstPage"
@@ -27,20 +26,19 @@
             :showNextBtn="showNextBtn"
             :showPreviousBtn="showPreviousBtn"
         />
-        <MovableModal v-model:visible="zoneModalVisible" :title="title" :modal_top="modal_top" :modal_left="modal_left" :modal_width="modal_width"
+        <MovableModal v-model:visible="propModalVisible" :title="title" :modal_top="modal_top" :modal_left="modal_left" :modal_width="modal_width"
             :loader="modal_loader" @showLoader="showModalLoader" @hideLoader="hideModalLoader" @closeModal="closeModal">
             <DynamicForm 
                 :fields="formFields" :flex_basis="flex_basis" :flex_basis_percentage="flex_basis_percentage" 
-                :displayButtons="displayButtons" @handleSubmit="saveZone" @handleReset="handleReset"
+                :displayButtons="displayButtons" @handleSubmit="saveDeposit" @handleReset="handleReset"
             />
         </MovableModal>
     </div>
-    
 </template>
 
 <script>
 import axios from "axios";
-import { ref, computed, watch, onBeforeMount } from 'vue';
+import { ref, computed, onMounted, onBeforeMount, watch} from 'vue';
 import PageComponent from '@/components/PageComponent.vue';
 import MovableModal from '@/components/MovableModal.vue'
 import DynamicForm from '../NewDynamicForm.vue';
@@ -48,55 +46,54 @@ import { useStore } from "vuex";
 import { useToast } from "vue-toastification";
 
 export default{
-    name: 'Zones',
+    name: 'Security_Deposits',
     components:{
         PageComponent, MovableModal,DynamicForm
     },
     setup(){
-        const store = useStore();
+        const store = useStore();     
         const toast = useToast();
         const loader = ref('none');
         const modal_loader = ref('none');
-        const idField = 'zone_id';
-        const addButtonLabel = ref('New Zone');
-        const title = ref('Zone Details');
+        const idField = 'deposit_id';
+        const addButtonLabel = ref('New Deposit');
+        const title = ref('Deposit Details');
         const submitButtonLabel = ref('Add');
+        const ledComponentKey = ref(0);
         const selectedIds = ref([]);
-        const zonesList = ref([]);
-        const zoneResults = ref([]);
-        const zoneArrLen = ref(0);
-        const zoneCount = ref(0);
+        const depositList = ref([]);
+        const propResults = ref([]);
+        const propArrLen = ref(0);
+        const propCount = ref(0);
         const pageCount = ref(0);
         const currentPage = ref(1);
         const showNextBtn = ref(false);
         const showPreviousBtn = ref(false);
-        const zoneModalVisible = ref(false);
+        const propModalVisible = ref(false);
         const flex_basis = ref('');
         const flex_basis_percentage = ref('');
         const displayButtons = ref(true);
         const errors = ref([]);
         const modal_top = ref('150px');
         const modal_left = ref('400px');
-        const modal_width = ref('35vw');
-        const isEditing = computed(()=> store.state.Zones.isEditing);
+        const modal_width = ref('30vw');
+        const isEditing = computed(()=> store.state.Security_Deposits.isEditing);
+        const selectedDeposit = computed(()=> store.state.Security_Deposits.selectedDeposit);
         const showModal = ref(false);
-        const selectedZone = computed(()=> store.state.Zones.selectedZone);
         const tableColumns = ref([
             {type: "checkbox"},
             {label: "Name", key:"name"},
-            {label: "Manager", key:"manager_name"},
-            {label: "Manager Phone#", key: "manager_phone_number"},
+            {label: "Charge Mode", key:"default_mode"},
+            {label: "Default Value", key: "default_value"},
         ])
         const actions = ref([
-            {name: 'edit', icon: 'fa fa-edit', title: 'Edit Zone'},
-            {name: 'view', icon: 'fa fa-file-pdf-o', title: 'View Statement'},
-            {name: 'delete', icon: 'fa fa-trash', title: 'Delete Zone'},
+            {name: 'edit', icon: 'fa fa-edit', title: 'Edit Deposit'},
+            {name: 'delete', icon: 'fa fa-trash', title: 'Delete Deposit'},
         ])
         const companyID = computed(()=> store.state.userData.company_id);
-        const zoneID = ref(null);
         const name_search = computed({
-            get: () => store.state.Zones.name_search,
-            set: (value) => store.commit('Zones/SET_SEARCH_FILTERS', {"name_search":value}),
+            get: () => store.state.Security_Deposits.name_search,
+            set: (value) => store.commit('Security_Deposits/SET_SEARCH_FILTERS', {"name_search":value}),
         });
         const searchFilters = ref([
             {type:'text', placeholder:"Name...", value: name_search, width:60,},
@@ -107,9 +104,9 @@ export default{
         const formFields = ref([]);
         const updateFormFields = () => {
             formFields.value = [
-            { type: 'text', name: 'name',label: "Zone Name", value: selectedZone.value?.name || '', required: true },
-            { type: 'text', name: 'manager_name',label: "Manager Name", value: selectedZone.value?.manager_name || '', required: true },
-            { type: 'text', name: 'manager_phone_number',label: "Phone Number", value: selectedZone.value?.manager_phone_number || '', required: true },
+                { type: 'text', name: 'name',label: "Name", value: selectedDeposit.value?.name || '', required: true },
+                { type: 'dropdown', name: 'default_mode',label: "Charge Mode", value: selectedDeposit.value?.default_mode || '', placeholder: "Select Charge Mode", required: false, options: [{ text: 'Fixed Amount', value: 'Fixed Amount' }, { text: 'Rent Percentage', value: 'Rent Percentage' }] },
+                { type: 'number', name: 'default_value',label: "Default Value", value: selectedDeposit.value?.default_value || 0, required: false },
             ];
         };
         const handleReset = () =>{
@@ -118,8 +115,8 @@ export default{
             }
         }
 
-        watch([selectedZone], () => {
-            if (selectedZone) {
+        watch([selectedDeposit], () => {
+            if (selectedDeposit.value) {
                 updateFormFields();
             }else{
                 updateFormFields();
@@ -133,53 +130,52 @@ export default{
         const hideModalLoader = () =>{
             modal_loader.value = "none";
         }
-        const createZone = async() =>{
+        const createDeposit = async() =>{
             showModalLoader();
             let formData = {
                 name: formFields.value[0].value,
-                manager_name: formFields.value[1].value,
-                manager_phone_number: formFields.value[2].value,
+                default_mode: formFields.value[1].value,
+                default_value: formFields.value[2].value || 0,
                 company: companyID.value
             }
-  
+            console.log("THE FORM DATA IS ",formData);
             errors.value = [];
             for(let i=0; i < formFields.value.length; i++){
                 if(formFields.value[i].value =='' && formFields.value[i].required == true){
                     errors.value.push(formFields.value[i].label);
                 }
             }
-
             if(errors.value.length){
                 toast.error('Fill In Required Fields');
                 hideModalLoader();
             }else{
                 try {
-                    const response = await store.dispatch('Zones/createZone', formData);
+                    const response = await store.dispatch('Security_Deposits/createDeposit', formData);
                     if (response && response.status === 200) {
                         hideModalLoader();
-                        toast.success('Zone created successfully!');
+                        toast.success('Security Deposit created successfully!');
                         handleReset();
                     } else {
-                        toast.error('An error occurred while creating the zone.');
+                        toast.error('An error occurred while creating the deposit.');
                     }
                 } catch (error) {
                     console.error(error.message);
-                    toast.error('Failed to create zone: ' + error.message);
+                    toast.error('Failed to create deposit: ' + error.message);
                 } finally {
                     hideModalLoader();
-                    searchZones();
+                    searchDeposits();
                 }
             }
         }
-        const updateZone = async() =>{
+        const updateDeposit = async() =>{
             showModalLoader();
             errors.value = [];
             let formData = {
-                zone: selectedZone.value.zone_id,
+                deposit: selectedDeposit.value.deposit_id,
                 name: formFields.value[0].value,
-                manager_name: formFields.value[1].value,
-                manager_phone_number: formFields.value[2].value,
-                company: companyID.value,
+                default_mode: formFields.value[1].value,
+                default_value: formFields.value[2].value || 0,
+                company: companyID.value
             }
 
             for(let i=0; i < formFields.value.length; i++){
@@ -192,85 +188,80 @@ export default{
                 hideModalLoader();
             }else{
                 try {
-                    const response = await store.dispatch('Zones/updateZone', formData);
+                    const response = await store.dispatch('Security_Deposits/updateDeposit', formData);
                     if (response && response.status === 200) {
                         hideModalLoader();
                         handleReset();
-                        toast.success("Zone updated successfully!");              
+                        toast.success("Security Deposit updated successfully!");              
                     } else {
-                        toast.error('An error occurred while updating the zone.');
+                        toast.error('An error occurred while updating the deposit.');
                     }
                 } catch (error) {
                     console.error(error.message);
-                    toast.error('Failed to update zone: ' + error.message);
+                    toast.error('Failed to update deposit: ' + error.message);
                 } finally {
                     hideModalLoader();
-                    zoneModalVisible.value = false;
-                    store.dispatch("Zones/updateState",{selectedZone:null})
-                    searchZones();
+                    propModalVisible.value = false;
+                    store.dispatch("Security_Deposits/updateState",{selectedDeposit:null})
+                    searchDeposits();
                 }             
             }
         }
-        const saveZone = () =>{
+        const saveDeposit = () =>{
             if(isEditing.value == true){
-                updateZone();
+                updateDeposit();
             }else{
-                createZone();
+                createDeposit();
             }
         }
-        const importZones = () =>{
-            store.commit('pageTab/ADD_PAGE', {'PMS':'Import_Zones'})
-            store.state.pageTab.pmsActiveTab = 'Import_Zones';
-        }
-        const removeZone = async() =>{
+        const removeDeposit = async() =>{
             if(selectedIds.value.length == 1){
                 let formData = {
                     company: companyID.value,
-                    zone: selectedIds.value
+                    deposit: selectedIds.value
                 }
                 try{
-                    const response = await store.dispatch('Zones/deleteZone',formData)
+                    const response = await store.dispatch('Security_Deposits/deleteDeposit',formData)
                     if(response && response.status == 200){
-                        toast.success("Zone Removed Succesfully");
-                        searchZones();
+                        toast.success("Security Deposit Removed Succesfully");
+                        searchDeposits();
                     }
                 }
                 catch(error){
                     console.error(error.message);
-                    toast.error('Failed to remove zone: ' + error.message);
+                    toast.error('Failed to remove deposit: ' + error.message);
                 }
                 finally{
                     selectedIds.value = [];
                 }
             }else if(selectedIds.value.length > 1){
-                toast.error("You have selected more than 1 zone") 
+                toast.error("You have selected more than 1 deposit") 
             }else{
-                toast.error("Please Select A Zone To Remove")
+                toast.error("Please Select A Security Deposit To Remove")
             }
         }
-        const removeZones = async() =>{
+        const removeDeposits = async() =>{
             if(selectedIds.value.length){
                 let formData = {
                     company: companyID.value,
-                    zone: selectedIds.value
+                    deposit: selectedIds.value
                 }
                 try{
-                    const response = await store.dispatch('Zones/deleteZone',formData)
+                    const response = await store.dispatch('Security_Deposits/deleteDeposit',formData)
                     if(response && response.status == 200){
-                        toast.success("Zone(s) Removed Succesfully");
-                        searchZones();
+                        toast.success("Security Deposit(s) Removed Succesfully");
+                        searchDeposits();
                     }
                 }
                 catch(error){
                     console.error(error.message);
-                    toast.error('Failed to remove zone: ' + error.message);
+                    toast.error('Failed to remove deposit(s): ' + error.message);
                 }
                 finally{
                     selectedIds.value = [];
-
                 }
             }else{
-                toast.error("Please Select A Zone To Remove")
+                toast.error("Please Select A Security Deposit To Remove")
             }
         }
         const showLoader = () =>{
@@ -279,7 +270,7 @@ export default{
         const hideLoader = () =>{
             loader.value = "none";
         }
-        const searchZones = () =>{
+        const searchDeposits = () =>{
             showLoader();
             showNextBtn.value = false;
             showPreviousBtn.value = false;
@@ -288,14 +279,14 @@ export default{
                 company_id: companyID.value
             } 
             axios
-            .post(`api/v1/zones-search/?page=${currentPage.value}`,formData)
+            .post(`api/v1/security-deposits-search/?page=${currentPage.value}`,formData)
             .then((response)=>{
-                zonesList.value = response.data.results;
-                store.commit('Zones/LIST_ZONES', zonesList.value)
-                zoneResults.value = response.data;
-                zoneArrLen.value = zonesList.value.length;
-                zoneCount.value = zoneResults.value.count;
-                pageCount.value = Math.ceil(zoneCount.value / 50);
+                depositList.value = response.data.results;
+                store.commit('Security_Deposits/LIST_DEPOSITS', depositList.value)
+                propResults.value = response.data;
+                propArrLen.value = depositList.value.length;
+                propCount.value = propResults.value.count;
+                pageCount.value = Math.ceil(propCount.value / 50);
                 if(response.data.next){
                     showNextBtn.value = true;
                 }
@@ -311,8 +302,8 @@ export default{
             })
         }
         const resetFilters = () =>{
-            store.commit('Zones/RESET_SEARCH_FILTERS')
-            searchZones();
+            store.commit('Security_Deposits/RESET_SEARCH_FILTERS')
+            searchDeposits();
         }
         const loadPrev = () =>{
             if (currentPage.value <= 1){
@@ -321,7 +312,7 @@ export default{
                 currentPage.value -= 1;
             }
             
-            searchZones();
+            searchDeposits();
             // scrollToTop();
         }
         const loadNext = () =>{
@@ -331,64 +322,66 @@ export default{
                 currentPage.value += 1;
             }
             
-            searchZones();
+            searchDeposits();
             // scrollToTop(); 
         }
         const firstPage = ()=>{
             currentPage.value = 1;
-            searchZones();
+            searchDeposits();
             // scrollToTop();
         }
         const lastPage = () =>{
             currentPage.value = pageCount.value;
-            searchZones();
+            searchDeposits();
             // scrollToTop();
         }
-        const addNewZone = () =>{
-            store.dispatch("Zones/updateState",{selectedZone:null})
-            zoneModalVisible.value = true;
+        const addNewDeposit = () =>{
+            store.dispatch("Security_Deposits/updateState",{selectedDeposit:null, isEditing:false})
+            propModalVisible.value = true;
             handleReset();
-            store.dispatch("Zones/updateState",{isEditing:false})
             flex_basis.value = '1/2';
             flex_basis_percentage.value = '50';
         }
         const handleActionClick = async(rowIndex, action, row) =>{
             if( action == 'edit'){
-                const zoneID = row[idField];
+                const depositID = row[idField];
                 let formData = {
                     company: companyID.value,
-                    zone: zoneID
+                    deposit: depositID
                 }
-                await store.dispatch('Zones/fetchZone',formData)
-                zoneModalVisible.value = true;
+                await store.dispatch('Security_Deposits/fetchDeposit',formData)
+                propModalVisible.value = true;
                 flex_basis.value = '1/2';
                 flex_basis_percentage.value = '50';
-                
+
             }else if(action == 'delete'){
-                const zoneID = [row[idField]];
+                const depositID = [row[idField]];
                 let formData = {
                     company: companyID.value,
-                    zone: zoneID
+                    deposit: depositID
                 }
-
-                await store.dispatch('Zones/deleteZone',formData)
-                searchZones();         
+                await store.dispatch('Security_Deposits/deleteDeposit',formData).
+                then(()=>{
+                    searchDeposits();
+                })
+            }else if(action == 'view'){
+                console.log("VIEWING TAKING PLACE");
             }
         }
         const closeModal = () =>{
-            zoneModalVisible.value = false;
+            propModalVisible.value = false;
         }
         onBeforeMount(()=>{
-            searchZones();
+            searchDeposits();
             
         })
         return{
-            title, searchZones,resetFilters, addButtonLabel, searchFilters, tableColumns, zonesList,
-            zoneResults, zoneArrLen, zoneCount, pageCount, showNextBtn, showPreviousBtn,
-            loadPrev, loadNext, firstPage, lastPage, idField, actions, handleActionClick, zoneModalVisible, closeModal,
-            submitButtonLabel, showModal, addNewZone, showLoader, loader, hideLoader, modal_loader, modal_top, modal_left, modal_width,displayButtons,
-            showModalLoader, hideModalLoader, saveZone, formFields, handleSelectionChange, flex_basis,flex_basis_percentage,
-            importZones, removeZone, removeZones
+            title, searchDeposits,resetFilters, addButtonLabel, searchFilters, tableColumns, depositList,
+            propResults, propArrLen, propCount, pageCount, showNextBtn, showPreviousBtn,
+            loadPrev, loadNext, firstPage, lastPage, idField, actions, handleActionClick, propModalVisible, closeModal,
+            submitButtonLabel, showModal, addNewDeposit, showLoader, loader, hideLoader, modal_loader, modal_top, modal_left, modal_width,displayButtons,
+            showModalLoader, hideModalLoader, saveDeposit, formFields, handleSelectionChange, flex_basis,flex_basis_percentage,
+            removeDeposit, removeDeposits
         }
     }
 };

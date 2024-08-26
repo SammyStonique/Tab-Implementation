@@ -25,7 +25,9 @@ import Properties_List from '@/components/PMS/Properties_List.vue';
 import Property_Details from '@/components/PMS/Property_Details.vue';
 import Zones from '@/components/PMS/Zones.vue';
 import Landlords_List from '@/components/PMS/Landlords_List.vue'
-import Units_List from '@/components/PMS/Units_List.vue'
+import Units_List from '@/components/PMS/Units_List.vue';
+import Utilities from '@/components/PMS/Utilities.vue';
+import Security_Deposits from '@/components/PMS/Security_Deposits.vue';
 import { useStore } from 'vuex';
 import { ref, computed, watch } from 'vue';
 export default{
@@ -33,7 +35,7 @@ export default{
         NavBar,
         NavBarPMS,
         PagesTab,
-        Dashboard, Properties_List, Zones, Landlords_List, Units_List, Property_Details
+        Dashboard, Properties_List, Zones, Landlords_List, Units_List, Property_Details, Utilities, Security_Deposits
     },
     props: {
         title: {

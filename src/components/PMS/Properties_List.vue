@@ -278,7 +278,7 @@ export default{
                     store.state.pageTab.pmsActiveTab = 'Property_Details';
                 })
             }else if(action == 'delete'){
-                const propertyID = row[idField];
+                const propertyID = [row[idField]];
                 let formData = {
                     company: companyID.value,
                     property: propertyID

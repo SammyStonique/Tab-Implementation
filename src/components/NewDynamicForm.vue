@@ -10,6 +10,15 @@
             </div>
             <input v-model="field.value" :name="field.name" type="text" :class="`rounded pl-3 border border-gray-400 text-base w-full`" :placeholder="field.placeholder"/>
           </div>
+          <div v-if="field.type === 'number'" class="text-left">
+            <div v-if="field.required">
+              <label for="">{{ field.label }} : <em>*</em></label><br />
+            </div>
+            <div v-else>
+              <label for="">{{ field.label }}:</label><br />
+            </div>
+            <input v-model="field.value" :name="field.name" type="number" pattern="[0-9]*" oninput="this.value = this.value.replace(/[^0-9]/g, '')" :class="`rounded pl-3 border border-gray-400 text-base w-full`" :placeholder="field.placeholder"/>
+          </div>
           <div v-if="field.type === 'date'" class="mr-2 text-left">
             <div v-if="field.required">
               <label for="">{{ field.label }} : <em>*</em></label><br />

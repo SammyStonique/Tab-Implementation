@@ -117,10 +117,7 @@ export default defineComponent({
                 landComponentKey.value += 1;
                 zoneComponentKey.value += 1;
                 updateFormFields();
-            }else{
-                updateFormFields();
             }
-            
         }, { immediate: true });
 
         const additionalFields = ref([]);
@@ -137,8 +134,6 @@ export default defineComponent({
             if(selectedProperty.value  && selectedLandlord.value && selectedZone.value){
                 landComponentKey.value += 1;
                 zoneComponentKey.value += 1;
-                updateAdditionalFormFields();
-            }else{
                 updateAdditionalFormFields();
             }
             
@@ -288,6 +283,8 @@ export default defineComponent({
         }
         
         onBeforeMount(()=>{ 
+            updateFormFields();
+            updateAdditionalFormFields();
             landComponentKey.value += 1;
             zoneComponentKey.value += 1;
             flex_basis.value = '1/4';

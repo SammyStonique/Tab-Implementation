@@ -2,35 +2,41 @@ import axios from "axios";
 import Swal from 'sweetalert2';
 
 const state = {
-  zonesList: [], 
-  zoneArr: [],
-  zoneArray: [],
-  zoneID: '',
-  zoneName: '',
+  utilitiesList: [], 
+  utilityArr: [],
+  utilityArray: [],
+  utilityID: '',
+  utilityNumber: '',
   company_id: '',
   name_search: '',
-  selectedZone: null,
+  selectedUtility: null,
+  selectedLedger: null,
   isEditing: false
 };
   
 const mutations = {
   initializeStore(state){
-    state.zonesList = [];
-    state.zoneArr = [];
-    state.zoneArray = [];
+    state.utilitiesList = [];
+    state.utilityArr = [];
+    state.utilityArray = [];
     state.company_id = '';
     state.name_search = '';
+    state.selectedUtility = null;
+    state.selectedLedger = null;
     state.isEditing = false;
   },
-  SET_SELECTED_ZONE(state, zone) {
-    state.selectedZone = zone;
+  SET_SELECTED_UTILITY(state, utility) {
+    state.selectedUtility = utility;
     state.isEditing = true;
   },
-  LIST_ZONES(state, zones) {
-    state.zonesList = zones;
+  SET_SELECTED_LEDGER(state, ledger) {
+    state.selectedLedger = ledger;
   },
-  ZONES_ARRAY(state, zones){
-    state.zoneArray = zones;
+  LIST_UTILITIES(state, utilities) {
+    state.utilitiesList = utilities;
+  },
+  UTILITIES_ARRAY(state, utilities){
+    state.utilityArray = utilities;
   },
   SET_STATE(state, payload) {
     for (const key in payload) {
@@ -43,7 +49,7 @@ const mutations = {
     for(const [key, value] of Object.entries(search_filter)){
       if(key == 'name_search'){
         state.name_search = value;
-      }  
+      }
     }
   },
   RESET_SEARCH_FILTERS(state){
@@ -56,8 +62,8 @@ const actions = {
     commit('SET_STATE', newState);
   },
   
-  async createZone({ commit,state }, formData) {
-    return axios.post('api/v1/create-zone/', formData)
+  async createUtility({ commit,state }, formData) {
+    return axios.post('api/v1/create-utility/', formData)
     .then((response)=>{
       return response;
     })
@@ -67,45 +73,46 @@ const actions = {
     })
   },
 
-  async fetchZones({ commit,state }, formData) {
-    state.zoneArr = [];
-    await axios.post(`api/v1/get-zones/`,formData)
+  fetchUtilities({ commit,state }, formData) {
+    state.utilityArr = [];
+    axios.post(`api/v1/get-utilities/`,formData)
     .then((response)=>{
       for(let i=0; i< response.data.length; i++){
-        state.zoneArr.push((response.data[i].name))
+        state.utilityArr.push((response.data[i].name));
       }
-      commit('LIST_ZONES', response.data);
+      commit('LIST_UTILITIES', response.data);
     })
     .catch((error)=>{
       console.log(error.message);
     })
     
   },
-  fetchZone({ commit,state }, formData) {
-    axios.post(`api/v1/get-zones/`,formData)
+  fetchUtility({ commit,state }, formData) {
+    axios.post(`api/v1/get-utilities/`,formData)
     .then((response)=>{
-      state.selectedZone = response.data;
-      commit('SET_SELECTED_ZONE',response.data);
+        const selectedLedger = response.data.posting_account.ledger_code + ' - '+ response.data.posting_account.ledger_name;
+        commit('SET_SELECTED_LEDGER',selectedLedger);
+        commit('SET_SELECTED_UTILITY',response.data);
     })
     .catch((error)=>{
       console.log(error.message);
     })
     
   },
-  handleSelectedZone({ commit, state }, option){
-    state.zoneArray = [];
-    const selectedZone = state.zonesList.find(zone => (zone.name) === option);
-    if (selectedZone) {
-        state.zoneID = selectedZone.zone_id;
-        state.zoneName = selectedZone.name;
-        state.zoneArray = [...state.zoneArray, selectedZone];
+  handleSelectedUtility({ commit, state }, option){
+    state.utilityArray = [];
+    const selectedUtility = state.utilitiesList.find(utility => (utility.name) === option);
+    if (selectedUtility) {
+        state.utilityID = selectedUtility.utility_id;
+        state.utilityName = selectedUtility.name;
+        state.utilityArray = [...state.utilityArray, selectedUtility];
     }
-    commit('ZONES_ARRAY', state.zoneArray);
+    commit('UTILITIES_ARRAY', state.utilityArray);
       
   },
 
-  async updateZone({ commit,state }, formData) {
-    return axios.put(`api/v1/update-zone/`,formData)
+  async updateUtility({ commit,state }, formData) {
+    return axios.put(`api/v1/update-utility/`,formData)
     .then((response)=>{
       return response;
     })
@@ -115,14 +122,14 @@ const actions = {
     })  
   },
 
-  deleteZone({ commit,state }, formData) {
+  deleteUtility({ commit,state }, formData) {
     Swal.fire({
       title: "Are you sure?",
-      text: `Do you wish to delete Zone?`,
+      text: `Do you wish to delete Utility?`,
       type: 'warning',
       showCloseButton: true,
       showCancelButton: true,
-      confirmButtonText: 'Yes Delete Zone!',
+      confirmButtonText: 'Yes Delete Utility!',
       cancelButtonText: 'Cancel!',
       customClass: {
           confirmButton: 'swal2-confirm-custom',
@@ -131,15 +138,15 @@ const actions = {
       showLoaderOnConfirm: true,
     }).then((result) => {
       if (result.value) {
-        axios.post(`api/v1/delete-zone/`,formData)
+        axios.post(`api/v1/delete-utility/`,formData)
         .then((response)=>{
           if(response.status == 200){
-              Swal.fire("Poof! Zone removed succesfully!", {
+              Swal.fire("Poof! Utility removed succesfully!", {
                 icon: "success",
               }); 
           }else{
             Swal.fire({
-              title: "Error Deleting Zone",
+              title: "Error Deleting Utility",
               icon: "warning",
             });
           }                   
@@ -152,7 +159,7 @@ const actions = {
           });
         })
       }else{
-        Swal.fire(`Zone has not been deleted!`);
+        Swal.fire(`Utility has not been deleted!`);
       }
     })
   },

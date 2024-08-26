@@ -57,30 +57,16 @@
     
                     </div>
                     <div class="py-2 px-3 pl-4 w-full hover:bg-slate-500 hover:w-full">
-                        <button class="flex text-sm">
+                        <button class="flex text-sm" @click="openPage({'PMS':'Utilities'})">
                             <i class="fa fa-id-badge pt-2 mr-2" aria-hidden="true"></i>
-                            <p class="">Department Managers</p>
+                            <p class="">Utilities</p>
                         </button>
     
                     </div>
                     <div class="py-2 px-3 pl-4 w-full hover:bg-slate-500 hover:w-full">
-                        <button class="flex text-sm">
+                        <button class="flex text-sm" @click="openPage({'PMS':'Security_Deposits'})">
                             <i class="fa fa-cubes pt-2 mr-2" aria-hidden="true"></i>
-                            <p class="">Staff Rooms</p>
-                        </button>
-    
-                    </div>
-                    <div class="py-2 px-3 pl-4 w-full hover:bg-slate-500 hover:w-full">
-                        <button class="flex text-sm">
-                            <i class="fa fa-university pt-2 mr-2" aria-hidden="true"></i>
-                            <p class="">Wards</p>
-                        </button>
-    
-                    </div>
-                    <div class="py-2 px-3 pl-4 w-full hover:bg-slate-500 hover:w-full">
-                        <button class="flex text-sm">
-                            <i class="fa fa-bed pt-2 mr-2" aria-hidden="true"></i>
-                            <p class="">Beds</p>
+                            <p class="">Security Deposits</p>
                         </button>
     
                     </div>

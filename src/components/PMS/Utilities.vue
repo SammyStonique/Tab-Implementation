@@ -3,16 +3,16 @@
         <PageComponent 
             :loader="loader" @showLoader="showLoader" @hideLoader="hideLoader"
             :addButtonLabel="addButtonLabel"
-            @handleAddNew="addNewLandlord"
+            @handleAddNew="addNewUtility"
             :searchFilters="searchFilters"
-            @searchPage="searchLandlords"
+            @searchPage="searchUtilities"
             @resetFilters="resetFilters"
-            @importData="importLandlords"
-            @removeItem="removeLandlord"
-            @removeSelectedItems="removeLandlords"
+            @importData="importUtilities"
+            @removeItem="removeUtility"
+            @removeSelectedItems="removeUtilities"
             @printList="printList"
             :columns="tableColumns"
-            :rows="landlordList"
+            :rows="utilityList"
             :actions="actions"
             :idField="idField"
             @handleSelectionChange="handleSelectionChange"
@@ -31,7 +31,7 @@
             :loader="modal_loader" @showLoader="showModalLoader" @hideLoader="hideModalLoader" @closeModal="closeModal">
             <DynamicForm 
                 :fields="formFields" :flex_basis="flex_basis" :flex_basis_percentage="flex_basis_percentage" 
-                :displayButtons="displayButtons" @handleSubmit="saveLandlord" @handleReset="handleReset"
+                :displayButtons="displayButtons" @handleSubmit="saveUtility" @handleReset="handleReset"
             />
         </MovableModal>
     </div>
@@ -47,7 +47,7 @@ import { useStore } from "vuex";
 import { useToast } from "vue-toastification";
 
 export default{
-    name: 'Landlords_List',
+    name: 'Utilities',
     components:{
         PageComponent, MovableModal,DynamicForm
     },
@@ -56,12 +56,13 @@ export default{
         const toast = useToast();
         const loader = ref('none');
         const modal_loader = ref('none');
-        const idField = 'landlord_id';
-        const addButtonLabel = ref('New Landlord');
-        const title = ref('Landlord Details');
+        const idField = 'utility_id';
+        const addButtonLabel = ref('New Utility');
+        const title = ref('Utility Details');
         const submitButtonLabel = ref('Add');
+        const ledComponentKey = ref(0);
         const selectedIds = ref([]);
-        const landlordList = ref([]);
+        const utilityList = ref([]);
         const propResults = ref([]);
         const propArrLen = ref(0);
         const propCount = ref(0);
@@ -76,61 +77,71 @@ export default{
         const errors = ref([]);
         const modal_top = ref('150px');
         const modal_left = ref('400px');
-        const modal_width = ref('45vw');
-        const isEditing = computed(()=> store.state.Landlords_List.isEditing);
-        const selectedLandlord = computed(()=> store.state.Landlords_List.selectedLandlord);
+        const modal_width = ref('30vw');
+        const ledgerID = ref('');
+        const isEditing = computed(()=> store.state.Utilities.isEditing);
+        const selectedUtility = computed(()=> store.state.Utilities.selectedUtility);
+        const selectedLedger = computed(()=> store.state.Utilities.selectedLedger);
+        const ledgerArray = computed(() => store.state.Ledgers.ledgerArr);
         const showModal = ref(false);
         const tableColumns = ref([
             {type: "checkbox"},
-            {label: "Code", key:"landlord_code"},
-            {label: "Landlord Name", key:"name"},
-            {label: "Type", key: "landlord_type"},
-            {label: "Email", key:"email"},
-            {label: "Phone No", key:"phone_number"},
-            {label: "Properties", key:"property_count"},
+            {label: "Name", key:"name"},
+            {label: "Charge Mode", key:"default_mode"},
+            {label: "Default Value", key: "default_value"},
+            {label: "Posting Account", key:"posting_account_name"},
         ])
         const actions = ref([
-            {name: 'edit', icon: 'fa fa-edit', title: 'Edit Landlord'},
-            {name: 'view', icon: 'fa fa-file-pdf-o', title: 'View Statement'},
-            {name: 'delete', icon: 'fa fa-trash', title: 'Delete Landlord'},
+            {name: 'edit', icon: 'fa fa-edit', title: 'Edit Utility'},
+            {name: 'delete', icon: 'fa fa-trash', title: 'Delete Utility'},
         ])
         const companyID = computed(()=> store.state.userData.company_id);
         const name_search = computed({
-            get: () => store.state.Landlords_List.name_search,
-            set: (value) => store.commit('Landlords_List/SET_SEARCH_FILTERS', {"name_search":value}),
-        });
-        const landlord_code_search = computed({
-            get: () => store.state.Landlords_List.landlord_code_search,
-            set: (value) => store.commit('Landlords_List/SET_SEARCH_FILTERS', {"landlord_code_search":value}),
+            get: () => store.state.Utilities.name_search,
+            set: (value) => store.commit('Utilities/SET_SEARCH_FILTERS', {"name_search":value}),
         });
         const searchFilters = ref([
-            {type:'text', placeholder:"Code...", value: landlord_code_search, width:60,},
             {type:'text', placeholder:"Name...", value: name_search, width:60,},
         ]);
         const handleSelectionChange = (ids) => {
             selectedIds.value = ids;
         };
+        const handleSelectedLedger = async(option) =>{
+            await store.dispatch('Ledgers/handleSelectedLedger', option);
+            ledgerID.value = store.state.Ledgers.ledgerID;
+            if(selectedUtility.value){
+                selectedUtility.value.posting_account.ledger_id = ledgerID.value;
+                ledgerValue.value = ledgerID.value
+            }
+        }
         const formFields = ref([]);
+        const ledgerValue = computed(() => {
+           return (selectedUtility.value && selectedUtility.value.posting_account && !ledgerID.value) ? selectedUtility.value.posting_account.ledger_id : ledgerID.value;
+
+        });
         const updateFormFields = () => {
             formFields.value = [
-                { type: 'text', name: 'landlord_code',label: "Code", value: selectedLandlord.value?.landlord_code || '', required: false },
-                { type: 'text', name: 'name',label: "Name", value: selectedLandlord.value?.name || '', required: true },
-                { type: 'text', name: 'phone_number',label: "Phone Number", value: selectedLandlord.value?.phone_number || '', required: true },
-                { type: 'text', name: 'email',label: "Email", value: selectedLandlord.value?.email || '', required: true },
-                { type: 'text', name: 'id_number',label: "ID/Reg Number", value: selectedLandlord.value?.id_number || '', required: true },
-                { type: 'text', name: 'kra_pin',label: "Tax Pin No", value: selectedLandlord.value?.kra_pin || '', required: true },
-                { type: 'text', name: 'address',label: "Address", value: selectedLandlord.value?.address || '', required: true },
-                { type: 'dropdown', name: 'landlord_type',label: "Landlord Type", value: selectedLandlord.value?.landlord_type || '', placeholder: "Select Landlord Type", required: true, options: [{ text: 'Individual', value: 'Individual' }, { text: 'Company', value: 'Company' }, { text: 'Organization', value: 'Organization' }] },
+                { type: 'text', name: 'name',label: "Name", value: selectedUtility.value?.name || '', required: true },
+                { type: 'dropdown', name: 'default_mode',label: "Charge Mode", value: selectedUtility.value?.default_mode || '', placeholder: "Select Charge Mode", required: false, options: [{ text: 'Fixed Amount', value: 'Fixed Amount' }, { text: 'Rent Percentage', value: 'Rent Percentage' }, { text: 'Billed On Use', value: 'Billed On Use' }] },
+                { type: 'number', name: 'default_value',label: "Default Value", value: selectedUtility.value?.default_value || 0, required: false },
+                {  
+                    type:'search-dropdown', label:"Posting Account", value: ledgerValue.value, componentKey: ledComponentKey,
+                    selectOptions: ledgerArray, optionSelected: handleSelectedLedger, required: true,
+                    searchPlaceholder: 'Select Posting Account...', dropdownWidth: '400px', updateValue: selectedLedger.value,
+                    fetchData: store.dispatch('Ledgers/fetchLedgers', {company:companyID.value})
+                },
             ];
         };
         const handleReset = () =>{
             for(let i=0; i < formFields.value.length; i++){
                 formFields.value[i].value = '';
             }
+            ledgerID.value = '';
         }
 
-        watch([selectedLandlord], () => {
-            if (selectedLandlord) {
+        watch([selectedUtility, selectedLedger], () => {
+            if (selectedUtility.value && selectedLedger.value) {
+                ledComponentKey.value += 1;
                 updateFormFields();
             }else{
                 updateFormFields();
@@ -144,63 +155,60 @@ export default{
         const hideModalLoader = () =>{
             modal_loader.value = "none";
         }
-        const createLandlord = async() =>{
+        const createUtility = async() =>{
             showModalLoader();
             let formData = {
-                name: formFields.value[1].value,
-                landlord_code: formFields.value[0].value,
-                email: formFields.value[3].value,
-                phone_number: formFields.value[2].value,
-                kra_pin: formFields.value[5].value,
-                id_number: formFields.value[4].value,
-                address: formFields.value[6].value,
-                landlord_type: formFields.value[7].value,
+                name: formFields.value[0].value,
+                default_mode: formFields.value[1].value,
+                default_value: formFields.value[2].value || 0,
+                posting_account: ledgerID.value,
+                posting_account_id: ledgerID.value,
                 company: companyID.value
             }
-  
+
             errors.value = [];
-            for(let i=0; i < formFields.value.length; i++){
+            for(let i=0; i < (formFields.value.length - 1); i++){
                 if(formFields.value[i].value =='' && formFields.value[i].required == true){
                     errors.value.push(formFields.value[i].label);
                 }
             }
-
+            if(ledgerValue.value == ''){
+                errors.value.push('error')
+            }
             if(errors.value.length){
                 toast.error('Fill In Required Fields');
                 hideModalLoader();
             }else{
                 try {
-                    const response = await store.dispatch('Landlords_List/createLandlord', formData);
+                    const response = await store.dispatch('Utilities/createUtility', formData);
                     if (response && response.status === 200) {
                         hideModalLoader();
-                        toast.success('Landlord created successfully!');
+                        toast.success('Utility created successfully!');
                         handleReset();
+                        ledComponentKey.value += 1;
                     } else {
-                        toast.error('An error occurred while creating the landlord.');
+                        toast.error('An error occurred while creating the utility.');
                     }
                 } catch (error) {
                     console.error(error.message);
-                    toast.error('Failed to create landlord: ' + error.message);
+                    toast.error('Failed to create utility: ' + error.message);
                 } finally {
                     hideModalLoader();
-                    searchLandlords();
+                    searchUtilities();
                 }
             }
         }
-        const updateLandlord = async() =>{
+        const updateUtility = async() =>{
             showModalLoader();
             errors.value = [];
             let formData = {
-                landlord: selectedLandlord.value.landlord_id,
-                name: formFields.value[1].value,
-                landlord_code: formFields.value[0].value,
-                email: formFields.value[3].value,
-                phone_number: formFields.value[2].value,
-                kra_pin: formFields.value[5].value,
-                id_number: formFields.value[4].value,
-                address: formFields.value[6].value,
-                landlord_type: formFields.value[7].value,
-                company: companyID.value,
+                utility: selectedUtility.value.utility_id,
+                name: formFields.value[0].value,
+                default_mode: formFields.value[1].value,
+                default_value: formFields.value[2].value || 0,
+                posting_account: ledgerValue.value,
+                posting_account_id: ledgerValue.value,
+                company: companyID.value
             }
 
             for(let i=0; i < formFields.value.length; i++){
@@ -208,90 +216,93 @@ export default{
                     errors.value.push('Error');
                 }
             }
+            if(ledgerValue.value == ''){
+                errors.value.push('error')
+            }
             if(errors.value.length){
                 toast.error('Fill In Required Fields');
                 hideModalLoader();
             }else{
                 try {
-                    const response = await store.dispatch('Landlords_List/updateLandlord', formData);
+                    const response = await store.dispatch('Utilities/updateUtility', formData);
                     if (response && response.status === 200) {
                         hideModalLoader();
                         handleReset();
-                        toast.success("Landlord updated successfully!");              
+                        ledComponentKey.value += 1;
+                        toast.success("Utility updated successfully!");              
                     } else {
-                        toast.error('An error occurred while updating the landlord.');
+                        toast.error('An error occurred while updating the utility.');
                     }
                 } catch (error) {
                     console.error(error.message);
-                    toast.error('Failed to update landlord: ' + error.message);
+                    toast.error('Failed to update utility: ' + error.message);
                 } finally {
                     hideModalLoader();
                     propModalVisible.value = false;
-                    store.dispatch("Landlords_List/updateState",{selectedLandlord:null})
-                    searchLandlords();
+                    store.dispatch("Utilities/updateState",{selectedUtility:null})
+                    searchUtilities();
                 }             
             }
         }
-        const saveLandlord = () =>{
+        const saveUtility = () =>{
             if(isEditing.value == true){
-                updateLandlord();
+                updateUtility();
             }else{
-                createLandlord();
+                createUtility();
             }
         }
-        const importLandlords = () =>{
-            store.commit('pageTab/ADD_PAGE', {'PMS':'Import_Landlords'})
-            store.state.pageTab.pmsActiveTab = 'Import_Landlords';
+        const importUtilities = () =>{
+            store.commit('pageTab/ADD_PAGE', {'PMS':'Import_Utilities'})
+            store.state.pageTab.pmsActiveTab = 'Import_Utilities';
         }
-        const removeLandlord = async() =>{
+        const removeUtility = async() =>{
             if(selectedIds.value.length == 1){
                 let formData = {
                     company: companyID.value,
-                    landlord: selectedIds.value
+                    utility: selectedIds.value
                 }
                 try{
-                    const response = await store.dispatch('Landlords_List/deleteLandlord',formData)
+                    const response = await store.dispatch('Utilities/deleteUtility',formData)
                     if(response && response.status == 200){
-                        toast.success("Landlord Removed Succesfully");
-                        searchLandlords();
+                        toast.success("Utility Removed Succesfully");
+                        searchUtilities();
                     }
                 }
                 catch(error){
                     console.error(error.message);
-                    toast.error('Failed to remove landlord: ' + error.message);
+                    toast.error('Failed to remove utility: ' + error.message);
                 }
                 finally{
                     selectedIds.value = [];
                 }
             }else if(selectedIds.value.length > 1){
-                toast.error("You have selected more than 1 landlord") 
+                toast.error("You have selected more than 1 utility") 
             }else{
-                toast.error("Please Select A Landlord To Remove")
+                toast.error("Please Select A Utility To Remove")
             }
         }
-        const removeLandlords = async() =>{
+        const removeUtilities = async() =>{
             if(selectedIds.value.length){
                 let formData = {
                     company: companyID.value,
-                    landlord: selectedIds.value
+                    utility: selectedIds.value
                 }
                 try{
-                    const response = await store.dispatch('Landlords_List/deleteLandlord',formData)
+                    const response = await store.dispatch('Utilities/deleteUtility',formData)
                     if(response && response.status == 200){
-                        toast.success("Landlord(s) Removed Succesfully");
-                        searchLandlords();
+                        toast.success("Utility(s) Removed Succesfully");
+                        searchUtilities();
                     }
                 }
                 catch(error){
                     console.error(error.message);
-                    toast.error('Failed to remove landlord: ' + error.message);
+                    toast.error('Failed to remove utilities: ' + error.message);
                 }
                 finally{
                     selectedIds.value = [];
-
                 }
             }else{
-                toast.error("Please Select A Landlord To Remove")
+                toast.error("Please Select A Utilities To Remove")
             }
         }
         const showLoader = () =>{
@@ -300,22 +311,21 @@ export default{
         const hideLoader = () =>{
             loader.value = "none";
         }
-        const searchLandlords = () =>{
+        const searchUtilities = () =>{
             showLoader();
             showNextBtn.value = false;
             showPreviousBtn.value = false;
             let formData = {
                 name: name_search.value,
-                landlord_code: landlord_code_search.value,
                 company_id: companyID.value
             } 
             axios
-            .post(`api/v1/landlords-search/?page=${currentPage.value}`,formData)
+            .post(`api/v1/utilities-search/?page=${currentPage.value}`,formData)
             .then((response)=>{
-                landlordList.value = response.data.results;
-                store.commit('Landlords_List/LIST_LANDLORDS', landlordList.value)
+                utilityList.value = response.data.results;
+                store.commit('Utilities/LIST_UTILITIES', utilityList.value)
                 propResults.value = response.data;
-                propArrLen.value = landlordList.value.length;
+                propArrLen.value = utilityList.value.length;
                 propCount.value = propResults.value.count;
                 pageCount.value = Math.ceil(propCount.value / 50);
                 if(response.data.next){
@@ -333,8 +343,8 @@ export default{
             })
         }
         const resetFilters = () =>{
-            store.commit('Landlords_List/RESET_SEARCH_FILTERS')
-            searchLandlords();
+            store.commit('Utilities/RESET_SEARCH_FILTERS')
+            searchUtilities();
         }
         const loadPrev = () =>{
             if (currentPage.value <= 1){
@@ -343,7 +353,7 @@ export default{
                 currentPage.value -= 1;
             }
             
-            searchLandlords();
+            searchUtilities();
             // scrollToTop();
         }
         const loadNext = () =>{
@@ -353,48 +363,49 @@ export default{
                 currentPage.value += 1;
             }
             
-            searchLandlords();
+            searchUtilities();
             // scrollToTop(); 
         }
         const firstPage = ()=>{
             currentPage.value = 1;
-            searchLandlords();
+            searchUtilities();
             // scrollToTop();
         }
         const lastPage = () =>{
             currentPage.value = pageCount.value;
-            searchLandlords();
+            searchUtilities();
             // scrollToTop();
         }
-        const addNewLandlord = () =>{
-            store.dispatch("Landlords_List/updateState",{selectedLandlord:null})
+        const addNewUtility = () =>{
+            store.dispatch("Utilities/updateState",{selectedUtility:null, selectedLedger:null, isEditing:false})
+            ledgerID.value = "";
+            ledComponentKey.value += 1;
             propModalVisible.value = true;
             handleReset();
-            store.dispatch("Landlords_List/updateState",{isEditing:false})
-            flex_basis.value = '1/3';
-            flex_basis_percentage.value = '33.333';
+            flex_basis.value = '1/2';
+            flex_basis_percentage.value = '50';
         }
         const handleActionClick = async(rowIndex, action, row) =>{
             if( action == 'edit'){
-                const landlordID = row[idField];
+                const utilityID = row[idField];
                 let formData = {
                     company: companyID.value,
-                    landlord: landlordID
+                    utility: utilityID
                 }
-                await store.dispatch('Landlords_List/fetchLandlord',formData)
+                await store.dispatch('Utilities/fetchUtility',formData)
                 propModalVisible.value = true;
-                flex_basis.value = '1/3';
-                flex_basis_percentage.value = '33.333';
+                flex_basis.value = '1/2';
+                flex_basis_percentage.value = '50';
 
             }else if(action == 'delete'){
-                const landlordID = [row[idField]];
+                const utilityID = [row[idField]];
                 let formData = {
                     company: companyID.value,
-                    landlord: landlordID
+                    utility: utilityID
                 }
-                await store.dispatch('Landlords_List/deleteLandlord',formData).
+                await store.dispatch('Utilities/deleteUtility',formData).
                 then(()=>{
-                    searchLandlords();
+                    searchUtilities();
                 })
             }else if(action == 'view'){
                 console.log("VIEWING TAKING PLACE");
@@ -404,16 +415,16 @@ export default{
             propModalVisible.value = false;
         }
         onBeforeMount(()=>{
-            searchLandlords();
+            searchUtilities();
             
         })
         return{
-            title, searchLandlords,resetFilters, addButtonLabel, searchFilters, tableColumns, landlordList,
+            title, searchUtilities,resetFilters, addButtonLabel, searchFilters, tableColumns, utilityList,
             propResults, propArrLen, propCount, pageCount, showNextBtn, showPreviousBtn,
             loadPrev, loadNext, firstPage, lastPage, idField, actions, handleActionClick, propModalVisible, closeModal,
-            submitButtonLabel, showModal, addNewLandlord, showLoader, loader, hideLoader, modal_loader, modal_top, modal_left, modal_width,displayButtons,
-            showModalLoader, hideModalLoader, saveLandlord, formFields, handleSelectionChange, flex_basis,flex_basis_percentage,
-            importLandlords, removeLandlord, removeLandlords
+            submitButtonLabel, showModal, addNewUtility, showLoader, loader, hideLoader, modal_loader, modal_top, modal_left, modal_width,displayButtons,
+            showModalLoader, hideModalLoader, saveUtility, formFields, handleSelectionChange, flex_basis,flex_basis_percentage,
+            importUtilities, removeUtility, removeUtilities
         }
     }
 };

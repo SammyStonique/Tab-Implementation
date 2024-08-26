@@ -15,6 +15,9 @@ import Zones from './PMS/Zones';
 import Landlords_List from './PMS/Landlords_List';
 import Units_List from './PMS/Units_List';
 import Tenants_List from './PMS/Tenants_List';
+import Utilities from './PMS/Utilities';
+import Ledgers from './FA/Ledgers';
+import Security_Deposits from './PMS/Security_Deposits';
 
 export default createStore({
   modules: {
@@ -24,6 +27,7 @@ export default createStore({
     pageTab,
     userData,
     Appointments,Client_Categories,Departments,Patients_List,Medical_Fees,Doctors,
-    Properties_List, Zones, Landlords_List, Units_List, Tenants_List
+    Properties_List, Zones, Landlords_List, Units_List, Tenants_List, Utilities,Security_Deposits,
+    Ledgers
   },
 });

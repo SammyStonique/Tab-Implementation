@@ -183,7 +183,7 @@
   }
   
   .modal-content {
-    padding: 20px;
+    padding: 10px;
     color: #1f2b37;
   }
 

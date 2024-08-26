@@ -2,35 +2,38 @@ import axios from "axios";
 import Swal from 'sweetalert2';
 
 const state = {
-  zonesList: [], 
-  zoneArr: [],
-  zoneArray: [],
-  zoneID: '',
-  zoneName: '',
-  company_id: '',
+  ledgersList: [], 
+  ledgerArr: [],
+  ledgerArray: [],
+  ledgerID: '',
+  ledgerName: '',
   name_search: '',
-  selectedZone: null,
+  selectedCategory: null,
+  selectedLedger: null,
   isEditing: false
 };
   
 const mutations = {
   initializeStore(state){
-    state.zonesList = [];
-    state.zoneArr = [];
-    state.zoneArray = [];
-    state.company_id = '';
+    state.ledgersList = [];
+    state.ledgerArr = [];
+    state.ledgerArray = [];
+    state.ledgerID = '';
+    state.ledgerName = '';
     state.name_search = '';
+    state.selectedCategory = null;
+    state.selectedLedger = null;
     state.isEditing = false;
   },
-  SET_SELECTED_ZONE(state, zone) {
-    state.selectedZone = zone;
+  SET_SELECTED_LEDGER(state, ledger) {
+    state.selectedLedger = ledger;
     state.isEditing = true;
   },
-  LIST_ZONES(state, zones) {
-    state.zonesList = zones;
+  LIST_LEDGERS(state, ledgers) {
+    state.ledgersList = ledgers;
   },
-  ZONES_ARRAY(state, zones){
-    state.zoneArray = zones;
+  LEDGERS_ARRAY(state, ledgers){
+    state.ledgerArray = ledgers;
   },
   SET_STATE(state, payload) {
     for (const key in payload) {
@@ -43,7 +46,7 @@ const mutations = {
     for(const [key, value] of Object.entries(search_filter)){
       if(key == 'name_search'){
         state.name_search = value;
-      }  
+      }
     }
   },
   RESET_SEARCH_FILTERS(state){
@@ -56,8 +59,8 @@ const actions = {
     commit('SET_STATE', newState);
   },
   
-  async createZone({ commit,state }, formData) {
-    return axios.post('api/v1/create-zone/', formData)
+  async createLedger({ commit,state }, formData) {
+    return axios.post('api/v1/create-ledger/', formData)
     .then((response)=>{
       return response;
     })
@@ -67,45 +70,45 @@ const actions = {
     })
   },
 
-  async fetchZones({ commit,state }, formData) {
-    state.zoneArr = [];
-    await axios.post(`api/v1/get-zones/`,formData)
+  fetchLedgers({ commit,state }, formData) {
+    state.ledgerArr = [];
+    axios.post(`api/v1/fetch-ledgers/`,formData)
     .then((response)=>{
       for(let i=0; i< response.data.length; i++){
-        state.zoneArr.push((response.data[i].name))
+        state.ledgerArr.push((response.data[i].ledger_code + " - " + response.data[i].ledger_name));
       }
-      commit('LIST_ZONES', response.data);
+      commit('LIST_LEDGERS', response.data);
     })
     .catch((error)=>{
       console.log(error.message);
     })
     
   },
-  fetchZone({ commit,state }, formData) {
-    axios.post(`api/v1/get-zones/`,formData)
+  fetchLedger({ commit,state }, formData) {
+    axios.post(`api/v1/fetch-ledgers/`,formData)
     .then((response)=>{
-      state.selectedZone = response.data;
-      commit('SET_SELECTED_ZONE',response.data);
+      state.selectedLedger = response.data;
+      commit('SET_SELECTED_LEDGER',response.data);
     })
     .catch((error)=>{
       console.log(error.message);
     })
     
   },
-  handleSelectedZone({ commit, state }, option){
-    state.zoneArray = [];
-    const selectedZone = state.zonesList.find(zone => (zone.name) === option);
-    if (selectedZone) {
-        state.zoneID = selectedZone.zone_id;
-        state.zoneName = selectedZone.name;
-        state.zoneArray = [...state.zoneArray, selectedZone];
+  handleSelectedLedger({ commit, state }, option){
+    state.ledgerArray = [];
+    const selectedLedger = state.ledgersList.find(ledger => (ledger.ledger_code + " - " +ledger.ledger_name) === option);
+    if (selectedLedger) {
+        state.ledgerID = selectedLedger.ledger_id;
+        state.ledgerName = selectedLedger.ledger_name;
+        state.ledgerArray = [...state.ledgerArray, selectedLedger];
     }
-    commit('ZONES_ARRAY', state.zoneArray);
+    commit('LEDGERS_ARRAY', state.ledgerArray);
       
   },
 
-  async updateZone({ commit,state }, formData) {
-    return axios.put(`api/v1/update-zone/`,formData)
+  async updateLedger({ commit,state }, formData) {
+    return axios.put(`api/v1/update-ledger/`,formData)
     .then((response)=>{
       return response;
     })
@@ -115,14 +118,14 @@ const actions = {
     })  
   },
 
-  deleteZone({ commit,state }, formData) {
+  deleteLedger({ commit,state }, formData) {
     Swal.fire({
       title: "Are you sure?",
-      text: `Do you wish to delete Zone?`,
+      text: `Do you wish to delete Ledger?`,
       type: 'warning',
       showCloseButton: true,
       showCancelButton: true,
-      confirmButtonText: 'Yes Delete Zone!',
+      confirmButtonText: 'Yes Delete Ledger!',
       cancelButtonText: 'Cancel!',
       customClass: {
           confirmButton: 'swal2-confirm-custom',
@@ -131,15 +134,15 @@ const actions = {
       showLoaderOnConfirm: true,
     }).then((result) => {
       if (result.value) {
-        axios.post(`api/v1/delete-zone/`,formData)
+        axios.post(`api/v1/delete-ledger/`,formData)
         .then((response)=>{
           if(response.status == 200){
-              Swal.fire("Poof! Zone removed succesfully!", {
+              Swal.fire("Poof! Ledger removed succesfully!", {
                 icon: "success",
               }); 
           }else{
             Swal.fire({
-              title: "Error Deleting Zone",
+              title: "Error Deleting Ledger",
               icon: "warning",
             });
           }                   
@@ -152,7 +155,7 @@ const actions = {
           });
         })
       }else{
-        Swal.fire(`Zone has not been deleted!`);
+        Swal.fire(`Ledger has not been deleted!`);
       }
     })
   },

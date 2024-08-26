@@ -92,9 +92,9 @@ const actions = {
     })
   },
 
-  fetchProperties({ commit,state }, formData) {
+  async fetchProperties({ commit,state }, formData) {
     state.propertyArr = [];
-    axios.post(`api/v1/get-properties/`,formData)
+    await axios.post(`api/v1/get-properties/`,formData)
     .then((response)=>{
       for(let i=0; i< response.data.length; i++){
         state.propertyArr.push((response.data[i].property_code + ' - ' + response.data[i].name))

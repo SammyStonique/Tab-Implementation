@@ -2,35 +2,34 @@ import axios from "axios";
 import Swal from 'sweetalert2';
 
 const state = {
-  zonesList: [], 
-  zoneArr: [],
-  zoneArray: [],
-  zoneID: '',
-  zoneName: '',
-  company_id: '',
+  depositsList: [], 
+  depositArr: [],
+  depositArray: [],
+  depositID: '',
+  depositName: '',
   name_search: '',
-  selectedZone: null,
+  selectedDeposit: null,
   isEditing: false
 };
   
 const mutations = {
   initializeStore(state){
-    state.zonesList = [];
-    state.zoneArr = [];
-    state.zoneArray = [];
-    state.company_id = '';
+    state.depositsList = [];
+    state.depositArr = [];
+    state.depositArray = [];
     state.name_search = '';
+    state.selectedDeposit = null;
     state.isEditing = false;
   },
-  SET_SELECTED_ZONE(state, zone) {
-    state.selectedZone = zone;
+  SET_SELECTED_DEPOSIT(state, deposit) {
+    state.selectedDeposit = deposit;
     state.isEditing = true;
   },
-  LIST_ZONES(state, zones) {
-    state.zonesList = zones;
+  LIST_DEPOSITS(state, deposits) {
+    state.depositsList , deposits;
   },
-  ZONES_ARRAY(state, zones){
-    state.zoneArray = zones;
+  DEPOSITS_ARRAY(state, deposits){
+    state.depositArray = deposits;
   },
   SET_STATE(state, payload) {
     for (const key in payload) {
@@ -43,7 +42,7 @@ const mutations = {
     for(const [key, value] of Object.entries(search_filter)){
       if(key == 'name_search'){
         state.name_search = value;
-      }  
+      }
     }
   },
   RESET_SEARCH_FILTERS(state){
@@ -56,8 +55,8 @@ const actions = {
     commit('SET_STATE', newState);
   },
   
-  async createZone({ commit,state }, formData) {
-    return axios.post('api/v1/create-zone/', formData)
+  async createDeposit({ commit,state }, formData) {
+    return axios.post('api/v1/create-security-deposit/', formData)
     .then((response)=>{
       return response;
     })
@@ -67,45 +66,44 @@ const actions = {
     })
   },
 
-  async fetchZones({ commit,state }, formData) {
-    state.zoneArr = [];
-    await axios.post(`api/v1/get-zones/`,formData)
+  fetchDeposits({ commit,state }, formData) {
+    state.depositArr = [];
+    axios.post(`api/v1/get-security-deposits/`,formData)
     .then((response)=>{
       for(let i=0; i< response.data.length; i++){
-        state.zoneArr.push((response.data[i].name))
+        state.depositArr.push((response.data[i].name));
       }
-      commit('LIST_ZONES', response.data);
+      commit('LIST_DEPOSITS', response.data);
     })
     .catch((error)=>{
       console.log(error.message);
     })
     
   },
-  fetchZone({ commit,state }, formData) {
-    axios.post(`api/v1/get-zones/`,formData)
+  fetchDeposit({ commit,state }, formData) {
+    axios.post(`api/v1/get-security-deposits/`,formData)
     .then((response)=>{
-      state.selectedZone = response.data;
-      commit('SET_SELECTED_ZONE',response.data);
+        commit('SET_SELECTED_DEPOSIT',response.data);
     })
     .catch((error)=>{
       console.log(error.message);
     })
     
   },
-  handleSelectedZone({ commit, state }, option){
-    state.zoneArray = [];
-    const selectedZone = state.zonesList.find(zone => (zone.name) === option);
-    if (selectedZone) {
-        state.zoneID = selectedZone.zone_id;
-        state.zoneName = selectedZone.name;
-        state.zoneArray = [...state.zoneArray, selectedZone];
+  handleSelectedDeposit({ commit, state }, option){
+    state.depositArray = [];
+    const selectedDeposit = state.depositsList.find(deposit => (deposit.name) === option);
+    if (selectedDeposit) {
+        state.depositID = selectedDeposit.deposit_id;
+        state.depositName = selectedDeposit.name;
+        state.depositArray = [...state.depositArray, selectedDeposit];
     }
-    commit('ZONES_ARRAY', state.zoneArray);
+    commit('DEPOSITS_ARRAY', state.depositArray);
       
   },
 
-  async updateZone({ commit,state }, formData) {
-    return axios.put(`api/v1/update-zone/`,formData)
+  async updateDeposit({ commit,state }, formData) {
+    return axios.put(`api/v1/update-security-deposit/`,formData)
     .then((response)=>{
       return response;
     })
@@ -115,14 +113,14 @@ const actions = {
     })  
   },
 
-  deleteZone({ commit,state }, formData) {
+  deleteDeposit({ commit,state }, formData) {
     Swal.fire({
       title: "Are you sure?",
-      text: `Do you wish to delete Zone?`,
+      text: `Do you wish to delete Deposit?`,
       type: 'warning',
       showCloseButton: true,
       showCancelButton: true,
-      confirmButtonText: 'Yes Delete Zone!',
+      confirmButtonText: 'Yes Delete Deposit!',
       cancelButtonText: 'Cancel!',
       customClass: {
           confirmButton: 'swal2-confirm-custom',
@@ -131,15 +129,15 @@ const actions = {
       showLoaderOnConfirm: true,
     }).then((result) => {
       if (result.value) {
-        axios.post(`api/v1/delete-zone/`,formData)
+        axios.post(`api/v1/delete-security-deposit/`,formData)
         .then((response)=>{
           if(response.status == 200){
-              Swal.fire("Poof! Zone removed succesfully!", {
+              Swal.fire("Poof! Deposit removed succesfully!", {
                 icon: "success",
               }); 
           }else{
             Swal.fire({
-              title: "Error Deleting Zone",
+              title: "Error Deleting Deposit",
               icon: "warning",
             });
           }                   
@@ -152,7 +150,7 @@ const actions = {
           });
         })
       }else{
-        Swal.fire(`Zone has not been deleted!`);
+        Swal.fire(`Deposit has not been deleted!`);
       }
     })
   },
