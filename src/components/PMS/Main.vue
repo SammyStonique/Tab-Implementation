@@ -28,6 +28,8 @@ import Landlords_List from '@/components/PMS/Landlords_List.vue'
 import Units_List from '@/components/PMS/Units_List.vue';
 import Utilities from '@/components/PMS/Utilities.vue';
 import Security_Deposits from '@/components/PMS/Security_Deposits.vue';
+import Active_Tenants from '@/components/PMS/Active_Tenants.vue';
+import Tenant_Details from '@/components/PMS/Tenant_Details.vue';
 import { useStore } from 'vuex';
 import { ref, computed, watch } from 'vue';
 export default{
@@ -35,7 +37,8 @@ export default{
         NavBar,
         NavBarPMS,
         PagesTab,
-        Dashboard, Properties_List, Zones, Landlords_List, Units_List, Property_Details, Utilities, Security_Deposits
+        Dashboard, Properties_List, Zones, Landlords_List, Units_List, Property_Details, Utilities, Security_Deposits, Active_Tenants,
+        Tenant_Details
     },
     props: {
         title: {

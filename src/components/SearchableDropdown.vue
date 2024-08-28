@@ -1,9 +1,9 @@
 <template>
     <div class="searchable-dropdown">
-      <input type="text" v-model="searchQuery" @input="filterOptions" :placeholder="searchPlaceholder" class="rounded bg-white pl-3" :style="{width: this.dropdownWidth, height:this.dropdownHeight}">
+      <input type="text" v-model="searchQuery" @input="filterOptions" :placeholder="searchPlaceholder" class="rounded bg-slate-50 pl-3" :style="{width: this.dropdownWidth, height:this.dropdownHeight}">
       <button type="button" class="show-dropdown" @click="toggleDropdown" v-if="!dropdown_active"><i class="fa fa-caret-down" aria-hidden="true"></i></button>
       <button type="button" class="show-dropdown" @click="resetDropdown" v-else><i class="fa fa-times" aria-hidden="true"></i></button>
-      <ul v-if="isOpen" class="dropdown-list">
+      <ul v-if="isOpen" class="dropdown-list bg-slate-50">
         <li v-for="(option, index) in filteredOptions" :key="index" @click="selectOption(option)" :style="{fontSize: this.fontSize}">
           {{ option }}
         </li>
@@ -116,7 +116,7 @@
     left: 10;
     text-align: left;
     z-index: 1;
-    background-color: white;
+    /* background-color: white; */
     border: 1px solid #ccc;
     list-style: none;
     padding: 0;
@@ -134,7 +134,8 @@
   }
   
   .dropdown-list li:hover {
-    background-color: #f0f0f0;
+    /* background-color: #f0f0f0; */
+    background-color: white;
   }
   .show-dropdown{
     float: right;

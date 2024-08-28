@@ -100,7 +100,6 @@ const actions = {
     
   },
   handleSelectedUtility({ commit, state }, option){
-    state.utilityArray = [];
     const selectedUtility = state.utilitiesList.find(utility => (utility.name) === option);
     if (selectedUtility) {
         state.utilityID = selectedUtility.utility_id;
@@ -162,6 +161,9 @@ const actions = {
         Swal.fire(`Utility has not been deleted!`);
       }
     })
+  },
+  removeUtility({commit, state}, index){
+    state.utilityArray.splice(index, 1); 
   },
 };
   

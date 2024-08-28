@@ -72,13 +72,12 @@
                     </div>
                 </div>
             </div>
-            <div class="web-links py-1.5 px-2.5 w-32 h-full hover:bg-slate-500 hover:rounded">
+            <!-- <div class="web-links py-1.5 px-2.5 w-32 h-full hover:bg-slate-500 hover:rounded">
                     <button class="flex" @click="openPage({'PMS':'Doctors'})">
                         <i class="fa fa-user-md pt-2 mr-2" aria-hidden="true"></i>
                         <p class="pt-1.5">Doctors</p>
                     </button>
-
-            </div>
+            </div> -->
             <div class="web-links dropdown w-32">
                 <div class="py-1.5 px-2.5 h-full hover:bg-slate-500 hover:rounded">
                     <button class="flex" @click="showTenantsDropdown">
@@ -88,7 +87,7 @@
                 </div>
                 <div class="dropdown-content w-52 absolute rounded border border-gray-200 bg-white shadow-slate-400 shadow-xl pt-2" v-if="tenants_dropdown">       
                     <div class="py-2 px-3 pl-4 w-full hover:bg-slate-500 hover:w-full">
-                        <button class="flex text-sm" @click="openPage({'PMS':'Tenants_List'})">
+                        <button class="flex text-sm" @click="openPage({'PMS':'Active_Tenants'})">
                             <i class="fa fa-universal-access pt-2 mr-2" aria-hidden="true"></i>
                             <p class="">Tenants List</p>
                         </button>
@@ -117,55 +116,28 @@
                     </div>
                 </div>
             </div>
-            <!-- <div class="web-links py-1.5 px-2.5 w-32 h-full hover:bg-slate-500 hover:rounded" v-if="userDetails.profile == 'Super Admin'">>
-                <button class="flex">
-                    <i class="fa fa-user-plus pt-2 mr-2" aria-hidden="true"></i>
-                    <p class="pt-1.5">Our Staff</p>
-                </button>
-            </div>
-            <div class="web-links py-1.5 px-2.5 w-32 h-full hover:bg-slate-500 hover:rounded" v-else-if="userDetails.profile == 'Admin'">
-                <button class="flex">
-                    <i class="fa fa-user-plus pt-2 mr-2" aria-hidden="true"></i>
-                    <p class="pt-1.5">Our Staff</p>
-                </button>
-            </div>
-            <div class="web-links py-1.5 px-2.5 w-40 h-full hover:bg-slate-500 hover:rounded">
-                    <button class="flex">
-                        <i class="fa fa-flask pt-2 mr-2" aria-hidden="true"></i>
-                        <p class="pt-1.5">Lab Management</p>
-                    </button>
-            </div>
             <div class="web-links dropdown w-36">
                 <div class="py-1.5 px-2.5 h-full hover:bg-slate-500 hover:rounded">
-                    <button class="flex" @click="showFinancialsDropdown">
+                    <button class="flex" @click="showSettingsDropdown">
                         <i class="fa fa-money pt-2 mr-2" aria-hidden="true"></i>
-                        <p class="pt-1.5">Financials</p>
+                        <p class="pt-1.5">Settings</p>
                     </button>
                 </div>
-                <div class="dropdown-content w-48 absolute rounded border border-gray-200 bg-white shadow-slate-400 shadow-xl" v-if="financials_dropdown">
+                <div class="dropdown-content w-48 absolute rounded border border-gray-200 bg-white shadow-slate-400 shadow-xl" v-if="settings_dropdown">
                     <div class="py-2 px-3 pl-4 w-full hover:bg-slate-500 hover:w-full">
-                            <button class="flex text-sm">
-                                <i class="fa fa-money pt-2 mr-2" aria-hidden="true"></i>
-                                <p class="">Fees & Charges</p>
-                            </button>
-    
+                        <button class="flex text-sm" @click="openPage({'PMS':'Utilities'})">
+                            <i class="fa fa-money pt-2 mr-2" aria-hidden="true"></i>
+                            <p class="">Utilities</p>
+                        </button>
                     </div>
                     <div class="py-2 px-3 pl-4 w-full hover:bg-slate-500 hover:w-full">
-                            <button class="flex text-sm">
-                            <i class="fa fa-object-ungroup pt-2 mr-2" aria-hidden="true"></i>
-                            <p class="">Invoices</p>
-                            </button>
-    
-                    </div>
-                    <div class="py-2 px-3 pl-4 w-full hover:bg-slate-500 hover:w-full">
-                            <button class="flex text-sm">
-                            <i class="fa fa-pencil-square-o pt-2 mr-2" aria-hidden="true"></i>
-                            <p class="">Receipts</p>
-                            </button>
-    
+                        <button class="flex text-sm" @click="openPage({'PMS':'Security_Deposits'})">
+                        <i class="fa fa-object-ungroup pt-2 mr-2" aria-hidden="true"></i>
+                        <p class="">Security Deposits</p>
+                        </button>
                     </div>
                 </div>
-            </div>             -->
+            </div>        
         </div>
     </div>
 </template>
@@ -177,7 +149,7 @@ import { defineComponent } from 'vue';
 export default defineComponent({
     setup(_, { emit }){
         const store = useStore();
-        const financials_dropdown = ref(false);
+        const settings_dropdown = ref(false);
         const property_dropdown = ref(false);
         const units_dropdown = ref(false);
         const tenants_dropdown = ref(false);
@@ -185,40 +157,40 @@ export default defineComponent({
 
         const showPropertyDropdown = () =>{
             units_dropdown.value = false;
-            financials_dropdown.value = false;
+            settings_dropdown.value = false;
             tenants_dropdown.value  = false;
             property_dropdown.value  = !property_dropdown.value ;
         }
         const showTenantsDropdown = () =>{
             units_dropdown.value = false;
-            financials_dropdown.value = false;
+            settings_dropdown.value = false;
             property_dropdown.value  = false;
             tenants_dropdown.value  = !tenants_dropdown.value ;
         }
         const showUnitsDropdown = () =>{
-            financials_dropdown.value = false;
+            settings_dropdown.value = false;
             property_dropdown.value  = false;
             tenants_dropdown.value = false;
             units_dropdown.value  = !units_dropdown.value ;
         }
-        const showFinancialsDropdown = () =>{
+        const showSettingsDropdown = () =>{
             units_dropdown.value = false;
             property_dropdown.value  = false;
             tenants_dropdown.value  = false;
-            financials_dropdown.value  = !financials_dropdown.value ;
+            settings_dropdown.value  = !settings_dropdown.value ;
         }
         const openPage = (pageName) =>{
             store.commit('pageTab/ADD_PAGE', pageName);
             emit('openPage', pageName)
         }
         return{
-            financials_dropdown, units_dropdown,
+            settings_dropdown, units_dropdown,
             property_dropdown,
             tenants_dropdown,
             userDetails,
             showPropertyDropdown, showUnitsDropdown,
             showTenantsDropdown,
-            showFinancialsDropdown,
+            showSettingsDropdown,
             openPage
         }
     },

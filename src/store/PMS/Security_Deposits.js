@@ -26,7 +26,7 @@ const mutations = {
     state.isEditing = true;
   },
   LIST_DEPOSITS(state, deposits) {
-    state.depositsList , deposits;
+    state.depositsList = deposits;
   },
   DEPOSITS_ARRAY(state, deposits){
     state.depositArray = deposits;
@@ -91,7 +91,6 @@ const actions = {
     
   },
   handleSelectedDeposit({ commit, state }, option){
-    state.depositArray = [];
     const selectedDeposit = state.depositsList.find(deposit => (deposit.name) === option);
     if (selectedDeposit) {
         state.depositID = selectedDeposit.deposit_id;
@@ -99,7 +98,6 @@ const actions = {
         state.depositArray = [...state.depositArray, selectedDeposit];
     }
     commit('DEPOSITS_ARRAY', state.depositArray);
-      
   },
 
   async updateDeposit({ commit,state }, formData) {
@@ -153,6 +151,9 @@ const actions = {
         Swal.fire(`Deposit has not been deleted!`);
       }
     })
+  },
+  removeDeposit({commit, state}, index){
+    state.depositArray.splice(index, 1); 
   },
 };
   
