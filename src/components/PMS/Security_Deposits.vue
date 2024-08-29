@@ -174,15 +174,16 @@ export default{
                 deposit: selectedDeposit.value.deposit_id,
                 name: formFields.value[0].value,
                 default_mode: formFields.value[1].value,
-                default_value: formFields.value[2].value || 0,
+                default_value: formFields.value[2].value,
                 company: companyID.value
             }
 
             for(let i=0; i < formFields.value.length; i++){
-                if(formFields.value[i].value ==''){
-                    errors.value.push('Error');
+                if(formFields.value[i].value =='' && formFields.value[i].required == true){
+                    errors.value.push(formFields.value[i].label );
                 }
             }
+
             if(errors.value.length){
                 toast.error('Fill In Required Fields');
                 hideModalLoader();

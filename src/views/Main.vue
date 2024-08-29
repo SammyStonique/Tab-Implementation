@@ -4,22 +4,22 @@
             @showLoader="showLoader"
             @hideLoader="hideLoader"
         />
-        <div v-if="hmsOpen && selectedModule =='Hospital Management'">
+        <div v-show="hmsOpen && selectedModule =='Hospital Management'">
             <HMS />
         </div>
-        <div v-if="hmsOpen && selectedModule =='Property Management'">
+        <div v-show="hmsOpen && selectedModule =='Property Management'">
             <PMS />
         </div>
-        <div v-if="hmsOpen && selectedModule =='Financial Accounts'">
+        <div v-show="hmsOpen && selectedModule =='Financial Accounts'">
             <FA />
         </div>
-        <div v-if="hmsOpen && selectedModule =='Inventory Management'">
+        <div v-show="hmsOpen && selectedModule =='Inventory Management'">
             <INV />
         </div>
-        <!-- <div v-if="hmsOpen && selectedModule =='Human Resource'">
+        <!-- <div v-show="hmsOpen && selectedModule =='Human Resource'">
             <HR />
         </div>
-        <div v-if="hmsOpen && selectedModule =='Settings'">
+        <div v-show="hmsOpen && selectedModule =='Settings'">
             <SET />
         </div> -->
         <div v-if="mainOpen" class="text-black h-screen bg-slate-500 px-12 w-full">

@@ -50,11 +50,11 @@ export default defineComponent({
   props: {
     columns: {
       type: Array,
-      required: true
+      default: () => []
     },
     rows: {
       type: Array,
-      required: true
+      default: () => []
     },
     idField: {
       type: String,
@@ -91,6 +91,7 @@ export default defineComponent({
         row.selected = isSelected;
       });
       selectedIds.value = isSelected ? props.rows.map(row => row[props.idField]) : [];
+
       console.log("THE SELECTED IDs ARE ",selectedIds.value);
       emit('selection-changed', selectedIds.value);
     };

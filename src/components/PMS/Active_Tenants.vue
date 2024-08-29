@@ -248,7 +248,7 @@ export default{
         }
         const addNewTenant = async() =>{
             store.commit('Active_Tenants/initializeStore');
-            await store.dispatch('Active_Tenants/updateState', {selectedTenant: null,selectedProperty: null,selectedUnit: null,selectedCurrency:null,selectedDeposit:null, isEditing: false});
+            await store.dispatch('Active_Tenants/updateState', {currentTab: 'Tenant_Biodata',selectedTenant: null,selectedProperty: null,selectedUnit: null,selectedCurrency:null,selectedDeposit:null, isEditing: false});
             store.commit('pageTab/ADD_PAGE', {'PMS':'Tenant_Details'});
             store.state.pageTab.pmsActiveTab = 'Tenant_Details';          
         }

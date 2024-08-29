@@ -1,4 +1,5 @@
 <template>
+
     <h2><strong>Tenant Details</strong></h2>
     <DynamicForm  :fields="formFields" :flex_basis="flex_basis" :flex_basis_percentage="flex_basis_percentage" @handleReset="handleReset"> 
         <template v-slot:additional-content>
@@ -10,9 +11,7 @@
             </div>
         </template>
     </DynamicForm>
-    <div class="flex-1 basis-full px-2">
-      <button @click="openLeaseDetails" class="rounded bg-green-400 text-sm mr-2  text-white px-2 py-1.5"><i class="fa fa-arrow-right text-xs mr-1.5" aria-hidden="true"></i>Next</button>
-    </div>
+
 </template>
 
 <script>
@@ -26,7 +25,12 @@ export default defineComponent({
     components:{
          DynamicForm
     },
-    setup(){
+    props:{
+        formFields: Array,
+        additionalFields: Array
+    },
+    emits: ['update-form'],
+    setup(props,{emit}){
         const store = useStore();
         const toast = useToast();
         const loader = ref('none');
@@ -40,17 +44,17 @@ export default defineComponent({
         const additional_flex_basis_percentage = ref('');
         const selectedTenant = computed(()=> store.state.Active_Tenants.selectedTenant);
         const isEditing = computed(()=> store.state.Active_Tenants.isEditing);
-        const formFields = ref([]);
+        const formFields = ref(props.formFields);
         const updateFormFields = () => {
             formFields.value = [
                 { type: 'text', name: 'tenant_code',label: "Code", value: selectedTenant.value?.tenant_code || '', required: false },
                 { type: 'text', name: 'tenant_name',label: "Tenant Name", value: selectedTenant.value?.tenant_name || '', required: true },
                 { type: 'text', name: 'phone_number',label: "Phone Number", value: selectedTenant.value?.phone_number || '', required: true, placeholder: '' },
                 { type: 'text', name: 'id_number',label: "ID Number", value: selectedTenant.value?.id_number || '', required: true, placeholder: '' },
-                { type: 'dropdown', name: 'gender',label: "Gender", value: selectedTenant.value?.gender || '', placeholder: "Gender", required: true, options: [{ text: 'Male', value: 'Male' }, { text: 'Female', value: 'Female' }, { text: 'Others', value: 'Others' }] },
+                { type: 'dropdown', name: 'gender',label: "Gender", value: selectedTenant.value?.gender || '', placeholder: "", required: true, options: [{ text: 'Male', value: 'Male' }, { text: 'Female', value: 'Female' }, { text: 'Others', value: 'Others' }] },
                 { type: 'text', name: 'email',label: "Email", value: selectedTenant.value?.email || '', required: true },
                 { type: 'text', name: 'kra_pin',label: "Tax Pin", value: selectedTenant.value?.kra_pin || '', required: true },
-                { type: 'dropdown', name: 'tenant_type',label: "Tenant Type", value: selectedTenant.value?.tenant_type || '', placeholder: "Tenant Type", required: true, options: [{ text: 'Individual', value: 'Individual' }, { text: 'Company', value: 'Company' }] },
+                { type: 'dropdown', name: 'tenant_type',label: "Tenant Type", value: selectedTenant.value?.tenant_type || '', placeholder: "", required: true, options: [{ text: 'Individual', value: 'Individual' }, { text: 'Company', value: 'Company' }] },
                 { type: 'text', name: 'country',label: "Country", value: selectedTenant.value?.country || 'Kenya', required: true },
                 { type: 'text', name: 'address',label: "Address", value: selectedTenant.value?.address || '', required: false },
             ];
@@ -70,7 +74,7 @@ export default defineComponent({
             }
         }, { immediate: true });
 
-        const additionalFields = ref([]);
+        const additionalFields = ref(props.additionalFields);
         const updateAdditionalFormFields = () => {
             additionalFields.value = [
                 { type: 'text', name: 'contact_names',label: "Name", value: selectedTenant.value?.contact_names || '', required: false },
@@ -85,6 +89,9 @@ export default defineComponent({
             }
             
         }, { immediate: true });
+        const emitUpdatedFields = () => {
+            emit('update-form', formFields.value, additionalFields.value);
+        };
          
         const showLoader = () =>{
             loader.value = "block";
@@ -92,21 +99,6 @@ export default defineComponent({
         const hideLoader = () =>{
             loader.value = "none";
         } 
-        const openLeaseDetails = () =>{
-            // errors.value = [];
-            // for(let i=0; i < formFields.value.length; i++){
-            //     if(formFields.value[i].value =='' && formFields.value[i].required){
-            //         errors.value.push('Error');
-            //     }
-            // }
-            // if(errors.value.length){
-            //     toast.error('Fill In Required Fields');
-            // }else{
-            //     store.dispatch('Active_Tenants/updateState', {currentTab: "Lease_Details"})
-            // }
-            store.dispatch('Active_Tenants/updateState', {currentTab: "Lease_Details"})
-            
-        }
         
         onBeforeMount(()=>{ 
             updateFormFields();
@@ -117,13 +109,13 @@ export default defineComponent({
             additional_flex_basis_percentage.value = '25';
         })
         onMounted(()=>{
-
+            emitUpdatedFields();
         })
 
         return{
             componentKey, formFields, additionalFields, flex_basis, flex_basis_percentage, additional_flex_basis,
             additional_flex_basis_percentage, mainComponentKey,handleReset, loader, showLoader, hideLoader,
-            openLeaseDetails
+            emitUpdatedFields
         }
     }
 })

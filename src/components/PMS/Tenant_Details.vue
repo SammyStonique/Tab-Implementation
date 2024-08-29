@@ -2,12 +2,33 @@
     <PageStyleComponent :key="mainComponentKey" :loader="loader" @showLoader="showLoader" @hideLoader="hideLoader">
         <template v-slot:body>
             <div class="mt-6">
-                <keep-alive :include="cachedComponents">
-                    <component 
-                        :is="currentTab"
-                    />
-                </keep-alive>
+                <div v-show="currentTab == 'Tenant_Biodata'">
+                    <keep-alive :include="['Tenant_Biodata']">
+                        <Tenant_Biodata
+                            :formFields="tenantFormFields"
+                            :additionalFields="tenantAdditionalFields" 
+                            @update-form="updateTenantFormFields"
+                        />
+                    </keep-alive>
+                </div>
+                <div v-show="currentTab == 'Lease_Details'">
+                    <keep-alive :include="['Lease_Details']">
+                        <Lease_Details 
+                            :formFields="leaseFormFields"
+                            :additionalFields="leaseAdditionalFields" 
+                            :depositRows="securityDeposits"
+                            :utilityRows="leaseUtilities"
+                            @update-form="updateLeaseFormFields"
+                        />  
+                    </keep-alive> 
+                </div>
             </div>
+            <div class="flex-1 px-2">
+                    <button v-if="currentTab == 'Tenant_Biodata'" @click="openLeaseDetails" class="rounded bg-green-400 text-sm mr-2 w-24 text-white px-2 py-1.5">Next<i class="fa fa-arrow-right text-xs mr-1.5" aria-hidden="true"></i></button>
+                    <button v-else-if="currentTab == 'Lease_Details'" @click="openTenantDetails" class="rounded bg-green-400 text-sm mr-2 w-24 text-white px-2 py-1.5"><i class="fa fa-arrow-left text-xs mr-1.5" aria-hidden="true"></i>Previous</button>
+                    <button v-if="currentTab == 'Lease_Details'" @click="submitAll" class="rounded bg-green-400 text-sm mr-2 w-24 text-white px-2 py-1.5"><i class="fa fa-check-circle text-xs mr-1.5" aria-hidden="true"></i>Submit</button>
+            </div>
+                
         </template>
     </PageStyleComponent>
 </template>
@@ -32,6 +53,26 @@ export default defineComponent({
         const mainComponentKey = ref(0);
         const currentTab = computed(()=> store.state.Active_Tenants.currentTab);
         const isEditing = computed(()=> store.state.Active_Tenants.isEditing);
+
+        const tenantFormFields = ref([]);
+        const tenantAdditionalFields = ref([]);
+
+        const leaseFormFields = ref([]);
+        const leaseAdditionalFields = ref([]);
+        const securityDeposits = ref([]);
+        const leaseUtilities = ref([]);
+
+        const updateTenantFormFields = (fields,additionalFields) => {
+            tenantFormFields.value = fields;
+            tenantAdditionalFields.value = additionalFields;
+        };
+
+        const updateLeaseFormFields = (fields,additionalFields,depositRows,utilityRows) => {
+            leaseFormFields.value = fields;
+            leaseAdditionalFields.value = additionalFields;
+            securityDeposits.value = depositRows;
+            leaseUtilities.value = utilityRows;
+        };
          
         const showLoader = () =>{
             loader.value = "block";
@@ -77,7 +118,6 @@ export default defineComponent({
             }
             if(errors.value.length){
                 toast.error('Fill In Required Fields');
-                console.log("THE ERRORS ARRAY IS ",errors.value);
                 hideLoader();                 
             }else{            
                 try {
@@ -175,16 +215,53 @@ export default defineComponent({
                 createProperty();
             }
         }
+
+        const openLeaseDetails = () =>{
+            // errors.value = [];
+            // for(let i=0; i < formFields.value.length; i++){
+            //     if(formFields.value[i].value =='' && formFields.value[i].required){
+            //         errors.value.push('Error');
+            //     }
+            // }
+            // if(errors.value.length){
+            //     toast.error('Fill In Required Fields');
+            // }else{
+            //     store.dispatch('Active_Tenants/updateState', {currentTab: "Lease_Details"})
+            // }
+            store.dispatch('Active_Tenants/updateState', {currentTab: "Lease_Details"})
+        };
+
+        const openTenantDetails = () =>{
+            store.dispatch('Active_Tenants/updateState', {currentTab: "Tenant_Biodata"})
+        }
+
+        const submitAll = () => {
+            // Combine form data from both child components
+            const allFormData = {
+                tenantData: tenantFormFields.value,
+                tenantAdditionalData: tenantAdditionalFields.value,
+                leaseData: leaseFormFields.value,
+                leaseAdditionalData: leaseAdditionalFields.value,
+                deposits: securityDeposits.value,
+                utilities: leaseUtilities.value,
+            };
+            
+            // Perform submission logic, e.g., API call
+            console.log('Submitting all form data:', allFormData);
+        };
         
         onBeforeMount(()=>{ 
 
         })
         onMounted(()=>{
-
+            
         })
 
         return{
-            mainComponentKey, currentTab, loader, showLoader, hideLoader
+            mainComponentKey, currentTab, loader, showLoader, hideLoader, 
+            updateTenantFormFields,tenantFormFields,tenantAdditionalFields,
+            updateLeaseFormFields, leaseFormFields, leaseAdditionalFields, securityDeposits, leaseUtilities,
+            submitAll, openLeaseDetails, openTenantDetails
         }
     }
 })
