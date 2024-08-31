@@ -63,7 +63,7 @@ export default{
         const tableColumns = ref([
             {type: "checkbox"},
             {label: "Code", key:"tenant_code"},
-            {label: "Tenant Name", key:"name"},
+            {label: "Tenant Name", key:"tenant_name"},
             {label: "Phone Number", key: "phone_number"},
             {label: "Property", key:"property_name"},
             {label: "Unit", key:"unit_number"},
@@ -100,14 +100,23 @@ export default{
         const properties_array = computed({
             get: () => store.state.Properties_List.propertyArr,
         });
+        const handleSelectedProperty = async(option) =>{
+            await store.dispatch('Properties_List/handleSelectedProperty', option)
+            propertyID.value = store.state.Properties_List.propertyID;
+        };
+        const clearSelectedProperty = async() =>{
+            await store.dispatch('Properties_List/updateState', {propertyID: ''});
+            propertyID.value = store.state.Properties_List.propertyID;
+        }
         const searchFilters = ref([
             {type:'text', placeholder:"Name...", value: name_search, width:48,},
             {type:'text', placeholder:"Code...", value: tenant_code_search, width:48,},
             {
                 type:'search-dropdown', value: properties_array, width:48,
-                selectOptions: properties_array,
+                selectOptions: properties_array, optionSelected: handleSelectedProperty,
                 searchPlaceholder: 'Property...', dropdownWidth: '300px',
-                fetchData: store.dispatch('Properties_List/fetchProperties', {company:companyID.value})
+                fetchData: store.dispatch('Properties_List/fetchProperties', {company:companyID.value}),
+                clearSearch: clearSelectedProperty
             },
             {type:'text', placeholder:"Unit No...", value: unit_number_search, width:48,},
             {type:'text', placeholder:"Phone No...", value: phone_number_search, width:48,},
@@ -275,7 +284,16 @@ export default{
                     searchTenants();
                 })
             }else if(action == 'view'){
-                console.log("VIEWING TAKING PLACE");
+                const tenantID = row[idField];
+                let formData = {
+                    company: companyID.value,
+                    tenant: tenantID
+                }
+                await store.dispatch('Security_Deposits/fetchTenantDeposits',formData)
+                await store.dispatch('Utilities/fetchTenantUtilities',formData)
+                await store.dispatch('Active_Tenants/fetchRentSchedules',formData)
+                store.commit('pageTab/ADD_PAGE', {'PMS':'Tenant_Statement'})
+                store.state.pageTab.pmsActiveTab = 'Tenant_Statement';
             }
         }
         const closeModal = () =>{

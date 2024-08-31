@@ -136,7 +136,7 @@ export default{
                 type:'search-dropdown', value: landlords_array, width:48,
                 selectOptions: landlords_array,
                 searchPlaceholder: 'Landlord...', dropdownWidth: '300px',
-                fetchData: store.dispatch('Units_List/fetchLandlords', {company:companyID.value})
+                fetchData: store.dispatch('Landlords_List/fetchLandlords', {company:companyID.value})
             },
             {
                 type:'dropdown', placeholder:"Status..", value: status_search, width:40,
@@ -190,9 +190,9 @@ export default{
                 },
                 { type: 'text', name: 'unit_number',label: "Unit No.", value: selectedUnit.value?.unit_number || '', required: true },
                 { type: 'number', name: 'market_rent',label: "Rent Amount", value: selectedUnit.value?.market_rent || '', required: true },
-                { type: 'dropdown', name: 'charge_frequency',label: "Charge Frequency", value: selectedUnit.value?.charge_frequency || '', placeholder: "Charge Frequency", required: false, options: [{ text: 'One Off', value: 'One Off' }, { text: 'Weekly', value: 'Weekly' }, { text: 'Monthly', value: 'Monthly' }, { text: 'Quartely', value: 'Quartely' }, { text: 'Semi-Annually', value: 'Semi-Annually' }, { text: 'Annually', value: 'Annually' }] },
-                { type: 'dropdown', name: 'owner_occupied',label: "Owner Occupied", value: selectedUnit.value?.owner_occupied || 'False', placeholder: "Owner Occupied", required: false, options: [{ text: 'Yes', value: 'True' }, { text: 'No', value: 'False' }] },
-                { type: 'dropdown', name: 'unit_type',label: "Unit Type", value: selectedUnit.value?.unit_type || '', placeholder: "Select Unit Type", required: false, options: [{ text: 'Studio', value: 'Studio' }, { text: 'Bedsitter', value: 'Bedsitter' }, { text: 'Bedroomed', value: 'Bedroomed' },{ text: 'Shop', value: 'Shop' }, { text: 'Office', value: 'Office' }, { text: 'Other', value: 'Other' }] },                
+                { type: 'dropdown', name: 'charge_frequency',label: "Charge Frequency", value: selectedUnit.value?.charge_frequency || '', placeholder: "", required: false, options: [{ text: 'One Off', value: 'One Off' }, { text: 'Weekly', value: 'Weekly' }, { text: 'Monthly', value: 'Monthly' }, { text: 'Quartely', value: 'Quartely' }, { text: 'Semi-Annually', value: 'Semi-Annually' }, { text: 'Annually', value: 'Annually' }] },
+                { type: 'dropdown', name: 'owner_occupied',label: "Owner Occupied", value: selectedUnit.value?.owner_occupied || 'False', placeholder: "", required: false, options: [{ text: 'Yes', value: 'True' }, { text: 'No', value: 'False' }] },
+                { type: 'dropdown', name: 'unit_type',label: "Unit Type", value: selectedUnit.value?.unit_type || '', placeholder: "", required: false, options: [{ text: 'Studio', value: 'Studio' }, { text: 'Bedsitter', value: 'Bedsitter' }, { text: 'Bedroomed', value: 'Bedroomed' },{ text: 'Shop', value: 'Shop' }, { text: 'Office', value: 'Office' }, { text: 'Other', value: 'Other' }] },                
                 { type: 'number', name: 'bedrooms',label: "Bedrooms", value: selectedUnit.value?.bedrooms || '', required: false },
                 { type: 'text', name: 'electricity_meter_number',label: "Electricity Mtr No.", value: selectedUnit.value?.electricity_meter_number || '', required: false },
                 { type: 'text', name: 'water_meter_number',label: "Water Mtr No.", value: selectedUnit.value?.water_meter_number || '', required: false },

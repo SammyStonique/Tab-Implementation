@@ -22,12 +22,18 @@
             <template v-if="column.type === 'checkbox'">
               <input type="checkbox" v-model="row.selected" class="checkbox" @change="updateSelectedIds(row)"/>
             </template>
+            <template v-else-if="column.type === 'dropdown'">
+              <select @change="handleChange($event, row)" v-model="row[column.key]" :name="row[column.key]" class="bg-inherit outline-none h-full text-sm w-full">
+                <option v-for="(option, index) in row.options" :key="index" :value="option.value">{{ option.text }}</option>
+              </select>
+            </template>
             <template v-else>
               <div v-if="column.editable === true">
                 <input :type="column.type" pattern="[0-9]*" oninput="this.value = this.value.replace(/[^0-9]/g, '')" class="w-full text-xs uppercase" v-model="row[column.key]" />             
               </div>
               <div v-else>
-                {{ row[column.key] }}
+                <!-- {{ row[column.key] }} -->
+                {{ getNestedValue(row, column.key) }}
               </div>
             </template>
           </td>
@@ -113,6 +119,19 @@ export default defineComponent({
       return selectedIds.value.length === props.rows.length;
     });
 
+    const getNestedValue = (row, key) => {
+      return key.split('.').reduce((obj, keyPart) => obj && obj[keyPart], row);
+    };
+
+    const handleChange = (event, row) =>{
+        const selectedValue = event.target.value;
+        if (row.method && typeof row.method === 'function') {
+          row.method(selectedValue); 
+        } else {
+          console.warn('Row method is not defined or is not a function');
+        }
+      }
+
     onMounted(() => {
       // Optional: Adjust column widths programmatically if needed
       const table = tableRef.value;
@@ -124,7 +143,7 @@ export default defineComponent({
     });
 
     return {
-      handleRowClick, handleAction,
+      handleRowClick, handleAction, handleChange, getNestedValue,
       tableRef, toggleSelectAll, selectedIds, allSelected, updateSelectedIds,
     };
   }

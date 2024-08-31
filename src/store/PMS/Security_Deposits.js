@@ -5,6 +5,7 @@ const state = {
   depositsList: [], 
   depositArr: [],
   depositArray: [],
+  tenantDeposits: [],
   depositID: '',
   depositName: '',
   name_search: '',
@@ -15,6 +16,7 @@ const state = {
 const mutations = {
   initializeStore(state){
     state.depositsList = [];
+    state.tenantDeposits = [];
     state.depositArr = [];
     state.depositArray = [];
     state.name_search = '';
@@ -24,6 +26,9 @@ const mutations = {
   SET_SELECTED_DEPOSIT(state, deposit) {
     state.selectedDeposit = deposit;
     state.isEditing = true;
+  },
+  SET_TENANT_DEPOSITS(state, deposit) {
+    state.tenantDeposits = deposit;
   },
   LIST_DEPOSITS(state, deposits) {
     state.depositsList = deposits;
@@ -90,11 +95,21 @@ const actions = {
     })
     
   },
+  fetchTenantDeposits({ commit,state }, formData){
+    axios.post(`api/v1/get-tenant-deposits/`,formData)
+    .then((response)=>{
+        commit('SET_TENANT_DEPOSITS',response.data);
+    })
+    .catch((error)=>{
+      console.log(error.message);
+    })
+  },
   handleSelectedDeposit({ commit, state }, option){
     const selectedDeposit = state.depositsList.find(deposit => (deposit.name) === option);
     if (selectedDeposit) {
         state.depositID = selectedDeposit.deposit_id;
         state.depositName = selectedDeposit.name;
+        selectedDeposit.options = [{ text: 'Fixed Amount', value: 'Fixed Amount' }, { text: 'Rent Percentage', value: 'Rent Percentage' }];
         state.depositArray = [...state.depositArray, selectedDeposit];
     }
     commit('DEPOSITS_ARRAY', state.depositArray);

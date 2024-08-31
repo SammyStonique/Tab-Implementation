@@ -19,6 +19,7 @@ const state = {
   selectedCurrency: null,
   selectedVat: null,
   isEditing: false,
+  rentSchedules: [],
   currentTab: "Tenant_Biodata"
 };
   
@@ -39,10 +40,14 @@ const mutations = {
     state.selectedCurrency = null;
     state.selectedVat = null;
     state.isEditing = false;
+    state.rentSchedules = [];
   },
   SET_SELECTED_TENANT(state, tenant) {
     state.selectedTenant = tenant;
     state.isEditing = true;
+  },
+  SET_RENT_SCHEDULES(state, schedules) {
+    state.rentSchedules = schedules;
   },
   LIST_TENANTS(state, tenants) {
     state.tenantList = tenants;
@@ -65,7 +70,7 @@ const mutations = {
         state.tenant_code_search = value;
       }else if(key == 'unit_number_search'){
           state.unit_number_search = value;
-      }else if(key == 'unit_number_search'){
+      }else if(key == 'phone_number_search'){
           state.phone_number_search = value;
       }   
     }
@@ -74,7 +79,7 @@ const mutations = {
     state.name_search = '';
     state.tenant_code_search = '';
     state.unit_number_search = '';
-    state.unit_number_search = '';
+    state.phone_number_search = '';
   }
 };
   
@@ -129,6 +134,15 @@ const actions = {
     }
     commit('TENANTS_ARRAY', state.tenantArray);
       
+  },
+  fetchRentSchedules({ commit,state }, formData){
+    axios.post(`api/v1/get-rent-schedules/`,formData)
+    .then((response)=>{
+        commit('SET_RENT_SCHEDULES',response.data);
+    })
+    .catch((error)=>{
+      console.log(error.message);
+    })
   },
 
   async updateTenant({ commit,state }, formData) {

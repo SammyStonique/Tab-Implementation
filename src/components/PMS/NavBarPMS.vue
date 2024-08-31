@@ -136,6 +136,12 @@
                         <p class="">Security Deposits</p>
                         </button>
                     </div>
+                    <div class="py-2 px-3 pl-4 w-full hover:bg-slate-500 hover:w-full">
+                        <button class="flex text-sm" @click="openPage({'PMS':'Variation_Periods'})">
+                        <i class="fa fa-object-ungroup pt-2 mr-2" aria-hidden="true"></i>
+                        <p class="">Variation Period</p>
+                        </button>
+                    </div>
                 </div>
             </div>        
         </div>
@@ -198,7 +204,7 @@ export default defineComponent({
 });
 </script>
 
-<style>
+<style scoped>
 .navbar{
   z-index: 4000;
 }

@@ -61,11 +61,14 @@ export default defineComponent({
         };
         const handleReset = () =>{
             for(let i=0; i < formFields.value.length; i++){
-                formFields.value[i].value = '';
+                if(formFields.value[i].label != 'Country'){
+                    formFields.value[i].value = '';
+                }
             }
             for(let i=0; i < additionalFields.value.length; i++){
                 additionalFields.value[i].value = '';
             }
+            emit('reset-tenant-details')
         }
 
         watch([selectedTenant], () => {

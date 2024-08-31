@@ -44,7 +44,7 @@
             <div v-else>
               <label for="">{{ field.label }}:</label><br />
             </div>
-            <select v-model="field.value" :name="field.name" class="bg-slate-50 rounded border border-gray-400 text-sm pl-2 pt-2 w-full">
+            <select @change="handleChange($event, field)" v-model="field.value" :name="field.name" class="bg-slate-50 rounded border border-gray-400 text-sm pl-2 pt-2 w-full">
               <option value="" selected disabled>{{ field.placeholder }}</option>
               <option v-for="(option, index) in field.options" :key="index" :value="option.value">{{ option.text }}</option>
             </select>
@@ -92,6 +92,7 @@
 
 <script>
 import { ref } from 'vue';
+import { getCurrentInstance } from 'vue';
 import SearchableDropdown from './SearchableDropdown.vue';
 
 export default{
@@ -121,6 +122,7 @@ export default{
       SearchableDropdown
     },
     setup(props, {emit}){
+      const {proxy} = getCurrentInstance();
       const handleSubmit = () =>{
         emit('handleSubmit');
       }
@@ -134,9 +136,17 @@ export default{
         }
         emit('handleReset');
       }
+      const handleChange = (event, field) =>{
+        const selectedValue = event.target.value;
+        if (field.method && typeof field.method === 'function') {
+          field.method(selectedValue); 
+        } else {
+          console.warn('Field method is not defined or is not a function');
+        }
+      }
 
       return{
-        handleSubmit, handleReset
+        handleSubmit, handleReset, handleChange
       }
     }
 

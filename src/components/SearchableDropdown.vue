@@ -3,7 +3,7 @@
       <input type="text" v-model="searchQuery" @input="filterOptions" :placeholder="searchPlaceholder" class="rounded bg-slate-50 pl-3" :style="{width: this.dropdownWidth, height:this.dropdownHeight}">
       <button type="button" class="show-dropdown" @click="toggleDropdown" v-if="!dropdown_active"><i class="fa fa-caret-down" aria-hidden="true"></i></button>
       <button type="button" class="show-dropdown" @click="resetDropdown" v-else><i class="fa fa-times" aria-hidden="true"></i></button>
-      <ul v-if="isOpen" class="dropdown-list bg-slate-50">
+      <ul v-if="isOpen" class="dropdown-list capitalize bg-slate-50">
         <li v-for="(option, index) in filteredOptions" :key="index" @click="selectOption(option)" :style="{fontSize: this.fontSize}">
           {{ option }}
         </li>

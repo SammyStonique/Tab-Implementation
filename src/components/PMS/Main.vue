@@ -17,6 +17,8 @@
 </template>
 
 <script>
+import { useStore } from 'vuex';
+import { ref, computed, watch } from 'vue';
 import NavBar from '@/components/NavBar.vue'
 import NavBarPMS from '@/components/PMS/NavBarPMS.vue'
 import PagesTab from '@/components/PMS/PagesTab.vue'
@@ -30,15 +32,16 @@ import Utilities from '@/components/PMS/Utilities.vue';
 import Security_Deposits from '@/components/PMS/Security_Deposits.vue';
 import Active_Tenants from '@/components/PMS/Active_Tenants.vue';
 import Tenant_Details from '@/components/PMS/Tenant_Details.vue';
-import { useStore } from 'vuex';
-import { ref, computed, watch } from 'vue';
+import Variation_Periods from '@/components/PMS/Variation_Periods.vue';
+import Tenant_Statement from '@/components/PMS/Tenant_Statement.vue';
+
 export default{
     components:{
         NavBar,
         NavBarPMS,
         PagesTab,
         Dashboard, Properties_List, Zones, Landlords_List, Units_List, Property_Details, Utilities, Security_Deposits, Active_Tenants,
-        Tenant_Details
+        Tenant_Details, Variation_Periods, Tenant_Statement
     },
     props: {
         title: {

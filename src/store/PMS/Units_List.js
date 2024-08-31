@@ -7,7 +7,7 @@ const state = {
   unitArray: [],
   unitID: '',
   unitNumber: '',
-  company_id: '',
+  unitPrice: 0,
   unit_number_search: '',
   status_search: '',
   vacancy_status_search: '',
@@ -22,7 +22,9 @@ const mutations = {
     state.unitsList = [];
     state.unitArr = [];
     state.unitArray = [];
-    state.company_id = '';
+    state.unitID = "";
+    state.unitNumber = "";
+    state.unitPrice = 0;
     state.unit_number_search = '';
     state.status_search = '';
     state.vacancy_status_search = '';
@@ -117,6 +119,7 @@ const actions = {
     if (selectedUnit) {
         state.unitID = selectedUnit.property_unit_id;
         state.unitNumber = selectedUnit.unit_number;
+        state.unitPrice = selectedUnit.market_rent;
         state.unitArray = [...state.unitArray, selectedUnit];
     }
     commit('UNITS_ARRAY', state.unitArray);

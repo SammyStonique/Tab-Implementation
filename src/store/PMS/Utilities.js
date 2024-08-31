@@ -5,6 +5,7 @@ const state = {
   utilitiesList: [], 
   utilityArr: [],
   utilityArray: [],
+  tenantUtilities: [],
   utilityID: '',
   utilityNumber: '',
   company_id: '',
@@ -19,6 +20,7 @@ const mutations = {
     state.utilitiesList = [];
     state.utilityArr = [];
     state.utilityArray = [];
+    state.tenantUtilities = [];
     state.company_id = '';
     state.name_search = '';
     state.selectedUtility = null;
@@ -28,6 +30,9 @@ const mutations = {
   SET_SELECTED_UTILITY(state, utility) {
     state.selectedUtility = utility;
     state.isEditing = true;
+  },
+  SET_TENANT_UTILITIES(state, utility) {
+    state.tenantUtilities = utility;
   },
   SET_SELECTED_LEDGER(state, ledger) {
     state.selectedLedger = ledger;
@@ -99,11 +104,21 @@ const actions = {
     })
     
   },
+  fetchTenantUtilities({ commit,state }, formData){
+    axios.post(`api/v1/get-tenant-utilities/`,formData)
+    .then((response)=>{
+        commit('SET_TENANT_UTILITIES',response.data);
+    })
+    .catch((error)=>{
+      console.log(error.message);
+    })
+  },
   handleSelectedUtility({ commit, state }, option){
     const selectedUtility = state.utilitiesList.find(utility => (utility.name) === option);
     if (selectedUtility) {
         state.utilityID = selectedUtility.utility_id;
         state.utilityName = selectedUtility.name;
+        selectedUtility.options = [{ text: 'Fixed Amount', value: 'Fixed Amount' }, { text: 'Rent Percentage', value: 'Rent Percentage' }, { text: 'Billed On Use', value: 'Billed On Use' }];
         state.utilityArray = [...state.utilityArray, selectedUtility];
     }
     commit('UTILITIES_ARRAY', state.utilityArray);
