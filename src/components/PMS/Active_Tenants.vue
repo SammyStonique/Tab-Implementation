@@ -297,6 +297,7 @@ export default{
                 await store.dispatch('Security_Deposits/fetchTenantDeposits',formData)
                 await store.dispatch('Utilities/fetchTenantUtilities',formData)
                 await store.dispatch('Active_Tenants/fetchRentSchedules',formData)
+                await store.dispatch('Active_Tenants/fetchTenantVariations',formData)
                 await store.dispatch('Journals/fetchClientJournals',formData1)
                 store.commit('pageTab/ADD_PAGE', {'PMS':'Tenant_Statement'})
                 store.state.pageTab.pmsActiveTab = 'Tenant_Statement';

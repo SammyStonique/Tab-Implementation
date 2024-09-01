@@ -8,7 +8,7 @@
                         {{ tab }}
                     </button>
                 </div>
-                <div class="tab-content">
+                <div class="tab-content mt-3">
                     <div v-show="activeTab == 0">
                         <div class="flex">
                             <div class="basis-1/2 border-left border-gray-400">
@@ -16,51 +16,51 @@
                                 <table class="w-full">
                                     <tr class="text-left">
                                         <td class="font-bold ">Tenant Code:</td>
-                                        <td> {{tenantLease ? tenantLease.tenant['tenant_code'] : ''}}</td>
+                                        <td> {{ tenantDetails.tenant_code }}</td>
                                         <td></td>
                                         <td></td>
                                         <td class="font-bold">Tenant Name:</td>
-                                        <td>{{ tenantLease.tenant['tenant_name'] }}</td>
+                                        <td>{{ tenantDetails.tenant_name }}</td>
                                     </tr>
                                     <tr class="text-left">
                                         <td class="font-bold pt-3">ID Number:</td>
-                                        <td>{{ tenantLease.tenant['id_number'] }}</td>
+                                        <td>{{ tenantDetails.id_number }}</td>
                                         <td></td>
                                         <td></td>
                                         <td class="font-bold pt-3">Phone Number:</td>
-                                        <td>{{ tenantLease.tenant['phone_number'] }}</td>
+                                        <td>{{ tenantDetails.phone_number }}</td>
                                     </tr>
                                     <tr class="text-left">
                                         <td class="font-bold pt-3">Email:</td>
-                                        <td>{{ tenantLease.tenant['email'] }}</td>
+                                        <td>{{ tenantDetails.email }}</td>
                                         <td></td>
                                         <td></td>
                                         <td class="font-bold pt-3">Tax Pin:</td>
-                                        <td>{{ tenantLease.tenant['kra_pin'] }}</td>
+                                        <td>{{ tenantDetails.kra_pin }}</td>
                                     </tr>
                                     <tr class="text-left">
                                         <td class="font-bold pt-3">Address:</td>
-                                        <td>{{ tenantLease.tenant['address'] }}</td>
+                                        <td>{{ tenantDetails.address }}</td>
                                         <td></td>
                                         <td></td>
                                         <td class="font-bold pt-3">Country:</td>
-                                        <td>{{ tenantLease.tenant['country'] }}</td>
+                                        <td>{{ tenantDetails.country }}</td>
                                     </tr>
                                     <tr class="text-left">
                                         <td class="font-bold pt-3">Contact Name:</td>
-                                        <td>{{ tenantLease.tenant['contact_names'] }}</td>
+                                        <td>{{ tenantDetails.contact_names }}</td>
                                         <td></td>
                                         <td></td>
                                         <td class="font-bold pt-3">Contact Phone No:</td>
-                                        <td>{{ tenantLease.tenant['contact_phone_number'] }}</td>
+                                        <td>{{ tenantDetails.contact_phone_number }}</td>
                                     </tr>
                                     <tr class="text-left">
                                         <td class="font-bold pt-3">Contact Email:</td>
-                                        <td>{{ tenantLease.tenant['contact_email'] }}</td>
+                                        <td>{{ tenantDetails.contact_email }}</td>
                                         <td></td>
                                         <td></td>
                                         <td class="font-bold pt-3">Contact Rltshp:</td>
-                                        <td>{{ tenantLease.tenant['contact_relationship'] }}</td>
+                                        <td>{{ tenantDetails.contact_relationship }}</td>
                                     </tr>
                                 </table>
                             </div>
@@ -69,7 +69,7 @@
                                 <table class="w-full">
                                     <tr class="text-left">
                                         <td class="font-bold">Property:</td>
-                                        <td>{{ property }}</td>
+                                        <td>{{ tenantProperty.name }}</td>
                                         <td></td>
                                         <td></td>
                                         <td class="font-bold">Occupied Unit(s):</td>
@@ -101,11 +101,11 @@
                                     </tr>
                                     <tr class="text-left">
                                         <td class="font-bold pt-3">Rent Amount:</td>
-                                        <td>{{ tenantLease.rent_amount }}</td>
+                                        <td>{{ Number(tenantLease.rent_amount).toLocaleString() }}</td>
                                         <td></td>
                                         <td></td>
                                         <td class="font-bold pt-3">Billing Amount:</td>
-                                        <td>{{ tenantLease.billing_amount }}</td>
+                                        <td>{{ Number(tenantLease.billing_amount).toLocaleString() }}</td>
                                     </tr>
                                     <tr class="text-left">
                                         <td class="font-bold pt-3">Lease Mode:</td>
@@ -113,7 +113,7 @@
                                         <td></td>
                                         <td></td>
                                         <td class="font-bold pt-3">Lease Currency:</td>
-                                        <td>{{ tenantLease.lease_currency['code'] }} - {{ tenantLease.lease_currency['name'] }}</td>
+                                        <td>{{ tenantCurrency.code }} - {{ tenantCurrency.name }}</td>
                                     </tr>
                                     
                                 </table>
@@ -124,14 +124,21 @@
                         <DynamicTable :key="statementTableKey" :columns="statementColumns" :rows="statementRows" :idField="idFieldStatement" :actions="actionsStatement"/>
                     </div>          
                     <div v-show="activeTab == 2">                     
-                        <DynamicTable :key="tableKey" :columns="depositColumns" :rows="computedDepositRows" :idField="idFieldDeposit" :actions="actionsDeposit" @action-click="deleteDeposit" />
+                        <DynamicTable :key="tableKey" :columns="depositColumns" :rows="computedDepositRows" :idField="idFieldDeposit" :actions="actionsDeposit" @action-click="depositActionClick" />
                     </div>
                     <div v-show="activeTab == 3">                    
                         <DynamicTable :key="utilityTableKey" :columns="utilityColumns" :rows="computedUtilityRows" :idField="idFieldUtility" :actions="actionsUtility" @action-click="deleteUtility" />
                     </div>
-                    <div v-show="activeTab == 4">                    
+                    <div v-show="activeTab == 4"> 
+                        <div class="flex mb-1.5">
+                            <button @click="" class="rounded bg-green-400 text-sm mr-2  text-white px-2 py-1.5"><i class="fa fa-check-circle text-xs mr-1.5" aria-hidden="true"></i>Actions</button>
+                            <button @click="refreshSchedule" class="rounded bg-green-400 text-sm mr-2  text-white px-2 py-1.5"><i class="fa fa-refresh text-xs mr-1.5" aria-hidden="true"></i>Refresh</button>
+                        </div>                   
                         <DynamicTable :key="scheduleTableKey" :columns="scheduleColumns" :rows="scheduleRows" :idField="idFieldSchedule" :actions="actionsSchedule" @action-click="scheduleActionClick" />
-                    </div>      
+                    </div>  
+                    <div v-show="activeTab == 5">                   
+                        <DynamicTable :key="variationTableKey" :columns="variationColumns" :rows="variationRows" :idField="idFieldVariation" :actions="actionsVariation" @action-click="variationActionClick" />
+                    </div>    
                 </div>
             </div>
         </template>
@@ -156,22 +163,29 @@ export default defineComponent({
         const toast = useToast();
         const loader = ref('none');
         const companyID = computed(()=> store.state.userData.company_id);
-        const tabs = ref(['Tenant Details','Tenant Statement','Tenant Deposits','Tenant Utilities','Rent Schedules']);
+        const tenantID = ref('');
+        const tabs = ref(['Tenant Details','Tenant Statement','Tenant Deposits','Tenant Utilities','Rent Schedules','Rent Variation']);
         const activeTab = ref(0);
         const mainComponentKey = ref(0);
         const tableKey = ref(0);
         const utilityTableKey = ref(0);
         const scheduleTableKey = ref(0);
         const statementTableKey = ref(0);
+        const variationTableKey = ref(0);
         const idFieldDeposit = ref('deposit_id');
         const idFieldUtility = ref('utility_id');
         const idFieldSchedule = ref('rent_schedule_id');
+        const idFieldVariation = ref('variation_id');
         const idFieldStatement = ref('');
         const computedDepositRows = computed(()=> store.state.Security_Deposits.tenantDeposits);
         const computedUtilityRows = computed(()=> store.state.Utilities.tenantUtilities);
         const scheduleRows = computed(()=> store.state.Active_Tenants.rentSchedules);
         const statementRows = computed(()=> store.state.Journals.jnlArray);
+        const variationRows = computed(()=> store.state.Active_Tenants.tenantVariations);
         const tenantLease = computed(()=> store.state.Active_Tenants.tenantLease);
+        const tenantDetails = computed(()=> store.state.Active_Tenants.tenantDetails);
+        const tenantCurrency = computed(()=> store.state.Active_Tenants.tenantCurrency);
+        const tenantProperty = computed(()=> store.state.Active_Tenants.tenantProperty);
         const depositColumns = ref([
             {type: "checkbox"},
             {label: "Name", key:"security_deposit.name", type: "text", editable: false},
@@ -182,6 +196,8 @@ export default defineComponent({
         ]);
 
         const actionsDeposit = ref([
+            {name: 'book-invoice', icon: 'fa fa-spinner', title: 'Book Rent'},
+            {name: 'unbook-invoice', icon: 'fa fa-minus-circle', title: 'Cancel Booking'},
             {name: 'delete', icon: 'fa fa-trash', title: 'Delete Deposit'},
         ]);
 
@@ -216,6 +232,7 @@ export default defineComponent({
 
         const actionsSchedule = ref([
             {name: 'book-invoice', icon: 'fa fa-spinner', title: 'Book Rent'},
+            {name: 'unbook-invoice', icon: 'fa fa-minus-circle', title: 'Cancel Booking'},
             {name: 'delete', icon: 'fa fa-trash', title: 'Delete Schedule'},
         ]);
 
@@ -234,6 +251,18 @@ export default defineComponent({
             {name: 'delete', icon: 'fa fa-trash', title: 'Delete Transaction'},
         ]);
 
+        const variationColumns = ref([
+            {type: "checkbox"},
+            {label: "Variation Type", key: "variation_type", type: "text", editable: false},
+            {label: "Variation Mode", key:"variation_mode", type: "text", editable: false},
+            {label: "Variation Value", key: "variation_value", type: "text", editable: false},
+        ]);
+
+        const actionsVariation = ref([
+            {name: 'reset-schedules', icon: 'fa fa-refresh', title: 'Reset Schedules'},
+            {name: 'delete', icon: 'fa fa-trash', title: 'Delete Variation'},
+        ]);
+
         const selectTab = (index) => {
             activeTab.value = index;
         };
@@ -245,27 +274,99 @@ export default defineComponent({
             loader.value = "none";
         };
 
-        const scheduleActionClick = async(rowIndex, action, row) =>{
+        const depositActionClick = async(rowIndex, action, row) =>{
             if( action == 'book-invoice'){
-                const scheduleID = [row['rent_schedule_id']];
+                if (row['posted'] == 'No'){
+                    const depositID = [row['tenant_deposit_id']];
+                    let formData = {
+                        company: companyID.value,
+                        tenant_deposit: depositID
+                    }
+                    try{
+                        const response = await store.dispatch('Active_Tenants/bookDepositInvoice',formData)
+                        if(response && response.status == 200){
+                            mainComponentKey.value += 1;
+                        }
+                    }                  
+                    catch{
+
+                    }
+                }else{
+                    toast.error("Security Deposit Already Booked")
+                }             
+            }else if( action == 'unbook-invoice'){
+                if (row['posted'] == 'Yes'){
+                    const depositID = [row['tenant_deposit_id']];
+                    let formData = {
+                        company: companyID.value,
+                        tenant_deposit: depositID
+                    }
+                    try{
+                        const response = await store.dispatch('Active_Tenants/cancelDepositBooking',formData)
+                        if(response && response.status == 200){
+                            mainComponentKey.value += 1;
+                        }
+                    }                  
+                    catch{
+
+                    }
+                }else{
+                    toast.error("Security Deposit Not Booked")
+                }             
+            }
+            else if(action == 'delete'){
+                const depositID = [row['tenant_deposit_id']];
                 let formData = {
                     company: companyID.value,
-                    rent_schedule: scheduleID
+                    tenant_deposit: depositID
                 }
-                console.log("THE FORM DATA IS ",formData)
-                try{
-                    showLoader();
-                    await store.dispatch('Active_Tenants/bookRentInvoice',formData)
-                }
-                catch{
+                await store.dispatch('Active_Tenants/deleteTenantDeposit',formData)
+            }
+        }
 
-                }
-                finally{
-                    mainComponentKey.value += 1;
-                    hideLoader();
-                }
-                
-            }else if(action == 'delete'){
+        const scheduleActionClick = async(rowIndex, action, row) =>{
+            if( action == 'book-invoice'){
+                if (row['posted'] == 'No'){
+                    const scheduleID = [row['rent_schedule_id']];
+                    let formData = {
+                        company: companyID.value,
+                        rent_schedule: scheduleID
+                    }
+                    try{
+                        const response = await store.dispatch('Active_Tenants/bookRentInvoice',formData)
+                        if(response && response.status == 200){
+                            mainComponentKey.value += 1;
+                            refreshSchedule();
+                        }
+                    }                  
+                    catch{
+
+                    }
+                }else{
+                    toast.error("Rent Already Booked")
+                }             
+            }else if( action == 'unbook-invoice'){
+                if (row['posted'] == 'Yes'){
+                    const scheduleID = [row['rent_schedule_id']];
+                    let formData = {
+                        company: companyID.value,
+                        rent_schedule: scheduleID
+                    }
+                    try{
+                        const response = await store.dispatch('Active_Tenants/cancelInvoiceBooking',formData)
+                        if(response && response.status == 200){
+                            mainComponentKey.value += 1;
+                            refreshSchedule();
+                        }
+                    }                  
+                    catch{
+
+                    }
+                }else{
+                    toast.error("Rent Not Booked")
+                }             
+            }
+            else if(action == 'delete'){
                 const scheduleID = [row[idField]];
                 let formData = {
                     company: companyID.value,
@@ -274,12 +375,56 @@ export default defineComponent({
                 await store.dispatch('Active_Tenants/deleteTenant',formData)
             }
         }
+        const variationActionClick = async(rowIndex, action, row) =>{
+            if( action === 'reset-schedules'){
+                showLoader();
+                const variationID = row['variation_id'];
+                let formData = {
+                    company: companyID.value,
+                    variation: variationID
+                }
+                try{
+                    const response = await store.dispatch('Active_Tenants/resetSchedules',formData)
+                    if(response && response.status === 200){
+                        mainComponentKey.value += 1
+                        toast.success("Success")
+                    }
+                }catch{
+                    toast.error("Error Reseting Schedules")
+                }finally{
+                    hideLoader();
+                }
+                
+            }
+            
+        };
+        const refreshSchedule = async() =>{
+            showLoader();
+            let formData = {
+                company: companyID.value,
+                tenant: tenantLease.value.tenant['tenant_id']
+            }
+            try{
+                await store.dispatch('Active_Tenants/fetchTenantLease',formData)
+                scheduleTableKey.value += 1;
+                mainComponentKey.value += 1;
+                activeTab.value = 4;
+            }
+            catch{
+
+            }
+            finally{
+                hideLoader();
+            }        
+        }
+
 
         return{
             tabs, activeTab, mainComponentKey, depositColumns, utilityColumns, selectTab, loader, showLoader, hideLoader,
             tableKey,utilityTableKey, idFieldDeposit, idFieldUtility, actionsDeposit, actionsUtility, computedDepositRows, computedUtilityRows,
             scheduleTableKey, idFieldSchedule, scheduleColumns, actionsSchedule, scheduleRows, statementTableKey, idFieldStatement, statementRows,
-            statementColumns, actionsStatement, tenantLease, scheduleActionClick
+            statementColumns, actionsStatement, tenantLease, tenantDetails, tenantCurrency, tenantProperty, scheduleActionClick, refreshSchedule,
+            depositActionClick, variationColumns, variationRows, variationTableKey, idFieldVariation, actionsVariation, variationActionClick
         }
     }
 })
@@ -300,7 +445,7 @@ export default defineComponent({
 }
 
 .tab-content {
-    padding: 3px;
+    padding: 1px;
 }
 
 </style>

@@ -21,6 +21,10 @@ const state = {
   isEditing: false,
   rentSchedules: [],
   tenantLease: [],
+  tenantDetails: [],
+  tenantCurrency: [],
+  tenantProperty: [],
+  tenantVariations: [],
   currentTab: "Tenant_Biodata"
 };
   
@@ -43,6 +47,8 @@ const mutations = {
     state.isEditing = false;
     state.rentSchedules = [];
     state.tenantLease = [];
+    state.tenantDetails = [];
+    state.tenantVariations = [];
   },
   SET_SELECTED_TENANT(state, tenant) {
     state.selectedTenant = tenant;
@@ -53,6 +59,9 @@ const mutations = {
   },
   SET_TENANT_LEASE(state, tenant){
     state.tenantLease = tenant;
+  },
+  SET_TENANT_VARIATIONS(state, variations){
+    state.tenantVariations = variations
   },
   LIST_TENANTS(state, tenants) {
     state.tenantList = tenants;
@@ -133,10 +142,66 @@ const actions = {
     axios.post(`api/v1/get-tenant-leases/`,formData)
     .then((response)=>{
       state.tenantLease = response.data;
+      state.tenantDetails = response.data.tenant;
+      state.tenantCurrency = response.data.lease_currency;
+      state.tenantProperty = response.data.property;
       commit('SET_TENANT_LEASE',response.data);
     })
     .catch((error)=>{
       console.log(error.message);
+    })
+    
+  },
+  fetchTenantVariations({ commit,state }, formData) {
+    axios.post(`api/v1/get-rent-variations/`,formData)
+    .then((response)=>{
+      state.tenantVariations = response.data;
+      commit('SET_TENANT_VARIATIONS',response.data);
+    })
+    .catch((error)=>{
+      console.log(error.message);
+    })
+    
+  },
+  resetSchedules({ commit,state }, formData) {
+    Swal.fire({
+      title: "Are you sure?",
+      text: `Do you wish to book the Reset Schedules?`,
+      type: 'warning',
+      showCloseButton: true,
+      showCancelButton: true,
+      confirmButtonText: 'Yes Reset Schedules!',
+      cancelButtonText: 'Cancel!',
+      customClass: {
+          confirmButton: 'swal2-confirm-custom',
+          cancelButton: 'swal2-cancel-custom',
+      },
+      showLoaderOnConfirm: true,
+    }).then((result) => {
+      if (result.value) {
+        axios.post(`api/v1/regenerate-rent-schedules/`,formData)
+        .then((response)=>{
+          if(response.status == 200){
+              Swal.fire("Schedules Have Been Reset!", {
+                icon: "success",
+              }); 
+          }else{
+            Swal.fire({
+              title: "Error Resetting Schedules",
+              icon: "warning",
+            });
+          }                   
+        })
+        .catch((error)=>{
+          console.log(error.message);
+          Swal.fire({
+            title: error.message,
+            icon: "warning",
+          });
+        })
+      }else{
+        Swal.fire(`Schedules have not been reset!`);
+      }
     })
     
   },
@@ -152,6 +217,7 @@ const actions = {
       
   },
   fetchRentSchedules({ commit,state }, formData){
+    state.rentSchedules = [];
     axios.post(`api/v1/get-rent-schedules/`,formData)
     .then((response)=>{
         commit('SET_RENT_SCHEDULES',response.data);
@@ -198,6 +264,129 @@ const actions = {
         })
       }else{
         Swal.fire(`Invoice has not been booked!`);
+      }
+    })
+  },
+  cancelInvoiceBooking({ commit,state }, formData){
+    Swal.fire({
+      title: "Are you sure?",
+      text: `Do you wish to cancel the rental invoice?`,
+      type: 'warning',
+      showCloseButton: true,
+      showCancelButton: true,
+      confirmButtonText: 'Yes Cancel Booking!',
+      cancelButtonText: 'Cancel!',
+      customClass: {
+          confirmButton: 'swal2-confirm-custom',
+          cancelButton: 'swal2-cancel-custom',
+      },
+      showLoaderOnConfirm: true,
+    }).then((result) => {
+      if (result.value) {
+        axios.post(`api/v1/cancel-rental-invoice/`,formData)
+        .then((response)=>{
+          if(response.status == 200){
+              Swal.fire("Booking Canceled!", {
+                icon: "success",
+              }); 
+          }else{
+            Swal.fire({
+              title: "Error Canceling Invoice",
+              icon: "warning",
+            });
+          }                   
+        })
+        .catch((error)=>{
+          console.log(error.message);
+          Swal.fire({
+            title: error.message,
+            icon: "warning",
+          });
+        })
+      }else{
+        Swal.fire(`Invoice Booking has not been canceled!`);
+      }
+    })
+  },
+  bookDepositInvoice({ commit,state }, formData){
+    Swal.fire({
+      title: "Are you sure?",
+      text: `Do you wish to book the deposit invoice?`,
+      type: 'warning',
+      showCloseButton: true,
+      showCancelButton: true,
+      confirmButtonText: 'Yes Book Invoice!',
+      cancelButtonText: 'Cancel!',
+      customClass: {
+          confirmButton: 'swal2-confirm-custom',
+          cancelButton: 'swal2-cancel-custom',
+      },
+      showLoaderOnConfirm: true,
+    }).then((result) => {
+      if (result.value) {
+        axios.post(`api/v1/book-tenant-deposit-invoice/`,formData)
+        .then((response)=>{
+          if(response.status == 200){
+              Swal.fire("Invoice Booked!", {
+                icon: "success",
+              }); 
+          }else{
+            Swal.fire({
+              title: "Error Booking Invoice",
+              icon: "warning",
+            });
+          }                   
+        })
+        .catch((error)=>{
+          console.log(error.message);
+          Swal.fire({
+            title: error.message,
+            icon: "warning",
+          });
+        })
+      }else{
+        Swal.fire(`Invoice has not been booked!`);
+      }
+    })
+  },
+  cancelDepositBooking({ commit,state }, formData){
+    Swal.fire({
+      title: "Are you sure?",
+      text: `Do you wish to cancel the deposit invoice?`,
+      type: 'warning',
+      showCloseButton: true,
+      showCancelButton: true,
+      confirmButtonText: 'Yes Cancel Booking!',
+      cancelButtonText: 'Cancel!',
+      customClass: {
+          confirmButton: 'swal2-confirm-custom',
+          cancelButton: 'swal2-cancel-custom',
+      },
+      showLoaderOnConfirm: true,
+    }).then((result) => {
+      if (result.value) {
+        axios.post(`api/v1/cancel-tenant-deposit-invoice/`,formData)
+        .then((response)=>{
+          if(response.status == 200){
+              Swal.fire("Booking Canceled!", {
+                icon: "success",
+              }); 
+          }else{
+            Swal.fire({
+              title: "Error Canceling Invoice",
+              icon: "warning",
+            });
+          }                   
+        })
+        .catch((error)=>{
+          console.log(error.message);
+          Swal.fire({
+            title: error.message,
+            icon: "warning",
+          });
+        })
+      }else{
+        Swal.fire(`Deposit Invoice has not been canceled!`);
       }
     })
   },
