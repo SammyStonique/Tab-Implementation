@@ -289,9 +289,15 @@ export default{
                     company: companyID.value,
                     tenant: tenantID
                 }
+                let formData1 = {
+                    company: companyID.value,
+                    client: tenantID
+                }
+                await store.dispatch('Active_Tenants/fetchTenantLease',formData)
                 await store.dispatch('Security_Deposits/fetchTenantDeposits',formData)
                 await store.dispatch('Utilities/fetchTenantUtilities',formData)
                 await store.dispatch('Active_Tenants/fetchRentSchedules',formData)
+                await store.dispatch('Journals/fetchClientJournals',formData1)
                 store.commit('pageTab/ADD_PAGE', {'PMS':'Tenant_Statement'})
                 store.state.pageTab.pmsActiveTab = 'Tenant_Statement';
             }
@@ -308,7 +314,7 @@ export default{
             propResults, propArrLen, propCount, pageCount, showNextBtn, showPreviousBtn,
             loadPrev, loadNext, firstPage, lastPage, idField, actions, handleActionClick, propModalVisible, closeModal,
             submitButtonLabel, showModal, addNewTenant, showLoader, loader, hideLoader, importTenants, removeTenant, removeTenants,
-            handleSelectionChange
+            handleSelectionChange,
         }
     }
 };

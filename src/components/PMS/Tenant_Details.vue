@@ -99,6 +99,7 @@ export default defineComponent({
                     errors.value.push('Error');
                 }
             }
+            
             if(errors.value.length){
                 toast.error('Fill In Required Fields');
             }else{

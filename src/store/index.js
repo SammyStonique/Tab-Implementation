@@ -21,7 +21,8 @@ import Security_Deposits from './PMS/Security_Deposits';
 import Variation_Periods from './PMS/Variation_Periods';
 
 import Ledgers from './FA/Ledgers';
-import Taxes from './FA/Taxes'
+import Taxes from './FA/Taxes';
+import Journals from './FA/Journals';
 
 export default createStore({
   modules: {
@@ -32,6 +33,6 @@ export default createStore({
     userData,
     Appointments,Client_Categories,Departments,Patients_List,Medical_Fees,Doctors,
     Properties_List, Zones, Landlords_List, Units_List, Active_Tenants, Utilities,Security_Deposits,Variation_Periods,
-    Ledgers, Currencies, Taxes
+    Ledgers, Currencies, Taxes, Journals
   },
 });

@@ -20,6 +20,7 @@ const state = {
   selectedVat: null,
   isEditing: false,
   rentSchedules: [],
+  tenantLease: [],
   currentTab: "Tenant_Biodata"
 };
   
@@ -41,6 +42,7 @@ const mutations = {
     state.selectedVat = null;
     state.isEditing = false;
     state.rentSchedules = [];
+    state.tenantLease = [];
   },
   SET_SELECTED_TENANT(state, tenant) {
     state.selectedTenant = tenant;
@@ -48,6 +50,9 @@ const mutations = {
   },
   SET_RENT_SCHEDULES(state, schedules) {
     state.rentSchedules = schedules;
+  },
+  SET_TENANT_LEASE(state, tenant){
+    state.tenantLease = tenant;
   },
   LIST_TENANTS(state, tenants) {
     state.tenantList = tenants;
@@ -124,6 +129,17 @@ const actions = {
     })
     
   },
+  fetchTenantLease({ commit,state }, formData) {
+    axios.post(`api/v1/get-tenant-leases/`,formData)
+    .then((response)=>{
+      state.tenantLease = response.data;
+      commit('SET_TENANT_LEASE',response.data);
+    })
+    .catch((error)=>{
+      console.log(error.message);
+    })
+    
+  },
   handleSelectedTenant({ commit, state }, option){
     state.tenantArray = [];
     const selectedTnt = state.tenantList.find(tenant => (tenant.tenant_code + ' - ' + tenant.tenant_name) === option);
@@ -142,6 +158,47 @@ const actions = {
     })
     .catch((error)=>{
       console.log(error.message);
+    })
+  },
+  bookRentInvoice({ commit,state }, formData){
+    Swal.fire({
+      title: "Are you sure?",
+      text: `Do you wish to book the rental invoice?`,
+      type: 'warning',
+      showCloseButton: true,
+      showCancelButton: true,
+      confirmButtonText: 'Yes Book Invoice!',
+      cancelButtonText: 'Cancel!',
+      customClass: {
+          confirmButton: 'swal2-confirm-custom',
+          cancelButton: 'swal2-cancel-custom',
+      },
+      showLoaderOnConfirm: true,
+    }).then((result) => {
+      if (result.value) {
+        axios.post(`api/v1/book-rental-invoice/`,formData)
+        .then((response)=>{
+          if(response.status == 200){
+              Swal.fire("Invoice Booked!", {
+                icon: "success",
+              }); 
+          }else{
+            Swal.fire({
+              title: "Error Booking Invoice",
+              icon: "warning",
+            });
+          }                   
+        })
+        .catch((error)=>{
+          console.log(error.message);
+          Swal.fire({
+            title: error.message,
+            icon: "warning",
+          });
+        })
+      }else{
+        Swal.fire(`Invoice has not been booked!`);
+      }
     })
   },
 
