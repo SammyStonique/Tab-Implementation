@@ -31,7 +31,7 @@
               <div v-if="column.editable === true">
                 <input :type="column.type" pattern="[0-9]*" oninput="this.value = this.value.replace(/[^0-9]/g, '')" class="w-full text-xs uppercase" v-model="row[column.key]" />             
               </div>
-              <div v-else>
+              <div v-else :class="`text-${column.textColor}-500`">
                 <!-- {{ row[column.key] }} -->
                 {{ getNestedValue(row, column.key) }}
               </div>

@@ -105,7 +105,7 @@ export default{
         const updateFormFields = () => {
             formFields.value = [
                 { type: 'text', name: 'name',label: "Name", value: selectedDeposit.value?.name || '', required: true },
-                { type: 'dropdown', name: 'default_mode',label: "Charge Mode", value: selectedDeposit.value?.default_mode || '', placeholder: "Select Charge Mode", required: false, options: [{ text: 'Fixed Amount', value: 'Fixed Amount' }, { text: 'Rent Percentage', value: 'Rent Percentage' }] },
+                { type: 'dropdown', name: 'default_mode',label: "Charge Mode", value: selectedDeposit.value?.default_mode || '', placeholder: "", required: false, options: [{ text: 'Fixed Amount', value: 'Fixed Amount' }, { text: 'Rent Percentage', value: 'Rent Percentage' }] },
                 { type: 'number', name: 'default_value',label: "Default Value", value: selectedDeposit.value?.default_value || 0, required: false },
             ];
         };

@@ -9,7 +9,7 @@
                     </button>
                 </div>
                 <div class="tab-content mt-3">
-                    <div v-show="activeTab == 0">
+                    <div v-if="activeTab == 0">
                         <div class="flex">
                             <div class="basis-1/2 border-left border-gray-400">
                                 <h1 class="font-bold mb-10">Tenant BioData</h1>
@@ -120,20 +120,47 @@
                             </div>
                         </div>
                     </div>
-                    <div v-show="activeTab == 1">
+                    <div v-if="activeTab == 1">
                         <DynamicTable :key="statementTableKey" :columns="statementColumns" :rows="statementRows" :idField="idFieldStatement" :actions="actionsStatement"/>
                     </div>          
-                    <div v-show="activeTab == 2">                     
-                        <DynamicTable :key="tableKey" :columns="depositColumns" :rows="computedDepositRows" :idField="idFieldDeposit" :actions="actionsDeposit" @action-click="depositActionClick" />
-                    </div>
-                    <div v-show="activeTab == 3">                    
-                        <DynamicTable :key="utilityTableKey" :columns="utilityColumns" :rows="computedUtilityRows" :idField="idFieldUtility" :actions="actionsUtility" @action-click="deleteUtility" />
-                    </div>
-                    <div v-show="activeTab == 4"> 
+                    <div v-if="activeTab == 2"> 
                         <div class="flex mb-1.5">
-                            <button @click="" class="rounded bg-green-400 text-sm mr-2  text-white px-2 py-1.5"><i class="fa fa-check-circle text-xs mr-1.5" aria-hidden="true"></i>Actions</button>
-                            <button @click="refreshSchedule" class="rounded bg-green-400 text-sm mr-2  text-white px-2 py-1.5"><i class="fa fa-refresh text-xs mr-1.5" aria-hidden="true"></i>Refresh</button>
+                            <button @click="addNewDeposit" class="rounded bg-green-400 text-sm  text-white px-2 py-1.5"><i class="fa fa-plus" aria-hidden="true"></i>New Deposit</button>
+                        </div>                    
+                        <DynamicTable :key="tableKey" :columns="depositColumns" :rows="computedDepositRows" :idField="idFieldDeposit" :actions="actionsDeposit" @action-click="depositActionClick" />
+                        <MovableModal v-model:visible="depModalVisible" :title="depositTitle" :modal_top="modal_top" :modal_left="modal_left" :modal_width="modal_width"
+                            :loader="dep_modal_loader" @showLoader="showDepModalLoader" @hideLoader="hideDepModalLoader" @closeModal="closeDepModal"
+                        >
+                            <DynamicForm 
+                                :fields="formFields" :flex_basis="flex_basis" :flex_basis_percentage="flex_basis_percentage" 
+                                :displayButtons="displayButtons" @handleSubmit="createTenantDeposit" @handleReset="handleDepReset"
+                            />
+                        </MovableModal>
+                    </div>
+                    <div v-show="activeTab == 3"> 
+                        <div class="flex mb-1.5">
+                            <button @click="addNewUtility" class="rounded bg-green-400 text-sm  text-white px-2 py-1.5"><i class="fa fa-plus" aria-hidden="true"></i>New Utility</button>
                         </div>                   
+                        <DynamicTable :key="utilityTableKey" :columns="utilityColumns" :rows="computedUtilityRows" :idField="idFieldUtility" :actions="actionsUtility" @action-click="utilityActionClick" />
+                        <MovableModal v-model:visible="utilModalVisible" :title="utilityTitle" :modal_top="modal_top" :modal_left="modal_left" :modal_width="modal_width"
+                            :loader="util_modal_loader" @showLoader="showUtilModalLoader" @hideLoader="hideUtilModalLoader" @closeModal="closeUtilModal"
+                        >
+                            <DynamicForm 
+                                :fields="additionalFields" :flex_basis="flex_basis" :flex_basis_percentage="flex_basis_percentage" 
+                                :displayButtons="displayButtons" @handleSubmit="createTenantUtility" @handleReset="handleUtilReset"
+                            />
+                        </MovableModal>
+                        <MovableModal v-model:visible="voidModalVisible" :title="voidTitle" :modal_top="modal_top" :modal_left="modal_left" :modal_width="void_modal_width"
+                            :loader="void_modal_loader" @showLoader="showVoidModalLoader" @hideLoader="hideVoidModalLoader" @closeModal="closeVoidModal"
+                        >
+                            <div class="p-4 mb-3">
+                                <label for="">Date:<em class="text-red-600">*</em></label><br />
+                                <input v-model="void_date" type="date" class="`bg-slate-50 w-56 rounded pl-3 border border-gray-400 text-base w-full`"/>
+                            </div>
+                            <button @click="voidUtility" class="rounded bg-green-400 text-sm mr-2  text-white px-2 py-1.5"><i class="fa fa-check-circle text-xs mr-1.5" aria-hidden="true"></i>Void</button>
+                        </MovableModal>
+                    </div>
+                    <div v-show="activeTab == 4">                   
                         <DynamicTable :key="scheduleTableKey" :columns="scheduleColumns" :rows="scheduleRows" :idField="idFieldSchedule" :actions="actionsSchedule" @action-click="scheduleActionClick" />
                     </div>  
                     <div v-show="activeTab == 5">                   
@@ -149,6 +176,8 @@
 import { defineComponent, ref, onBeforeMount, onMounted, computed, watch, reactive } from 'vue';
 import PageStyleComponent from '../PageStyleComponent.vue';
 import DynamicTable from '@/components/DynamicTable.vue';
+import DynamicForm from '../NewDynamicForm.vue';
+import MovableModal from '@/components/MovableModal.vue';
 import { useStore } from "vuex";
 import { useToast } from "vue-toastification";
 import axios from 'axios';
@@ -156,17 +185,44 @@ import axios from 'axios';
 export default defineComponent({
     name: 'Tenant_Statement',
     components:{
-        PageStyleComponent, DynamicTable
+        PageStyleComponent, DynamicTable, MovableModal, DynamicForm
     },
     setup(props,{emit}){
         const store = useStore();
         const toast = useToast();
         const loader = ref('none');
+        const errors = ref([]);
+        const dep_modal_loader = ref('none');
+        const util_modal_loader = ref('none');
+        const void_modal_loader = ref('none');
+        const voidModalVisible = ref(false);
+        const depModalVisible = ref(false);
+        const depositID = ref('');
+        const utilModalVisible = ref(false);
+        const utilityID = ref('');
+        const taxID = ref(null);
+        const displayButtons = ref(true);
+        const depositTitle = ref('Security Deposit Details');
+        const utilityTitle = ref('Utility Details');
+        const voidTitle = ref('Void Utility');
+        const utilityFormData = ref(null);
+        const flex_basis = ref('');
+        const flex_basis_percentage = ref('');
+        const modal_top = ref('150px');
+        const modal_left = ref('400px');
+        const modal_width = ref('30vw');
+        const void_modal_width = ref('45vw');
         const companyID = computed(()=> store.state.userData.company_id);
-        const tenantID = ref('');
+        const depositArray = computed(() => store.state.Security_Deposits.depositArr);
+        const utilityArray = computed(() => store.state.Utilities.utilityArr);
+        const taxArray = computed(() => store.state.Taxes.taxArr);
         const tabs = ref(['Tenant Details','Tenant Statement','Tenant Deposits','Tenant Utilities','Rent Schedules','Rent Variation']);
         const activeTab = ref(0);
         const mainComponentKey = ref(0);
+        const depComponentKey = ref(0);
+        const utilComponentKey = ref(0);
+        const void_date = ref('');
+        const taxComponentKey = ref(0);
         const tableKey = ref(0);
         const utilityTableKey = ref(0);
         const scheduleTableKey = ref(0);
@@ -196,7 +252,7 @@ export default defineComponent({
         ]);
 
         const actionsDeposit = ref([
-            {name: 'book-invoice', icon: 'fa fa-spinner', title: 'Book Rent'},
+            {name: 'book-invoice', icon: 'fa fa-spinner', title: 'Book Deposit'},
             {name: 'unbook-invoice', icon: 'fa fa-minus-circle', title: 'Cancel Booking'},
             {name: 'delete', icon: 'fa fa-trash', title: 'Delete Deposit'},
         ]);
@@ -209,9 +265,13 @@ export default defineComponent({
             {label: "Utility Vat", key: "deposit_value", type: "text", editable: false},
             {label: "Utility Amount", key: "utility_amount", type: "text", editable: false},
             {label: "Status", key: "status", type: "text", editable: false},
+            {label: "From", key: "from_date", type: "text", editable: false},
+            {label: "To", key: "to_date", type: "text", editable: false},
         ])
 
         const actionsUtility = ref([
+            {name: 'void-utility', icon: 'fa fa-minus-circle', title: 'Void Utility'},
+            {name: 'reactivate-utility', icon: 'fa fa-redo', title: 'Reactivate Utility'},
             {name: 'delete', icon: 'fa fa-trash', title: 'Delete Utility'},
         ]);
 
@@ -263,8 +323,54 @@ export default defineComponent({
             {name: 'delete', icon: 'fa fa-trash', title: 'Delete Variation'},
         ]);
 
-        const selectTab = (index) => {
-            activeTab.value = index;
+        const selectTab = async(index) => {
+            showLoader();
+            let formData = {
+                company: companyID.value,
+                tenant: tenantDetails.value.tenant_id
+            }
+            let formData1 = {
+                company: companyID.value,
+                client: tenantDetails.value.tenant_id
+            }
+            if(index == 1){
+                activeTab.value = index;
+                await store.dispatch('Journals/fetchClientJournals',formData1)
+                .then(()=>{
+                    hideLoader();
+                })
+            }else if( index == 2){
+                activeTab.value = index;
+                await store.dispatch('Security_Deposits/fetchTenantDeposits',formData)
+                .then(()=>{
+                    hideLoader();
+                })
+            }
+            else if( index == 3){
+                activeTab.value = index;
+                await store.dispatch('Utilities/fetchTenantUtilities',formData)
+                .then(()=>{
+                    hideLoader();
+                })
+            }
+            else if( index == 4){
+                activeTab.value = index;
+                await store.dispatch('Active_Tenants/fetchRentSchedules',formData)
+                .then(()=>{
+                    hideLoader();
+                })
+
+            }
+            else if( index == 5){
+                activeTab.value = index;
+                await store.dispatch('Active_Tenants/fetchTenantVariations',formData)
+                .then(()=>{
+                    hideLoader();
+                })
+            }else{
+                activeTab.value = index;
+            }
+
         };
 
         const showLoader = () =>{
@@ -320,8 +426,90 @@ export default defineComponent({
                     company: companyID.value,
                     tenant_deposit: depositID
                 }
-                await store.dispatch('Active_Tenants/deleteTenantDeposit',formData)
+                if(row['posted'] == 'Yes'){
+                    toast.error("Cannot Remove Posted Deposit")
+                }else{
+                    await store.dispatch('Active_Tenants/deleteTenantDeposit',formData)
+                }
+                
             }
+        }
+
+        const utilityActionClick = async(rowIndex, action, row) =>{
+            if( action == 'void-utility'){
+                if (row['status'] == 'Active'){
+                    voidModalVisible.value = true;
+                    const utilityID = row['tenant_utility_id'];
+                    utilityFormData.value = {
+                        company: companyID.value,
+                        tenant_utility: utilityID,
+                        utility: row['utility']['utility_id'],
+                        utility_id: row['utility']['utility_id'],
+                        utility_charge_mode: row['utility_charge_mode'],
+                        utility_value: row['utility_value'],
+                        utility_vat: row['utility_vat']?['tax_id'] : null,
+                        tenant: row['tenant']['tenant_lease_id'],
+                        tenant_id: row['tenant']['tenant_lease_id'],
+                        status: 'Inactive',
+                        from_date: row['from_date'],
+                    }
+                }else{
+                    toast.error("Utility Already Voided")
+                }             
+            }else if( action == 'reactivate-utility'){
+                if (row['status'] == 'Inactive'){
+                    const utilityID = row['tenant_utility_id'];
+                    let formData = {
+                        company: companyID.value,
+                        tenant_utility: utilityID,
+                        utility: row['utility']['utility_id'],
+                        utility_id: row['utility']['utility_id'],
+                        utility_charge_mode: row['utility_charge_mode'],
+                        utility_value: row['utility_value'],
+                        utility_vat: row['utility_vat']?['tax_id'] : null,
+                        tenant: row['tenant']['tenant_lease_id'],
+                        tenant_id: row['tenant']['tenant_lease_id'],
+                        status: 'Active',
+                        from_date: row['from_date'],
+                        to_date: row['tenant']['lease_end_date']
+                    }
+                    await store.dispatch('Active_Tenants/activateTenantUtility',formData)
+                }else{
+                    toast.error("Utility Already Active")
+                }
+            }
+            else if(action == 'delete'){
+                const tenant_utility = [row['tenant_utility_id']];
+                let formData = {
+                    company: companyID.value,
+                    tenant_utility: tenant_utility
+                }
+                await store.dispatch('Active_Tenants/deleteTenantUtility',formData)
+            }
+        }
+
+        const voidUtility = async() =>{
+            showVoidModalLoader();
+            if(void_date.value != ''){
+                utilityFormData.value['to_date'] = void_date.value;
+                try{
+                    const response = await store.dispatch('Active_Tenants/voidTenantUtility',utilityFormData.value)
+                    if(response && response.status == 200){
+                        toast.success("Utility Voided Succesfully")
+                        mainComponentKey.value += 1;
+                        closeVoidModal();
+                    }
+                }catch (error) {
+                    console.error(error.message);
+                    toast.error('Failed to void utility: ' + error.message);
+                }finally{
+                    hideUtilModalLoader();
+                }
+            }else{
+                hideUtilModalLoader();
+                toast.error("Invalid Date");
+            }
+            
         }
 
         const scheduleActionClick = async(rowIndex, action, row) =>{
@@ -336,7 +524,6 @@ export default defineComponent({
                         const response = await store.dispatch('Active_Tenants/bookRentInvoice',formData)
                         if(response && response.status == 200){
                             mainComponentKey.value += 1;
-                            refreshSchedule();
                         }
                     }                  
                     catch{
@@ -356,7 +543,6 @@ export default defineComponent({
                         const response = await store.dispatch('Active_Tenants/cancelInvoiceBooking',formData)
                         if(response && response.status == 200){
                             mainComponentKey.value += 1;
-                            refreshSchedule();
                         }
                     }                  
                     catch{
@@ -398,33 +584,228 @@ export default defineComponent({
             }
             
         };
-        const refreshSchedule = async() =>{
-            showLoader();
-            let formData = {
-                company: companyID.value,
-                tenant: tenantLease.value.tenant['tenant_id']
-            }
-            try{
-                await store.dispatch('Active_Tenants/fetchTenantLease',formData)
-                scheduleTableKey.value += 1;
-                mainComponentKey.value += 1;
-                activeTab.value = 4;
-            }
-            catch{
+        const handleSelectedDeposit = async(option) =>{
+            await store.dispatch('Security_Deposits/handleSelectedDeposit', option)
+            depositID.value = store.state.Security_Deposits.depositID;
+        }
+        const fetchDeposits = async() =>{
+            await store.dispatch('Security_Deposits/fetchDeposits', {company:companyID.value})
+        }
+        const formFields = ref([
+            {  
+                type:'search-dropdown', label:"Security Deposit", value: depositID.value, componentKey: depComponentKey,
+                selectOptions: depositArray, optionSelected: handleSelectedDeposit, required: true,
+                searchPlaceholder: 'Select Security Deposit...', dropdownWidth: '400px', updateValue: '',
+                fetchData: fetchDeposits()
+            },
+            { type: 'date', name: 'date',label: "Date", value: '', required: true },
+            { type: 'dropdown', name: 'default_mode',label: "Charge Mode", value: '', placeholder: "", required: true, options: [{ text: 'Fixed Amount', value: 'Fixed Amount' }, { text: 'Rent Percentage', value: 'Rent Percentage' }] },
+            { type: 'number', name: 'default_value',label: "Default Value", value: 0, required: true },
+        ]);
 
+        const handleDepReset = () =>{
+            for(let i=0; i < formFields.value.length; i++){
+                formFields.value[i].value = '';
             }
-            finally{
-                hideLoader();
-            }        
+            depositID.value = '';
+        }
+        const showDepModalLoader = () =>{
+            dep_modal_loader.value = "block";
+        }
+        const hideDepModalLoader = () =>{
+            dep_modal_loader.value = "none";
+        }
+        
+        const addNewDeposit = () =>{
+            store.dispatch("Security_Deposits/updateState",{selectedDeposit:null, isEditing:false})
+            depositID.value = "";
+            depModalVisible.value = true;
+            flex_basis.value = '1/2';
+            flex_basis_percentage.value = '50';
+        };
+        const createTenantDeposit = async() =>{
+            showDepModalLoader();
+            let formData = {
+                security_deposit: depositID.value,
+                security_deposit_id: depositID.value,
+                date: formFields.value[1].value,
+                tenant: tenantLease.value.tenant_lease_id,
+                tenant_id: tenantLease.value.tenant_lease_id,
+                deposit_charge_mode: formFields.value[2].value,
+                deposit_value: formFields.value[3].value,
+                posted: 'No',
+                company: companyID.value
+            }
+
+            errors.value = [];
+            for(let i=1; i < formFields.value.length; i++){
+                if(formFields.value[i].value =='' && formFields.value[i].required == true){
+                    errors.value.push(formFields.value[i].label);
+                }
+            }
+            if(tenantLease.value.tenant['tenant_id'] == '' && depositID.value == ''){
+                errors.value.push('error')
+            }
+
+            if(errors.value.length){
+                toast.error('Fill In Required Fields');
+                hideDepModalLoader();
+            }else{
+                try {
+                    const response = await store.dispatch('Active_Tenants/createTenantDeposit', formData);
+                    if (response && response.status === 200) {
+                        hideDepModalLoader();
+                        toast.success('Security Deposit added successfully!');
+                        handleDepReset();
+                        depComponentKey.value += 1;
+                        depModalVisible.value = false;
+                    } else {
+                        toast.error('An error occurred while creating the deposit.');
+                    }
+                } catch (error) {
+                    console.error(error.message);
+                    toast.error('Failed to create deposit: ' + error.message);
+                } finally {
+                    hideDepModalLoader();
+                    store.dispatch('Security_Deposits/updateState',{depositID:''})
+                }
+            }
+        }
+        const closeDepModal = () =>{
+            depModalVisible.value = false;
+            depositID.value = '';
+            store.dispatch('Security_Deposits/updateState',{depositID:''})
+        };
+        const handleSelectedUtility = async(option) =>{
+            await store.dispatch('Utilities/handleSelectedUtility', option)
+            utilityID.value = store.state.Utilities.utilityID;
+        }
+        const handleSelectedTax = async(option) =>{
+            await store.dispatch('Taxes/handleSelectedTax', option)
+            taxID.value = store.state.Taxes.taxID;
+        }
+        const fetchUtilities = async() =>{
+            await store.dispatch('Utilities/fetchUtilities', {company:companyID.value})
+        }
+        const fetchTaxes = async() =>{
+            await store.dispatch('Taxes/fetchTaxes', {company:companyID.value})
+        }
+        const additionalFields = ref([
+            {  
+                type:'search-dropdown', label:"Utility", value: utilityID.value, componentKey: utilComponentKey,
+                selectOptions: utilityArray, optionSelected: handleSelectedUtility, required: true,
+                searchPlaceholder: 'Select Utility...', dropdownWidth: '400px', updateValue: "",
+                fetchData: fetchUtilities()
+            },
+            { type: 'dropdown', name: 'default_mode',label: "Charge Mode", value: '', placeholder: "", required: true, options: [{ text: 'Fixed Amount', value: 'Fixed Amount' }, { text: 'Rent Percentage', value: 'Rent Percentage' }, { text: 'Billed On Use', value: 'Billed On Use' }] },
+            { type: 'number', name: 'default_value',label: "Default Value", value: 0, required: true },
+            { type: 'date', name: 'from_date',label: "From Date", value: '', required: true },
+            {  
+                type:'search-dropdown', label:"Utility Vat", value: '', componentKey: taxComponentKey,
+                selectOptions: taxArray, optionSelected: handleSelectedTax, required: false,
+                searchPlaceholder: 'Select Vat...', dropdownWidth: '400px', updateValue: "",
+                fetchData: fetchTaxes()
+            },
+        ]);
+        const handleUtilReset = () =>{
+            for(let i=0; i < additionalFields.value.length; i++){
+                additionalFields.value[i].value = '';
+            }
+            utilityID.value = '';
+            taxID.value = null;
+        }
+        const showUtilModalLoader = () =>{
+            util_modal_loader.value = "block";
+        }
+        const hideUtilModalLoader = () =>{
+            util_modal_loader.value = "none";
+        }
+        const addNewUtility = () =>{
+            store.dispatch("Utilities/updateState",{selectedUtility:null, isEditing:false})
+            utilityID.value = "";
+            utilModalVisible.value = true;
+            handleUtilReset();
+            flex_basis.value = '1/2';
+            flex_basis_percentage.value = '50';
+        };
+        const createTenantUtility = async() =>{
+            showUtilModalLoader();
+            let formData = {
+                utility: utilityID.value,
+                utility_id: utilityID.value,
+                from_date: additionalFields.value[3].value,
+                to_date: tenantLease.value.lease_end_date,
+                tenant: tenantLease.value.tenant_lease_id,
+                tenant_id: tenantLease.value.tenant_lease_id,
+                utility_charge_mode: additionalFields.value[1].value,
+                utility_value: additionalFields.value[2].value,
+                utility_vat: taxID.value,
+                utility_vat_id: taxID.value,
+                status: 'Active',
+                company: companyID.value
+            }
+
+            errors.value = [];
+            for(let i=1; i < additionalFields.value.length; i++){
+                if(additionalFields.value[i].value =='' && additionalFields.value[i].required == true){
+                    errors.value.push(additionalFields.value[i].label);
+                }
+            }
+            if(tenantLease.value.tenant['tenant_id'] == '' && utilityID.value == ''){
+                errors.value.push('error')
+            }
+
+            if(errors.value.length){
+                toast.error('Fill In Required Fields');
+                hideUtilModalLoader();
+            }else{
+                try {
+                    const response = await store.dispatch('Active_Tenants/createTenantUtility', formData);
+                    if (response && response.status === 200) {
+                        hideUtilModalLoader();
+                        toast.success('Utility added successfully!');
+                        handleUtilReset();
+                        utilComponentKey.value += 1;
+                        utilModalVisible.value = false;
+                    } else {
+                        toast.error('An error occurred while creating the utility.');
+                    }
+                } catch (error) {
+                    console.error(error.message);
+                    toast.error('Failed to create utility: ' + error.message);
+                } finally {
+                    hideUtilModalLoader();
+                    store.dispatch('Utilities/updateState',{utilityID:''})
+                }
+            }
+        }
+        const closeUtilModal = () =>{
+            utilModalVisible.value = false;
+            utilityID.value = ''
+            store.dispatch('Utilities/updateState',{utilityID:''})
+        }
+        const showVoidModalLoader = () =>{
+            void_modal_loader.value = "block";
+        }
+        const hideVoidModalLoader = () =>{
+            void_modal_loader.value = "none";
+        }
+        const closeVoidModal = () =>{
+            voidModalVisible.value = false;
+            void_date.value = '';
+            utilityFormData.value = null;
         }
 
-
         return{
-            tabs, activeTab, mainComponentKey, depositColumns, utilityColumns, selectTab, loader, showLoader, hideLoader,
+            tabs, activeTab, mainComponentKey, depositColumns, utilityColumns, selectTab, loader, showLoader, hideLoader, formFields, additionalFields,
             tableKey,utilityTableKey, idFieldDeposit, idFieldUtility, actionsDeposit, actionsUtility, computedDepositRows, computedUtilityRows,
             scheduleTableKey, idFieldSchedule, scheduleColumns, actionsSchedule, scheduleRows, statementTableKey, idFieldStatement, statementRows,
-            statementColumns, actionsStatement, tenantLease, tenantDetails, tenantCurrency, tenantProperty, scheduleActionClick, refreshSchedule,
-            depositActionClick, variationColumns, variationRows, variationTableKey, idFieldVariation, actionsVariation, variationActionClick
+            statementColumns, actionsStatement, tenantLease, tenantDetails, tenantCurrency, tenantProperty, scheduleActionClick,
+            depositActionClick, variationColumns, variationRows, variationTableKey, idFieldVariation, actionsVariation, variationActionClick,
+            addNewDeposit, addNewUtility, dep_modal_loader, util_modal_loader, depModalVisible, utilModalVisible, displayButtons, depositTitle, utilityTitle, 
+            modal_top, modal_left, modal_width, showDepModalLoader, hideDepModalLoader, showUtilModalLoader, hideUtilModalLoader, handleDepReset,
+            flex_basis, flex_basis_percentage, closeDepModal, closeUtilModal, handleUtilReset, createTenantDeposit, createTenantUtility, utilityActionClick,
+            void_date, voidTitle, void_modal_loader, voidModalVisible, void_modal_width, showVoidModalLoader, hideVoidModalLoader, closeVoidModal, voidUtility
         }
     }
 })

@@ -113,6 +113,27 @@ const actions = {
     })
   },
 
+  async createTenantDeposit({ commit,state }, formData) {
+    return axios.post('api/v1/create-tenant-deposit/', formData)
+    .then((response)=>{
+      return response;
+    })
+    .catch((error)=>{
+      console.log(error.message);
+      throw error;
+    })
+  },
+
+  async createTenantUtility({ commit,state }, formData) {
+    return axios.post('api/v1/create-tenant-utility/', formData)
+    .then((response)=>{
+      return response;
+    })
+    .catch((error)=>{
+      console.log(error.message);
+      throw error;
+    })
+  },
   fetchTenants({ commit,state }, formData) {
     state.tenantArr = [];
     axios.post(`api/v1/get-tenants/`,formData)
@@ -166,7 +187,7 @@ const actions = {
   resetSchedules({ commit,state }, formData) {
     Swal.fire({
       title: "Are you sure?",
-      text: `Do you wish to book the Reset Schedules?`,
+      text: `Do you wish to Reset Schedules?`,
       type: 'warning',
       showCloseButton: true,
       showCancelButton: true,
@@ -440,6 +461,139 @@ const actions = {
         })
       }else{
         Swal.fire(`Tenant has not been deleted!`);
+      }
+    })
+  },
+  deleteTenantDeposit({ commit,state }, formData) {
+    Swal.fire({
+      title: "Are you sure?",
+      text: `Do you wish to delete Deposit?`,
+      type: 'warning',
+      showCloseButton: true,
+      showCancelButton: true,
+      confirmButtonText: 'Yes Delete Deposit!',
+      cancelButtonText: 'Cancel!',
+      customClass: {
+          confirmButton: 'swal2-confirm-custom',
+          cancelButton: 'swal2-cancel-custom',
+      },
+      showLoaderOnConfirm: true,
+    }).then((result) => {
+      if (result.value) {
+        axios.post(`api/v1/delete-tenant-deposit/`,formData)
+        .then((response)=>{
+          if(response.status == 200){
+              Swal.fire("Poof! Deposit removed succesfully!", {
+                icon: "success",
+              }); 
+          }else{
+            Swal.fire({
+              title: "Error Deleting Deposit",
+              icon: "warning",
+            });
+          }                   
+        })
+        .catch((error)=>{
+          console.log(error.message);
+          Swal.fire({
+            title: error.message,
+            icon: "warning",
+          });
+        })
+      }else{
+        Swal.fire(`Deposit has not been deleted!`);
+      }
+    })
+  },
+  deleteTenantUtility({ commit,state }, formData) {
+    Swal.fire({
+      title: "Are you sure?",
+      text: `Do you wish to delete Utility?`,
+      type: 'warning',
+      showCloseButton: true,
+      showCancelButton: true,
+      confirmButtonText: 'Yes Delete Utility!',
+      cancelButtonText: 'Cancel!',
+      customClass: {
+          confirmButton: 'swal2-confirm-custom',
+          cancelButton: 'swal2-cancel-custom',
+      },
+      showLoaderOnConfirm: true,
+    }).then((result) => {
+      if (result.value) {
+        axios.post(`api/v1/delete-tenant-utility/`,formData)
+        .then((response)=>{
+          if(response.status == 200){
+              Swal.fire("Poof! Utility removed succesfully!", {
+                icon: "success",
+              }); 
+          }else{
+            Swal.fire({
+              title: "Error Deleting Utility",
+              icon: "warning",
+            });
+          }                   
+        })
+        .catch((error)=>{
+          console.log(error.message);
+          Swal.fire({
+            title: error.message,
+            icon: "warning",
+          });
+        })
+      }else{
+        Swal.fire(`Utility has not been deleted!`);
+      }
+    })
+  },
+  async voidTenantUtility({ commit,state }, formData) {
+    return axios.put(`api/v1/update-tenant-utility/`,formData)
+    .then((response)=>{
+      return response;
+    })
+    .catch((error)=>{
+      console.log(error.message);
+      throw error;
+    })  
+  },
+  activateTenantUtility({ commit,state }, formData) {
+    Swal.fire({
+      title: "Are you sure?",
+      text: `Do you wish to Activate Utility?`,
+      type: 'warning',
+      showCloseButton: true,
+      showCancelButton: true,
+      confirmButtonText: 'Yes Activate Utility!',
+      cancelButtonText: 'Cancel!',
+      customClass: {
+          confirmButton: 'swal2-confirm-custom',
+          cancelButton: 'swal2-cancel-custom',
+      },
+      showLoaderOnConfirm: true,
+    }).then((result) => {
+      if (result.value) {
+        axios.put(`api/v1/update-tenant-utility/`,formData)
+        .then((response)=>{
+          if(response.status == 200){
+              Swal.fire("Poof! Utility activated succesfully!", {
+                icon: "success",
+              }); 
+          }else{
+            Swal.fire({
+              title: "Error Activating Utility",
+              icon: "warning",
+            });
+          }                   
+        })
+        .catch((error)=>{
+          console.log(error.message);
+          Swal.fire({
+            title: error.message,
+            icon: "warning",
+          });
+        })
+      }else{
+        Swal.fire(`Utility has not been activated!`);
       }
     })
   },
