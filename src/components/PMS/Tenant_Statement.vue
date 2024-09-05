@@ -121,7 +121,7 @@
                         </div>
                     </div>
                     <div v-if="activeTab == 1">
-                        <DynamicTable :key="statementTableKey" :columns="statementColumns" :rows="statementRows" :idField="idFieldStatement" :actions="actionsStatement"/>
+                        <DynamicTable :key="statementTableKey" :columns="statementColumns" :rows="statementRows" :idField="idFieldStatement" :showActions="showActions" :actions="actionsStatement"/>
                     </div>          
                     <div v-if="activeTab == 2"> 
                         <div class="flex mb-1.5">
@@ -244,10 +244,10 @@ export default defineComponent({
         const tenantProperty = computed(()=> store.state.Active_Tenants.tenantProperty);
         const depositColumns = ref([
             {type: "checkbox"},
-            {label: "Name", key:"security_deposit.name", type: "text", editable: false},
+            {label: "Deposit Name", key:"security_deposit.name", type: "text", editable: false},
             {label: "Charge Mode", key:"deposit_charge_mode", type: "text", editable: false},
-            {label: "Default Value", key: "deposit_value", type: "text", editable: false},
-            {label: "Deposit Amount", key: "deposit_amount", type: "text", editable: false},
+            {label: "Def. Value", key: "deposit_value", type: "text", editable: false},
+            {label: "Amount", key: "deposit_amount", type: "text", editable: false},
             {label: "Posted", key: "posted", type: "text", editable: false},
         ]);
 
@@ -259,11 +259,11 @@ export default defineComponent({
 
         const utilityColumns = ref([
             {type: "checkbox"},
-            {label: "Name", key:"utility.name", type: "text", editable: false},
+            {label: "Utility Name", key:"utility.name", type: "text", editable: false},
             {label: "Charge Mode", key:"utility_charge_mode", type: "text", editable: false},
-            {label: "Default Value", key: "utility_value", type: "text", editable: false},
+            {label: "Def. Value", key: "utility_value", type: "text", editable: false},
             {label: "Utility Vat", key: "deposit_value", type: "text", editable: false},
-            {label: "Utility Amount", key: "utility_amount", type: "text", editable: false},
+            {label: "Amount", key: "utility_amount", type: "text", editable: false},
             {label: "Status", key: "status", type: "text", editable: false},
             {label: "From", key: "from_date", type: "text", editable: false},
             {label: "To", key: "to_date", type: "text", editable: false},
@@ -289,6 +289,7 @@ export default defineComponent({
             {label: "Posted", key: "posted", type: "text", editable: false},
             {label: "Invoice", key: "invoice.journal_no", type: "text", editable: false},
         ])
+        const showActions = ref(false);
 
         const actionsSchedule = ref([
             {name: 'book-invoice', icon: 'fa fa-spinner', title: 'Book Rent'},
@@ -369,6 +370,7 @@ export default defineComponent({
                 })
             }else{
                 activeTab.value = index;
+                hideLoader();
             }
 
         };
@@ -799,7 +801,7 @@ export default defineComponent({
         return{
             tabs, activeTab, mainComponentKey, depositColumns, utilityColumns, selectTab, loader, showLoader, hideLoader, formFields, additionalFields,
             tableKey,utilityTableKey, idFieldDeposit, idFieldUtility, actionsDeposit, actionsUtility, computedDepositRows, computedUtilityRows,
-            scheduleTableKey, idFieldSchedule, scheduleColumns, actionsSchedule, scheduleRows, statementTableKey, idFieldStatement, statementRows,
+            scheduleTableKey, idFieldSchedule, scheduleColumns, actionsSchedule, scheduleRows, statementTableKey, idFieldStatement, statementRows,showActions,
             statementColumns, actionsStatement, tenantLease, tenantDetails, tenantCurrency, tenantProperty, scheduleActionClick,
             depositActionClick, variationColumns, variationRows, variationTableKey, idFieldVariation, actionsVariation, variationActionClick,
             addNewDeposit, addNewUtility, dep_modal_loader, util_modal_loader, depModalVisible, utilModalVisible, displayButtons, depositTitle, utilityTitle, 

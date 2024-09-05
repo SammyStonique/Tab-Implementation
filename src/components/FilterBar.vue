@@ -1,13 +1,13 @@
 <template>
     <div class="filter-bar items-end h-20 border-b-2 border-gray-300 w-full mb-1.5">
       <button @click="handleAddNew" class="rounded bg-green-400 text-sm  text-white px-2 py-1.5"><i class="fa fa-plus" aria-hidden="true"></i> {{ addButtonLabel }}</button>
-      <div class="flex flex-wrap gap-x-3 max-w-[800px]">
+      <div class="flex text-base flex-wrap gap-x-3 max-w-[800px]">
         <div v-for="(filter, index) in filters" :key="index" class="filter items-end pt-1.5" :class="{'w-full sm:w-1/2 md:w-1/3 lg:w-1/4' : filters.length > 4 && index > 3}">
           <div v-if="filter.type === 'text'" class="mr-2">
-            <input v-model="filter.value" type="text" :class="`bg-slate-100 rounded pl-3 border border-gray-400 text-base w-${filter.width}`" :placeholder="filter.placeholder"/>
+            <input v-model="filter.value" type="text" :class="`bg-slate-100 rounded pl-3 border border-gray-400 w-${filter.width}`" :placeholder="filter.placeholder"/>
           </div>
           <div v-if="filter.type === 'date'" class="mr-2">
-            <input v-model="filter.value" type="date" :class="`bg-slate-100 rounded pl-3 border border-gray-400 text-base w-${filter.width}`" :placeholder="filter.placeholder" :title="filter.title"/>
+            <input v-model="filter.value" type="date" :class="`bg-slate-100 rounded pl-3 border border-gray-400 text-sm w-${filter.width}`" :placeholder="filter.placeholder" :title="filter.title"/>
           </div>
           <div v-else-if="filter.type === 'dropdown'">
             <select v-model="filter.value" :class="`rounded border border-gray-400 bg-slate-100 text-sm pl-2 pt-2 w-${filter.width}`">
@@ -35,7 +35,7 @@
       </div>
       <div>
         <button @click="showDropdown" class="rounded bg-green-400 text-sm  text-white px-2 py-1.5">{{ actionsButtonLabel }} <i class="fa fa-caret-down pl-2" aria-hidden="true"></i></button>
-        <button class="fixed inset-0 bg-gray-50 opacity-25 cursor-default w-full" v-if="dropdown" @click="dropdown = !dropdown"></button>
+        <button class="fixed inset-0 bg-gray-50 opacity-15 cursor-default w-full" v-if="dropdown" @click="dropdown = !dropdown"></button>
         <div class=" text-left text-sm mt-1.5 absolute rounded bg-white w-36 py-1.5 px-1.5 shadow-md shadow-slate-500" v-if="dropdown">
           <div>
             <button @click="importData">Import</button><br />
@@ -152,7 +152,7 @@
         emit('printList');
       }
       const handleDynamicOption = (option) =>{
-        emit('handleDynamicOption');
+        emit('handleDynamicOption', option);
       }
       const optionSelected = () =>{
         emit('option-selected');

@@ -5,7 +5,7 @@ const state = {
   propertyList: [], 
   propertyArr: [],
   propArray: [],
-  propertyID: '',
+  propertyID: null,
   propertyName: '',
   company_id: '',
   name_search: '',

@@ -11,7 +11,7 @@
               {{ column.label }}
             </template>
           </th>
-          <th style="width: 5%">
+          <th style="width: 5%" v-if="showActions">
             Actions
           </th>
         </tr>
@@ -28,8 +28,11 @@
               </select>
             </template>
             <template v-else>
-              <div v-if="column.editable === true">
-                <input :type="column.type" pattern="[0-9]*" oninput="this.value = this.value.replace(/[^0-9]/g, '')" class="w-full text-xs uppercase" v-model="row[column.key]" />             
+              <div v-if="column.editable === true && column.type === 'number'">
+                <input :type="column.type" @input="handleInputChange($event, row)" pattern="[0-9]*" oninput="this.value = this.value.replace(/[^0-9]/g, '')" class="" v-model="row[column.key]" />             
+              </div>
+              <div v-else-if="column.editable === true ">
+                <input :type="column.type" @input="handleInputChange($event, row)" class="w-inherit" v-model="row[column.key]" /> 
               </div>
               <div v-else :class="`text-${column.textColor}-500`">
                 <!-- {{ row[column.key] }} -->
@@ -37,7 +40,7 @@
               </div>
             </template>
           </td>
-          <td class="actions flex gap-2 border-0">
+          <td class="actions flex gap-2 border-0" v-if="showActions">
             <div v-for="action in actions">
               <button @click.stop="handleAction(rowIndex,action.name, row)" :title="action.title"><i :class="action.icon"></i></button>
             </div>
@@ -71,6 +74,11 @@ export default defineComponent({
       default: () => [],
       required: false
     },
+    showActions:{
+      type: Boolean,
+      default: () => true,
+      required: false
+    }
   },
   emits : ['row-click', 'action-click','selection-changed'],
   setup(props, { emit }) {
@@ -124,13 +132,27 @@ export default defineComponent({
     };
 
     const handleChange = (event, row) =>{
-        const selectedValue = event.target.value;
-        if (row.method && typeof row.method === 'function') {
-          row.method(selectedValue); 
-        } else {
-          console.warn('Row method is not defined or is not a function');
-        }
+      const selectedValue = event.target.value;
+      if (row.method && typeof row.method === 'function') {
+        row.method(selectedValue); 
+      } else {
+        console.warn('Row method is not defined or is not a function');
       }
+    }
+
+    const handleInputChange = (event, row) =>{
+      // Call the updateUnits method whenever a value changes
+      updateUnits(row);
+    }
+
+    const updateUnits = (row) =>{
+      // Calculate and update units consumed
+      const prevReading = parseFloat(row.prev_reading) || 0;
+      const currReading = parseFloat(row.current_reading) || 0;
+      row.units_consumed = (currReading - prevReading).toFixed(2);
+      row.total = ((row.units_consumed * row.unit_cost) + row.meter_rent).toFixed(2)
+
+    }
 
     onMounted(() => {
       // Optional: Adjust column widths programmatically if needed
@@ -143,7 +165,7 @@ export default defineComponent({
     });
 
     return {
-      handleRowClick, handleAction, handleChange, getNestedValue,
+      handleRowClick, handleAction, handleChange, getNestedValue, handleInputChange,
       tableRef, toggleSelectAll, selectedIds, allSelected, updateSelectedIds,
     };
   }

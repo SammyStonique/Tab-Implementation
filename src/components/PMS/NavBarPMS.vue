@@ -94,16 +94,16 @@
     
                     </div>
                     <div class="py-2 px-3 pl-4 w-full hover:bg-slate-500 hover:w-full">
-                        <button class="flex text-sm" @click="openPage({'PMS':'Emergency_Contacts'})">
+                        <button class="flex text-sm" @click="openPage({'PMS':'Tenant_Deposits'})">
                             <i class="fa fa-address-card pt-2 mr-2" aria-hidden="true"></i>
-                            <p class="">Emergency Contacts</p>
+                            <p class="">Tenant Deposits</p>
                         </button>
     
                     </div>
                     <div class="py-2 px-3 pl-4 w-full hover:bg-slate-500 hover:w-full">
-                        <button class="flex text-sm" @click="openPage({'PMS':'AddPatient'})">
+                        <button class="flex text-sm" @click="openPage({'PMS':'Meter_Readings'})">
                             <i class="fa fa-address-book-o pt-2 mr-2" aria-hidden="true"></i>
-                            <p class="">Patient Visits</p>
+                            <p class="">Meter Readings</p>
                         </button>
     
                     </div>
@@ -113,6 +113,40 @@
                             <p class="">Patients Queue</p>
                         </button>
     
+                    </div>
+                </div>
+            </div>
+            <div class="web-links dropdown w-36">
+                <div class="py-1.5 px-2.5 h-full hover:bg-slate-500 hover:rounded">
+                    <button class="flex" @click="showFinancesDropdown">
+                        <i class="fa fa-money pt-2 mr-2" aria-hidden="true"></i>
+                        <p class="pt-1.5">Finances</p>
+                    </button>
+                </div>
+                <div class="dropdown-content w-48 absolute rounded border border-gray-200 bg-white shadow-slate-400 shadow-xl" v-if="finances_dropdown">
+                    <div class="py-2 px-3 pl-4 w-full hover:bg-slate-500 hover:w-full">
+                        <button class="flex text-sm" @click="openPage({'PMS':'Tenant_Invoices'})">
+                            <i class="fa fa-money pt-2 mr-2" aria-hidden="true"></i>
+                            <p class="">Invoices</p>
+                        </button>
+                    </div>
+                    <div class="py-2 px-3 pl-4 w-full hover:bg-slate-500 hover:w-full">
+                        <button class="flex text-sm" @click="openPage({'PMS':'Receipts'})">
+                        <i class="fa fa-object-ungroup pt-2 mr-2" aria-hidden="true"></i>
+                        <p class="">Receipts</p>
+                        </button>
+                    </div>
+                    <div class="py-2 px-3 pl-4 w-full hover:bg-slate-500 hover:w-full">
+                        <button class="flex text-sm" @click="openPage({'PMS':'Debit_Notes'})">
+                        <i class="fa fa-object-ungroup pt-2 mr-2" aria-hidden="true"></i>
+                        <p class="">Debit Notes</p>
+                        </button>
+                    </div>
+                    <div class="py-2 px-3 pl-4 w-full hover:bg-slate-500 hover:w-full">
+                        <button class="flex text-sm" @click="openPage({'PMS':'Credit_Notes'})">
+                        <i class="fa fa-object-ungroup pt-2 mr-2" aria-hidden="true"></i>
+                        <p class="">Credit Notes</p>
+                        </button>
                     </div>
                 </div>
             </div>
@@ -142,6 +176,12 @@
                         <p class="">Variation Period</p>
                         </button>
                     </div>
+                    <div class="py-2 px-3 pl-4 w-full hover:bg-slate-500 hover:w-full">
+                        <button class="flex text-sm" @click="openPage({'PMS':'Meter_Setup'})">
+                        <i class="fa fa-object-ungroup pt-2 mr-2" aria-hidden="true"></i>
+                        <p class="">Meter Reading Setup</p>
+                        </button>
+                    </div>
                 </div>
             </div>        
         </div>
@@ -159,31 +199,43 @@ export default defineComponent({
         const property_dropdown = ref(false);
         const units_dropdown = ref(false);
         const tenants_dropdown = ref(false);
+        const finances_dropdown = ref(false);
         const userDetails = ref([]);
 
         const showPropertyDropdown = () =>{
             units_dropdown.value = false;
             settings_dropdown.value = false;
             tenants_dropdown.value  = false;
+            finances_dropdown.value = false;
             property_dropdown.value  = !property_dropdown.value ;
         }
         const showTenantsDropdown = () =>{
             units_dropdown.value = false;
             settings_dropdown.value = false;
             property_dropdown.value  = false;
+            finances_dropdown.value = false;
             tenants_dropdown.value  = !tenants_dropdown.value ;
         }
         const showUnitsDropdown = () =>{
             settings_dropdown.value = false;
             property_dropdown.value  = false;
             tenants_dropdown.value = false;
+            finances_dropdown.value = false;
             units_dropdown.value  = !units_dropdown.value ;
         }
         const showSettingsDropdown = () =>{
             units_dropdown.value = false;
             property_dropdown.value  = false;
             tenants_dropdown.value  = false;
+            finances_dropdown.value = false;
             settings_dropdown.value  = !settings_dropdown.value ;
+        }
+        const showFinancesDropdown = () =>{
+            units_dropdown.value = false;
+            property_dropdown.value  = false;
+            tenants_dropdown.value  = false;
+            settings_dropdown.value = false;
+            finances_dropdown.value  = !finances_dropdown.value ;
         }
         const openPage = (pageName) =>{
             store.commit('pageTab/ADD_PAGE', pageName);
@@ -191,11 +243,11 @@ export default defineComponent({
         }
         return{
             settings_dropdown, units_dropdown,
-            property_dropdown,
+            property_dropdown, finances_dropdown,
             tenants_dropdown,
             userDetails,
             showPropertyDropdown, showUnitsDropdown,
-            showTenantsDropdown,
+            showTenantsDropdown, showFinancesDropdown,
             showSettingsDropdown,
             openPage
         }

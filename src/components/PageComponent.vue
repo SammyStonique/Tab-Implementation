@@ -154,7 +154,7 @@ export default defineComponent({
             emit('removeSelectedItems');
         }
         const handleDynamicOption = (option) =>{
-            emit('handleDynamicOption');
+            emit('handleDynamicOption', option);
         }
         const printList = () =>{
             emit('printList');

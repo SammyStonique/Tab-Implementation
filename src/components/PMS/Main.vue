@@ -34,6 +34,12 @@ import Active_Tenants from '@/components/PMS/Active_Tenants.vue';
 import Tenant_Details from '@/components/PMS/Tenant_Details.vue';
 import Variation_Periods from '@/components/PMS/Variation_Periods.vue';
 import Tenant_Statement from '@/components/PMS/Tenant_Statement.vue';
+import Tenant_Deposits from '@/components/PMS/Tenant_Deposits.vue';
+import Meter_Setup from '@/components/PMS/Meter_Setup.vue';
+import Meter_Readings from '@/components/PMS/Meter_Readings.vue';
+import Batch_Readings from '@/components/PMS/Batch_Readings.vue';
+import Tenant_Invoices from '@/components/PMS/Tenant_Invoices.vue';
+import Invoice_Details from '@/components/PMS/Invoice_Details.vue';
 
 export default{
     components:{
@@ -41,7 +47,8 @@ export default{
         NavBarPMS,
         PagesTab,
         Dashboard, Properties_List, Zones, Landlords_List, Units_List, Property_Details, Utilities, Security_Deposits, Active_Tenants,
-        Tenant_Details, Variation_Periods, Tenant_Statement
+        Meter_Setup, Meter_Readings,Batch_Readings,Tenant_Invoices,Invoice_Details,
+        Tenant_Details, Variation_Periods, Tenant_Statement, Tenant_Deposits
     },
     props: {
         title: {

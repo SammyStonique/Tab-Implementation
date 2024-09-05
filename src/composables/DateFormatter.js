@@ -9,8 +9,20 @@ export function useDateFormatter() {
     return `${year}-${month}-${day}`;
   };
 
-  // You can return the function or any other reactive state if needed
+  const months = ["January", "February", "March", "April", "May", "June","July", "August", "September", "October", "November", "December"];
+
+  const getMonth = (date) =>{
+    const month = date.getMonth();
+    const monthName = months[month];
+    return monthName;
+  };
+
+  const getYear = (date) =>{
+    const year = date.getFullYear();
+    return year;
+  };
+  
   return {
-    formatDate,
+    formatDate, getYear, getMonth
   };
 }

@@ -6,11 +6,15 @@ const state = {
   journalArr: [],
   journalArray: [],
   journalsArray: [],
+  tenantInvoices: [],
   jnlArray: [],
   jnlSortedArr: [],
   journalID: '',
   journalNo: '',
-  journal_no_search: '',
+  client_name_search: '',
+  client_code_search: '',
+  from_date_search: '',
+  to_date_search: '',
   selectedLedger: null,
   selectedJournal: null,
   isEditing: false
@@ -24,9 +28,13 @@ const mutations = {
     state.journalsArray = [];
     state.jnlArray = [];
     state.jnlSortedArr = [];
+    state.tenantInvoices = [];
     state.journalID = '';
     state.journalNo = '';
-    state.journal_no_search = '';
+    state.client_name_search = '';
+    state.client_code_search = '';
+    state.from_date_search = '';
+    state.to_date_search = '';
     state.selectedJournal = null;
     state.selectedLedger = null;
     state.isEditing = false;
@@ -37,6 +45,9 @@ const mutations = {
   },
   LIST_JOURNALS(state, journals) {
     state.journalsList = journals;
+  },
+  LIST_TENANTS_INVOICES(state, journals) {
+    state.tenantInvoices = journals;
   },
   JOURNALS_ARRAY(state, journals){
     state.journalArray = journals;
@@ -50,13 +61,22 @@ const mutations = {
   },
   SET_SEARCH_FILTERS(state, search_filter){
     for(const [key, value] of Object.entries(search_filter)){
-      if(key == 'journal_no_search'){
-        state.journal_no_search = value;
+      if(key == 'client_name_search'){
+        state.client_name_search = value;
+      }else if(key == 'client_code_search'){
+        state.client_code_search = value;
+      }else if(key == 'from_date_search'){
+        state.from_date_search = value;
+      }else if(key == 'to_date_search'){
+        state.to_date_search = value;
       }
     }
   },
   RESET_SEARCH_FILTERS(state){
-    state.journal_no_search = '';
+    state.client_name_search = '';
+    state.client_code_search = '';
+    state.from_date_search = '';
+    state.to_date_search = '';
   }
 };
   
@@ -67,6 +87,16 @@ const actions = {
   
   async createJournal({ commit,state }, formData) {
     return axios.post('api/v1/create-journal/', formData)
+    .then((response)=>{
+      return response;
+    })
+    .catch((error)=>{
+      console.log(error.message);
+      throw error;
+    })
+  },
+  async bookTenantInvoices({ commit,state }, formData) {
+    return axios.post('api/v1/book-rental-invoices/', formData)
     .then((response)=>{
       return response;
     })
@@ -101,10 +131,20 @@ const actions = {
     })
     
   },
+  fetchTenantsInvoices({ commit,state }, formData) {
+    axios.post(`api/v1/client-category-journals-search/`,formData)
+    .then((response)=>{
+      commit('LIST_TENANTS_INVOICES', response.data);
+    })
+    .catch((error)=>{
+      console.log(error.message);
+    })
+    
+  },
   fetchClientJournals({ commit,state }, formData){
     state.journalsArray = [];
     axios
-    .post("api/v1/clients-journals-search/", formData)
+    .post("api/v1/client-journals-search/", formData)
     .then((response)=>{
         state.jnlArray = [];
         let running_balance = 0;
@@ -161,14 +201,14 @@ const actions = {
     })  
   },
 
-  deleteJournal({ commit,state }, formData) {
+  deleteInvoice({ commit,state }, formData) {
     Swal.fire({
       title: "Are you sure?",
-      text: `Do you wish to delete Journal?`,
+      text: `Do you wish to delete Invoice?`,
       type: 'warning',
       showCloseButton: true,
       showCancelButton: true,
-      confirmButtonText: 'Yes Delete Journal!',
+      confirmButtonText: 'Yes Delete Invoice!',
       cancelButtonText: 'Cancel!',
       customClass: {
           confirmButton: 'swal2-confirm-custom',
@@ -179,13 +219,13 @@ const actions = {
       if (result.value) {
         axios.post(`api/v1/delete-journal/`,formData)
         .then((response)=>{
-          if(response.status == 200){
-              Swal.fire("Poof! Journal removed succesfully!", {
+          if(response.message == "Success"){
+              Swal.fire("Poof! Invoice removed succesfully!", {
                 icon: "success",
               }); 
-          }else{
+          }else if(response.message == "Paid"){
             Swal.fire({
-              title: "Error Deleting Journal",
+              title: "Cannot Delete Paid Invoice",
               icon: "warning",
             });
           }                   
@@ -198,7 +238,7 @@ const actions = {
           });
         })
       }else{
-        Swal.fire(`Journal has not been deleted!`);
+        Swal.fire(`Invoice has not been deleted!`);
       }
     })
   },

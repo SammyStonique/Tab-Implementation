@@ -5,7 +5,8 @@ const state = {
   tenantList: [], 
   tenantArr: [],
   tenantArray: [],
-  tenantID: '',
+  tenantID: null,
+  tenantUnitID: null,
   tenantName: '',
   name_search: '',
   tenant_code_search: '',
@@ -25,6 +26,9 @@ const state = {
   tenantCurrency: [],
   tenantProperty: [],
   tenantVariations: [],
+  tenantUnitsArr: [],
+  tenantUnitsList: [],
+  tenantUnitsArray: [],
   currentTab: "Tenant_Biodata"
 };
   
@@ -49,6 +53,9 @@ const mutations = {
     state.tenantLease = [];
     state.tenantDetails = [];
     state.tenantVariations = [];
+    state.tenantUnitsList = [];
+    state.tenantUnitsArr = [];
+    state.tenantUnitsArray = [];
   },
   SET_SELECTED_TENANT(state, tenant) {
     state.selectedTenant = tenant;
@@ -59,6 +66,18 @@ const mutations = {
   },
   SET_TENANT_LEASE(state, tenant){
     state.tenantLease = tenant;
+  },
+  LIST_TENANT_UNITS(state, units){
+    state.tenantUnitsList = units;
+  },
+  SET_TENANT_DETAILS(state, details){
+    state.tenantDetails = details;
+  },
+  SET_TENANT_CURRENCY(state, currency){
+    state.tenantCurrency = tenant;
+  },
+  SET_TENANT_PROPERTY(state, property){
+    state.tenanatProperty = property;
   },
   SET_TENANT_VARIATIONS(state, variations){
     state.tenantVariations = variations
@@ -162,11 +181,24 @@ const actions = {
   fetchTenantLease({ commit,state }, formData) {
     axios.post(`api/v1/get-tenant-leases/`,formData)
     .then((response)=>{
-      state.tenantLease = response.data;
-      state.tenantDetails = response.data.tenant;
-      state.tenantCurrency = response.data.lease_currency;
-      state.tenantProperty = response.data.property;
       commit('SET_TENANT_LEASE',response.data);
+      commit('SET_TENANT_DETAILS',response.data.tenant);
+      commit('SET_TENANT_CURRENCY',response.data.lease_currency);
+      commit('SET_TENANT_PROPERTY',response.data.property);
+    })
+    .catch((error)=>{
+      console.log(error.message);
+    })
+    
+  },
+  fetchTenantUnits({ commit,state }, formData) {
+    state.tenantUnitsArr = [];
+    axios.post(`api/v1/get-tenant-units/`,formData)
+    .then((response)=>{
+      for(let i=0; i< response.data.length; i++){
+        state.tenantUnitsArr.push((response.data[i].unit.unit_number + ' - ' + response.data[i].tenant.tenant.tenant_name))
+      }
+      commit('LIST_TENANT_UNITS', response.data);
     })
     .catch((error)=>{
       console.log(error.message);
@@ -235,6 +267,15 @@ const actions = {
         state.tenantArray = [...state.tenantArray, selectedTnt];
     }
     commit('TENANTS_ARRAY', state.tenantArray);
+      
+  },
+  handleSelectedTenantUnit({ commit, state }, option){
+
+    const selectedUnit = state.tenantUnitsList.find(unit => (unit.unit.unit_number + ' - ' + unit.tenant.tenant.tenant_name) === option);
+    if (selectedUnit) {
+        state.tenantUnitID = selectedUnit.tenant_unit_id;
+        state.tenantUnitsArray = [...state.tenantUnitsArray, selectedUnit];
+    }
       
   },
   fetchRentSchedules({ commit,state }, formData){
