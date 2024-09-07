@@ -1,12 +1,18 @@
 import axios from "axios";
 import Swal from 'sweetalert2';
+import { useToast } from "vue-toastification";
+
+const toast = useToast();
 
 const state = {
   journalsList: [], 
+  journalsClientList: [], 
   journalArr: [],
   journalArray: [],
   journalsArray: [],
   tenantInvoices: [],
+  tenantReceipts: [],
+  outstandingBalance: 0,
   jnlArray: [],
   jnlSortedArr: [],
   journalID: '',
@@ -23,12 +29,14 @@ const state = {
 const mutations = {
   initializeStore(state){
     state.journalsList = [];
+    state.journalsClientList = [];
     state.journalArr = [];
     state.journalArray = [];
     state.journalsArray = [];
     state.jnlArray = [];
     state.jnlSortedArr = [];
     state.tenantInvoices = [];
+    state.tenantReceipts = [];
     state.journalID = '';
     state.journalNo = '';
     state.client_name_search = '';
@@ -46,8 +54,17 @@ const mutations = {
   LIST_JOURNALS(state, journals) {
     state.journalsList = journals;
   },
+  LIST_JOURNALS_CLIENT(state, journals) {
+    state.journalsClientList = journals;
+  },
+  CLIENT_OUTSTANDING_AMOUNT(state, amount){
+    state.outstandingBalance = amount;
+  },
   LIST_TENANTS_INVOICES(state, journals) {
     state.tenantInvoices = journals;
+  },
+  LIST_TENANTS_RECEIPTS(state, journals) {
+    state.tenantReceipts = journals;
   },
   JOURNALS_ARRAY(state, journals){
     state.journalArray = journals;
@@ -95,6 +112,16 @@ const actions = {
       throw error;
     })
   },
+  async createTenantReceipt({ commit,state }, formData) {
+    return axios.post('api/v1/create-tenant-receipt/', formData)
+    .then((response)=>{
+      return response;
+    })
+    .catch((error)=>{
+      console.log(error.message);
+      throw error;
+    })
+  },
   async bookTenantInvoices({ commit,state }, formData) {
     return axios.post('api/v1/book-rental-invoices/', formData)
     .then((response)=>{
@@ -114,6 +141,32 @@ const actions = {
         state.journalArr.push((response.data[i].journal_no + " - " + response.data[i].description + " - " + response.data[i].amount));
       }
       commit('LIST_JOURNALS', response.data);
+    })
+    .catch((error)=>{
+      console.log(error.message);
+    })
+    
+  },
+  handleClientPrepayment({commit,state}, formData){
+    state.journalsClientList.push(formData);
+    commit('LIST_JOURNALS_CLIENT', state.journalsClientList);
+  },
+  fetchJournalsClient({ commit,state }, formData) {
+    state.outstandingBalance = 0;
+    axios.post(`api/v1/fetch-journals/`,formData)
+    .then((response)=>{
+      const clientInvoices = response.data;
+      for(let i=0; i<response.data.length; i++){
+        state.outstandingBalance += Number(response.data[i].due_amount);
+      }
+      const transformedInvoiceArray = clientInvoices.map(clientInvoice =>({
+          ...clientInvoice,
+          payment_allocation: 0,
+          bal_after_alloc: "",
+          allocation_status: false
+      }));
+      commit('LIST_JOURNALS_CLIENT', transformedInvoiceArray);
+      commit('CLIENT_OUTSTANDING_AMOUNT', state.outstandingBalance);
     })
     .catch((error)=>{
       console.log(error.message);
@@ -219,11 +272,12 @@ const actions = {
       if (result.value) {
         axios.post(`api/v1/delete-journal/`,formData)
         .then((response)=>{
-          if(response.message == "Success"){
-              Swal.fire("Poof! Invoice removed succesfully!", {
+          if(response.data.msg == "Success"){
+              Swal.fire("Poof! Invoice(s) removed succesfully!", {
                 icon: "success",
               }); 
-          }else if(response.message == "Paid"){
+              toast.success("Invoice(s) removed succesfully")
+          }else if(response.data.msg == "Paid"){
             Swal.fire({
               title: "Cannot Delete Paid Invoice",
               icon: "warning",

@@ -166,7 +166,7 @@ export default defineComponent({
                 landlord: landlordID.value,
                 landlord_id: landlordID.value,
             }
-            console.log("THE FORM DAAATA IS ",formData)
+
             errors.value = [];
             for(let i=1; i < (formFields.value.length - 1); i++){
                 if(formFields.value[i].value =='' && formFields.value[i].required == true){

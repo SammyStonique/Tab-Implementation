@@ -29,13 +29,13 @@
             :showPreviousBtn="showPreviousBtn"
         />
         <MovableModal v-model:visible="invModalVisible" :title="title" :modal_top="modal_top" :modal_left="modal_left" :modal_width="modal_width"
-        :loader="modal_loader" @showLoader="showModalLoader" @hideLoader="hideModalLoader" @closeModal="closeModal"
-    >
-        <DynamicForm 
-            :fields="formFields" :flex_basis="flex_basis" :flex_basis_percentage="flex_basis_percentage" 
-            :displayButtons="displayButtons" @handleSubmit="bookRentalInvoice" @handleReset="handleReset"
-        />
-    </MovableModal>
+            :loader="modal_loader" @showLoader="showModalLoader" @hideLoader="hideModalLoader" @closeModal="closeModal"
+        >
+            <DynamicForm 
+                :fields="formFields" :flex_basis="flex_basis" :flex_basis_percentage="flex_basis_percentage" 
+                :displayButtons="displayButtons" @handleSubmit="bookRentalInvoice" @handleReset="handleReset"
+            />
+        </MovableModal>
     </div>
 </template>
 
@@ -43,7 +43,7 @@
 import axios from "axios";
 import { ref, computed, onMounted, onBeforeMount, watch} from 'vue';
 import PageComponent from '@/components/PageComponent.vue';
-import MovableModal from '@/components/MovableModal.vue'
+import MovableModal from '@/components/MovableModal.vue';
 import DynamicForm from '../NewDynamicForm.vue';
 import { useStore } from "vuex";
 import { useToast } from "vue-toastification";
@@ -227,7 +227,7 @@ export default{
                 period_year: formFields.value[3].value,
                 company: companyID.value
             }
-            console.log("THE FORM DATA IS ",formData)
+
             errors.value = [];
             for(let i=2; i < (formFields.value.length); i++){
                 if(formFields.value[i].value =='' && formFields.value[i].required == true){
@@ -263,7 +263,8 @@ export default{
             if(selectedIds.value.length == 1){
                 let formData = {
                     company: companyID.value,
-                    journal: selectedIds.value
+                    journal: selectedIds.value,
+                    txn_type: "INV"
                 }
                 try{
                     const response = await store.dispatch('Journals/deleteInvoice',formData)
@@ -290,11 +291,13 @@ export default{
             if(selectedIds.value.length){
                 let formData = {
                     company: companyID.value,
-                    journal: selectedIds.value
+                    journal: selectedIds.value,
+                    txn_type: "INV"
                 }
+
                 try{
                     const response = await store.dispatch('Journals/deleteInvoice',formData)
-                    if(response && response.status == 200){
+                    if(response && response.msg == "Success"){
                         toast.success("Invoice(s) Removed Succesfully");
                         searchInvoices();
                     }
@@ -323,6 +326,7 @@ export default{
             showPreviousBtn.value = false;
             let formData = {
                 client_category: "Tenants",
+                txn_type: "INV",
                 client_name: tenant_name_search.value,
                 client_code: tenant_code_search.value,
                 from_date: from_date_search.value,
@@ -424,7 +428,7 @@ export default{
         }
 
         const dropdownOptions = ref([
-            {label: 'Batch Reading', action: 'batch-meter-reading'},
+            {label: 'Withholding Tax', action: 'withholding-tax'},
         ]);
         const handleDynamicOption = (option) =>{
             if(option == 'batch-meter-reading'){

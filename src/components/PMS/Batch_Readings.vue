@@ -152,7 +152,7 @@ export default defineComponent({
                 current_reading_date: formFields.value[2].value,
                 meter_readings: readingRows.value,
             }
-            console.log("THE FORM DAAATA IS ",formData)
+
             errors.value = [];
             const tableValidation = []
             for(let i=2; i < formFields.value.length; i++){

@@ -17,8 +17,8 @@
         </tr>
       </thead>
       <tbody class="table-body">
-        <tr v-for="(row, rowIndex) in rows" :key="rowIndex" @click="handleRowClick(row)" class="even:bg-gray-100 text-xs uppercase">
-          <td v-for="(column, colIndex) in columns" :key="colIndex">
+        <tr v-for="(row, rowIndex) in rows" :key="rowIndex" @dblclick="handleRowClick(row)" class="cursor-pointer even:bg-gray-100 text-xs uppercase">
+          <td v-for="(column, colIndex) in columns" :key="colIndex" :class="{'ellipsis': column.maxWidth}">
             <template v-if="column.type === 'checkbox'">
               <input type="checkbox" v-model="row.selected" class="checkbox" @change="updateSelectedIds(row)"/>
             </template>
@@ -29,10 +29,10 @@
             </template>
             <template v-else>
               <div v-if="column.editable === true && column.type === 'number'">
-                <input :type="column.type" @input="handleInputChange($event, row)" pattern="[0-9]*" oninput="this.value = this.value.replace(/[^0-9]/g, '')" class="" v-model="row[column.key]" />             
+                <input :type="column.type" @change="handleInputChange($event, row)" pattern="[0-9]*" oninput="this.value = this.value.replace(/[^0-9]/g, '')" class="" v-model="row[column.key]" />             
               </div>
               <div v-else-if="column.editable === true ">
-                <input :type="column.type" @input="handleInputChange($event, row)" class="w-inherit" v-model="row[column.key]" /> 
+                <input :type="column.type" @change="handleInputChange($event, row)" class="w-inherit" v-model="row[column.key]" /> 
               </div>
               <div v-else :class="`text-${column.textColor}-500`">
                 <!-- {{ row[column.key] }} -->
@@ -80,7 +80,7 @@ export default defineComponent({
       required: false
     }
   },
-  emits : ['row-click', 'action-click','selection-changed'],
+  emits : ['row-db-click', 'action-click','selection-changed', 'update-receipt-amount'],
   setup(props, { emit }) {
 
     const tableRef = ref(null);
@@ -92,7 +92,7 @@ export default defineComponent({
     });
 
     const handleRowClick = (row) => {
-      emit('row-click', row);
+      emit('row-db-click', row);
     };
 
     const handleAction = (rowIndex, action, row) => {
@@ -133,6 +133,7 @@ export default defineComponent({
 
     const handleChange = (event, row) =>{
       const selectedValue = event.target.value;
+      // receiptAllocation(row);
       if (row.method && typeof row.method === 'function') {
         row.method(selectedValue); 
       } else {
@@ -141,17 +142,29 @@ export default defineComponent({
     }
 
     const handleInputChange = (event, row) =>{
-      // Call the updateUnits method whenever a value changes
       updateUnits(row);
+      receiptAllocation(row);
     }
 
     const updateUnits = (row) =>{
-      // Calculate and update units consumed
       const prevReading = parseFloat(row.prev_reading) || 0;
       const currReading = parseFloat(row.current_reading) || 0;
       row.units_consumed = (currReading - prevReading).toFixed(2);
       row.total = ((row.units_consumed * row.unit_cost) + row.meter_rent).toFixed(2)
 
+    }
+
+    const receiptAllocation = (row) =>{
+      const invAmount = parseFloat(row.due_amount) || 0;
+      const paymentAllocation = parseFloat(row.payment_allocation) || 0;
+      const balance = (invAmount - paymentAllocation).toFixed(2);
+      if(balance >= 0){
+        row.bal_after_alloc = balance;
+      }else{
+        row.payment_allocation = 0;
+        row.bal_after_alloc = 0;
+      }
+      emit('update-receipt-amount', paymentAllocation)
     }
 
     onMounted(() => {
@@ -188,12 +201,13 @@ input {
 .dynamic-table {
   width: 100%;
   border-collapse: collapse;
+  /* table-layout: fixed; */
 }
 
 .dynamic-table th,
 .dynamic-table td {
   border: 1px solid #ccc;
-  padding: 8px;
+  padding: 6px;
   text-align: left;
 }
 
@@ -215,6 +229,12 @@ input {
 
 .table-body tr:nth-child(even) {
   background-color: #f2f2f2;
+}
+.ellipsis {
+  max-width: 350px; /* Adjust the max-width as needed */
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 </style>
   

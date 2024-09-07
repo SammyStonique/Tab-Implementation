@@ -3,17 +3,17 @@
         <PageComponent 
             :loader="loader" @showLoader="showLoader" @hideLoader="hideLoader"
             :addButtonLabel="addButtonLabel"
-            @handleAddNew="addNewInvoice"
+            @handleAddNew="addNewReceipt"
             :searchFilters="searchFilters"
             :dropdownOptions="dropdownOptions"
             @handleDynamicOption="handleDynamicOption"
-            @searchPage="searchInvoices"
+            @searchPage="searchReceipts"
             @resetFilters="resetFilters"
-            @removeItem="removeInvoice"
-            @removeSelectedItems="removeInvoices"
+            @removeItem="removeReceipt"
+            @removeSelectedItems="removeReceipts"
             @printList="printList"
             :columns="tableColumns"
-            :rows="invoicesList"
+            :rows="receiptsList"
             :actions="actions"
             :idField="idField"
             @handleSelectionChange="handleSelectionChange"
@@ -39,7 +39,7 @@ import { useStore } from "vuex";
 import { useToast } from "vue-toastification";
 
 export default{
-    name: 'Tenant_Invoices',
+    name: 'Tenant_Receipts',
     components:{
         PageComponent
     },
@@ -49,13 +49,17 @@ export default{
         const loader = ref('none');
         const modal_loader = ref('none');
         const idField = 'journal_id';
-        const addButtonLabel = ref('New Invoice');
+        const addButtonLabel = ref('New Receipt');
         const submitButtonLabel = ref('Add');
+        const title = ref('Receipt Reversal');
+        const modal_top = ref('150px');
+        const modal_left = ref('400px');
+        const modal_width = ref('32vw');
         const tntComponentKey = ref(0);
-        const ledgerComponentKey = ref(0);
+        const ledComponentKey = ref(0);
         const propComponentKey = ref(0);
         const selectedIds = ref([]);
-        const invoicesList = ref([]);
+        const receiptsList = ref([]);
         const propResults = ref([]);
         const propArrLen = ref(0);
         const propCount = ref(0);
@@ -68,30 +72,26 @@ export default{
         const flex_basis_percentage = ref('');
         const displayButtons = ref(true);
         const errors = ref([]);
-        const ledgerID = ref('');
-        const tenantID = ref('');
-        const propertyID = ref('');
         const propertySearchID = ref('');
         const ledgerSearchID = ref('');
         const ledgerArray = computed(() => store.state.Ledgers.ledgerArr);
         const propertyArray = computed(() => store.state.Properties_List.propertyArr);
-        const tenantArray = computed(() => store.state.Active_Tenants.tenantArr);
         const showModal = ref(false);
         const tableColumns = ref([
             {type: "checkbox"},
-            {label: "Invoice#", key:"tenant_name"},
-            {label: "Date", key: "current_reading_date"},
+            {label: "Receipt#", key:"journal_no"},
+            {label: "Date", key: "date"},
+            {label: "Bank. Date", key: "banking_date"},
             {label: "Tenant Name", key:"tenant_name"},
             {label: "Property Name", key:"property_name"},
-            {label: "Description", key:"previous_reading"},
-            {label: "Amount", key:"current_reading"},
-            {label: "Paid", key:"units_consumed"},
-            {label: "Balance", key:"meter_rent"},
-            {label: "Status", key:"sub_total"},
+            {label: "Pay. Method", key:"payment_method"},
+            {label: "Ref No", key:"reference_no"},
+            {label: "Amount", key:"total_amount"},
+            {label: "Done By", key:"done_by"},
         ])
         
         const actions = ref([
-            {name: 'delete', icon: 'fa fa-trash', title: 'Delete Invoice'},
+            {name: 'delete', icon: 'fa fa-trash', title: 'Delete Receipt'},
         ])
         const companyID = computed(()=> store.state.userData.company_id);
         const fetchProperties = async() =>{
@@ -117,12 +117,12 @@ export default{
             ledgerSearchID.value = ""
         }
         const tenant_name_search = computed({
-            get: () => store.state.Journals.tenant_name_search,
-            set: (value) => store.commit('Journals/SET_SEARCH_FILTERS', {"tenant_name_search":value}),
+            get: () => store.state.Journals.client_name_search,
+            set: (value) => store.commit('Journals/SET_SEARCH_FILTERS', {"client_name_search":value}),
         });
         const tenant_code_search = computed({
-            get: () => store.state.Journals.tenant_code_search,
-            set: (value) => store.commit('Journals/SET_SEARCH_FILTERS', {"tenant_code_search":value}),
+            get: () => store.state.Journals.client_code_search,
+            set: (value) => store.commit('Journals/SET_SEARCH_FILTERS', {"client_code_search":value}),
         });
         const from_date_search = computed({
             get: () => store.state.Journals.from_date_search,
@@ -153,102 +153,18 @@ export default{
         const handleSelectionChange = (ids) => {
             selectedIds.value = ids;
         };
-        const handleSelectedProperty = async(option) =>{
-            await store.dispatch('Properties_List/handleSelectedProperty', option)
-            propertyID.value = store.state.Properties_List.propertyID;
-        };
-        const clearSelectedProperty = async() =>{
-            await store.dispatch('Properties_List/updateState', {propertyID: ''});
-            propertyID.value = ""
-        }
-        const fetchTenants = async() =>{
-            if(propertyID.value){
-                await store.dispatch('Active_Tenants/fetchTenants', {company:companyID.value, property: propertyID.value})
-            }       
-        };
-        const handleSelectedTenant = async(option) =>{
-            await store.dispatch('Active_Tenants/handleSelectedTenantUnit', option)
-            tenantID.value = store.state.Active_Tenants.tenantID;
-        };
-        const clearSelectedTenant = async() =>{
-            await store.dispatch('Active_Tenants/updateState', {tenantID: ''});
-            tenantID.value = ""
-        }
-        const handleSelectedLedger = async(option) =>{
-            await store.dispatch('Ledgers/handleSelectedLedger', option)
-            ledgerID.value = store.state.Ledgers.ledgerID;
-        };
-        const clearSelectedLedger = async() =>{
-            await store.dispatch('Ledgers/updateState', {ledgerID: ''});
-            ledgerID.value = ""
-        }
-        const formFields = ref([]);
-        const updateFormFields = () =>{
-            formFields.value = [
-                {
-                    type:'search-dropdown', label:"Property", value: propertyID.value, componentKey: propComponentKey,
-                    selectOptions: propertyArray, optionSelected: handleSelectedProperty, required: true,
-                    searchPlaceholder: 'Select Property...', dropdownWidth: '320px', updateValue: "",
-                    fetchData: fetchProperties(), clearSearch: clearSelectedProperty()            
-                },
-                {
-                    type:'search-dropdown', label:"Tenant", value: tenantID.value, componentKey: tntComponentKey,
-                    selectOptions: tenantArray, optionSelected: handleSelectedTenant, required: true,
-                    searchPlaceholder: 'Select Tenant...', dropdownWidth: '320px', updateValue: "",
-                    fetchData: fetchTenants(), clearSearch: clearSelectedTenant()  
-                },
-                { type: 'date', name: 'invoice_date',label: "Invoice Date", value: '', required: true },
-                { type: 'date', name: 'due_date',label: "Due Date", value: '', required: true },
-                {
-                    type:'search-dropdown', label:"Unit", value: unitID.value, componentKey: unitComponentKey,
-                    selectOptions: unitsArray, optionSelected: handleSelectedUnit, required: true,
-                    searchPlaceholder: 'Select Unit...', dropdownWidth: '320px', updateValue: "",
-                    fetchData: fetchUnits(), clearSearch: clearSelectedUnit()  
-                },
-                
-                { type: 'number', name: 'previous_reading',label: "Prev Reading", value: 0, required: true },
-                { type: 'date', name: 'current_reading_date',label: "Curr Reading Date", value: '', required: true },
-                { type: 'number', name: 'current_reading',label: "Curr Reading", value: 0, method: calculateUnitsConsumed, required: true },
-                { type: 'number', name: 'units_consumed',label: "Units Consumed", value: 0, required: false, disabled: true },
-                { type: 'number', name: 'meter_rent',label: "Meter Rent", value: 0, required: false, disabled: true },
-                { type: 'number', name: 'total_amount',label: "Total", value: 0, required: false, disabled: true },
-                { value: "", required: false},
-                
-            ]
-        };
+        
+        
         const handleReset = async() =>{
-            await store.dispatch('Meter_Setup/updateState', {setupArr:[]})
             await store.dispatch('Active_Tenants/updateState', {tenantUnitsArr:[]});
-            for(let i=0; i < formFields.value.length; i++){
-                formFields.value[i].value = '';
-            }
             propComponentKey.value += 1;
-            unitComponentKey.value += 1;
-            setupComponentKey.value += 1;
-            propertyID.value = '';
-            unitID.value = "";
-            setupID.value = '';
-            setupArray.value = [];
-            unitsArray.value = [];
+            ledComponentKey.value += 1;
+            tntComponentKey.value += 1;
+            propertySearchID.value = '';
+            ledgerSearchID.value = '';
         }
 
-        watch([propertyID,], () => {
-            if (propertyID.value) {
-                unitComponentKey.value += 1;
-                setupComponentKey.value += 1;
-                fetchUnits();
-                fetchSetups();
-            }
-            
-        }, { immediate: true });
 
-        watch([ consumed_units], ()=>{
-            if(consumed_units.value){
-                formFields.value[7].value = consumed_units.value;
-                formFields.value[8].value = meter_rent.value;
-                formFields.value[9].value = consumed_units_totals.value;
-            }
-        }, { immediate: true });
         
         const showModalLoader = () =>{
             modal_loader.value = "block";
@@ -256,109 +172,57 @@ export default{
         const hideModalLoader = () =>{
             modal_loader.value = "none";
         }
-        const saveMeterReading = async() =>{
-            showModalLoader();
-            let formData = {
-                unit: unitID.value,
-                unit_id: unitID.value,
-                previous_reading: formFields.value[4].value,
-                previous_reading_date: formFields.value[3].value,
-                current_reading: formFields.value[6].value,
-                current_reading_date: formFields.value[5].value,
-                meter_costing: setupID.value,
-                meter_costing_id: setupID.value,
-                company: companyID.value
-            }
 
-            errors.value = [];
-            for(let i=3; i < (formFields.value.length); i++){
-                if(formFields.value[i].value =='' && formFields.value[i].type =='text' && formFields.value[i].required == true){
-                    errors.value.push(formFields.value[i].label);
-                }else if(formFields.value[i].value < 0 && formFields.value[i].type =='number' && formFields.value[i].required == true){
-                    errors.value.push(formFields.value[i].label);
-                }
-            }
-            if(propertyID.value == '' && unitID.value == '' && setupID.value == ''){
-                errors.value.push('error')
-            }
-
-            if(errors.value.length){
-                toast.error('Fill In Required Fields');
-                hideModalLoader();
-            }else if(consumed_units.value <= 0){
-                toast.error('Invalid Reading');
-                hideModalLoader();
-            }else{
-                try {
-                    const response = await store.dispatch('Meter_Readings/createMeterReading', formData);
-                    if (response && response.status === 200) {
-                        hideModalLoader();
-                        toast.success('Meter Reading created successfully!');
-                        handleReset();
-                        unitComponentKey.value += 1;
-                        setupComponentKey.value += 1;
-                        propComponentKey.value += 1;
-                    } else {
-                        toast.error('An error occurred while creating the reading.');
-                    }
-                } catch (error) {
-                    console.error(error.message);
-                    toast.error('Failed to create reading: ' + error.message);
-                } finally {
-                    hideModalLoader();
-                    searchMeterReadings();
-                }
-            }
-        }
-
-        const removeMeterReading = async() =>{
+        const removeReceipt = async() =>{
             if(selectedIds.value.length == 1){
                 let formData = {
                     company: companyID.value,
-                    meter_reading: selectedIds.value
+                    journal: selectedIds.value,
+                    txn_type: "RCPT"
                 }
                 try{
-                    const response = await store.dispatch('Meter_Readings/deleteMeterReading',formData)
+                    const response = await store.dispatch('Journals/deleteReceipt',formData)
                     if(response && response.status == 200){
-                        toast.success("Meter Reading Removed Succesfully");
-                        searchMeterReadings();
+                        toast.success("Receipt Removed Succesfully");
+                        searchReceipts();
                     }
                 }
                 catch(error){
                     console.error(error.message);
-                    toast.error('Failed to remove meter reading: ' + error.message);
+                    toast.error('Failed to remove Receipt: ' + error.message);
                 }
                 finally{
                     selectedIds.value = [];
                 }
             }else if(selectedIds.value.length > 1){
-                toast.error("You have selected more than 1 reading") 
+                toast.error("You have selected more than 1 Receipt") 
             }else{
-                toast.error("Please Select A Meter Reading To Remove")
+                toast.error("Please Select A Receipt To Remove")
             }
         }
-        const removeMeterReadings = async() =>{
+        const removeReceipts = async() =>{
             if(selectedIds.value.length){
                 let formData = {
                     company: companyID.value,
-                    meter_reading: selectedIds.value
+                    journal: selectedIds.value,
+                    txn_type: "RCPT"
                 }
                 try{
-                    const response = await store.dispatch('Meter_Readings/deleteMeterReading',formData)
+                    const response = await store.dispatch('Journals/deleteReceipt',formData)
                     if(response && response.status == 200){
-                        toast.success("Meter Reading(s) Removed Succesfully");
-                        searchMeterReadings();
+                        toast.success("Receipt(s) Removed Succesfully");
+                        searchReceipts();
                     }
                 }
                 catch(error){
                     console.error(error.message);
-                    toast.error('Failed to remove readings: ' + error.message);
+                    toast.error('Failed to remove Receipt(s): ' + error.message);
                 }
                 finally{
                     selectedIds.value = [];
                 }
             }else{
-                toast.error("Please Select A Meter Reading To Remove")
+                toast.error("Please Select A Receipt To Remove")
             }
         }
         const showLoader = () =>{
@@ -367,26 +231,28 @@ export default{
         const hideLoader = () =>{
             loader.value = "none";
         }
-        const searchMeterReadings = () =>{
+        const searchReceipts = () =>{
             showLoader();
             showNextBtn.value = false;
             showPreviousBtn.value = false;
             let formData = {
-                tenant_name: tenant_name_search.value,
-                tenant_code: tenant_code_search.value,
+                client_category: "Tenants",
+                txn_type: "RCPT",
+                client_name: tenant_name_search.value,
+                client_code: tenant_code_search.value,
                 from_date: from_date_search.value,
                 to_date: to_date_search.value,
                 property: propertySearchID.value,
-                utility: utilitySearchID.value,
-                company_id: companyID.value
+                company: companyID.value
             } 
+   
             axios
-            .post(`api/v1/meter-readings-search/?page=${currentPage.value}`,formData)
+            .post(`api/v1/clients-journals-search/?page=${currentPage.value}`,formData)
             .then((response)=>{
-                readingsList.value = response.data.results;
-                store.commit('Meter_Readings/LIST_METER_READINGS', readingsList.value)
+                receiptsList.value = response.data.results;
+                store.commit('Journals/LIST_TENANTS_RECEIPTS', receiptsList.value)
                 propResults.value = response.data;
-                propArrLen.value = readingsList.value.length;
+                propArrLen.value = receiptsList.value.length;
                 propCount.value = propResults.value.count;
                 pageCount.value = Math.ceil(propCount.value / 50);
                 if(response.data.next){
@@ -404,8 +270,8 @@ export default{
             })
         }
         const resetFilters = () =>{
-            store.commit('Meter_Readings/RESET_SEARCH_FILTERS')
-            searchMeterReadings();
+            store.commit('Journals/RESET_SEARCH_FILTERS')
+            searchReceipts();
         }
         const loadPrev = () =>{
             if (currentPage.value <= 1){
@@ -414,7 +280,7 @@ export default{
                 currentPage.value -= 1;
             }
             
-            searchMeterReadings();
+            searchReceipts();
             // scrollToTop();
         }
         const loadNext = () =>{
@@ -424,63 +290,43 @@ export default{
                 currentPage.value += 1;
             }
             
-            searchMeterReadings();
+            searchReceipts();
             // scrollToTop(); 
         }
         const firstPage = ()=>{
             currentPage.value = 1;
-            searchMeterReadings();
+            searchReceipts();
             // scrollToTop();
         }
         const lastPage = () =>{
             currentPage.value = pageCount.value;
-            searchMeterReadings();
+            searchReceipts();
             // scrollToTop();
         }
-        const addNewReading = () =>{
-            updateFormFields();
-            store.dispatch("Meter_Readings/updateState",{selectedReading:null, isEditing:false})
-            propertyID.value = "";
-            unitID.value = "";
-            setupID.value = "";
-            unitComponentKey.value += 1;
-            propComponentKey.value += 1;
-            setupComponentKey.value += 1;
-            propModalVisible.value = true;
-            handleReset();
-            flex_basis.value = '1/4';
-            flex_basis_percentage.value = '25';
+        const addNewReceipt = async() =>{
+            store.dispatch('Journals/updateState', {journalsClientList: []})
+            store.commit('pageTab/ADD_PAGE', {'PMS':'Receipt_Details'});
+            store.state.pageTab.pmsActiveTab = 'Receipt_Details'; 
         }
         const handleActionClick = async(rowIndex, action, row) =>{
             if(action == 'delete'){
-                const meter_readingID = [row['meter_reading_id']];
+                const journalID = [row['journal_id']];
                 let formData = {
                     company: companyID.value,
-                    meter_reading: meter_readingID
+                    journal: journalID
                 }
-                await store.dispatch('Meter_Readings/deleteMeterReading',formData).
+                await store.dispatch('Journals/deleteReceipt',formData).
                 then(()=>{
-                    searchMeterReadings();
+                    searchInvoices();
                 })
             }
         }
         const closeModal = async() =>{
-            await store.dispatch('Meter_Setup/updateState', {setupArr:[]})
-            await store.dispatch('Active_Tenants/updateState', {tenantUnitsArr:[]})
-            setupArray.value = [];
-            unitsArray.value = [];
-            propModalVisible.value = false;
-            propComponentKey.value += 1;
-            setupComponentKey.value += 1;
-            unitComponentKey.value += 1;
-            propertyID.value = "";
-            unitID.value = "";
-            setupID.value = "";
             
         }
 
         const dropdownOptions = ref([
-            {label: 'Batch Reading', action: 'batch-meter-reading'},
+            {label: 'Reverse Receipt', action: 'reverse-receipt'},
         ]);
         const handleDynamicOption = (option) =>{
             if(option == 'batch-meter-reading'){
@@ -489,16 +335,16 @@ export default{
             }
         }
         onBeforeMount(()=>{
-            searchMeterReadings();
+            searchReceipts();
             
         })
         return{
-            title, searchMeterReadings,resetFilters, addButtonLabel, searchFilters, tableColumns, readingsList,
+            title, searchReceipts,resetFilters, addButtonLabel, searchFilters, tableColumns, receiptsList,
             propResults, propArrLen, propCount, pageCount, showNextBtn, showPreviousBtn,
             loadPrev, loadNext, firstPage, lastPage, idField, actions, handleActionClick, propModalVisible, closeModal,
-            submitButtonLabel, showModal, addNewReading, showLoader, loader, hideLoader, modal_loader, modal_top, modal_left, modal_width,displayButtons,
-            showModalLoader, hideModalLoader, saveMeterReading, formFields, handleSelectionChange, flex_basis,flex_basis_percentage,
-            removeMeterReading, removeMeterReadings, dropdownOptions, handleDynamicOption
+            submitButtonLabel, showModal, addNewReceipt, showLoader, loader, hideLoader, modal_loader, modal_top, modal_left, modal_width,displayButtons,
+            showModalLoader, hideModalLoader, handleSelectionChange, flex_basis,flex_basis_percentage,
+            removeReceipt, removeReceipts, dropdownOptions, handleDynamicOption
         }
     }
 };

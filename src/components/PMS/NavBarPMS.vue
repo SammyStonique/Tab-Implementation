@@ -131,7 +131,7 @@
                         </button>
                     </div>
                     <div class="py-2 px-3 pl-4 w-full hover:bg-slate-500 hover:w-full">
-                        <button class="flex text-sm" @click="openPage({'PMS':'Receipts'})">
+                        <button class="flex text-sm" @click="openPage({'PMS':'Tenant_Receipts'})">
                         <i class="fa fa-object-ungroup pt-2 mr-2" aria-hidden="true"></i>
                         <p class="">Receipts</p>
                         </button>

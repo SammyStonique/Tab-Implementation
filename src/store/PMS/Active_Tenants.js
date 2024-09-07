@@ -274,6 +274,7 @@ const actions = {
     const selectedUnit = state.tenantUnitsList.find(unit => (unit.unit.unit_number + ' - ' + unit.tenant.tenant.tenant_name) === option);
     if (selectedUnit) {
         state.tenantUnitID = selectedUnit.tenant_unit_id;
+        state.tenantID = selectedUnit.tenant.tenant.tenant_id;
         state.tenantUnitsArray = [...state.tenantUnitsArray, selectedUnit];
     }
       

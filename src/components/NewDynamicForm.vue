@@ -74,7 +74,7 @@
             <div v-else>
               <label for="">{{ field.label }}:</label><br />
             </div>
-            <textarea v-model="field.value" :name="field.name" class="bg-slate-50 rounded border border-gray-400 text-base pl-2 pt-2" :rows="field.textarea_rows" :cols="field.textarea_cols"></textarea>
+            <textarea v-model="field.value" :name="field.name" class="bg-slate-50 rounded border border-gray-400 text-sm pl-2 pt-2" :rows="field.textarea_rows" :cols="field.textarea_cols"></textarea>
           </div>
         </div>
         <div class="flex-1 basis-full p-2">
@@ -146,7 +146,7 @@ export default{
       }
 
       return{
-        handleSubmit, handleReset, handleChange
+        handleSubmit, handleReset, handleChange, 
       }
     }
 

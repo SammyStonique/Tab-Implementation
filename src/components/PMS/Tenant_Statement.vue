@@ -302,7 +302,7 @@ export default defineComponent({
             {label: "Date", key:"date", type: "text", editable: false},
             {label: "Ref No", key:"reference_no", type: "text", editable: false},
             {label: "Txn No", key: "journal_no", type: "text", editable: false},
-            {label: "Narration", key: "description", type: "text", editable: false},
+            {label: "Narration", key: "description", type: "text", editable: false, maxWidth:"700px"},
             {label: "Charges", key: "debit_amount", type: "text", editable: false},
             {label: "Payments", key: "credit_amount", type: "text", editable: false},
             {label: "Balance", key: "running_balance", type: "text", editable: false},
