@@ -1,6 +1,6 @@
 <template>
     <div class="tab-container h-6 bg-gray-200 w-full flex">
-        <div v-for="page,index in pageArray" :key="index" :class="{'relative text-left pl-1.5 bg-white rounded text-xs pt-1.5 w-36 border border-slate-300': true,'text-slate-400': page === activePage}">
+        <div v-for="page,index in pageArray" :key="index" :class="{'relative text-left pl-1.5 bg-white rounded text-xs pt-1.5 w-40 border border-slate-300': true,'text-slate-400': page === activePage}">
             <button class="text-left w-3/4 mr-2" @click="openPage(page)">{{ page }}</button>
             <button class="close-tab left-2 font-bold text-xs" @click="closePage(page)" v-if="page !='Dashboard'">x</button>
         </div>
@@ -48,7 +48,7 @@ export default defineComponent({
 }
 .close-tab{
     float: right;
-    margin-left: 125px;
+    margin-left: 140px;
     position: absolute;
     border:0px;
     background-color: inherit;

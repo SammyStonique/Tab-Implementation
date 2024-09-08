@@ -157,7 +157,7 @@ export default defineComponent({
                         receiptRows.value[i].payment_allocation = receiptRows.value[i].due_amount;
                         receiptRows.value[i].bal_after_alloc = receiptRows.value[i].due_amount - receiptRows.value[i].payment_allocation;
                         receiptTotals.value = receiptTotals.value - receiptRows.value[i].payment_allocation;
-                        receipt_memo.value += receiptRows.value[i].description + ','
+                        receipt_memo.value += receiptRows.value[i].description + ', '
                     }else{
                         receiptRows.value[i].payment_allocation = receiptTotals.value;
                         receiptRows.value[i].bal_after_alloc = receiptRows.value[i].due_amount - receiptRows.value[i].payment_allocation;
@@ -276,6 +276,13 @@ export default defineComponent({
         } 
         const createTenantReceipt = async() =>{
             showLoader();
+            if(formFields.value[8].value == ""){
+                let rcptMemo = ""
+                for(let i=0; i<receiptRows.value.length; i++){
+                    rcptMemo = rcptMemo + receiptRows.value[i].description + ', ';
+                }
+                formFields.value[8].value = rcptMemo;
+            }
             let formData = {
                 company: companyID.value,
                 txn_type: "RCPT",
@@ -292,7 +299,7 @@ export default defineComponent({
                 banking_date: formFields.value[3].value,
                 receipt_items: receiptRows.value
             }
-            console.log("THE FORM DAAATA IS ",formData)
+            
             errors.value = [];
             for(let i=2; i < (formFields.value.length); i++){
                 if(formFields.value[i].value =='' && formFields.value[i].required == true){
@@ -306,8 +313,7 @@ export default defineComponent({
             for(let i=0; i<receiptRows.value.length; i++){
                 rcptTotal += Number(receiptRows.value[i].payment_allocation);
             }
-            console.log("THE RECEIPT TOTAL AAMOUNT IS ",rcptTotal)
-            console.log("THE RECEIPT TOTALS IS ",formFields.value[6].value)
+
             if(formFields.value[6].value != Number(rcptTotal)){
                 toast.error('Invalid Receipt Amount');
                 hideLoader();
@@ -387,7 +393,7 @@ export default defineComponent({
                 hideModalLoader();
             }else{
                 let formData = {
-                    journal_no : "-",
+                    journal_no : "PREPAID",
                     description : "Tenant Prepayment",
                     total_amount : prepaymentAmount.value,
                     total_paid : prepaymentAmount.value,

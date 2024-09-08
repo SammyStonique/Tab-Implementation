@@ -410,7 +410,8 @@ export default{
                 const journalID = [row['journal_id']];
                 let formData = {
                     company: companyID.value,
-                    journal: journalID
+                    journal: journalID,
+                    txn_type: "INV"
                 }
                 await store.dispatch('Journals/deleteInvoice',formData).
                 then(()=>{

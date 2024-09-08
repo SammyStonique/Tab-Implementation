@@ -1,6 +1,7 @@
 <template>
     <div class="z-10">
         <PageComponent 
+            :key="mainComponentKey"
             :loader="loader" @showLoader="showLoader" @hideLoader="hideLoader"
             :addButtonLabel="addButtonLabel"
             @handleAddNew="addNewReceipt"
@@ -48,6 +49,7 @@ export default{
         const toast = useToast();
         const loader = ref('none');
         const modal_loader = ref('none');
+        const mainComponentKey = ref(0);
         const idField = 'journal_id';
         const addButtonLabel = ref('New Receipt');
         const submitButtonLabel = ref('Add');
@@ -184,6 +186,7 @@ export default{
                     const response = await store.dispatch('Journals/deleteReceipt',formData)
                     if(response && response.status == 200){
                         toast.success("Receipt Removed Succesfully");
+                        mainComponentKey.value += 1;
                         searchReceipts();
                     }
                 }
@@ -211,6 +214,7 @@ export default{
                     const response = await store.dispatch('Journals/deleteReceipt',formData)
                     if(response && response.status == 200){
                         toast.success("Receipt(s) Removed Succesfully");
+                        mainComponentKey.value += 1;
                         searchReceipts();
                     }
                 }
@@ -315,10 +319,9 @@ export default{
                     company: companyID.value,
                     journal: journalID
                 }
-                await store.dispatch('Journals/deleteReceipt',formData).
-                then(()=>{
-                    searchInvoices();
-                })
+                await store.dispatch('Journals/deleteReceipt',formData)
+                mainComponentKey.value += 1;
+                searchReceipts();       
             }
         }
         const closeModal = async() =>{
@@ -339,7 +342,7 @@ export default{
             
         })
         return{
-            title, searchReceipts,resetFilters, addButtonLabel, searchFilters, tableColumns, receiptsList,
+            mainComponentKey, title, searchReceipts,resetFilters, addButtonLabel, searchFilters, tableColumns, receiptsList,
             propResults, propArrLen, propCount, pageCount, showNextBtn, showPreviousBtn,
             loadPrev, loadNext, firstPage, lastPage, idField, actions, handleActionClick, propModalVisible, closeModal,
             submitButtonLabel, showModal, addNewReceipt, showLoader, loader, hideLoader, modal_loader, modal_top, modal_left, modal_width,displayButtons,

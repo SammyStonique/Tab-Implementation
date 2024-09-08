@@ -348,13 +348,13 @@ const actions = {
       if (result.value) {
         axios.post(`api/v1/cancel-rental-invoice/`,formData)
         .then((response)=>{
-          if(response.status == 200){
+          if(response.data.msg == "Success"){
               Swal.fire("Booking Canceled!", {
                 icon: "success",
               }); 
-          }else{
+          }else if(response.data.msg == "Paid"){
             Swal.fire({
-              title: "Error Canceling Invoice",
+              title: "Cannot Cancel Booking For Paid Invoice(s)",
               icon: "warning",
             });
           }                   

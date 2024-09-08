@@ -22,6 +22,8 @@ import Variation_Periods from './PMS/Variation_Periods';
 import Tenant_Deposits from './PMS/Tenant_Deposits';
 import Meter_Setup from './PMS/Meter_Setup';
 import Meter_Readings from './PMS/Meter_Readings';
+import Tenant_Prepayments from './PMS/Tenant_Prepayments';
+import Prepayment_Allocations from './PMS/Prepayment_Allocations';
 
 import Ledgers from './FA/Ledgers';
 import Taxes from './FA/Taxes';
@@ -36,7 +38,7 @@ export default createStore({
     userData,
     Appointments,Client_Categories,Departments,Patients_List,Medical_Fees,Doctors,
     Properties_List, Zones, Landlords_List, Units_List, Active_Tenants, Utilities,Security_Deposits,Variation_Periods, Tenant_Deposits,
-    Meter_Setup, Meter_Readings,
+    Meter_Setup, Meter_Readings,Tenant_Prepayments,Prepayment_Allocations,
     Ledgers, Currencies, Taxes, Journals
   },
 });

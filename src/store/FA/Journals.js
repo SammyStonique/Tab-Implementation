@@ -13,6 +13,7 @@ const state = {
   tenantInvoices: [],
   tenantReceipts: [],
   outstandingBalance: 0,
+  invoiceDueAmount: 0,
   jnlArray: [],
   jnlSortedArr: [],
   journalID: '',
@@ -37,6 +38,9 @@ const mutations = {
     state.jnlSortedArr = [];
     state.tenantInvoices = [];
     state.tenantReceipts = [];
+    state.outstandingBalance = 0;
+    state.invoiceDescription = "";
+    state.invoiceDueAmount = 0;
     state.journalID = '';
     state.journalNo = '';
     state.client_name_search = '';
@@ -138,7 +142,7 @@ const actions = {
     axios.post(`api/v1/fetch-journals/`,formData)
     .then((response)=>{
       for(let i=0; i< response.data.length; i++){
-        state.journalArr.push((response.data[i].journal_no + " - " + response.data[i].description + " - " + response.data[i].amount));
+        state.journalArr.push((response.data[i].journal_no + " - " + response.data[i].description + " - " + response.data[i].due_amount));
       }
       commit('LIST_JOURNALS', response.data);
     })
@@ -233,10 +237,12 @@ const actions = {
     },
   handleSelectedJournal({ commit, state }, option){
     state.journalArray = [];
-    const selectedJournal = state.journalsList.find(journal => (journal.journal_no + " - " +journal.description + " - " +journal.amount) === option);
+    const selectedJournal = state.journalsList.find(journal => (journal.journal_no + " - " +journal.description + " - " +journal.due_amount) === option);
     if (selectedJournal) {
         state.journalID = selectedJournal.journal_id;
         state.journalNo = selectedJournal.journal_no;
+        state.invoiceDescription = selectedJournal.description;
+        state.invoiceDueAmount = selectedJournal.due_amount;
         state.journalArray = [...state.journalArray, selectedJournal];
     }
     commit('JOURNALS_ARRAY', state.journalArray);
@@ -276,10 +282,14 @@ const actions = {
               Swal.fire("Poof! Invoice(s) removed succesfully!", {
                 icon: "success",
               }); 
-              toast.success("Invoice(s) removed succesfully")
           }else if(response.data.msg == "Paid"){
             Swal.fire({
               title: "Cannot Delete Paid Invoice",
+              icon: "warning",
+            });
+          }else if(response.data.msg == "Prepayment"){
+            Swal.fire({
+              title: "Invoice Has A Prepayment Allocation",
               icon: "warning",
             });
           }                   
@@ -293,6 +303,48 @@ const actions = {
         })
       }else{
         Swal.fire(`Invoice has not been deleted!`);
+      }
+    })
+  },
+  deleteReceipt({ commit,state }, formData) {
+    Swal.fire({
+      title: "Are you sure?",
+      text: `Do you wish to delete Receipt?`,
+      type: 'warning',
+      showCloseButton: true,
+      showCancelButton: true,
+      confirmButtonText: 'Yes Delete Receipt!',
+      cancelButtonText: 'Cancel!',
+      customClass: {
+          confirmButton: 'swal2-confirm-custom',
+          cancelButton: 'swal2-cancel-custom',
+      },
+      showLoaderOnConfirm: true,
+    }).then((result) => {
+      if (result.value) {
+        axios.post(`api/v1/delete-journal/`,formData)
+        .then((response)=>{
+          if(response.data.msg == "Success"){
+              Swal.fire("Poof! Receipt(s) removed succesfully!", {
+                icon: "success",
+              }); 
+              toast.success("Receipt(s) removed succesfully")
+          }else if(response.data.msg == "Paid"){
+            Swal.fire({
+              title: "Cannot Delete Paid Receipt",
+              icon: "warning",
+            });
+          }                   
+        })
+        .catch((error)=>{
+          console.log(error.message);
+          Swal.fire({
+            title: error.message,
+            icon: "warning",
+          });
+        })
+      }else{
+        Swal.fire(`Receipt has not been deleted!`);
       }
     })
   },
