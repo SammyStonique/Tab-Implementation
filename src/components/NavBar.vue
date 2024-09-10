@@ -31,7 +31,7 @@
                   <button @click="showDropdown"><i class="fa fa-caret-down" aria-hidden="true"></i></button>
               </div>
               </div>
-              <button class="fixed inset-0 bg-gray-50 opacity-25 cursor-default w-full" v-if="dropdown" @click="dropdown = !dropdown"></button>
+              <button class="fixed inset-0 bg-gray-50 opacity-15 cursor-default w-full" v-if="dropdown" @click="dropdown = !dropdown"></button>
               <div class="dropdown-content mt-1.5 absolute rounded bg-white w-44 py-3 px-3 shadow-md shadow-slate-500" v-if="dropdown">
                 <router-link to="/my-account"><strong>My Account</strong></router-link><br />
                 <button @click="logout"><strong>Logout</strong></button>

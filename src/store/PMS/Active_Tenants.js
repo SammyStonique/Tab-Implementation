@@ -524,16 +524,16 @@ const actions = {
       if (result.value) {
         axios.post(`api/v1/delete-tenant-deposit/`,formData)
         .then((response)=>{
-          if(response.status == 200){
-              Swal.fire("Poof! Deposit removed succesfully!", {
-                icon: "success",
-              }); 
-          }else{
+          if(response.data.msg == "Success"){
+            Swal.fire("Poof! Deposit removed succesfully!", {
+              icon: "success",
+            }); 
+          }else if(response.data.msg == "Failed"){
             Swal.fire({
-              title: "Error Deleting Deposit",
+              title: "The Deposit Has An Invoice",
               icon: "warning",
             });
-          }                   
+          }                    
         })
         .catch((error)=>{
           console.log(error.message);
@@ -565,16 +565,16 @@ const actions = {
       if (result.value) {
         axios.post(`api/v1/delete-tenant-utility/`,formData)
         .then((response)=>{
-          if(response.status == 200){
+            if(response.data.msg == "Success"){
               Swal.fire("Poof! Utility removed succesfully!", {
                 icon: "success",
               }); 
-          }else{
+          }else if(response.data.msg == "Failed"){
             Swal.fire({
-              title: "Error Deleting Utility",
+              title: "The Utility Has An Invoice",
               icon: "warning",
             });
-          }                   
+          }                    
         })
         .catch((error)=>{
           console.log(error.message);

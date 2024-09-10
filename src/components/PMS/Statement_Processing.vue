@@ -2,22 +2,42 @@
     <PageStyleComponent :key="mainComponentKey" :loader="loader" @showLoader="showLoader" @hideLoader="hideLoader">
         <template v-slot:body>
             <div class="mt-6">
-                <DynamicForm  :fields="formFields" :flex_basis="flex_basis" :flex_basis_percentage="flex_basis_percentage" :displayButtons="displayButtons" @handleSubmit="createTenantReceipt" @handleReset="handleReset"> 
-                    <template v-slot:additional-content>
-                        <div class="flex">
-                            <div class="basis-1/3 text-left">
-                                <button v-show="hasPrepayment" @click="addPrepayment" class="rounded bg-green-400 text-sm mr-2  text-white px-2 py-1.5"><i class="fa fa-check-circle text-xs mr-1.5" aria-hidden="true"></i>Add Prepayment</button>
-                            </div>
-                            <div class="basis-1/2 text-red-500 text-left">
-                                <p class="font-bold">DUE BALANCE:  {{ Number(outstanding_balance).toLocaleString() }}</p>
-                            </div>               
-                        </div>
-                        
-                        <div class="px-3 min-h-[220px]">
-                            <DynamicTable :key="tableKey" :columns="receiptColumns" :rows="receiptRows" :showActions="showActions" :idField="idField" @update-receipt-amount="allocateInputAmount" @row-db-click="autoPopulatePaymentAlloc"/>
-                        </div>
-                    </template>
-                </DynamicForm>
+                <div class="flex h-16">
+                    <DynamicForm  :fields="formFields" :flex_basis="flex_basis" :flex_basis_percentage="flex_basis_percentage"  @handleSubmit="createTenantReceipt" @handleReset="handleReset" /> 
+                    <button @click="fetchTransactions" class="rounded bg-green-400 text-sm h-8 w-24 mt-2 text-white px-1.5 py-1.5"><i class="fa fa-check-circle text-xs mr-1.5" aria-hidden="true"></i>Load</button>
+                </div>
+            </div>
+            <div class="table-container capitalize text-sm min-h-[500px] mt-3">
+                <table class="dynamic-table rounded">
+                    <thead>
+                        <tr>
+                            <!-- Fixed main headers -->
+                            <th rowspan="2" style="width:3%;">Unit</th>
+                            <th rowspan="2">Tenant Name</th>
+                            <th :colspan="subHeaders.balanceBF.length">Balance B/F</th>
+                            <th :colspan="subHeaders.invoiced.length">Invoiced</th>
+                            <th :colspan="subHeaders.paid.length">Paid</th>
+                            <th :colspan="subHeaders.balanceCF.length">Balance C/F</th>
+                        </tr>
+                        <tr>
+                            <!-- Dynamic sub-column headers -->
+                            <th v-for="(subHeader, index) in subHeaders['balanceBF']" :key="'balanceBF-' + index">{{ subHeader }}</th>
+                            <th v-for="(subHeader, index) in subHeaders['invoiced']" :key="'invoiced-' + index">{{ subHeader }}</th>
+                            <th v-for="(subHeader, index) in subHeaders['paid']" :key="'paid-' + index">{{ subHeader }}</th>
+                            <th v-for="(subHeader, index) in subHeaders['balanceCF']" :key="'balanceCF-' + index">{{ subHeader }}</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr v-for="(row, rowIndex) in tableData" :key="rowIndex">
+                            <td>{{ row.unitNo }}</td>
+                            <td>{{ row.tenantName }}</td>
+                            <td v-for="(subHeader, subIndex) in subHeaders['balanceBF']" :key="'balanceBF-' + subIndex">{{ row.balanceBF[subIndex] }}</td>
+                            <td v-for="(subHeader, subIndex) in subHeaders['invoiced']" :key="'invoiced-' + subIndex">{{ row.invoiced[subIndex] }}</td>
+                            <td v-for="(subHeader, subIndex) in subHeaders['paid']" :key="'paid-' + subIndex">{{ row.paid[subIndex] }}</td>
+                            <td v-for="(subHeader, subIndex) in subHeaders['balanceCF']" :key="'balanceCF-' + subIndex">{{ row.balanceCF[subIndex] }}</td>
+                        </tr>
+                    </tbody>
+                </table>
             </div>
         </template>
     </PageStyleComponent>
@@ -51,6 +71,13 @@ export default defineComponent({
         const loader = ref('none');
         const modal_loader = ref('none');
         const tableKey = ref(0);
+        const subHeaders = ref({
+            balanceBF: computed(()=> store.state.Property_Statements.subHeaders),
+            invoiced: computed(()=> store.state.Property_Statements.subHeaders),
+            paid: computed(()=> store.state.Property_Statements.subHeaders),
+            balanceCF: computed(()=> store.state.Property_Statements.subHeaders),
+        });
+        const tableData = computed(()=> store.state.Property_Statements.tableData);
         const mainComponentKey = ref(0);
         const tntComponentKey = ref(0);
         const ledComponentKey = ref(0);
@@ -204,25 +231,10 @@ export default defineComponent({
                     searchPlaceholder: 'Select Property...', dropdownWidth: '390px', updateValue: "",
                     fetchData: fetchProperties(), clearSearch: clearSelectedProperty()            
                 },
-                {
-                    type:'search-dropdown', label:"Tenant", value: tenantID.value, componentKey: tntComponentKey,
-                    selectOptions: tenantArray, optionSelected: handleSelectedTenant, required: true,
-                    searchPlaceholder: 'Select Tenant...', dropdownWidth: '390px', updateValue: "",
-                    fetchData: fetchTenants(), clearSearch: clearSelectedTenant()  
-                },
-                { type: 'date', name: 'issue_date',label: "Recording Date", value: '', required: true },
-                { type: 'date', name: 'banking_date',label: "Banking Date", value: '', required: true },
-                { type: 'dropdown', name: 'payment_method',label: "Payment Method", value: '', placeholder: "", required: true, options: [{ text: 'Cash', value: 'Cash' }, { text: 'Mpesa', value: 'Mpesa' },{ text: 'Bank Deposit', value: 'Bank Deposit' }, { text: 'Cheque', value: 'Cheque' },{ text: 'Check-off', value: 'Check-off' }, { text: 'RTGS', value: 'RTGS' },{ text: 'EFT', value: 'EFT' }, { text: 'Not Applicable', value: 'Not Applicable' }] },
-                { type: 'text', name: 'reference_no',label: "Reference No", value: '', required: true,},
-                { type: 'number', name: 'total_amount',label: "Amount", value: receipt_totals.value || 0, required: true, method: allocateReceivedAmount },
-                {
-                    type:'search-dropdown', label:"Cashbook", value: ledgerID.value, componentKey: ledComponentKey,
-                    selectOptions: ledgerArray, optionSelected: handleSelectedLedger, required: true,
-                    searchPlaceholder: 'Select Cashbook...', dropdownWidth: '250px', updateValue: "",
-                    fetchData: fetchLedgers(), clearSearch: clearSelectedLedger()  
-                },
-                {type:'text-area', label:"Memo", value: receipt_memo.value, textarea_rows: '2', textarea_cols: '40', required: true},
-                
+                { type: 'dropdown', name: 'month',label: "Month", value: '', placeholder: "", required: true, options: [{ text: 'January', value: 'January' }, { text: 'February', value: 'February' },{ text: 'March', value: 'March' }, { text: 'April', value: 'April' },{ text: 'May', value: 'May' }, { text: 'June', value: 'June' },{ text: 'July', value: 'July' }, { text: 'August', value: 'August' },{ text: 'September', value: 'September' }, { text: 'October', value: 'October' },{ text: 'November', value: 'November' }, { text: 'December', value: 'December' }] },
+                { type: 'text', name: 'reference_no',label: "Year", value: '', required: true,},
+                { type: 'date', name: 'with_effect_from',label: "W.E.F", value: '', required: true },
+                { type: 'date', name: 'with_effect_to',label: "W.E.T", value: '', required: true },            
             ]
         };
         watch([receipt_memo, receipt_totals], () => {
@@ -428,6 +440,20 @@ export default defineComponent({
             handlePrepaymentReset();
         }
 
+        const fetchTransactions = async() =>{
+            showLoader();
+            let formData = {
+                month: formFields.value[1].value,
+                year: formFields.value[2].value,
+                with_effect_from: formFields.value[3].value,
+                with_effect_to: formFields.value[4].value,
+                property: propertyID.value,
+                company: companyID.value
+            }
+            await store.dispatch('Property_Statements/fetchStatementData', formData)
+            hideLoader();
+        }
+
         onBeforeMount(()=>{ 
             updateFormFields();
             outstanding_balance.value = 0;
@@ -442,12 +468,45 @@ export default defineComponent({
         })
 
         return{
-            formFields, flex_basis, flex_basis_percentage, displayButtons, createTenantReceipt, mainComponentKey,
+            subHeaders, tableData, formFields, flex_basis, flex_basis_percentage, displayButtons, createTenantReceipt, mainComponentKey,
             handleReset, loader, showLoader, hideLoader, tableKey, receiptColumns, receiptRows, showActions, idField,
             autoPopulatePaymentAlloc, outstanding_balance, hasPrepayment, addPrepayment, handlePrepayment, allocateInputAmount,
             title, modal_loader, modal_left, modal_top, modal_width, prepModalVisible, showModalLoader, hideModalLoader, closeModal,
-            additionalFields,flex_basis_additional, flex_basis_percentage_additional, handlePrepaymentReset
+            additionalFields,flex_basis_additional, flex_basis_percentage_additional, handlePrepaymentReset,
+            fetchTransactions
         }
     }
 })
 </script>
+
+<style scoped>
+.dynamic-table {
+  width: 100%;
+  border-collapse: collapse;
+  /* table-layout: fixed; */
+}
+
+.dynamic-table th,
+.dynamic-table td {
+  border: 1px solid #ccc;
+  padding: 3px;
+  text-align: left;
+}
+
+.dynamic-table input{
+  text-align: left;
+  outline: none;
+  background-color: inherit;
+}
+/* Style for fixed header */
+.table-container thead th {
+  position: sticky;
+  top: 0;
+  background: #3b4252;
+  color: white;
+}
+
+.table-body tr:nth-child(even) {
+  background-color: #f2f2f2;
+}
+</style>

@@ -184,7 +184,7 @@ export default{
                     fetchData: fetchProperties(), clearSearch: clearSelectedProperty()            
                 },
                 {
-                    type:'search-dropdown', label:"Tenant", value: propertyID.value, componentKey: tntComponentKey,
+                    type:'search-dropdown', label:"Tenant", value: tenantID.value, componentKey: tntComponentKey,
                     selectOptions: tenantArray, optionSelected: handleSelectedTenant, required: false,
                     searchPlaceholder: 'Select Tenant...', dropdownWidth: '400px', updateValue: "",
                     fetchData: fetchTenants(), clearSearch: clearSelectedTenant()            

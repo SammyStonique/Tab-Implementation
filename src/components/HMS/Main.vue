@@ -1,9 +1,15 @@
 <template>
     <div class="main-container w-full min-h-[90vh] bottom-8">
         <div class="fixed top-0 w-full z-50">
-            <NavBar :title="title" @minimize="minimize" @close="close"/>
-            <NavBarHMS @openPage="selectTab"/>
-            <PagesTab @openPage="selectedTab" @closePage="closeTab"/>
+            <div class="z-50 relative">
+                <NavBar :title="title" @minimize="minimize" @close="close"/>
+            </div> 
+            <div class="z-40 relative">
+                <NavBarHMS @openPage="selectTab"/>
+            </div>
+            <div class="z-30">
+                <PagesTab @openPage="selectedTab" @closePage="closeTab"/>
+            </div>
         </div>
         <div class="tab-content z-10 overflow-y-hidden">
             <keep-alive :include="cachedComponents">

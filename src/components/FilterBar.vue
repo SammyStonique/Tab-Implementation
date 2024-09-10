@@ -16,7 +16,8 @@
             </select>
           </div>
           <div v-else-if="filter.type === 'search-dropdown'">
-            <SearchableDropdown          
+            <SearchableDropdown  
+              :key="filter.componentKey"         
               :options="filter.selectOptions"
               :updateValue="filter.updateValue"
               :dropdownWidth="filter.dropdownWidth"

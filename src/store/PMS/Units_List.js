@@ -42,6 +42,9 @@ const mutations = {
   UNITS_ARRAY(state, units){
     state.unitArray = units;
   },
+  SET_SELECTED_PROPERTY(state, property) {
+    state.selectedProperty = property;
+  },
   SET_STATE(state, payload) {
     for (const key in payload) {
         if (payload.hasOwnProperty(key) && key in state) {
@@ -106,7 +109,9 @@ const actions = {
     axios.post(`api/v1/get-property-units/`,formData)
     .then((response)=>{
       state.selectedUnit = response.data;
+      const selectedProperty = response.data.property.property_code + " - " + response.data.property.name;
       commit('SET_SELECTED_UNIT',response.data);
+      commit('SET_SELECTED_PROPERTY', selectedProperty);
     })
     .catch((error)=>{
       console.log(error.message);

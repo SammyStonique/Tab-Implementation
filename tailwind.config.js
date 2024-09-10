@@ -9,6 +9,9 @@ module.exports = {
       colors: {
         'custom-light-blue': '#e8f0fe',
       },
+      fontSize: {
+        'xxs': '0.7rem', // Adding a size smaller than 'xs'
+      },
     },
   },
   plugins: [],

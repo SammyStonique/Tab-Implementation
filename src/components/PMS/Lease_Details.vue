@@ -197,7 +197,7 @@ export default defineComponent({
         };
         const fetchUnits = async() =>{
             if(propertyID.value){
-                await store.dispatch('Units_List/fetchUnits', {company:companyID.value, property: propertyID.value});
+                await store.dispatch('Units_List/fetchUnits', {company:companyID.value, property: propertyID.value, vacancy_status: "Vacant", owner_occupied:"False"});
             }
         };
         watch([propertyID, unitID, currencyID, taxID, periodID], () => {
@@ -394,12 +394,16 @@ export default defineComponent({
                 localDepositRows.value = [...newVal];
                 tableKey.value += 1;
                 emitUpdatedFields();
+            }else{
+                emitUpdatedFields();
             }
         },{ immediate: true });
         watch(() => store.state.Utilities.utilityArray, (newVal) => {
             if (newVal) {
                 localUtilitiesRows.value = [...newVal];
                 utilityTableKey.value += 1;
+                emitUpdatedFields();
+            }else{
                 emitUpdatedFields();
             }
         },{ immediate: true });

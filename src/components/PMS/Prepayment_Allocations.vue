@@ -89,7 +89,8 @@ export default{
         const tableColumns = ref([
             {type: "checkbox"},
             {label: "Date", key:"date",type: "text", editable: false},
-            {label: "Tenant", key:"tenant_name",type: "text", editable: false},
+            {label: "Code", key:"tenant_code",type: "text", editable: false},
+            {label: "Tenant Name", key:"tenant_name",type: "text", editable: false},
             {label: "Invoice", key:"invoice_no",type: "text", editable: false},
             {label: "Description", key:"description",type: "text", editable: false},
             {label: "Allocated", key: "allocated_amount", type: "text", editable: false},

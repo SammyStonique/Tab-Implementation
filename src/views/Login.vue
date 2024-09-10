@@ -5,7 +5,7 @@
         @hideLoader="hideLoader"
     />
     <div class="login">
-        <div class="w-full h-screen bg-slate-700 grid place-items-center">
+        <div class="w-full h-screen bg-[url('@/assets/image1.jpg')] bg-cover bg-center grid place-items-center">
             <div class="w-1/2 h-100 bg-white p-4 rounded-lg">
                 <div class="text-center grid place-items-center">
                     <div class="flex w-44">

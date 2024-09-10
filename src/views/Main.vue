@@ -22,7 +22,7 @@
         <div v-show="hmsOpen && selectedModule =='Settings'">
             <SET />
         </div> -->
-        <div v-if="mainOpen" class="text-black h-screen bg-slate-500 px-12 w-full">
+        <div v-if="mainOpen" class="text-black h-screen bg-[url('@/assets/image1.jpg')] bg-cover bg-center px-12 w-full">
             <div class="border-b border-gray-300 py-2 w-full flex pl-6">
                 <p class="text-left basis-3/6">Welcome, {{ username }}</p>
                 <p class="text-left basis-2/6 uppercase font-semibold text-sm">{{ company_name}}</p>
@@ -39,14 +39,16 @@
                     </div>
                 </div>
                 </div>
-            <div class="w-full bg-slate-500 grid grid-cols-4 gap-4 pt-8">
-                <div class="" v-for="mod,index in company_modules" :key="index">
-                    <div class="rounded-full w-24 h-24 overflow-hidden mb-2">
-                        <img :src="getImagePath(mod.module_logo)" alt="Module Icon" class="w-full h-full object-cover">
-                    </div>
-                    <div class="text-left">
-                        <button class="underline" @click="openModule(mod.module_name)"> {{ mod.module_name }} </button>
-                    </div>
+            <div class="w-full grid grid-cols-4 gap-4 pt-8">
+                <div class="text-left" v-for="mod,index in company_modules" :key="index">
+                    <button @click="openModule(mod.module_name)">
+                        <div class="rounded-full w-24 h-24 overflow-hidden mb-2">
+                            <img :src="getImagePath(mod.module_logo)" alt="Module Icon" class="w-full h-full object-cover">
+                        </div>
+                        <div class="text-left">
+                            <button class="underline"> {{ mod.module_name }} </button>
+                        </div>
+                    </button>          
                 </div>
             </div>
         </div>

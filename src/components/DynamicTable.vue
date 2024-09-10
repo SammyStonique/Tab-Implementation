@@ -17,7 +17,7 @@
         </tr>
       </thead>
       <tbody class="table-body">
-        <tr v-for="(row, rowIndex) in rows" :key="rowIndex" @dblclick="handleRowClick(row)" class="cursor-pointer even:bg-gray-100 text-xs uppercase">
+        <tr v-for="(row, rowIndex) in rows" :key="rowIndex" @dblclick="handleRowClick(row)" class="cursor-pointer even:bg-gray-100 text-xxs uppercase">
           <td v-for="(column, colIndex) in columns" :key="colIndex" :class="{'ellipsis': column.maxWidth}">
             <template v-if="column.type === 'checkbox'">
               <input type="checkbox" v-model="row.selected" class="checkbox" @change="updateSelectedIds(row)"/>
@@ -207,7 +207,7 @@ input {
 .dynamic-table th,
 .dynamic-table td {
   border: 1px solid #ccc;
-  padding: 6px;
+  padding: 3px;
   text-align: left;
 }
 

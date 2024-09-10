@@ -91,13 +91,13 @@ export default{
         const tableColumns = ref([
             {type: "checkbox"},
             {label: "Unit No", key:"unit_number"},
-            {label: "Property", key:"property_name"},
+            {label: "Property Name", key:"property_name"},
             {label: "Tenant Name", key: "tenant_name"},
-            {label: "Market Rent", key: "market_rent"},
+            {label: "Mrkt Rent", key: "market_rent"},
             {label: "Curr. Rent", key: "current_rent"},
             {label: "Vacancy", key:"vacancy_status"},
             {label: "Owner Occ", key:"owner_occupied"},
-            {label: "Bedrooms", key:"bedrooms"},
+            {label: "Bdrms", key:"bedrooms"},
         ])
         const actions = ref([
             {name: 'edit', icon: 'fa fa-edit', title: 'Edit Unit'},
@@ -477,7 +477,7 @@ export default{
         }
         const handleActionClick = async(rowIndex, action, row) =>{
             if( action == 'edit'){
-                const unitID = row[idField];
+                const unitID = row['property_unit_id'];
                 let formData = {
                     company: companyID.value,
                     property_unit: unitID

@@ -1,11 +1,17 @@
 <template>
     <div class="main-container w-full min-h-[90vh] bottom-8">
         <div class="fixed top-0 w-full z-50">
-            <NavBar :title="title" @minimize="minimize" @close="close"/>
-            <NavBarPMS @openPage="selectTab"/>
-            <PagesTab @openPage="selectedTab" @closePage="closeTab"/>
+            <div class="z-50 relative">
+                <NavBar :title="title" @minimize="minimize" @close="close"/>
+            </div> 
+            <div class="z-40 relative">
+                <NavBarPMS @openPage="selectTab"/>
+            </div>
+            <div class="z-30">
+                <PagesTab @openPage="selectedTab" @closePage="closeTab"/>
+            </div>
         </div>
-        <div class="tab-content z-10 overflow-y-hidden">
+        <div class="tab-content z-20 overflow-y-hidden">
             <keep-alive :include="cachedComponents">
                 <component 
                     :is="activeComponent"
@@ -43,6 +49,9 @@ import Tenant_Receipts from '@/components/PMS/Tenant_Receipts.vue';
 import Receipt_Details from '@/components/PMS/Receipt_Details.vue';
 import Tenant_Prepayments from '@/components/PMS/Tenant_Prepayments.vue';
 import Prepayment_Allocations from '@/components/PMS/Prepayment_Allocations.vue';
+import Statement_Transactions from '@/components/PMS/Statement_Transactions.vue';
+import Property_Statements from '@/components/PMS/Property_Statements.vue';
+import Statement_Processing from '@/components/PMS/Statement_Processing.vue';
 
 export default{
     components:{
@@ -51,7 +60,7 @@ export default{
         PagesTab,
         Dashboard, Properties_List, Zones, Landlords_List, Units_List, Property_Details, Utilities, Security_Deposits, Active_Tenants,
         Meter_Setup, Meter_Readings,Batch_Readings,Tenant_Invoices,Tenant_Receipts,Receipt_Details, Tenant_Prepayments, Prepayment_Allocations,
-        Tenant_Details, Variation_Periods, Tenant_Statement, Tenant_Deposits
+        Tenant_Details, Variation_Periods, Tenant_Statement, Tenant_Deposits, Statement_Transactions, Property_Statements, Statement_Processing
     },
     props: {
         title: {
@@ -122,5 +131,11 @@ export default{
 .main-container{
     max-height: 100vh;
     overflow: hidden;
+}
+.navbar-pms{
+    z-index: 100 !important;
+}
+.pages-tab{
+    z-index: 50 !important;
 }
 </style>
