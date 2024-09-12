@@ -13,7 +13,14 @@ const state = {
   selectedStatement: null,
   isEditing: false,
   subHeaders: [],
-  tableData: []
+  tableData: [],
+  statementTransactions: [],
+  statementInvoicedTotals: [],
+  statementPaidTotals: [],
+  statementBalanceTotals: 0,
+  statementBfTotals: 0,
+  invoicedSum: 0,
+  paidSum: 0
 };
   
 const mutations = {
@@ -28,6 +35,15 @@ const mutations = {
     state.statement_type_search = '';
     state.selectedStatement = null;
     state.isEditing = false;
+    state.subHeaders = [];
+    state.tableData = [];
+    state.statementTransactions = [];
+    state.statementInvoicedTotals = [];
+    state.statementPaidTotals = [];
+    state.statementBalanceTotals = 0;
+    state.statementBfTotals = 0;
+    state.invoicedSum = 0;
+    state.paidSum = 0;
   },
   SET_SELECTED_STATEMENT(state, statement) {
     state.selectedStatement = statement;
@@ -109,11 +125,37 @@ const actions = {
     
   },
   fetchStatementData({ commit,state }, formData) {
+    state.subHeaders = [];
+    state.tableData = [];
+    state.statementTransactions = [];
+    state.statementInvoicedTotals = [];
+    state.statementPaidTotals = [];
+    state.statementBalanceTotals = 0;
+    state.statementBfTotals = 0;
+    state.invoicedSum = 0;
+    state.paidSum = 0;
     axios.post(`api/v1/statement-processing-search/`,formData)
     .then((response)=>{
-        console.log("THE RESPONSE DATA IS ",response.data)
+        for(let i=0; i<response.data.items.length; i++){
+            if(response.data.items[i] == "Service Charge"){
+                response.data.items[i] = "S. Charge"
+            }else if(response.data.items[i] == "Prepayment"){
+                response.data.items[i] = "Prepymt"
+            }
+        }
+        for(let i=0; i<response.data.invoicedTotals.length; i++){
+            state.invoicedSum += response.data.invoicedTotals[i];
+        }
+        for(let i=0; i<response.data.paidTotals.length; i++){
+            state.paidSum += response.data.paidTotals[i];
+        }
         state.subHeaders = response.data.items;
         state.tableData = response.data.tableData;
+        state.statementTransactions = response.data.statementTransactions;
+        state.statementInvoicedTotals = response.data.invoicedTotals;
+        state.statementPaidTotals = response.data.paidTotals;
+        state.statementBalanceTotals = response.data.balanceTotals;
+        state.statementBfTotals = response.data.balanceBF_totals;
     })
     .catch((error)=>{
       console.log(error.message);
@@ -141,11 +183,52 @@ const actions = {
       throw error;
     })  
   },
+  approvePropertyStatement({ commit,state }, formData) {
+    Swal.fire({
+      title: "Are you sure?",
+      text: `Do you wish to approve Statement?`,
+      type: 'warning',
+      showCloseButton: true,
+      showCancelButton: true,
+      confirmButtonText: 'Yes Approve Statement!',
+      cancelButtonText: 'Cancel!',
+      customClass: {
+          confirmButton: 'swal2-confirm-custom',
+          cancelButton: 'swal2-cancel-custom',
+      },
+      showLoaderOnConfirm: true,
+    }).then((result) => {
+      if (result.value) {
+        axios.put(`api/v1/update-landlord-statement/`,formData)
+        .then((response)=>{
+          if(response.status == 200){
+              Swal.fire("Statement approved succesfully!", {
+                icon: "success",
+              }); 
+          }else{
+            Swal.fire({
+              title: "Error Approving Statement",
+              icon: "warning",
+            });
+          }                   
+        })
+        .catch((error)=>{
+          console.log(error.message);
+          Swal.fire({
+            title: error.message,
+            icon: "warning",
+          });
+        })
+      }else{
+        Swal.fire(`Statement has not been approved!`);
+      }
+    })
+  },
 
   deletePropertyStatement({ commit,state }, formData) {
     Swal.fire({
       title: "Are you sure?",
-      text: `Do you wish to delete Property Statement?`,
+      text: `Do you wish to delete Statement?`,
       type: 'warning',
       showCloseButton: true,
       showCancelButton: true,
@@ -161,12 +244,12 @@ const actions = {
         axios.post(`api/v1/delete-landlord-statement/`,formData)
         .then((response)=>{
           if(response.status == 200){
-              Swal.fire("Poof! Property Statement removed succesfully!", {
+              Swal.fire("Poof! Statement removed succesfully!", {
                 icon: "success",
               }); 
           }else{
             Swal.fire({
-              title: "Error Deleting Property Statement",
+              title: "Error Deleting Statement",
               icon: "warning",
             });
           }                   
@@ -179,7 +262,7 @@ const actions = {
           });
         })
       }else{
-        Swal.fire(`Property Statement has not been deleted!`);
+        Swal.fire(`Statement has not been deleted!`);
       }
     })
   },

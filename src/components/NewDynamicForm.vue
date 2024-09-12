@@ -26,7 +26,7 @@
             <div v-else>
               <label for="">{{ field.label }}:</label><br />
             </div>
-            <input v-model="field.value" :name="field.name" type="date" :class="`bg-slate-50 rounded pl-3 border border-gray-400 text-base w-full`" :placeholder="field.placeholder"/>
+            <input v-model="field.value" :name="field.name" type="date" :disabled="field.disabled" :min="field.minDate" :max="field.maxDate" :class="`bg-slate-50 rounded pl-3 border border-gray-400 text-base w-full`" :placeholder="field.placeholder"/>
           </div>
           <div v-if="field.type === 'time'" class="mr-2 text-left">
             <div v-if="field.required">

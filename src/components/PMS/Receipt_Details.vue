@@ -38,6 +38,7 @@ import MovableModal from '@/components/MovableModal.vue';
 import PageStyleComponent from '@/components/PageStyleComponent.vue';
 import { useStore } from "vuex";
 import { useToast } from "vue-toastification";
+import { useDateFormatter } from '@/composables/DateFormatter';
 import DynamicTable from '@/components/DynamicTable.vue';
 
 export default defineComponent({
@@ -48,6 +49,8 @@ export default defineComponent({
     setup(){
         const store = useStore();
         const toast = useToast();
+        const { formatDate } = useDateFormatter();
+        const current_date = new Date();
         const loader = ref('none');
         const modal_loader = ref('none');
         const tableKey = ref(0);
@@ -201,17 +204,17 @@ export default defineComponent({
                 {
                     type:'search-dropdown', label:"Property", value: propertyID.value, componentKey: propComponentKey,
                     selectOptions: propertyArray, optionSelected: handleSelectedProperty, required: false,
-                    searchPlaceholder: 'Select Property...', dropdownWidth: '390px', updateValue: "",
+                    searchPlaceholder: 'Select Property...', dropdownWidth: '400px', updateValue: "",
                     fetchData: fetchProperties(), clearSearch: clearSelectedProperty()            
                 },
                 {
                     type:'search-dropdown', label:"Tenant", value: tenantID.value, componentKey: tntComponentKey,
                     selectOptions: tenantArray, optionSelected: handleSelectedTenant, required: true,
-                    searchPlaceholder: 'Select Tenant...', dropdownWidth: '390px', updateValue: "",
+                    searchPlaceholder: 'Select Tenant...', dropdownWidth: '400px', updateValue: "",
                     fetchData: fetchTenants(), clearSearch: clearSelectedTenant()  
                 },
-                { type: 'date', name: 'issue_date',label: "Recording Date", value: '', required: true },
-                { type: 'date', name: 'banking_date',label: "Banking Date", value: '', required: true },
+                { type: 'date', name: 'issue_date',label: "Recording Date", value: formatDate(current_date), required: true, maxDate: formatDate(current_date) },
+                { type: 'date', name: 'banking_date',label: "Banking Date", value: '', required: true, maxDate: formatDate(current_date) },
                 { type: 'dropdown', name: 'payment_method',label: "Payment Method", value: '', placeholder: "", required: true, options: [{ text: 'Cash', value: 'Cash' }, { text: 'Mpesa', value: 'Mpesa' },{ text: 'Bank Deposit', value: 'Bank Deposit' }, { text: 'Cheque', value: 'Cheque' },{ text: 'Check-off', value: 'Check-off' }, { text: 'RTGS', value: 'RTGS' },{ text: 'EFT', value: 'EFT' }, { text: 'Not Applicable', value: 'Not Applicable' }] },
                 { type: 'text', name: 'reference_no',label: "Reference No", value: '', required: true,},
                 { type: 'number', name: 'total_amount',label: "Amount", value: receipt_totals.value || 0, required: true, method: allocateReceivedAmount },
@@ -279,7 +282,9 @@ export default defineComponent({
             if(formFields.value[8].value == ""){
                 let rcptMemo = ""
                 for(let i=0; i<receiptRows.value.length; i++){
-                    rcptMemo = rcptMemo + receiptRows.value[i].description + ', ';
+                    if(receiptRows.value[i].payment_allocation > 0){
+                        rcptMemo = rcptMemo + receiptRows.value[i].description + ', ';
+                    }
                 }
                 formFields.value[8].value = rcptMemo;
             }
@@ -403,6 +408,7 @@ export default defineComponent({
                 }
                 await store.dispatch('Journals/handleClientPrepayment',formData);
                 toast.success("Prepayment Added");
+                formFields.value[8].value += "Tenant Prepayment"
                 hideModalLoader();
                 prepModalVisible.value = false;
             }

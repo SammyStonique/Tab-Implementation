@@ -14,7 +14,7 @@
             @removeSelectedItems="removeStatements"
             @printList="printList"
             :columns="tableColumns"
-            :rows="StatementsList"
+            :rows="statementsList"
             :actions="actions"
             :idField="idField"
             @handleSelectionChange="handleSelectionChange"
@@ -38,6 +38,7 @@ import { ref, computed, onMounted, onBeforeMount, watch} from 'vue';
 import PageComponent from '@/components/PageComponent.vue';
 import { useStore } from "vuex";
 import { useToast } from "vue-toastification";
+import { useDateFormatter } from '@/composables/DateFormatter';
 
 export default{
     name: 'Property_Statements',
@@ -47,6 +48,8 @@ export default{
     setup(){
         const store = useStore();     
         const toast = useToast();
+        const { formatDate } = useDateFormatter();
+        const current_date = new Date();
         const loader = ref('none');
         const modal_loader = ref('none');
         const mainComponentKey = ref(0);
@@ -57,7 +60,7 @@ export default{
         const modal_top = ref('150px');
         const modal_left = ref('400px');
         const modal_width = ref('32vw');
-        const utilComponentKey = ref(0);
+        const landComponentKey = ref(0);
         const propComponentKey = ref(0);
         const selectedIds = ref([]);
         const statementsList = ref([]);
@@ -80,24 +83,25 @@ export default{
         const showModal = ref(false);
         const tableColumns = ref([
             {type: "checkbox"},
-            {label: "Property", key:"property_name"},
+            {label: "Property Name", key:"property_name"},
             {label: "Type", key: "statement_type"},
-            {label: "Prep Date", key: "date_prepared"},
+            {label: "Prep Date", key: "formatted_date_prepared"},
             {label: "Prepared By", key:"prepared_by"},
-            {label: "W.E.F", key:"with_effect_from"},
-            {label: "W.E.T", key:"with_effect_to"},
+            {label: "W.E.F", key:"formatted_with_effect_from"},
+            {label: "W.E.T", key:"formatted_with_effect_to"},
             {label: "Month", key:"month"},
             {label: "Year", key:"year"},
             {label: "Approved By", key:"approved_by"},
             {label: "App. Date", key:"date_approved"},
-            {label: "Collection", key:"period_collection"},
-            {label: "Expenses", key:"period_expenses"},
+            {label: "Collection", key:"formatted_period_collection"},
         ])
         
-        const actions = ref([
+        const actions = ref([ 
+            {name: 'approve', icon: 'fa fa-check-circle', title: 'Approve Statement'},
             {name: 'delete', icon: 'fa fa-trash', title: 'Delete Statement'},
         ])
         const companyID = computed(()=> store.state.userData.company_id);
+        const userID = computed(()=> store.state.userData.user_id);
         const fetchProperties = async() =>{
             await store.dispatch('Properties_List/fetchProperties', {company:companyID.value})
         };
@@ -107,7 +111,7 @@ export default{
         };
         const clearSearchProperty = async() =>{
             await store.dispatch('Properties_List/updateState', {propertyID: ''});
-            propertySearchID.value = ""
+            propertySearchID.value = null;
         }
         const fetchLandlords = async() =>{
             await store.dispatch('Landlords_List/fetchLandlords', {company:companyID.value})
@@ -118,7 +122,7 @@ export default{
         };
         const clearSearchLandlord = async() =>{
             await store.dispatch('Landlords_List/updateState', {landlordID: ''});
-            landlordSearchID.value = ""
+            landlordSearchID.value = null;
         }
         const month_search = computed({
             get: () => store.state.Property_Statements.month_search,
@@ -138,13 +142,13 @@ export default{
         });
         const searchFilters = ref([
             {
-                type:'search-dropdown', value: propertySearchID.value, width:64,
+                type:'search-dropdown', value: propertySearchID.value, width:64, componentKey: propComponentKey,
                 selectOptions: propertyArray, optionSelected: handleSearchProperty,
                 searchPlaceholder: 'Property Search...', dropdownWidth: '350px',
                 fetchData: fetchProperties(), clearSearch: clearSearchProperty()             
             },
             {
-                type:'search-dropdown', value: landlordSearchID.value, width:64,
+                type:'search-dropdown', value: landlordSearchID.value, width:64, componentKey: landComponentKey,
                 selectOptions: landlordArray, optionSelected: handleSearchLandlord,
                 searchPlaceholder: 'Landlord Search...', dropdownWidth: '350px',
                 fetchData: fetchLandlords(), clearSearch: clearSearchLandlord()   
@@ -156,7 +160,7 @@ export default{
             {type:'text', placeholder:"Year...", value: year_search, width:36},
             {
                 type:'dropdown', placeholder:"Statement Type", value: statement_type_search, width:40,
-                options: [{text:'Rent',value:'Rent'},{text:'Utility',value:'Utility'}]
+                options: [{text:'Rent',value:'Rent'},{text:'Utility',value:'Utility'},{text:'Combined',value:'Combined'}]
             },
             {
                 type:'dropdown', placeholder:"Approved", value: approval_status_search, width:40,
@@ -278,6 +282,10 @@ export default{
             })
         }
         const resetFilters = () =>{
+            landlordSearchID.value = null;
+            propertySearchID.value = null;
+            propComponentKey.value += 1;
+            landComponentKey.value += 1;
             store.commit('Property_Statements/RESET_SEARCH_FILTERS')
             searchStatements();
         }
@@ -312,13 +320,12 @@ export default{
             // scrollToTop();
         }
         const addNewStatement = async() =>{
-            // store.dispatch('Journals/updateState', {journalsClientList: [], outstandingBalance:0})
             store.commit('pageTab/ADD_PAGE', {'PMS':'Statement_Processing'});
             store.state.pageTab.pmsActiveTab = 'Statement_Processing'; 
         }
         const handleActionClick = async(rowIndex, action, row) =>{
             if(action == 'delete'){
-                const statementID = [row['journal_id']];
+                const statementID = [row['landlord_statement_id']];
                 let formData = {
                     company: companyID.value,
                     landlord_statement: statementID
@@ -326,6 +333,43 @@ export default{
                 await store.dispatch('Property_Statements/deletePropertyStatement',formData)
                 mainComponentKey.value += 1;
                 searchStatements();       
+            }else if(action == 'approve'){
+                if(row['approval_status'] == 'No'){
+                    const statementID = row['landlord_statement_id'];
+                    let formData = {
+                        company: companyID.value,
+                        landlord_statement: statementID,
+                        prepared_by: row['prepared_by_id'],
+                        prepared_by_id: row['prepared_by_id'],
+                        date_prepared: row['date_prepared'],
+                        with_effect_from: row['with_effect_from'],
+                        with_effect_to: row['with_effect_to'],
+                        statement_type: row['statement_type'],
+                        approval_status: "Yes",
+                        month: row['month'],
+                        year: row['year'],
+                        period_collection: row['period_collection'],
+                        period_expenses: row['period_expenses'],
+                        approved_by: userID.value,
+                        approved_by_id: userID.value,
+                        date_approved: formatDate(current_date),
+                        property: row['property_id'],
+                        property_id: row['property_id'],
+                        statement_transactions: row['statement_transactions']
+                    }
+                    try{
+                        await store.dispatch('Property_Statements/approvePropertyStatement',formData)
+    
+                    }
+                    catch(error){
+                        console.error(error.message);
+                        toast.error('Failed to approve Statement(s): ' + error.message);
+                    }finally{
+                        searchStatements();
+                    }
+                }else{
+                    toast.error('Statement Already Approved');
+                }             
             }
         }
         const closeModal = async() =>{
