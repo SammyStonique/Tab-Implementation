@@ -53,6 +53,9 @@ import Statement_Transactions from '@/components/PMS/Statement_Transactions.vue'
 import Property_Statements from '@/components/PMS/Property_Statements.vue';
 import Statement_Processing from '@/components/PMS/Statement_Processing.vue';
 
+
+import Default_Settings from '@/components/SET/Default_Settings.vue';
+
 export default{
     components:{
         NavBar,
@@ -60,7 +63,9 @@ export default{
         PagesTab,
         Dashboard, Properties_List, Zones, Landlords_List, Units_List, Property_Details, Utilities, Security_Deposits, Active_Tenants,
         Meter_Setup, Meter_Readings,Batch_Readings,Tenant_Invoices,Tenant_Receipts,Receipt_Details, Tenant_Prepayments, Prepayment_Allocations,
-        Tenant_Details, Variation_Periods, Tenant_Statement, Tenant_Deposits, Statement_Transactions, Property_Statements, Statement_Processing
+        Tenant_Details, Variation_Periods, Tenant_Statement, Tenant_Deposits, Statement_Transactions, Property_Statements, Statement_Processing,
+
+        Default_Settings
     },
     props: {
         title: {

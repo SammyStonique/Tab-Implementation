@@ -31,6 +31,8 @@ import Ledgers from './FA/Ledgers';
 import Taxes from './FA/Taxes';
 import Journals from './FA/Journals';
 
+import Default_Settings from './SET/Default_Settings';
+
 export default createStore({
   modules: {
     tab1,
@@ -41,6 +43,9 @@ export default createStore({
     Appointments,Client_Categories,Departments,Patients_List,Medical_Fees,Doctors,
     Properties_List, Zones, Landlords_List, Units_List, Active_Tenants, Utilities,Security_Deposits,Variation_Periods, Tenant_Deposits,
     Meter_Setup, Meter_Readings,Tenant_Prepayments,Prepayment_Allocations,Statement_Transactions,Property_Statements,
-    Ledgers, Currencies, Taxes, Journals
+
+    Ledgers, Currencies, Taxes, Journals,
+
+    Default_Settings
   },
 });

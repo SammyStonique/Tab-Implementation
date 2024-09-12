@@ -4,6 +4,10 @@ import Swal from 'sweetalert2';
 const state = {
   ledgersList: [], 
   ledgerArr: [],
+  incomeLedgerArr: [],
+  expenseLedgerArr: [],
+  cashbookLedgerArr: [],
+  liabilityLedgerArr: [],
   ledgerArray: [],
   ledgerID: '',
   ledgerName: '',
@@ -84,6 +88,59 @@ const actions = {
     })
     
   },
+  fetchIncomeLedgers({ commit,state }, formData) {
+    state.incomeLedgerArr = [];
+    axios.post(`api/v1/fetch-ledgers/`,formData)
+    .then((response)=>{
+      for(let i=0; i< response.data.length; i++){
+        state.incomeLedgerArr.push((response.data[i].ledger_code + " - " + response.data[i].ledger_name));
+      }
+    })
+    .catch((error)=>{
+      console.log(error.message);
+    })
+    
+  },
+  fetchExpenseLedgers({ commit,state }, formData) {
+    state.expenseLedgerArr = [];
+    axios.post(`api/v1/fetch-ledgers/`,formData)
+    .then((response)=>{
+      for(let i=0; i< response.data.length; i++){
+        state.expenseLedgerArr.push((response.data[i].ledger_code + " - " + response.data[i].ledger_name));
+      }
+
+    })
+    .catch((error)=>{
+      console.log(error.message);
+    })
+    
+  },
+  fetchCashbookLedgers({ commit,state }, formData) {
+    state.cashbookLedgerArr = [];
+    axios.post(`api/v1/fetch-ledgers/`,formData)
+    .then((response)=>{
+      for(let i=0; i< response.data.length; i++){
+        state.cashbookLedgerArr.push((response.data[i].ledger_code + " - " + response.data[i].ledger_name));
+      }
+    })
+    .catch((error)=>{
+      console.log(error.message);
+    })
+    
+  },
+  fetchLiabilityLedgers({ commit,state }, formData) {
+    state.liabilityLedgerArr = [];
+    axios.post(`api/v1/fetch-ledgers/`,formData)
+    .then((response)=>{
+      for(let i=0; i< response.data.length; i++){
+        state.liabilityLedgerArr.push((response.data[i].ledger_code + " - " + response.data[i].ledger_name));
+      }
+    })
+    .catch((error)=>{
+      console.log(error.message);
+    })
+    
+  },
   fetchLedger({ commit,state }, formData) {
     axios.post(`api/v1/fetch-ledgers/`,formData)
     .then((response)=>{
@@ -100,7 +157,7 @@ const actions = {
     const selectedLedger = state.ledgersList.find(ledger => (ledger.ledger_code + " - " +ledger.ledger_name) === option);
     if (selectedLedger) {
         state.ledgerID = selectedLedger.ledger_id;
-        state.ledgerName = selectedLedger.ledger_name;
+        state.ledgerName = selectedLedger.ledger_code + " - " + selectedLedger.ledger_name;
         state.ledgerArray = [...state.ledgerArray, selectedLedger];
     }
     commit('LEDGERS_ARRAY', state.ledgerArray);

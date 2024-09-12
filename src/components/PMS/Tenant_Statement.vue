@@ -748,8 +748,8 @@ export default defineComponent({
             }
 
             errors.value = [];
-            for(let i=1; i < additionalFields.value.length; i++){
-                if(additionalFields.value[i].value =='' && additionalFields.value[i].required == true){
+            for(let i=1; i < (additionalFields.value.length -1); i++){
+                if(additionalFields.value[i].value =='' && additionalFields.value[i].type != "number" && additionalFields.value[i].required == true){
                     errors.value.push(additionalFields.value[i].label);
                 }
             }
