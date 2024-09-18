@@ -7,7 +7,7 @@
                     <button @click="fetchTransactions" class="rounded bg-green-400 text-sm h-8 w-24 mt-2 text-white px-1.5 py-1.5"><i class="fa fa-check-circle text-xs mr-1.5" aria-hidden="true"></i>Load</button>
                 </div>
             </div>
-            <div class="table-container capitalize text-sm min-h-[330px] mt-3">
+            <div class="table-container capitalize text-xs min-h-[330px] mt-3">
                 <table class="dynamic-table rounded">
                     <thead>
                         <tr>

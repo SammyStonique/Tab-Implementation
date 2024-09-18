@@ -95,6 +95,13 @@
     
                     </div>
                     <div class="py-2 px-3 pl-4 w-full hover:bg-slate-500 hover:w-full">
+                        <button class="flex text-sm w-full" @click="openPage({'PMS':'Tenant_Arrears'})">
+                            <i class="fa fa-dollar-sign pt-2 mr-2" aria-hidden="true"></i>
+                            <p class="">Tenant Arrears</p>
+                        </button>
+    
+                    </div>
+                    <div class="py-2 px-3 pl-4 w-full hover:bg-slate-500 hover:w-full">
                         <button class="flex text-sm w-full" @click="openPage({'PMS':'Tenant_Deposits'})">
                             <i class="fa fa-address-card pt-2 mr-2" aria-hidden="true"></i>
                             <p class="">Tenant Deposits</p>

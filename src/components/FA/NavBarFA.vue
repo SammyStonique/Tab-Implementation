@@ -14,7 +14,7 @@
                 </button>
             </div>
             <div class="web-links py-1.5 px-2.5 h-full hover:bg-slate-500 hover:rounded">
-                <button class="flex" @click="openPage({'FA':'ChartOfAccounts'})">
+                <button class="flex" @click="openPage({'FA':'Chart_Of_Accounts'})">
                     <i class="fa fa-briefcase pt-2 mr-2" aria-hidden="true"></i>
                     <p class="pt-1.5">Chart Of Accounts</p>
                 </button>

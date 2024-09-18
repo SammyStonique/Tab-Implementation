@@ -204,7 +204,12 @@ input {
   /* table-layout: fixed; */
 }
 
-.dynamic-table th,
+.dynamic-table th {
+  border: 1px solid #ccc;
+  padding: 6px;
+  text-align: left;
+}
+
 .dynamic-table td {
   border: 1px solid #ccc;
   padding: 3px;

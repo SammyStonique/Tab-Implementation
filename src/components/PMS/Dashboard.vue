@@ -140,7 +140,6 @@
   </script>
   <style scoped>
   
-  
   .main-content{
     z-index: -1;
     margin-left: 1px;

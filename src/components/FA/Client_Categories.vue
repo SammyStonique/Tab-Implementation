@@ -1,150 +1,284 @@
 <template>
-    <div class="main-content grid grid-rows-12 bg-gray-100 px-4 py-4 text-sm">
-        <div class="subsection row-span-2 rounded-lg bg-white w-full">
-            <div class="md:px-4  w-full">
-                <!-- <div class="mb-4 flex items-end h-20 border-b-2 border-gray-300 mb-3 pb-3">
-                    <div class="basis-1/4 pl-3">
-                        <button class="rounded bg-green-400 text-white px-3 py-2" @click="showModal"><i class="fa fa-plus" aria-hidden="true"></i> New Category</button>
-                    </div>
-                    <div class="basis-3/4">
-                        <div class="flex items-end">
-                            <div class="basis-1/2 pl-3 items-center">
-                                <input type="text" class="rounded pl-3 border-2 border-gray-200 text-lg" name="name" id="" placeholder="Name..." v-model="category_name_search"  @keyup.enter="searchClientCategory">
-                            </div>
-                        </div>
-                    </div>
-                    <div class="basis-1/8 pl-3 w-36">
-                        <button class="rounded-lg bg-green-400 text-white px-3 py-2" @click="searchClientCategory"><i class="fa fa-binoculars" aria-hidden="true"></i> Search</button>
-                    </div>
-                    <div class="basis-1/8 pl-3 w-36">
-                        <div class="print-dropdown">
-                            <button class="rounded-lg bg-green-400 text-white px-3 py-2" @click="showDropdown">Options<i class="fa fa-caret-down pl-2" aria-hidden="true"></i></button>
-                            <button class="fixed inset-button inset-0 bg-gray-50 opacity-25 cursor-default w-full" v-if="showOptions" @click="showOptions = !showOptions"></button>
-                        </div>
-                        <div class="options-container absolute right-25 pt-4 pb-2 rounded border border-gray-200 bg-white shadow-slate-400 shadow-xl" v-if="showOptions">
-                            <button @click="printReport" class="pl-3 hover:bg-slate-500 hover:rounded hover:w-full">Print List</button><br />
-                            <button @click="exportClientCategoryPDF" class="pl-3 hover:bg-slate-500 hover:rounded hover:w-full">Export PDF</button><br />
-                            <button @click="exportClientCategoryExcel" class="pl-3 hover:bg-slate-500 hover:rounded hover:w-full">Export Excel</button>
-                            <button @click="exportClientCategoryCSV" class="pl-3 hover:bg-slate-500 hover:rounded hover:w-full">Export CSV</button>
-                        </div>
-                    </div>
-                </div> -->
-                <div class="">
-                    <FilterBar :addButtonLabel="addButtonLabel" :filters="searchFilters" @search="searchClientCategory"/>
-                </div>
-                <!-- MODAL component for adding a new category -->
-                <Modal v-show="isModalVisible" @close="closeModal" :index="index">
-                    <template v-slot:header> Category Details </template>
-                    <template v-slot:body>
-                    <form action="" @submit.prevent="">
-                    <div class="flex mb-6">
-                        <div class="basis-1/2">
-                            <label for="">Name<em>*</em></label><br />
-                            <input type="text" name="" id="" class="rounded border border-gray-600 text-lg pl-2" v-model="category_name">
-                        </div>
-                        <div class="basis-1/2">
-
-                        </div>
-                    </div>
-                    <div class="text-center" v-if="isEditing">
-                        <button class="rounded border bg-green-400 w-36 py-2 px-4 text-white text-lg" @click="updateCategory(index)">Update</button>
-                    </div>
-                    <div class="text-center" v-else>
-                        <button class="rounded border bg-green-400 w-36 py-2 px-4 text-white text-lg" @click="createCategory">Save</button>
-                    </div>
-
-                    </form>
-                    </template>
-                    <template v-slot:footer> We Value Your Partnership </template>
-                </Modal>
-
-                <div class="shadow overflow-hidden rounded border-b border-gray-200 row-span-8">
-                    <table class="min-w-full bg-white"> 
-                        <thead class="bg-gray-800 text-white">
-                            <tr class="rounded bg-slate-800 text-white font-semibold text-sm uppercase">
-                                <th>#</th>
-                                <th class="text-left py-2 px-4">Name</th>
-                                <th class="text-left py-2 px-4"></th>
-                                <th class="text-left py-2 px-4"></th>
-                                <th class="text-left py-2 px-4"></th>
-                                <th class="text-left py-2 px-4"></th>
-                                <th class="text-left py-2 px-4">Actions</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                        
-                        <tr v-for="(cat,index) in categoryList" :key="cat.category_id" class="even:bg-gray-100">
-                            <td>{{ index + 1 }}.</td>
-                            <td class="text-left py-2 px-4">{{ cat.category_name }}</td>
-                            <th class="text-left py-2 px-4"></th>
-                            <th class="text-left py-2 px-4"></th>
-                            <th class="text-left py-2 px-4"></th>
-                            <th class="text-left py-2 px-4"></th>
-                            <td class="text-right right-0">
-                                <div class="flex">
-                                    <div class="basis-1/6">
-                                        <button @click="editCategory(index)"><i class="fa fa-pencil" aria-hidden="true" title="Edit"></i></button>
-                                    </div>
-                                    <div class="basis-1/6">
-                                        <button @click="removeCategory(index)"><i class="fa fa-trash-o" aria-hidden="true" title="Delete"></i></button>
-                                    </div>
-                                </div>
-                            </td>
-                        </tr>
-                        </tbody>
-                    </table>   
-                </div>
-                <div class="pagination row-span-2">
-                    <MyPagination 
-                    :count="catCount"
-                    :currentPage="currentPage"
-                    :result="catArrLen"
-                    @loadPrev="loadPrev"
-                    @loadNext="loadNext"
-                    @firstPage="firstPage"
-                    @lastPage="lastPage"
-                    :showNextBtn="showNextBtn"
-                    :showPreviousBtn="showPreviousBtn"
-                    />
-                </div>
-            </div>
-        </div>
-    </div>
+    <PageComponent 
+        :loader="loader" @showLoader="showLoader" @hideLoader="hideLoader"
+        :addButtonLabel="addButtonLabel"
+        @handleAddNew="addNewCategory"
+        :searchFilters="searchFilters"
+        @searchPage="searchCategories"
+        @resetFilters="resetFilters"
+        @removeItem="removeCategory"
+        @removeSelectedItems="removeCategories"
+        :columns="tableColumns"
+        :rows="categoryList"
+        :actions="actions"
+        :idField="idField"
+        @handleActionClick="handleActionClick"
+        :count="depCount"
+        :currentPage="currentPage"
+        :result="depArrLen"
+        @loadPrev="loadPrev"
+        @loadNext="loadNext"
+        @firstPage="firstPage"
+        @lastPage="lastPage"
+        :showNextBtn="showNextBtn"
+        :showPreviousBtn="showPreviousBtn"
+    />
+    <MovableModal v-model:visible="depModalVisible" :title="title" :modal_top="modal_top" :modal_left="modal_left" :modal_width="modal_width"
+        :loader="modal_loader" @showLoader="showModalLoader" @hideLoader="hideModalLoader" >
+        <DynamicForm 
+            :fields="formFields" :flex_basis="flex_basis" :flex_basis_percentage="flex_basis_percentage" 
+            :displayButtons="displayButtons" @handleSubmit="saveCategory" @handleReset="handleReset"
+        />
+    </MovableModal>
 </template>
 
 <script>
-import axios from 'axios';
-import { ref, computed, onMounted} from 'vue';
-import { useStore } from 'vuex';
-import FilterBar from '@/components/FilterBar.vue';
+import axios from "axios";
+import { ref, computed, watch, onMounted, onBeforeMount } from 'vue';
+import PageComponent from '@/components/PageComponent.vue'
+import MovableModal from '@/components/MovableModal.vue'
+import DynamicForm from '../NewDynamicForm.vue';
+import { useStore } from "vuex";
+import { useToast } from "vue-toastification";
 
 export default{
-    name: 'ClientCategoryView',
-    props:['scrollToTop','loader','showLoader','hideLoader',],
+    name: 'Client_Categories',
     components:{
-        FilterBar
+        PageComponent,MovableModal,DynamicForm
     },
     setup(){
         const store = useStore();
+        const toast = useToast();
+        const loader = ref('');
+        const modal_loader = ref('none');
+        const title = ref('Category Details');
         const addButtonLabel = ref('New Category');
-        const category_name_search = computed({
+        const idField = 'category_id';
+        const depModalVisible = ref(false);
+        const categoryList = ref([]);
+        const depResults = ref([]);
+        const depArrLen = ref(0);
+        const depCount = ref(0);
+        const pageCount = ref(0);
+        const currentPage = ref(1);
+        const showNextBtn = ref(false);
+        const showPreviousBtn = ref(false);
+        const flex_basis = ref('');
+        const flex_basis_percentage = ref('');
+        const displayButtons = ref(true);
+        const errors = ref([]);
+        const modal_top = ref('200px');
+        const modal_left = ref('400px');
+        const modal_width = ref('30vw');
+        const isEditing = computed(()=> store.state.Client_Categories.isEditing)
+        const selectedCategory = computed(()=> store.state.Client_Categories.selectedCategory);
+        const tableColumns = ref([
+            {type: "checkbox"},
+            {label: "Name", key: "category_name", type: "text", editable: false}
+        ])
+        const actions = ref([
+            {name: 'edit', icon: 'fa fa-edit', title: 'Edit Category'},
+            {name: 'delete', icon: 'fa fa-trash', title: 'Delete Category'},
+        ])
+        const companyID = computed(()=> store.state.userData.company_id);
+        const name_search = computed({
             get: () => store.state.Client_Categories.category_name_search,
             set: (value) => store.commit('Client_Categories/SET_SEARCH_FILTERS', {"category_name_search":value}),
         });
         const searchFilters = ref([
-            { type:'text', placeholder:"Search Category...", value: category_name_search, width:48,},
-            { type:'text', placeholder:"Search Name...", width:48,},
-            
-        ])
-        const companyID = ref('9e14bcef-d3c1-400c-a8c0-66d7b25cc5ff');
-        const currentPage = ref(1);
-        const categoryList = computed({
-            get: () => store.state.Client_Categories.categoryList,
-            set: (value) => store.commit('Client_Categories/LIST_CLIENT_CATEGORIES', value),
-        });
-        const searchClientCategory = () =>{
+            {type:'text', placeholder:"Search Name...", value: name_search}
+        ]);
+        const formFields = ref([]);
+        const updateFormFields = (category) => {
+            formFields.value = [
+                { type: 'text', name: 'name',label: "Name", value: category?.name || '', required: true },
+            ];
+        };
+        watch(selectedCategory, (newCategory) => {
+            updateFormFields(newCategory);
+        }, { immediate: true });
+        const addNewCategory = () =>{
+            depModalVisible.value = true;
+            handleReset();
+            store.dispatch("Client_Categories/updateState",{isEditing:false})
+            flex_basis.value = '1/2';
+            flex_basis_percentage.value = '50';
+        }
+        const handleActionClick = async(rowIndex, action, row) =>{
+            if( action == 'edit'){
+                const categoryID = row[idField];
+                let formData = {
+                    company: companyID.value,
+                    category: categoryID
+                }
+                await store.dispatch('Client_Categories/fetchClientCategory',formData).
+                then(()=>{
+                    depModalVisible.value = true;
+                    flex_basis.value = '1/2';
+                    flex_basis_percentage.value = '50';
+                })
+                
+            }else if(action == 'delete'){
+                const categoryID = row[idField];
+                let formData = {
+                    company: companyID.value,
+                    category: categoryID
+                }
+                await store.dispatch('Client_Categories/deleteClientCategory',formData).
+                then(()=>{
+                    searchCategories();
+                })
+            }
+        } 
+        const handleReset = () =>{
+            for(let i=0; i < formFields.value.length; i++){
+                formFields.value[i].value = '';
+            }
+        }
+        const showModalLoader = () =>{
+            modal_loader.value = "block";
+        }
+        const hideModalLoader = () =>{
+            modal_loader.value = "none";
+        }
+        const createCategory = async() =>{
+            showModalLoader();
             let formData = {
-                category_name: category_name_search.value,
+                name: formFields.value[0].value,
+                company: companyID.value
+            }
+            errors.value = [];
+            for(let i=0; i < formFields.value.length; i++){
+                if(formFields.value[i].value =='' && formFields.value[i].required == true){
+                    errors.value.push('Error');
+                }
+            }
+            if(errors.value.length){
+                toast.error('Fill In Required Fields');
+                hideModalLoader();
+            }else{
+                try {
+                    const response = await store.dispatch('Client_Categories/createClientCategory', formData);
+                    if(response && response.status === 200) {
+                        hideModalLoader();
+                        toast.success('Category created successfully!');
+                        handleReset();
+                    }else {
+                        toast.error('An error occurred while creating the category.');
+                    }
+                } catch (error) {
+                    console.error(error.message);
+                    toast.error('Failed to create category: ' + error.message);
+                } finally {
+                    hideModalLoader();
+                    searchCategories();
+                }
+            }
+
+        }
+        const updateCategory = async() =>{
+            showModalLoader();
+            errors.value = [];
+            let formData = {
+                name: formFields.value[0].value,
+                company: companyID.value,
+                category: selectedCategory.value.category_id
+            }
+            for(let i=0; i < formFields.value.length; i++){
+                if(formFields.value[i].value =='' && formFields.value[i].required == true){
+                    errors.value.push('Error');
+                }
+            }
+            if(errors.value.length){
+                    toast.error('Fill In Required Fields');
+            }else{
+                try {
+                    const response = await store.dispatch('Client_Categories/updateClientCategory', formData);
+                    if (response && response.status === 200) {
+                        hideModalLoader();
+                        toast.success("Category updated successfully!");
+                        handleReset();
+                    } else {
+                        toast.error('An error occurred while updating the Category.');
+                    }
+                } catch (error) {
+                    console.error(error.message);
+                    toast.error('Failed to update Category: ' + error.message);
+                } finally {
+                    hideModalLoader();
+                    searchCategories();
+                }
+            }
+        }
+        const saveCategory = () =>{
+            if(isEditing.value == true){
+                updateCategory();
+            }else{
+                createCategory();
+            }
+        }
+        const removeCategory = async() =>{
+            if(selectedIds.value.length == 1){
+                let formData = {
+                    company: companyID.value,
+                    category: selectedIds.value,
+                }
+                try{
+                    const response = await store.dispatch('Client_Categories/deleteClientCategory',formData)
+                    if(response && response.status == 200){
+                        toast.success("Category Removed Succesfully");
+                        searchCategories();
+                    }
+                }
+                catch(error){
+                    console.error(error.message);
+                    toast.error('Failed to remove Category: ' + error.message);
+                }
+                finally{
+                    selectedIds.value = [];
+                }
+            }else if(selectedIds.value.length > 1){
+                toast.error("You have selected more than 1 Category") 
+            }else{
+                toast.error("Please Select A Category To Remove")
+            }
+        }
+        const removeCategories = async() =>{
+            if(selectedIds.value.length){
+                let formData = {
+                    company: companyID.value,
+                    category: selectedIds.value,
+                }
+                try{
+                    const response = await store.dispatch('Client_Categories/deleteClientCategory',formData)
+                    if(response && response.status == 200){
+                        toast.success("Category(s) Removed Succesfully");
+                        searchCategories();
+                    }
+                }
+                catch(error){
+                    console.error(error.message);
+                    toast.error('Failed to remove Category(s): ' + error.message);
+                }
+                finally{
+                    selectedIds.value = [];
+                }
+            }else{
+                toast.error("Please Select A Category To Remove")
+            }
+        }
+        const showLoader = () =>{
+            loader.value = "block";
+        }
+        const hideLoader = () =>{
+            loader.value = "none";
+        }
+        const searchCategories = () =>{
+            showLoader();
+            showNextBtn.value = false;
+            showPreviousBtn.value = false;
+            let formData = {
+                category_name: name_search.value,
                 company_id: companyID.value
             }
             axios
@@ -152,49 +286,65 @@ export default{
             .then((response)=>{
                 categoryList.value = response.data.results;
                 store.commit('Client_Categories/LIST_CLIENT_CATEGORIES', categoryList.value)
+                depResults.value = response.data;
+                depArrLen.value = categoryList.value.length;
+                depCount.value = depResults.value.count;
+                pageCount.value = Math.ceil(depCount.value / 50);
+                
+                if(response.data.next){
+                    showNextBtn.value = true;
+                }
+                if(response.data.previous){
+                    showPreviousBtn.value = true;
+                }
+            })
+            .catch((error)=>{
+                console.log(error);
+            })
+            .finally(()=>{
+                hideLoader();
             })
         }
+        const loadPrev = () =>{
+            if (currentPage.value <= 1){
+                currentPage.value = 1;
+            }else{
+                currentPage.value -= 1;
+            }
+            
+            searchCategories();
+        }
+        const loadNext = () =>{
+            if(currentPage.value >= pageCount.value){
+                currentPage.value = pageCount.value;
+            }else if(currentPage.value < pageCount.value){
+                currentPage.value += 1;
+            }
+            
+            searchCategories();
+        }
+        const firstPage = ()=>{
+            currentPage.value = 1;
+            searchCategories();
+        }
+        const lastPage = () =>{
+            currentPage.value = pageCount.value;
+            searchCategories();
+        }
+        const resetFilters = () =>{
+            store.commit('Client_Categories/RESET_SEARCH_FILTERS')
+            searchCategories();
+        }
         onMounted(()=>{
-            searchClientCategory();
+            searchCategories();
         })
         return{
-            searchClientCategory,
-            categoryList, addButtonLabel, searchFilters,category_name_search
+            title,idField, searchCategories, addButtonLabel, searchFilters, resetFilters, tableColumns, categoryList,
+            depResults, depArrLen, depCount, pageCount, showNextBtn, showPreviousBtn,modal_top, modal_left, modal_width,
+            loadPrev, loadNext, firstPage, lastPage, actions, formFields, depModalVisible, addNewCategory,
+            displayButtons,flex_basis,flex_basis_percentage, handleActionClick, handleReset, saveCategory,
+            showLoader, loader, hideLoader, modal_loader, showModalLoader, hideModalLoader, removeCategory, removeCategories
         }
     }
-
 }
 </script>
-
-<style scoped>
-.disabled {
-  opacity: 0.5;
-  pointer-events: none;
-}
-.main-content{
-    z-index: -1;
-    margin-left: 1px;
-    margin-top: 90px;
-    min-height: 100vh;
-}
-.subsection{
-    min-height: 100vh;
-}
-.pagination{
-    bottom: 20px;
-}
-em{
-  color: red;
-}
-.options-container {
-  width: 150px;
-
-}
-.dropdown-button{
-    z-index: 1;
-}
-.inset-button{
-    min-height: 100vh;
-}
-
-</style>

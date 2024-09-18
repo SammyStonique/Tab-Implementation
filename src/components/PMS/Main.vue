@@ -52,6 +52,7 @@ import Prepayment_Allocations from '@/components/PMS/Prepayment_Allocations.vue'
 import Statement_Transactions from '@/components/PMS/Statement_Transactions.vue';
 import Property_Statements from '@/components/PMS/Property_Statements.vue';
 import Statement_Processing from '@/components/PMS/Statement_Processing.vue';
+import Tenant_Arrears from '@/components/PMS/Tenant_Arrears.vue';
 
 
 import Default_Settings from '@/components/SET/Default_Settings.vue';
@@ -64,6 +65,7 @@ export default{
         Dashboard, Properties_List, Zones, Landlords_List, Units_List, Property_Details, Utilities, Security_Deposits, Active_Tenants,
         Meter_Setup, Meter_Readings,Batch_Readings,Tenant_Invoices,Tenant_Receipts,Receipt_Details, Tenant_Prepayments, Prepayment_Allocations,
         Tenant_Details, Variation_Periods, Tenant_Statement, Tenant_Deposits, Statement_Transactions, Property_Statements, Statement_Processing,
+        Tenant_Arrears,
 
         Default_Settings
     },
@@ -129,9 +131,9 @@ export default{
 }
 </script>
 
-<style>
+<style scoped>
 .tab-content{
-    margin-top: 20px;
+    margin-top: 35px;
 }
 .main-container{
     max-height: 100vh;

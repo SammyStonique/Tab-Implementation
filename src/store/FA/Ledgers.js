@@ -12,9 +12,16 @@ const state = {
   ledgerID: '',
   ledgerName: '',
   name_search: '',
+  ledger_code_search: "",
+  ledger_name_search: "",
+  financial_statement_search: "",
   selectedCategory: null,
   selectedLedger: null,
-  isEditing: false
+  isEditing: false,
+  journalsArray: [],
+  jnlSortedArr: [],
+  jnlArray: [],
+
 };
   
 const mutations = {
@@ -28,6 +35,9 @@ const mutations = {
     state.selectedCategory = null;
     state.selectedLedger = null;
     state.isEditing = false;
+    state.journalsArray = [];
+    state.jnlSortedArr = [];
+    state.jnlArray = [];
   },
   SET_SELECTED_LEDGER(state, ledger) {
     state.selectedLedger = ledger;
@@ -50,11 +60,20 @@ const mutations = {
     for(const [key, value] of Object.entries(search_filter)){
       if(key == 'name_search'){
         state.name_search = value;
+      }else if(key == 'ledger_code_search'){
+        state.ledger_code_search = value;
+      }else if(key == 'ledger_name_search'){
+        state.ledger_name_search = value;
+      }else if(key == 'financial_statement_search'){
+        state.financial_statement_search = value;
       }
     }
   },
   RESET_SEARCH_FILTERS(state){
     state.name_search = '';
+    state.ledger_code_search = '';
+    state.ledger_name_search = '';
+    state.financial_statement_search = '';
   }
 };
   
@@ -71,6 +90,43 @@ const actions = {
     .catch((error)=>{
       console.log(error.message);
       throw error;
+    })
+  },
+  fetchClientJournals({ commit,state }, formData){
+    state.journalsArray = [];
+    axios
+    .post("api/v1/ledger-journals-entries-search/", formData)
+    .then((response)=>{
+        state.jnlArray = [];
+        let running_balance = 0;
+        state.journalsArray = response.data.results;
+        state.jnlSortedArr = state.journalsArray.sort(function(a, b){
+            // Convert the date strings to Date objects
+            let dateA = new Date(a.date);
+            let dateB = new Date(b.date);
+
+            // Subtract the dates to get a value that is either negative, positive, or zero
+            return dateA - dateB;
+        })
+
+        for(let i=0; i<state.journalsArray.length; i++){
+            if(state.journalsArray[i].debit_amount != 0){
+                running_balance += state.journalsArray[i].debit_amount;
+                state.journalsArray[i]['running_balance'] = Number(running_balance).toLocaleString();
+                state.jnlArray.push(state.journalsArray[i])
+            }
+            else if(state.journalsArray[i].credit_amount != 0){
+                running_balance -= state.journalsArray[i].credit_amount;
+                state.journalsArray[i]['running_balance'] = Number(running_balance).toLocaleString();
+                state.jnlArray.push(state.journalsArray[i])
+            }
+        }
+    })
+    .catch((error)=>{
+        console.log(error.message)
+    })
+    .finally(()=>{
+    
     })
   },
 
@@ -152,6 +208,8 @@ const actions = {
     })
     
   },
+
+
   handleSelectedLedger({ commit, state }, option){
     state.ledgerArray = [];
     const selectedLedger = state.ledgersList.find(ledger => (ledger.ledger_code + " - " +ledger.ledger_name) === option);
@@ -193,7 +251,7 @@ const actions = {
       if (result.value) {
         axios.post(`api/v1/delete-ledger/`,formData)
         .then((response)=>{
-          if(response.status == 200){
+          if(response.data.msg == "Success"){
               Swal.fire("Poof! Ledger removed succesfully!", {
                 icon: "success",
               }); 

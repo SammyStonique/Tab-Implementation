@@ -1,17 +1,25 @@
 <template>
-    <div class="bg-blue-200 w-full min-h-[98vh] bottom-8">
+    <div class="main-container w-full min-h-[90vh] bottom-8">
         <div class="fixed top-0 w-full z-50">
-            <NavBar :title="title" @minimize="minimize" @close="close"/>
-            <NavBarFA  @openPage="selectTab"/>
-            <PagesTab @openPage="selectedTab" @closePage="closeTab"/>
+            <div class="z-50 relative">
+                <NavBar :title="title" @minimize="minimize" @close="close"/>
+            </div> 
+            <div class="z-40 relative">
+                <NavBarFA @openPage="selectTab"/>
+            </div>
+            <div class="z-30">
+                <PagesTab @openPage="selectedTab" @closePage="closeTab"/>
+            </div>
         </div>
-        <div class="tab-content z-10 overflow-y-hidden">
-            <keep-alive>
-                <component :is="activeComponent" />
+        <div class="tab-content z-20 overflow-y-hidden">
+            <keep-alive :include="cachedComponents">
+                <component 
+                    :is="activeComponent"
+                 />
             </keep-alive>
         </div>
+        
     </div>
-    
 </template>
 
 <script>
@@ -20,12 +28,23 @@ import NavBarFA from '@/components/FA/NavBarFA.vue';
 import PagesTab from '@/components/FA/PagesTab.vue';
 import Dashboard from '@/components/FA/Dashboard.vue';
 import Client_Categories from '@/components/FA/Client_Categories.vue';
+import Chart_Of_Accounts from '@/components/FA/Chart_Of_Accounts.vue';
+import Ledger_Details from '@/components/FA/Ledger_Details.vue';
 import { useStore } from 'vuex';
 import { ref, computed } from 'vue';
+
+
+
+import Default_Settings from '@/components/SET/Default_Settings.vue';
+
 export default{
     components:{
-        NavBar, Dashboard,
-        NavBarFA, PagesTab, Client_Categories
+        NavBar,
+        NavBarFA,
+        PagesTab,
+        Dashboard, Client_Categories,Chart_Of_Accounts,Ledger_Details,
+
+        Default_Settings
     },
     props: {
         title: {
@@ -35,39 +54,42 @@ export default{
     },
     setup(){
         const store = useStore();
-        const title = ref('Financial Accounts')
-        const activeTab = ref('');
-        const tabs = computed(()=> store.state.pageTab.faArray);
+        const title = ref('Financial Accounts');
+        const cachedComponents = computed(() =>  Array.from(store.state.pageTab.faArray));
+        const tabs = computed({
+            get: ()=> store.state.pageTab.faArray,
+        });
+
+        const activeTab = computed(() => store.state.pageTab.faActiveTab);
     
         const activeComponent = computed(() => activeTab.value);
     
         const selectTab = (pageName) => {
             for(const [key, value] of Object.entries(pageName)){
-                activeTab.value = value;
-                console.log("THE SELECTED TAB IS ",activeTab.value);
+                store.state.pageTab.pmsActiveTab = value;
             }
         };
         const selectedTab = (pageName) => {
-            activeTab.value = pageName;
             store.state.pageTab.faActiveTab = pageName;
         };
         const closeTab = (pageName) =>{
             let page = {"FA":pageName};
-            store.commit('pageTab/REMOVE_PAGE', page);
-            store.commit(`${pageName}/RESET_SEARCH_FILTERS`);12
+            store.commit('pageTab/REMOVE_PAGE', page)
+            store.commit(`${pageName}/RESET_SEARCH_FILTERS`)
             activeTab.value = store.state.pageTab.faActiveTab;
+            store.commit(`${pageName}/initializeStore`);
         }
         const minimize = () =>{
             store.commit('modulesTab/MINIMIZE_TAB')
         }
         const close = () =>{
             let myArray = Array.from(tabs.value);
-            console.log("THE VALUE OF TAB IS ",myArray);
             for(let i=0; i<myArray.length; i++){
                 store.commit(`${myArray[i]}/RESET_SEARCH_FILTERS`)
+                store.commit(`${myArray[i]}/initializeStore`)
             }
             store.commit('modulesTab/REMOVE_TAB', {'FA':'Financial Accounts'}),
-            store.commit('pageTab/CLEAR_PAGE_TAB', 'Financial Accounts')
+            store.commit('pageTab/CLEAR_PAGE_TAB', 'Financial Accounts');
             activeTab.value = store.state.pageTab.faActiveTab;
         }
         return{
@@ -76,7 +98,7 @@ export default{
             title,
             activeComponent,
             selectTab, selectedTab, closeTab,
-            activeTab
+            activeTab, cachedComponents
         }
     },
     mounted(){
@@ -86,8 +108,20 @@ export default{
 }
 </script>
 
-<style>
+<style scoped>
 .tab-content{
-    margin-top: 40px;
+    margin-top: 35px;
+}
+.main-container{
+    max-height: 100vh;
+    overflow: hidden;
+}
+.navbar-pms{
+    z-index: 100 !important;
+}
+.pages-tab{
+    z-index: 50 !important;
 }
 </style>
+
+

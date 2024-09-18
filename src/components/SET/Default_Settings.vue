@@ -5,15 +5,25 @@
                 <div class="border-b-2 border-gray-500 px-3 py-2 text-left">
                     <button class="w-full text-left font-semibold" @click="showPMSSettings">PMS Default Settings</button>
                     <div class="w-full mt-4" v-if="pms_settings_options">
-                        <div class="flex mb-3">
-                            <div class="basis-1/2 flex mr-3">
+                        <div class="flex mb-1.5">
+                            <div class="basis-1/3 flex mr-3">
                                 <label for="">Current Selection:<em></em></label>
                                 <p class="ml-4 font-bold">{{ rentalIncome }}</p>
                                 <button type="button" class="ml-4 text-red-600" @click="removeDefaultSetting('PMS','Rental Income Posting A/c',rentalIncome)" v-if="rentalIncome"><i class="fa fa-times" aria-hidden="true"></i></button>
                             </div>
+                            <div class="basis-1/3 flex mr-3">
+                                <label for="">Current Selection:<em></em></label>
+                                <p class="ml-4 font-bold">{{ tenantCodePrefix }}</p>
+                                <button type="button" class="ml-4 text-red-600" @click="removeDefaultSetting('PMS','Tenant Code Prefix',tenantCodePrefix)" v-if="tenantCodePrefix"><i class="fa fa-times" aria-hidden="true"></i></button>
+                            </div>
+                            <div class="basis-1/3 flex mr-3">
+                                <label for="">Current Selection:<em></em></label>
+                                <p class="ml-4 font-bold">{{ tenantCodeCounter }}</p>
+                                <button type="button" class="ml-4 text-red-600" @click="removeDefaultSetting('PMS','Tenant Code Zero Padding',tenantCodeCounter)" v-if="tenantCodeCounter"><i class="fa fa-times" aria-hidden="true"></i></button>
+                            </div>
                         </div>
-                        <div class="flex mb-6">
-                            <div class="basis-1/4 mr-3 relative">
+                        <div class="flex mb-3">
+                            <div class="basis-1/3 mr-8 relative">
                                 <label for="">Rental Income A/c:<em>*</em></label><br />
                                 <SearchableDropdown
                                     :options="incomeLedgerArr"
@@ -25,15 +35,25 @@
                                 />
                                 <button type="button" class="absolute ml-4 rounded px-2 bg-green-500 text-white" @click="saveDefaultSetting('PMS','Rental Income Posting A/c',ledgerID,ledgerName)"><i class="fa fa-check"></i></button>
                             </div>
+                            <div class="basis-1/3 mr-3 relative">
+                                <label for="">Tenant Code Prefix:<em>*</em></label><br />
+                                <input type="text" name="" id="" class="bg-slate-50 rounded pl-3 border border-gray-400 text-base w-3/4" v-model="tenantCodePrefix">
+                                <button type="button" class="absolute ml-4 rounded px-2 bg-green-500 text-white" @click="saveDefaultSetting('PMS','Tenant Code Prefix',tenantCodePrefix,tenantCodePrefix)"><i class="fa fa-check"></i></button>
+                            </div>
+                            <div class="basis-1/3 mr-3 relative">
+                                <label for="">Tenant Code Zero Padding:<em>*</em></label><br />
+                                <input type="number" name="" id="" class="bg-slate-50 rounded pl-3 border border-gray-400 text-base w-3/4" v-model="tenantCodeCounter">
+                                <button type="button" class="absolute ml-4 rounded px-2 bg-green-500 text-white" @click="saveDefaultSetting('PMS','Tenant Code Zero Padding',tenantCodeCounter,tenantCodeCounter)"><i class="fa fa-check"></i></button>
+                            </div>
                         </div>
-                        <div class="flex mb-3">
+                        <div class="flex mb-1.5">
                             <div class="basis-1/2 flex mr-3">
                                 <label for="">Current Selection:<em></em></label>
                                 <p class="ml-4 font-bold">{{ rentalSecurityDeposit }}</p>
                                 <button type="button" class="ml-4 text-red-600" @click="removeDefaultSetting('PMS','Rental Security Deposits Posting A/c',rentalSecurityDeposit)" v-if="rentalSecurityDeposit"><i class="fa fa-times" aria-hidden="true"></i></button>
                             </div>
                         </div>
-                        <div class="flex mb-6">
+                        <div class="flex mb-3">
                             <div class="basis-1/4 mr-3 relative">
                                 <label for="">Security Deposits Paybale A/c:<em>*</em></label><br />
                                 <SearchableDropdown
@@ -47,14 +67,14 @@
                                 <button type="button" class="absolute ml-4 rounded px-2 bg-green-500 text-white" @click="saveDefaultSetting('PMS','Rental Security Deposits Posting A/c',ledgerID,ledgerName)"><i class="fa fa-check"></i></button>
                             </div>
                         </div>
-                        <div class="flex mb-3">
+                        <div class="flex mb-1.5">
                             <div class="basis-1/2 flex mr-3">
                                 <label for="">Current Selection:<em></em></label>
                                 <p class="ml-4 font-bold">{{ rentalLeaseIncome }}</p>
                                 <button type="button" class="ml-4 text-red-600" @click="removeDefaultSetting('PMS','Lease Fees Income Posting A/c',rentalLeaseIncome)" v-if="rentalLeaseIncome"><i class="fa fa-times" aria-hidden="true"></i></button>
                             </div>
                         </div>
-                        <div class="flex mb-6">
+                        <div class="flex mb-3">
                             <div class="basis-1/4 mr-3 relative">
                                 <label for="">Lease Fees Posting A/c:<em>*</em></label><br />
                                 <SearchableDropdown
@@ -67,14 +87,14 @@
                                 <button type="button" class="absolute ml-4 rounded px-2 bg-green-500 text-white" @click="saveDefaultSetting('PMS','Lease Fees Income Posting A/c',ledgerID,ledgerName)"><i class="fa fa-check"></i></button>
                             </div>
                         </div>
-                        <div class="flex mb-3">
+                        <div class="flex mb-1.5">
                             <div class="basis-1/2 flex mr-3">
                                 <label for="">Current Selection:<em></em></label>
                                 <p class="ml-4 font-bold">{{ rentalPenaltyIncome }}</p>
                                 <button type="button" class="ml-4 text-red-600" @click="removeDefaultSetting('PMS','Penalty Income Posting A/c',rentalPenaltyIncome)" v-if="rentalPenaltyIncome"><i class="fa fa-times" aria-hidden="true"></i></button>
                             </div>
                         </div>
-                        <div class="flex mb-6">
+                        <div class="flex mb-3">
                             <div class="basis-1/4 mr-3 relative">
                                 <label for="">Penalty Income Posting A/c:<em>*</em></label><br />
                                 <SearchableDropdown
@@ -494,8 +514,10 @@ export default defineComponent({
         const rentalSecurityDeposit = ref("");
         const rentalPenaltyIncome = ref("");
         const rentalLeaseIncome = ref("");
+        const tenantCodePrefix = ref("");
+        const tenantCodeCounter = ref(0);
 
-        const dropdownWidth = ref("400px");
+        const dropdownWidth = ref("320px");
         const incomePlaceholder = ref("Select Income A/c");
 
         const ledgerID = ref("");
@@ -632,6 +654,10 @@ export default defineComponent({
                     }
                     else if(response.data[i].setting_name === 'Penalty Income Posting A/c'){
                         rentalPenaltyIncome.value = response.data[i].setting_value_name;
+                    }else if(response.data[i].setting_name === 'Tenant Code Prefix'){
+                        tenantCodePrefix.value = response.data[i].setting_value_name;
+                    }else if(response.data[i].setting_name === 'Tenant Code Zero Padding'){
+                        tenantCodeCounter.value = response.data[i].setting_value_name;
                     }
                 }
             })
@@ -719,7 +745,7 @@ export default defineComponent({
             settings_settings_options, showHMSSettings, showPMSSettings, showAccountsSettings, showInventorySettings, showHRSettings, showSettingsSettings,
             dropdownWidth,incomePlaceholder, incomeLedgerArr, expenseLedgerArr, liabilityLedgerArr, cashbookLedgerArr, fetchIncomeLedgers, fetchExpenseLedgers,
             fetchCashbookLedgers, fetchLiabilityLedgers, rentalIncome, rentalSecurityDeposit, rentalLeaseIncome, rentalPenaltyIncome,
-            ledgerID,ledgerName, handleSelectedLedger, clearSelectedLedger, saveDefaultSetting, removeDefaultSetting
+            ledgerID,ledgerName, handleSelectedLedger, clearSelectedLedger, saveDefaultSetting, removeDefaultSetting, tenantCodePrefix, tenantCodeCounter
         }
     }
 });

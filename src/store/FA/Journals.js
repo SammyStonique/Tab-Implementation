@@ -14,6 +14,7 @@ const state = {
   tenantReceipts: [],
   outstandingBalance: 0,
   invoiceDueAmount: 0,
+  invoiceDescription: "",
   jnlArray: [],
   jnlSortedArr: [],
   journalID: '',
@@ -214,7 +215,7 @@ const actions = {
             // Subtract the dates to get a value that is either negative, positive, or zero
             return dateA - dateB;
         })
-        console.log("The sorted array is ",state.jnlSortedArr );
+
         for(let i=0; i<state.journalsArray.length; i++){
             if(state.journalsArray[i].debit_amount != 0){
                 running_balance += state.journalsArray[i].debit_amount;
@@ -234,7 +235,7 @@ const actions = {
     .finally(()=>{
     
     })
-    },
+  },
   handleSelectedJournal({ commit, state }, option){
     state.journalArray = [];
     const selectedJournal = state.journalsList.find(journal => (journal.journal_no + " - " +journal.description + " - " +journal.due_amount) === option);

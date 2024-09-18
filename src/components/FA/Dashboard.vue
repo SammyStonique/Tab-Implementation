@@ -106,11 +106,17 @@
     .main-content{
       z-index: -1;
       margin-left: 1px;
-      margin-top: 90px;
-      min-height: 100vh;
+      margin-top: 64px;
+      min-height: 90vh;
+      overflow: hidden;
     }
     .subsection{
         min-height: 100vh;
+    }
+    .appointments-table{
+      min-height: 40vh;
+      max-height: 40vh;
+      overflow-y: scroll;
     }
     </style>
     
