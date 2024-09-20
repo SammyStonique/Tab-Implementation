@@ -4,8 +4,7 @@ import tab2 from './modules/tab2Store';
 import modulesTab from './modules/modulesTab';
 import pageTab from './modules/pageTab';
 import Appointments from './HMS/Appointments';
-import Client_Categories from './FA/Client_Categories';
-import Currencies from './FA/Currencies';
+
 import Departments from './HMS/Departments';
 import Patients_List from './HMS/Patients_List';
 import Medical_Fees from './HMS/Medical_Fees';
@@ -27,9 +26,13 @@ import Prepayment_Allocations from './PMS/Prepayment_Allocations';
 import Statement_Transactions from './PMS/Statement_Transactions';
 import Property_Statements from './PMS/Property_Statements';
 
+import Client_Categories from './FA/Client_Categories';
+import Currencies from './FA/Currencies';
 import Ledgers from './FA/Ledgers';
 import Taxes from './FA/Taxes';
 import Journals from './FA/Journals';
+import Customers from './FA/Customers';
+import Vendors from './FA/Vendors';
 
 import Default_Settings from './SET/Default_Settings';
 
@@ -44,7 +47,7 @@ export default createStore({
     Properties_List, Zones, Landlords_List, Units_List, Active_Tenants, Utilities,Security_Deposits,Variation_Periods, Tenant_Deposits,
     Meter_Setup, Meter_Readings,Tenant_Prepayments,Prepayment_Allocations,Statement_Transactions,Property_Statements,
 
-    Ledgers, Currencies, Taxes, Journals,
+    Ledgers, Currencies, Taxes, Journals, Customers, Vendors,
 
     Default_Settings
   },

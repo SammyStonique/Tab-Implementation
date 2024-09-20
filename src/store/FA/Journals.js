@@ -11,7 +11,9 @@ const state = {
   journalArray: [],
   journalsArray: [],
   tenantInvoices: [],
+  customerInvoices: [],
   tenantReceipts: [],
+  customerReceipts: [],
   outstandingBalance: 0,
   invoiceDueAmount: 0,
   invoiceDescription: "",
@@ -38,7 +40,9 @@ const mutations = {
     state.jnlArray = [];
     state.jnlSortedArr = [];
     state.tenantInvoices = [];
+    state.customerInvoices = [];
     state.tenantReceipts = [];
+    state.customerReceipts = [];
     state.outstandingBalance = 0;
     state.invoiceDescription = "";
     state.invoiceDueAmount = 0;
@@ -68,8 +72,14 @@ const mutations = {
   LIST_TENANTS_INVOICES(state, journals) {
     state.tenantInvoices = journals;
   },
+  LIST_CUSTOMERS_INVOICES(state, journals) {
+    state.customerInvoices = journals;
+  },
   LIST_TENANTS_RECEIPTS(state, journals) {
     state.tenantReceipts = journals;
+  },
+  LIST_CUSTOMERS_RECEIPTS(state, journals) {
+    state.customerReceipts = journals;
   },
   JOURNALS_ARRAY(state, journals){
     state.journalArray = journals;
@@ -193,6 +203,16 @@ const actions = {
     axios.post(`api/v1/client-category-journals-search/`,formData)
     .then((response)=>{
       commit('LIST_TENANTS_INVOICES', response.data);
+    })
+    .catch((error)=>{
+      console.log(error.message);
+    })
+    
+  },
+  fetchCustomersInvoices({ commit,state }, formData) {
+    axios.post(`api/v1/client-category-journals-search/`,formData)
+    .then((response)=>{
+      commit('LIST_CUSTOMERS_INVOICES', response.data);
     })
     .catch((error)=>{
       console.log(error.message);

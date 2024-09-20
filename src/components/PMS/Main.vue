@@ -131,7 +131,7 @@ export default{
 }
 </script>
 
-<style scoped>
+<style>
 .tab-content{
     margin-top: 35px;
 }
@@ -139,10 +139,5 @@ export default{
     max-height: 100vh;
     overflow: hidden;
 }
-.navbar-pms{
-    z-index: 100 !important;
-}
-.pages-tab{
-    z-index: 50 !important;
-}
+
 </style>

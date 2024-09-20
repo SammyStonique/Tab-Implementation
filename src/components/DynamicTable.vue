@@ -3,7 +3,7 @@
     <table ref="tableRef" class="dynamic-table rounded">
       <thead class="bg-gray-800 text-white">
         <tr class="rounded bg-slate-800 text-white font-semibold text-sm uppercase">
-          <th v-for="(column, index) in columns" :key="index">
+          <th v-for="(column, index) in columns" :key="index" :class="`min-w-[${column.minWidth}] max-w-[${column.maxWidth}]`">
             <template v-if="column.type === 'checkbox'" >
               <input type="checkbox" @change="toggleSelectAll" :checked="allSelected" />
             </template>
@@ -18,20 +18,25 @@
       </thead>
       <tbody class="table-body">
         <tr v-for="(row, rowIndex) in rows" :key="rowIndex" @dblclick="handleRowClick(row)" class="cursor-pointer even:bg-gray-100 text-xxs uppercase">
-          <td v-for="(column, colIndex) in columns" :key="colIndex" :class="{'ellipsis': column.maxWidth}">
+          <td v-for="(column, colIndex) in columns" :key="colIndex" :class="[{'ellipsis': column.maxWidth}, { 'max-width': column.maxWidth },{ 'min-width': column.minWidth }]" >
             <template v-if="column.type === 'checkbox'">
               <input type="checkbox" v-model="row.selected" class="checkbox" @change="updateSelectedIds(row)"/>
             </template>
             <template v-else-if="column.type === 'dropdown'">
-              <select @change="handleChange($event, row)" v-model="row[column.key]" :name="row[column.key]" class="bg-inherit outline-none h-full text-sm w-full">
+              <select @change="handleChange($event, row)" v-model="row[column.key]" :name="row[column.key]" class="bg-inherit outline-none h-full text-xxs w-full uppercase">
                 <option v-for="(option, index) in row.options" :key="index" :value="option.value">{{ option.text }}</option>
               </select>
             </template>
-            <template v-else>
-              <div v-if="column.editable === true && column.type === 'number'">
-                <input :type="column.type" @change="handleInputChange($event, row)" pattern="[0-9]*" oninput="this.value = this.value.replace(/[^0-9]/g, '')" class="" v-model="row[column.key]" />             
+            <template v-else-if="column.type === 'select-dropdown'">
+              <select @change="handleChange($event, row)" v-model="row[column.key]" :name="row[column.key]" class="bg-inherit outline-none h-full text-xxs w-full uppercase">
+                <option v-for="(option, index) in column.options" :key="index" :value="option.value">{{ option.text }}</option>
+              </select>
+            </template>
+            <template v-else >            
+              <div v-if="column.editable === true && column.type === 'number'" class="max-w-[100px]">
+                <input :type="column.type" @change="handleInputChange($event, row)" pattern="[0-9]*" oninput="this.value = this.value.replace(/[^0-9]/g, '')" class="w-full" v-model="row[column.key]" />             
               </div>
-              <div v-else-if="column.editable === true ">
+              <div v-else-if="column.editable === true">
                 <input :type="column.type" @change="handleInputChange($event, row)" class="w-inherit" v-model="row[column.key]" /> 
               </div>
               <div v-else :class="`text-${column.textColor}-500`">
@@ -131,9 +136,29 @@ export default defineComponent({
       return key.split('.').reduce((obj, keyPart) => obj && obj[keyPart], row);
     };
 
+    const calculateTaxAmount = (row) =>{
+      const subTotal = (parseFloat(row.quantity) * parseFloat(row.cost)) || 0;
+      const taxRate = parseFloat(row.vat_rate?.tax_rate) || 0;
+      const taxIncl = row.vat_inclusivity || "Yes";
+      let totalAmount = parseFloat(row.total_amount) || 0;
+      let taxAmount = parseFloat(row.vat_amount) || 0;
+      if(taxIncl == "Yes"){
+        taxAmount = ((taxRate/100) * subTotal).toFixed(2);
+        totalAmount = subTotal.toFixed(2);
+        row.vat_amount = taxAmount;
+        row.sub_total = subTotal.toFixed(2);
+        row.total_amount = totalAmount;
+      }else{
+        taxAmount = ((taxRate/100) * subTotal).toFixed(2);
+        totalAmount = (parseFloat(subTotal) + parseFloat(taxAmount)).toFixed(2);
+        row.sub_total = subTotal.toFixed(2);
+        row.vat_amount = taxAmount;
+        row.total_amount = totalAmount;
+      }
+    };
     const handleChange = (event, row) =>{
       const selectedValue = event.target.value;
-      // receiptAllocation(row);
+      calculateTaxAmount(row);
       if (row.method && typeof row.method === 'function') {
         row.method(selectedValue); 
       } else {
@@ -142,6 +167,7 @@ export default defineComponent({
     }
 
     const handleInputChange = (event, row) =>{
+      calculateTaxAmount(row);
       updateUnits(row);
       receiptAllocation(row);
     }
@@ -241,5 +267,6 @@ input {
   text-overflow: ellipsis;
   white-space: nowrap;
 }
+
 </style>
   

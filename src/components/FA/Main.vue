@@ -23,6 +23,8 @@
 </template>
 
 <script>
+import { useStore } from 'vuex';
+import { ref, computed } from 'vue';
 import NavBar from '@/components/NavBar.vue';
 import NavBarFA from '@/components/FA/NavBarFA.vue';
 import PagesTab from '@/components/FA/PagesTab.vue';
@@ -30,9 +32,10 @@ import Dashboard from '@/components/FA/Dashboard.vue';
 import Client_Categories from '@/components/FA/Client_Categories.vue';
 import Chart_Of_Accounts from '@/components/FA/Chart_Of_Accounts.vue';
 import Ledger_Details from '@/components/FA/Ledger_Details.vue';
-import { useStore } from 'vuex';
-import { ref, computed } from 'vue';
-
+import General_Invoices from '@/components/FA/General_Invoices.vue';
+import Invoice_Details from '@/components/FA/Invoice_Details.vue';
+import General_Receipts from '@/components/FA/General_Receipts.vue';
+import Receipt_Details from '@/components/FA/Receipt_Details.vue';
 
 
 import Default_Settings from '@/components/SET/Default_Settings.vue';
@@ -42,7 +45,8 @@ export default{
         NavBar,
         NavBarFA,
         PagesTab,
-        Dashboard, Client_Categories,Chart_Of_Accounts,Ledger_Details,
+        Dashboard, Client_Categories,Chart_Of_Accounts,Ledger_Details,General_Invoices,Invoice_Details,General_Receipts,
+        Receipt_Details,
 
         Default_Settings
     },
@@ -66,7 +70,7 @@ export default{
     
         const selectTab = (pageName) => {
             for(const [key, value] of Object.entries(pageName)){
-                store.state.pageTab.pmsActiveTab = value;
+                store.state.pageTab.faActiveTab = value;
             }
         };
         const selectedTab = (pageName) => {

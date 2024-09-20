@@ -11,6 +11,7 @@ const state = {
   ledgerArray: [],
   ledgerID: '',
   ledgerName: '',
+  ledgerTitle: "",
   name_search: '',
   ledger_code_search: "",
   ledger_name_search: "",
@@ -21,7 +22,7 @@ const state = {
   journalsArray: [],
   jnlSortedArr: [],
   jnlArray: [],
-
+  invoiceItemsArray: [],
 };
   
 const mutations = {
@@ -29,8 +30,10 @@ const mutations = {
     state.ledgersList = [];
     state.ledgerArr = [];
     state.ledgerArray = [];
+    state.invoiceItemsArray = [];
     state.ledgerID = '';
     state.ledgerName = '';
+    state.ledgerTitle = '';
     state.name_search = '';
     state.selectedCategory = null;
     state.selectedLedger = null;
@@ -100,6 +103,7 @@ const actions = {
         state.jnlArray = [];
         let running_balance = 0;
         state.journalsArray = response.data.results;
+        // state.ledgerTitle = response.data.result.ledger_code + " - " + response.data.result.ledger_name;
         state.jnlSortedArr = state.journalsArray.sort(function(a, b){
             // Convert the date strings to Date objects
             let dateA = new Date(a.date);
@@ -216,8 +220,18 @@ const actions = {
     if (selectedLedger) {
         state.ledgerID = selectedLedger.ledger_id;
         state.ledgerName = selectedLedger.ledger_code + " - " + selectedLedger.ledger_name;
+        selectedLedger.posting_account = selectedLedger.ledger_code + " - " + selectedLedger.ledger_name;
+        selectedLedger.description = "";
+        selectedLedger.cost = 0;
+        selectedLedger.quantity = 1;
+        selectedLedger.vat_rate = null;
+        selectedLedger.vat_inclusivity = null;
+        selectedLedger.vat_amount = 0;
+        selectedLedger.sub_total = 0;
+        selectedLedger.total_amount = 0;
         state.ledgerArray = [...state.ledgerArray, selectedLedger];
     }
+    state.invoiceItemsArray.push(selectedLedger);
     commit('LEDGERS_ARRAY', state.ledgerArray);
       
   },
@@ -273,6 +287,9 @@ const actions = {
         Swal.fire(`Ledger has not been deleted!`);
       }
     })
+  },
+  removeInvoiceLine({commit, state}, index){
+    state.invoiceItemsArray.splice(index, 1); 
   },
 };
   

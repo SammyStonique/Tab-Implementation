@@ -2,6 +2,7 @@
     <PageComponent 
         :key="pageComponentKey"
         :loader="loader" @showLoader="showLoader" @hideLoader="hideLoader"
+        :pageTitle="pageTitle"
         :addButtonLabel="addButtonLabel"
         :searchFilters="searchFilters"
         @searchPage="searchJournalEntries"
@@ -24,7 +25,8 @@
         @lastPage="lastPage"
         :showNextBtn="showNextBtn"
         :showPreviousBtn="showPreviousBtn"
-    />
+    >
+    </PageComponent>
     <MovableModal v-model:visible="appModalVisible" :title="title" :modal_top="modal_top" :modal_left="modal_left" :modal_width="modal_width"
         :loader="modal_loader" @showLoader="showModalLoader" @hideLoader="hideModalLoader" @closeModal="closeModal"
     >
@@ -54,6 +56,7 @@ export default{
         const store = useStore();
         const toast = useToast();
         const loader = ref('');
+        const pageTitle = "LEDGER TITLE";
         const modal_loader = ref('none');
         const addButtonLabel = ref('');
         const pageComponentKey = ref(0);
@@ -191,7 +194,7 @@ export default{
         const hideLoader = () =>{
             loader.value = "none";
         }
-        const searchJournalEntries = () =>{
+        const searchJournalEntries = async() =>{
             showLoader();
             let formData = {
                 posting_account: ledgerID.value,
@@ -199,30 +202,16 @@ export default{
                 date_from: from_date_search.value,
                 date_to: to_date_search.value,
             }
- 
-            axios
-            .post(`api/v1/ledger-journals-entries-search/?page=${currentPage.value}`,formData)
-            .then((response)=>{
-                prepaymentsList.value = response.data.results;
-                store.commit('Ledgers/updateState', { jnlArray: response.data.results})
-                appResults.value = response.data;
-                appArrLen.value = prepaymentsList.value.length;
-                appCount.value = appResults.value.count;
-                pageCount.value = Math.ceil(appCount.value / 10000);
-                
-                if(response.data.next){
-                    showNextBtn.value = true;
-                }
-                if(response.data.previous){
-                    showPreviousBtn.value = true;
-                }
-            })
-            .catch((error)=>{
-                console.log(error);
-            })
-            .finally(()=>{
+            try{
+                const response = await store.dispatch('Ledgers/fetchClientJournals', formData)
+            }
+            catch(error){
+
+            }finally{
                 hideLoader();
-            })
+            }
+            
+            
         }
         const loadPrev = () =>{
             if (currentPage.value <= 1){
@@ -267,7 +256,7 @@ export default{
             addButtonLabel, searchFilters,tableColumns,resetFilters,loadPrev,loadNext,firstPage,lastPage,
             showNextBtn,showPreviousBtn, handleActionClick,displayButtons,handleReset,
             modal_top, modal_left, modal_width, showLoader, loader, hideLoader, modal_loader, showModalLoader, hideModalLoader,
-            closeModal, handleSelectionChange, pageComponentKey, flex_basis, flex_basis_percentage
+            closeModal, handleSelectionChange, pageComponentKey, flex_basis, flex_basis_percentage, pageTitle
         }
     }
 }

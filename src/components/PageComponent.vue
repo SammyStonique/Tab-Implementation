@@ -1,6 +1,9 @@
 <template>
     <PageStyleComponent :loader="loader" @showLoader="showLoader" @hideLoader="hideLoader">
         <template v-slot:body>
+            <div class="fixed bg-white w-[93%] z-60" v-if="pageTitle != ''">
+                <p class="font-bold text-lg text-black">{{ pageTitle }}</p>
+            </div>
             <div class="fixed bg-white w-[93%] z-50">
                 <FilterBar 
                     :addButtonLabel="addButtonLabel" 
@@ -60,6 +63,11 @@ import PageStyleComponent from './PageStyleComponent.vue';
 
 export default defineComponent({
     props:{
+        pageTitle:{
+            type: String,
+            required: false,
+            default: () => ''
+        },
         addButtonLabel:{
             type: String,
             required: true
