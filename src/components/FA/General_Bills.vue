@@ -3,17 +3,17 @@
         <PageComponent 
             :loader="loader" @showLoader="showLoader" @hideLoader="hideLoader"
             :addButtonLabel="addButtonLabel"
-            @handleAddNew="addNewInvoice"
+            @handleAddNew="addNewBill"
             :searchFilters="searchFilters"
             :dropdownOptions="dropdownOptions"
             @handleDynamicOption="handleDynamicOption"
-            @searchPage="searchInvoices"
+            @searchPage="searchBills"
             @resetFilters="resetFilters"
-            @removeItem="removeInvoice"
-            @removeSelectedItems="removeInvoices"
+            @removeItem="removeBill"
+            @removeSelectedItems="removeBills"
             @printList="printList"
             :columns="tableColumns"
-            :rows="invoicesList"
+            :rows="billsList"
             :actions="actions"
             :idField="idField"
             @handleSelectionChange="handleSelectionChange"
@@ -33,7 +33,7 @@
         >
             <DynamicForm 
                 :fields="formFields" :flex_basis="flex_basis" :flex_basis_percentage="flex_basis_percentage" 
-                :displayButtons="displayButtons" @handleSubmit="saveInvoice" @handleReset="handleReset"
+                :displayButtons="displayButtons" @handleSubmit="saveBill" @handleReset="handleReset"
             />
         </MovableModal>
     </div>
@@ -50,7 +50,7 @@ import { useToast } from "vue-toastification";
 import { useDateFormatter } from '@/composables/DateFormatter';
 
 export default{
-    name: 'General_Invoices',
+    name: 'General_Bills',
     components:{
         PageComponent, MovableModal,DynamicForm
     },
@@ -63,7 +63,7 @@ export default{
         const loader = ref('none');
         const modal_loader = ref('none');
         const idField = 'journal_id';
-        const addButtonLabel = ref('New Invoice');
+        const addButtonLabel = ref('New Bill');
         const submitButtonLabel = ref('Add');
         const title = ref('Invoice Booking');
         const custComponentKey = ref(0);
@@ -72,7 +72,7 @@ export default{
         const modal_left = ref('400px');
         const modal_width = ref('32vw');
         const selectedIds = ref([]);
-        const invoicesList = ref([]);
+        const billsList = ref([]);
         const propResults = ref([]);
         const propArrLen = ref(0);
         const propCount = ref(0);
@@ -85,15 +85,15 @@ export default{
         const flex_basis_percentage = ref('');
         const displayButtons = ref(true);
         const errors = ref([]);
-        const customerID = ref('');
-        const customerArray = computed(() => store.state.Customers.customerArr);
+        const vendorID = ref('');
+        const vendorArray = computed(() => store.state.Vendors.vendorArr);
         const showModal = ref(false);
         const tableColumns = ref([
             {type: "checkbox"},
-            {label: "Invoice#", key:"journal_no"},
+            {label: "Bill#", key:"journal_no"},
             {label: "Date", key: "date"},
             {label: "Code", key:"code"},
-            {label: "Customer Name", key:"customer_name"},
+            {label: "Vendor Name", key:"customer_name"},
             {label: "Description", key:"description"},
             {label: "Amount", key:"total_amount"},
             {label: "Paid", key:"total_paid"},
@@ -102,19 +102,20 @@ export default{
         ])
         
         const actions = ref([
-            {name: 'delete', icon: 'fa fa-trash', title: 'Delete Invoice'},
+            {name: 'delete', icon: 'fa fa-trash', title: 'Delete Bill'},
         ])
         const companyID = computed(()=> store.state.userData.company_id);
-        const fetchCustomers = async() =>{
-            await store.dispatch('Customers/fetchCustomers', {company:companyID.value})
+        const userID = computed(()=> store.state.userData.user_id);
+        const fetchVendors = async() =>{
+            await store.dispatch('Vendors/fetchVendors', {company:companyID.value})
         };
-        const handleSearchCustomers = async(option) =>{
-            await store.dispatch('Customers/handleSelectedCustomer', option)
-            customerID.value = store.state.Customers.customerID;
+        const handleSearchVendors = async(option) =>{
+            await store.dispatch('Vendors/handleSelectedCustomer', option)
+            vendorID.value = store.state.Vendors.vendorID;
         };
-        const clearSearchCustomer = async() =>{
-            await store.dispatch('Customers/updateState', {customerID: ''});
-            customerID.value = ""
+        const clearSearchVendor = async() =>{
+            await store.dispatch('Vendors/updateState', {vendorID: ''});
+            vendorID.value = ""
         }
         const client_name_search = computed({
             get: () => store.state.Journals.client_name_search,
@@ -138,10 +139,10 @@ export default{
             {type:'date', placeholder:"From Date...", value: from_date_search, width:36, title: "Date From Search"},
             {type:'date', placeholder:"To Date...", value: to_date_search, width:36, title: "Date To Search"},
             {
-                type:'search-dropdown', value: customerID.value, width:64,
-                selectOptions: customerArray, optionSelected: handleSearchCustomers,
-                searchPlaceholder: 'Customer Search...', dropdownWidth: '400px',
-                fetchData: fetchCustomers(), clearSearch: clearSearchCustomer()             
+                type:'search-dropdown', value: vendorID.value, width:64,
+                selectOptions: vendorArray, optionSelected: handleSearchVendors,
+                searchPlaceholder: 'Vendor Search...', dropdownWidth: '400px',
+                fetchData: fetchVendors(), clearSearch: clearSearchVendor()             
             },
         ]);
         const handleSelectionChange = (ids) => {
@@ -160,7 +161,7 @@ export default{
                 formFields.value[i].value = '';
             }
             custComponentKey.value += 1;
-            customerID.value = '';
+            vendorID.value = '';
         }
         
         const showModalLoader = () =>{
@@ -169,63 +170,63 @@ export default{
         const hideModalLoader = () =>{
             modal_loader.value = "none";
         }
-        const addNewInvoice = () =>{
-            store.commit('pageTab/ADD_PAGE', {'FA':'Invoice_Details'});
-            store.state.pageTab.faActiveTab = 'Invoice_Details'; 
+        const addNewBill = () =>{
+            store.commit('pageTab/ADD_PAGE', {'FA':'Bill_Details'});
+            store.state.pageTab.faActiveTab = 'Bill_Details'; 
         }
-        const removeInvoice = async() =>{
+        const removeBill = async() =>{
             if(selectedIds.value.length == 1){
                 let formData = {
                     company: companyID.value,
                     journal: selectedIds.value,
-                    txn_type: "INV"
+                    txn_type: "BIL"
                 }
                 try{
                     const response = await store.dispatch('Journals/deleteInvoice',formData)
                     if(response && response.status == 200){
-                        toast.success("Invoice Removed Succesfully");
-                        searchInvoices();
+                        toast.success("Bill Removed Succesfully");
+                        searchBills();
                     }
                 }
                 catch(error){
                     console.error(error.message);
-                    toast.error('Failed to remove invoice: ' + error.message);
+                    toast.error('Failed to remove Bill: ' + error.message);
                 }
                 finally{
                     selectedIds.value = [];
-                    searchInvoices();
+                    searchBills();
                 }
             }else if(selectedIds.value.length > 1){
-                toast.error("You have selected more than 1 Invoice") 
+                toast.error("You have selected more than 1 Bill") 
             }else{
-                toast.error("Please Select An Invoice To Remove")
+                toast.error("Please Select A Bill To Remove")
             }
         }
-        const removeInvoices = async() =>{
+        const removeBills = async() =>{
             if(selectedIds.value.length){
                 let formData = {
                     company: companyID.value,
                     journal: selectedIds.value,
-                    txn_type: "INV"
+                    txn_type: "BIL"
                 }
 
                 try{
                     const response = await store.dispatch('Journals/deleteInvoice',formData)
                     if(response && response.msg == "Success"){
-                        toast.success("Invoice(s) Removed Succesfully");
-                        searchInvoices();
+                        toast.success("Bill(s) Removed Succesfully");
+                        searchBills();
                     }
                 }
                 catch(error){
                     console.error(error.message);
-                    toast.error('Failed to remove invoices: ' + error.message);
+                    toast.error('Failed to remove bill: ' + error.message);
                 }
                 finally{
                     selectedIds.value = [];
-                    searchInvoices();
+                    searchBills();
                 }
             }else{
-                toast.error("Please Select An Invoice To Remove")
+                toast.error("Please Select A Bill To Remove")
             }
         }
         const showLoader = () =>{
@@ -234,13 +235,13 @@ export default{
         const hideLoader = () =>{
             loader.value = "none";
         }
-        const searchInvoices = () =>{
+        const searchBills = () =>{
             showLoader();
             showNextBtn.value = false;
             showPreviousBtn.value = false;
             let formData = {
                 client_category: "Customers",
-                txn_type: "INV",
+                txn_type: "BIL",
                 client_name: client_name_search.value,
                 client_code: client_code_search.value,
                 from_date: from_date_search.value,
@@ -252,10 +253,10 @@ export default{
             axios
             .post(`api/v1/clients-journals-search/?page=${currentPage.value}`,formData)
             .then((response)=>{
-                invoicesList.value = response.data.results;
-                store.commit('Journals/LIST_INVOICES', invoicesList.value)
+                billsList.value = response.data.results;
+                store.commit('Journals/LIST_INVOICES', billsList.value)
                 propResults.value = response.data;
-                propArrLen.value = invoicesList.value.length;
+                propArrLen.value = billsList.value.length;
                 propCount.value = propResults.value.count;
                 pageCount.value = Math.ceil(propCount.value / 50);
                 if(response.data.next){
@@ -274,7 +275,7 @@ export default{
         }
         const resetFilters = () =>{
             store.commit('Journals/RESET_SEARCH_FILTERS')
-            searchInvoices();
+            searchBills();
         }
         const loadPrev = () =>{
             if (currentPage.value <= 1){
@@ -283,7 +284,7 @@ export default{
                 currentPage.value -= 1;
             }
             
-            searchInvoices();
+            searchBills();
             // scrollToTop();
         }
         const loadNext = () =>{
@@ -293,17 +294,17 @@ export default{
                 currentPage.value += 1;
             }
             
-            searchInvoices();
+            searchBills();
             // scrollToTop(); 
         }
         const firstPage = ()=>{
             currentPage.value = 1;
-            searchInvoices();
+            searchBills();
             // scrollToTop();
         }
         const lastPage = () =>{
             currentPage.value = pageCount.value;
-            searchInvoices();
+            searchBills();
             // scrollToTop();
         }
         const handleActionClick = async(rowIndex, action, row) =>{
@@ -312,11 +313,11 @@ export default{
                 let formData = {
                     company: companyID.value,
                     journal: journalID,
-                    txn_type: "INV"
+                    txn_type: "BIL"
                 }
-                await store.dispatch('Journals/deleteInvoice',formData).
+                await store.dispatch('Journals/deleteBill',formData).
                 then(()=>{
-                    searchInvoices();
+                    searchBills();
                 })
             }
         }
@@ -335,16 +336,16 @@ export default{
             }
         }
         onBeforeMount(()=>{
-            searchInvoices();
+            searchBills();
             
         })
         return{
-            title, searchInvoices,resetFilters, addButtonLabel, searchFilters, tableColumns, invoicesList,
+            title, searchBills,resetFilters, addButtonLabel, searchFilters, tableColumns, billsList,
             propResults, propArrLen, propCount, pageCount, showNextBtn, showPreviousBtn,invModalVisible,
             loadPrev, loadNext, firstPage, lastPage, idField, actions, handleActionClick, propModalVisible, closeModal,
             submitButtonLabel, showModal, showLoader, loader, hideLoader, modal_loader, modal_top, modal_left, modal_width,displayButtons,
             showModalLoader, hideModalLoader, formFields, handleSelectionChange, flex_basis,flex_basis_percentage,
-            removeInvoice, removeInvoices, dropdownOptions, handleDynamicOption, addNewInvoice
+            removeBill, removeBills, dropdownOptions, handleDynamicOption, addNewBill
         }
     }
 };

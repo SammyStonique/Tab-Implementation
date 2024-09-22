@@ -5,10 +5,14 @@ const state = {
   vendorsList: [], 
   vendorArr: [],
   vendorArray: [],
+  vendorDetails: [],
   vendorID: '',
   vendorName: '',
-  name_search: '',
+  vendorLedger: '',
+  vendor_name_search: '',
+  vendor_code_search: '',
   selectedVendor: null,
+  selectedCategory: null,
   isEditing: false
 };
   
@@ -17,21 +21,31 @@ const mutations = {
     state.vendorsList = [];
     state.vendorArr = [];
     state.vendorArray = [];
+    state.vendorDetails = [];
     state.vendorID = '';
     state.vendorName = '';
-    state.name_search = '';
+    state.vendorLedger = '';
+    state.vendor_name_search = '';
+    state.vendor_code_search = '';
     state.selectedVendor = null;
+    state.selectedCategory = null;
     state.isEditing = false;
   },
   SET_SELECTED_VENDOR(state, vendor) {
     state.selectedVendor = vendor;
     state.isEditing = true;
   },
+  SET_SELECTED_CATEGORY(state, category) {
+    state.selectedCategory = category;
+  },
   LIST_VENDORS(state, vendors) {
     state.vendorsList = vendors;
   },
   VENDORS_ARRAY(state, vendors){
     state.vendorArray = vendors;
+  },
+  SET_VENDOR_DETAILS(state, details){
+    state.vendorDetails = details;
   },
   SET_STATE(state, payload) {
     for (const key in payload) {
@@ -42,13 +56,16 @@ const mutations = {
   },
   SET_SEARCH_FILTERS(state, search_filter){
     for(const [key, value] of Object.entries(search_filter)){
-      if(key == 'name_search'){
-        state.name_search = value;
+      if(key == 'vendor_code_search'){
+        state.vendor_code_search = value;
+      }else if(key == 'vendor_name_search'){
+        state.vendor_name_search = value;
       }
     }
   },
   RESET_SEARCH_FILTERS(state){
-    state.name_search = '';
+    state.vendor_code_search = '';
+    state.vendor_name_search = '';
   }
 };
   
@@ -86,7 +103,10 @@ const actions = {
     axios.post(`api/v1/fetch-vendors/`,formData)
     .then((response)=>{
       state.selectedVendor = response.data;
+      const selectedCategory = response.data.category.name;
+      commit('SET_SELECTED_CATEGORY',selectedCategory);
       commit('SET_SELECTED_VENDOR',response.data);
+      commit('SET_VENDOR_DETAILS',response.data);
     })
     .catch((error)=>{
       console.log(error.message);
@@ -99,6 +119,7 @@ const actions = {
     if (selectedVendor) {
         state.vendorID = selectedVendor.vendor_id;
         state.vendorName = selectedVendor.vendor_name;
+        state.vendorLedger = selectedVendor.ledger_id;
         state.vendorArray = [...state.vendorArray, selectedVendor];
     }
     commit('VENDORS_ARRAY', state.vendorArray);

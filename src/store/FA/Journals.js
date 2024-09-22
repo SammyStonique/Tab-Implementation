@@ -12,6 +12,7 @@ const state = {
   journalsArray: [],
   tenantInvoices: [],
   customerInvoices: [],
+  vendorBills: [],
   tenantReceipts: [],
   customerReceipts: [],
   outstandingBalance: 0,
@@ -42,6 +43,7 @@ const mutations = {
     state.tenantInvoices = [];
     state.customerInvoices = [];
     state.tenantReceipts = [];
+    state.vendorBills = [];
     state.customerReceipts = [];
     state.outstandingBalance = 0;
     state.invoiceDescription = "";
@@ -77,6 +79,9 @@ const mutations = {
   },
   LIST_TENANTS_RECEIPTS(state, journals) {
     state.tenantReceipts = journals;
+  },
+  LIST_VENDOR_BILLS(state, journals) {
+    state.vendorBills = journals;
   },
   LIST_CUSTOMERS_RECEIPTS(state, journals) {
     state.customerReceipts = journals;
@@ -129,6 +134,26 @@ const actions = {
   },
   async createTenantReceipt({ commit,state }, formData) {
     return axios.post('api/v1/create-tenant-receipt/', formData)
+    .then((response)=>{
+      return response;
+    })
+    .catch((error)=>{
+      console.log(error.message);
+      throw error;
+    })
+  },
+  async createCustomerReceipt({ commit,state }, formData) {
+    return axios.post('api/v1/create-customer-receipt/', formData)
+    .then((response)=>{
+      return response;
+    })
+    .catch((error)=>{
+      console.log(error.message);
+      throw error;
+    })
+  },
+  async createPaymentVoucher({ commit,state }, formData) {
+    return axios.post('api/v1/create-payment-voucher/', formData)
     .then((response)=>{
       return response;
     })
@@ -213,6 +238,16 @@ const actions = {
     axios.post(`api/v1/client-category-journals-search/`,formData)
     .then((response)=>{
       commit('LIST_CUSTOMERS_INVOICES', response.data);
+    })
+    .catch((error)=>{
+      console.log(error.message);
+    })
+    
+  },
+  fetchVendorBills({ commit,state }, formData) {
+    axios.post(`api/v1/client-category-journals-search/`,formData)
+    .then((response)=>{
+      commit('LIST_VENDOR_BILLS', response.data);
     })
     .catch((error)=>{
       console.log(error.message);
@@ -366,6 +401,94 @@ const actions = {
         })
       }else{
         Swal.fire(`Receipt has not been deleted!`);
+      }
+    })
+  },
+  deleteBill({ commit,state }, formData) {
+    Swal.fire({
+      title: "Are you sure?",
+      text: `Do you wish to delete Bill?`,
+      type: 'warning',
+      showCloseButton: true,
+      showCancelButton: true,
+      confirmButtonText: 'Yes Delete Bill!',
+      cancelButtonText: 'Cancel!',
+      customClass: {
+          confirmButton: 'swal2-confirm-custom',
+          cancelButton: 'swal2-cancel-custom',
+      },
+      showLoaderOnConfirm: true,
+    }).then((result) => {
+      if (result.value) {
+        axios.post(`api/v1/delete-journal/`,formData)
+        .then((response)=>{
+          if(response.data.msg == "Success"){
+              Swal.fire("Poof! Bill(s) removed succesfully!", {
+                icon: "success",
+              }); 
+          }else if(response.data.msg == "Paid"){
+            Swal.fire({
+              title: "Cannot Delete Paid Bill",
+              icon: "warning",
+            });
+          }else if(response.data.msg == "Prepayment"){
+            Swal.fire({
+              title: "Bill Has A Prepayment Allocation",
+              icon: "warning",
+            });
+          }                   
+        })
+        .catch((error)=>{
+          console.log(error.message);
+          Swal.fire({
+            title: error.message,
+            icon: "warning",
+          });
+        })
+      }else{
+        Swal.fire(`Bill has not been deleted!`);
+      }
+    })
+  },
+  deletePaymentVoucher({ commit,state }, formData) {
+    Swal.fire({
+      title: "Are you sure?",
+      text: `Do you wish to delete Payment Voucher?`,
+      type: 'warning',
+      showCloseButton: true,
+      showCancelButton: true,
+      confirmButtonText: 'Yes Delete Payment Voucher!',
+      cancelButtonText: 'Cancel!',
+      customClass: {
+          confirmButton: 'swal2-confirm-custom',
+          cancelButton: 'swal2-cancel-custom',
+      },
+      showLoaderOnConfirm: true,
+    }).then((result) => {
+      if (result.value) {
+        axios.post(`api/v1/delete-journal/`,formData)
+        .then((response)=>{
+          if(response.data.msg == "Success"){
+              Swal.fire("Poof! Payment Voucher(s) removed succesfully!", {
+                icon: "success",
+              }); 
+              toast.success("Payment Voucher(s) removed succesfully")
+          }else if(response.data.msg == "Paid"){
+            Swal.fire({
+              title: "Cannot Delete Paid Payment Voucher",
+              icon: "warning",
+            });
+          }                   
+        })
+        .catch((error)=>{
+          console.log(error.message);
+          Swal.fire({
+            title: error.message,
+            icon: "warning",
+          });
+        })
+      }else{
+        Swal.fire(`Payment Voucher has not been deleted!`);
       }
     })
   },

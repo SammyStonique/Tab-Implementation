@@ -3,17 +3,17 @@
         <PageComponent 
             :loader="loader" @showLoader="showLoader" @hideLoader="hideLoader"
             :addButtonLabel="addButtonLabel"
-            @handleAddNew="addNewInvoice"
+            @handleAddNew="addNewPaymentVoucher"
             :searchFilters="searchFilters"
             :dropdownOptions="dropdownOptions"
             @handleDynamicOption="handleDynamicOption"
-            @searchPage="searchInvoices"
+            @searchPage="searchPaymentVouchers"
             @resetFilters="resetFilters"
-            @removeItem="removeInvoice"
-            @removeSelectedItems="removeInvoices"
+            @removeItem="removePaymentVoucher"
+            @removeSelectedItems="removePaymentVouchers"
             @printList="printList"
             :columns="tableColumns"
-            :rows="invoicesList"
+            :rows="vouchersList"
             :actions="actions"
             :idField="idField"
             @handleSelectionChange="handleSelectionChange"
@@ -33,7 +33,7 @@
         >
             <DynamicForm 
                 :fields="formFields" :flex_basis="flex_basis" :flex_basis_percentage="flex_basis_percentage" 
-                :displayButtons="displayButtons" @handleSubmit="saveInvoice" @handleReset="handleReset"
+                :displayButtons="displayButtons" @handleSubmit="savePaymentVoucher" @handleReset="handleReset"
             />
         </MovableModal>
     </div>
@@ -50,7 +50,7 @@ import { useToast } from "vue-toastification";
 import { useDateFormatter } from '@/composables/DateFormatter';
 
 export default{
-    name: 'General_Invoices',
+    name: 'Payment_Vouchers',
     components:{
         PageComponent, MovableModal,DynamicForm
     },
@@ -63,16 +63,16 @@ export default{
         const loader = ref('none');
         const modal_loader = ref('none');
         const idField = 'journal_id';
-        const addButtonLabel = ref('New Invoice');
+        const addButtonLabel = ref('New Payment Voucher');
         const submitButtonLabel = ref('Add');
-        const title = ref('Invoice Booking');
+        const title = ref('Receipt Booking');
         const custComponentKey = ref(0);
         const invModalVisible = ref(false);
         const modal_top = ref('150px');
         const modal_left = ref('400px');
         const modal_width = ref('32vw');
         const selectedIds = ref([]);
-        const invoicesList = ref([]);
+        const vouchersList = ref([]);
         const propResults = ref([]);
         const propArrLen = ref(0);
         const propCount = ref(0);
@@ -85,36 +85,35 @@ export default{
         const flex_basis_percentage = ref('');
         const displayButtons = ref(true);
         const errors = ref([]);
-        const customerID = ref('');
-        const customerArray = computed(() => store.state.Customers.customerArr);
+        const vendorID = ref('');
+        const vendorArray = computed(() => store.state.Vendors.vendorArr);
         const showModal = ref(false);
         const tableColumns = ref([
             {type: "checkbox"},
-            {label: "Invoice#", key:"journal_no"},
+            {label: "Voucher#", key:"journal_no"},
             {label: "Date", key: "date"},
-            {label: "Code", key:"code"},
-            {label: "Customer Name", key:"customer_name"},
-            {label: "Description", key:"description"},
+            {label: "Bank. Date", key: "banking_date"},
+            {label: "Vendor Name", key:"customer_name"},
+            {label: "Pay. Method", key:"payment_method"},
+            {label: "Ref No", key:"reference_no"},
             {label: "Amount", key:"total_amount"},
-            {label: "Paid", key:"total_paid"},
-            {label: "Balance", key:"due_amount"},
-            {label: "Status", key:"status"},
+            {label: "Done By", key:"done_by"},
         ])
         
         const actions = ref([
-            {name: 'delete', icon: 'fa fa-trash', title: 'Delete Invoice'},
+            {name: 'delete', icon: 'fa fa-trash', title: 'Delete PV'},
         ])
         const companyID = computed(()=> store.state.userData.company_id);
-        const fetchCustomers = async() =>{
-            await store.dispatch('Customers/fetchCustomers', {company:companyID.value})
+        const fetchVendors = async() =>{
+            await store.dispatch('Vendors/fetchVendors', {company:companyID.value})
         };
-        const handleSearchCustomers = async(option) =>{
-            await store.dispatch('Customers/handleSelectedCustomer', option)
-            customerID.value = store.state.Customers.customerID;
+        const handleSearchVendors = async(option) =>{
+            await store.dispatch('Vendors/handleSelectedVendor', option)
+            vendorID.value = store.state.Vendors.vendorID;
         };
-        const clearSearchCustomer = async() =>{
-            await store.dispatch('Customers/updateState', {customerID: ''});
-            customerID.value = ""
+        const clearSearchVendor = async() =>{
+            await store.dispatch('Vendors/updateState', {vendorID: ''});
+            vendorID.value = ""
         }
         const client_name_search = computed({
             get: () => store.state.Journals.client_name_search,
@@ -138,30 +137,15 @@ export default{
             {type:'date', placeholder:"From Date...", value: from_date_search, width:36, title: "Date From Search"},
             {type:'date', placeholder:"To Date...", value: to_date_search, width:36, title: "Date To Search"},
             {
-                type:'search-dropdown', value: customerID.value, width:64,
-                selectOptions: customerArray, optionSelected: handleSearchCustomers,
-                searchPlaceholder: 'Customer Search...', dropdownWidth: '400px',
-                fetchData: fetchCustomers(), clearSearch: clearSearchCustomer()             
+                type:'search-dropdown', value: vendorID.value, width:64,
+                selectOptions: vendorArray, optionSelected: handleSearchVendors,
+                searchPlaceholder: 'Vendor Search...', dropdownWidth: '400px',
+                fetchData: fetchVendors(), clearSearch: clearSearchVendor()             
             },
         ]);
         const handleSelectionChange = (ids) => {
             selectedIds.value = ids;
         };
-        
-        const formFields = ref([]);
-        const updateFormFields = () =>{
-            formFields.value = [
-
-            ]
-        };
-
-        const handleReset = async() =>{
-            for(let i=0; i < formFields.value.length; i++){
-                formFields.value[i].value = '';
-            }
-            custComponentKey.value += 1;
-            customerID.value = '';
-        }
         
         const showModalLoader = () =>{
             modal_loader.value = "block";
@@ -169,63 +153,63 @@ export default{
         const hideModalLoader = () =>{
             modal_loader.value = "none";
         }
-        const addNewInvoice = () =>{
-            store.commit('pageTab/ADD_PAGE', {'FA':'Invoice_Details'});
-            store.state.pageTab.faActiveTab = 'Invoice_Details'; 
+        const addNewPaymentVoucher = () =>{
+            store.commit('pageTab/ADD_PAGE', {'FA':'Payment_Details'});
+            store.state.pageTab.faActiveTab = 'Payment_Details'; 
         }
-        const removeInvoice = async() =>{
+        const removePaymentVoucher = async() =>{
             if(selectedIds.value.length == 1){
                 let formData = {
                     company: companyID.value,
                     journal: selectedIds.value,
-                    txn_type: "INV"
+                    txn_type: "PMT"
                 }
                 try{
-                    const response = await store.dispatch('Journals/deleteInvoice',formData)
+                    const response = await store.dispatch('Journals/deletePaymentVoucher',formData)
                     if(response && response.status == 200){
-                        toast.success("Invoice Removed Succesfully");
-                        searchInvoices();
+                        toast.success("Payment Voucher Removed Succesfully");
+                        searchPaymentVouchers();
                     }
                 }
                 catch(error){
                     console.error(error.message);
-                    toast.error('Failed to remove invoice: ' + error.message);
+                    toast.error('Failed to remove payment voucher: ' + error.message);
                 }
                 finally{
                     selectedIds.value = [];
-                    searchInvoices();
+                    searchPaymentVouchers();
                 }
             }else if(selectedIds.value.length > 1){
-                toast.error("You have selected more than 1 Invoice") 
+                toast.error("You have selected more than 1 Payment Voucher") 
             }else{
-                toast.error("Please Select An Invoice To Remove")
+                toast.error("Please Select A Payment Voucher To Remove")
             }
         }
-        const removeInvoices = async() =>{
+        const removePaymentVouchers = async() =>{
             if(selectedIds.value.length){
                 let formData = {
                     company: companyID.value,
                     journal: selectedIds.value,
-                    txn_type: "INV"
+                    txn_type: "PMT"
                 }
 
                 try{
-                    const response = await store.dispatch('Journals/deleteInvoice',formData)
+                    const response = await store.dispatch('Journals/deletePaymentVoucher',formData)
                     if(response && response.msg == "Success"){
-                        toast.success("Invoice(s) Removed Succesfully");
-                        searchInvoices();
+                        toast.success("Payment Voucher(s) Removed Succesfully");
+                        searchPaymentVouchers();
                     }
                 }
                 catch(error){
                     console.error(error.message);
-                    toast.error('Failed to remove invoices: ' + error.message);
+                    toast.error('Failed to remove Payment Voucher: ' + error.message);
                 }
                 finally{
                     selectedIds.value = [];
-                    searchInvoices();
+                    searchPaymentVouchers();
                 }
             }else{
-                toast.error("Please Select An Invoice To Remove")
+                toast.error("Please Select A Payment Voucher To Remove")
             }
         }
         const showLoader = () =>{
@@ -234,13 +218,13 @@ export default{
         const hideLoader = () =>{
             loader.value = "none";
         }
-        const searchInvoices = () =>{
+        const searchPaymentVouchers = () =>{
             showLoader();
             showNextBtn.value = false;
             showPreviousBtn.value = false;
             let formData = {
                 client_category: "Customers",
-                txn_type: "INV",
+                txn_type: "PMT",
                 client_name: client_name_search.value,
                 client_code: client_code_search.value,
                 from_date: from_date_search.value,
@@ -252,10 +236,10 @@ export default{
             axios
             .post(`api/v1/clients-journals-search/?page=${currentPage.value}`,formData)
             .then((response)=>{
-                invoicesList.value = response.data.results;
-                store.commit('Journals/LIST_INVOICES', invoicesList.value)
+                vouchersList.value = response.data.results;
+                store.commit('Journals/LIST_RECEIPTS', vouchersList.value)
                 propResults.value = response.data;
-                propArrLen.value = invoicesList.value.length;
+                propArrLen.value = vouchersList.value.length;
                 propCount.value = propResults.value.count;
                 pageCount.value = Math.ceil(propCount.value / 50);
                 if(response.data.next){
@@ -274,7 +258,7 @@ export default{
         }
         const resetFilters = () =>{
             store.commit('Journals/RESET_SEARCH_FILTERS')
-            searchInvoices();
+            searchPaymentVouchers();
         }
         const loadPrev = () =>{
             if (currentPage.value <= 1){
@@ -283,7 +267,7 @@ export default{
                 currentPage.value -= 1;
             }
             
-            searchInvoices();
+            searchPaymentVouchers();
             // scrollToTop();
         }
         const loadNext = () =>{
@@ -293,17 +277,17 @@ export default{
                 currentPage.value += 1;
             }
             
-            searchInvoices();
+            searchPaymentVouchers();
             // scrollToTop(); 
         }
         const firstPage = ()=>{
             currentPage.value = 1;
-            searchInvoices();
+            searchPaymentVouchers();
             // scrollToTop();
         }
         const lastPage = () =>{
             currentPage.value = pageCount.value;
-            searchInvoices();
+            searchPaymentVouchers();
             // scrollToTop();
         }
         const handleActionClick = async(rowIndex, action, row) =>{
@@ -312,11 +296,11 @@ export default{
                 let formData = {
                     company: companyID.value,
                     journal: journalID,
-                    txn_type: "INV"
+                    txn_type: "PMT"
                 }
-                await store.dispatch('Journals/deleteInvoice',formData).
+                await store.dispatch('Journals/deletePaymentVoucher',formData).
                 then(()=>{
-                    searchInvoices();
+                    searchPaymentVouchers();
                 })
             }
         }
@@ -335,16 +319,16 @@ export default{
             }
         }
         onBeforeMount(()=>{
-            searchInvoices();
+            searchPaymentVouchers();
             
         })
         return{
-            title, searchInvoices,resetFilters, addButtonLabel, searchFilters, tableColumns, invoicesList,
+            title, searchPaymentVouchers,resetFilters, addButtonLabel, searchFilters, tableColumns, vouchersList,
             propResults, propArrLen, propCount, pageCount, showNextBtn, showPreviousBtn,invModalVisible,
             loadPrev, loadNext, firstPage, lastPage, idField, actions, handleActionClick, propModalVisible, closeModal,
             submitButtonLabel, showModal, showLoader, loader, hideLoader, modal_loader, modal_top, modal_left, modal_width,displayButtons,
-            showModalLoader, hideModalLoader, formFields, handleSelectionChange, flex_basis,flex_basis_percentage,
-            removeInvoice, removeInvoices, dropdownOptions, handleDynamicOption, addNewInvoice
+            showModalLoader, hideModalLoader, handleSelectionChange, flex_basis,flex_basis_percentage,
+            removePaymentVoucher, removePaymentVouchers, dropdownOptions, handleDynamicOption, addNewPaymentVoucher
         }
     }
 };

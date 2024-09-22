@@ -71,6 +71,7 @@ export default defineComponent({
         const outstanding_balance = computed(()=> store.state.Journals.outstandingBalance);
         const errors = ref([]);
         const companyID = computed(()=> store.state.userData.company_id);
+        const userID = computed(()=> store.state.userData.user_id);
         const displayButtons = ref(true);
         const showActions = ref(false);
         const idField = ref('');
@@ -292,6 +293,7 @@ export default defineComponent({
                 company: companyID.value,
                 txn_type: "RCPT",
                 tenant: tenantID.value,
+                user: userID.value,
                 cashbook: ledgerID.value,
                 description: formFields.value[8].value,
                 issue_date: formFields.value[2].value,

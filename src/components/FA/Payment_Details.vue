@@ -2,7 +2,7 @@
     <PageStyleComponent :key="mainComponentKey" :loader="loader" @showLoader="showLoader" @hideLoader="hideLoader">
         <template v-slot:body>
             <div class="mt-6">
-                <DynamicForm  :fields="formFields" :flex_basis="flex_basis" :flex_basis_percentage="flex_basis_percentage" :displayButtons="displayButtons" @handleSubmit="createCustomerReceipt" @handleReset="handleReset"> 
+                <DynamicForm  :fields="formFields" :flex_basis="flex_basis" :flex_basis_percentage="flex_basis_percentage" :displayButtons="displayButtons" @handleSubmit="createPaymentVoucher" @handleReset="handleReset"> 
                     <template v-slot:additional-content>
                         <div class="flex">
                             <div class="basis-1/3 text-left">
@@ -80,13 +80,13 @@ export default defineComponent({
         const flex_basis_additional = ref('');
         const flex_basis_percentage_additional = ref('');
         const ledgerID = ref('');
-        const customerID = ref('');
+        const vendorID = ref('');
         const ledgerArray = computed(() => store.state.Ledgers.ledgerArr);
-        const customerArray = computed(() => store.state.Customers.customerArr);
+        const vendorArray = computed(() => store.state.Vendors.vendorArr);
         const receiptRows = computed(() => store.state.Journals.journalsClientList);
         const receiptColumns = ref([
             {type: "checkbox"},
-            {label: "Invoice", key:"journal_no", type: "text", editable: false},
+            {label: "Bill", key:"journal_no", type: "text", editable: false},
             {label: "Description", key:"description", type: "text", editable: false},
             {label: "Amount", key: "total_amount", type: "text", editable: false},
             {label: "Paid", key: "total_paid", type: "text", editable: false},
@@ -95,22 +95,22 @@ export default defineComponent({
             {label: "Balance", key: "bal_after_alloc", type: "text", editable: false},
         ])
 
-        const fetchCustomers = async() =>{
-            await store.dispatch('Customers/fetchCustomers', {company:companyID.value}) 
+        const fetchVendors = async() =>{
+            await store.dispatch('Vendors/fetchVendors', {company:companyID.value}) 
     
         };
-        const fetchCustomerInvoices = async() =>{
-            if(customerID.value){
-                await store.dispatch('Journals/fetchJournalsClient', {company:companyID.value, txn_type:"INV", customer:customerID.value, status:"Open"})
+        const fetchVendorBills = async() =>{
+            if(vendorID.value){
+                await store.dispatch('Journals/fetchJournalsClient', {company:companyID.value, txn_type:"BIL", customer:vendorID.value, status:"Open"})
             }       
         };
-        const handleSelectedCustomer = async(option) =>{
-            await store.dispatch('Customers/handleSelectedCustomer', option)
-            customerID.value = store.state.Customers.customerID;
+        const handleSelectedVendor = async(option) =>{
+            await store.dispatch('Vendors/handleSelectedVendor', option)
+            vendorID.value = store.state.Vendors.vendorID;
         };
-        const clearSelectedCustomer = async() =>{
-            await store.dispatch('Customers/updateState', {customerID: ''});
-            customerID.value = ""
+        const clearSelectedVendor = async() =>{
+            await store.dispatch('Vendors/updateState', {vendorID: ''});
+            vendorID.value = ""
         }
         const fetchLedgers = async() =>{
             await store.dispatch('Ledgers/fetchLedgers', {company:companyID.value, ledger_type: 'Cashbook'})
@@ -132,8 +132,8 @@ export default defineComponent({
                 receiptRows.value[i].bal_after_alloc = "";
                 receiptRows.value[i].allocation_status = false;
             }
-            if(customerID.value == "" || customerID.value == null){
-                toast.error("Select A Customer To Receipt")
+            if(vendorID.value == "" || vendorID.value == null){
+                toast.error("Select A Vendor To Receipt")
                 formFields.value[6].value = 0;
                 hasPrepayment.value = false;
             }
@@ -186,10 +186,10 @@ export default defineComponent({
         const updateFormFields = () =>{
             formFields.value = [
                 {
-                    type:'search-dropdown', label:"Customer", value: customerID.value, componentKey: tntComponentKey,
-                    selectOptions: customerArray, optionSelected: handleSelectedCustomer, required: true,
-                    searchPlaceholder: 'Select Customer...', dropdownWidth: '400px', updateValue: "",
-                    fetchData: fetchCustomers(), clearSearch: clearSelectedCustomer()  
+                    type:'search-dropdown', label:"Vendor", value: vendorID.value, componentKey: tntComponentKey,
+                    selectOptions: vendorArray, optionSelected: handleSelectedVendor, required: true,
+                    searchPlaceholder: 'Select Vendor...', dropdownWidth: '400px', updateValue: "",
+                    fetchData: fetchVendors(), clearSearch: clearSelectedVendor()  
                 },
                 {
                     type:'search-dropdown', label:"Cashbook", value: ledgerID.value, componentKey: ledComponentKey,
@@ -224,7 +224,7 @@ export default defineComponent({
                 }
                 
             }
-            customerID.value = '';
+            vendorID.value = '';
             ledgerID.value = '';
             propComponentKey.value += 1;
             tntComponentKey.value += 1;
@@ -234,9 +234,9 @@ export default defineComponent({
             prepaymentAmount.value = 0;
             hasPrepayment.value = false;
         }
-        watch([customerID], () => {
-            if(customerID.value){
-                fetchCustomerInvoices();
+        watch([vendorID], () => {
+            if(vendorID.value){
+                fetchVendorBills();
             }    
         }, { immediate: true });
         watch([ledgerID], () => {
@@ -251,7 +251,7 @@ export default defineComponent({
         const hideLoader = () =>{
             loader.value = "none";
         } 
-        const createCustomerReceipt = async() =>{
+        const createPaymentVoucher = async() =>{
             showLoader();
             if(formFields.value[7].value == ""){
                 let rcptMemo = ""
@@ -264,8 +264,8 @@ export default defineComponent({
             }
             let formData = {
                 company: companyID.value,
-                txn_type: "RCPT",
-                customer: customerID.value,
+                txn_type: "PMT",
+                vendor: vendorID.value,
                 user: userID.value,
                 cashbook: ledgerID.value,
                 description: formFields.value[7].value,
@@ -286,7 +286,7 @@ export default defineComponent({
                     errors.value.push(formFields.value[i].label);
                 }
             }
-            if(customerID.value == '' || ledgerID.value == ''){
+            if(vendorID.value == '' || ledgerID.value == ''){
                 errors.value.push('Error');
             }
             let rcptTotal = 0
@@ -295,7 +295,7 @@ export default defineComponent({
             }
 
             if(formFields.value[6].value != Number(rcptTotal)){
-                toast.error('Invalid Receipt Amount');
+                toast.error('Invalid Voucher Amount');
                 hideLoader();
             }
             else{
@@ -304,22 +304,22 @@ export default defineComponent({
                     hideLoader();                 
                 }else{            
                     try {
-                        const response = await store.dispatch('Journals/createCustomerReceipt', formData);
+                        const response = await store.dispatch('Journals/createPaymentVoucher', formData);
                         if (response && response.status === 200) {
                             hideLoader();
-                            toast.success('Receipt created successfully!');
+                            toast.success('Voucher created successfully!');
                             handleReset();
                             mainComponentKey.value += 1;
                             propComponentKey.value += 1;
                             ledComponentKey.value += 1;
                             tntComponentKey.value += 1;
                         } else {
-                            toast.error('An error occurred while creating the receipt.');
+                            toast.error('An error occurred while creating the Voucher.');
                             hideLoader();
                         }
                     } catch (error) {
                         console.error(error.message);
-                        toast.error('Failed to create receipt: ' + error.message);
+                        toast.error('Failed to create Voucher: ' + error.message);
                     } finally {
                         hideLoader();
                     }              
@@ -374,7 +374,7 @@ export default defineComponent({
             }else{
                 let formData = {
                     journal_no : "PREPAID",
-                    description : "Customer Prepayment",
+                    description : "Bill Prepayment",
                     total_amount : prepaymentAmount.value,
                     total_paid : prepaymentAmount.value,
                     due_amount : 0,
@@ -383,7 +383,7 @@ export default defineComponent({
                 }
                 await store.dispatch('Journals/handleClientPrepayment',formData);
                 toast.success("Prepayment Added");
-                formFields.value[7].value += "Customer Prepayment"
+                formFields.value[7].value += "Bill Prepayment"
                 hideModalLoader();
                 prepModalVisible.value = false;
             }
@@ -423,7 +423,7 @@ export default defineComponent({
         })
 
         return{
-            formFields, flex_basis, flex_basis_percentage, displayButtons, createCustomerReceipt, mainComponentKey,
+            formFields, flex_basis, flex_basis_percentage, displayButtons, createPaymentVoucher, mainComponentKey,
             handleReset, loader, showLoader, hideLoader, tableKey, receiptColumns, receiptRows, showActions, idField,
             autoPopulatePaymentAlloc, outstanding_balance, hasPrepayment, addPrepayment, handlePrepayment, allocateInputAmount,
             title, modal_loader, modal_left, modal_top, modal_width, prepModalVisible, showModalLoader, hideModalLoader, closeModal,

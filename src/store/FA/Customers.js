@@ -5,11 +5,14 @@ const state = {
   customersList: [], 
   customerArr: [],
   customerArray: [],
+  customerDetails: [],
   customerID: '',
   customerName: '',
   customerLedger: '',
-  name_search: '',
+  customer_name_search: '',
+  customer_code_search: '',
   selectedCustomer: null,
+  selectedCategory: null,
   isEditing: false
 };
   
@@ -18,22 +21,31 @@ const mutations = {
     state.customersList = [];
     state.customerArr = [];
     state.customerArray = [];
+    state.customerDetails = [];
     state.customerID = '';
     state.customerName = '';
     state.customerLedger = '';
-    state.name_search = '';
+    state.customer_name_search = '';
+    state.customer_code_search = '';
     state.selectedCustomer = null;
+    state.selectedCategory = null;
     state.isEditing = false;
   },
   SET_SELECTED_CUSTOMER(state, customer) {
     state.selectedCustomer = customer;
     state.isEditing = true;
   },
+  SET_SELECTED_CATEGORY(state, category) {
+    state.selectedCategory = category;
+  },
   LIST_CUSTOMERS(state, customers) {
     state.customersList = customers;
   },
   CUSTOMERS_ARRAY(state, customers){
     state.customerArray = customers;
+  },
+  SET_CUSTOMER_DETAILS(state, details){
+    state.customerDetails = details;
   },
   SET_STATE(state, payload) {
     for (const key in payload) {
@@ -44,13 +56,16 @@ const mutations = {
   },
   SET_SEARCH_FILTERS(state, search_filter){
     for(const [key, value] of Object.entries(search_filter)){
-      if(key == 'name_search'){
-        state.name_search = value;
+      if(key == 'customer_code_search'){
+        state.customer_code_search = value;
+      }else if(key == 'customer_name_search'){
+        state.customer_name_search = value;
       }
     }
   },
   RESET_SEARCH_FILTERS(state){
-    state.name_search = '';
+    state.customer_code_search = '';
+    state.customer_name_search = '';
   }
 };
   
@@ -88,7 +103,10 @@ const actions = {
     axios.post(`api/v1/fetch-customers/`,formData)
     .then((response)=>{
       state.selectedCustomer = response.data;
+      const selectedCategory = response.data.category.name;
+      commit('SET_SELECTED_CATEGORY',selectedCategory);
       commit('SET_SELECTED_CUSTOMER',response.data);
+      commit('SET_CUSTOMER_DETAILS',response.data);
     })
     .catch((error)=>{
       console.log(error.message);
@@ -137,7 +155,7 @@ const actions = {
       if (result.value) {
         axios.post(`api/v1/delete-customer/`,formData)
         .then((response)=>{
-          if(response.status == 200){
+          if(response.data.msg == "Success"){
               Swal.fire("Poof! Customer removed succesfully!", {
                 icon: "success",
               }); 

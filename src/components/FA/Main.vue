@@ -36,6 +36,14 @@ import General_Invoices from '@/components/FA/General_Invoices.vue';
 import Invoice_Details from '@/components/FA/Invoice_Details.vue';
 import General_Receipts from '@/components/FA/General_Receipts.vue';
 import Receipt_Details from '@/components/FA/Receipt_Details.vue';
+import General_Bills from '@/components/FA/General_Bills.vue';
+import Bill_Details from '@/components/FA/Bill_Details.vue';
+import Payment_Vouchers from '@/components/FA/Payment_Vouchers.vue';
+import Payment_Details from '@/components/FA/Payment_Details.vue';
+import Customers from '@/components/FA/Customers.vue';
+import Vendors from '@/components/FA/Vendors.vue';
+import Debtor_Statement from '@/components/FA/Debtor_Statement.vue';
+import Vendor_Statement from '@/components/FA/Vendor_Statement.vue';
 
 
 import Default_Settings from '@/components/SET/Default_Settings.vue';
@@ -46,7 +54,7 @@ export default{
         NavBarFA,
         PagesTab,
         Dashboard, Client_Categories,Chart_Of_Accounts,Ledger_Details,General_Invoices,Invoice_Details,General_Receipts,
-        Receipt_Details,
+        Receipt_Details,General_Bills, Bill_Details,Payment_Vouchers,Payment_Details,Customers,Vendors,Debtor_Statement,Vendor_Statement,
 
         Default_Settings
     },
