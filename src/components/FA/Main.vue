@@ -51,6 +51,9 @@ import Tax_Mapping from '@/components/FA/Tax_Mapping.vue';
 import Withholding_Tax from '@/components/FA/Withholding_Tax.vue';
 import Withholding_Vat from '@/components/FA/Withholding_Vat.vue';
 import Fiscal_Periods from '@/components/FA/Fiscal_Periods.vue';
+import Income_Statement from '@/components/FA/Income_Statement.vue';
+import Balance_Sheet from '@/components/FA/Balance_Sheet.vue';
+import Trial_Balance from '@/components/FA/Trial_Balance.vue';
 
 import Default_Settings from '@/components/SET/Default_Settings.vue';
 
@@ -61,7 +64,8 @@ export default{
         PagesTab,
         Dashboard, Client_Categories,Chart_Of_Accounts,Ledger_Details,General_Invoices,Invoice_Details,General_Receipts,
         Receipt_Details,General_Bills, Bill_Details,Payment_Vouchers,Payment_Details,Customers,Vendors,Debtor_Statement,Vendor_Statement,
-        Journals,Journal_Details,Vat_Transactions, Tax_Mapping,Withholding_Tax,Withholding_Vat,Fiscal_Periods,
+        Journals,Journal_Details,Vat_Transactions, Tax_Mapping,Withholding_Tax,Withholding_Vat,Fiscal_Periods,Income_Statement,Balance_Sheet,
+        Trial_Balance,
 
         Default_Settings
     },

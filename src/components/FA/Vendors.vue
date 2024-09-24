@@ -81,7 +81,7 @@ export default{
         const isEditing = computed(()=> store.state.Vendors.isEditing);
         const selectedVendor = computed(()=> store.state.Vendors.selectedVendor);
         const selectedCategory = computed(()=> store.state.Vendors.selectedCategory);
-        const categoryArray = computed(()=> store.state.Client_Categories.categoryArr)
+        const categoryArray = computed(()=> store.state.Client_Categories.categoryArr);
         const categoryID = ref('');
         const categorySearchID = ref('');
         const showModal = ref(false);

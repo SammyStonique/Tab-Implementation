@@ -63,7 +63,7 @@ const actions = {
     })
   },
 
-  async fetchLandlords({ commit,state }, formData) {
+  async fetchFiscalPeriods({ commit,state }, formData) {
     state.periodArr = [];
     await axios.post(`api/v1/fetch-fiscal-periods/`,formData)
     .then((response)=>{
