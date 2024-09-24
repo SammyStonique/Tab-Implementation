@@ -286,7 +286,7 @@ export default{
                 tax_input_account_id: inputValue.value,
                 tax_output_account: outputValue.value,
                 tax_output_account_id: outputValue.value,
-                company: companyID
+                company: companyID.value
             }
 
             for(let i=0; i < (formFields.value.length - 2); i++){

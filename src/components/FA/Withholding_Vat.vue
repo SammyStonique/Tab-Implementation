@@ -45,7 +45,7 @@ import DynamicForm from '../NewDynamicForm.vue';
 import { useToast } from "vue-toastification";
 
 export default{
-    name: 'Vat_Transactions',
+    name: 'Withholding_Vat',
     props: ['scrollToTop','loader','showLoader','hideLoader',],
     components:{
         PageComponent,MovableModal,DynamicForm
@@ -116,21 +116,9 @@ export default{
         });
 
         const searchFilters = ref([
-            {type:'text', placeholder:"Invoice...", value: invoice_no_search, width:36},
-            {
-                type:'dropdown', placeholder:"Category..", value: tax_category_search, width:40,
-                options: [{text:'Input',value:'Input'},{text:'Output',value:'Output'}]
-            },
-            {type:'date', placeholder:"From Date...", value: date_from_search, width:36, title: "Date From Search"},
-            {type:'date', placeholder:"To Date...", value: date_to_search, width:36, title: "Date To Search"},
-            {
-                type:'dropdown', placeholder:"Inclusivity..", value: tax_inclusivity_search, width:40,
-                options: [{text:'Inclusive',value:'Inclusive'},{text:'Exclusive',value:'Exclusive'}]
-            },
-            // {
-            //     type:'dropdown', placeholder:"Type..", value: tax_type_search, width:40,
-            //     options: taxRates
-            // },
+            {type:'text', placeholder:"Invoice...", value: invoice_no_search, width:56},
+            {type:'date', placeholder:"From Date...", value: date_from_search, width:44, title: "Date From Search"},
+            {type:'date', placeholder:"To Date...", value: date_to_search, width:44, title: "Date To Search"},
             
         ]);
         const handleSelectionChange = (ids) => {
@@ -169,7 +157,7 @@ export default{
         const searchTaxTransactions = () =>{
             showLoader();
             let formData = {
-                tax_type: "VAT",
+                tax_type: "Withholding Tax",
                 tax_category: tax_category_search.value,
                 tax_inclusivity: tax_inclusivity_search.value,
                 invoice_no: invoice_no_search.value,
@@ -182,7 +170,7 @@ export default{
             .post(`api/v1/tax-transactions-search/?page=${currentPage.value}`,formData)
             .then((response)=>{
                 transactionsList.value = response.data.results;
-                store.commit('Prepayment_Allocations/LIST_PREPAYMENT_ALLOCATIONS', transactionsList.value)
+                store.commit('Taxes/LIST_TAX_TRANSACTIONS', transactionsList.value)
                 appResults.value = response.data;
                 appArrLen.value = transactionsList.value.length;
                 appCount.value = appResults.value.count;

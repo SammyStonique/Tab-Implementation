@@ -183,7 +183,7 @@ const actions = {
       if (result.value) {
         axios.post(`api/v1/delete-tax/`,formData)
         .then((response)=>{
-          if(response.status == 200){
+          if(response.data.msg == "Success"){
               Swal.fire("Poof! Tax removed succesfully!", {
                 icon: "success",
               }); 

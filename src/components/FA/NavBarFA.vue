@@ -117,14 +117,14 @@
 
                     </div>
                     <div class="py-2 px-3 pl-4 w-full hover:bg-slate-500 hover:w-full">
-                        <button class="flex text-sm">
+                        <button class="flex text-sm" @click="openPage({'FA':'Withholding_Vat'})">
                             <i class="fa fa-address-book-o pt-2 mr-2" aria-hidden="true"></i>
                             <p class="">Withholding VAT</p>
                         </button>
 
                     </div>
                     <div class="py-2 px-3 pl-4 w-full hover:bg-slate-500 hover:w-full">
-                        <button class="flex text-sm">
+                        <button class="flex text-sm" @click="openPage({'FA':'Withholding_Tax'})">
                             <i class="fa fa-list-ul pt-2 mr-2" aria-hidden="true"></i>
                             <p class="">Withholding Tax</p>
                         </button>
@@ -133,9 +133,9 @@
                 </div>
             </div>
             <div class="web-links py-1.5 px-2.5 h-full hover:bg-slate-500 hover:rounded">
-                <button class="flex">
+                <button class="flex" @click="openPage({'FA':'Fiscal_Periods'})">
                     <i class="fa fa-clock-o pt-2 mr-2" aria-hidden="true"></i>
-                    <p class="pt-1.5">Fiscal Period</p>
+                    <p class="pt-1.5">Fiscal Periods</p>
                 </button>
             </div>
             <div class="web-links dropdown">
@@ -147,19 +147,19 @@
                 </div>
                 <div class="dropdown-content w-48 absolute rounded border border-gray-200 bg-white shadow-slate-400 shadow-sm" v-if="reports_dropdown">
                 <div class="py-2 px-3 pl-4 w-full  hover:bg-slate-500 hover:w-full">
-                    <button class="flex text-sm">
+                    <button class="flex text-sm" @click="openPage({'FA':'Income_Statement'})">
                         <i class="fa fa-bar-chart pt-2 mr-2" aria-hidden="true"></i>
                         <p class="">Income Statement</p>
                     </button>
                 </div>
                 <div class="py-2 px-3 pl-4 w-full hover:bg-slate-500 hover:w-full">
-                    <button class="flex text-sm">
+                    <button class="flex text-sm" @click="openPage({'FA':'Balance_Sheet'})">
                         <i class="fa fa-balance-scale pt-2 mr-2" aria-hidden="true"></i>
                         <p class="">Balance Sheet</p>
                     </button>
                 </div>
                 <div class="py-2 px-3 pl-4 w-full hover:bg-slate-500 hover:w-full">
-                    <button class="flex text-sm">
+                    <button class="flex text-sm" @click="openPage({'FA':'Trial_Balance'})">
                         <i class="fa fa-book pt-2 mr-2" aria-hidden="true"></i>
                         <p class="">Trial Balance</p>
                     </button>
