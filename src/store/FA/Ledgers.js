@@ -8,6 +8,7 @@ const state = {
   expenseLedgerArr: [],
   cashbookLedgerArr: [],
   liabilityLedgerArr: [],
+  ledgerDetails: [],
   ledgerArray: [],
   ledgerID: '',
   ledgerName: '',
@@ -23,6 +24,7 @@ const state = {
   jnlSortedArr: [],
   jnlArray: [],
   invoiceItemsArray: [],
+  journalItemsArray: [],
 };
   
 const mutations = {
@@ -30,7 +32,9 @@ const mutations = {
     state.ledgersList = [];
     state.ledgerArr = [];
     state.ledgerArray = [];
+    state.ledgerDetails = [];
     state.invoiceItemsArray = [];
+    state.journalItemsArray = [];
     state.ledgerID = '';
     state.ledgerName = '';
     state.ledgerTitle = '';
@@ -51,6 +55,9 @@ const mutations = {
   },
   LEDGERS_ARRAY(state, ledgers){
     state.ledgerArray = ledgers;
+  },
+  SET_LEDGER_DETAILS(state, details){
+    state.ledgerDetails = details;
   },
   SET_STATE(state, payload) {
     for (const key in payload) {
@@ -206,6 +213,7 @@ const actions = {
     .then((response)=>{
       state.selectedLedger = response.data;
       commit('SET_SELECTED_LEDGER',response.data);
+      commit('SET_LEDGER_DETAILS',response.data);
     })
     .catch((error)=>{
       console.log(error.message);
@@ -232,6 +240,22 @@ const actions = {
         state.ledgerArray = [...state.ledgerArray, selectedLedger];
     }
     state.invoiceItemsArray.push(selectedLedger);
+    commit('LEDGERS_ARRAY', state.ledgerArray);
+      
+  },
+
+  handleJournalLedger({ commit, state }, option){
+    state.ledgerArray = [];
+    const selectedLedger = state.ledgersList.find(ledger => (ledger.ledger_code + " - " +ledger.ledger_name) === option);
+    if (selectedLedger) {
+      state.ledgerID = selectedLedger.ledger_id;
+      state.ledgerName = selectedLedger.ledger_code + " - " + selectedLedger.ledger_name;
+      selectedLedger.posting_account = selectedLedger.ledger_code + " - " + selectedLedger.ledger_name;
+      selectedLedger.debit_amount = 0;
+      selectedLedger.credit_amount = 0;
+      state.ledgerArray = [...state.ledgerArray, selectedLedger];
+    }
+    state.journalItemsArray.push(selectedLedger);
     commit('LEDGERS_ARRAY', state.ledgerArray);
       
   },
@@ -290,6 +314,9 @@ const actions = {
   },
   removeInvoiceLine({commit, state}, index){
     state.invoiceItemsArray.splice(index, 1); 
+  },
+  removeJournalLine({commit, state}, index){
+    state.journalItemsArray.splice(index, 1); 
   },
 };
   

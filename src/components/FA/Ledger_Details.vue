@@ -1,38 +1,60 @@
 <template>
-    <PageComponent 
-        :key="pageComponentKey"
-        :loader="loader" @showLoader="showLoader" @hideLoader="hideLoader"
-        :pageTitle="pageTitle"
-        :addButtonLabel="addButtonLabel"
-        :searchFilters="searchFilters"
-        @searchPage="searchJournalEntries"
-        @resetFilters="resetFilters"
-        @removeItem="removeAllocation"
-        @removeSelectedItems="removeAllocations"
-        @printList="printList"
-        :columns="tableColumns"
-        :rows="tableRows"
-        :actions="actions"
-        :idField="idField"
-        @handleSelectionChange="handleSelectionChange"
-        @handleActionClick="handleActionClick"
-        :count="appCount"
-        :currentPage="currentPage"
-        :result="appArrLen"
-        @loadPrev="loadPrev"
-        @loadNext="loadNext"
-        @firstPage="firstPage"
-        @lastPage="lastPage"
-        :showNextBtn="showNextBtn"
-        :showPreviousBtn="showPreviousBtn"
-    >
-    </PageComponent>
+    <PageStyleComponent :key="mainComponentKey" :loader="loader" @showLoader="showLoader" @hideLoader="hideLoader">
+        <template v-slot:body>
+            <div class="border border-slate-200 rounded relative py-1.5 mt-3 px-2 min-h-[450px]">
+                <h1 class="font-bold absolute top-[-13px] left-5 bg-white">Ledger Details</h1>
+                <div class="tabs pt-2">
+                    <button v-for="(tab, index) in tabs" :key="tab" :class="['tab', { active: activeTab === index }]"@click="selectTab(index)">
+                        {{ tab }}
+                    </button>
+                </div>
+                <div class="tab-content mt-3">
+                    <div v-if="activeTab == 0">
+                        <div class="flex">
+                            <div class="basis-1/2 border-left border-gray-400">
+                                <h1 class="font-bold mb-10">Ledger Details</h1>
+                                <table class="w-full">
+                                    <tr class="text-left">
+                                        <td class="font-bold ">Ledger Code:</td>
+                                        <td> {{ ledgerDetails.ledger_code }}</td>
+                                        <td></td>
+                                        <td></td>
+                                        <td class="font-bold">Ledger Name:</td>
+                                        <td>{{ ledgerDetails.ledger_name }}</td>
+                                    </tr>
+                                    <tr class="text-left">
+                                        <td class="font-bold pt-3">Ledger Type:</td>
+                                        <td>{{ ledgerDetails.ledger_type }}</td>
+                                        <td></td>
+                                        <td></td>
+                                        <td class="font-bold pt-3">Ledger Category:</td>
+                                        <td>{{ ledgerDetails.ledger_category }}</td>
+                                    </tr>
+                                    <tr class="text-left">
+                                        <td class="font-bold pt-3">Financial Statement:</td>
+                                        <td>{{ ledgerDetails.financial_statement }}</td>
+                                        <td></td>
+                                        <td></td>
+                                        <td class="font-bold pt-3">Running Balance:</td>
+                                        <td>{{ ledgerDetails.running_balance }}</td>
+                                    </tr>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                    <div v-if="activeTab == 1">
+                        <DynamicTable :key="statementTableKey" :columns="statementColumns" :rows="statementRows" :idField="idFieldStatement" :showActions="showActions" :actions="actionsStatement"/>
+                    </div>             
+                </div>
+            </div>
+        </template>
+    </PageStyleComponent>
     <MovableModal v-model:visible="appModalVisible" :title="title" :modal_top="modal_top" :modal_left="modal_left" :modal_width="modal_width"
         :loader="modal_loader" @showLoader="showModalLoader" @hideLoader="hideModalLoader" @closeModal="closeModal"
     >
         <DynamicForm 
             :fields="formFields" :flex_basis="flex_basis" :flex_basis_percentage="flex_basis_percentage" 
-            :displayButtons="displayButtons" @handleSubmit="allocatePrepayment" @handleReset="handleReset"
+            :displayButtons="displayButtons" @handleSubmit="" @handleReset="handleReset"
         />
     </MovableModal>
 </template>
@@ -41,40 +63,35 @@
 import axios from "axios";
 import { ref, computed, onMounted,watch } from 'vue';
 import { useStore } from "vuex";
-import PageComponent from "../PageComponent.vue";
+import PageStyleComponent from "../PageStyleComponent.vue";
 import MovableModal from '@/components/MovableModal.vue'
 import DynamicForm from '../NewDynamicForm.vue';
+import DynamicTable from '@/components/DynamicTable.vue';
 import { useToast } from "vue-toastification";
 
 export default{
     name: 'Ledger_Details',
     props: ['scrollToTop','loader','showLoader','hideLoader',],
     components:{
-        PageComponent,MovableModal,DynamicForm
+        PageStyleComponent,MovableModal,DynamicForm,DynamicTable
     },
     setup(){
         const store = useStore();
         const toast = useToast();
-        const loader = ref('');
-        const pageTitle = "LEDGER TITLE";
+        const loader = ref('none');
         const modal_loader = ref('none');
+        const activeTab = ref(0);
         const addButtonLabel = ref('');
         const pageComponentKey = ref(0);
         const invComponentKey = ref(0);
-        const title = ref('Prepayment Allocation');
+        const title = ref('Move Transaction');
         const companyID = computed(()=> store.state.userData.company_id);
         const ledgerID = computed(()=> store.state.Ledgers.ledgerID);
-        const prepaymentID = ref("");
-        const prepaymentAmount = ref(0);
-        const prepaymentAllocError = ref(false);
-        const invoiceID = ref('');
-        const invoiceDescription = ref('');
-        const invoiceDueAmount = ref(0);
-        const invoiceArray = computed(() => store.state.Journals.journalArr);
-        const idField = 'tenant_prepayment_alloc_id';
+        const ledgerDetails = computed(()=> store.state.Ledgers.ledgerDetails);
+        const tabs = ref(['Ledger Details','Ledger Statement']);
+        const idField = 'journal_id';
         const selectedIds = ref([]);
         const appModalVisible = ref(false);
-        const prepaymentsList = ref([]);
         const appResults = ref([]);
         const appArrLen = ref(0);
         const appCount = ref(0);
@@ -85,12 +102,12 @@ export default{
         const flex_basis = ref('');
         const flex_basis_percentage = ref('');
         const displayButtons = ref(true);
-        const errors = ref([]);
         const modal_top = ref('150px');
         const modal_left = ref('400px');
         const modal_width = ref('35vw');
-        const tableRows = computed(()=> store.state.Ledgers.jnlArray);
-        const tableColumns = ref([
+        const showActions = ref(false);
+        const statementRows = computed(()=> store.state.Ledgers.jnlArray);
+        const statementColumns = ref([
             {type: "checkbox"},
             {label: "Date", key:"date", type: "text", editable: false},
             {label: "Ref No", key:"reference_no", type: "text", editable: false},
@@ -103,38 +120,25 @@ export default{
         const actions = ref([
             {name: 'delete', icon: 'fa fa-trash', title: 'Delete Allocation'},
         ])
-        const tenant_name_search = computed({
-            get: () => store.state.Prepayment_Allocations.tenant_name_search,
-            set: (value) => store.commit('Prepayment_Allocations/SET_SEARCH_FILTERS', {"tenant_name_search":value}),
+        const min_amount_search = computed({
+            get: () => store.state.Journals.min_amount_search,
+            set: (value) => store.commit('Journals/SET_SEARCH_FILTERS', {"min_amount_search":value}),
         });
-        const tenant_code_search = computed({
-            get: () => store.state.Prepayment_Allocations.tenant_code_search,
-            set: (value) => store.commit('Prepayment_Allocations/SET_SEARCH_FILTERS', {"tenant_code_search":value}),
+        const max_amount_search = computed({
+            get: () => store.state.Journals.max_amount_search,
+            set: (value) => store.commit('Journals/SET_SEARCH_FILTERS', {"max_amount_search":value}),
         });
         const from_date_search = computed({
-            get: () => store.state.Prepayment_Allocations.from_date_search,
-            set: (value) => store.commit('Prepayment_Allocations/SET_SEARCH_FILTERS', {"from_date_search":value}),
+            get: () => store.state.Journals.from_date_search,
+            set: (value) => store.commit('Journals/SET_SEARCH_FILTERS', {"from_date_search":value}),
         });
         const to_date_search = computed({
-            get: () => store.state.Prepayment_Allocations.to_date_search,
-            set: (value) => store.commit('Prepayment_Allocations/SET_SEARCH_FILTERS', {"to_date_search":value}),
+            get: () => store.state.Journals.to_date_search,
+            set: (value) => store.commit('Journals/SET_SEARCH_FILTERS', {"to_date_search":value}),
         });
-        const fetchInvoices = async(tenantID) =>{
-            await store.dispatch('Journals/fetchJournals', {company:companyID.value, customer: tenantID, txn_type: "INV", status: "Open"})
-        };
-        const handleSelectedInvoice = async(option) =>{
-            await store.dispatch('Journals/handleSelectedJournal', option)
-            invoiceID.value = store.state.Journals.journalID;
-            invoiceDescription.value = store.state.Journals.invoiceDescription;
-            invoiceDueAmount.value = store.state.Journals.invoiceDueAmount;
-        };
-        const clearSelectedInvoice  = async() =>{
-            await store.dispatch('Journals/updateState', {journalID: ''});
-            invoiceID.value = ""
-        }
         const searchFilters = ref([
-            {type:'text', placeholder:"Min Amount...", value: tenant_code_search, width:36},
-            {type:'text', placeholder:"Max Amount...", value: tenant_name_search, width:36},
+            {type:'text', placeholder:"Min Amount...", value: min_amount_search, width:36},
+            {type:'text', placeholder:"Max Amount...", value: max_amount_search, width:36},
             {type:'date', placeholder:"From Date...", value: from_date_search, width:36, title: "Date From Search"},
             {type:'date', placeholder:"To Date...", value: to_date_search, width:36, title: "Date To Search"},
             
@@ -142,42 +146,44 @@ export default{
         const handleSelectionChange = (ids) => {
             selectedIds.value = ids;
         };
-        const checkPrepaymentLimit = (value) =>{
-            if(invoiceDueAmount.value < value){
-                toast.error(`Invoice Balance is ${invoiceDueAmount.value}`)
-                formFields.value[2].value = 0;
+
+        const selectTab = async(index) => {
+            showLoader();
+            let formData1 = {
+                posting_account: ledgerDetails.value.ledger_id,
+                company: companyID.value,
+                date_from: from_date_search.value,
+                date_to: to_date_search.value,
             }
-            else if(prepaymentAmount.value < value){
-                toast.error(`Cannot Allocate More Than ${prepaymentAmount.value}`)
-                formFields.value[2].value = 0;
+            if(index == 1){
+                activeTab.value = index;
+                await store.dispatch('Ledgers/fetchClientJournals',formData1)
+                .then(()=>{
+                    hideLoader();
+                })
+
+            }else{
+                activeTab.value = index;
+                hideLoader();
             }
-        }
-        const formFields = ref([
-            {  
-                type:'search-dropdown', label:"Invoice", value: invoiceID.value, componentKey: invComponentKey,
-                selectOptions: invoiceArray, optionSelected: handleSelectedInvoice, required: true,
-                searchPlaceholder: 'Select Deposit...', dropdownWidth: '450px', updateValue: "",
-                fetchData: fetchInvoices(), clearSearch: clearSelectedInvoice() 
-            },
-            { type: 'date', name: 'date',label: "Date", value: '', required: true },
-            { type: 'number', name: 'allocated_amount',label: "Amount", value: 0, required: true, method: checkPrepaymentLimit },
-            
-        ]);
+
+        };
+
+        const formFields = ref([]);
         const handleReset = () =>{
             for(let i=1; i < formFields.value.length; i++){
                 formFields.value[i].value = '';
             }
-            invoiceID.value = '';
         }
         
         const handleActionClick = async(rowIndex, action, row) =>{
             if(action == 'delete'){
-                const allocationID = [row['tenant_prepayment_alloc_id']];
+                const journalID = [row['journal_id']];
                 let formData = {
                     company: companyID.value,
-                    tenant_prepayment_allocs: allocationID
+                    journal: journalID
                 }
-                await store.dispatch('Prepayment_Allocations/deleteAllocation',formData)
+                await store.dispatch('Journals/deleteJournal',formData)
                 searchJournalEntries();     
             }
         } 
@@ -197,7 +203,7 @@ export default{
         const searchJournalEntries = async() =>{
             showLoader();
             let formData = {
-                posting_account: ledgerID.value,
+                posting_account: ledgerDetails.value.ledger_id,
                 company: companyID.value,
                 date_from: from_date_search.value,
                 date_to: to_date_search.value,
@@ -240,24 +246,43 @@ export default{
             searchJournalEntries();
         }
         const resetFilters = () =>{
-            store.commit('Prepayment_Allocations/RESET_SEARCH_FILTERS')
+            store.commit('Journals/RESET_SEARCH_FILTERS')
             searchJournalEntries();
         }
         const closeModal = () =>{
             appModalVisible.value = false;
-            invoiceID.value = "";
             store.dispatch('Journals/updateState',{journalID:''})
         }
         onMounted(() =>{
-            searchJournalEntries();
+            
         })
         return{
-            title, searchJournalEntries, idField, selectedIds, actions, tableRows, appArrLen,appCount,appResults,appModalVisible,formFields,
-            addButtonLabel, searchFilters,tableColumns,resetFilters,loadPrev,loadNext,firstPage,lastPage,
+            tabs,title, searchJournalEntries, idField, selectedIds, actions, statementRows, appArrLen,appCount,appResults,appModalVisible,formFields,
+            addButtonLabel, searchFilters,statementColumns,resetFilters,loadPrev,loadNext,firstPage,lastPage,
             showNextBtn,showPreviousBtn, handleActionClick,displayButtons,handleReset,
             modal_top, modal_left, modal_width, showLoader, loader, hideLoader, modal_loader, showModalLoader, hideModalLoader,
-            closeModal, handleSelectionChange, pageComponentKey, flex_basis, flex_basis_percentage, pageTitle
+            closeModal, handleSelectionChange, pageComponentKey, flex_basis, flex_basis_percentage, ledgerDetails, selectTab, activeTab,showActions
         }
     }
 }
 </script>
+
+<style scoped>
+.tabs {
+    display: flex;
+    border-bottom: 1px solid #ccc;
+}
+.tab {
+    padding: 2px 20px 2px 20px;
+    cursor: pointer;
+}
+
+.tab.active {
+    border-bottom: 2px solid #000;
+}
+
+.tab-content {
+    padding: 1px;
+}
+
+</style>

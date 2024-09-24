@@ -22,6 +22,10 @@ const state = {
   jnlSortedArr: [],
   journalID: '',
   journalNo: '',
+  journal_no_search: "",
+  description_search: '',
+  min_amount_search: '',
+  max_amount_search: '',
   client_name_search: '',
   client_code_search: '',
   from_date_search: '',
@@ -54,6 +58,10 @@ const mutations = {
     state.client_code_search = '';
     state.from_date_search = '';
     state.to_date_search = '';
+    state.journal_no_search = '';
+    state.description_search = '';
+    state.min_amount_search = '';
+    state.max_amount_search = '';
     state.selectedJournal = null;
     state.selectedLedger = null;
     state.isEditing = false;
@@ -106,6 +114,14 @@ const mutations = {
         state.from_date_search = value;
       }else if(key == 'to_date_search'){
         state.to_date_search = value;
+      }else if(key == 'journal_no_search'){
+        state.journal_no_search = value;
+      }else if(key == 'description_search'){
+        state.description_search = value;
+      }else if(key == 'min_amount_search'){
+        state.min_amount_search = value;
+      }else if(key == 'max_amount_search'){
+        state.max_amount_search = value;
       }
     }
   },
@@ -114,6 +130,10 @@ const mutations = {
     state.client_code_search = '';
     state.from_date_search = '';
     state.to_date_search = '';
+    state.journal_no_search = '';
+    state.description_search = '';
+    state.min_amount_search = '';
+    state.max_amount_search = '';
   }
 };
   
@@ -489,6 +509,47 @@ const actions = {
         })
       }else{
         Swal.fire(`Payment Voucher has not been deleted!`);
+      }
+    })
+  },
+  deleteJournal({ commit,state }, formData) {
+    Swal.fire({
+      title: "Are you sure?",
+      text: `Do you wish to delete Journal?`,
+      type: 'warning',
+      showCloseButton: true,
+      showCancelButton: true,
+      confirmButtonText: 'Yes Delete Journal!',
+      cancelButtonText: 'Cancel!',
+      customClass: {
+          confirmButton: 'swal2-confirm-custom',
+          cancelButton: 'swal2-cancel-custom',
+      },
+      showLoaderOnConfirm: true,
+    }).then((result) => {
+      if (result.value) {
+        axios.post(`api/v1/delete-journal/`,formData)
+        .then((response)=>{
+          if(response.data.msg == "Success"){
+              Swal.fire("Poof! Journal(s) removed succesfully!", {
+                icon: "success",
+              }); 
+          }else if(response.data.msg == "Failed"){
+            Swal.fire({
+              title: "Cannot Delete Journal",
+              icon: "warning",
+            });
+          }                  
+        })
+        .catch((error)=>{
+          console.log(error.message);
+          Swal.fire({
+            title: error.message,
+            icon: "warning",
+          });
+        })
+      }else{
+        Swal.fire(`Journal has not been deleted!`);
       }
     })
   },

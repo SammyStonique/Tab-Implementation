@@ -613,9 +613,14 @@ export default{
                 date_from: "",
                 date_to: "",
             }
+            let formData1 = {
+                ledger: chartOfAccountsList.value[index].ledger_id,
+                company: companyID.value,
+            }
             store.commit('pageTab/ADD_PAGE', {'FA':'Ledger_Details'});
             store.state.pageTab.faActiveTab = 'Ledger_Details'; 
-            await store.dispatch('Ledgers/fetchClientJournals', formData)
+            // await store.dispatch('Ledgers/fetchClientJournals', formData)
+            await store.dispatch('Ledgers/fetchLedger', formData1)
             await store.dispatch('Ledgers/updateState', {ledgerID: chartOfAccountsList.value[index].ledger_id })
         }
         const removeLedger = async(index) =>{

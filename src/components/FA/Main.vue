@@ -44,7 +44,10 @@ import Customers from '@/components/FA/Customers.vue';
 import Vendors from '@/components/FA/Vendors.vue';
 import Debtor_Statement from '@/components/FA/Debtor_Statement.vue';
 import Vendor_Statement from '@/components/FA/Vendor_Statement.vue';
-
+import Journals from '@/components/FA/Journals.vue';
+import Journal_Details from '@/components/FA/Journal_Details.vue';
+import Vat_Transactions from '@/components/FA/Vat_Transactions.vue';
+import Tax_Mapping from '@/components/FA/Tax_Mapping.vue';
 
 import Default_Settings from '@/components/SET/Default_Settings.vue';
 
@@ -55,6 +58,7 @@ export default{
         PagesTab,
         Dashboard, Client_Categories,Chart_Of_Accounts,Ledger_Details,General_Invoices,Invoice_Details,General_Receipts,
         Receipt_Details,General_Bills, Bill_Details,Payment_Vouchers,Payment_Details,Customers,Vendors,Debtor_Statement,Vendor_Statement,
+        Journals,Journal_Details,Vat_Transactions, Tax_Mapping,
 
         Default_Settings
     },

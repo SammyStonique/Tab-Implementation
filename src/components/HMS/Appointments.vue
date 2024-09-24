@@ -49,7 +49,6 @@ import { useToast } from "vue-toastification";
 
 export default{
     name: 'Appointments',
-    props: ['scrollToTop','loader','showLoader','hideLoader',],
     components:{
         PageComponent,MovableModal,DynamicForm
     },

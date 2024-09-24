@@ -103,16 +103,16 @@
                 </div>
                 <div class="dropdown-content w-48 absolute rounded border border-gray-200 bg-white shadow-slate-400 shadow-sm" v-if="taxes_dropdown">
                     <div class="py-2 px-3 pl-4 w-full hover:bg-slate-500 hover:w-full">
-                        <button class="flex text-sm">
+                        <button class="flex text-sm" @click="openPage({'FA':'Tax_Mapping'})">
                             <i class="fa fa-universal-access pt-2 mr-2" aria-hidden="true"></i>
                             <p class="">Tax Mapping</p>
                         </button>
 
                     </div>
                     <div class="py-2 px-3 pl-4 w-full hover:bg-slate-500 hover:w-full">
-                        <button class="flex text-sm">
+                        <button class="flex text-sm" @click="openPage({'FA':'Vat_Transactions'})">
                             <i class="fa fa-address-card pt-2 mr-2" aria-hidden="true"></i>
-                            <p class="">VAT</p>
+                            <p class="">VAT Transactions</p>
                         </button>
 
                     </div>

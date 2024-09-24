@@ -7,10 +7,16 @@ const state = {
   taxArray: [],
   taxID: '',
   taxName: '',
-  name_search: '',
+  tax_name_search: '',
+  tax_type_search: '',
+  tax_inclusivity_search: '',
+  invoice_no_search: '',
+  tax_category_search: '',
+  date_from_search: '',
+  date_to_search: '',
   selectedTax: null,
-  selectedOutput: null,
-  selectedInput: null,
+  selectedOutputAccount: null,
+  selectedInputAccount: null,
   isEditing: false
 };
   
@@ -21,15 +27,27 @@ const mutations = {
     state.taxArray = [];
     state.taxID = '';
     state.taxName = '';
-    state.name_search = '';
+    state.tax_name_search = '';
+    state.tax_type_search = '';
+    state.tax_inclusivity_search = '';
+    state.invoice_no_search = '';
+    state.tax_category_search = '';
+    state.date_from_search = '';
+    state.date_to_search = '';
     state.selectedTax = null;
-    state.selectedOutput = null;
-    state.selectedInput = null;
+    state.selectedOutputAccount = null;
+    state.selectedInputAccount = null;
     state.isEditing = false;
   },
   SET_SELECTED_TAX(state, tax) {
     state.selectedTax = tax;
     state.isEditing = true;
+  },
+  SET_SELECTED_INPUT_ACCOUNT(state, input) {
+    state.selectedInputAccount = input;
+  },
+  SET_SELECTED_OUTPUT_ACCOUNT(state, output) {
+    state.selectedOutputAccount = output;
   },
   LIST_TAXES(state, taxes) {
     state.taxesList = taxes;
@@ -46,13 +64,36 @@ const mutations = {
   },
   SET_SEARCH_FILTERS(state, search_filter){
     for(const [key, value] of Object.entries(search_filter)){
-      if(key == 'name_search'){
-        state.name_search = value;
+      if(key == 'tax_category_search'){
+        state.tax_category_search = value;
+      }else if(key == 'tax_inclusivity_search'){
+        state.tax_inclusivity_search = value;
+      }
+      else if(key == 'invoice_no_search'){
+        state.invoice_no_search = value;
+      }
+      else if(key == 'date_from_search'){
+        state.date_from_search = value;
+      }
+      else if(key == 'date_to_search'){
+        state.date_to_search = value;
+      }
+      else if(key == 'tax_type_search'){
+        state.tax_type_search = value;
+      }
+      else if(key == 'tax_name_search'){
+        state.tax_name_search = value;
       }
     }
   },
   RESET_SEARCH_FILTERS(state){
-    state.name_search = '';
+    state.tax_type_search = '';
+    state.tax_category_search = '';
+    state.tax_inclusivity_search = '';
+    state.invoice_no_search = '';
+    state.date_to_search = '';
+    state.date_from_search = '';
+    state.tax_name_search = "";
   }
 };
   
@@ -90,7 +131,11 @@ const actions = {
     axios.post(`api/v1/fetch-taxes/`,formData)
     .then((response)=>{
       state.selectedTax = response.data;
+      let taxInputAccount = response.data.tax_input_account.ledger_code + " - " + response.data.tax_input_account.ledger_name;
+      let taxOutputAccount = response.data.tax_output_account.ledger_code + " - " + response.data.tax_output_account.ledger_name;
       commit('SET_SELECTED_TAX',response.data);
+      commit('SET_SELECTED_INPUT_ACCOUNT', taxInputAccount);
+      commit('SET_SELECTED_OUTPUT_ACCOUNT', taxOutputAccount);
     })
     .catch((error)=>{
       console.log(error.message);

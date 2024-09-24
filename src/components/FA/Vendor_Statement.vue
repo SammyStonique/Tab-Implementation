@@ -2,7 +2,7 @@
     <PageStyleComponent :key="mainComponentKey" :loader="loader" @showLoader="showLoader" @hideLoader="hideLoader">
         <template v-slot:body>
             <div class="border border-slate-200 rounded relative py-1.5 mt-3 px-2 min-h-[450px]">
-                <h1 class="font-bold absolute top-[-13px] left-5 bg-white">Debtor Details</h1>
+                <h1 class="font-bold absolute top-[-13px] left-5 bg-white">Vendor Details</h1>
                 <div class="tabs pt-2">
                     <button v-for="(tab, index) in tabs" :key="tab" :class="['tab', { active: activeTab === index }]"@click="selectTab(index)">
                         {{ tab }}

@@ -136,6 +136,16 @@ export default defineComponent({
       return key.split('.').reduce((obj, keyPart) => obj && obj[keyPart], row);
     };
 
+    const journalLineCheck = (row) =>{
+      let debitAmount = parseFloat(row.debit_amount) || 0;
+      let creditAmount = parseFloat(row.credit_amount) || 0;
+      if(debitAmount > 0){
+        row.credit_amount = 0;
+      }else if(creditAmount > 0){
+        row.debit_amount = 0;
+      }
+    }
+
     const calculateTaxAmount = (row) =>{
       const subTotal = (parseFloat(row.quantity) * parseFloat(row.cost)) || 0;
       const taxRate = parseFloat(row.vat_rate?.tax_rate) || 0;
@@ -170,6 +180,7 @@ export default defineComponent({
       calculateTaxAmount(row);
       updateUnits(row);
       receiptAllocation(row);
+      journalLineCheck(row);
     }
 
     const updateUnits = (row) =>{
