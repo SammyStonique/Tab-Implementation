@@ -1,5 +1,6 @@
 import axios from "axios";
 import Swal from 'sweetalert2';
+import PrintJS from 'print-js';
 import { useToast } from "vue-toastification";
 
 const toast = useToast();
@@ -551,6 +552,110 @@ const actions = {
       }else{
         Swal.fire(`Journal has not been deleted!`);
       }
+    })
+  },
+  previewClientInvoice({commit,state}, formData){
+    axios
+    .post(`api/v1/client-invoice-pdf/`, formData, { responseType: 'blob' })
+    .then((response) => {
+      if(response.status == 200){
+        const blob1 = new Blob([response.data]);
+        // Convert blob to URL
+        const url = URL.createObjectURL(blob1);
+        PrintJS({printable: url, type: 'pdf'});
+    }
+    
+    })
+    .catch((error)=>{
+        console.log(error.message);
+    })
+  },
+  downloadClientInvoice({commit,state}, formData){
+    axios
+    .post(`api/v1/client-invoice-pdf/`, formData, { responseType: 'blob' })
+    .then((response) => {
+    if(response.status == 200){
+        const url = window.URL.createObjectURL(new Blob([response.data]));
+        const link = document.createElement('a');
+        link.href = url;
+        link.setAttribute('download', 'Customer Invoice.pdf');
+        document.body.appendChild(link);
+        link.click();
+    }
+    
+    })
+    .catch((error)=>{
+        console.log(error.message);
+    })
+  },
+  downloadVendorBill({commit,state}, formData){
+    axios
+    .post(`api/v1/client-invoice-pdf/`, formData, { responseType: 'blob' })
+    .then((response) => {
+    if(response.status == 200){
+        const url = window.URL.createObjectURL(new Blob([response.data]));
+        const link = document.createElement('a');
+        link.href = url;
+        link.setAttribute('download', 'Vendor Bill.pdf');
+        document.body.appendChild(link);
+        link.click();
+    }
+    
+    })
+    .catch((error)=>{
+        console.log(error.message);
+    })
+  },
+  previewClientReceipt({commit,state}, formData){
+    axios
+    .post(`api/v1/client-receipt-pdf/`, formData, { responseType: 'blob' })
+    .then((response) => {
+      if(response.status == 200){
+        const blob1 = new Blob([response.data]);
+        // Convert blob to URL
+        const url = URL.createObjectURL(blob1);
+        PrintJS({printable: url, type: 'pdf'});
+    }
+    
+    })
+    .catch((error)=>{
+        console.log(error.message);
+    })
+  },
+  downloadClientReceipt({commit,state}, formData){
+    axios
+    .post(`api/v1/client-receipt-pdf/`, formData, { responseType: 'blob' })
+    .then((response) => {
+    if(response.status == 200){
+        const url = window.URL.createObjectURL(new Blob([response.data]));
+        const link = document.createElement('a');
+        link.href = url;
+        link.setAttribute('download', 'Customer Receipt.pdf');
+        document.body.appendChild(link);
+        link.click();
+    }
+    
+    })
+    .catch((error)=>{
+        console.log(error.message);
+    })
+  },
+  downloadPaymentVoucher({commit,state}, formData){
+    axios
+    .post(`api/v1/client-receipt-pdf/`, formData, { responseType: 'blob' })
+    .then((response) => {
+    if(response.status == 200){
+        const url = window.URL.createObjectURL(new Blob([response.data]));
+        const link = document.createElement('a');
+        link.href = url;
+        link.setAttribute('download', 'Payment Voucher.pdf');
+        document.body.appendChild(link);
+        link.click();
+    }
+    
+    })
+    .catch((error)=>{
+        console.log(error.message);
     })
   },
 };

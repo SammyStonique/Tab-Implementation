@@ -30,6 +30,7 @@
                     :rows="rows"
                     :idField="idField"
                     :actions="actions"
+                    :showTotals="showTotals"
                     @action-click="handleActionClick"
                     @selection-changed="handleSelectionChange"
                 />
@@ -87,6 +88,11 @@ export default defineComponent({
         rows:{
             type: Array,
             default: () => []   
+        },
+        showTotals:{
+            type: Boolean,
+            default: () => false,
+            required: false
         },
         actions:{
             type: Array,

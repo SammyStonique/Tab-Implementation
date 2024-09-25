@@ -78,7 +78,7 @@ export default defineComponent({
             {label: "Cost", key: "cost", type: "number", editable: true, minWidth:"50px", maxWidth:"50px"},
             {label: "Qty", key: "quantity", type: "number", editable: true, minWidth:"50px", maxWidth:"50px"},
             {label: "Vat Rate", key: "vat_rate", type: "select-dropdown", editable: false, options: taxRates},
-            {label: "Vat Incl", key: "vat_inclusivity", type: "select-dropdown", editable: false, maxWidth:"20px", options: [{ text: 'Yes', value: 'Yes' }, { text: 'No', value: 'No' }]},
+            {label: "Vat Incl", key: "vat_inclusivity", type: "select-dropdown", editable: false, maxWidth:"20px", options: [{ text: 'Yes', value: 'Inclusive' }, { text: 'No', value: 'Exclusive' }]},
             {label: "Vat", key: "vat_amount", type: "text", editable: false, maxWidth:"30px"},
             {label: "Total", key: "total_amount", type: "text", editable: false},
         ]);
@@ -216,7 +216,7 @@ export default defineComponent({
                         "date": formFields.value[1].value,
                         "description": invoiceRows.value[i].description+", Tax Payable",
                         "txn_type": "INV",
-                        "posting_account": invoiceRows.value[i].vat_rate.tax_output_account,
+                        "posting_account": invoiceRows.value[i].vat_rate.tax_output_account.ledger_id,
                         "debit_amount": 0,
                         "credit_amount": invoiceRows.value[i].vat_amount,
                     }
@@ -226,7 +226,7 @@ export default defineComponent({
                         "client_id": customerID.value,
                         "amount": invoiceRows.value[i].vat_amount,
                         "description": invoiceRows.value[i].description+", Tax Payable",
-                        "tax_inclusive": invoiceRows.value[i].vat_inclusivity,
+                        "tax_inclusive": invoiceRows.value[i].vat_inclusivity || "Inclusive",
                         "tax_category": 'Output'
                     }
                     
@@ -252,16 +252,17 @@ export default defineComponent({
                     "quantity": invoiceRows.value[i].quantity,
                 }
                 journalsArray.value.push(jnlLine);
-                let jnlEntry3 = {
-                    "date": formFields.value[1].value,
-                    "description": formFields.value[5].value,
-                    "txn_type": "INV",
-                    "posting_account": customerLedger.value,
-                    "debit_amount": invoiceTotals.value,
-                    "credit_amount": 0,
-                }
-                journalEntryArr.value.push(jnlEntry3)
+                
             }
+            let jnlEntry3 = {
+                "date": formFields.value[1].value,
+                "description": formFields.value[5].value,
+                "txn_type": "INV",
+                "posting_account": customerLedger.value,
+                "debit_amount": invoiceTotals.value,
+                "credit_amount": 0,
+            }
+            journalEntryArr.value.push(jnlEntry3)
 
             let formData = {
                 company: companyID.value,
@@ -281,7 +282,7 @@ export default defineComponent({
                 journals_array: journalsArray.value,
                 user: userID.value
             }
-            
+            console.log("THE FORM DATA IS ",formData)
             errors.value = [];
             for(let i=1; i < (formFields.value.length - 3); i++){
                 if(formFields.value[i].value =='' && formFields.value[i].required == true){

@@ -94,6 +94,7 @@ export default{
             {label: "Date", key: "date"},
             {label: "Bank. Date", key: "banking_date"},
             {label: "Customer Name", key:"customer_name"},
+            {label: "Cashbook", key:"cashbook"},
             {label: "Pay. Method", key:"payment_method"},
             {label: "Ref No", key:"reference_no"},
             {label: "Amount", key:"total_amount"},
@@ -101,6 +102,8 @@ export default{
         ])
         
         const actions = ref([
+            {name: 'print', icon: 'fa fa-print', title: 'Print Receipt'},
+            {name: 'download', icon: 'fa fa-download', title: 'Download Receipt'},
             {name: 'delete', icon: 'fa fa-trash', title: 'Delete Receipt'},
         ])
         const companyID = computed(()=> store.state.userData.company_id);
@@ -301,6 +304,32 @@ export default{
                 await store.dispatch('Journals/deleteReceipt',formData).
                 then(()=>{
                     searchReceipts();
+                })
+            }else if(action == 'print'){
+                showLoader();
+                const journalID = row['journal_id'];
+                let formData = {
+                    receipt: journalID,
+                    client: row['customer_id'],
+                    type: 'RCPT',
+                    company: companyID.value
+                }
+                await store.dispatch('Journals/previewClientReceipt',formData).
+                then(()=>{
+                    hideLoader();
+                })
+            }else if(action == 'download'){
+                showLoader();
+                const journalID = row['journal_id'];
+                let formData = {
+                    receipt: journalID,
+                    client: row['customer_id'],
+                    type: 'RCPT',
+                    company: companyID.value
+                }
+                await store.dispatch('Journals/downloadClientReceipt',formData).
+                then(()=>{
+                    hideLoader();
                 })
             }
         }

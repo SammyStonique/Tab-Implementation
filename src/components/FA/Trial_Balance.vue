@@ -14,6 +14,7 @@
             :rows="trialBalanceList"
             :actions="actions"
             :idField="idField"
+            :showTotals="showTotals"
             @handleSelectionChange="handleSelectionChange"
             @handleActionClick="handleActionClick"
         />
@@ -68,12 +69,15 @@ export default{
         const patient_ledger_totals = ref(0);
         const customer_ledger_totals = ref(0);
         const vendor_ledger_totals = ref(0);
+        const tenant_ledger_totals = ref(0);
         const patientLedger = ref('');
         const vendorLedger = ref('');
         const customerLedger = ref('');
-        const merge_patients_setting = ref('Yes');
-        const merge_vendors_setting = ref('Yes');
-        const merge_debtors_setting = ref('Yes');
+        const tenantLedger = ref('');
+        const merge_patients_setting = ref('No');
+        const merge_vendors_setting = ref('No');
+        const merge_debtors_setting = ref('No');
+        const merge_tenants_setting = ref('No');
         const trialBalanceList = ref([]);
         const showModal = ref(false);
         const tableColumns = ref([
@@ -81,21 +85,39 @@ export default{
             {label: "Type", key:"ledger_type"},
             {label: "Code", key: "ledger_code"},
             {label: "Account Name", key:"ledger_name"},
-            {label: "Debits", key:"debits"},
-            {label: "Credits", key:"credits"},
+            {label: "Debits", key:"debits", type: "number"},
+            {label: "Credits", key:"credits", type: "number"},
         ])
-        
+        const showTotals = ref(true);
         const actions = ref([
-            {name: 'delete', icon: 'fa fa-trash', title: 'Delete Journal'},
+            {name: 'view', icon: 'fa fa-file-pdf-o', title: 'View Ledger Details'},
         ])
         const companyID = computed(()=> store.state.userData.company_id);
-
-        const from_date_search = ref("")
+        const defaultSettings = computed(()=> store.state.Default_Settings.settingsList);
+        const from_date_search = ref("");
         const to_date_search = ref("");
+        const ledger_code_search = ref("");
+        const ledger_name_search = ref("");
         const searchFilters = ref([
+            {type:'text', placeholder:"Code...", value: ledger_code_search, width:36, title: ""},
+            {type:'text', placeholder:"Name...", value: ledger_name_search, width:56, title: ""},
             {type:'date', placeholder:"From Date...", value: from_date_search, width:36, title: "Date From Search"},
             {type:'date', placeholder:"To Date...", value: to_date_search, width:36, title: "Date To Search"},
         ]);
+        const fetchDefaultSettings = async() =>{
+            await store.dispatch('Default_Settings/fetchDefaultSettings', {company:companyID.value})
+            for(let i=0; i < defaultSettings.value.length; i++){
+                if(defaultSettings.value[i].setting_name === 'Merge Patients Ledgers in Reports'){
+                    merge_patients_setting.value = defaultSettings.value[i].setting_value_name;
+                }else if(defaultSettings.value[i].setting_name === 'Merge Debtors Ledgers in Reports'){
+                    merge_debtors_setting.value = defaultSettings.value[i].setting_value_name;
+                }else if(defaultSettings.value[i].setting_name === 'Merge Vendors Ledgers in Reports'){
+                    merge_vendors_setting.value = defaultSettings.value[i].setting_value_name;
+                }else if(defaultSettings.value[i].setting_name === 'Merge Tenants Ledgers in Reports'){
+                    merge_tenants_setting.value = defaultSettings.value[i].setting_value_name;
+                }
+            }
+        };
         const handleSelectionChange = (ids) => {
             selectedIds.value = ids;
         };
@@ -131,12 +153,13 @@ export default{
             showLoader();
             patient_ledger_totals.value = 0;
             customer_ledger_totals.value = 0;
+            tenant_ledger_totals.value = 0;
             vendor_ledger_totals.value = 0;
             trialBalanceList.value = [];
 
             let formData = {
-                ledger_code: "",
-                ledger_name: "",
+                ledger_code: ledger_code_search.value,
+                ledger_name: ledger_name_search.value,
                 date_from: from_date_search.value,
                 date_to: to_date_search.value,
                 company_id: companyID.value
@@ -151,71 +174,90 @@ export default{
                     for(let i=trialBalanceList.value.length - 1; i >= 0; i--){
                         if(trialBalanceList.value[i].ledger_category === "Patients" && merge_patients_setting.value === 'Yes'){
                             if(trialBalanceList.value[i].debits !='-'){
-                                patient_ledger_totals.value += trialBalanceList.value[i].debits;
+                                let debits = parseFloat(trialBalanceList.value[i].debits.replace(/,/g, ''))
+                                patient_ledger_totals.value += debits;
                                 patientLedger.value = "debit";
                                 
                             }else if(trialBalanceList.value[i].credits !='-'){
-                                patient_ledger_totals.value += trialBalanceList.value[i].credits;
+                                let credits = parseFloat(trialBalanceList.value[i].credits.replace(/,/g, ''))
+                                patient_ledger_totals.value -= credits;
                                 patientLedger.value  = "credit";
                             }
                             trialBalanceList.value.splice(i, 1);
                         }else if(trialBalanceList.value[i].ledger_category === "Vendors" && merge_vendors_setting.value === 'Yes'){
                             if(trialBalanceList.value[i].debits !='-'){
-                                vendor_ledger_totals.value += trialBalanceList.value[i].debits;
+                                let debits = parseFloat(trialBalanceList.value[i].debits.replace(/,/g, ''))
+                                vendor_ledger_totals.value += debits;
                                 vendorLedger.value = 'debit';
                             }else if(trialBalanceList.value[i].credits !='-'){
-                                vendor_ledger_totals.value += trialBalanceList.value[i].credits;
+                                let credits = parseFloat(trialBalanceList.value[i].credits.replace(/,/g, ''))
+                                vendor_ledger_totals.value -= credits;
                                 vendorLedger.value  = 'credit';
                             }
+                            trialBalanceList.value.splice(i, 1);
                         }else if(trialBalanceList.value[i].ledger_category === "Debtors" && merge_debtors_setting.value === 'Yes'){
                             if(trialBalanceList.value[i].debits !='-'){
-                                customer_ledger_totals.value += trialBalanceList.value[i].debits;
+                                let debits = parseFloat(trialBalanceList.value[i].debits.replace(/,/g, ''))
+                                customer_ledger_totals.value += debits;
                                 customerLedger.value = 'debit';
                             }else if(trialBalanceList.value[i].credits !='-'){
-                                customer_ledger_totals.value += trialBalanceList.value[i].credits;
+                                let credits = parseFloat(trialBalanceList.value[i].credits.replace(/,/g, ''))
+                                customer_ledger_totals.value -= credits;
                                 customerLedger.value = 'credit';
                             }
                             trialBalanceList.value.splice(i, 1);
+                        }else if(trialBalanceList.value[i].ledger_category === "Tenants" && merge_tenants_setting.value === 'Yes'){
+                            if(trialBalanceList.value[i].debits !='-'){
+                                let debits = parseFloat(trialBalanceList.value[i].debits.replace(/,/g, ''))
+                                tenant_ledger_totals.value += debits;
+                                tenantLedger.value = 'debit';
+                            }else if(trialBalanceList.value[i].credits !='-'){
+                                let credits = parseFloat(trialBalanceList.value[i].credits.replace(/,/g, ''))
+                                tenant_ledger_totals.value -= credits;
+                                tenantLedger.value = 'credit';
                             }
+                            trialBalanceList.value.splice(i, 1);
+                        }
+
                     }
-                    if(patientLedger.value === 'debit'){
+                    if(patient_ledger_totals.value > 0){
                         let patientArr ={
                             "ledger_code": 'PAT',
                             "ledger_name": 'PATIENTS',
                             "ledger_type": 'Current Asset',
                             "ledger_category": 'Patients',
                             "financial_statement": 'Balance Sheet',
-                            "debits": patient_ledger_totals.value,
+                            "debits": Number(patient_ledger_totals.value).toLocaleString(),
                             "credits": '-',
                             "status": 'Active',
                         }
                         trialBalanceList.value.push(patientArr);
-                    }else if(patientLedger.value  === 'credit'){
+                    }else if(patient_ledger_totals.value < 0){
                         let patientArr ={
                             "ledger_code": 'PAT',
                             "ledger_name": 'PATIENTS',
                             "ledger_type": 'Current Asset',
                             "ledger_category": 'Patients',
                             "financial_statement": 'Balance Sheet',
-                            "credits": Math.abs(patient_ledger_totals.value),
+                            "credits": Number(Math.abs(patient_ledger_totals.value)).toLocaleString(),
                             "debits": '-',
                             "status": 'Active',
                         }
                         trialBalanceList.value.push(patientArr);
                     }
-                    if(customerLedger.value === 'debit'){
+                    if(customer_ledger_totals.value > 0){
                         let customersArr ={
                             "ledger_code": 'DEB',
                             "ledger_name": 'DEBTORS',
                             "ledger_type": 'Current Asset',
                             "ledger_category": 'Debtors',
                             "financial_statement": 'Balance Sheet',
-                            "debits": customer_ledger_totals.value,
+                            "debits": Number(customer_ledger_totals.value).toLocaleString(),
                             "credits": '-',
                             "status": 'Active',
                         }
                         trialBalanceList.value.push(customersArr);
-                    }else if(customerLedger.value === 'credit'){
+                    }else if(customer_ledger_totals.value < 0){
                         let customersArr ={
                             "ledger_code": 'DEB',
                             "ledger_name": 'DEBTORS',
@@ -223,24 +265,24 @@ export default{
                             "ledger_category": 'Debtors',
                             "financial_statement": 'Balance Sheet',
                             "debits": '-',
-                            "credits": Math.abs(customer_ledger_totals.value),
+                            "credits": Number(Math.abs(customer_ledger_totals.value)).toLocaleString(),
                             "status": 'Active',
                         }
                         trialBalanceList.value.push(customersArr);
                     }
-                    if(vendorLedger.value  === 'debit'){
+                    if(vendor_ledger_totals.value > 0){
                         let vendorsArr ={
                             "ledger_code": 'VEN',
                             "ledger_name": 'VENDORS',
                             "ledger_type": 'Current Liability',
                             "ledger_category": 'Vendors',
                             "financial_statement": 'Balance Sheet',
-                            "debits": vendor_ledger_totals.value,
+                            "debits": Number(vendor_ledger_totals.value).toLocaleString(),
                             "credits": '-',
                             "status": 'Active',
                         }
                         trialBalanceList.value.push(vendorsArr);
-                    }else if(vendorLedger.value  === 'credit'){
+                    }else if(vendor_ledger_totals.value < 0){
                         let vendorsArr ={
                             "ledger_code": 'VEN',
                             "ledger_name": 'VENDORS',
@@ -248,10 +290,36 @@ export default{
                             "ledger_category": 'Vendors',
                             "financial_statement": 'Balance Sheet',
                             "debits": '-',
-                            "credits": Math.abs(vendor_ledger_totals.value),
+                            "credits": Number(Math.abs(vendor_ledger_totals.value)).toLocaleString(),
                             "status": 'Active',
                         }
                         trialBalanceList.value.push(vendorsArr);
+                    }
+
+                    if(tenant_ledger_totals.value > 0){
+                        let tenantsArr ={
+                            "ledger_code": 'TNT',
+                            "ledger_name": 'TENANTS',
+                            "ledger_type": 'Current Asset',
+                            "ledger_category": 'Tenants',
+                            "financial_statement": 'Balance Sheet',
+                            "debits": Number(tenant_ledger_totals.value).toLocaleString(),
+                            "credits": '-',
+                            "status": 'Active',
+                        }
+                        trialBalanceList.value.push(tenantsArr);
+                    }else if(tenant_ledger_totals.value < 0){
+                        let tenantsArr ={
+                            "ledger_code": 'TNT',
+                            "ledger_name": 'TENANTS',
+                            "ledger_type": 'Current Asset',
+                            "ledger_category": 'Tenants',
+                            "financial_statement": 'Balance Sheet',
+                            "debits": '-',
+                            "credits": Number(Math.abs(tenant_ledger_totals.value)).toLocaleString(),
+                            "status": 'Active',
+                        }
+                        trialBalanceList.value.push(tenantsArr);
                     }
 
                 }
@@ -266,12 +334,28 @@ export default{
             })
         }
         const resetFilters = () =>{
-            store.commit('Journals/RESET_SEARCH_FILTERS')
+            ledger_code_search.value = "";
+            ledger_name_search.value = "";
+            from_date_search.value = "";
+            to_date_search.value = "";
             searchTrialBalance();
         }
 
         const handleActionClick = async(rowIndex, action, row) =>{
-
+            let formData = {
+                posting_account: row[idField],
+                company: companyID.value,
+                date_from: "",
+                date_to: "",
+            }
+            let formData1 = {
+                ledger: row[idField],
+                company: companyID.value,
+            }
+            store.commit('pageTab/ADD_PAGE', {'FA':'Ledger_Details'});
+            store.state.pageTab.faActiveTab = 'Ledger_Details'; 
+            await store.dispatch('Ledgers/fetchLedger', formData1)
+            await store.dispatch('Ledgers/updateState', {ledgerID: row[idField] })
         }
         const closeModal = async() =>{
             invModalVisible.value = false;
@@ -288,11 +372,13 @@ export default{
             }
         }
         onBeforeMount(()=>{
+            fetchDefaultSettings();           
+        })
+        onMounted(() =>{
             searchTrialBalance();
-            
         })
         return{
-            title, searchTrialBalance,resetFilters, addButtonLabel, searchFilters, tableColumns, trialBalanceList,
+            showTotals,title, searchTrialBalance,resetFilters, addButtonLabel, searchFilters, tableColumns, trialBalanceList,
             invModalVisible, idField, actions, handleActionClick, propModalVisible, closeModal,
             submitButtonLabel, showModal, showLoader, loader, hideLoader, modal_loader, modal_top, modal_left, modal_width,displayButtons,
             showModalLoader, hideModalLoader, formFields, handleSelectionChange, flex_basis,flex_basis_percentage,

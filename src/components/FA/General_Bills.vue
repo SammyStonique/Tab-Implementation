@@ -11,10 +11,11 @@
             @resetFilters="resetFilters"
             @removeItem="removeBill"
             @removeSelectedItems="removeBills"
-            @printList="printList"
+            @printList="printBillList"
             :columns="tableColumns"
             :rows="billsList"
             :actions="actions"
+            :showTotals="showTotals"
             :idField="idField"
             @handleSelectionChange="handleSelectionChange"
             @handleActionClick="handleActionClick"
@@ -48,6 +49,7 @@ import DynamicForm from '../NewDynamicForm.vue';
 import { useStore } from "vuex";
 import { useToast } from "vue-toastification";
 import { useDateFormatter } from '@/composables/DateFormatter';
+import PrintJS from 'print-js';
 
 export default{
     name: 'General_Bills',
@@ -95,13 +97,15 @@ export default{
             {label: "Code", key:"code"},
             {label: "Vendor Name", key:"customer_name"},
             {label: "Description", key:"description"},
-            {label: "Amount", key:"total_amount"},
-            {label: "Paid", key:"total_paid"},
-            {label: "Balance", key:"due_amount"},
+            {label: "Amount", key:"total_amount", type:"number"},
+            {label: "Paid", key:"total_paid", type:"number"},
+            {label: "Balance", key:"due_amount", type:"number"},
             {label: "Status", key:"status"},
         ])
-        
+        const showTotals = ref(true);
         const actions = ref([
+            {name: 'print', icon: 'fa fa-print', title: 'Print Bill'},
+            {name: 'download', icon: 'fa fa-download', title: 'Download Bill'},
             {name: 'delete', icon: 'fa fa-trash', title: 'Delete Bill'},
         ])
         const companyID = computed(()=> store.state.userData.company_id);
@@ -319,6 +323,28 @@ export default{
                 then(()=>{
                     searchBills();
                 })
+            }else if(action == 'print'){
+                showLoader();
+                const journalID = row['journal_id'];
+                let formData = {
+                    invoice: journalID,
+                    company: companyID.value
+                }
+                await store.dispatch('Journals/previewClientInvoice',formData).
+                then(()=>{
+                    hideLoader();
+                })
+            }else if(action == 'download'){
+                showLoader();
+                const journalID = row['journal_id'];
+                let formData = {
+                    invoice: journalID,
+                    company: companyID.value
+                }
+                await store.dispatch('Journals/downloadVendorBill',formData).
+                then(()=>{
+                    hideLoader();
+                })
             }
         }
         const closeModal = async() =>{
@@ -334,18 +360,49 @@ export default{
                 store.commit('pageTab/ADD_PAGE', {'PMS':'Batch_Readings'})
                 store.state.pageTab.faActiveTab = 'Batch_Readings';
             }
+        };
+        const printBillList = () =>{
+            showLoader();
+
+            let formData = {
+                journal_no: "",
+                client_category: "Customers",
+                txn_type: "BIL",
+                client: client_name_search.value,
+                date_from: from_date_search.value,
+                date_to: to_date_search.value,
+                status: "",
+                company_id: companyID.value
+            } 
+   
+            axios
+            .post("api/v1/export-clients-invoices-pdf/", formData, { responseType: 'blob' })
+                .then((response)=>{
+                    if(response.status == 200){
+                        const blob1 = new Blob([response.data]);
+                        // Convert blob to URL
+                        const url = URL.createObjectURL(blob1);
+                        PrintJS({printable: url, type: 'pdf'});
+                    }
+                })
+            .catch((error)=>{
+                console.log(error.message);
+            })
+            .finally(()=>{
+                hideLoader();
+            })
         }
         onBeforeMount(()=>{
             searchBills();
             
         })
         return{
-            title, searchBills,resetFilters, addButtonLabel, searchFilters, tableColumns, billsList,
+            showTotals,title, searchBills,resetFilters, addButtonLabel, searchFilters, tableColumns, billsList,
             propResults, propArrLen, propCount, pageCount, showNextBtn, showPreviousBtn,invModalVisible,
             loadPrev, loadNext, firstPage, lastPage, idField, actions, handleActionClick, propModalVisible, closeModal,
             submitButtonLabel, showModal, showLoader, loader, hideLoader, modal_loader, modal_top, modal_left, modal_width,displayButtons,
             showModalLoader, hideModalLoader, formFields, handleSelectionChange, flex_basis,flex_basis_percentage,
-            removeBill, removeBills, dropdownOptions, handleDynamicOption, addNewBill
+            removeBill, removeBills, dropdownOptions, handleDynamicOption, addNewBill, printBillList
         }
     }
 };

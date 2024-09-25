@@ -51,6 +51,16 @@
             </div>
           </td>
         </tr>
+        <tr class="font-bold text-xs" v-if="showTotals">
+          <td v-for="(column, colIndex) in columns" :key="colIndex" :class="[{'ellipsis': column.maxWidth}, { 'max-width': column.maxWidth }, { 'min-width': column.minWidth }]">
+              <template v-if="column.type === 'number'">
+                  {{ Number(calculateColumnTotal(column.key)).toLocaleString() }}
+              </template>
+          </td>
+          <td class="actions" v-if="showActions">
+            
+        </td>
+      </tr>
       </tbody>
     </table>
   </div>
@@ -82,6 +92,11 @@ export default defineComponent({
     showActions:{
       type: Boolean,
       default: () => true,
+      required: false
+    },
+    showTotals:{
+      type: Boolean,
+      default: () => false,
       required: false
     }
   },
@@ -146,17 +161,24 @@ export default defineComponent({
       }
     }
 
+    const calculateColumnTotal =(columnKey) =>{
+        return props.rows.reduce((total, row) => {
+            const value = typeof row[columnKey] === 'string' ? (parseFloat((row[columnKey]).replace(/,/g, '')) || 0) : (parseFloat(row[columnKey])|| 0);
+            return total + value;
+        }, 0);
+    };
+
     const calculateTaxAmount = (row) =>{
       const subTotal = (parseFloat(row.quantity) * parseFloat(row.cost)) || 0;
       const taxRate = parseFloat(row.vat_rate?.tax_rate) || 0;
-      const taxIncl = row.vat_inclusivity || "Yes";
+      const taxIncl = row.vat_inclusivity || "Inclusive";
       let totalAmount = parseFloat(row.total_amount) || 0;
       let taxAmount = parseFloat(row.vat_amount) || 0;
-      if(taxIncl == "Yes"){
+      if(taxIncl == "Inclusive"){
         taxAmount = ((taxRate/100) * subTotal).toFixed(2);
         totalAmount = subTotal.toFixed(2);
         row.vat_amount = taxAmount;
-        row.sub_total = subTotal.toFixed(2);
+        row.sub_total = (parseFloat(subTotal) - parseFloat(taxAmount)).toFixed(2);
         row.total_amount = totalAmount;
       }else{
         taxAmount = ((taxRate/100) * subTotal).toFixed(2);
@@ -216,7 +238,7 @@ export default defineComponent({
 
     return {
       handleRowClick, handleAction, handleChange, getNestedValue, handleInputChange,
-      tableRef, toggleSelectAll, selectedIds, allSelected, updateSelectedIds,
+      tableRef, toggleSelectAll, selectedIds, allSelected, updateSelectedIds, calculateColumnTotal
     };
   }
 });

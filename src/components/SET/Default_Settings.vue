@@ -178,65 +178,43 @@
                     <button class="w-full text-left font-semibold" @click="showAccountsSettings">Accounts Default Settings</button>
                     <div class="w-full mt-4" v-if="accounts_settings_options">
                         <div class="flex mb-3">
-                            <div class="basis-1/2 flex mr-3">
-                                <label for="">Current Selection:<em></em></label>
-                                <p class="ml-4 font-bold">{{ patientsOption }}</p>
-                                <button type="button" class="ml-4 text-red-600" @click="removeDefaultSetting('Accounts','Merge Patients Ledgers in Reports',merge_patients)" v-if="merge_patients"><i class="fa fa-times" aria-hidden="true"></i></button>
-                            </div>
-                        </div>
-                        <div class="flex mb-6">
-                            <div class="basis-1/2 mr-3">
+                            <div class="basis-1/3 relative">
                                 <label for="">Merge Patients Ledgers in Reports:<em>*</em></label><br />
-                                <SearchableDropdown
-                                    :options="optionsArr"
-                                    :updateValue="selectedPatientsOption"
-                                    :dropdownWidth="ledgerDropdownWidth"
-                                    :searchPlaceholder="optionsPlaceholder"
-                                    @option-selected="handleSelectedPatientsOption"
-                                    @clearSearch="handleClearPatientsOption"
-                                />
-                                <button type="button" class="absolute ml-4 rounded px-2 bg-green-500 text-white" @click="saveDefaultSetting('Accounts','Merge Patients Ledgers in Reports',selectedPatientsOption,selectedPatientsOption)"><i class="fa fa-check"></i></button>
+                                <select  v-model="patientsOption" name="" class="bg-slate-50 rounded border border-gray-400 text-sm pl-2 pt-2 w-full">
+                                    <option value="Yes">Yes</option>
+                                    <option value="No">No</option>
+                                </select>
+                                <button type="button" class="absolute ml-4 rounded px-2 bg-green-500 text-white" @click="saveDefaultSetting('Accounts','Merge Patients Ledgers in Reports',patientsOption,patientsOption)"><i class="fa fa-check"></i></button>
                             </div>
                         </div>
                         <div class="flex mb-3">
-                            <div class="basis-1/2 flex mr-3">
-                                <label for="">Current Selection:<em></em></label>
-                                <p class="ml-4 font-bold">{{ debtorsOption }}</p>
-                                <button type="button" class="ml-4 text-red-600" @click="removeDefaultSetting('Accounts','Merge Debtors Ledgers in Reports',merge_debtors)" v-if="merge_debtors"><i class="fa fa-times" aria-hidden="true"></i></button>
-                            </div>
-                        </div>
-                        <div class="flex mb-6">
-                            <div class="basis-1/2 mr-3">
+                            <div class="basis-1/3 relative">
                                 <label for="">Merge Debtors Ledgers in Reports:<em>*</em></label><br />
-                                <SearchableDropdown
-                                    :options="optionsArr"
-                                    :updateValue="selectedDebtorsOption"
-                                    :dropdownWidth="ledgerDropdownWidth"
-                                    :searchPlaceholder="optionsPlaceholder"
-                                    @option-selected="handleSelectedDebtorsOption"
-                                    @clearSearch="handleClearDebtorsOption"
-                                />
-                                <button type="button" class="absolute ml-4 rounded px-2 bg-green-500 text-white" @click="saveDefaultSetting('Accounts','Merge Debtors Ledgers in Reports',selectedDebtorsOption,selectedDebtorsOption)"><i class="fa fa-check"></i></button>
+                                <select  v-model="debtorsOption" name="" class="bg-slate-50 rounded border border-gray-400 text-sm pl-2 pt-2 w-full">
+                                    <option value="Yes">Yes</option>
+                                    <option value="No">No</option>
+                                </select>
+                                <button type="button" class="absolute ml-4 rounded px-2 bg-green-500 text-white" @click="saveDefaultSetting('Accounts','Merge Debtors Ledgers in Reports',debtorsOption,debtorsOption)"><i class="fa fa-check"></i></button>
                             </div>
                         </div>
                         <div class="flex mb-3">
-                            <div class="basis-1/2 flex mr-3">
-                                <label for="">Current Selection:<em></em></label>
-                                <p class="ml-4 font-bold">{{ vendorsOption }}</p>
-                                <button type="button" class="ml-4 text-red-600" @click="removeDefaultSetting('Accounts','Merge Vendors Ledgers in Reports',merge_vendors)" v-if="merge_vendors"><i class="fa fa-times" aria-hidden="true"></i></button>
+                            <div class="basis-1/3 relative">
+                                <label for="">Merge Vendors Ledgers in Reports:<em>*</em></label><br />
+                                <select  v-model="vendorsOption" name="" class="bg-slate-50 rounded border border-gray-400 text-sm pl-2 pt-2 w-full">
+                                    <option value="Yes">Yes</option>
+                                    <option value="No">No</option>
+                                </select>
+                                <button type="button" class="absolute ml-4 rounded px-2 bg-green-500 text-white" @click="saveDefaultSetting('Accounts','Merge Vendors Ledgers in Reports',vendorsOption,vendorsOption)"><i class="fa fa-check"></i></button>
                             </div>
                         </div>
-                        <div class="flex mb-6">
-                            <div class="basis-1/4 mr-3">
-                                <label for="">Merge Vendors Ledgers in Reports:<em>*</em></label><br />
-                                <SearchableDropdown
-                                    :options="optionsArr"
-                                    :dropdownWidth="ledgerDropdownWidth"
-                                    :searchPlaceholder="optionsPlaceholder"
-                                    @option-selected="handleSelectedVendorsOption"
-                                    @clearSearch="handleClearVendorsOption"
-                                />
-                                <button type="button" class="absolute ml-4 rounded px-2 bg-green-500 text-white" @click="saveDefaultSetting('Accounts','Merge Vendors Ledgers in Reports',selectedVendorsOption,selectedVendorsOption)"><i class="fa fa-check"></i></button>
+                        <div class="flex mb-3">
+                            <div class="basis-1/3 relative">
+                                <label for="">Merge Tenants Ledgers in Reports:<em>*</em></label><br />
+                                <select  v-model="tenantsOption" name="" class="bg-slate-50 rounded border border-gray-400 text-sm pl-2 pt-2 w-full">
+                                    <option value="Yes">Yes</option>
+                                    <option value="No">No</option>
+                                </select>
+                                <button type="button" class="absolute ml-4 rounded px-2 bg-green-500 text-white" @click="saveDefaultSetting('Accounts','Merge Tenants Ledgers in Reports',tenantsOption,tenantsOption)"><i class="fa fa-check"></i></button>
                             </div>
                         </div>
                     </div>
@@ -517,6 +495,11 @@ export default defineComponent({
         const tenantCodePrefix = ref("");
         const tenantCodeCounter = ref(0);
 
+        const patientsOption = ref("");
+        const debtorsOption = ref("");
+        const vendorsOption = ref("");
+        const tenantsOption = ref("");
+
         const dropdownWidth = ref("320px");
         const incomePlaceholder = ref("Select Income A/c");
 
@@ -658,6 +641,14 @@ export default defineComponent({
                         tenantCodePrefix.value = response.data[i].setting_value_name;
                     }else if(response.data[i].setting_name === 'Tenant Code Zero Padding'){
                         tenantCodeCounter.value = response.data[i].setting_value_name;
+                    }else if(response.data[i].setting_name === 'Merge Patients Ledgers in Reports'){
+                        patientsOption.value = response.data[i].setting_value_name;
+                    }else if(response.data[i].setting_name === 'Merge Debtors Ledgers in Reports'){
+                        debtorsOption.value = response.data[i].setting_value_name;
+                    }else if(response.data[i].setting_name === 'Merge Vendors Ledgers in Reports'){
+                        vendorsOption.value = response.data[i].setting_value_name;
+                    }else if(response.data[i].setting_name === 'Merge Tenants Ledgers in Reports'){
+                        tenantsOption.value = response.data[i].setting_value_name;
                     }
                 }
             })
@@ -745,7 +736,8 @@ export default defineComponent({
             settings_settings_options, showHMSSettings, showPMSSettings, showAccountsSettings, showInventorySettings, showHRSettings, showSettingsSettings,
             dropdownWidth,incomePlaceholder, incomeLedgerArr, expenseLedgerArr, liabilityLedgerArr, cashbookLedgerArr, fetchIncomeLedgers, fetchExpenseLedgers,
             fetchCashbookLedgers, fetchLiabilityLedgers, rentalIncome, rentalSecurityDeposit, rentalLeaseIncome, rentalPenaltyIncome,
-            ledgerID,ledgerName, handleSelectedLedger, clearSelectedLedger, saveDefaultSetting, removeDefaultSetting, tenantCodePrefix, tenantCodeCounter
+            ledgerID,ledgerName, handleSelectedLedger, clearSelectedLedger, saveDefaultSetting, removeDefaultSetting, tenantCodePrefix, tenantCodeCounter,
+            patientsOption, debtorsOption, vendorsOption, tenantsOption
         }
     }
 });

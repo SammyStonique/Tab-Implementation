@@ -16,6 +16,7 @@
             :columns="tableColumns"
             :rows="receiptsList"
             :actions="actions"
+            :showTotals="showTotals"
             :idField="idField"
             @handleSelectionChange="handleSelectionChange"
             @handleActionClick="handleActionClick"
@@ -86,12 +87,13 @@ export default{
             {label: "Bank. Date", key: "banking_date"},
             {label: "Tenant Name", key:"tenant_name"},
             {label: "Property Name", key:"property_name"},
+            {label: "Cashbook", key:"cashbook"},
             {label: "Pay. Method", key:"payment_method"},
             {label: "Ref No", key:"reference_no"},
-            {label: "Amount", key:"total_amount"},
+            {label: "Amount", key:"total_amount", type:"number"},
             {label: "Done By", key:"done_by"},
         ])
-        
+        const showTotals = ref(true);
         const actions = ref([
             {name: 'delete', icon: 'fa fa-trash', title: 'Delete Receipt'},
         ])
@@ -342,7 +344,7 @@ export default{
             
         })
         return{
-            mainComponentKey, title, searchReceipts,resetFilters, addButtonLabel, searchFilters, tableColumns, receiptsList,
+            showTotals,mainComponentKey, title, searchReceipts,resetFilters, addButtonLabel, searchFilters, tableColumns, receiptsList,
             propResults, propArrLen, propCount, pageCount, showNextBtn, showPreviousBtn,
             loadPrev, loadNext, firstPage, lastPage, idField, actions, handleActionClick, propModalVisible, closeModal,
             submitButtonLabel, showModal, addNewReceipt, showLoader, loader, hideLoader, modal_loader, modal_top, modal_left, modal_width,displayButtons,

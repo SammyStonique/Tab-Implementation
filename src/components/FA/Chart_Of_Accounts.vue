@@ -388,6 +388,10 @@ export default{
         const customerLedger = ref(false);
         const tenant_ledger_totals = ref(0);
         const tenantLedger = ref(false);
+        const merge_patients_setting = ref('No');
+        const merge_vendors_setting = ref('No');
+        const merge_debtors_setting = ref('No');
+        const merge_tenants_setting = ref('No');
         const depResults = ref([]);
         const depArrLen = ref(0);
         const depCount = ref(0);
@@ -414,6 +418,7 @@ export default{
         ])
         const companyID = computed(()=> store.state.userData.company_id);
         const userID = computed(()=> store.state.userData.user_id);
+        const defaultSettings = computed(()=> store.state.Default_Settings.settingsList);
         const ledger_code_search = computed({
             get: () => store.state.Ledgers.ledger_code_search,
             set: (value) => store.commit('Ledgers/SET_SEARCH_FILTERS', {"ledger_code_search":value}),
@@ -434,6 +439,20 @@ export default{
                 options: [{text:'Income Statement',value:'Income Statement'},{text:'Balance Sheet',value:'Balance Sheet'}]
             },
         ]);
+        const fetchDefaultSettings = async() =>{
+            await store.dispatch('Default_Settings/fetchDefaultSettings', {company:companyID.value})
+            for(let i=0; i < defaultSettings.value.length; i++){
+                if(defaultSettings.value[i].setting_name === 'Merge Patients Ledgers in Reports'){
+                    merge_patients_setting.value = defaultSettings.value[i].setting_value_name;
+                }else if(defaultSettings.value[i].setting_name === 'Merge Debtors Ledgers in Reports'){
+                    merge_debtors_setting.value = defaultSettings.value[i].setting_value_name;
+                }else if(defaultSettings.value[i].setting_name === 'Merge Vendors Ledgers in Reports'){
+                    merge_vendors_setting.value = defaultSettings.value[i].setting_value_name;
+                }else if(defaultSettings.value[i].setting_name === 'Merge Tenants Ledgers in Reports'){
+                    merge_tenants_setting.value = defaultSettings.value[i].setting_value_name;
+                }
+            }
+        };
         const formFields = ref([]);
         const updateFormFields = () => {
             formFields.value = [
@@ -619,7 +638,6 @@ export default{
             }
             store.commit('pageTab/ADD_PAGE', {'FA':'Ledger_Details'});
             store.state.pageTab.faActiveTab = 'Ledger_Details'; 
-            // await store.dispatch('Ledgers/fetchClientJournals', formData)
             await store.dispatch('Ledgers/fetchLedger', formData1)
             await store.dispatch('Ledgers/updateState', {ledgerID: chartOfAccountsList.value[index].ledger_id })
         }
@@ -713,19 +731,19 @@ export default{
             .post(`api/v1/chart-of-accounts-search/?page=${currentPage.value}`,formData)
             .then((response)=>{
                 for(let i = response.data.results.length - 1; i >= 0; i--){
-                    if(response.data.results[i].ledger_category === "Patients"){
+                    if(response.data.results[i].ledger_category === "Patients" && merge_patients_setting.value === 'Yes'){
                         patient_ledger_totals.value += response.data.results[i].balance;
                         patientLedger.value = true;
                         response.data.results.splice(i, 1);
-                    }else if(response.data.results[i].ledger_category === "Vendors"){
+                    }else if(response.data.results[i].ledger_category === "Vendors" && merge_vendors_setting.value === 'Yes'){
                         vendor_ledger_totals.value += response.data.results[i].balance;
                         vendorLedger.value = true;
                         response.data.results.splice(i, 1);
-                    }else if(response.data.results[i].ledger_category === "Debtors"){
+                    }else if(response.data.results[i].ledger_category === "Debtors" && merge_debtors_setting.value === 'Yes'){
                         customer_ledger_totals.value += response.data.results[i].balance;
                         customerLedger.value = true;
                         response.data.results.splice(i, 1);
-                    }else if(response.data.results[i].ledger_category === "Tenants"){
+                    }else if(response.data.results[i].ledger_category === "Tenants" && merge_tenants_setting.value === 'Yes'){
                         tenant_ledger_totals.value += response.data.results[i].balance;
                         tenantLedger.value = true;
                         response.data.results.splice(i, 1);
@@ -820,7 +838,10 @@ export default{
         const resetFilters = () =>{
             store.commit('Ledgers/RESET_SEARCH_FILTERS')
             searchChartOfAccounts();
-        }
+        };
+        onBeforeMount(()=>{
+            fetchDefaultSettings();           
+        });
         onMounted(()=>{
             searchChartOfAccounts();
         })

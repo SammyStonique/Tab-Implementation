@@ -15,6 +15,7 @@
             :columns="tableColumns"
             :rows="invoicesList"
             :actions="actions"
+            :showTotals="showTotals"
             :idField="idField"
             @handleSelectionChange="handleSelectionChange"
             @handleActionClick="handleActionClick"
@@ -100,12 +101,12 @@ export default{
             {label: "Tenant Name", key:"tenant_name"},
             {label: "Property Name", key:"property_name"},
             {label: "Description", key:"description"},
-            {label: "Amount", key:"total_amount"},
-            {label: "Paid", key:"total_paid"},
-            {label: "Balance", key:"due_amount"},
+            {label: "Amount", key:"total_amount", type: "number"},
+            {label: "Paid", key:"total_paid", type: "number"},
+            {label: "Balance", key:"due_amount", type: "number"},
             {label: "Status", key:"status"},
         ])
-        
+        const showTotals = ref(true);
         const actions = ref([
             {name: 'delete', icon: 'fa fa-trash', title: 'Delete Invoice'},
         ])
@@ -442,7 +443,7 @@ export default{
             
         })
         return{
-            title, searchInvoices,resetFilters, addButtonLabel, searchFilters, tableColumns, invoicesList,
+            showTotals,title, searchInvoices,resetFilters, addButtonLabel, searchFilters, tableColumns, invoicesList,
             propResults, propArrLen, propCount, pageCount, showNextBtn, showPreviousBtn,invModalVisible,
             loadPrev, loadNext, firstPage, lastPage, idField, actions, handleActionClick, propModalVisible, closeModal,
             submitButtonLabel, showModal, bookInvoice, showLoader, loader, hideLoader, modal_loader, modal_top, modal_left, modal_width,displayButtons,

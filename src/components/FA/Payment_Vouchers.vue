@@ -94,6 +94,7 @@ export default{
             {label: "Date", key: "date"},
             {label: "Bank. Date", key: "banking_date"},
             {label: "Vendor Name", key:"customer_name"},
+            {label: "Cashbook", key:"cashbook"},
             {label: "Pay. Method", key:"payment_method"},
             {label: "Ref No", key:"reference_no"},
             {label: "Amount", key:"total_amount"},
@@ -101,7 +102,9 @@ export default{
         ])
         
         const actions = ref([
-            {name: 'delete', icon: 'fa fa-trash', title: 'Delete PV'},
+            {name: 'print', icon: 'fa fa-print', title: 'Print Voucher'},
+            {name: 'download', icon: 'fa fa-download', title: 'Download Voucher'},
+            {name: 'delete', icon: 'fa fa-trash', title: 'Delete Voucher'},
         ])
         const companyID = computed(()=> store.state.userData.company_id);
         const fetchVendors = async() =>{
@@ -301,6 +304,32 @@ export default{
                 await store.dispatch('Journals/deletePaymentVoucher',formData).
                 then(()=>{
                     searchPaymentVouchers();
+                })
+            }else if(action == 'print'){
+                showLoader();
+                const journalID = row['journal_id'];
+                let formData = {
+                    receipt: journalID,
+                    client: row['customer_id'],
+                    type: 'PMT',
+                    company: companyID.value
+                }
+                await store.dispatch('Journals/previewClientReceipt',formData).
+                then(()=>{
+                    hideLoader();
+                })
+            }else if(action == 'download'){
+                showLoader();
+                const journalID = row['journal_id'];
+                let formData = {
+                    receipt: journalID,
+                    client: row['customer_id'],
+                    type: 'PMT',
+                    company: companyID.value
+                }
+                await store.dispatch('Journals/downloadPaymentVoucher',formData).
+                then(()=>{
+                    hideLoader();
                 })
             }
         }
