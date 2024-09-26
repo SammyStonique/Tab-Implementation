@@ -26,6 +26,7 @@ import Prepayment_Allocations from './PMS/Prepayment_Allocations';
 import Statement_Transactions from './PMS/Statement_Transactions';
 import Property_Statements from './PMS/Property_Statements';
 import Tenant_Arrears from './PMS/Tenant_Arrears';
+import Lease_Fees from './PMS/Lease_Fees';
 
 import Client_Categories from './FA/Client_Categories';
 import Currencies from './FA/Currencies';
@@ -48,7 +49,7 @@ export default createStore({
     Appointments,Client_Categories,Departments,Patients_List,Medical_Fees,Doctors,
     
     Properties_List, Zones, Landlords_List, Units_List, Active_Tenants, Utilities,Security_Deposits,Variation_Periods, Tenant_Deposits,
-    Meter_Setup, Meter_Readings,Tenant_Prepayments,Prepayment_Allocations,Statement_Transactions,Property_Statements,Tenant_Arrears,
+    Meter_Setup, Meter_Readings,Tenant_Prepayments,Prepayment_Allocations,Statement_Transactions,Property_Statements,Tenant_Arrears,Lease_Fees,
 
     Ledgers, Currencies, Taxes, Journals, Customers, Vendors,Fiscal_Periods,
 
