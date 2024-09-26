@@ -3,15 +3,17 @@
         :key="pageComponentKey"
         :loader="loader" @showLoader="showLoader" @hideLoader="hideLoader"
         :addButtonLabel="addButtonLabel"
+        :showAddButton="showAddButton"
         :searchFilters="searchFilters"
         @searchPage="searchTaxTransactions"
         @resetFilters="resetFilters"
         @removeItem=""
         @removeSelectedItems=""
-        @printList="printList"
+        @printList="printTransactionsList"
         :columns="tableColumns"
         :rows="transactionsList"
         :actions="actions"
+        :showTotals="showTotals"
         :idField="idField"
         @handleSelectionChange="handleSelectionChange"
         @handleActionClick="handleActionClick"
@@ -43,6 +45,7 @@ import PageComponent from "../PageComponent.vue";
 import MovableModal from '@/components/MovableModal.vue'
 import DynamicForm from '../NewDynamicForm.vue';
 import { useToast } from "vue-toastification";
+import PrintJS from 'print-js';
 
 export default{
     name: 'Vat_Transactions',
@@ -56,6 +59,7 @@ export default{
         const loader = ref('');
         const modal_loader = ref('none');
         const addButtonLabel = ref('');
+        const showAddButton = ref(false);
         const pageComponentKey = ref(0);
         const title = ref('Vat Transaction');
         const companyID = computed(()=> store.state.userData.company_id);
@@ -85,8 +89,9 @@ export default{
             {label: "Invoice#", key:"invoice_no",type: "text", editable: false},
             {label: "Description", key:"description",type: "text", editable: false},
             {label: "Rate", key: "tax_rate", type: "text", editable: false},
-            {label: "Amount", key:"amount",type: "text", editable: false},
+            {label: "Amount", key:"amount",type: "number", editable: false},
         ])
+        const showTotals = ref(true);
         const actions = ref([
             {name: 'delete', icon: 'fa fa-trash', title: 'Delete Tax Transaction'},
         ])
@@ -238,16 +243,46 @@ export default{
         const fetchTaxes = async() =>{
             await store.dispatch('Taxes/fetchTaxes', {company:companyID.value})
         };
+        const printTransactionsList = () =>{
+            showLoader();
+
+            let formData = {
+                tax_type: "VAT",
+                tax_category: tax_category_search.value,
+                tax_inclusivity: tax_inclusivity_search.value,
+                invoice_no: invoice_no_search.value,
+                date_from: date_from_search.value,
+                date_to: date_to_search.value,
+                company_id: companyID.value
+            } 
+
+            axios
+            .post("api/v1/export-tax-transactions-pdf/", formData, { responseType: 'blob' })
+                .then((response)=>{
+                    if(response.status == 200){
+                        const blob1 = new Blob([response.data]);
+                        // Convert blob to URL
+                        const url = URL.createObjectURL(blob1);
+                        PrintJS({printable: url, type: 'pdf'});
+                    }
+                })
+            .catch((error)=>{
+                console.log(error.message);
+            })
+            .finally(()=>{
+                hideLoader();
+            })
+        }
         onMounted(() =>{
             fetchTaxes();
             searchTaxTransactions();
         })
         return{
-            title, searchTaxTransactions, idField, selectedIds, actions, transactionsList, appArrLen,appCount,appResults,appModalVisible,formFields,
+            showAddButton,showTotals,title, searchTaxTransactions, idField, selectedIds, actions, transactionsList, appArrLen,appCount,appResults,appModalVisible,formFields,
             addButtonLabel, searchFilters,tableColumns,resetFilters,loadPrev,loadNext,firstPage,lastPage,
             showNextBtn,showPreviousBtn, handleActionClick,displayButtons,handleReset,
             modal_top, modal_left, modal_width, showLoader, loader, hideLoader, modal_loader, showModalLoader, hideModalLoader,
-            closeModal, handleSelectionChange, pageComponentKey, flex_basis, flex_basis_percentage,
+            closeModal, handleSelectionChange, pageComponentKey, flex_basis, flex_basis_percentage,printTransactionsList
         }
     }
 }

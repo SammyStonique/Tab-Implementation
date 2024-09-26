@@ -12,6 +12,8 @@
             @removeItem="removeInvoice"
             @removeSelectedItems="removeInvoices"
             @printList="printInvoiceList"
+            :addingRight="addingRight"
+            :rightsModule="rightsModule"
             :columns="tableColumns"
             :rows="invoicesList"
             :actions="actions"
@@ -61,6 +63,8 @@ export default{
         const toast = useToast();
         const { getYear } = useDateFormatter();
         const { getMonth } = useDateFormatter();
+        const addingRight = ref('Adding Invoice');
+        const rightsModule = ref('Accounts');
         const current_date = new Date();
         const loader = ref('none');
         const modal_loader = ref('none');
@@ -104,9 +108,9 @@ export default{
         ])
         const showTotals = ref(true);
         const actions = ref([
-            {name: 'print', icon: 'fa fa-print', title: 'Print Invoice'},
-            {name: 'download', icon: 'fa fa-download', title: 'Download Invoice'},
-            {name: 'delete', icon: 'fa fa-trash', title: 'Delete Invoice'},
+            {name: 'print', icon: 'fa fa-print', title: 'Print Invoice', rightName: 'Print Invoice'},
+            {name: 'download', icon: 'fa fa-download', title: 'Download Invoice', rightName: 'Print Invoice'},
+            {name: 'delete', icon: 'fa fa-trash', title: 'Delete Invoice',rightName: 'Deleting Invoice'},
         ])
         const companyID = computed(()=> store.state.userData.company_id);
         const fetchCustomers = async() =>{
@@ -401,7 +405,8 @@ export default{
             loadPrev, loadNext, firstPage, lastPage, idField, actions, handleActionClick, propModalVisible, closeModal,
             submitButtonLabel, showModal, showLoader, loader, hideLoader, modal_loader, modal_top, modal_left, modal_width,displayButtons,
             showModalLoader, hideModalLoader, formFields, handleSelectionChange, flex_basis,flex_basis_percentage,
-            removeInvoice, removeInvoices, dropdownOptions, handleDynamicOption, addNewInvoice, printInvoiceList
+            removeInvoice, removeInvoices, dropdownOptions, handleDynamicOption, addNewInvoice, printInvoiceList,
+            addingRight,rightsModule
         }
     }
 };

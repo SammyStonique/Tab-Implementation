@@ -11,6 +11,8 @@
             @removeItem="removeUtility"
             @removeSelectedItems="removeUtilities"
             @printList="printList"
+            :addingRight="addingRight"
+            :rightsModule="rightsModule"
             :columns="tableColumns"
             :rows="utilityList"
             :actions="actions"
@@ -58,6 +60,8 @@ export default{
         const modal_loader = ref('none');
         const idField = 'utility_id';
         const addButtonLabel = ref('New Utility');
+        const addingRight = ref('Adding Utilities');
+        const rightsModule = ref('PMS');
         const title = ref('Utility Details');
         const submitButtonLabel = ref('Add');
         const ledComponentKey = ref(0);
@@ -92,8 +96,8 @@ export default{
             {label: "Posting Account", key:"posting_account_name"},
         ])
         const actions = ref([
-            {name: 'edit', icon: 'fa fa-edit', title: 'Edit Utility'},
-            {name: 'delete', icon: 'fa fa-trash', title: 'Delete Utility'},
+            {name: 'edit', icon: 'fa fa-edit', title: 'Edit Utility', rightName: 'Editing Utilities'},
+            {name: 'delete', icon: 'fa fa-trash', title: 'Delete Utility', rightName: 'Deleting Utilities'},
         ])
         const companyID = computed(()=> store.state.userData.company_id);
         const name_search = computed({
@@ -424,7 +428,7 @@ export default{
             loadPrev, loadNext, firstPage, lastPage, idField, actions, handleActionClick, propModalVisible, closeModal,
             submitButtonLabel, showModal, addNewUtility, showLoader, loader, hideLoader, modal_loader, modal_top, modal_left, modal_width,displayButtons,
             showModalLoader, hideModalLoader, saveUtility, formFields, handleSelectionChange, flex_basis,flex_basis_percentage,
-            importUtilities, removeUtility, removeUtilities
+            importUtilities, removeUtility, removeUtilities,addingRight,rightsModule
         }
     }
 };

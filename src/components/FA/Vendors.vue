@@ -10,7 +10,9 @@
             @importData="importVendors"
             @removeItem="removeVendor"
             @removeSelectedItems="removeVendors"
-            @printList="printList"
+            @printList="printVendorsList"
+            :addingRight="addingRight"
+            :rightsModule="rightsModule"
             :columns="tableColumns"
             :rows="vendorList"
             :actions="actions"
@@ -45,6 +47,7 @@ import MovableModal from '@/components/MovableModal.vue'
 import DynamicForm from '../NewDynamicForm.vue';
 import { useStore } from "vuex";
 import { useToast } from "vue-toastification";
+import PrintJS from 'print-js';
 
 export default{
     name: 'Vendors',
@@ -58,6 +61,8 @@ export default{
         const modal_loader = ref('none');
         const idField = 'vendor_id';
         const addButtonLabel = ref('New Vendor');
+        const addingRight = ref('Adding Vendor');
+        const rightsModule = ref('Accounts');
         const title = ref('Vendor Details');
         const submitButtonLabel = ref('Add');
         const selectedIds = ref([]);
@@ -97,9 +102,9 @@ export default{
             {label: "Address", key:"invoicing_address"},
         ])
         const actions = ref([
-            {name: 'edit', icon: 'fa fa-edit', title: 'Edit Vendor'},
-            {name: 'view', icon: 'fa fa-file-pdf-o', title: 'View Statement'},
-            {name: 'delete', icon: 'fa fa-trash', title: 'Delete Vendor'},
+            {name: 'edit', icon: 'fa fa-edit', title: 'Edit Vendor', rightName: 'Editing Vendor'},
+            {name: 'view', icon: 'fa fa-file-pdf-o', title: 'View Statement', rightName: 'View Vendor Statement'},
+            {name: 'delete', icon: 'fa fa-trash', title: 'Delete Vendor', rightName: 'Deleting Vendor'},
         ])
         const companyID = computed(()=> store.state.userData.company_id);
         
@@ -461,6 +466,32 @@ export default{
         const closeModal = () =>{
             propModalVisible.value = false;
         }
+        const printVendorsList = () =>{
+            showLoader();
+
+            let formData = {
+                vendor_name: vendor_name_search.value,
+                vendor_code: vendor_code_search.value,
+                category: categorySearchID.value,
+                company_id: companyID.value
+            }
+            axios
+            .post("api/v1/export-vendors-pdf/", formData, { responseType: 'blob' })
+            .then((response)=>{
+                if(response.status == 200){
+                    const blob1 = new Blob([response.data]);
+                    // Convert blob to URL
+                    const url = URL.createObjectURL(blob1);
+                    PrintJS({printable: url, type: 'pdf'});
+                }
+            })
+            .catch((error)=>{
+                console.log(error.message);
+            })
+            .finally(()=>{
+                hideLoader();
+            })
+        }
         onBeforeMount(()=>{
             searchVendors();
             
@@ -471,7 +502,7 @@ export default{
             loadPrev, loadNext, firstPage, lastPage, idField, actions, handleActionClick, propModalVisible, closeModal,
             submitButtonLabel, showModal, addNewVendor, showLoader, loader, hideLoader, modal_loader, modal_top, modal_left, modal_width,displayButtons,
             showModalLoader, hideModalLoader, saveVendor, formFields, handleSelectionChange, flex_basis,flex_basis_percentage,
-            importVendors, removeVendor, removeVendors, handleReset,
+            importVendors, removeVendor, removeVendors, handleReset,printVendorsList,addingRight,rightsModule
         }
     }
 };

@@ -8,10 +8,13 @@
         @searchPage="searchPrepayments"
         @resetFilters="resetFilters"
         @printList="printList"
+        :addingRight="addingRight"
+        :rightsModule="rightsModule"
         :columns="tableColumns"
         :rows="prepaymentsList"
         :actions="actions"
         :idField="idField"
+        :showTotals="showTotals"
         @handleSelectionChange="handleSelectionChange"
         @handleActionClick="handleActionClick"
         :count="appCount"
@@ -55,6 +58,8 @@ export default{
         const loader = ref('');
         const modal_loader = ref('none');
         const addButtonLabel = ref('Allocations');
+        const addingRight = ref('View Prepayment Allocations');
+        const rightsModule = ref('PMS');
         const pageComponentKey = ref(0);
         const invComponentKey = ref(0);
         const title = ref('Prepayment Allocation');
@@ -91,12 +96,13 @@ export default{
             {label: "Code", key:"tenant_code",type: "text", editable: false},
             {label: "Tenant Name", key:"tenant_name",type: "text", editable: false},
             {label: "Receipt", key:"receipt_no",type: "text", editable: false},
-            {label: "Amount", key: "total_amount", type: "text", editable: false},
-            {label: "Allocated", key: "allocated_amount", type: "text", editable: false},
-            {label: "Balance", key: "due_amount", type: "text", editable: false},
+            {label: "Amount", key: "total_amount", type: "number", editable: false},
+            {label: "Allocated", key: "allocated_amount", type: "number", editable: false},
+            {label: "Balance", key: "due_amount", type: "number", editable: false},
         ])
+        const showTotals = ref(true);
         const actions = ref([
-            {name: 'allocate', icon: 'fa fa-exchange-alt', title: 'Allocate Prepayment'},
+            {name: 'allocate', icon: 'fa fa-exchange-alt', title: 'Allocate Prepayment', rightName: 'Allocate Prepayment'},
         ])
         const tenant_name_search = computed({
             get: () => store.state.Tenant_Prepayments.tenant_name_search,
@@ -329,11 +335,12 @@ export default{
             searchPrepayments();
         })
         return{
-            title, searchPrepayments, idField, selectedIds, actions, prepaymentsList, appArrLen,appCount,appResults,appModalVisible,formFields,
+            showTotals,title, searchPrepayments, idField, selectedIds, actions, prepaymentsList, appArrLen,appCount,appResults,appModalVisible,formFields,
             addButtonLabel, searchFilters,tableColumns,resetFilters,loadPrev,loadNext,firstPage,lastPage,
             showNextBtn,showPreviousBtn, handleActionClick,allocatePrepayment,displayButtons,handleReset,
             modal_top, modal_left, modal_width, showLoader, loader, hideLoader, modal_loader, showModalLoader, hideModalLoader,
-            closeModal, handleSelectionChange, pageComponentKey, flex_basis, flex_basis_percentage, prepaymentAllocations
+            closeModal, handleSelectionChange, pageComponentKey, flex_basis, flex_basis_percentage, prepaymentAllocations,
+            addingRight,rightsModule
         }
     }
 }

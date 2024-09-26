@@ -47,11 +47,11 @@
           </td>
           <td class="actions flex gap-2 border-0" v-if="showActions">
             <div v-for="action in actions">
-              <button @click.stop="handleAction(rowIndex,action.name, row)" :title="action.title"><i :class="action.icon"></i></button>
+              <button :class="{ 'disabled': isDisabled(`${action.rightName}`) }" @click.stop="handleAction(rowIndex,action.name,action.rightName, row)" :title="action.title"><i :class="action.icon"></i></button>
             </div>
           </td>
         </tr>
-        <tr class="font-bold text-xs" v-if="showTotals">
+        <tr class="font-bold text-xs" v-if="showTotals && rows.length">
           <td v-for="(column, colIndex) in columns" :key="colIndex" :class="[{'ellipsis': column.maxWidth}, { 'max-width': column.maxWidth }, { 'min-width': column.minWidth }]">
               <template v-if="column.type === 'number'">
                   {{ Number(calculateColumnTotal(column.key)).toLocaleString() }}
@@ -68,6 +68,8 @@
 
 <script>
 import { defineComponent, ref, onMounted, computed} from 'vue';
+import axios from "axios";
+import { useStore } from "vuex";
 
 export default defineComponent({
   name: 'DynamicTable',
@@ -98,13 +100,21 @@ export default defineComponent({
       type: Boolean,
       default: () => false,
       required: false
-    }
+    },
+    rightsModule:{
+      type: String,
+      default: () => ''
+    },
   },
   emits : ['row-db-click', 'action-click','selection-changed', 'update-receipt-amount'],
   setup(props, { emit }) {
 
     const tableRef = ref(null);
     const selectedIds = ref([]);
+    const store = useStore(); 
+    const allowedRights = ref([]);
+    const companyID = computed(()=> store.state.userData.company_id);
+    const userID = computed(()=> store.state.userData.user_id);
 
     // Initialize selected state for each row
     props.rows.forEach(row => {
@@ -115,8 +125,10 @@ export default defineComponent({
       emit('row-db-click', row);
     };
 
-    const handleAction = (rowIndex, action, row) => {
-      emit('action-click', rowIndex, action, row);
+    const handleAction = (rowIndex, action, right, row) => {
+      if(!isDisabled(right) ){
+        emit('action-click', rowIndex, action, row);
+      }
     }
 
     const toggleSelectAll = (event) => {
@@ -224,7 +236,28 @@ export default defineComponent({
         row.bal_after_alloc = 0;
       }
       emit('update-receipt-amount', paymentAllocation)
-    }
+    };
+
+    const fetchEnabledRights = () =>{
+        allowedRights.value = [];
+        let formData = {
+          user: userID.value,
+          company: companyID.value,
+          module: props.rightsModule
+        }
+        axios
+        .post("api/v1/user-permissions-search/",formData)
+        .then((response)=>{
+          allowedRights.value = response.data.results;
+        })
+        .catch((error)=>{
+          console.log(error.message);
+        })
+      };
+      const isDisabled =(permissionName) =>{
+          const permission = allowedRights.value.find(p => p.permission_name === permissionName);
+          return permission ? !permission.right_status : true;
+      };
 
     onMounted(() => {
       // Optional: Adjust column widths programmatically if needed
@@ -234,17 +267,22 @@ export default defineComponent({
         const tds = table.querySelectorAll('tbody td');
         // Logic to ensure column widths are consistent
       }
+      fetchEnabledRights();
     });
 
     return {
       handleRowClick, handleAction, handleChange, getNestedValue, handleInputChange,
-      tableRef, toggleSelectAll, selectedIds, allSelected, updateSelectedIds, calculateColumnTotal
+      tableRef, toggleSelectAll, selectedIds, allSelected, updateSelectedIds, calculateColumnTotal,isDisabled
     };
   }
 });
 </script>
 
 <style scoped>
+.disabled {
+  opacity: 0.5;
+  pointer-events: none;
+}
 input {
   width: 100%;
   box-sizing: border-box;

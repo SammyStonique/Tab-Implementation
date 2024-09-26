@@ -5,11 +5,12 @@
             <div class="fixed bg-white w-[93%] z-50">
                 <FilterBar 
                     :addButtonLabel="addButtonLabel" 
+                    :showAddButton="showAddButton"
                     :filters="searchFilters" 
                     @add-new=""
                     @search="searchBalanceSheet"
                     @reset="resetFilters"
-                    @printList="printList"
+                    @printList="printBalanceSheet"
                     :dropdownOptions="dropdownOptions"
                     @handleDynamicOption="handleDynamicOption"
                     :options="options"
@@ -87,6 +88,7 @@ import DynamicTable from '../DynamicTable.vue';
 import FilterBar from "../FilterBar.vue";
 import { useStore } from "vuex";
 import { useToast } from "vue-toastification";
+import PrintJS from 'print-js';
 
 export default{
     name: 'Balance_Sheet',
@@ -100,6 +102,7 @@ export default{
         const modal_loader = ref('none');
         const idField = '';
         const addButtonLabel = ref('');
+        const showAddButton = ref(false);
         const title = ref('');
         const submitButtonLabel = ref('Add');
         const periodComponentKey = ref(0);
@@ -291,7 +294,39 @@ export default{
             })
         }
         const resetFilters = () =>{
+            from_date_search.value = "";
+            to_date_search.value = "";
             searchBalanceSheet();
+        };
+        const printBalanceSheet = () =>{
+            showLoader();
+
+            let formData = {
+                merge_patients_setting: merge_patients_setting.value,
+                merge_debtors_setting: merge_debtors_setting.value,
+                merge_vendors_setting: merge_vendors_setting.value,
+                merge_tenants_setting: merge_tenants_setting.value,
+                date_from: from_date_search.value,
+                date_to: to_date_search.value,
+                company_id: companyID.value
+            } 
+   
+            axios
+            .post("api/v1/export-balance-sheet-pdf/", formData, { responseType: 'blob' })
+                .then((response)=>{
+                    if(response.status == 200){
+                        const blob1 = new Blob([response.data]);
+                        // Convert blob to URL
+                        const url = URL.createObjectURL(blob1);
+                        PrintJS({printable: url, type: 'pdf'});
+                    }
+                })
+            .catch((error)=>{
+                console.log(error.message);
+            })
+            .finally(()=>{
+                hideLoader();
+            })
         }
 
         onBeforeMount(()=>{
@@ -301,11 +336,12 @@ export default{
             searchBalanceSheet();
         })
         return{
-            title, searchBalanceSheet,resetFilters, addButtonLabel, searchFilters, periodList,
+            showAddButton,title, searchBalanceSheet,resetFilters, addButtonLabel, searchFilters, periodList,
             idField, actions, propModalVisible,
             submitButtonLabel, showModal, showLoader, loader, hideLoader, modal_loader, modal_top, modal_left, modal_width,displayButtons,
             showModalLoader, hideModalLoader, formFields, handleSelectionChange, flex_basis,flex_basis_percentage,
-            patient_ledger_totals,customer_ledger_totals,vendor_ledger_totals,assetTotals,liabilitiesTotals,balanceSheetList,assetsList,liabilitiesList
+            patient_ledger_totals,customer_ledger_totals,vendor_ledger_totals,assetTotals,liabilitiesTotals,balanceSheetList,assetsList,liabilitiesList,
+            printBalanceSheet
         }
     }
 };

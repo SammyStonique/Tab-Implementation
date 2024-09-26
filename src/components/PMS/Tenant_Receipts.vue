@@ -13,6 +13,8 @@
             @removeItem="removeReceipt"
             @removeSelectedItems="removeReceipts"
             @printList="printList"
+            :addingRight="addingRight"
+            :rightsModule="rightsModule"
             :columns="tableColumns"
             :rows="receiptsList"
             :actions="actions"
@@ -53,6 +55,8 @@ export default{
         const mainComponentKey = ref(0);
         const idField = 'journal_id';
         const addButtonLabel = ref('New Receipt');
+        const addingRight = ref('Adding Tenant Receipt');
+        const rightsModule = ref('PMS');
         const submitButtonLabel = ref('Add');
         const title = ref('Receipt Reversal');
         const modal_top = ref('150px');
@@ -95,7 +99,9 @@ export default{
         ])
         const showTotals = ref(true);
         const actions = ref([
-            {name: 'delete', icon: 'fa fa-trash', title: 'Delete Receipt'},
+            {name: 'print', icon: 'fa fa-print', title: 'Print Receipt', rightName: 'Print Tenant Receipt'},
+            {name: 'download', icon: 'fa fa-download', title: 'Download Receipt', rightName: 'Print Tenant Receipt'},
+            {name: 'delete', icon: 'fa fa-trash', title: 'Delete Receipt', rightName: 'Deleting Tenant Receipt'},
         ])
         const companyID = computed(()=> store.state.userData.company_id);
         const fetchProperties = async() =>{
@@ -349,7 +355,7 @@ export default{
             loadPrev, loadNext, firstPage, lastPage, idField, actions, handleActionClick, propModalVisible, closeModal,
             submitButtonLabel, showModal, addNewReceipt, showLoader, loader, hideLoader, modal_loader, modal_top, modal_left, modal_width,displayButtons,
             showModalLoader, hideModalLoader, handleSelectionChange, flex_basis,flex_basis_percentage,
-            removeReceipt, removeReceipts, dropdownOptions, handleDynamicOption
+            removeReceipt, removeReceipts, dropdownOptions, handleDynamicOption,addingRight,rightsModule
         }
     }
 };

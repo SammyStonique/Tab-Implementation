@@ -11,10 +11,13 @@
             @resetFilters="resetFilters"
             @removeItem="removeReceipt"
             @removeSelectedItems="removeReceipts"
-            @printList="printList"
+            @printList="printReceiptsList"
+            :addingRight="addingRight"
+            :rightsModule="rightsModule"
             :columns="tableColumns"
             :rows="receiptsList"
             :actions="actions"
+            :showTotals="showTotals"
             :idField="idField"
             @handleSelectionChange="handleSelectionChange"
             @handleActionClick="handleActionClick"
@@ -48,6 +51,7 @@ import DynamicForm from '../NewDynamicForm.vue';
 import { useStore } from "vuex";
 import { useToast } from "vue-toastification";
 import { useDateFormatter } from '@/composables/DateFormatter';
+import PrintJS from 'print-js';
 
 export default{
     name: 'General_Receipts',
@@ -59,7 +63,8 @@ export default{
         const toast = useToast();
         const { getYear } = useDateFormatter();
         const { getMonth } = useDateFormatter();
-        const current_date = new Date();
+        const addingRight = ref('Adding Receipt');
+        const rightsModule = ref('Accounts');
         const loader = ref('none');
         const modal_loader = ref('none');
         const idField = 'journal_id';
@@ -97,14 +102,14 @@ export default{
             {label: "Cashbook", key:"cashbook"},
             {label: "Pay. Method", key:"payment_method"},
             {label: "Ref No", key:"reference_no"},
-            {label: "Amount", key:"total_amount"},
+            {label: "Amount", key:"total_amount", type:"number"},
             {label: "Done By", key:"done_by"},
         ])
-        
+        const showTotals = ref(true);
         const actions = ref([
-            {name: 'print', icon: 'fa fa-print', title: 'Print Receipt'},
-            {name: 'download', icon: 'fa fa-download', title: 'Download Receipt'},
-            {name: 'delete', icon: 'fa fa-trash', title: 'Delete Receipt'},
+            {name: 'print', icon: 'fa fa-print', title: 'Print Receipt', rightName: 'Print Receipt'},
+            {name: 'download', icon: 'fa fa-download', title: 'Download Receipt', rightName: 'Print Receipt'},
+            {name: 'delete', icon: 'fa fa-trash', title: 'Delete Receipt', rightName: 'Deleting Receipt'},
         ])
         const companyID = computed(()=> store.state.userData.company_id);
         const fetchCustomers = async() =>{
@@ -346,18 +351,50 @@ export default{
                 store.commit('pageTab/ADD_PAGE', {'PMS':'Batch_Readings'})
                 store.state.pageTab.faActiveTab = 'Batch_Readings';
             }
+        };
+        const printReceiptsList = () =>{
+            showLoader();
+
+            let formData = {
+                journal_no: "",
+                reference_no: "",
+                client: "",
+                client_category: "Customers",
+                payment_method: "",
+                txn_type: "RCPT",
+                date_from: from_date_search.value,
+                date_to: to_date_search.value,
+                company_id: companyID.value,
+            }
+            axios
+            .post("api/v1/export-clients-receipts-pdf/", formData, { responseType: 'blob' })
+            .then((response)=>{
+                if(response.status == 200){
+                    const blob1 = new Blob([response.data]);
+                    // Convert blob to URL
+                    const url = URL.createObjectURL(blob1);
+                    PrintJS({printable: url, type: 'pdf'});
+                }
+            })
+            .catch((error)=>{
+                console.log(error.message);
+            })
+            .finally(()=>{
+                hideLoader();
+            })
         }
         onBeforeMount(()=>{
             searchReceipts();
             
         })
         return{
-            title, searchReceipts,resetFilters, addButtonLabel, searchFilters, tableColumns, receiptsList,
+            showTotals,title, searchReceipts,resetFilters, addButtonLabel, searchFilters, tableColumns, receiptsList,
             propResults, propArrLen, propCount, pageCount, showNextBtn, showPreviousBtn,invModalVisible,
             loadPrev, loadNext, firstPage, lastPage, idField, actions, handleActionClick, propModalVisible, closeModal,
             submitButtonLabel, showModal, showLoader, loader, hideLoader, modal_loader, modal_top, modal_left, modal_width,displayButtons,
             showModalLoader, hideModalLoader, handleSelectionChange, flex_basis,flex_basis_percentage,
-            removeReceipt, removeReceipts, dropdownOptions, handleDynamicOption, addNewReceipt
+            removeReceipt, removeReceipts, dropdownOptions, handleDynamicOption, addNewReceipt, printReceiptsList,
+            addingRight,rightsModule
         }
     }
 };

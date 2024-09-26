@@ -10,6 +10,8 @@
             @removeItem="removeMeterSetup"
             @removeSelectedItems="removeMeterSetups"
             @printList="printList"
+            :addingRight="addingRight"
+            :rightsModule="rightsModule"
             :columns="tableColumns"
             :rows="setupList"
             :actions="actions"
@@ -57,6 +59,8 @@ export default{
         const modal_loader = ref('none');
         const idField = 'meter_setup_id';
         const addButtonLabel = ref('New Setup');
+        const addingRight = ref('Adding Meter Reading Setup');
+        const rightsModule = ref('PMS');
         const title = ref('Setup Details');
         const submitButtonLabel = ref('Add');
         const utilComponentKey = ref(0);
@@ -99,8 +103,8 @@ export default{
             {label: "Meter Rent", key:"meter_rent"},
         ])
         const actions = ref([
-            {name: 'edit', icon: 'fa fa-edit', title: 'Edit Setup'},
-            {name: 'delete', icon: 'fa fa-trash', title: 'Delete Setup'},
+            {name: 'edit', icon: 'fa fa-edit', title: 'Edit Setup', rightName: 'Editing Meter Reading Setup'},
+            {name: 'delete', icon: 'fa fa-trash', title: 'Delete Setup', rightName: 'Deleting Meter Reading Setup'},
         ])
         const companyID = computed(()=> store.state.userData.company_id);
         const fetchProperties = async() =>{
@@ -491,7 +495,7 @@ export default{
             loadPrev, loadNext, firstPage, lastPage, idField, actions, handleActionClick, propModalVisible, closeModal,
             submitButtonLabel, showModal, addNewSetup, showLoader, loader, hideLoader, modal_loader, modal_top, modal_left, modal_width,displayButtons,
             showModalLoader, hideModalLoader, saveMeterSetup, formFields, handleSelectionChange, flex_basis,flex_basis_percentage,
-            removeMeterSetup, removeMeterSetups
+            removeMeterSetup, removeMeterSetups,addingRight,rightsModule
         }
     }
 };

@@ -3,13 +3,15 @@
         <PageComponent 
             :loader="loader" @showLoader="showLoader" @hideLoader="hideLoader"
             :addButtonLabel="addButtonLabel"
+            :showAddButton="showAddButton"
             @handleAddNew=""
             :searchFilters="searchFilters"
             :dropdownOptions="dropdownOptions"
             @handleDynamicOption="handleDynamicOption"
             @searchPage="searchTrialBalance"
             @resetFilters="resetFilters"
-            @printList="printList"
+            @printList="printTrialBalance"
+            :rightsModule="rightsModule"
             :columns="tableColumns"
             :rows="trialBalanceList"
             :actions="actions"
@@ -38,6 +40,7 @@ import DynamicForm from '../NewDynamicForm.vue';
 import { useStore } from "vuex";
 import { useToast } from "vue-toastification";
 import { useDateFormatter } from '@/composables/DateFormatter';
+import PrintJS from 'print-js';
 
 export default{
     name: 'Trial_Balance',
@@ -51,8 +54,10 @@ export default{
         const { getMonth } = useDateFormatter();
         const loader = ref('none');
         const modal_loader = ref('none');
+        const rightsModule = ref('Accounts');
         const idField = 'ledger_id';
         const addButtonLabel = ref('');
+        const showAddButton = ref(false);
         const submitButtonLabel = ref('Add');
         const title = ref('Invoice Booking');
         const invModalVisible = ref(false);
@@ -90,7 +95,7 @@ export default{
         ])
         const showTotals = ref(true);
         const actions = ref([
-            {name: 'view', icon: 'fa fa-file-pdf-o', title: 'View Ledger Details'},
+            {name: 'view', icon: 'fa fa-file-pdf-o', title: 'View Ledger Details', rightName: 'View Ledger Statement'},
         ])
         const companyID = computed(()=> store.state.userData.company_id);
         const defaultSettings = computed(()=> store.state.Default_Settings.settingsList);
@@ -371,6 +376,34 @@ export default{
                 store.state.pageTab.faActiveTab = 'Batch_Readings';
             }
         }
+        const printTrialBalance = () =>{
+            showLoader();
+
+            let formData = {
+                ledger_code: ledger_code_search.value,
+                ledger_name: ledger_name_search.value,
+                date_from: from_date_search.value,
+                date_to: to_date_search.value,
+                company_id: companyID.value
+            } 
+   
+            axios
+            .post("api/v1/export-trial-balance-pdf/", formData, { responseType: 'blob' })
+                .then((response)=>{
+                    if(response.status == 200){
+                        const blob1 = new Blob([response.data]);
+                        // Convert blob to URL
+                        const url = URL.createObjectURL(blob1);
+                        PrintJS({printable: url, type: 'pdf'});
+                    }
+                })
+            .catch((error)=>{
+                console.log(error.message);
+            })
+            .finally(()=>{
+                hideLoader();
+            })
+        }
         onBeforeMount(()=>{
             fetchDefaultSettings();           
         })
@@ -378,11 +411,11 @@ export default{
             searchTrialBalance();
         })
         return{
-            showTotals,title, searchTrialBalance,resetFilters, addButtonLabel, searchFilters, tableColumns, trialBalanceList,
+            showAddButton,showTotals,title, searchTrialBalance,resetFilters, addButtonLabel, searchFilters, tableColumns, trialBalanceList,
             invModalVisible, idField, actions, handleActionClick, propModalVisible, closeModal,
             submitButtonLabel, showModal, showLoader, loader, hideLoader, modal_loader, modal_top, modal_left, modal_width,displayButtons,
             showModalLoader, hideModalLoader, formFields, handleSelectionChange, flex_basis,flex_basis_percentage,
-             dropdownOptions, handleDynamicOption,
+             dropdownOptions, handleDynamicOption,printTrialBalance,rightsModule
         }
     }
 };

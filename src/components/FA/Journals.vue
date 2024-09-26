@@ -11,10 +11,13 @@
             @resetFilters="resetFilters"
             @removeItem="removeJournal"
             @removeSelectedItems="removeJournals"
-            @printList="printList"
+            @printList="printJournalsList"
+            :addingRight="addingRight"
+            :rightsModule="rightsModule"
             :columns="tableColumns"
             :rows="journalsList"
             :actions="actions"
+            :showTotals="showTotals"
             :idField="idField"
             @handleSelectionChange="handleSelectionChange"
             @handleActionClick="handleActionClick"
@@ -48,6 +51,7 @@ import DynamicForm from '../NewDynamicForm.vue';
 import { useStore } from "vuex";
 import { useToast } from "vue-toastification";
 import { useDateFormatter } from '@/composables/DateFormatter';
+import PrintJS from 'print-js';
 
 export default{
     name: 'Journals',
@@ -59,7 +63,8 @@ export default{
         const toast = useToast();
         const { getYear } = useDateFormatter();
         const { getMonth } = useDateFormatter();
-        const current_date = new Date();
+        const addingRight = ref('Adding Journal');
+        const rightsModule = ref('Accounts');
         const loader = ref('none');
         const modal_loader = ref('none');
         const idField = 'journal_id';
@@ -92,12 +97,12 @@ export default{
             {label: "Journal#", key:"journal_no"},
             {label: "Date", key: "issue_date"},
             {label: "Description", key:"description"},
-            {label: "Amount", key:"total_amount"},
+            {label: "Amount", key:"total_amount", type:"number"},
             {label: "Done By", key:"done_by"},
         ])
-        
+        const showTotals = ref(true);
         const actions = ref([
-            {name: 'delete', icon: 'fa fa-trash', title: 'Delete Journal'},
+            {name: 'delete', icon: 'fa fa-trash', title: 'Delete Journal', rightName: 'Deleting Journal'},
         ])
         const companyID = computed(()=> store.state.userData.company_id);
         const journal_no_search = computed({
@@ -323,18 +328,53 @@ export default{
                 store.commit('pageTab/ADD_PAGE', {'PMS':'Batch_Readings'})
                 store.state.pageTab.faActiveTab = 'Batch_Readings';
             }
+        };
+        const printJournalsList = () =>{
+            showLoader();
+
+            let formData = {
+                description: description_search.value,
+                txn_type: "JNL",
+                status: "",
+                client: "",
+                reference_no: "",
+                payment_method: "",
+                journal_no: journal_no_search.value,
+                min_amount: min_amount_search.value,
+                max_amount: max_amount_search.value,
+                date_from: from_date_search.value,
+                date_to: to_date_search.value,
+                client_category: "",
+                company_id: companyID.value
+            }
+            axios
+            .post("api/v1/export-journals-pdf/", formData, { responseType: 'blob' })
+            .then((response)=>{
+                if(response.status == 200){
+                    const blob1 = new Blob([response.data]);
+                    // Convert blob to URL
+                    const url = URL.createObjectURL(blob1);
+                    PrintJS({printable: url, type: 'pdf'});
+                }
+            })
+            .catch((error)=>{
+                console.log(error.message);
+            })
+            .finally(()=>{
+                hideLoader();
+            })
         }
         onBeforeMount(()=>{
             searchJournals();
             
         })
         return{
-            title, searchJournals,resetFilters, addButtonLabel, searchFilters, tableColumns, journalsList,
+            showTotals,title, searchJournals,resetFilters, addButtonLabel, searchFilters, tableColumns, journalsList,
             propResults, propArrLen, propCount, pageCount, showNextBtn, showPreviousBtn,invModalVisible,
             loadPrev, loadNext, firstPage, lastPage, idField, actions, handleActionClick, propModalVisible, closeModal,
             submitButtonLabel, showModal, showLoader, loader, hideLoader, modal_loader, modal_top, modal_left, modal_width,displayButtons,
             showModalLoader, hideModalLoader, formFields, handleSelectionChange, flex_basis,flex_basis_percentage,
-            removeJournal, removeJournals, dropdownOptions, handleDynamicOption, addNewJournal
+            removeJournal, removeJournals, dropdownOptions, handleDynamicOption, addNewJournal, printJournalsList,addingRight,rightsModule
         }
     }
 };

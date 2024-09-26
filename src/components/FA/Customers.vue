@@ -10,7 +10,9 @@
             @importData="importDebtors"
             @removeItem="removeDebtor"
             @removeSelectedItems="removeDebtors"
-            @printList="printList"
+            @printList="printCustomersList"
+            :addingRight="addingRight"
+            :rightsModule="rightsModule"
             :columns="tableColumns"
             :rows="debtorList"
             :actions="actions"
@@ -45,6 +47,7 @@ import MovableModal from '@/components/MovableModal.vue'
 import DynamicForm from '../NewDynamicForm.vue';
 import { useStore } from "vuex";
 import { useToast } from "vue-toastification";
+import PrintJS from 'print-js';
 
 export default{
     name: 'Customers',
@@ -59,6 +62,8 @@ export default{
         const idField = 'customer_id';
         const addButtonLabel = ref('New Debtor');
         const title = ref('Debtor Details');
+        const addingRight = ref('Adding Debtor');
+        const rightsModule = ref('Accounts');
         const submitButtonLabel = ref('Add');
         const selectedIds = ref([]);
         const debtorList = ref([]);
@@ -97,9 +102,9 @@ export default{
             {label: "Address", key:"invoicing_address"},
         ])
         const actions = ref([
-            {name: 'edit', icon: 'fa fa-edit', title: 'Edit Debtor'},
-            {name: 'view', icon: 'fa fa-file-pdf-o', title: 'View Statement'},
-            {name: 'delete', icon: 'fa fa-trash', title: 'Delete Debtor'},
+            {name: 'edit', icon: 'fa fa-edit', title: 'Edit Debtor', rightName: 'Editing Debtor'},
+            {name: 'view', icon: 'fa fa-file-pdf-o', title: 'View Statement', rightName: 'View Debtor Statement'},
+            {name: 'delete', icon: 'fa fa-trash', title: 'Delete Debtor', rightName: 'Deleting Debtor'},
         ])
         const companyID = computed(()=> store.state.userData.company_id);
         
@@ -460,6 +465,32 @@ export default{
         }
         const closeModal = () =>{
             propModalVisible.value = false;
+        };
+        const printCustomersList = () =>{
+            showLoader();
+
+            let formData = {
+                customer_name: customer_name_search.value,
+                customer_code: customer_code_search.value,
+                category: categorySearchID.value,
+                company_id: companyID.value
+            }
+            axios
+            .post("api/v1/export-customers-pdf/", formData, { responseType: 'blob' })
+            .then((response)=>{
+                if(response.status == 200){
+                    const blob1 = new Blob([response.data]);
+                    // Convert blob to URL
+                    const url = URL.createObjectURL(blob1);
+                    PrintJS({printable: url, type: 'pdf'});
+                }
+            })
+            .catch((error)=>{
+                console.log(error.message);
+            })
+            .finally(()=>{
+                hideLoader();
+            })
         }
         onBeforeMount(()=>{
             searchDebtors();
@@ -471,7 +502,7 @@ export default{
             loadPrev, loadNext, firstPage, lastPage, idField, actions, handleActionClick, propModalVisible, closeModal,
             submitButtonLabel, showModal, addNewDebtor, showLoader, loader, hideLoader, modal_loader, modal_top, modal_left, modal_width,displayButtons,
             showModalLoader, hideModalLoader, saveDebtor, formFields, handleSelectionChange, flex_basis,flex_basis_percentage,
-            importDebtors, removeDebtor, removeDebtors, handleReset,
+            importDebtors, removeDebtor, removeDebtors, handleReset,printCustomersList,addingRight,rightsModule
         }
     }
 };

@@ -11,6 +11,8 @@
             @removeItem="removeUnit"
             @removeSelectedItems="removeUnits"
             @printList="printList"
+            :addingRight="addingRight"
+            :rightsModule="rightsModule"
             :columns="tableColumns"
             :rows="unitList"
             :actions="actions"
@@ -59,6 +61,8 @@ export default{
         const propComponentKey = ref(0);
         const idField = 'property_unit_id';
         const addButtonLabel = ref('New Unit');
+        const addingRight = ref('Adding Property Unit');
+        const rightsModule = ref('PMS');
         const title = ref('Unit Details');
         const submitButtonLabel = ref('Add');
         const selectedIds = ref([]);
@@ -100,9 +104,9 @@ export default{
             {label: "Bdrms", key:"bedrooms"},
         ])
         const actions = ref([
-            {name: 'edit', icon: 'fa fa-edit', title: 'Edit Unit'},
+            {name: 'edit', icon: 'fa fa-edit', title: 'Edit Unit', rightName: 'Editing Property Unit'},
             {name: 'view', icon: 'fa fa-file-pdf-o', title: 'View Statement'},
-            {name: 'delete', icon: 'fa fa-trash', title: 'Delete Unit'},
+            {name: 'delete', icon: 'fa fa-trash', title: 'Delete Unit', rightName: 'Deleting Property Unit'},
         ])
         const companyID = computed(()=> store.state.userData.company_id);
         const unit_number_search = computed({
@@ -514,7 +518,7 @@ export default{
             loadPrev, loadNext, firstPage, lastPage, idField, actions, handleActionClick, propModalVisible, closeModal,
             submitButtonLabel, showModal, addNewUnit, showLoader, loader, hideLoader, modal_loader, modal_top, modal_left, modal_width,displayButtons,
             showModalLoader, hideModalLoader, saveUnit, formFields, handleSelectionChange, flex_basis,flex_basis_percentage,
-            importUnits, removeUnit, removeUnits
+            importUnits, removeUnit, removeUnits,addingRight,rightsModule
         }
     }
 };

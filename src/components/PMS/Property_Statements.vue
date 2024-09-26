@@ -13,6 +13,8 @@
             @removeItem="removeStatement"
             @removeSelectedItems="removeStatements"
             @printList="printList"
+            :addingRight="addingRight"
+            :rightsModule="rightsModule"
             :columns="tableColumns"
             :rows="statementsList"
             :actions="actions"
@@ -55,6 +57,8 @@ export default{
         const mainComponentKey = ref(0);
         const idField = 'landlord_statement_id';
         const addButtonLabel = ref('New Statement');
+        const addingRight = ref('Process Property Statement');
+        const rightsModule = ref('PMS');
         const submitButtonLabel = ref('Add');
         const title = ref('Property Statement');
         const modal_top = ref('150px');
@@ -97,8 +101,8 @@ export default{
         ])
         
         const actions = ref([ 
-            {name: 'approve', icon: 'fa fa-check-circle', title: 'Approve Statement'},
-            {name: 'delete', icon: 'fa fa-trash', title: 'Delete Statement'},
+            {name: 'approve', icon: 'fa fa-check-circle', title: 'Approve Statement', rightName: 'Approve Property Statement'},
+            {name: 'delete', icon: 'fa fa-trash', title: 'Delete Statement', rightName: 'Deleting Property Statement'},
         ])
         const companyID = computed(()=> store.state.userData.company_id);
         const userID = computed(()=> store.state.userData.user_id);
@@ -395,7 +399,7 @@ export default{
             loadPrev, loadNext, firstPage, lastPage, idField, actions, handleActionClick, propModalVisible, closeModal,
             submitButtonLabel, showModal, addNewStatement, showLoader, loader, hideLoader, modal_loader, modal_top, modal_left, modal_width,displayButtons,
             showModalLoader, hideModalLoader, handleSelectionChange, flex_basis,flex_basis_percentage,
-            removeStatement, removeStatements, dropdownOptions, handleDynamicOption
+            removeStatement, removeStatements, dropdownOptions, handleDynamicOption,addingRight,rightsModule
         }
     }
 };

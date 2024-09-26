@@ -13,10 +13,13 @@
             @removeItem="removeMeterReading"
             @removeSelectedItems="removeMeterReadings"
             @printList="printList"
+            :addingRight="addingRight"
+            :rightsModule="rightsModule"
             :columns="tableColumns"
             :rows="readingsList"
             :actions="actions"
             :idField="idField"
+            :showTotals="showTotals"
             @handleSelectionChange="handleSelectionChange"
             @handleActionClick="handleActionClick"
             :count="propCount"
@@ -60,6 +63,8 @@ export default{
         const modal_loader = ref('none');
         const idField = 'meter_reading_id';
         const addButtonLabel = ref('New Reading');
+        const addingRight = ref('Adding Meter Reading');
+        const rightsModule = ref('PMS');
         const title = ref('Reading Details');
         const submitButtonLabel = ref('Add');
         const setupComponentKey = ref(0);
@@ -104,15 +109,15 @@ export default{
             {label: "Property Name", key:"property_name"},
             {label: "Prev Read.", key:"previous_reading"},
             {label: "Curr Read.", key:"current_reading"},
-            {label: "Units", key:"units_consumed"},
-            {label: "Meter Rent", key:"meter_rent"},
-            {label: "Sub Total", key:"sub_total"},
-            {label: "Total", key:"total_amount"},
+            {label: "Units", key:"units_consumed", type: "number"},
+            {label: "Meter Rent", key:"meter_rent", type: "number"},
+            {label: "Sub Total", key:"sub_total", type: "number"},
+            {label: "Total", key:"total_amount", type: "number"},
             {label: "Invoice#", key:"invoice"},
         ])
-        
+        const showTotals = ref(true);
         const actions = ref([
-            {name: 'delete', icon: 'fa fa-trash', title: 'Delete Reading'},
+            {name: 'delete', icon: 'fa fa-trash', title: 'Delete Reading', rightName: 'Deleting Meter Reading'},
         ])
         const companyID = computed(()=> store.state.userData.company_id);
         const fetchProperties = async() =>{
@@ -524,12 +529,12 @@ export default{
             
         })
         return{
-            title, searchMeterReadings,resetFilters, addButtonLabel, searchFilters, tableColumns, readingsList,
+            showTotals,title, searchMeterReadings,resetFilters, addButtonLabel, searchFilters, tableColumns, readingsList,
             propResults, propArrLen, propCount, pageCount, showNextBtn, showPreviousBtn,
             loadPrev, loadNext, firstPage, lastPage, idField, actions, handleActionClick, propModalVisible, closeModal,
             submitButtonLabel, showModal, addNewReading, showLoader, loader, hideLoader, modal_loader, modal_top, modal_left, modal_width,displayButtons,
             showModalLoader, hideModalLoader, saveMeterReading, formFields, handleSelectionChange, flex_basis,flex_basis_percentage,
-            removeMeterReading, removeMeterReadings, dropdownOptions, handleDynamicOption
+            removeMeterReading, removeMeterReadings, dropdownOptions, handleDynamicOption,addingRight,rightsModule
         }
     }
 };

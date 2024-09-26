@@ -11,10 +11,13 @@
             @removeItem="removeStatementTransaction"
             @removeSelectedItems="removeStatementTransactions"
             @printList="printList"
+            :addingRight="addingRight"
+            :rightsModule="rightsModule"
             :columns="tableColumns"
             :rows="transactionsList"
             :actions="actions"
             :idField="idField"
+            :showTotals="showTotals"
             @handleSelectionChange="handleSelectionChange"
             @handleActionClick="handleActionClick"
             :count="propCount"
@@ -58,6 +61,8 @@ export default{
         const modal_loader = ref('none');
         const idField = 'statement_transaction_id';
         const addButtonLabel = ref('New Transaction');
+        const addingRight = ref('Adding Statement Transactions');
+        const rightsModule = ref('PMS');
         const title = ref('Transaction Details');
         const submitButtonLabel = ref('Add');
         const mainComponentKey = ref(0);
@@ -101,15 +106,15 @@ export default{
             {label: "Bank. Date", key: "banking_date"},
             {label: "Description", key: "description", maxWidth:"450px"},
             {label: "Txn", key: "journal_no"},
-            // {label: "Ref No", key: "reference_no"},
-            {label: "Bill", key: "bill"},
-            {label: "Tax", key: "bill_tax"},
-            {label: "Paid", key: "paid"},
-            {label: "Tax", key: "paid_tax"},
+            {label: "Bill", key: "bill", type: "number"},
+            {label: "Tax", key: "bill_tax", type: "number"},
+            {label: "Paid", key: "paid", type: "number"},
+            {label: "Tax", key: "paid_tax", type: "number"},
         ])
+        const showTotals = ref(true);
         const actions = ref([
-            {name: 'edit', icon: 'fa fa-edit', title: 'Edit Transaction'},
-            {name: 'delete', icon: 'fa fa-trash', title: 'Delete Transaction'},
+            {name: 'edit', icon: 'fa fa-edit', title: 'Edit Transaction', rightName: 'Editing Statement Transactions'},
+            {name: 'delete', icon: 'fa fa-trash', title: 'Delete Transaction', rightName: 'Deleting Statement Transactions'},
         ])
         const companyID = computed(()=> store.state.userData.company_id);
         const fetchProperties = async() =>{
@@ -497,12 +502,12 @@ export default{
             
         })
         return{
-            title, searchStatementTransactions,resetFilters, addButtonLabel, searchFilters, tableColumns, transactionsList,
+            showTotals,title, searchStatementTransactions,resetFilters, addButtonLabel, searchFilters, tableColumns, transactionsList,
             propResults, propArrLen, propCount, pageCount, showNextBtn, showPreviousBtn,
             loadPrev, loadNext, firstPage, lastPage, idField, actions, handleActionClick, propModalVisible, closeModal,
             submitButtonLabel, showModal, addNewTransaction, showLoader, loader, hideLoader, modal_loader, modal_top, modal_left, modal_width,displayButtons,
             showModalLoader, hideModalLoader, saveTransaction, formFields, handleSelectionChange, flex_basis,flex_basis_percentage,
-            removeStatementTransaction, removeStatementTransactions, mainComponentKey, propComponentKey, tntComponentKey
+            removeStatementTransaction, removeStatementTransactions, mainComponentKey, propComponentKey, tntComponentKey,addingRight,rightsModule
         }
     }
 };

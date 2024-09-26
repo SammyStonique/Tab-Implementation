@@ -3,6 +3,7 @@
         :key="pageComponentKey"
         :loader="loader" @showLoader="showLoader" @hideLoader="hideLoader"
         :addButtonLabel="addButtonLabel"
+        :showAddButton="showAddButton"
         :searchFilters="searchFilters"
         @searchPage="searchTaxTransactions"
         @resetFilters="resetFilters"
@@ -56,6 +57,7 @@ export default{
         const loader = ref('');
         const modal_loader = ref('none');
         const addButtonLabel = ref('');
+        const showAddButton = ref(false);
         const pageComponentKey = ref(0);
         const title = ref('Vat Transaction');
         const companyID = computed(()=> store.state.userData.company_id);
@@ -231,7 +233,7 @@ export default{
             searchTaxTransactions();
         })
         return{
-            title, searchTaxTransactions, idField, selectedIds, actions, transactionsList, appArrLen,appCount,appResults,appModalVisible,formFields,
+            showAddButton,title, searchTaxTransactions, idField, selectedIds, actions, transactionsList, appArrLen,appCount,appResults,appModalVisible,formFields,
             addButtonLabel, searchFilters,tableColumns,resetFilters,loadPrev,loadNext,firstPage,lastPage,
             showNextBtn,showPreviousBtn, handleActionClick,displayButtons,handleReset,
             modal_top, modal_left, modal_width, showLoader, loader, hideLoader, modal_loader, showModalLoader, hideModalLoader,

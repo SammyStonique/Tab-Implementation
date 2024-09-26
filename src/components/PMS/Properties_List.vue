@@ -11,6 +11,8 @@
             @removeItem="removeProperty"
             @removeSelectedItems="removeProperties"
             @printList="printList"
+            :addingRight="addingRight"
+            :rightsModule="rightsModule"
             :columns="tableColumns"
             :rows="propertyList"
             :actions="actions"
@@ -48,6 +50,8 @@ export default{
         const loader = ref('');
         const idField = 'property_id';
         const addButtonLabel = ref('New Property');
+        const addingRight = ref('Adding Property');
+        const rightsModule = ref('PMS');
         const submitButtonLabel = ref('Add');
         const selectedIds = ref([]);
         const propertyList = ref([]);
@@ -70,9 +74,9 @@ export default{
             {label: "Units", key:"units_count"},
         ])
         const actions = ref([
-            {name: 'edit', icon: 'fa fa-edit', title: 'Edit Property'},
+            {name: 'edit', icon: 'fa fa-edit', title: 'Edit Property', rightName: 'Editing Property'},
             {name: 'view', icon: 'fa fa-file-pdf-o', title: 'View Statement'},
-            {name: 'delete', icon: 'fa fa-trash', title: 'Delete Property'},
+            {name: 'delete', icon: 'fa fa-trash', title: 'Delete Property', rightName: 'Deleting Property'},
         ])
         const companyID = computed(()=> store.state.userData.company_id);
         const landlordID = ref(null);
@@ -303,7 +307,7 @@ export default{
             propResults, propArrLen, propCount, pageCount, showNextBtn, showPreviousBtn,
             loadPrev, loadNext, firstPage, lastPage, idField, actions, handleActionClick, propModalVisible, closeModal,
             submitButtonLabel, showModal, addNewProperty, showLoader, loader, hideLoader, importProperties, removeProperty, removeProperties,
-            handleSelectionChange
+            handleSelectionChange,addingRight,rightsModule
         }
     }
 };

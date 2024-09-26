@@ -11,6 +11,8 @@
             @removeItem="removeZone"
             @removeSelectedItems="removeZones"
             @printList="printList"
+            :addingRight="addingRight"
+            :rightsModule="rightsModule"
             :columns="tableColumns"
             :rows="zonesList"
             :actions="actions"
@@ -59,6 +61,8 @@ export default{
         const modal_loader = ref('none');
         const idField = 'zone_id';
         const addButtonLabel = ref('New Zone');
+        const addingRight = ref('Adding Zone');
+        const rightsModule = ref('PMS');
         const title = ref('Zone Details');
         const submitButtonLabel = ref('Add');
         const selectedIds = ref([]);
@@ -88,9 +92,8 @@ export default{
             {label: "Manager Phone#", key: "manager_phone_number"},
         ])
         const actions = ref([
-            {name: 'edit', icon: 'fa fa-edit', title: 'Edit Zone'},
-            {name: 'view', icon: 'fa fa-file-pdf-o', title: 'View Statement'},
-            {name: 'delete', icon: 'fa fa-trash', title: 'Delete Zone'},
+            {name: 'edit', icon: 'fa fa-edit', title: 'Edit Zone', rightName: 'Editing Zone'},
+            {name: 'delete', icon: 'fa fa-trash', title: 'Delete Zone', rightName: 'Deleting Zone'},
         ])
         const companyID = computed(()=> store.state.userData.company_id);
         const zoneID = ref(null);
@@ -388,7 +391,7 @@ export default{
             loadPrev, loadNext, firstPage, lastPage, idField, actions, handleActionClick, zoneModalVisible, closeModal,
             submitButtonLabel, showModal, addNewZone, showLoader, loader, hideLoader, modal_loader, modal_top, modal_left, modal_width,displayButtons,
             showModalLoader, hideModalLoader, saveZone, formFields, handleSelectionChange, flex_basis,flex_basis_percentage,
-            importZones, removeZone, removeZones
+            importZones, removeZone, removeZones,addingRight,rightsModule
         }
     }
 };

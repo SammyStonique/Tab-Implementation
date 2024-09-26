@@ -12,6 +12,8 @@
             @removeItem="removeBill"
             @removeSelectedItems="removeBills"
             @printList="printBillList"
+            :addingRight="addingRight"
+            :rightsModule="rightsModule"
             :columns="tableColumns"
             :rows="billsList"
             :actions="actions"
@@ -61,7 +63,8 @@ export default{
         const toast = useToast();
         const { getYear } = useDateFormatter();
         const { getMonth } = useDateFormatter();
-        const current_date = new Date();
+        const addingRight = ref('Adding Bills');
+        const rightsModule = ref('Accounts');
         const loader = ref('none');
         const modal_loader = ref('none');
         const idField = 'journal_id';
@@ -104,9 +107,9 @@ export default{
         ])
         const showTotals = ref(true);
         const actions = ref([
-            {name: 'print', icon: 'fa fa-print', title: 'Print Bill'},
-            {name: 'download', icon: 'fa fa-download', title: 'Download Bill'},
-            {name: 'delete', icon: 'fa fa-trash', title: 'Delete Bill'},
+            {name: 'print', icon: 'fa fa-print', title: 'Print Bill', rightName: 'Print Bill'},
+            {name: 'download', icon: 'fa fa-download', title: 'Download Bill', rightName: 'Print Bill'},
+            {name: 'delete', icon: 'fa fa-trash', title: 'Delete Bill', rightName: 'Deleting Bills'},
         ])
         const companyID = computed(()=> store.state.userData.company_id);
         const userID = computed(()=> store.state.userData.user_id);
@@ -402,7 +405,7 @@ export default{
             loadPrev, loadNext, firstPage, lastPage, idField, actions, handleActionClick, propModalVisible, closeModal,
             submitButtonLabel, showModal, showLoader, loader, hideLoader, modal_loader, modal_top, modal_left, modal_width,displayButtons,
             showModalLoader, hideModalLoader, formFields, handleSelectionChange, flex_basis,flex_basis_percentage,
-            removeBill, removeBills, dropdownOptions, handleDynamicOption, addNewBill, printBillList
+            removeBill, removeBills, dropdownOptions, handleDynamicOption, addNewBill, printBillList, addingRight,rightsModule
         }
     }
 };

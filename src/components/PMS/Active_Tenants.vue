@@ -11,6 +11,8 @@
             @removeItem="removeTenant"
             @removeSelectedItems="removeTenants"
             @printList="printList"
+            :addingRight="addingRight"
+            :rightsModule="rightsModule"
             :columns="tableColumns"
             :rows="tenantList"
             :actions="actions"
@@ -48,6 +50,8 @@ export default{
         const loader = ref('');
         const idField = 'tenant_id';
         const addButtonLabel = ref('New Tenant');
+        const addingRight = ref('Adding Tenants');
+        const rightsModule = ref('PMS');
         const submitButtonLabel = ref('Add');
         const selectedIds = ref([]);
         const tenantList = ref([]);
@@ -71,9 +75,9 @@ export default{
             {label: "Balance", key:"rent_balance"},
         ])
         const actions = ref([
-            {name: 'edit', icon: 'fa fa-edit', title: 'Edit Tenant'},
-            {name: 'view', icon: 'fa fa-file-pdf-o', title: 'View Statement'},
-            {name: 'delete', icon: 'fa fa-trash', title: 'Delete Tenant'},
+            {name: 'edit', icon: 'fa fa-edit', title: 'Edit Tenant', rightName: 'Editing Tenants'},
+            {name: 'view', icon: 'fa fa-file-pdf-o', title: 'View Statement', rightName: 'Viewing Tenant Statement'},
+            {name: 'delete', icon: 'fa fa-trash', title: 'Delete Tenant', rightName: 'Deleting Tenants'},
         ])
         const companyID = computed(()=> store.state.userData.company_id);
         const propertyID = ref(null);
@@ -306,7 +310,7 @@ export default{
             propResults, propArrLen, propCount, pageCount, showNextBtn, showPreviousBtn,
             loadPrev, loadNext, firstPage, lastPage, idField, actions, handleActionClick, propModalVisible, closeModal,
             submitButtonLabel, showModal, addNewTenant, showLoader, loader, hideLoader, importTenants, removeTenant, removeTenants,
-            handleSelectionChange,
+            handleSelectionChange,addingRight,rightsModule
         }
     }
 };

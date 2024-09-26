@@ -11,6 +11,8 @@
         @removeItem="removeTax"
         @removeSelectedItems="removeTaxes"
         @printList="printList"
+        :addingRight="addingRight"
+        :rightsModule="rightsModule"
         :columns="tableColumns"
         :rows="taxList"
         :actions="actions"
@@ -59,6 +61,8 @@ export default{
         const modal_loader = ref('none');
         const { formatDate } = useDateFormatter();
         const addButtonLabel = ref('New Tax Type');
+        const addingRight = ref('Adding Taxes');
+        const rightsModule = ref('Accounts');
         const pageComponentKey = ref(0);
         const inputComponentKey = ref(0);
         const outputComponentKey = ref(0);
@@ -99,8 +103,8 @@ export default{
             {label: "Withholding Acc", key: "withholding_account_name", type: "text", editable: false},
         ])
         const actions = ref([
-            {name: 'edit', icon: 'fa fa-edit', title: 'Edit Tax'},
-            {name: 'delete', icon: 'fa fa-trash', title: 'Delete Tax'},
+            {name: 'edit', icon: 'fa fa-edit', title: 'Edit Tax', rightName: 'Editing Taxes'},
+            {name: 'delete', icon: 'fa fa-trash', title: 'Delete Tax', rightName: 'Deleting Taxes'},
         ])
         const tax_name_search = computed({
             get: () => store.state.Taxes.tax_name_search,
@@ -464,7 +468,7 @@ export default{
             addButtonLabel, searchFilters,tableColumns,resetFilters,loadPrev,loadNext,firstPage,lastPage,flex_basis,flex_basis_percentage,
             showNextBtn,showPreviousBtn,addNewTax, handleActionClick,saveTax,displayButtons,handleReset,
             modal_top, modal_left, modal_width, showLoader, loader, hideLoader, modal_loader, showModalLoader, hideModalLoader,
-            closeModal, handleSelectionChange, removeTax, removeTaxes, pageComponentKey
+            closeModal, handleSelectionChange, removeTax, removeTaxes, pageComponentKey,addingRight,rightsModule
         }
     }
 }

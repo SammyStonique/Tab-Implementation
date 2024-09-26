@@ -11,10 +11,13 @@
             @resetFilters="resetFilters"
             @removeItem="removePaymentVoucher"
             @removeSelectedItems="removePaymentVouchers"
-            @printList="printList"
+            @printList="printVouchersList"
+            :addingRight="addingRight"
+            :rightsModule="rightsModule"
             :columns="tableColumns"
             :rows="vouchersList"
             :actions="actions"
+            :showTotals="showTotals"
             :idField="idField"
             @handleSelectionChange="handleSelectionChange"
             @handleActionClick="handleActionClick"
@@ -48,6 +51,7 @@ import DynamicForm from '../NewDynamicForm.vue';
 import { useStore } from "vuex";
 import { useToast } from "vue-toastification";
 import { useDateFormatter } from '@/composables/DateFormatter';
+import PrintJS from 'print-js';
 
 export default{
     name: 'Payment_Vouchers',
@@ -64,6 +68,8 @@ export default{
         const modal_loader = ref('none');
         const idField = 'journal_id';
         const addButtonLabel = ref('New Payment Voucher');
+        const addingRight = ref('Adding Payment Voucher');
+        const rightsModule = ref('Accounts');
         const submitButtonLabel = ref('Add');
         const title = ref('Receipt Booking');
         const custComponentKey = ref(0);
@@ -97,14 +103,14 @@ export default{
             {label: "Cashbook", key:"cashbook"},
             {label: "Pay. Method", key:"payment_method"},
             {label: "Ref No", key:"reference_no"},
-            {label: "Amount", key:"total_amount"},
+            {label: "Amount", key:"total_amount", type:"number"},
             {label: "Done By", key:"done_by"},
         ])
-        
+        const showTotals = ref(true);
         const actions = ref([
-            {name: 'print', icon: 'fa fa-print', title: 'Print Voucher'},
-            {name: 'download', icon: 'fa fa-download', title: 'Download Voucher'},
-            {name: 'delete', icon: 'fa fa-trash', title: 'Delete Voucher'},
+            {name: 'print', icon: 'fa fa-print', title: 'Print Voucher', rightName: 'Print Payment Voucher'},
+            {name: 'download', icon: 'fa fa-download', title: 'Download Voucher', rightName: 'Print Payment Voucher'},
+            {name: 'delete', icon: 'fa fa-trash', title: 'Delete Voucher', rightName: 'Deleting Payment Vouchers'},
         ])
         const companyID = computed(()=> store.state.userData.company_id);
         const fetchVendors = async() =>{
@@ -346,18 +352,50 @@ export default{
                 store.commit('pageTab/ADD_PAGE', {'PMS':'Batch_Readings'})
                 store.state.pageTab.faActiveTab = 'Batch_Readings';
             }
+        };
+        const printVouchersList = () =>{
+            showLoader();
+
+            let formData = {
+                journal_no: "",
+                reference_no: "",
+                client: "",
+                client_category: "Customers",
+                payment_method: "",
+                txn_type: "PMT",
+                date_from: from_date_search.value,
+                date_to: to_date_search.value,
+                company_id: companyID.value,
+            }
+            axios
+            .post("api/v1/export-clients-receipts-pdf/", formData, { responseType: 'blob' })
+            .then((response)=>{
+                if(response.status == 200){
+                    const blob1 = new Blob([response.data]);
+                    // Convert blob to URL
+                    const url = URL.createObjectURL(blob1);
+                    PrintJS({printable: url, type: 'pdf'});
+                }
+            })
+            .catch((error)=>{
+                console.log(error.message);
+            })
+            .finally(()=>{
+                hideLoader();
+            })
         }
         onBeforeMount(()=>{
             searchPaymentVouchers();
             
         })
         return{
-            title, searchPaymentVouchers,resetFilters, addButtonLabel, searchFilters, tableColumns, vouchersList,
+            showTotals, title, searchPaymentVouchers,resetFilters, addButtonLabel, searchFilters, tableColumns, vouchersList,
             propResults, propArrLen, propCount, pageCount, showNextBtn, showPreviousBtn,invModalVisible,
             loadPrev, loadNext, firstPage, lastPage, idField, actions, handleActionClick, propModalVisible, closeModal,
             submitButtonLabel, showModal, showLoader, loader, hideLoader, modal_loader, modal_top, modal_left, modal_width,displayButtons,
             showModalLoader, hideModalLoader, handleSelectionChange, flex_basis,flex_basis_percentage,
-            removePaymentVoucher, removePaymentVouchers, dropdownOptions, handleDynamicOption, addNewPaymentVoucher
+            removePaymentVoucher, removePaymentVouchers, dropdownOptions, handleDynamicOption, addNewPaymentVoucher, printVouchersList,
+            addingRight,rightsModule
         }
     }
 };

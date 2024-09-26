@@ -8,6 +8,8 @@
         @resetFilters="resetFilters"
         @removeItem="removeCategory"
         @removeSelectedItems="removeCategories"
+        :addingRight="addingRight"
+        :rightsModule="rightsModule"
         :columns="tableColumns"
         :rows="categoryList"
         :actions="actions"
@@ -53,6 +55,8 @@ export default{
         const modal_loader = ref('none');
         const title = ref('Category Details');
         const addButtonLabel = ref('New Category');
+        const addingRight = ref('Adding Client Categories');
+        const rightsModule = ref('Accounts');
         const idField = 'category_id';
         const depModalVisible = ref(false);
         const categoryList = ref([]);
@@ -77,8 +81,8 @@ export default{
             {label: "Name", key: "category_name", type: "text", editable: false}
         ])
         const actions = ref([
-            {name: 'edit', icon: 'fa fa-edit', title: 'Edit Category'},
-            {name: 'delete', icon: 'fa fa-trash', title: 'Delete Category'},
+            {name: 'edit', icon: 'fa fa-edit', title: 'Edit Category', rightName: 'Editing Client Categories'},
+            {name: 'delete', icon: 'fa fa-trash', title: 'Delete Category', rightName: 'Deleting Client Categories'},
         ])
         const companyID = computed(()=> store.state.userData.company_id);
         const name_search = computed({
@@ -343,7 +347,8 @@ export default{
             depResults, depArrLen, depCount, pageCount, showNextBtn, showPreviousBtn,modal_top, modal_left, modal_width,
             loadPrev, loadNext, firstPage, lastPage, actions, formFields, depModalVisible, addNewCategory,
             displayButtons,flex_basis,flex_basis_percentage, handleActionClick, handleReset, saveCategory,
-            showLoader, loader, hideLoader, modal_loader, showModalLoader, hideModalLoader, removeCategory, removeCategories
+            showLoader, loader, hideLoader, modal_loader, showModalLoader, hideModalLoader, removeCategory, removeCategories,
+            addingRight,rightsModule
         }
     }
 }

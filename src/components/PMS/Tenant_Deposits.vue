@@ -10,10 +10,13 @@
         @removeItem="removeDeposit"
         @removeSelectedItems="removeDeposits"
         @printList="printList"
+        :addingRight="addingRight"
+        :rightsModule="rightsModule"
         :columns="tableColumns"
         :rows="depositsList"
         :actions="actions"
         :idField="idField"
+        :showTotals="showTotals"
         @handleSelectionChange="handleSelectionChange"
         @handleActionClick="handleActionClick"
         :count="appCount"
@@ -58,6 +61,8 @@ export default{
         const loader = ref('');
         const modal_loader = ref('none');
         const addButtonLabel = ref('New Deposit');
+        const addingRight = ref('Adding Tenant Deposit');
+        const rightsModule = ref('PMS');
         const pageComponentKey = ref(0);
         const depComponentKey = ref(0);
         const tntComponentKey = ref(0);
@@ -95,11 +100,12 @@ export default{
             {label: "Deposit", key: "security_deposit", type: "text", editable: false},
             {label: "Charge Mode", key: "deposit_charge_mode", type: "text", editable: false},
             {label: "Value", key: "deposit_value", type: "text", editable: false},
-            {label: "Amount", key: "deposit_amount", type: "text", editable: false},
+            {label: "Amount", key: "deposit_amount", type: "number", editable: false},
             {label: "Posted", key: "posted", type: "text", editable: false},
         ])
+        const showTotals = ref(true);
         const actions = ref([
-            {name: 'delete', icon: 'fa fa-trash', title: 'Delete Deposit'},
+            {name: 'delete', icon: 'fa fa-trash', title: 'Delete Deposit', rightName: 'Deleting Tenant Deposit'},
         ])
         const tenant_name_search = computed({
             get: () => store.state.Tenant_Deposits.tenant_name_search,
@@ -412,11 +418,12 @@ export default{
             searchDeposits();
         })
         return{
-            title, searchDeposits, idField, selectedIds, actions, depositsList, appArrLen,appCount,appResults,appModalVisible,formFields,
+            showTotals,title, searchDeposits, idField, selectedIds, actions, depositsList, appArrLen,appCount,appResults,appModalVisible,formFields,
             addButtonLabel, searchFilters,tableColumns,resetFilters,loadPrev,loadNext,firstPage,lastPage,
             showNextBtn,showPreviousBtn,addNewDeposit, handleActionClick,createTenantDeposit,displayButtons,handleReset,
             modal_top, modal_left, modal_width, showLoader, loader, hideLoader, modal_loader, showModalLoader, hideModalLoader,
-            closeModal, handleSelectionChange, removeDeposit, removeDeposits, pageComponentKey, flex_basis, flex_basis_percentage
+            closeModal, handleSelectionChange, removeDeposit, removeDeposits, pageComponentKey, flex_basis, flex_basis_percentage,
+            addingRight,rightsModule
         }
     }
 }

@@ -7,6 +7,7 @@
             <div class="fixed bg-white w-[93%] z-50">
                 <FilterBar 
                     :addButtonLabel="addButtonLabel" 
+                    :showAddButton="showAddButton"
                     :filters="searchFilters" 
                     @add-new="handleAddNew"
                     @search="searchPage"
@@ -18,6 +19,8 @@
                     :dropdownOptions="dropdownOptions"
                     @handleDynamicOption="handleDynamicOption"
                     :options="options"
+                    :addingRight="addingRight"
+                    :rightsModule="rightsModule"
                     :dropdownWidth="dropdownWidth"
                     :selectOptions="selectOptions"
                     :updateValue="updateValue"
@@ -33,6 +36,7 @@
                     :showTotals="showTotals"
                     @action-click="handleActionClick"
                     @selection-changed="handleSelectionChange"
+                    :rightsModule="rightsModule"
                 />
             </div>
             <div class="fixed w-[93%] z-30 bottom-5 pb-2 bg-white">
@@ -72,6 +76,11 @@ export default defineComponent({
         addButtonLabel:{
             type: String,
             required: true
+        },
+        showAddButton: {
+            type: Boolean,
+            default: true,
+            required: false
         },
         dropdownOptions: {
             type: Array,
@@ -145,7 +154,15 @@ export default defineComponent({
         loader:{
             type: String,
             default: 'none'
-        }
+        },
+        rightsModule:{
+            type: String,
+            default: () => ''
+        },
+        addingRight:{
+            type: String,
+            default: () => ''
+        },
 
     },
     components:{

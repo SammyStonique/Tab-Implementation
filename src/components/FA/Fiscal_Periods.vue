@@ -10,6 +10,8 @@
             @removeItem="removeFiscalPeriod"
             @removeSelectedItems="removeFiscalPeriods"
             @printList="printList"
+            :addingRight="addingRight"
+            :rightsModule="rightsModule"
             :columns="tableColumns"
             :rows="periodList"
             :actions="actions"
@@ -58,6 +60,8 @@ export default{
         const period_end_date = ref('');
         const idField = 'fiscal_period_id';
         const addButtonLabel = ref('New Fiscal Period');
+        const addingRight = ref('Adding Fiscal Periods');
+        const rightsModule = ref('Accounts');
         const title = ref('Fiscal Period Details');
         const submitButtonLabel = ref('Add');
         const selectedIds = ref([]);
@@ -89,7 +93,8 @@ export default{
             {label: "Status", key: "status"},
         ])
         const actions = ref([
-            {name: 'delete', icon: 'fa fa-trash', title: 'Delete Period'},
+            {name: 'close', icon: 'fa fa-sign-out', title: 'Close Period', rightName: 'Closing Fiscal Period'},
+            {name: 'delete', icon: 'fa fa-trash', title: 'Delete Period', rightName: 'Deleting Fiscal Periods'},
         ])
         const companyID = computed(()=> store.state.userData.company_id);
 
@@ -335,7 +340,7 @@ export default{
             loadPrev, loadNext, firstPage, lastPage, idField, actions, handleActionClick, propModalVisible, closeModal,
             submitButtonLabel, showModal, addNewFiscalPeriod, showLoader, loader, hideLoader, modal_loader, modal_top, modal_left, modal_width,displayButtons,
             showModalLoader, hideModalLoader, createFiscalPeriod, formFields, handleSelectionChange, flex_basis,flex_basis_percentage,
-            removeFiscalPeriod, removeFiscalPeriods
+            removeFiscalPeriod, removeFiscalPeriods,addingRight,rightsModule
         }
     }
 };

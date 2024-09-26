@@ -12,6 +12,8 @@
             @removeItem="removeInvoice"
             @removeSelectedItems="removeInvoices"
             @printList="printList"
+            :addingRight="addingRight"
+            :rightsModule="rightsModule"
             :columns="tableColumns"
             :rows="invoicesList"
             :actions="actions"
@@ -65,6 +67,8 @@ export default{
         const modal_loader = ref('none');
         const idField = 'journal_id';
         const addButtonLabel = ref('New Booking');
+        const addingRight = ref('Book Rental Invoice');
+        const rightsModule = ref('PMS');
         const submitButtonLabel = ref('Add');
         const title = ref('Invoice Booking');
         const propComponentKey = ref(0);
@@ -108,7 +112,9 @@ export default{
         ])
         const showTotals = ref(true);
         const actions = ref([
-            {name: 'delete', icon: 'fa fa-trash', title: 'Delete Invoice'},
+            {name: 'print', icon: 'fa fa-print', title: 'Print Invoice', rightName: 'Print Tenant Invoice'},
+            {name: 'download', icon: 'fa fa-download', title: 'Download Invoice', rightName: 'Print Tenant Invoice'},
+            {name: 'delete', icon: 'fa fa-trash', title: 'Delete Invoice', rightName: 'Deleting Tenant Invoice'},
         ])
         const companyID = computed(()=> store.state.userData.company_id);
         const fetchProperties = async() =>{
@@ -448,7 +454,7 @@ export default{
             loadPrev, loadNext, firstPage, lastPage, idField, actions, handleActionClick, propModalVisible, closeModal,
             submitButtonLabel, showModal, bookInvoice, showLoader, loader, hideLoader, modal_loader, modal_top, modal_left, modal_width,displayButtons,
             showModalLoader, hideModalLoader, formFields, handleSelectionChange, flex_basis,flex_basis_percentage,
-            removeInvoice, removeInvoices, dropdownOptions, handleDynamicOption, bookRentalInvoice
+            removeInvoice, removeInvoices, dropdownOptions, handleDynamicOption, bookRentalInvoice,addingRight,rightsModule
         }
     }
 };

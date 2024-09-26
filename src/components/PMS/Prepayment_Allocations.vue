@@ -3,16 +3,19 @@
         :key="pageComponentKey"
         :loader="loader" @showLoader="showLoader" @hideLoader="hideLoader"
         :addButtonLabel="addButtonLabel"
+        :showAddButton="showAddButton"
         :searchFilters="searchFilters"
         @searchPage="searchAllocations"
         @resetFilters="resetFilters"
         @removeItem="removeAllocation"
         @removeSelectedItems="removeAllocations"
         @printList="printList"
+        :rightsModule="rightsModule"
         :columns="tableColumns"
         :rows="prepaymentsList"
         :actions="actions"
         :idField="idField"
+        :showTotals="showTotals"
         @handleSelectionChange="handleSelectionChange"
         @handleActionClick="handleActionClick"
         :count="appCount"
@@ -58,7 +61,9 @@ export default{
         const addButtonLabel = ref('');
         const pageComponentKey = ref(0);
         const invComponentKey = ref(0);
+        const showAddButton = ref(false);
         const title = ref('Prepayment Allocation');
+        const rightsModule = ref('PMS');
         const companyID = computed(()=> store.state.userData.company_id);
         const tenantID = ref("");
         const prepaymentID = ref("");
@@ -93,11 +98,12 @@ export default{
             {label: "Tenant Name", key:"tenant_name",type: "text", editable: false},
             {label: "Invoice", key:"invoice_no",type: "text", editable: false},
             {label: "Description", key:"description",type: "text", editable: false},
-            {label: "Allocated", key: "allocated_amount", type: "text", editable: false},
+            {label: "Allocated", key: "allocated_amount", type: "number", editable: false},
             {label: "Receipt", key:"receipt_no",type: "text", editable: false},
         ])
+        const showTotals = ref(true);
         const actions = ref([
-            {name: 'delete', icon: 'fa fa-trash', title: 'Delete Allocation'},
+            {name: 'delete', icon: 'fa fa-trash', title: 'Delete Allocation', rightName: 'Deleting Prepayment Allocations'},
         ])
         const tenant_name_search = computed({
             get: () => store.state.Prepayment_Allocations.tenant_name_search,
@@ -367,11 +373,12 @@ export default{
             searchAllocations();
         })
         return{
-            title, searchAllocations, idField, selectedIds, actions, prepaymentsList, appArrLen,appCount,appResults,appModalVisible,formFields,
+            showTotals,showAddButton,title, searchAllocations, idField, selectedIds, actions, prepaymentsList, appArrLen,appCount,appResults,appModalVisible,formFields,
             addButtonLabel, searchFilters,tableColumns,resetFilters,loadPrev,loadNext,firstPage,lastPage,
             showNextBtn,showPreviousBtn, handleActionClick,allocatePrepayment,displayButtons,handleReset,
             modal_top, modal_left, modal_width, showLoader, loader, hideLoader, modal_loader, showModalLoader, hideModalLoader,
-            closeModal, handleSelectionChange, pageComponentKey, flex_basis, flex_basis_percentage, removeAllocation, removeAllocations
+            closeModal, handleSelectionChange, pageComponentKey, flex_basis, flex_basis_percentage, removeAllocation, removeAllocations,
+            rightsModule
         }
     }
 }

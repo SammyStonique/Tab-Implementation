@@ -11,6 +11,8 @@
             @removeItem="removeLandlord"
             @removeSelectedItems="removeLandlords"
             @printList="printList"
+            :addingRight="addingRight"
+            :rightsModule="rightsModule"
             :columns="tableColumns"
             :rows="landlordList"
             :actions="actions"
@@ -58,6 +60,8 @@ export default{
         const modal_loader = ref('none');
         const idField = 'landlord_id';
         const addButtonLabel = ref('New Landlord');
+        const addingRight = ref('Adding Landlord');
+        const rightsModule = ref('PMS');
         const title = ref('Landlord Details');
         const submitButtonLabel = ref('Add');
         const selectedIds = ref([]);
@@ -90,9 +94,9 @@ export default{
             {label: "Properties", key:"property_count"},
         ])
         const actions = ref([
-            {name: 'edit', icon: 'fa fa-edit', title: 'Edit Landlord'},
+            {name: 'edit', icon: 'fa fa-edit', title: 'Edit Landlord', rightName: 'Editing Landlord'},
             {name: 'view', icon: 'fa fa-file-pdf-o', title: 'View Statement'},
-            {name: 'delete', icon: 'fa fa-trash', title: 'Delete Landlord'},
+            {name: 'delete', icon: 'fa fa-trash', title: 'Delete Landlord', rightName: 'Deleting Landlord'},
         ])
         const companyID = computed(()=> store.state.userData.company_id);
         const name_search = computed({
@@ -413,7 +417,7 @@ export default{
             loadPrev, loadNext, firstPage, lastPage, idField, actions, handleActionClick, propModalVisible, closeModal,
             submitButtonLabel, showModal, addNewLandlord, showLoader, loader, hideLoader, modal_loader, modal_top, modal_left, modal_width,displayButtons,
             showModalLoader, hideModalLoader, saveLandlord, formFields, handleSelectionChange, flex_basis,flex_basis_percentage,
-            importLandlords, removeLandlord, removeLandlords
+            importLandlords, removeLandlord, removeLandlords,addingRight,rightsModule
         }
     }
 };

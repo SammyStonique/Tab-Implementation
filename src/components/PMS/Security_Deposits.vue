@@ -10,6 +10,8 @@
             @removeItem="removeDeposit"
             @removeSelectedItems="removeDeposits"
             @printList="printList"
+            :addingRight="addingRight"
+            :rightsModule="rightsModule"
             :columns="tableColumns"
             :rows="depositList"
             :actions="actions"
@@ -57,6 +59,8 @@ export default{
         const modal_loader = ref('none');
         const idField = 'deposit_id';
         const addButtonLabel = ref('New Deposit');
+        const addingRight = ref('Adding Security Deposits');
+        const rightsModule = ref('PMS');
         const title = ref('Deposit Details');
         const submitButtonLabel = ref('Add');
         const ledComponentKey = ref(0);
@@ -87,8 +91,8 @@ export default{
             {label: "Default Value", key: "default_value"},
         ])
         const actions = ref([
-            {name: 'edit', icon: 'fa fa-edit', title: 'Edit Deposit'},
-            {name: 'delete', icon: 'fa fa-trash', title: 'Delete Deposit'},
+            {name: 'edit', icon: 'fa fa-edit', title: 'Edit Deposit', rightName: 'Editing Security Deposits'},
+            {name: 'delete', icon: 'fa fa-trash', title: 'Delete Deposit', rightName: 'Deleting Security Deposits'},
         ])
         const companyID = computed(()=> store.state.userData.company_id);
         const name_search = computed({
@@ -382,7 +386,7 @@ export default{
             loadPrev, loadNext, firstPage, lastPage, idField, actions, handleActionClick, propModalVisible, closeModal,
             submitButtonLabel, showModal, addNewDeposit, showLoader, loader, hideLoader, modal_loader, modal_top, modal_left, modal_width,displayButtons,
             showModalLoader, hideModalLoader, saveDeposit, formFields, handleSelectionChange, flex_basis,flex_basis_percentage,
-            removeDeposit, removeDeposits
+            removeDeposit, removeDeposits,addingRight,rightsModule
         }
     }
 };

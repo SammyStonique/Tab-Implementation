@@ -5,6 +5,7 @@
             <div class="fixed bg-white w-[93%] z-50">
                 <FilterBar 
                     :addButtonLabel="addButtonLabel" 
+                    :showAddButton="showAddButton"
                     :filters="searchFilters" 
                     @add-new=""
                     @search="searchIncomeStatement"
@@ -87,6 +88,7 @@ export default{
         const modal_loader = ref('none');
         const idField = '';
         const addButtonLabel = ref('');
+        const showAddButton = ref(false);
         const title = ref('');
         const submitButtonLabel = ref('Add');
         const periodComponentKey = ref(0);
@@ -286,7 +288,7 @@ export default{
             
         })
         return{
-            title, searchIncomeStatement,resetFilters, addButtonLabel, searchFilters, periodList,
+            showAddButton,title, searchIncomeStatement,resetFilters, addButtonLabel, searchFilters, periodList,
             idField, actions, propModalVisible,
             submitButtonLabel, showModal, showLoader, loader, hideLoader, modal_loader, modal_top, modal_left, modal_width,displayButtons,
             showModalLoader, hideModalLoader, formFields, handleSelectionChange, flex_basis,flex_basis_percentage,

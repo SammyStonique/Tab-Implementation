@@ -12,6 +12,8 @@
                     @removeItem="removeItem"
                     @removeSelectedItems="removeSelectedItems"
                     @printList="printList"
+                    :addingRight="addingRight"
+                    :rightsModule="rightsModule"
                     :dropdownOptions="dropdownOptions"
                     @handleDynamicOption="handleDynamicOption"
                     :options="options"
@@ -375,6 +377,8 @@ export default{
         const loader = ref('');
         const modal_loader = ref('none');
         const title = ref('Ledger Details');
+        const addingRight = ref('Adding Posting Account');
+        const rightsModule = ref('Accounts');
         const addButtonLabel = ref('New Ledger');
         const idField = 'ledger_id';
         const depModalVisible = ref(false);
@@ -474,9 +478,9 @@ export default{
             let formData = {
                 user: userID.value,
                 company: companyID.value,
-                module: "Accounts"
+                module: rightsModule.value
             }
-            this.axios
+            axios
             .post("api/v1/user-permissions-search/",formData)
             .then((response)=>{
                 allowedRights.value = response.data.results;
@@ -498,32 +502,7 @@ export default{
             flex_basis.value = '1/2';
             flex_basis_percentage.value = '50';
         }
-        const handleActionClick = async(rowIndex, action, row) =>{
-            if( action == 'edit'){
-                const categoryID = row[idField];
-                let formData = {
-                    company: companyID.value,
-                    category: categoryID
-                }
-                await store.dispatch('Client_Categories/fetchClientCategory',formData).
-                then(()=>{
-                    depModalVisible.value = true;
-                    flex_basis.value = '1/2';
-                    flex_basis_percentage.value = '50';
-                })
-                
-            }else if(action == 'delete'){
-                const categoryID = row[idField];
-                let formData = {
-                    company: companyID.value,
-                    category: categoryID
-                }
-                await store.dispatch('Client_Categories/deleteClientCategory',formData).
-                then(()=>{
-                    searchChartOfAccounts();
-                })
-            }
-        } 
+
         const handleReset = () =>{
             for(let i=0; i < formFields.value.length; i++){
                 formFields.value[i].value = '';
@@ -574,10 +553,12 @@ export default{
 
         }
         const editLedger = (index) =>{
-            depModalVisible.value = true;
-            store.commit('Ledgers/SET_SELECTED_LEDGER', chartOfAccountsList.value[index]); 
-            flex_basis.value = '1/2';
-            flex_basis_percentage.value = '50';         
+            if(!isDisabled('Editing Posting Account') ){
+                depModalVisible.value = true;
+                store.commit('Ledgers/SET_SELECTED_LEDGER', chartOfAccountsList.value[index]); 
+                flex_basis.value = '1/2';
+                flex_basis_percentage.value = '50'; 
+            }        
         };
         const updateLedger = async() =>{
             showModalLoader();
@@ -626,86 +607,88 @@ export default{
             }
         }
         const viewLedger = async(index) =>{
-            let formData = {
-                posting_account: chartOfAccountsList.value[index].ledger_id,
-                company: companyID.value,
-                date_from: "",
-                date_to: "",
+            if(!isDisabled('View Ledger Statement') ){
+                let formData1 = {
+                    ledger: chartOfAccountsList.value[index].ledger_id,
+                    company: companyID.value,
+                }
+                store.commit('pageTab/ADD_PAGE', {'FA':'Ledger_Details'});
+                store.state.pageTab.faActiveTab = 'Ledger_Details'; 
+                await store.dispatch('Ledgers/fetchLedger', formData1)
+                await store.dispatch('Ledgers/updateState', {ledgerID: chartOfAccountsList.value[index].ledger_id })
             }
-            let formData1 = {
-                ledger: chartOfAccountsList.value[index].ledger_id,
-                company: companyID.value,
-            }
-            store.commit('pageTab/ADD_PAGE', {'FA':'Ledger_Details'});
-            store.state.pageTab.faActiveTab = 'Ledger_Details'; 
-            await store.dispatch('Ledgers/fetchLedger', formData1)
-            await store.dispatch('Ledgers/updateState', {ledgerID: chartOfAccountsList.value[index].ledger_id })
         }
         const removeLedger = async(index) =>{
-            let formData = {
-                company: companyID.value,
-                ledger: chartOfAccountsList.value[index].ledger_id
+            if(!isDisabled('Deleting Posting Account') ){
+                let formData = {
+                    company: companyID.value,
+                    ledger: chartOfAccountsList.value[index].ledger_id
+                }
+                await store.dispatch('Ledgers/deleteLedger', formData); 
             }
-            await store.dispatch('Ledgers/deleteLedger', formData); 
         }
 
         const blockLedger = async(index) =>{
-            store.commit('Ledgers/SET_SELECTED_LEDGER', chartOfAccountsList.value[index]); 
-            let formData = {
-                ledger_type: selectedLedger.value.ledger_type,
-                ledger_code: selectedLedger.value.ledger_code,
-                ledger_name: selectedLedger.value.ledger_name,
-                financial_statement: selectedLedger.value.financial_statement,
-                ledger: selectedLedger.value.ledger_id,
-                status: "Inactive",
-                company: companyID.value
-            }
-            try {
-                const response = await store.dispatch('Ledgers/updateLedger', formData);
-                if (response && response.status === 200) {
-                    hideModalLoader();
-                    toast.success("Ledger Blocked Successfully!");
-                    handleReset();
-                } else {
-                    toast.error('An error occurred while blocking the Ledger.');
+            if(!isDisabled('Block Posting Account') ){
+                store.commit('Ledgers/SET_SELECTED_LEDGER', chartOfAccountsList.value[index]); 
+                let formData = {
+                    ledger_type: selectedLedger.value.ledger_type,
+                    ledger_code: selectedLedger.value.ledger_code,
+                    ledger_name: selectedLedger.value.ledger_name,
+                    financial_statement: selectedLedger.value.financial_statement,
+                    ledger: selectedLedger.value.ledger_id,
+                    status: "Inactive",
+                    company: companyID.value
                 }
-            } catch (error) {
-                console.error(error.message);
-                toast.error('Failed to block Ledger: ' + error.message);
-            } finally {
-                hideModalLoader();
-                store.dispatch("Ledgers/updateState",{isEditing:false, selectedLedger: null})
-                searchChartOfAccounts();
+                try {
+                    const response = await store.dispatch('Ledgers/updateLedger', formData);
+                    if (response && response.status === 200) {
+                        hideModalLoader();
+                        toast.success("Ledger Blocked Successfully!");
+                        handleReset();
+                    } else {
+                        toast.error('An error occurred while blocking the Ledger.');
+                    }
+                } catch (error) {
+                    console.error(error.message);
+                    toast.error('Failed to block Ledger: ' + error.message);
+                } finally {
+                    hideModalLoader();
+                    store.dispatch("Ledgers/updateState",{isEditing:false, selectedLedger: null})
+                    searchChartOfAccounts();
+                }
             }
         }
 
         const unblockLedger = async(index) =>{
-            store.commit('Ledgers/SET_SELECTED_LEDGER', chartOfAccountsList.value[index]); 
-            let formData = {
-                ledger_type: selectedLedger.value.ledger_type,
-                ledger_code: selectedLedger.value.ledger_code,
-                ledger_name: selectedLedger.value.ledger_name,
-                financial_statement: selectedLedger.value.financial_statement,
-                ledger: selectedLedger.value.ledger_id,
-                status: "Active",
-                company: companyID.value
-            }
-            try {
-                const response = await store.dispatch('Ledgers/updateLedger', formData);
-                if (response && response.status === 200) {
-                    hideModalLoader();
-                    toast.success("Ledger Unblocked Successfully!");
-                    handleReset();
-                } else {
-                    toast.error('An error occurred while unblocking the Ledger.');
+            if(!isDisabled('Block Posting Account') ){
+                store.commit('Ledgers/SET_SELECTED_LEDGER', chartOfAccountsList.value[index]); 
+                let formData = {
+                    ledger_type: selectedLedger.value.ledger_type,
+                    ledger_code: selectedLedger.value.ledger_code,
+                    ledger_name: selectedLedger.value.ledger_name,
+                    financial_statement: selectedLedger.value.financial_statement,
+                    ledger: selectedLedger.value.ledger_id,
+                    status: "Active",
+                    company: companyID.value
                 }
-            } catch (error) {
-                console.error(error.message);
-                toast.error('Failed to unblock Ledger: ' + error.message);
-            } finally {
-                hideModalLoader();
-                store.dispatch("Ledgers/updateState",{isEditing:false, selectedLedger: null})
-                searchChartOfAccounts();
+                try {
+                    const response = await store.dispatch('Ledgers/updateLedger', formData);
+                    if (response && response.status === 200) {
+                        hideModalLoader();
+                        toast.success("Ledger Unblocked Successfully!");
+                        handleReset();
+                    } else {
+                        toast.error('An error occurred while unblocking the Ledger.');
+                    }
+                } catch (error) {
+                    console.error(error.message);
+                    toast.error('Failed to unblock Ledger: ' + error.message);
+                } finally {
+                    hideModalLoader();
+                    store.dispatch("Ledgers/updateState",{isEditing:false, selectedLedger: null})
+                    searchChartOfAccounts();
+                }
             }
         }
 
@@ -839,8 +822,10 @@ export default{
             store.commit('Ledgers/RESET_SEARCH_FILTERS')
             searchChartOfAccounts();
         };
+
         onBeforeMount(()=>{
-            fetchDefaultSettings();           
+            fetchDefaultSettings();  
+            fetchEnabledRights();         
         });
         onMounted(()=>{
             searchChartOfAccounts();
@@ -849,15 +834,19 @@ export default{
             title,idField, searchChartOfAccounts, addButtonLabel, searchFilters, resetFilters, tableColumns, chartOfAccountsList,
             depResults, depArrLen, depCount, pageCount, showNextBtn, showPreviousBtn,modal_top, modal_left, modal_width,
             loadPrev, loadNext, firstPage, lastPage, actions, formFields, depModalVisible, addNewLedger,
-            displayButtons,flex_basis,flex_basis_percentage, handleActionClick, handleReset, saveLedger,
+            displayButtons,flex_basis,flex_basis_percentage, handleReset, saveLedger,
             showLoader, loader, hideLoader, modal_loader, showModalLoader, hideModalLoader, removeLedger,
-            fetchEnabledRights, isDisabled, editLedger, blockLedger, unblockLedger, viewLedger
+            fetchEnabledRights, isDisabled, editLedger, blockLedger, unblockLedger, viewLedger,addingRight,rightsModule
         }
     }
 }
 </script>
 
 <style scoped>
+.disabled {
+  opacity: 0.5;
+  pointer-events: none;
+}
 .table-container thead th {
   position: sticky;
   top: 0;

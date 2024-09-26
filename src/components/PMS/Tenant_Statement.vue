@@ -121,13 +121,13 @@
                         </div>
                     </div>
                     <div v-if="activeTab == 1">
-                        <DynamicTable :key="statementTableKey" :columns="statementColumns" :rows="statementRows" :idField="idFieldStatement" :showActions="showActions" :actions="actionsStatement"/>
+                        <DynamicTable :key="statementTableKey" :rightsModule="rightsModule" :columns="statementColumns" :rows="statementRows" :idField="idFieldStatement" :showActions="showActions" :actions="actionsStatement"/>
                     </div>          
                     <div v-if="activeTab == 2"> 
                         <div class="flex mb-1.5">
-                            <button @click="addNewDeposit" class="rounded bg-green-400 text-sm  text-white px-2 py-1.5"><i class="fa fa-plus" aria-hidden="true"></i>New Deposit</button>
+                            <button @click="addNewDeposit" :class="{ 'disabled': isDisabled('Adding Tenant Deposit') }" class="rounded bg-green-400 text-sm  text-white px-2 py-1.5"><i class="fa fa-plus" aria-hidden="true"></i>New Deposit</button>
                         </div>                    
-                        <DynamicTable :key="tableKey" :columns="depositColumns" :rows="computedDepositRows" :idField="idFieldDeposit" :actions="actionsDeposit" @action-click="depositActionClick" />
+                        <DynamicTable :key="tableKey" :rightsModule="rightsModule" :columns="depositColumns" :rows="computedDepositRows" :idField="idFieldDeposit" :actions="actionsDeposit" @action-click="depositActionClick" />
                         <MovableModal v-model:visible="depModalVisible" :title="depositTitle" :modal_top="modal_top" :modal_left="modal_left" :modal_width="modal_width"
                             :loader="dep_modal_loader" @showLoader="showDepModalLoader" @hideLoader="hideDepModalLoader" @closeModal="closeDepModal"
                         >
@@ -139,9 +139,9 @@
                     </div>
                     <div v-show="activeTab == 3"> 
                         <div class="flex mb-1.5">
-                            <button @click="addNewUtility" class="rounded bg-green-400 text-sm  text-white px-2 py-1.5"><i class="fa fa-plus" aria-hidden="true"></i>New Utility</button>
+                            <button @click="addNewUtility" :class="{ 'disabled': isDisabled('Adding Tenant Utility') }" class="rounded bg-green-400 text-sm  text-white px-2 py-1.5"><i class="fa fa-plus" aria-hidden="true"></i>New Utility</button>
                         </div>                   
-                        <DynamicTable :key="utilityTableKey" :columns="utilityColumns" :rows="computedUtilityRows" :idField="idFieldUtility" :actions="actionsUtility" @action-click="utilityActionClick" />
+                        <DynamicTable :key="utilityTableKey" :rightsModule="rightsModule" :columns="utilityColumns" :rows="computedUtilityRows" :idField="idFieldUtility" :actions="actionsUtility" @action-click="utilityActionClick" />
                         <MovableModal v-model:visible="utilModalVisible" :title="utilityTitle" :modal_top="modal_top" :modal_left="modal_left" :modal_width="modal_width"
                             :loader="util_modal_loader" @showLoader="showUtilModalLoader" @hideLoader="hideUtilModalLoader" @closeModal="closeUtilModal"
                         >
@@ -161,10 +161,10 @@
                         </MovableModal>
                     </div>
                     <div v-show="activeTab == 4">                   
-                        <DynamicTable :key="scheduleTableKey" :columns="scheduleColumns" :rows="scheduleRows" :idField="idFieldSchedule" :actions="actionsSchedule" @action-click="scheduleActionClick" />
+                        <DynamicTable :key="scheduleTableKey" :rightsModule="rightsModule" :columns="scheduleColumns" :rows="scheduleRows" :idField="idFieldSchedule" :actions="actionsSchedule" @action-click="scheduleActionClick" />
                     </div>  
                     <div v-show="activeTab == 5">                   
-                        <DynamicTable :key="variationTableKey" :columns="variationColumns" :rows="variationRows" :idField="idFieldVariation" :actions="actionsVariation" @action-click="variationActionClick" />
+                        <DynamicTable :key="variationTableKey" :rightsModule="rightsModule" :columns="variationColumns" :rows="variationRows" :idField="idFieldVariation" :actions="actionsVariation" @action-click="variationActionClick" />
                     </div>    
                 </div>
             </div>
@@ -195,6 +195,8 @@ export default defineComponent({
         const dep_modal_loader = ref('none');
         const util_modal_loader = ref('none');
         const void_modal_loader = ref('none');
+        const rightsModule = ref('PMS');
+        const allowedRights = ref([]);
         const voidModalVisible = ref(false);
         const depModalVisible = ref(false);
         const depositID = ref('');
@@ -213,6 +215,7 @@ export default defineComponent({
         const modal_width = ref('30vw');
         const void_modal_width = ref('45vw');
         const companyID = computed(()=> store.state.userData.company_id);
+        const userID = computed(()=> store.state.userData.user_id);
         const depositArray = computed(() => store.state.Security_Deposits.depositArr);
         const utilityArray = computed(() => store.state.Utilities.utilityArr);
         const taxArray = computed(() => store.state.Taxes.taxArr);
@@ -252,9 +255,9 @@ export default defineComponent({
         ]);
 
         const actionsDeposit = ref([
-            {name: 'book-invoice', icon: 'fa fa-spinner', title: 'Book Deposit'},
-            {name: 'unbook-invoice', icon: 'fa fa-minus-circle', title: 'Cancel Booking'},
-            {name: 'delete', icon: 'fa fa-trash', title: 'Delete Deposit'},
+            {name: 'book-invoice', icon: 'fa fa-spinner', title: 'Book Deposit', rightName: 'Booking Tenant Deposit'},
+            {name: 'unbook-invoice', icon: 'fa fa-minus-circle', title: 'Cancel Booking', rightName: 'Booking Tenant Deposit'},
+            {name: 'delete', icon: 'fa fa-trash', title: 'Delete Deposit', rightName: 'Deleting Tenant Deposit'},
         ]);
 
         const utilityColumns = ref([
@@ -270,9 +273,9 @@ export default defineComponent({
         ])
 
         const actionsUtility = ref([
-            {name: 'void-utility', icon: 'fa fa-minus-circle', title: 'Void Utility'},
-            {name: 'reactivate-utility', icon: 'fa fa-redo', title: 'Reactivate Utility'},
-            {name: 'delete', icon: 'fa fa-trash', title: 'Delete Utility'},
+            {name: 'void-utility', icon: 'fa fa-minus-circle', title: 'Void Utility', rightName: 'Voiding Tenant Utility'},
+            {name: 'reactivate-utility', icon: 'fa fa-redo', title: 'Reactivate Utility', rightName: 'Voiding Tenant Utility'},
+            {name: 'delete', icon: 'fa fa-trash', title: 'Delete Utility', rightName: 'Deleting Tenant Utility'},
         ]);
 
         const scheduleColumns = ref([
@@ -292,9 +295,9 @@ export default defineComponent({
         const showActions = ref(false);
 
         const actionsSchedule = ref([
-            {name: 'book-invoice', icon: 'fa fa-spinner', title: 'Book Rent'},
-            {name: 'unbook-invoice', icon: 'fa fa-minus-circle', title: 'Cancel Booking'},
-            {name: 'delete', icon: 'fa fa-trash', title: 'Delete Schedule'},
+            {name: 'book-invoice', icon: 'fa fa-spinner', title: 'Book Rent', rightName: 'Book Rental Invoice'},
+            {name: 'unbook-invoice', icon: 'fa fa-minus-circle', title: 'Cancel Booking', rightName: 'Cancel Invoice Booking'},
+            {name: 'delete', icon: 'fa fa-trash', title: 'Delete Schedule', rightName: 'Deleting Rent Schedules'},
         ]);
 
         const statementColumns = ref([
@@ -320,8 +323,8 @@ export default defineComponent({
         ]);
 
         const actionsVariation = ref([
-            {name: 'reset-schedules', icon: 'fa fa-refresh', title: 'Reset Schedules'},
-            {name: 'delete', icon: 'fa fa-trash', title: 'Delete Variation'},
+            {name: 'reset-schedules', icon: 'fa fa-refresh', title: 'Reset Schedules', rightName: 'Reset Rent Schedules'},
+            {name: 'delete', icon: 'fa fa-trash', title: 'Delete Variation', rightName: 'Deleting Rent Variation'},
         ]);
 
         const selectTab = async(index) => {
@@ -796,7 +799,30 @@ export default defineComponent({
             voidModalVisible.value = false;
             void_date.value = '';
             utilityFormData.value = null;
-        }
+        };
+        const fetchEnabledRights = () =>{
+            allowedRights.value = [];
+            let formData = {
+                user: userID.value,
+                company: companyID.value,
+                module: rightsModule.value
+            }
+            axios
+            .post("api/v1/user-permissions-search/",formData)
+            .then((response)=>{
+                allowedRights.value = response.data.results;
+            })
+            .catch((error)=>{
+                console.log(error.message);
+            })
+        };
+        const isDisabled =(permissionName) =>{
+            const permission = allowedRights.value.find(p => p.permission_name === permissionName);
+            return permission ? !permission.right_status : true;
+        };
+        onMounted(()=>{
+            fetchEnabledRights();
+        })
 
         return{
             tabs, activeTab, mainComponentKey, depositColumns, utilityColumns, selectTab, loader, showLoader, hideLoader, formFields, additionalFields,
@@ -807,13 +833,18 @@ export default defineComponent({
             addNewDeposit, addNewUtility, dep_modal_loader, util_modal_loader, depModalVisible, utilModalVisible, displayButtons, depositTitle, utilityTitle, 
             modal_top, modal_left, modal_width, showDepModalLoader, hideDepModalLoader, showUtilModalLoader, hideUtilModalLoader, handleDepReset,
             flex_basis, flex_basis_percentage, closeDepModal, closeUtilModal, handleUtilReset, createTenantDeposit, createTenantUtility, utilityActionClick,
-            void_date, voidTitle, void_modal_loader, voidModalVisible, void_modal_width, showVoidModalLoader, hideVoidModalLoader, closeVoidModal, voidUtility
+            void_date, voidTitle, void_modal_loader, voidModalVisible, void_modal_width, showVoidModalLoader, hideVoidModalLoader, closeVoidModal, voidUtility,
+            rightsModule,isDisabled
         }
     }
 })
 </script>
 
 <style scoped>
+.disabled {
+  opacity: 0.5;
+  pointer-events: none;
+}
 .tabs {
     display: flex;
     border-bottom: 1px solid #ccc;

@@ -1,6 +1,6 @@
 <template>
     <div class="filter-bar items-end h-20 border-b-2 border-gray-300 w-full mb-1.5">
-      <button @click="handleAddNew" class="rounded bg-green-400 text-sm  text-white px-2 py-1.5"><i class="fa fa-plus" aria-hidden="true"></i> {{ addButtonLabel }}</button>
+      <button @click="handleAddNew" v-if="showAddButton" class="rounded bg-green-400 text-sm  text-white px-2 py-1.5" :class="{ 'disabled': isDisabled(`${addingRight}`) }"><i class="fa fa-plus" aria-hidden="true"></i> {{ addButtonLabel }}</button>
       <div class="flex text-base flex-wrap gap-x-3 max-w-[800px]">
         <div v-for="(filter, index) in filters" :key="index" class="filter items-end pt-1.5" :class="{'w-full sm:w-1/2 md:w-1/3 lg:w-1/4' : filters.length > 4 && index > 3}">
           <div v-if="filter.type === 'text'" class="mr-2">
@@ -58,7 +58,10 @@
   <script>
   import SearchableDropdown from '@/components/SearchableDropdown.vue'
   import MovableModal from './MovableModal.vue';
-  import { defineComponent,ref } from 'vue';
+  import { ref, computed, defineComponent, onMounted, onBeforeMount} from 'vue';
+  import axios from "axios";
+  import { useStore } from "vuex";
+
   export default defineComponent({
     name: 'FilterBar',
     props: {
@@ -69,6 +72,11 @@
       addButtonLabel: {
         type: String,
         default: 'Add New'
+      },
+      showAddButton: {
+        type: Boolean,
+        default: true,
+        required: false
       },
       actionsButtonLabel: {
         type: String,
@@ -122,14 +130,28 @@
         type: String,
         default: () => ''
       },
+      rightsModule:{
+        type: String,
+        default: () => ''
+      },
+      addingRight:{
+        type: String,
+        default: () => ''
+      },
     },
     components:{
       SearchableDropdown, MovableModal
     },
-    setup(_,{emit}){
+    setup(props,{emit}){
+      const store = useStore(); 
       const dropdown = ref(false);
+      const allowedRights = ref([]);
+      const companyID = computed(()=> store.state.userData.company_id);
+      const userID = computed(()=> store.state.userData.user_id);
       const handleAddNew = () =>{
-        emit('add-new');
+        if(!isDisabled(props.addingRight) ){
+          emit('add-new');
+        }
       }
       const handleReset = () =>{
         emit('reset');
@@ -167,17 +189,44 @@
       const hideModalLoader = () =>{
         emit('hideModalLoader')
       }
+      const fetchEnabledRights = () =>{
+        allowedRights.value = [];
+        let formData = {
+          user: userID.value,
+          company: companyID.value,
+          module: props.rightsModule
+        }
+        axios
+        .post("api/v1/user-permissions-search/",formData)
+        .then((response)=>{
+          allowedRights.value = response.data.results;
+        })
+        .catch((error)=>{
+          console.log(error.message);
+        })
+      };
+      const isDisabled =(permissionName) =>{
+          const permission = allowedRights.value.find(p => p.permission_name === permissionName);
+          return permission ? !permission.right_status : true;
+      };
+      onBeforeMount(() =>{
+        fetchEnabledRights();
+      })
 
       return{
         dropdown, handleAddNew, handleReset, showDropdown, optionSelected, handleSearch, clearSearch,
         importData, removeItem, removeSelectedItems, printList, handleDynamicOption, showModalLoader,
-        hideModalLoader
+        hideModalLoader,isDisabled,
       }
     },
   });
   </script>
   
   <style scoped>
+  .disabled {
+    opacity: 0.5;
+    pointer-events: none;
+  }
   .filter-bar {
     display: flex;
     /* align-items: center; */
