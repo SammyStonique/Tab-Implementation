@@ -122,7 +122,7 @@ export default{
             set: (value) => store.commit('Prepayment_Allocations/SET_SEARCH_FILTERS', {"to_date_search":value}),
         });
         const fetchInvoices = async(tenantID) =>{
-            await store.dispatch('Journals/fetchJournals', {company:companyID.value, customer: tenantID, txn_type: "INV", status: "Open"})
+            await store.dispatch('Journals/fetchJournals', {company:companyID.value, customer: tenantID.value, txn_type: ["INV","DBN"], status: "Open"})
         };
         const handleSelectedInvoice = async(option) =>{
             await store.dispatch('Journals/handleSelectedJournal', option)

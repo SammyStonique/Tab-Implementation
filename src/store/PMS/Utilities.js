@@ -183,8 +183,21 @@ const actions = {
 };
   
 const getters = {
-  // users: (state) => state.users,
-  // currentUser: (state) => state.currentUser,
+  getFormatedUtilities: (state) =>{
+    const formattedUtilities = state.utilitiesList.map((utility) => {
+      return {
+        text: utility.name,
+        value: utility.utility_id,
+      };
+    });
+    const additionalOptions = [
+      { text: "Rent", value: "Rent" },
+      { text: "Deposit", value: "Deposit" },
+      { text: "Penalty", value: "Penalty" },
+      { text: "Other", value: "Other" },
+    ]
+    return [...additionalOptions , ...formattedUtilities];
+  },
 };
   
 export default {

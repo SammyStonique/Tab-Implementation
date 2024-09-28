@@ -554,6 +554,94 @@ const actions = {
       }
     })
   },
+  deleteDebitNote({ commit,state }, formData) {
+    Swal.fire({
+      title: "Are you sure?",
+      text: `Do you wish to delete Debit Note?`,
+      type: 'warning',
+      showCloseButton: true,
+      showCancelButton: true,
+      confirmButtonText: 'Yes Delete Debit Note!',
+      cancelButtonText: 'Cancel!',
+      customClass: {
+          confirmButton: 'swal2-confirm-custom',
+          cancelButton: 'swal2-cancel-custom',
+      },
+      showLoaderOnConfirm: true,
+    }).then((result) => {
+      if (result.value) {
+        axios.post(`api/v1/delete-journal/`,formData)
+        .then((response)=>{
+          if(response.data.msg == "Success"){
+              Swal.fire("Poof! Debit Note(s) removed succesfully!", {
+                icon: "success",
+              }); 
+          }else if(response.data.msg == "Paid"){
+            Swal.fire({
+              title: "Cannot Delete Paid Debit Note",
+              icon: "warning",
+            });
+          }else if(response.data.msg == "Prepayment"){
+            Swal.fire({
+              title: "Debit Note Has A Prepayment Allocation",
+              icon: "warning",
+            });
+          }                   
+        })
+        .catch((error)=>{
+          console.log(error.message);
+          Swal.fire({
+            title: error.message,
+            icon: "warning",
+          });
+        })
+      }else{
+        Swal.fire(`Debit Note has not been deleted!`);
+      }
+    })
+  },
+  deleteCreditNote({ commit,state }, formData) {
+    Swal.fire({
+      title: "Are you sure?",
+      text: `Do you wish to delete Credit Note?`,
+      type: 'warning',
+      showCloseButton: true,
+      showCancelButton: true,
+      confirmButtonText: 'Yes Delete Credit Note!',
+      cancelButtonText: 'Cancel!',
+      customClass: {
+          confirmButton: 'swal2-confirm-custom',
+          cancelButton: 'swal2-cancel-custom',
+      },
+      showLoaderOnConfirm: true,
+    }).then((result) => {
+      if (result.value) {
+        axios.post(`api/v1/delete-journal/`,formData)
+        .then((response)=>{
+          if(response.data.msg == "Success"){
+              Swal.fire("Poof! Credit Note(s) removed succesfully!", {
+                icon: "success",
+              }); 
+              toast.success("Credit Note(s) removed succesfully")
+          }else{
+            Swal.fire({
+              title: "Cannot Delete Credit Note",
+              icon: "warning",
+            });
+          }                   
+        })
+        .catch((error)=>{
+          console.log(error.message);
+          Swal.fire({
+            title: error.message,
+            icon: "warning",
+          });
+        })
+      }else{
+        Swal.fire(`Credit Note has not been deleted!`);
+      }
+    })
+  },
   previewClientInvoice({commit,state}, formData){
     axios
     .post(`api/v1/client-invoice-pdf/`, formData, { responseType: 'blob' })

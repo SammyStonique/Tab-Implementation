@@ -43,7 +43,7 @@ import { useStore } from "vuex";
 import { useToast } from "vue-toastification";
 
 export default{
-    name: 'Tenant_Receipts',
+    name: 'Credit_Notes',
     components:{
         PageComponent
     },
@@ -54,8 +54,8 @@ export default{
         const modal_loader = ref('none');
         const mainComponentKey = ref(0);
         const idField = 'journal_id';
-        const addButtonLabel = ref('New Receipt');
-        const addingRight = ref('Adding Tenant Receipt');
+        const addButtonLabel = ref('New Credit Note');
+        const addingRight = ref('Adding Credit Notes');
         const rightsModule = ref('PMS');
         const submitButtonLabel = ref('Add');
         const title = ref('Receipt Reversal');
@@ -80,22 +80,17 @@ export default{
         const displayButtons = ref(true);
         const errors = ref([]);
         const propertySearchID = ref('');
-        const ledgerSearchID = ref('');
-        const ledgerArray = computed(() => store.state.Ledgers.ledgerArr);
         const propertyArray = computed(() => store.state.Properties_List.propertyArr);
         const showModal = ref(false);
         const tableColumns = ref([
             {type: "checkbox"},
-            {label: "Receipt#", key:"journal_no"},
+            {label: "C.Note#", key:"journal_no"},
             {label: "Date", key: "date"},
-            {label: "B.Date", key: "banking_date"},
             {label: "Tenant Name", key:"tenant_name"},
             {label: "Property Name", key:"property_name"},
             {label: "Unit", key:"unit_number"},
-            {label: "Cashbook", key:"cashbook"},
-            {label: "P.Method", key:"payment_method"},
-            {label: "Ref No", key:"reference_no"},
-            {label: "Amnt", key:"total_amount", type:"number"},
+            {label: "Description", key:"description"},
+            {label: "Amount", key:"total_amount", type:"number"},
             {label: "Done By", key:"done_by"},
         ])
         const showTotals = ref(true);
@@ -115,17 +110,6 @@ export default{
         const clearSearchProperty = async() =>{
             await store.dispatch('Properties_List/updateState', {propertyID: ''});
             propertySearchID.value = ""
-        }
-        const fetchLedgers = async() =>{
-            await store.dispatch('Ledgers/fetchLedgers', {company:companyID.value, ledger_type: 'Cashbook'})
-        };
-        const handleSearchLedger = async(option) =>{
-            await store.dispatch('Ledgers/handleSelectedLedger', option)
-            ledgerSearchID.value = store.state.Ledgers.ledgerID;
-        };
-        const clearSearchLedger = async() =>{
-            await store.dispatch('Ledgers/updateState', {ledgerID: ''});
-            ledgerSearchID.value = ""
         }
         const tenant_name_search = computed({
             get: () => store.state.Journals.client_name_search,
@@ -154,12 +138,6 @@ export default{
                 searchPlaceholder: 'Property Search...', dropdownWidth: '200px',
                 fetchData: fetchProperties(), clearSearch: clearSearchProperty()             
             },
-            {
-                type:'search-dropdown', value: ledgerSearchID.value, width:48,
-                selectOptions: ledgerArray, optionSelected: handleSearchLedger,
-                searchPlaceholder: 'Cashbook Search...', dropdownWidth: '250px',
-                fetchData: fetchLedgers(), clearSearch: clearSearchLedger()   
-            },
         ]);
         const handleSelectionChange = (ids) => {
             selectedIds.value = ids;
@@ -172,7 +150,6 @@ export default{
             ledComponentKey.value += 1;
             tntComponentKey.value += 1;
             propertySearchID.value = '';
-            ledgerSearchID.value = '';
         }
 
 
@@ -189,27 +166,27 @@ export default{
                 let formData = {
                     company: companyID.value,
                     journal: selectedIds.value,
-                    txn_type: "RCPT"
+                    txn_type: "CDN"
                 }
                 try{
-                    const response = await store.dispatch('Journals/deleteReceipt',formData)
+                    const response = await store.dispatch('Journals/deleteCreditNote',formData)
                     if(response && response.status == 200){
-                        toast.success("Receipt Removed Succesfully");
+                        toast.success("Credit Note Removed Succesfully");
                         mainComponentKey.value += 1;
                         searchReceipts();
                     }
                 }
                 catch(error){
                     console.error(error.message);
-                    toast.error('Failed to remove Receipt: ' + error.message);
+                    toast.error('Failed to remove Credit Note: ' + error.message);
                 }
                 finally{
                     selectedIds.value = [];
                 }
             }else if(selectedIds.value.length > 1){
-                toast.error("You have selected more than 1 Receipt") 
+                toast.error("You have selected more than 1 Credit Note") 
             }else{
-                toast.error("Please Select A Receipt To Remove")
+                toast.error("Please Select A Credit Note To Remove")
             }
         }
         const removeReceipts = async() =>{
@@ -217,25 +194,25 @@ export default{
                 let formData = {
                     company: companyID.value,
                     journal: selectedIds.value,
-                    txn_type: "RCPT"
+                    txn_type: "CDN"
                 }
                 try{
-                    const response = await store.dispatch('Journals/deleteReceipt',formData)
+                    const response = await store.dispatch('Journals/deleteCreditNote',formData)
                     if(response && response.status == 200){
-                        toast.success("Receipt(s) Removed Succesfully");
+                        toast.success("Credit Note(s) Removed Succesfully");
                         mainComponentKey.value += 1;
                         searchReceipts();
                     }
                 }
                 catch(error){
                     console.error(error.message);
-                    toast.error('Failed to remove Receipt(s): ' + error.message);
+                    toast.error('Failed to remove Credit Note(s): ' + error.message);
                 }
                 finally{
                     selectedIds.value = [];
                 }
             }else{
-                toast.error("Please Select A Receipt To Remove")
+                toast.error("Please Select A Credit Note To Remove")
             }
         }
         const showLoader = () =>{
@@ -250,7 +227,7 @@ export default{
             showPreviousBtn.value = false;
             let formData = {
                 client_category: "Tenants",
-                txn_type: "RCPT",
+                txn_type: "CDN",
                 client_name: tenant_name_search.value,
                 client_code: tenant_code_search.value,
                 from_date: from_date_search.value,
@@ -263,7 +240,7 @@ export default{
             .post(`api/v1/clients-journals-search/?page=${currentPage.value}`,formData)
             .then((response)=>{
                 receiptsList.value = response.data.results;
-                store.commit('Journals/LIST_TENANTS_RECEIPTS', receiptsList.value)
+                store.commit('Journals/LIST_TENANTS_CREDIT_NOTES', receiptsList.value)
                 propResults.value = response.data;
                 propArrLen.value = receiptsList.value.length;
                 propCount.value = propResults.value.count;
@@ -318,8 +295,8 @@ export default{
         }
         const addNewReceipt = async() =>{
             store.dispatch('Journals/updateState', {journalsClientList: [], outstandingBalance:0})
-            store.commit('pageTab/ADD_PAGE', {'PMS':'Receipt_Details'});
-            store.state.pageTab.pmsActiveTab = 'Receipt_Details'; 
+            store.commit('pageTab/ADD_PAGE', {'PMS':'Credit_Note_Details'});
+            store.state.pageTab.pmsActiveTab = 'Credit_Note_Details'; 
         }
         const handleActionClick = async(rowIndex, action, row) =>{
             if(action == 'delete'){
@@ -328,7 +305,7 @@ export default{
                     company: companyID.value,
                     journal: journalID
                 }
-                await store.dispatch('Journals/deleteReceipt',formData)
+                await store.dispatch('Journals/deleteCreditNote',formData)
                 mainComponentKey.value += 1;
                 searchReceipts();       
             }

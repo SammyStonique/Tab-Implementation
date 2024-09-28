@@ -86,7 +86,7 @@ export default{
             {type: "checkbox"},
             {label: "Code", key:"tenant_code",type: "text", editable: false},
             {label: "Tenant Name", key:"tenant_name",type: "text", editable: false},
-            {label: "Tenant Unit", key:"tenant_unit",type: "text", editable: false},
+            {label: "Unit", key:"unit_number",type: "text", editable: false},
             {label: "Phone No", key:"phone_number",type: "text", editable: false},
             {label: "Email", key:"tenant_email",type: "text", editable: false},
             {label: "Property Name", key:"property_name",type: "text", editable: false},

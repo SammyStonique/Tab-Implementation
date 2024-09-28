@@ -8,6 +8,8 @@ const state = {
   tenantID: null,
   tenantUnitID: null,
   tenantName: '',
+  tenantLedger: '',
+  tenantCode: '',
   name_search: '',
   tenant_code_search: '',
   phone_number_search: '',
@@ -29,7 +31,8 @@ const state = {
   tenantUnitsArr: [],
   tenantUnitsList: [],
   tenantUnitsArray: [],
-  currentTab: "Tenant_Biodata"
+  currentTab: "Tenant_Biodata",
+  allotablePrepayment: 0
 };
   
 const mutations = {
@@ -37,6 +40,7 @@ const mutations = {
     state.tenantList = [];
     state.tenantArr = [];
     state.tenantArray = [];
+    state.tenantCode = "";
     state.name_search = '';
     state.tenant_code_search = '';
     state.phone_number_search = '';
@@ -56,6 +60,7 @@ const mutations = {
     state.tenantUnitsList = [];
     state.tenantUnitsArr = [];
     state.tenantUnitsArray = [];
+    state.allotablePrepayment = 0;
   },
   SET_SELECTED_TENANT(state, tenant) {
     state.selectedTenant = tenant;
@@ -63,6 +68,9 @@ const mutations = {
   },
   SET_RENT_SCHEDULES(state, schedules) {
     state.rentSchedules = schedules;
+  },
+  SET_ALLOTABLE_PREPAYMENT(state, prepayment) {
+    state.allotablePrepayment = prepayment;
   },
   SET_TENANT_LEASE(state, tenant){
     state.tenantLease = tenant;
@@ -275,8 +283,20 @@ const actions = {
     if (selectedUnit) {
         state.tenantUnitID = selectedUnit.tenant_unit_id;
         state.tenantID = selectedUnit.tenant.tenant.tenant_id;
+        state.tenantCode = selectedUnit.tenant.tenant.tenant_code; 
+        state.tenantLedger = selectedUnit.tenant.tenant.ledger_id;  
         state.tenantUnitsArray = [...state.tenantUnitsArray, selectedUnit];
     }
+    let formData = {
+      tenant: selectedUnit.tenant.tenant_lease_id
+    }
+    axios.post(`api/v1/check-tenant-prepayment/`,formData)
+    .then((response)=>{
+        commit('SET_ALLOTABLE_PREPAYMENT',response.data.allotable_prepayment);
+    })
+    .catch((error)=>{
+      console.log(error.message);
+    })
       
   },
   fetchRentSchedules({ commit,state }, formData){

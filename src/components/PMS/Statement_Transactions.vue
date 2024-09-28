@@ -83,7 +83,7 @@ export default{
         const flex_basis_percentage = ref('');
         const displayButtons = ref(true);
         const errors = ref([]);
-        const modal_top = ref('120px');
+        const modal_top = ref('80px');
         const modal_left = ref('400px');
         const modal_width = ref('30vw');
         const isEditing = computed(()=> store.state.Statement_Transactions.isEditing);
@@ -202,16 +202,21 @@ export default{
             utilityID.value = ""
         }
         const formFields = ref([]);
+        const utilityValue = computed(() => {
+           return (selectedTransaction.value && selectedTransaction.value.utility && !utilityID.value) ? selectedTransaction.value.utility.utility_id : utilityID.value;
+
+        });
         const updateFormFields = () => {
             formFields.value = [
                 { type: 'dropdown', name: 'transaction_type',label: "Type", value: selectedTransaction.value?.transaction_type || '', placeholder: "", required: true, options: [{ text: 'Rent', value: 'Rent' }, { text: 'Rent Prep Alloc', value: 'Rent Prep Alloc' },{ text: 'Prepayment', value: 'Prepayment' },{ text: 'Deposit', value: 'Deposit' }, { text: 'Deposit Prep Alloc', value: 'Deposit Prep Alloc' },{ text: 'Utility', value: 'Utility' }, { text: 'Utility Prep Alloc', value: 'Utility Prep Alloc' },
                         { text: 'Penalty', value: 'Penalty' }, { text: 'Penalty Prep Alloc', value: 'Penalty Prep Alloc' },{ text: 'Other', value: 'Other' }, { text: 'Other Prep Alloc', value: 'Other Prep Alloc' }] },
                 {
-                    type:'search-dropdown', label:"Utility", value: utilityID.value, componentKey: utilComponentKey,
+                    type:'search-dropdown', label:"Utility", value: utilityValue.value, componentKey: utilComponentKey,
                     selectOptions: utilityArray, optionSelected: handleSelectedUtility, required: false,
                     searchPlaceholder: 'Select Utility...', dropdownWidth: '400px', updateValue: selectedUtility.value,
                     fetchData: fetchUtilities(), clearSearch: clearSelectedUtility()            
                 },
+                { type: 'date', name: 'date',label: "Date", value: selectedTransaction.value?.date || "", required: true },
                 {type:'text-area', label:"Description", value: selectedTransaction.value?.description || "" , textarea_rows: '2', textarea_cols: '44', required: true},
                 { type: 'number', name: 'bill',label: "Bill", value: selectedTransaction.value?.bill || 0, required: true },
                 { type: 'number', name: 'bill_tax',label: "Bill Tax", value: selectedTransaction.value?.bill_tax || 0, required: false },
@@ -223,7 +228,7 @@ export default{
             for(let i=0; i < formFields.value.length; i++){
                 formFields.value[i].value = '';
             }
-            utilityID.value = "";
+            utilityValue.value = "";
             utilComponentKey.value += 1;
         }
 
@@ -245,17 +250,33 @@ export default{
         const createTransaction = async() =>{
             showModalLoader();
             let formData = {
-                name: formFields.value[0].value,
-                default_mode: formFields.value[1].value,
-                default_value: formFields.value[2].value || 0,
+                tenant: selectedTransaction.value.tenant.tenant_unit_id,
+                tenant_id: selectedTransaction.value.tenant.tenant_unit_id,
+                date: formFields.value[2].value,
+                banking_date: selectedTransaction.value.banking_date,
+                transaction_type: formFields.value[0].value,
+                description: formFields.value[3].value,
+                schedule: selectedTransaction.value.schedule,
+                journal: selectedTransaction.value.journal,
+                utility: utilityValue.value,
+                utility_id: utilityValue.value,
+                client_id: selectedTransaction.value.client_id,
+                bill: formFields.value[4].value,
+                bill_tax: formFields.value[5].value,
+                paid: formFields.value[6].value,
+                paid_tax: formFields.value[7].value,
+                processed: selectedTransaction.value.processed,
                 company: companyID.value
             }
-            console.log("THE FORM DATA IS ",formData);
+
             errors.value = [];
-            for(let i=0; i < formFields.value.length; i++){
+            for(let i=2; i < formFields.value.length; i++){
                 if(formFields.value[i].value =='' && formFields.value[i].required == true){
                     errors.value.push(formFields.value[i].label);
                 }
+            }
+            if(formFields.value[0].value == ""){
+                errors.value.push("Error")
             }
             if(errors.value.length){
                 toast.error('Fill In Required Fields');
@@ -283,17 +304,34 @@ export default{
             showModalLoader();
             errors.value = [];
             let formData = {
-                deposit: selectedTransaction.value.deposit_id,
-                name: formFields.value[0].value,
-                default_mode: formFields.value[1].value,
-                default_value: formFields.value[2].value,
+                statement_transaction: selectedTransaction.value.statement_transaction_id,
+                tenant: tenantID.value,
+                tenant_id: tenantID.value,
+                date: formFields.value[2].value,
+                banking_date: formFields.value[2].value,
+                transaction_type: formFields.value[0].value,
+                description: formFields.value[3].value,
+                schedule: null,
+                journal: null,
+                utility: utilityValue.value,
+                utility_id: utilityValue.value,
+                client_id: tenantID.value,
+                bill: formFields.value[4].value,
+                bill_tax: formFields.value[5].value,
+                paid: formFields.value[6].value,
+                paid_tax: formFields.value[7].value,
+                processed: "False",
                 company: companyID.value
             }
 
-            for(let i=0; i < formFields.value.length; i++){
+            for(let i=2; i < formFields.value.length; i++){
                 if(formFields.value[i].value =='' && formFields.value[i].required == true){
                     errors.value.push(formFields.value[i].label );
                 }
+            }
+
+            if(formFields.value[0].value == ""){
+                errors.value.push("Error")
             }
 
             if(errors.value.length){

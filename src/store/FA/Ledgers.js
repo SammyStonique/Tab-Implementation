@@ -229,6 +229,7 @@ const actions = {
         state.ledgerID = selectedLedger.ledger_id;
         state.ledgerName = selectedLedger.ledger_code + " - " + selectedLedger.ledger_name;
         selectedLedger.posting_account = selectedLedger.ledger_code + " - " + selectedLedger.ledger_name;
+        selectedLedger.charge_type = "";
         selectedLedger.description = "";
         selectedLedger.cost = 0;
         selectedLedger.quantity = 1;
