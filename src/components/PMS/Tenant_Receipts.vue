@@ -12,7 +12,7 @@
             @resetFilters="resetFilters"
             @removeItem="removeReceipt"
             @removeSelectedItems="removeReceipts"
-            @printList="printList"
+            @printList="printReceiptsList"
             :addingRight="addingRight"
             :rightsModule="rightsModule"
             :columns="tableColumns"
@@ -41,6 +41,7 @@ import { ref, computed, onMounted, onBeforeMount, watch} from 'vue';
 import PageComponent from '@/components/PageComponent.vue';
 import { useStore } from "vuex";
 import { useToast } from "vue-toastification";
+import PrintJS from 'print-js';
 
 export default{
     name: 'Tenant_Receipts',
@@ -86,14 +87,14 @@ export default{
         const showModal = ref(false);
         const tableColumns = ref([
             {type: "checkbox"},
-            {label: "Receipt#", key:"journal_no"},
+            {label: "Rcpt#", key:"journal_no"},
             {label: "Date", key: "date"},
             {label: "B.Date", key: "banking_date"},
             {label: "Tenant Name", key:"tenant_name"},
             {label: "Property Name", key:"property_name"},
             {label: "Unit", key:"unit_number"},
             {label: "Cashbook", key:"cashbook"},
-            {label: "P.Method", key:"payment_method"},
+            {label: "P.Mthd", key:"payment_method"},
             {label: "Ref No", key:"reference_no"},
             {label: "Amnt", key:"total_amount", type:"number"},
             {label: "Done By", key:"done_by"},
@@ -331,6 +332,32 @@ export default{
                 await store.dispatch('Journals/deleteReceipt',formData)
                 mainComponentKey.value += 1;
                 searchReceipts();       
+            }else if(action == 'print'){
+                showLoader();
+                const journalID = row['journal_id'];
+                let formData = {
+                    receipt: journalID,
+                    client: row['customer_id'],
+                    type: "RCPT",
+                    company: companyID.value
+                }
+                await store.dispatch('Journals/previewTenantReceipt',formData).
+                then(()=>{
+                    hideLoader();
+                })
+            }else if(action == 'download'){
+                showLoader();
+                const journalID = row['journal_id'];
+                let formData = {
+                    receipt: journalID,
+                    client: row['customer_id'],
+                    type: "RCPT",
+                    company: companyID.value
+                }
+                await store.dispatch('Journals/downloadTenantReceipt',formData).
+                then(()=>{
+                    hideLoader();
+                })
             }
         }
         const closeModal = async() =>{
@@ -345,6 +372,37 @@ export default{
                 store.commit('pageTab/ADD_PAGE', {'PMS':'Batch_Readings'})
                 store.state.pageTab.pmsActiveTab = 'Batch_Readings';
             }
+        };
+        const printReceiptsList = () =>{
+            showLoader();
+
+            let formData = {
+                journal_no: "",
+                reference_no: "",
+                client: "",
+                client_category: "Tenants",
+                payment_method: "",
+                txn_type: "RCPT",
+                date_from: from_date_search.value,
+                date_to: to_date_search.value,
+                company_id: companyID.value,
+            }
+            axios
+            .post("api/v1/export-rental-receipts-pdf/", formData, { responseType: 'blob' })
+            .then((response)=>{
+                if(response.status == 200){
+                    const blob1 = new Blob([response.data]);
+                    // Convert blob to URL
+                    const url = URL.createObjectURL(blob1);
+                    PrintJS({printable: url, type: 'pdf'});
+                }
+            })
+            .catch((error)=>{
+                console.log(error.message);
+            })
+            .finally(()=>{
+                hideLoader();
+            })
         }
         onBeforeMount(()=>{
             searchReceipts();
@@ -356,7 +414,7 @@ export default{
             loadPrev, loadNext, firstPage, lastPage, idField, actions, handleActionClick, propModalVisible, closeModal,
             submitButtonLabel, showModal, addNewReceipt, showLoader, loader, hideLoader, modal_loader, modal_top, modal_left, modal_width,displayButtons,
             showModalLoader, hideModalLoader, handleSelectionChange, flex_basis,flex_basis_percentage,
-            removeReceipt, removeReceipts, dropdownOptions, handleDynamicOption,addingRight,rightsModule
+            removeReceipt, removeReceipts, dropdownOptions, handleDynamicOption,addingRight,rightsModule,printReceiptsList
         }
     }
 };

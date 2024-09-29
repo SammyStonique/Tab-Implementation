@@ -746,6 +746,74 @@ const actions = {
         console.log(error.message);
     })
   },
+  previewTenantInvoice({commit,state}, formData){
+    axios
+    .post(`api/v1/tenant-invoice-pdf/`, formData, { responseType: 'blob' })
+    .then((response) => {
+      if(response.status == 200){
+        const blob1 = new Blob([response.data]);
+        // Convert blob to URL
+        const url = URL.createObjectURL(blob1);
+        PrintJS({printable: url, type: 'pdf'});
+    }
+    
+    })
+    .catch((error)=>{
+        console.log(error.message);
+    })
+  },
+  downloadTenantInvoice({commit,state}, formData){
+    axios
+    .post(`api/v1/tenant-invoice-pdf/`, formData, { responseType: 'blob' })
+    .then((response) => {
+    if(response.status == 200){
+        const url = window.URL.createObjectURL(new Blob([response.data]));
+        const link = document.createElement('a');
+        link.href = url;
+        link.setAttribute('download', 'Tenant Invoice.pdf');
+        document.body.appendChild(link);
+        link.click();
+    }
+    
+    })
+    .catch((error)=>{
+        console.log(error.message);
+    })
+  },
+  previewTenantReceipt({commit,state}, formData){
+    axios
+    .post(`api/v1/tenant-receipt-pdf/`, formData, { responseType: 'blob' })
+    .then((response) => {
+      if(response.status == 200){
+        const blob1 = new Blob([response.data]);
+        // Convert blob to URL
+        const url = URL.createObjectURL(blob1);
+        PrintJS({printable: url, type: 'pdf'});
+    }
+    
+    })
+    .catch((error)=>{
+        console.log(error.message);
+    })
+  },
+  downloadTenantReceipt({commit,state}, formData){
+    axios
+    .post(`api/v1/tenant-receipt-pdf/`, formData, { responseType: 'blob' })
+    .then((response) => {
+    if(response.status == 200){
+        const url = window.URL.createObjectURL(new Blob([response.data]));
+        const link = document.createElement('a');
+        link.href = url;
+        link.setAttribute('download', 'Tenant Receipt.pdf');
+        document.body.appendChild(link);
+        link.click();
+    }
+    
+    })
+    .catch((error)=>{
+        console.log(error.message);
+    })
+  },
 };
   
 const getters = {

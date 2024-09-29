@@ -102,6 +102,8 @@ export default{
             {label: "Property Name", key:"property_name"},
             {label: "Description", key:"description"},
             {label: "Amount", key:"amount", type: "number"},
+            {label: "Paid", key:"paid", type: "number"},
+            {label: "Balance", key:"balance", type: "number"},
         ])
         const showTotals = ref(true);
         const actions = ref([

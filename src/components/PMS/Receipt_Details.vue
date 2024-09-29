@@ -338,7 +338,7 @@ export default defineComponent({
                 }else{            
                     try {
                         const response = await store.dispatch('Journals/createTenantReceipt', formData);
-                        if (response && response.status === 200) {
+                        if (response && response.data.msg === "Success") {
                             hideLoader();
                             toast.success('Receipt created successfully!');
                             handleReset();
@@ -346,7 +346,11 @@ export default defineComponent({
                             propComponentKey.value += 1;
                             ledComponentKey.value += 1;
                             tntComponentKey.value += 1;
-                        } else {
+                        }else if(response && response.data.msg === "Exists"){
+                            hideLoader();
+                            toast.error('Duplicate Reference No!');
+                        }
+                         else {
                             toast.error('An error occurred while creating the receipt.');
                             hideLoader();
                         }

@@ -33,7 +33,7 @@
     >
         <DynamicForm 
             :fields="formFields" :flex_basis="flex_basis" :flex_basis_percentage="flex_basis_percentage" 
-            :displayButtons="displayButtons" @handleSubmit="allocatePrepayment" @handleReset="handleReset"
+            :displayButtons="displayButtons" @handleSubmit="" @handleReset=""
         />
     </MovableModal>
 </template>
@@ -65,14 +65,6 @@ export default{
         const title = ref('Prepayment Allocation');
         const rightsModule = ref('PMS');
         const companyID = computed(()=> store.state.userData.company_id);
-        const tenantID = ref("");
-        const prepaymentID = ref("");
-        const prepaymentAmount = ref(0);
-        const prepaymentAllocError = ref(false);
-        const invoiceID = ref('');
-        const invoiceDescription = ref('');
-        const invoiceDueAmount = ref(0);
-        const invoiceArray = computed(() => store.state.Journals.journalArr);
         const idField = 'tenant_prepayment_alloc_id';
         const selectedIds = ref([]);
         const appModalVisible = ref(false);
@@ -121,19 +113,7 @@ export default{
             get: () => store.state.Prepayment_Allocations.to_date_search,
             set: (value) => store.commit('Prepayment_Allocations/SET_SEARCH_FILTERS', {"to_date_search":value}),
         });
-        const fetchInvoices = async(tenantID) =>{
-            await store.dispatch('Journals/fetchJournals', {company:companyID.value, customer: tenantID.value, txn_type: ["INV","DBN"], status: "Open"})
-        };
-        const handleSelectedInvoice = async(option) =>{
-            await store.dispatch('Journals/handleSelectedJournal', option)
-            invoiceID.value = store.state.Journals.journalID;
-            invoiceDescription.value = store.state.Journals.invoiceDescription;
-            invoiceDueAmount.value = store.state.Journals.invoiceDueAmount;
-        };
-        const clearSelectedInvoice  = async() =>{
-            await store.dispatch('Journals/updateState', {journalID: ''});
-            invoiceID.value = ""
-        }
+
         const searchFilters = ref([
             {type:'text', placeholder:"Tenant Code...", value: tenant_code_search, width:36},
             {type:'text', placeholder:"Tenant Name...", value: tenant_name_search, width:64},
@@ -144,33 +124,6 @@ export default{
         const handleSelectionChange = (ids) => {
             selectedIds.value = ids;
         };
-        const checkPrepaymentLimit = (value) =>{
-            if(invoiceDueAmount.value < value){
-                toast.error(`Invoice Balance is ${invoiceDueAmount.value}`)
-                formFields.value[2].value = 0;
-            }
-            else if(prepaymentAmount.value < value){
-                toast.error(`Cannot Allocate More Than ${prepaymentAmount.value}`)
-                formFields.value[2].value = 0;
-            }
-        }
-        const formFields = ref([
-            {  
-                type:'search-dropdown', label:"Invoice", value: invoiceID.value, componentKey: invComponentKey,
-                selectOptions: invoiceArray, optionSelected: handleSelectedInvoice, required: true,
-                searchPlaceholder: 'Select Deposit...', dropdownWidth: '450px', updateValue: "",
-                fetchData: fetchInvoices(), clearSearch: clearSelectedInvoice() 
-            },
-            { type: 'date', name: 'date',label: "Date", value: '', required: true },
-            { type: 'number', name: 'allocated_amount',label: "Amount", value: 0, required: true, method: checkPrepaymentLimit },
-            
-        ]);
-        const handleReset = () =>{
-            for(let i=1; i < formFields.value.length; i++){
-                formFields.value[i].value = '';
-            }
-            invoiceID.value = '';
-        }
         
         const handleActionClick = async(rowIndex, action, row) =>{
             if(action == 'delete'){
@@ -241,59 +194,7 @@ export default{
                 toast.error("Please Select An Allocation To Remove")
             }
         }
-        const allocatePrepayment = async() =>{
-            showModalLoader();
-            let formData = {
-                date: formFields.value[1].value,
-                description: invoiceDescription.value,
-                allocated_amount: formFields.value[2].value,
-                invoice: invoiceID.value,
-                invoice_id: invoiceID.value,
-                tenant_prepayment: prepaymentID.value,
-                tenant_prepayment_id: prepaymentID.value,
-                company: companyID.value
-            }
-            errors.value = [];
-            for(let i=1; i < formFields.value.length; i++){
-                if(formFields.value[i].value =='' && formFields.value[i].type != "number" && formFields.value[i].required == true){
-                    errors.value.push(formFields.value[i].label);
-                }else if(formFields.value[i].value == 0 && formFields.value[i].type == "number"){
-                    prepaymentAllocError.value = true;
-                }
-            }
-            if(invoiceID.value == ''){
-                errors.value.push('error')
-            }
 
-            if(errors.value.length){
-                toast.error('Fill In Required Fields');
-                hideModalLoader();
-            }else if(prepaymentAllocError.value){
-                toast.error('Invalid Amount');
-                hideModalLoader();
-                prepaymentAllocError.value = false;
-            }else{
-                try {
-                    const response = await store.dispatch('Tenant_Prepayments/allocatePrepayment', formData);
-                    if (response && response.status === 200) {
-                        hideModalLoader();
-                        toast.success('Prepayment Allocated Successfully!');
-                        handleReset();
-                        invComponentKey.value += 1;
-                        appModalVisible.value = false;
-                    } else {
-                        toast.error('An error occurred while allocating the prepayment.');
-                    }
-                } catch (error) {
-                    console.error(error.message);
-                    toast.error('Failed to allocate prepayment: ' + error.message);
-                } finally {
-                    hideModalLoader();
-                    store.dispatch('Journals/updateState',{journalID:''})
-                    searchAllocations();
-                }
-            }
-        }
         const showLoader = () =>{
             loader.value = "block";
         }
@@ -373,9 +274,8 @@ export default{
             searchAllocations();
         })
         return{
-            showTotals,showAddButton,title, searchAllocations, idField, selectedIds, actions, prepaymentsList, appArrLen,appCount,appResults,appModalVisible,formFields,
-            addButtonLabel, searchFilters,tableColumns,resetFilters,loadPrev,loadNext,firstPage,lastPage,
-            showNextBtn,showPreviousBtn, handleActionClick,allocatePrepayment,displayButtons,handleReset,
+            showTotals,showAddButton,title, searchAllocations, idField, selectedIds, actions, prepaymentsList, appArrLen,appCount,appResults,appModalVisible,
+            addButtonLabel, searchFilters,tableColumns,resetFilters,loadPrev,loadNext,firstPage,lastPage,showNextBtn,showPreviousBtn, handleActionClick,displayButtons,
             modal_top, modal_left, modal_width, showLoader, loader, hideLoader, modal_loader, showModalLoader, hideModalLoader,
             closeModal, handleSelectionChange, pageComponentKey, flex_basis, flex_basis_percentage, removeAllocation, removeAllocations,
             rightsModule

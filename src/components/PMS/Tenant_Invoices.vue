@@ -11,7 +11,7 @@
             @resetFilters="resetFilters"
             @removeItem="removeInvoice"
             @removeSelectedItems="removeInvoices"
-            @printList="printList"
+            @printList="printInvoiceList"
             :addingRight="addingRight"
             :rightsModule="rightsModule"
             :columns="tableColumns"
@@ -51,6 +51,7 @@ import DynamicForm from '../NewDynamicForm.vue';
 import { useStore } from "vuex";
 import { useToast } from "vue-toastification";
 import { useDateFormatter } from '@/composables/DateFormatter';
+import PrintJS from 'print-js';
 
 export default{
     name: 'Tenant_Invoices',
@@ -425,6 +426,28 @@ export default{
                 then(()=>{
                     searchInvoices();
                 })
+            }else if(action == 'print'){
+                showLoader();
+                const journalID = row['journal_id'];
+                let formData = {
+                    invoice: journalID,
+                    company: companyID.value
+                }
+                await store.dispatch('Journals/previewTenantInvoice',formData).
+                then(()=>{
+                    hideLoader();
+                })
+            }else if(action == 'download'){
+                showLoader();
+                const journalID = row['journal_id'];
+                let formData = {
+                    invoice: journalID,
+                    company: companyID.value
+                }
+                await store.dispatch('Journals/downloadTenantInvoice',formData).
+                then(()=>{
+                    hideLoader();
+                })
             }
         }
         const closeModal = async() =>{
@@ -444,6 +467,37 @@ export default{
                 store.commit('pageTab/ADD_PAGE', {'PMS':'Batch_Readings'})
                 store.state.pageTab.pmsActiveTab = 'Batch_Readings';
             }
+        };
+        const printInvoiceList = () =>{
+            showLoader();
+
+            let formData = {
+                journal_no: "",
+                client_category: "Tenants",
+                txn_type: "INV",
+                client: tenant_name_search.value,
+                date_from: from_date_search.value,
+                date_to: to_date_search.value,
+                status: "",
+                company_id: companyID.value
+            } 
+   
+            axios
+            .post("api/v1/export-rental-invoices-pdf/", formData, { responseType: 'blob' })
+                .then((response)=>{
+                    if(response.status == 200){
+                        const blob1 = new Blob([response.data]);
+                        // Convert blob to URL
+                        const url = URL.createObjectURL(blob1);
+                        PrintJS({printable: url, type: 'pdf'});
+                    }
+                })
+            .catch((error)=>{
+                console.log(error.message);
+            })
+            .finally(()=>{
+                hideLoader();
+            })
         }
         onBeforeMount(()=>{
             searchInvoices();
@@ -455,7 +509,7 @@ export default{
             loadPrev, loadNext, firstPage, lastPage, idField, actions, handleActionClick, propModalVisible, closeModal,
             submitButtonLabel, showModal, bookInvoice, showLoader, loader, hideLoader, modal_loader, modal_top, modal_left, modal_width,displayButtons,
             showModalLoader, hideModalLoader, formFields, handleSelectionChange, flex_basis,flex_basis_percentage,
-            removeInvoice, removeInvoices, dropdownOptions, handleDynamicOption, bookRentalInvoice,addingRight,rightsModule
+            removeInvoice, removeInvoices, dropdownOptions, handleDynamicOption, bookRentalInvoice,addingRight,rightsModule,printInvoiceList
         }
     }
 };
