@@ -1,19 +1,47 @@
 <template>
-    <div class="bg-red-200 w-full min-h-[98vh] bottom-8">
-        <NavBar :title="title" @minimize="minimize" @close="close" />
-        <PagesTab/>
+    <div class="main-container w-full min-h-[90vh] bottom-8">
+        <div class="fixed top-0 w-full z-50">
+            <div class="z-50 relative">
+                <NavBar :title="title" @minimize="minimize" @close="close"/>
+            </div> 
+            <div class="z-40 relative">
+                <NavBarINV @openPage="selectTab"/>
+            </div>
+            <div class="z-30">
+                <PagesTab @openPage="selectedTab" @closePage="closeTab"/>
+            </div>
+        </div>
+        <div class="tab-content z-20 overflow-y-hidden">
+            <keep-alive :include="cachedComponents">
+                <component 
+                    :is="activeComponent"
+                 />
+            </keep-alive>
+        </div>
+        
     </div>
 </template>
 
 <script>
-import NavBar from '@/components/NavBar.vue';
-import PagesTab from '@/components/INV/PagesTab.vue';
 import { useStore } from 'vuex';
-import { ref } from 'vue';
+import { ref, computed, watch } from 'vue';
+import NavBar from '@/components/NavBar.vue'
+import NavBarINV from '@/components/INV/NavBarINV.vue';
+import PagesTab from '@/components/INV/PagesTab.vue';
+import Dashboard from '@/components/INV/Dashboard.vue';
+import Item_Categories from '@/components/INV/Item_Categories.vue';
+
+
+import Default_Settings from '@/components/SET/Default_Settings.vue';
+
 export default{
     components:{
         NavBar,
-        PagesTab
+        NavBarINV,
+        PagesTab,
+        Dashboard,Item_Categories,
+
+        Default_Settings
     },
     props: {
         title: {
@@ -23,18 +51,67 @@ export default{
     },
     setup(){
         const store = useStore();
-        const title = ref('Inventory Management')
+        const title = ref('Inventory Management');
+        const cachedComponents = computed(() =>  Array.from(store.state.pageTab.invArray));
+        const tabs = computed({
+            get: ()=> store.state.pageTab.invArray,
+        });
+
+        const activeTab = computed(() => store.state.pageTab.invActiveTab);
+    
+        const activeComponent = computed(() => activeTab.value);
+    
+        const selectTab = (pageName) => {
+            for(const [key, value] of Object.entries(pageName)){
+                store.state.pageTab.invActiveTab = value;
+            }
+        };
+        const selectedTab = (pageName) => {
+            store.state.pageTab.invActiveTab = pageName;
+        };
+        const closeTab = (pageName) =>{
+            let page = {"INV":pageName};
+            store.commit('pageTab/REMOVE_PAGE', page)
+            store.commit(`${pageName}/RESET_SEARCH_FILTERS`)
+            activeTab.value = store.state.pageTab.invActiveTab;
+            store.commit(`${pageName}/initializeStore`);
+        }
         const minimize = () =>{
             store.commit('modulesTab/MINIMIZE_TAB')
         }
         const close = () =>{
-            store.commit('modulesTab/REMOVE_TAB', 'Inventory Management')
+            let myArray = Array.from(tabs.value);
+            for(let i=0; i<myArray.length; i++){
+                store.commit(`${myArray[i]}/RESET_SEARCH_FILTERS`)
+                store.commit(`${myArray[i]}/initializeStore`)
+            }
+            store.commit('modulesTab/REMOVE_TAB', {'INV':'Inventory Management'}),
+            store.commit('pageTab/CLEAR_PAGE_TAB', 'Inventory Management');
+            activeTab.value = store.state.pageTab.invActiveTab;
         }
         return{
             close,
             minimize,
-            title
+            title,
+            activeComponent,
+            selectTab, selectedTab, closeTab,
+            activeTab, cachedComponents
         }
+    },
+    mounted(){
+        const store = useStore();
+        this.activeTab = store.state.pageTab.invActiveTab;
     }
 }
 </script>
+
+<style>
+.tab-content{
+    margin-top: 35px;
+}
+.main-container{
+    max-height: 100vh;
+    overflow: hidden;
+}
+
+</style>

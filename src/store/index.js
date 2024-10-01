@@ -37,6 +37,8 @@ import Customers from './FA/Customers';
 import Vendors from './FA/Vendors';
 import Fiscal_Periods from './FA/Fiscal_Periods';
 
+import Item_Categories from './INV/Item_Categories';
+
 import Default_Settings from './SET/Default_Settings';
 
 export default createStore({
@@ -51,6 +53,8 @@ export default createStore({
     Properties_List, Zones, Landlords_List, Units_List, Active_Tenants, Utilities,Security_Deposits,Variation_Periods, Tenant_Deposits,
     Meter_Setup, Meter_Readings,Tenant_Prepayments,Prepayment_Allocations,Statement_Transactions,Property_Statements,Tenant_Arrears,Lease_Fees,
 
+    Item_Categories,
+    
     Ledgers, Currencies, Taxes, Journals, Customers, Vendors,Fiscal_Periods,
 
     Default_Settings

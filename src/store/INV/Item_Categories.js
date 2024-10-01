@@ -7,8 +7,9 @@ const state = {
     categoryArray: [],
     categoryID: "",
     selectedCategory: null,
-    isEditing: "",
+    isEditing: false,
     category_name_search: '',
+    module_search: '',
   };
   
   const mutations = {
@@ -18,6 +19,7 @@ const state = {
       state.categoryArray = [];
       state.categoryID = '';
       state.category_name_search = '';
+      state.module_search = '';
       state.selectedCategory = null;
       state.isEditing = false;
     },
@@ -28,25 +30,28 @@ const state = {
     CATEGORIES_ARRAY(state, categories){
       state.categoryArray = categories;
     },
-    LIST_CLIENT_CATEGORIES(state, categories) {
+    LIST_ITEM_CATEGORIES(state, categories) {
       state.categoryList = categories;
     },
     SET_STATE(state, payload) {
-      for (const key in payload) {
-          if (payload.hasOwnProperty(key) && key in state) {
-              state[key] = payload[key];
-          }
-      }
+        for (const key in payload) {
+            if (payload.hasOwnProperty(key) && key in state) {
+                state[key] = payload[key];
+            }
+        }
     },
     SET_SEARCH_FILTERS(state, search_filter){
       for(const [key, value] of Object.entries(search_filter)){
         if(key == 'category_name_search'){
           state.category_name_search = value;
-        } 
+        }else if(key == 'module_search'){
+            state.module_search = value;
+        }
       }
     },
     RESET_SEARCH_FILTERS(state){
       state.category_name_search = '';
+      state.module_search = '';
     }
 
   };
@@ -56,8 +61,8 @@ const state = {
       commit('SET_STATE', newState);
     },
     
-    async createClientCategory({ commit,state }, formData) {
-      return axios.post('api/v1/create-client-category/', formData)
+    async createItemCategory({ commit,state }, formData) {
+      return axios.post('api/v1/create-item-category/', formData)
       .then((response)=>{
         return response;
       })
@@ -67,22 +72,22 @@ const state = {
       })
     },
   
-    fetchClientCategories({ commit,state }, formData) {
+    fetchItemCategories({ commit,state }, formData) {
       state.categoryArr = [];
-      axios.post(`api/v1/fetch-client-categories/`,formData)
+      axios.post(`api/v1/fetch-item-categories/`,formData)
       .then((response)=>{
         for(let i=0; i< response.data.length; i++){
-          state.categoryArr.push((response.data[i].name));
+          state.categoryArr.push((response.data[i].category_name));
         }
-        commit('LIST_CLIENT_CATEGORIES', response.data);
+        commit('LIST_ITEM_CATEGORIES', response.data);
       })
       .catch((error)=>{
         console.log(error.message);
       })
       
     },
-    fetchClientCategory({ commit,state }, formData) {
-      axios.post(`api/v1/fetch-client-categories/`,formData)
+    fetchItemCategory({ commit,state }, formData) {
+      axios.post(`api/v1/fetch-item-categories/`,formData)
       .then((response)=>{
         state.selectedCategory = response.data;
         commit('SET_SELECTED_CATEGORY',response.data);
@@ -94,17 +99,17 @@ const state = {
     },
     handleSelectedCategory({ commit, state }, option){
       state.categoryArray = [];
-      const selectedCategory = state.categoryList.find(category => (category.name) === option);
+      const selectedCategory = state.categoryList.find(category => (category.category_name) === option);
       if (selectedCategory) {
-          state.categoryID = selectedCategory.category_id;
+          state.categoryID = selectedCategory.item_category_id;
           state.categoryArray = [...state.categoryArray, selectedCategory];
       }
       commit('CATEGORIES_ARRAY', state.categoryArray);
         
     },
   
-    async updateClientCategory({ commit,state }, formData) {
-      return axios.put(`api/v1/update-client-category/`,formData)
+    async updateItemCategory({ commit,state }, formData) {
+      return axios.put(`api/v1/update-item-category/`,formData)
       .then((response)=>{
         return response;
       })
@@ -114,7 +119,7 @@ const state = {
       })  
     },
   
-    deleteClientCategory({ commit,state }, formData) {
+    deleteItemCategory({ commit,state }, formData) {
       Swal.fire({
         title: "Are you sure?",
         text: `Do you wish to delete Category?`,
@@ -130,7 +135,7 @@ const state = {
         showLoaderOnConfirm: true,
       }).then((result) => {
         if (result.value) {
-          axios.post(`api/v1/delete-client-category/`,formData)
+          axios.post(`api/v1/delete-item-category/`,formData)
           .then((response)=>{
             if(response.status == 200){
                 Swal.fire("Poof! Category removed succesfully!", {

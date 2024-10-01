@@ -29,14 +29,14 @@
             <div class="web-links dropdown">
                 <div class="py-1.5 px-2.5 h-full hover:bg-slate-500 hover:rounded">
                 <button class="flex" @click="showInvoicesDropdown">
-                    <i class="fa fa-file-text pt-2 mr-2" aria-hidden="true"></i>
+                    <i class="fa fa-file-invoice pt-2 mr-2" aria-hidden="true"></i>
                     <p class="pt-1.5">Invoices</p>
                 </button>
                 </div>
                 <div class="dropdown-content w-40 absolute rounded border border-gray-200 bg-white shadow-slate-400 shadow-sm pt-2" v-if="invoices_dropdown">
                     <div class="py-2 px-3 pl-4 w-full hover:bg-slate-500 hover:w-full">
                         <button class="flex text-sm" @click="openPage({'FA':'General_Invoices'})">
-                            <i class="fa fa-file-text pt-2 mr-2" aria-hidden="true"></i>
+                            <i class="fa fa-file-invoice pt-2 mr-2" aria-hidden="true"></i>
                             <p class="">Invoices</p>
                         </button>
 
