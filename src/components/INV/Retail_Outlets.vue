@@ -2,16 +2,16 @@
     <PageComponent 
         :loader="loader" @showLoader="showLoader" @hideLoader="hideLoader"
         :addButtonLabel="addButtonLabel"
-        @handleAddNew="addNewCategory"
+        @handleAddNew="addNewOutlet"
         :searchFilters="searchFilters"
-        @searchPage="searchCategories"
+        @searchPage="searchOutlets"
         @resetFilters="resetFilters"
-        @removeItem="removeCategory"
-        @removeSelectedItems="removeCategories"
+        @removeItem="removeOutlet"
+        @removeSelectedItems="removeOutlets"
         :addingRight="addingRight"
         :rightsModule="rightsModule"
         :columns="tableColumns"
-        :rows="categoryList"
+        :rows="outletList"
         :actions="actions"
         :idField="idField"
         @handleSelectionChange="handleSelectionChange"
@@ -30,7 +30,7 @@
         :loader="modal_loader" @showLoader="showModalLoader" @hideLoader="hideModalLoader" @closeModal="closeModal">
         <DynamicForm 
             :fields="formFields" :flex_basis="flex_basis" :flex_basis_percentage="flex_basis_percentage" 
-            :displayButtons="displayButtons" @handleSubmit="saveCategory" @handleReset="handleReset"
+            :displayButtons="displayButtons" @handleSubmit="saveOutlet" @handleReset="handleReset"
         />
     </MovableModal>
 </template>
@@ -45,7 +45,7 @@ import { useStore } from "vuex";
 import { useToast } from "vue-toastification";
 
 export default{
-    name: 'Item_Categories',
+    name: 'Retail_Outlets',
     components:{
         PageComponent,MovableModal,DynamicForm
     },
@@ -54,14 +54,14 @@ export default{
         const toast = useToast();
         const loader = ref('');
         const modal_loader = ref('none');
-        const title = ref('Category Details');
-        const addButtonLabel = ref('New Category');
-        const addingRight = ref('Adding Item Categories');
+        const title = ref('Outlet Details');
+        const addButtonLabel = ref('New Outlet');
+        const addingRight = ref('Adding Outlet Counter');
         const rightsModule = ref('Inventory');
-        const idField = 'category_id';
+        const idField = 'warehouse_id';
         const selectedIds = ref([]);
         const depModalVisible = ref(false);
-        const categoryList = ref([]);
+        const outletList = ref([]);
         const depResults = ref([]);
         const depArrLen = ref(0);
         const depCount = ref(0);
@@ -76,50 +76,51 @@ export default{
         const modal_top = ref('200px');
         const modal_left = ref('400px');
         const modal_width = ref('30vw');
-        const isEditing = computed(()=> store.state.Item_Categories.isEditing);
-        const selectedCategory = computed(()=> store.state.Item_Categories.selectedCategory);
+        const isEditing = computed(()=> store.state.Retail_Outlets.isEditing);
+        const selectedOutlet = computed(()=> store.state.Retail_Outlets.selectedOutlet);
         const tableColumns = ref([
             {type: "checkbox"},
-            {label: "Name", key: "category_name", type: "text", editable: false},
-            {label: "Group", key: "item_group", type: "text", editable: false},
-            {label: "Module", key: "module", type: "text", editable: false},
+            {label: "Name", key: "warehouse_name", type: "text", editable: false},
+            {label: "Type", key: "area_location", type: "text", editable: false},
+            {label: "Location", key: "retail_type", type: "text", editable: false},
         ])
         const actions = ref([
-            {name: 'edit', icon: 'fa fa-edit', title: 'Edit Category', rightName: 'Editing Item Categories'},
-            {name: 'delete', icon: 'fa fa-trash', title: 'Delete Category', rightName: 'Deleting Item Categories'},
+            {name: 'edit', icon: 'fa fa-edit', title: 'Edit Outlet', rightName: 'Editing Outlet Counter'},
+            {name: 'delete', icon: 'fa fa-trash', title: 'Delete Outlet', rightName: 'Deleting Outlet Counter'},
         ])
         const companyID = computed(()=> store.state.userData.company_id);
-        const name_search = computed({
-            get: () => store.state.Item_Categories.category_name_search,
-            set: (value) => store.commit('Item_Categories/SET_SEARCH_FILTERS', {"category_name_search":value}),
+        const warehouse_name_search = computed({
+            get: () => store.state.Retail_Outlets.warehouse_name_search,
+            set: (value) => store.commit('Retail_Outlets/SET_SEARCH_FILTERS', {"warehouse_name_search":value}),
         });
-        const module_search = computed({
-            get: () => store.state.Item_Categories.module_search,
-            set: (value) => store.commit('Item_Categories/SET_SEARCH_FILTERS', {"module_search":value}),
+        const area_location_search = computed({
+            get: () => store.state.Retail_Outlets.area_location_search,
+            set: (value) => store.commit('Retail_Outlets/SET_SEARCH_FILTERS', {"area_location_search":value}),
         });
         const searchFilters = ref([
-            {type:'text', placeholder:"Search Name...", value: name_search},
+            {type:'text', placeholder:"Search Name...", value: warehouse_name_search},
             {
-                type:'dropdown', placeholder:"Module..", value: module_search, width:40,
-                options: [{text:'Inventory',value:'Inventory'},{text:'Accounts',value:'Accounts'},{text:'HMS',value:'HMS'}]
+                type:'dropdown', placeholder:"Retail Type..", value: area_location_search, width:40,
+                options: [{text:'Store',value:'Store'},{text:'Outlet',value:'Outlet'}]
             },
         ]);
         const formFields = ref([]);
         const updateFormFields = () => {
             formFields.value = [
-                { type: 'dropdown', name: 'item_group',label: "Item Group", value: selectedCategory.value?.item_group || '', placeholder: "", required: true, options: [{ text: 'Goods', value: 'Goods' }, { text: 'Service', value: 'Service' }] },
-                { type: 'text', name: 'name',label: "Name", value: selectedCategory.value?.category_name || '', required: true },
-                { type: 'dropdown', name: 'module',label: "Module", value: selectedCategory.value?.module || 'Inventory', placeholder: "", required: true, options: [{ text: 'Inventory', value: 'Inventory' }, { text: 'HMS', value: 'HMS' }, { text: 'Accounts', value: 'Accounts' }] },
+                { type: 'dropdown', name: 'retail_type',label: "Retail Type", value: selectedOutlet.value?.retail_type || '', placeholder: "", required: true, options: [{ text: 'Store', value: 'Store' }, { text: 'Outlet', value: 'Outlet' }] },
+                { type: 'text', name: 'warehouse_name',label: "Name", value: selectedOutlet.value?.warehouse_name || '', required: true },
+                { type: 'text', name: 'area_location',label: "Area Location", value: selectedOutlet.value?.area_location || '', required: true },
             ];
         };
-        watch([selectedCategory], () => {
-            if(selectedCategory.value){
+        watch([selectedOutlet], () => {
+            if(selectedOutlet.value){
                 updateFormFields();
             }      
         }, { immediate: true });
-        const addNewCategory = async() =>{
+        const addNewOutlet = async() =>{
             updateFormFields();
-            await store.dispatch("Item_Categories/updateState",{isEditing:false, selectedCategory:null})
+            await store.dispatch("Retail_Outlets/updateState",{isEditing:false, selectedOutlet:null})
+    
             depModalVisible.value = true;
             handleReset();
             flex_basis.value = '1/2';
@@ -130,12 +131,12 @@ export default{
         };
         const handleActionClick = async(rowIndex, action, row) =>{
             if( action == 'edit'){
-                const categoryID = row[idField];
+                const outletID = row[idField];
                 let formData = {
                     company: companyID.value,
-                    category: categoryID
+                    warehouse: outletID
                 }
-                await store.dispatch('Item_Categories/fetchItemCategory',formData).
+                await store.dispatch('Retail_Outlets/fetchOutlet',formData).
                 then(()=>{
                     depModalVisible.value = true;
                     flex_basis.value = '1/2';
@@ -143,13 +144,13 @@ export default{
                 })
                 
             }else if(action == 'delete'){
-                const categoryID = [row['category_id']];
+                const outletID = [row['warehouse_id']];
                 let formData = {
                     company: companyID.value,
-                    category: categoryID
+                    warehouse: outletID
                 }
-                await store.dispatch('Item_Categories/deleteItemCategory',formData)
-                searchCategories();
+                await store.dispatch('Retail_Outlets/deleteOutlet',formData)
+                searchOutlets();
             }
         } 
         const handleReset = () =>{
@@ -163,13 +164,12 @@ export default{
         const hideModalLoader = () =>{
             modal_loader.value = "none";
         }
-        const createCategory = async() =>{
+        const createOutlet = async() =>{
             showModalLoader();
             let formData = {
-                item_group: formFields.value[0].value,
-                category_name: formFields.value[1].value,    
-                item_count: 0, 
-                module: formFields.value[2].value,
+                warehouse_name: formFields.value[1].value,
+                area_location: formFields.value[2].value,
+                retail_type: formFields.value[0].value,
                 company: companyID.value
             }
             errors.value = [];
@@ -183,34 +183,33 @@ export default{
                 hideModalLoader();
             }else{
                 try {
-                    const response = await store.dispatch('Item_Categories/createItemCategory', formData);
+                    const response = await store.dispatch('Retail_Outlets/createOutlet', formData);
                     if(response && response.status === 200) {
                         hideModalLoader();
-                        toast.success('Category created successfully!');
+                        toast.success('Outlet created successfully!');
                         handleReset();
                     }else {
-                        toast.error('An error occurred while creating the category.');
+                        toast.error('An error occurred while creating the Outlet.');
                     }
                 } catch (error) {
                     console.error(error.message);
-                    toast.error('Failed to create category: ' + error.message);
+                    toast.error('Failed to create Outlet: ' + error.message);
                 } finally {
                     hideModalLoader();
-                    searchCategories();
+                    searchOutlets();
                 }
             }
 
         }
-        const updateCategory = async() =>{
+        const updateOutlet = async() =>{
             showModalLoader();
             errors.value = [];
             let formData = {
-                item_group: formFields.value[0].value,
-                category_name: formFields.value[1].value,
-                item_count: selectedCategory.value.item_count,
-                module: formFields.value[2].value,
-                category: selectedCategory.value.item_category_id,
-                company: companyID.value,
+                warehouse: selectedOutlet.value.warehouse_id,
+                warehouse_name: formFields.value[1].value,
+                area_location: formFields.value[2].value,
+                retail_type: formFields.value[0].value,
+                company: companyID.value
             }
             for(let i=0; i < formFields.value.length; i++){
                 if(formFields.value[i].value =='' && formFields.value[i].required == true){
@@ -221,78 +220,78 @@ export default{
                     toast.error('Fill In Required Fields');
             }else{
                 try {
-                    const response = await store.dispatch('Item_Categories/updateItemCategory', formData);
+                    const response = await store.dispatch('Retail_Outlets/updateOutlet', formData);
                     if (response && response.status === 200) {
                         hideModalLoader();
-                        toast.success("Category updated successfully!");
+                        toast.success("Outlet updated successfully!");
                         handleReset();
                     } else {
-                        toast.error('An error occurred while updating the Category.');
+                        toast.error('An error occurred while updating the Outlet.');
                     }
                 } catch (error) {
                     console.error(error.message);
-                    toast.error('Failed to update Category: ' + error.message);
+                    toast.error('Failed to update Outlet: ' + error.message);
                 } finally {
                     hideModalLoader();
-                    searchCategories();
+                    searchOutlets();
                 }
             }
         }
-        const saveCategory = () =>{
+        const saveOutlet = () =>{
             if(isEditing.value == true){
-                updateCategory();
+                updateOutlet();
             }else{
-                createCategory();
+                createOutlet();
             }
         }
-        const removeCategory = async() =>{
+        const removeOutlet = async() =>{
             if(selectedIds.value.length == 1){
                 let formData = {
                     company: companyID.value,
-                    category: selectedIds.value,
+                    warehouse: selectedIds.value,
                 }
                 try{
-                    const response = await store.dispatch('Item_Categories/deleteItemCategory',formData)
+                    const response = await store.dispatch('Retail_Outlets/deleteOutlet',formData)
                     if(response && response.status == 200){
-                        toast.success("Category Removed Succesfully");
-                        searchCategories();
+                        toast.success("Outlet Removed Succesfully");
+                        searchOutlets();
                     }
                 }
                 catch(error){
                     console.error(error.message);
-                    toast.error('Failed to remove Category: ' + error.message);
+                    toast.error('Failed to remove Outlet: ' + error.message);
                 }
                 finally{
                     selectedIds.value = [];
                 }
             }else if(selectedIds.value.length > 1){
-                toast.error("You have selected more than 1 Category") 
+                toast.error("You have selected more than 1 Outlet") 
             }else{
-                toast.error("Please Select A Category To Remove")
+                toast.error("Please Select An Outlet To Remove")
             }
         }
-        const removeCategories = async() =>{
+        const removeOutlets = async() =>{
             if(selectedIds.value.length){
                 let formData = {
                     company: companyID.value,
-                    category: selectedIds.value,
+                    warehouse: selectedIds.value,
                 }
                 try{
-                    const response = await store.dispatch('Item_Categories/deleteItemCategory',formData)
+                    const response = await store.dispatch('Retail_Outlets/deleteOutlet',formData)
                     if(response && response.status == 200){
-                        toast.success("Category(s) Removed Succesfully");
-                        searchCategories();
+                        toast.success("Outlet(s) Removed Succesfully");
+                        searchOutlets();
                     }
                 }
                 catch(error){
                     console.error(error.message);
-                    toast.error('Failed to remove Category(s): ' + error.message);
+                    toast.error('Failed to remove Outlet(s): ' + error.message);
                 }
                 finally{
                     selectedIds.value = [];
                 }
             }else{
-                toast.error("Please Select A Category To Remove")
+                toast.error("Please Select An Outlet To Remove")
             }
         }
         const showLoader = () =>{
@@ -301,22 +300,22 @@ export default{
         const hideLoader = () =>{
             loader.value = "none";
         }
-        const searchCategories = () =>{
+        const searchOutlets = () =>{
             showLoader();
             showNextBtn.value = false;
             showPreviousBtn.value = false;
             let formData = {
-                category_name: name_search.value,
-                module: module_search.value,
+                warehouse_name: warehouse_name_search.value,
+                area_location: area_location_search.value,
                 company_id: companyID.value
             }
             axios
-            .post(`api/v1/item-category-search/?page=${currentPage.value}`,formData)
+            .post(`api/v1/warehouse-search/?page=${currentPage.value}`,formData)
             .then((response)=>{
-                categoryList.value = response.data.results;
-                store.commit('Item_Categories/LIST_ITEM_CATEGORIES', categoryList.value)
+                outletList.value = response.data.results;
+                store.commit('Retail_Outlets/LIST_OUTLETS', outletList.value)
                 depResults.value = response.data;
-                depArrLen.value = categoryList.value.length;
+                depArrLen.value = outletList.value.length;
                 depCount.value = depResults.value.count;
                 pageCount.value = Math.ceil(depCount.value / 50);
                 
@@ -341,7 +340,7 @@ export default{
                 currentPage.value -= 1;
             }
             
-            searchCategories();
+            searchOutlets();
         }
         const loadNext = () =>{
             if(currentPage.value >= pageCount.value){
@@ -350,34 +349,34 @@ export default{
                 currentPage.value += 1;
             }
             
-            searchCategories();
+            searchOutlets();
         }
         const firstPage = ()=>{
             currentPage.value = 1;
-            searchCategories();
+            searchOutlets();
         }
         const lastPage = () =>{
             currentPage.value = pageCount.value;
-            searchCategories();
+            searchOutlets();
         }
         const resetFilters = () =>{
-            store.commit('Item_Categories/RESET_SEARCH_FILTERS')
-            searchCategories();
+            store.commit('Retail_Outlets/RESET_SEARCH_FILTERS')
+            searchOutlets();
         };
         const closeModal = async() =>{
-            await store.dispatch("Item_Categories/updateState",{isEditing:false, selectedCategory:null})
+            await store.dispatch("Retail_Outlets/updateState",{isEditing:false, selectedOutlet:null})
             depModalVisible.value = false;
             handleReset();
         }
         onMounted(()=>{
-            searchCategories();
+            searchOutlets();
         })
         return{
-            title,idField, searchCategories, addButtonLabel, searchFilters, resetFilters, tableColumns, categoryList,
+            title,idField, searchOutlets, addButtonLabel, searchFilters, resetFilters, tableColumns, outletList,
             depResults, depArrLen, depCount, pageCount, showNextBtn, showPreviousBtn,modal_top, modal_left, modal_width,
-            loadPrev, loadNext, firstPage, lastPage, actions, formFields, depModalVisible, addNewCategory,
-            displayButtons,flex_basis,flex_basis_percentage, handleActionClick, handleReset, saveCategory,
-            showLoader, loader, hideLoader, modal_loader, showModalLoader, hideModalLoader, removeCategory, removeCategories,
+            loadPrev, loadNext, firstPage, lastPage, actions, formFields, depModalVisible, addNewOutlet,
+            displayButtons,flex_basis,flex_basis_percentage, handleActionClick, handleReset, saveOutlet,
+            showLoader, loader, hideLoader, modal_loader, showModalLoader, hideModalLoader, removeOutlet, removeOutlets,
             addingRight,rightsModule,handleSelectionChange,closeModal
         }
     }

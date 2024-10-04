@@ -38,6 +38,9 @@ import Vendors from './FA/Vendors';
 import Fiscal_Periods from './FA/Fiscal_Periods';
 
 import Item_Categories from './INV/Item_Categories';
+import Items_Catalog from './INV/Items_Catalog';
+import Uom from './INV/Uom';
+import Retail_Outlets from './INV/Retail_Outlets';
 
 import Default_Settings from './SET/Default_Settings';
 
@@ -53,7 +56,7 @@ export default createStore({
     Properties_List, Zones, Landlords_List, Units_List, Active_Tenants, Utilities,Security_Deposits,Variation_Periods, Tenant_Deposits,
     Meter_Setup, Meter_Readings,Tenant_Prepayments,Prepayment_Allocations,Statement_Transactions,Property_Statements,Tenant_Arrears,Lease_Fees,
 
-    Item_Categories,
+    Item_Categories,Items_Catalog,Uom,Retail_Outlets,
     
     Ledgers, Currencies, Taxes, Journals, Customers, Vendors,Fiscal_Periods,
 
