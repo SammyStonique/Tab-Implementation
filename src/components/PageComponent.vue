@@ -34,6 +34,7 @@
                     :idField="idField"
                     :actions="actions"
                     :showTotals="showTotals"
+                    :showActions="showActions"
                     @action-click="handleActionClick"
                     @selection-changed="handleSelectionChange"
                     :rightsModule="rightsModule"
@@ -99,6 +100,11 @@ export default defineComponent({
             default: () => []   
         },
         showTotals:{
+            type: Boolean,
+            default: () => false,
+            required: false
+        },
+        showActions:{
             type: Boolean,
             default: () => false,
             required: false

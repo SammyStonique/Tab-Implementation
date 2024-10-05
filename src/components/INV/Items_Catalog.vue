@@ -16,6 +16,7 @@
             :columns="tableColumns"
             :rows="itemsList"
             :actions="actions"
+            :showTotals="showTotals"
             :idField="idField"
             @handleSelectionChange="handleSelectionChange"
             @handleActionClick="handleActionClick"
@@ -70,12 +71,13 @@ export default{
             {label: "Item Name", key:"item_name"},
             {label: "Category", key: "item_category"},
             {label: "Type", key:"inventory_type"},
-            {label: "Stock", key:"available_stock"},
+            {label: "Stock", key:"available_stock", type: "number"},
             {label: "P.Price", key:"default_purchase_price"},
             {label: "S.Price", key:"default_selling_price"},
-            {label: "Sold", key:"quantity_sold"},
+            {label: "Sold", key:"quantity_sold", type: "number"},
             {label: "Reorder", key:"reorder_level"},
-        ])
+        ]);
+        const showTotals = ref(true);
         const actions = ref([
             {name: 'edit', icon: 'fa fa-edit', title: 'Edit Item', rightName: 'Editing Inventory Item'},
             {name: 'delete', icon: 'fa fa-trash', title: 'Delete Item', rightName: 'Deleting Inventory Item'},
@@ -97,14 +99,22 @@ export default{
         const categories_array = computed({
             get: () => store.state.Item_Categories.categoryArr,
         });
+        const handleSelectedCategory= async(option) =>{
+            await store.dispatch('Item_Categories/handleSelectedCategory', option)
+            categoryID.value = store.state.Item_Categories.categoryID;
+        };
+        const clearSelectedCategory= async() =>{
+            await store.dispatch('Item_Categories/updateState', {categoryID: ''});
+            categoryID.value = store.state.Item_Categories.categoryID;
+        };
         const searchFilters = ref([
             {type:'text', placeholder:"Code...", value: item_code_search, width:48,},
             {type:'text', placeholder:"Name...", value: item_name_search, width:48,},
             {
                 type:'search-dropdown', value: categories_array, width:48,
-                selectOptions: categories_array,
+                selectOptions: categories_array,optionSelected: handleSelectedCategory,
                 searchPlaceholder: 'Category...', dropdownWidth: '300px',
-                fetchData: store.dispatch('Item_Categories/fetchItemCategories', {company:companyID.value})
+                fetchData: store.dispatch('Item_Categories/fetchItemCategories', {company:companyID.value}), clearSearch: clearSelectedCategory()
             },
             {
                 type:'dropdown', placeholder:"Stock Type", value: stock_type_search, width:48,
@@ -285,7 +295,7 @@ export default{
             
         })
         return{
-            searchItems,resetFilters, addButtonLabel, searchFilters, tableColumns, itemsList,
+            showTotals,searchItems,resetFilters, addButtonLabel, searchFilters, tableColumns, itemsList,
             propResults, propArrLen, propCount, pageCount, showNextBtn, showPreviousBtn,
             loadPrev, loadNext, firstPage, lastPage, idField, actions, handleActionClick, propModalVisible, closeModal,
             submitButtonLabel, showModal, addNewItem, showLoader, loader, hideLoader, importItems, removeItem, removeItems,

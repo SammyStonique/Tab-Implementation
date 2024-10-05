@@ -33,6 +33,7 @@ import Item_Categories from '@/components/INV/Item_Categories.vue';
 import Items_Catalog from '@/components/INV/Items_Catalog.vue';
 import Item_Details from '@/components/INV/Item_Details.vue';
 import Retail_Outlets from '@/components/INV/Retail_Outlets.vue';
+import Catalog_By_Outlet from '@/components/INV/Catalog_By_Outlet.vue';
 
 import Default_Settings from '@/components/SET/Default_Settings.vue';
 
@@ -41,7 +42,7 @@ export default{
         NavBar,
         NavBarINV,
         PagesTab,
-        Dashboard,Item_Categories,Items_Catalog,Item_Details,Retail_Outlets,
+        Dashboard,Item_Categories,Items_Catalog,Item_Details,Retail_Outlets,Catalog_By_Outlet,
 
         Default_Settings
     },
