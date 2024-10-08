@@ -106,7 +106,7 @@ export default defineComponent({
         },
         showActions:{
             type: Boolean,
-            default: () => false,
+            default: () => true,
             required: false
         },
         actions:{
