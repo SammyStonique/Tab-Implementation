@@ -36,6 +36,10 @@ import Retail_Outlets from '@/components/INV/Retail_Outlets.vue';
 import Catalog_By_Outlet from '@/components/INV/Catalog_By_Outlet.vue';
 import Fast_Moving_Items from '@/components/INV/Fast_Moving_Items.vue';
 import Item_Location from '@/components/INV/Item_Location.vue';
+import Uom from '@/components/INV/Uom.vue';
+import Outlet_Counters from '@/components/INV/Outlet_Counters.vue';
+import Direct_Sales from '@/components/INV/Direct_Sales.vue';
+import Sale_Details from '@/components/INV/Sale_Details.vue';
 
 import Default_Settings from '@/components/SET/Default_Settings.vue';
 
@@ -44,7 +48,8 @@ export default{
         NavBar,
         NavBarINV,
         PagesTab,
-        Dashboard,Item_Categories,Items_Catalog,Item_Details,Retail_Outlets,Catalog_By_Outlet,Fast_Moving_Items,Item_Location,
+        Dashboard,Item_Categories,Items_Catalog,Item_Details,Retail_Outlets,Catalog_By_Outlet,Fast_Moving_Items,Item_Location,Uom,
+        Outlet_Counters,Direct_Sales,Sale_Details,
 
         Default_Settings
     },

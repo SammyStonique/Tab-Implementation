@@ -9,6 +9,7 @@ const state = {
   outletName: '',
   warehouse_name_search: '',
   area_location_search: '',
+  retail_type_search: '',
   selectedOutlet: null,
   isEditing: false
 };
@@ -22,6 +23,7 @@ const mutations = {
     state.outletName = '';
     state.warehouse_name_search = '';
     state.area_location_search = '';
+    state.retail_type_search = '';
     state.isEditing = false;
     state.selectedOutlet = null;
   },
@@ -48,12 +50,15 @@ const mutations = {
         state.warehouse_name_search = value;
       }else if(key == 'area_location_search'){
         state.area_location_search = value;
+      }else if(key == 'retail_type_search'){
+        state.retail_type_search = value;
       }
     }
   },
   RESET_SEARCH_FILTERS(state){
     state.warehouse_name_search = '';
     state.area_location_search = '';
+    state.retail_type_search = '';
   }
 };
   

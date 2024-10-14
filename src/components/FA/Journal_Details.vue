@@ -5,7 +5,7 @@
                 <DynamicForm  :fields="formFields" :flex_basis="flex_basis" :flex_basis_percentage="flex_basis_percentage" :displayButtons="displayButtons" @handleSubmit="createJournal" @handleReset="handleReset"> 
                     <template v-slot:additional-content>                    
                         <div class="px-3 min-h-[280px]">
-                            <DynamicTable :key="tableKey" :columns="invoiceColumns" :rows="invoiceRows" :showActions="showActions" :idField="idField" :actions="actions" @action-click="deleteJournalLine"/>
+                            <DynamicTable :key="tableKey" :showTotals="showTotals" :columns="invoiceColumns" :rows="invoiceRows" :showActions="showActions" :idField="idField" :actions="actions" @action-click="deleteJournalLine"/>
                         </div>
                     </template>
                 </DynamicForm>
@@ -67,7 +67,7 @@ export default defineComponent({
             {label: "Debits", key: "debit_amount", type: "number", editable: true, maxWidth:"20px"},
             {label: "Credits", key: "credit_amount", type: "number", editable: true, maxWidth:"20px"},
         ]);
-
+        const showTotals = ref(true);
         const actions = ref([
             {name: 'delete', icon: 'fa fa-minus-circle', title: 'Remove Journal Line'},
         ])
@@ -217,7 +217,7 @@ export default defineComponent({
         })
 
         return{
-            formFields, flex_basis, flex_basis_percentage, displayButtons, createJournal, mainComponentKey,
+            formFields, flex_basis, flex_basis_percentage, displayButtons, createJournal, mainComponentKey,showTotals,
             handleReset, loader, showLoader, hideLoader, tableKey, invoiceColumns, invoiceRows, showActions, actions, deleteJournalLine, idField,
             title, modal_loader, modal_left, modal_top, modal_width, showModalLoader, hideModalLoader,
         }

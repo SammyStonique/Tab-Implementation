@@ -7,8 +7,8 @@ const state = {
   uomArray: [],
   uomID: '',
   uomName: '',
-  name_search: '',
-  uom_code_search: '',
+  uom_name_search: '',
+  abbreviation_search: '',
   selectedUom: null,
   isEditing: false
 };
@@ -18,8 +18,8 @@ const mutations = {
     state.uomList = [];
     state.uomArr = [];
     state.uomArray = [];
-    state.name_search = '';
-    state.uom_code_search = '';
+    state.uom_name_search = '';
+    state.abbreviation_search = '';
     state.isEditing = false;
     state.selectedUom = null;
   },
@@ -42,16 +42,16 @@ const mutations = {
   },
   SET_SEARCH_FILTERS(state, search_filter){
     for(const [key, value] of Object.entries(search_filter)){
-      if(key == 'name_search'){
-        state.name_search = value;
-      }else if(key == 'landlord_code_search'){
-        state.landlord_code_search = value;
+      if(key == 'uom_name_search'){
+        state.uom_name_search = value;
+      }else if(key == 'abbreviation_search'){
+        state.abbreviation_search = value;
       }  
     }
   },
   RESET_SEARCH_FILTERS(state){
-    state.name_search = '';
-    state.landlord_code_search = '';
+    state.uom_name_search = '';
+    state.abbreviation_search = '';
   }
 };
   

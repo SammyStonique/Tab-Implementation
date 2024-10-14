@@ -59,7 +59,7 @@
                         </button>
                     </div>
                     <div class="py-2 px-3 pl-4 w-full hover:bg-slate-500 hover:w-full">
-                        <button class="flex text-sm w-full" @click="openPage({'INV':'Unit_Of_Measure'})">
+                        <button class="flex text-sm w-full" @click="openPage({'INV':'Uom'})">
                             <i class="fa fa-hashtag pt-2 mr-2" aria-hidden="true"></i>
                             <p class="">Unit Of Measure</p>
                         </button>

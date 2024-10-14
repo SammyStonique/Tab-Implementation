@@ -49,6 +49,7 @@ export default{
         const store = useStore();
         const toast = useToast();
         const loader = ref('');
+        const catComponentKey = ref('');
         const idField = 'inventory_item_id';
         const addButtonLabel = ref('New Item');
         const addingRight = ref('Adding Inventory Item');
@@ -111,7 +112,7 @@ export default{
             {type:'text', placeholder:"Code...", value: item_code_search, width:48,},
             {type:'text', placeholder:"Name...", value: item_name_search, width:48,},
             {
-                type:'search-dropdown', value: categories_array, width:48,
+                type:'search-dropdown', value: categories_array, width:48, componentKey: catComponentKey,
                 selectOptions: categories_array,optionSelected: handleSelectedCategory,
                 searchPlaceholder: 'Category...', dropdownWidth: '300px',
                 fetchData: store.dispatch('Item_Categories/fetchItemCategories', {company:companyID.value}), clearSearch: clearSelectedCategory()
@@ -222,6 +223,7 @@ export default{
         }
         const resetFilters = () =>{
             store.commit('Items_Catalog/RESET_SEARCH_FILTERS')
+            
             searchItems();
         }
         const loadPrev = () =>{

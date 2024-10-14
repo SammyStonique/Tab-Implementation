@@ -1,10 +1,15 @@
 import axios from "axios";
 import Swal from 'sweetalert2';
+import { useToast } from "vue-toastification";
+
+const toast = useToast();
 
 const state = {
   itemsList: [], 
+  itemsSaleList: [],
   itemsArr: [],
   itemsArray: [],
+  lineItemsArray: [],
   itemID: null,
   itemName: '',
   item_name_search: '',
@@ -21,8 +26,10 @@ const state = {
 const mutations = {
   initializeStore(state){
     state.itemsList = [];
+    state.itemsSaleList = [];
     state.itemsArr = [];
     state.itemsArray = [];
+    state.lineItemsArray = [];
     state.itemID = null;
     state.itemName = null;
     state.item_name_search = '';
@@ -41,6 +48,9 @@ const mutations = {
   },
   LIST_ITEMS(state, items) {
     state.itemsList = items;
+  },
+  LIST_SALE_ITEMS(state, items) {
+    state.itemsSaleList = items;
   },
   ITEMS_ARRAY(state, items){
     state.propArray = items;
@@ -112,6 +122,20 @@ const actions = {
     })
     
   },
+  async fetchItems({ commit,state }, formData) {
+    state.itemsArr = [];
+    await axios.post(`api/v1/custom-stock-adjustment-item-search/`,formData)
+    .then((response)=>{
+      for(let i=0; i< response.data.items.length; i++){
+        state.itemsArr.push((response.data.items[i].inventory_item_code + ' - ' + response.data.items[i].inventory_item_name))
+      }
+      commit('LIST_SALE_ITEMS', response.data.items);
+    })
+    .catch((error)=>{
+      console.log(error.message);
+    })
+    
+  },
   fetchInventoryItem({ commit,state }, formData) {
     axios.post(`api/v1/fetch-inventory-items/`,formData)
     .then((response)=>{
@@ -131,12 +155,36 @@ const actions = {
   },
   handleSelectedItem({ commit, state }, option){
     state.itemsArray = [];
-    const selectedItem = state.itemsList.find(item => (item.item_code + ' - ' + item.item_name) === option);
+    const selectedItem = state.itemsSaleList.find(item => (item.inventory_item_code + ' - ' + item.inventory_item_name) === option);
     if (selectedItem) {
-        state.itemID = selectedItem.inventory_item_id;
-        state.itemName = selectedItem.item_name;
+        selectedItem.item = selectedItem.inventory_item_id;
+        selectedItem.batch_count = selectedItem.batch_count;
+        selectedItem.stock_at_hand = selectedItem.batch_after_sale;
+        selectedItem.quantity = 1;
+        selectedItem.cost = parseFloat(selectedItem.selling_price);
+        selectedItem.discount = 0;
+        selectedItem.vat_rate = null;
+        selectedItem.vat_inclusivity = "Inclusive";
+        selectedItem.vat_amount = 0;
+        selectedItem.sub_total = 0;
+        selectedItem.total_amount = selectedItem.quantity * selectedItem.cost;
+        selectedItem.available_batch_count = selectedItem.batch_before_sale,
+        selectedItem.item_sales_income = (parseFloat(selectedItem.selling_price) - parseFloat(selectedItem.selling_price)) * 1,
         state.itemsArray = [...state.itemsArray, selectedItem];
     }
+    let itemExists = false;
+    for (let i=0; i< state.lineItemsArray.length; i++){
+      if(state.lineItemsArray[i] == selectedItem){
+        itemExists = true;
+        break;
+      }
+    }
+    if(itemExists == false){
+      state.lineItemsArray.push(selectedItem)
+    }else{
+      toast.error("Item Already Selected")
+    }
+    
     commit('ITEMS_ARRAY', state.itemsArray);
       
   },
@@ -192,6 +240,9 @@ const actions = {
         Swal.fire(`Inventory Item has not been deleted!`);
       }
     })
+  },
+  removeItemLine({commit, state}, index){
+    state.lineItemsArray.splice(index, 1); 
   },
 };
   

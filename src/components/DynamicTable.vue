@@ -162,7 +162,7 @@ export default defineComponent({
     const getNestedValue = (row, key) => {
       return key.split('.').reduce((obj, keyPart) => obj && obj[keyPart], row);
     };
-
+    //JOURNALS
     const journalLineCheck = (row) =>{
       let debitAmount = parseFloat(row.debit_amount) || 0;
       let creditAmount = parseFloat(row.credit_amount) || 0;
@@ -172,7 +172,39 @@ export default defineComponent({
         row.debit_amount = 0;
       }
     }
-
+    //DIRECT SALES
+    const availableItemQuantityCheck = (row) =>{
+      let availQuant = parseFloat(row.available_batch_count) || 0;
+      let quantity = parseFloat(row.quantity) || 0;
+      if(quantity > availQuant){
+        row.quantity = 1;
+        row.vat_rate = null;
+        row.vat_amount = 0;
+        row.discount = 0;
+        row.total_amount = row.cost;
+        row.item_sales_income = (parseFloat(row.selling_price) - parseFloat(row.purchase_price)) * row.quantity;
+      }else if(quantity <= 0){
+        row.quantity = 1;
+        row.vat_rate = null;
+        row.vat_amount = 0;
+        row.discount = 0;
+        row.total_amount = row.cost;
+        row.item_sales_income = (parseFloat(row.selling_price) - parseFloat(row.purchase_price)) * row.quantity;
+      }
+    }
+    //DIRECT SALES
+    const saleDiscount = (row) =>{
+      let totalAmount = parseFloat(row.total_amount) || 0;
+      let quantity = parseFloat(row.quantity) || 0;
+      let subTotal = parseFloat(row.sub_total) || 0;
+      let discount = parseFloat(row.discount) || 0;
+      totalAmount = totalAmount - discount;
+      subTotal = subTotal - discount;
+      row.total_amount = totalAmount;
+      row.sub_total = subTotal;
+      row.item_sales_income = ((parseFloat(row.selling_price) - parseFloat(row.purchase_price)) * quantity) - discount;
+    };
+    //TABLE TOTALS
     const calculateColumnTotal =(columnKey) =>{
         return props.rows.reduce((total, row) => {
             const value = typeof row[columnKey] === 'string' ? (parseFloat((row[columnKey]).replace(/,/g, '')) || 0) : (parseFloat(row[columnKey])|| 0);
@@ -200,6 +232,7 @@ export default defineComponent({
         row.total_amount = totalAmount;
       }
     };
+
     const handleChange = (event, row) =>{
       const selectedValue = event.target.value;
       calculateTaxAmount(row);
@@ -215,8 +248,10 @@ export default defineComponent({
       updateUnits(row);
       receiptAllocation(row);
       journalLineCheck(row);
+      availableItemQuantityCheck(row);
+      saleDiscount(row);
     }
-
+    //METER READING
     const updateUnits = (row) =>{
       const prevReading = parseFloat(row.prev_reading) || 0;
       const currReading = parseFloat(row.current_reading) || 0;
@@ -224,7 +259,7 @@ export default defineComponent({
       row.total = ((row.units_consumed * row.unit_cost) + row.meter_rent).toFixed(2)
 
     }
-
+    //RECEIPTING
     const receiptAllocation = (row) =>{
       const invAmount = parseFloat(row.due_amount) || 0;
       const paymentAllocation = parseFloat(row.payment_allocation) || 0;

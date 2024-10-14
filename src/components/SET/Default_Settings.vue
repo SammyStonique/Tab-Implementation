@@ -7,17 +7,17 @@
                     <div class="w-full mt-4" v-if="pms_settings_options">
                         <div class="flex mb-1.5">
                             <div class="basis-1/3 flex mr-3">
-                                <label for="">Current Selection:<em></em></label>
+                                <label for="">Current:<em></em></label>
                                 <p class="ml-4 font-bold">{{ rentalIncome }}</p>
                                 <button type="button" class="ml-4 text-red-600" @click="removeDefaultSetting('PMS','Rental Income Posting A/c',rentalIncome)" v-if="rentalIncome"><i class="fa fa-times" aria-hidden="true"></i></button>
                             </div>
                             <div class="basis-1/3 flex mr-3">
-                                <label for="">Current Selection:<em></em></label>
+                                <label for="">Current:<em></em></label>
                                 <p class="ml-4 font-bold">{{ tenantCodePrefix }}</p>
                                 <button type="button" class="ml-4 text-red-600" @click="removeDefaultSetting('PMS','Tenant Code Prefix',tenantCodePrefix)" v-if="tenantCodePrefix"><i class="fa fa-times" aria-hidden="true"></i></button>
                             </div>
                             <div class="basis-1/3 flex mr-3">
-                                <label for="">Current Selection:<em></em></label>
+                                <label for="">Current:<em></em></label>
                                 <p class="ml-4 font-bold">{{ tenantCodeCounter }}</p>
                                 <button type="button" class="ml-4 text-red-600" @click="removeDefaultSetting('PMS','Tenant Code Zero Padding',tenantCodeCounter)" v-if="tenantCodeCounter"><i class="fa fa-times" aria-hidden="true"></i></button>
                             </div>
@@ -48,7 +48,7 @@
                         </div>
                         <div class="flex mb-1.5">
                             <div class="basis-1/2 flex mr-3">
-                                <label for="">Current Selection:<em></em></label>
+                                <label for="">Current:<em></em></label>
                                 <p class="ml-4 font-bold">{{ rentalSecurityDeposit }}</p>
                                 <button type="button" class="ml-4 text-red-600" @click="removeDefaultSetting('PMS','Rental Security Deposits Posting A/c',rentalSecurityDeposit)" v-if="rentalSecurityDeposit"><i class="fa fa-times" aria-hidden="true"></i></button>
                             </div>
@@ -69,7 +69,7 @@
                         </div>
                         <div class="flex mb-1.5">
                             <div class="basis-1/2 flex mr-3">
-                                <label for="">Current Selection:<em></em></label>
+                                <label for="">Current:<em></em></label>
                                 <p class="ml-4 font-bold">{{ rentalLeaseIncome }}</p>
                                 <button type="button" class="ml-4 text-red-600" @click="removeDefaultSetting('PMS','Lease Fees Income Posting A/c',rentalLeaseIncome)" v-if="rentalLeaseIncome"><i class="fa fa-times" aria-hidden="true"></i></button>
                             </div>
@@ -89,7 +89,7 @@
                         </div>
                         <div class="flex mb-1.5">
                             <div class="basis-1/2 flex mr-3">
-                                <label for="">Current Selection:<em></em></label>
+                                <label for="">Current:<em></em></label>
                                 <p class="ml-4 font-bold">{{ rentalPenaltyIncome }}</p>
                                 <button type="button" class="ml-4 text-red-600" @click="removeDefaultSetting('PMS','Penalty Income Posting A/c',rentalPenaltyIncome)" v-if="rentalPenaltyIncome"><i class="fa fa-times" aria-hidden="true"></i></button>
                             </div>
@@ -114,7 +114,7 @@
                     <div class="w-full mt-4" v-if="hms_settings_options">
                         <div class="flex mb-3">
                             <div class="basis-1/2 flex mr-3">
-                                <label for="">Current Selection:<em></em></label>
+                                <label for="">Current:<em></em></label>
                                 <p class="ml-4 font-bold">{{ stock_control }}</p>
                             </div>
                         </div>
@@ -134,7 +134,7 @@
                         </div>
                         <div class="flex mb-3">
                             <div class="basis-1/2 flex mr-3">
-                                <label for="">Current Selection:<em></em></label>
+                                <label for="">Current:<em></em></label>
                                 <p class="ml-4 font-bold">{{ sales_income }}</p>
                             </div>
                         </div>
@@ -154,7 +154,7 @@
                         </div>
                         <div class="flex mb-3">
                             <div class="basis-1/2 flex mr-3">
-                                <label for="">Current Selection:<em></em></label>
+                                <label for="">Current:<em></em></label>
                                 <p class="ml-4 font-bold">{{ inventory_take_on }}</p>
                             </div>
                         </div>
@@ -224,7 +224,7 @@
                     <div class="w-full mt-4" v-if="hr_settings_options">
                         <div class="flex mb-3">
                             <div class="basis-1/2 flex mr-3">
-                                <label for="">Current Selection:<em></em></label>
+                                <label for="">Current:<em></em></label>
                                 <p class="ml-4 font-bold">{{ stock_control }}</p>
                             </div>
                         </div>
@@ -244,7 +244,7 @@
                         </div>
                         <div class="flex mb-3">
                             <div class="basis-1/2 flex mr-3">
-                                <label for="">Current Selection:<em></em></label>
+                                <label for="">Current:<em></em></label>
                                 <p class="ml-4 font-bold">{{ sales_income }}</p>
                             </div>
                         </div>
@@ -264,7 +264,7 @@
                         </div>
                         <div class="flex mb-3">
                             <div class="basis-1/2 flex mr-3">
-                                <label for="">Current Selection:<em></em></label>
+                                <label for="">Current:<em></em></label>
                                 <p class="ml-4 font-bold">{{ inventory_take_on }}</p>
                             </div>
                         </div>
@@ -287,100 +287,129 @@
                 <div class="border-b-2 border-gray-500 px-3 py-2 text-left">
                     <button class="w-full text-left font-semibold" @click="showInventorySettings">Inventory Default Settings</button>
                     <div class="w-full mt-4" v-if="inventory_settings_options">
-                        <div class="flex mb-3">
-                            <div class="basis-1/2 flex mr-3">
-                                <label for="">Current Selection:<em></em></label>
-                                <p class="ml-4 font-bold">{{ defaultOutlet }}</p>
-                                <button type="button" class="ml-4 text-red-600" @click="removeDefaultSetting('Inventory','Default Outlet',default_outlet)" v-if="default_outlet"><i class="fa fa-times" aria-hidden="true"></i></button>
+                        <div class="flex mb-1.5">
+                            <div class="basis-1/3 flex mr-3">
+                                <label for="">Current:<em></em></label>
+                                <p class="ml-4 font-bold">{{ retailOutlet }}</p>
+                                <button type="button" class="ml-4 text-red-600" @click="removeDefaultSetting('Inventory','Default Retail Outlet',retailOutlet)" v-if="retailOutlet"><i class="fa fa-times" aria-hidden="true"></i></button>
                             </div>
-                            <div class="basis-1/2 flex mr-3">
-                                <label for="">Current Selection:<em></em></label>
-                                <p class="ml-4 font-bold">{{ defaultStockType }}</p>
-                                <button type="button" class="ml-4 text-red-600" @click="removeDefaultSetting('Inventory','Default Stock Type',default_stock_type)" v-if="default_stock_type"><i class="fa fa-times" aria-hidden="true"></i></button>
+                            <div class="basis-1/3 flex mr-3">
+                                <label for="">Current:<em></em></label>
+                                <p class="ml-4 font-bold">{{ stockControl }}</p>
+                                <button type="button" class="ml-4 text-red-600" @click="removeDefaultSetting('Inventory','Inventory Stock Control A/c',stockControl)" v-if="stockControl"><i class="fa fa-times" aria-hidden="true"></i></button>
+                            </div>
+                            <div class="basis-1/3 flex mr-3">
+                                <label for="">Current:<em></em></label>
+                                <p class="ml-4 font-bold">{{ salesIncome }}</p>
+                                <button type="button" class="ml-4 text-red-600" @click="removeDefaultSetting('Inventory','Inventory Sales Income A/c',salesIncome)" v-if="salesIncome"><i class="fa fa-times" aria-hidden="true"></i></button>
                             </div>
                         </div>
-                        <div class="flex mb-6">
-                            <div class="basis-1/2 mr-3">
-                                <label for="">Default Outlet:<em>*</em></label><br />
+                        <div class="flex mb-3">
+                            <div class="basis-1/3 mr-4 relative">
+                                <label for="">Default Retail Outlet:<em>*</em></label><br />
                                 <SearchableDropdown
-                                    :options="outletsArr"
-                                    :updateValue="selectedOutlet"
-                                    :dropdownWidth="ledgerDropdownWidth"
-                                    :searchPlaceholder="outletPlaceholder"
+                                    :options="retailOutletArr"
+                                    :updateValue="selectedRetailOutlet"
+                                    :dropdownWidth="dropdownWidth"
                                     @option-selected="handleSelectedOutlet"
-                                    @clearSearch="handleClearOutlet"
+                                    @clearSearch="clearSelectedOutlet"   
+                                    @fetchData="fetchRetailOutlets"                              
                                 />
-                                <button type="button" class="absolute ml-4 rounded px-2 bg-green-500 text-white" @click="saveDefaultSetting('Inventory','Default Outlet',outletID,outletName)"><i class="fa fa-check"></i></button>
+                                <button type="button" class="absolute ml-4 rounded px-2 bg-green-500 text-white" @click="saveDefaultSetting('Inventory','Default Retail Outlet',outletID,outletName)"><i class="fa fa-check"></i></button>
                             </div>
-                            <div class="basis-1/2 mr-3">
-                                <label for="">Default Stock Type:<em>*</em></label><br />
+                            <div class="basis-1/3 mr-4 relative">
+                                <label for="">Stock Control A/c:<em>*</em></label><br />
                                 <SearchableDropdown
-                                    :options="stockTypeArr"
-                                    :updateValue="selectedStockType"
-                                    :dropdownWidth="ledgerDropdownWidth"
-                                    :searchPlaceholder="stockTypePlaceholder"
-                                    @option-selected="handleSelectedStockType"
-                                    @clearSearch="handleClearStockType"
+                                    :options="ledgerArr"
+                                    :updateValue="selectedLedger"
+                                    :dropdownWidth="dropdownWidth"
+                                    @option-selected="handleSelectedLedger"
+                                    @clearSearch="clearSelectedLedger"   
+                                    @fetchData="fetchLedgers"                              
                                 />
-                                <button type="button" class="absolute ml-4 rounded px-2 bg-green-500 text-white" @click="saveDefaultSetting('Inventory','Default Stock Type',selectedStockType,selectedStockType)"><i class="fa fa-check"></i></button>
+                                <button type="button" class="absolute ml-4 rounded px-2 bg-green-500 text-white" @click="saveDefaultSetting('Inventory','Inventory Stock Control A/c',ledgerID,ledgerName)"><i class="fa fa-check"></i></button>
+                            </div>
+                            <div class="basis-1/3 mr-3 relative">
+                                <label for="">Sales Income A/c:<em>*</em></label><br />
+                                <SearchableDropdown
+                                    :options="incomeLedgerArr"
+                                    :updateValue="selectedSalesIncome"
+                                    :dropdownWidth="dropdownWidth"
+                                    @option-selected="handleSelectedLedger"
+                                    @clearSearch="clearSelectedLedger"
+                                    @fetchData="fetchIncomeLedgers"   
+                                />
+                                <button type="button" class="absolute ml-4 rounded px-2 bg-green-500 text-white" @click="saveDefaultSetting('Inventory','Inventory Sales Income A/c',ledgerID,ledgerName)"><i class="fa fa-check"></i></button>
+                            </div>
+                        </div>
+                        <div class="flex mb-1.5">
+                            <div class="basis-1/3 flex mr-3">
+                                <label for="">Current:<em></em></label>
+                                <p class="ml-4 font-bold">{{ outletCounter }}</p>
+                                <button type="button" class="ml-4 text-red-600" @click="removeDefaultSetting('Inventory','Default Outlet Counter',outletCounter)" v-if="outletCounter"><i class="fa fa-times" aria-hidden="true"></i></button>
+                            </div>
+                            <div class="basis-1/3 flex mr-3">
+                                <label for="">Current:<em></em></label>
+                                <p class="ml-4 font-bold">{{ invTakeOn }}</p>
+                                <button type="button" class="ml-4 text-red-600" @click="removeDefaultSetting('Inventory','Inventory Take On Balancing A/c',invTakeOn)" v-if="invTakeOn"><i class="fa fa-times" aria-hidden="true"></i></button>
                             </div>
                         </div>
                         <div class="flex mb-3">
-                            <div class="basis-1/2 flex mr-3">
-                                <label for="">Current Selection:<em></em></label>
-                                <p class="ml-4 font-bold">{{ defaultCounter }}</p>
-                                <button type="button" class="ml-4 text-red-600" @click="removeDefaultSetting('Inventory','Default Counter',default_counter)" v-if="default_counter"><i class="fa fa-times" aria-hidden="true"></i></button>
-                            </div>
-                            <div class="basis-1/2 flex mr-3">
-                                <label for="">Current Selection:<em></em></label>
-                                <p class="ml-4 font-bold">{{ defaultSellingPrice }}</p>
-                                <button type="button" class="ml-4 text-red-600" @click="removeDefaultSetting('Inventory','Update Selling Price For All Batches',default_selling_price)" v-if="default_selling_price"><i class="fa fa-times" aria-hidden="true"></i></button>
-                            </div>
-                        </div>
-                        <div class="flex mb-6">
-                            <div class="basis-1/2 mr-3">
-                                <label for="">Default Counter:<em>*</em></label><br />
+                            <div class="basis-1/3 mr-4 relative">
+                                <label for="">Default Outlet Counter:<em>*</em></label><br />
                                 <SearchableDropdown
-                                    :options="countersArr"
-                                    :updateValue="selectedCounter"
-                                    :dropdownWidth="ledgerDropdownWidth"
-                                    :searchPlaceholder="counterPlaceholder"
+                                    :options="outletCounterArr"
+                                    :updateValue="selectedOutletCounter"
+                                    :dropdownWidth="dropdownWidth"
                                     @option-selected="handleSelectedCounter"
-                                    @clearSearch="handleClearCounter"
+                                    @clearSearch="clearSelectedCounter"
+                                    @fetchData="fetchOutletCounters"   
                                 />
-                                <button type="button" class="absolute ml-4 rounded px-2 bg-green-500 text-white" @click="saveDefaultSetting('Inventory','Default Counter',counterID,counterName)"><i class="fa fa-check"></i></button>
+                                <button type="button" class="absolute ml-4 rounded px-2 bg-green-500 text-white" @click="saveDefaultSetting('Inventory','Default Outlet Counter',outletID,outletName)"><i class="fa fa-check"></i></button>
                             </div>
-                            <div class="basis-1/2 mr-3">
-                                <label for="">Update Selling Price For All Batches:<em>*</em></label><br />
+                            <div class="basis-1/3 mr-3 relative">
+                                <label for="">Inventory Take On Balancing A/c:<em>*</em></label><br />
                                 <SearchableDropdown
-                                    :options="optionsArr"
-                                    :updateValue="selectedSellingPriceOption"
-                                    :dropdownWidth="ledgerDropdownWidth"
-                                    :searchPlaceholder="optionsPlaceholder"
-                                    @option-selected="handleSelectedSellingPriceOption"
-                                    @clearSearch="handleClearSellingPriceOption"
+                                    :options="ledgerArr"
+                                    :updateValue="selectedLedger"
+                                    :dropdownWidth="dropdownWidth"
+                                    @option-selected="handleSelectedLedger"
+                                    @clearSearch="clearSelectedLedger"   
+                                    @fetchData="fetchLedgers"                              
                                 />
-                                <button type="button" class="absolute ml-4 rounded px-2 bg-green-500 text-white" @click="saveDefaultSetting('Inventory','Update Selling Price For All Batches',selectedSellingPriceOption,selectedSellingPriceOption)"><i class="fa fa-check"></i></button>
+                                <button type="button" class="absolute ml-4 rounded px-2 bg-green-500 text-white" @click="saveDefaultSetting('Inventory','Inventory Take On Balancing A/c',ledgerID,ledgerName)"><i class="fa fa-check"></i></button>
+                            </div>
+                        </div>
+                        <div class="flex mb-1.5">
+                            <div class="basis-1/2 flex mr-3">
+                                <label for="">Current:<em></em></label>
+                                <p class="ml-4 font-bold">{{ counterChannel }}</p>
+                                <button type="button" class="ml-4 text-red-600" @click="removeDefaultSetting('Inventory','Default Counter Channel',counterChannel)" v-if="counterChannel"><i class="fa fa-times" aria-hidden="true"></i></button>
                             </div>
                         </div>
                         <div class="flex mb-3">
-                            <div class="basis-1/2 flex mr-3">
-                                <label for="">Current Selection:<em></em></label>
-                                <p class="ml-4 font-bold">{{ defaultChannel }}</p>
-                                <button type="button" class="ml-4 text-red-600" @click="removeDefaultSetting('Inventory','Default Counter Channel',default_channel)" v-if="default_channel"><i class="fa fa-times" aria-hidden="true"></i></button>
-                            </div>
-                        </div>
-                        <div class="flex mb-6">
-                            <div class="basis-1/4 mr-3">
-                                <label for="">Default Channel:<em>*</em></label><br />
+                            <div class="basis-1/4 mr-3 relative">
+                                <label for="">Default Counter Channel:<em>*</em></label><br />
                                 <SearchableDropdown
-                                    :options="channelsArr"
-                                    :dropdownWidth="ledgerDropdownWidth"
-                                    :searchPlaceholder="channelPlaceholder"
-                                    @option-selected="handleSelectedChannel"
-                                    @clearSearch="handleClearChannel"
+                                    :options="incomeLedgerArr"
+                                    :updateValue="selectedBalancingAccount"
+                                    :dropdownWidth="dropdownWidth"
+                                    @option-selected="handleSelectedLedger"
+                                    @clearSearch="clearSelectedLedger"
                                 />
                                 <button type="button" class="absolute ml-4 rounded px-2 bg-green-500 text-white" @click="saveDefaultSetting('Inventory','Default Counter Channel',channelID,channelName)"><i class="fa fa-check"></i></button>
+                            </div>
+                        </div>
+                        <div class="flex mb-3">
+                            <div class="basis-1/3 relative">
+                                <label for="">Default Stock Type:<em>*</em></label><br />
+                                <select  v-model="stockType" name="" class="bg-slate-50 rounded border border-gray-400 text-sm pl-2 pt-2 w-3/4">
+                                    <option value="Stocked">Stocked</option>
+                                    <option value="Serialized">Serialized</option>
+                                    <option value="Non Stocked">Non Stocked</option>
+                                    <option value="Service">Service</option>
+                                </select>
+                                <button type="button" class="absolute ml-4 rounded px-2 bg-green-500 text-white" @click="saveDefaultSetting('Inventory','Default Stock Type',stockType,stockType)"><i class="fa fa-check"></i></button>
                             </div>
                         </div>
                     </div>
@@ -390,7 +419,7 @@
                     <div class="w-full mt-4" v-if="settings_settings_options">
                         <div class="flex mb-3">
                             <div class="basis-1/2 flex mr-3">
-                                <label for="">Current Selection:<em></em></label>
+                                <label for="">Current:<em></em></label>
                                 <p class="ml-4 font-bold">{{ stock_control }}</p>
                             </div>
                         </div>
@@ -410,7 +439,7 @@
                         </div>
                         <div class="flex mb-3">
                             <div class="basis-1/2 flex mr-3">
-                                <label for="">Current Selection:<em></em></label>
+                                <label for="">Current:<em></em></label>
                                 <p class="ml-4 font-bold">{{ sales_income }}</p>
                             </div>
                         </div>
@@ -430,7 +459,7 @@
                         </div>
                         <div class="flex mb-3">
                             <div class="basis-1/2 flex mr-3">
-                                <label for="">Current Selection:<em></em></label>
+                                <label for="">Current:<em></em></label>
                                 <p class="ml-4 font-bold">{{ inventory_take_on }}</p>
                             </div>
                         </div>
@@ -476,10 +505,14 @@ export default defineComponent({
         const mainComponentKey = ref(0);
         const settingsArray = ref([]);
         const companyID = computed(()=> store.state.userData.company_id);
+        const ledgerArr = computed(() => store.state.Ledgers.ledgerArr);
         const incomeLedgerArr = computed(() => store.state.Ledgers.incomeLedgerArr);
         const expenseLedgerArr = computed(() => store.state.Ledgers.expenseLedgerArr);
         const cashbookLedgerArr = computed(() => store.state.Ledgers.cashbookLedgerArr);
         const liabilityLedgerArr = computed(() => store.state.Ledgers.liabilityLedgerArr);
+        const retailOutletArr = computed(() => store.state.Retail_Outlets.outletArr);
+        const outletCounterArr = computed(() => store.state.Outlet_Counters.counterArr);
+        const counterChannelArr = computed(() => store.state.Counter_Channels.channelArr);
 
         const hms_settings_options = ref(false);
         const inventory_settings_options = ref(false);
@@ -500,11 +533,25 @@ export default defineComponent({
         const vendorsOption = ref("");
         const tenantsOption = ref("");
 
+        const retailOutlet = ref("");
+        const outletCounter = ref("");
+        const counterChannel = ref("");
+        const stockType = ref("");
+        const stockControl = ref("");
+        const salesIncome = ref("");
+        const invTakeOn = ref("");
+
         const dropdownWidth = ref("320px");
         const incomePlaceholder = ref("Select Income A/c");
 
         const ledgerID = ref("");
         const ledgerName = ref("");
+        const outletID = ref("");
+        const outletName = ref("");
+        const counterID = ref("");
+        const counterName = ref("");
+        const channelID = ref("");
+        const channelName = ref("");
 
         const showHMSSettings = () =>{
             fetchDefaultSetting('HMS');
@@ -562,6 +609,14 @@ export default defineComponent({
             settings_settings_options.value  = !settings_settings_options.value ;
         }
 
+        const fetchLedgers = async() =>{
+            let formData = {
+                company: companyID.value,
+                ledger_category: "General Ledger"
+            }
+            await store.dispatch("Ledgers/fetchLedgers", formData)
+        }
+
         const fetchIncomeLedgers = async() =>{
             let formData = {
                 company: companyID.value,
@@ -610,6 +665,69 @@ export default defineComponent({
             ledgerName.value = "";
         }
 
+        const fetchRetailOutlets = async() =>{
+            let formData = {
+                company: companyID.value,
+            }
+            await store.dispatch("Retail_Outlets/fetchOutlets", formData)
+        }
+
+        const handleSelectedOutlet = async(option) =>{
+            await store.dispatch('Retail_Outlets/handleSelectedOutlet', option)
+            outletID.value = store.state.Retail_Outlets.outletID;
+            outletName.value = store.state.Retail_Outlets.outletName;
+
+        };
+        const clearSelectedOutlet = async() =>{
+            await store.dispatch('Retail_Outlets/updateState', {outletID: '', outletName: ""});
+            outletID.value = "";
+            outletName.value = "";
+        }
+
+        const fetchOutletCounters = async() =>{
+            if(outletID.value){
+                let formData = {
+                    company: companyID.value,
+                    outlet: outletID.value
+                }
+                await store.dispatch("Outlet_Counters/fetchCounters", formData)
+            }
+        }
+
+        const handleSelectedCounter = async(option) =>{
+            await store.dispatch('Outlet_Counters/handleSelectedCounter', option)
+            counterID.value = store.state.Outlet_Counters.counterID;
+            counterName.value = store.state.Outlet_Counters.counterName;
+
+        };
+        const clearSelectedCounter = async() =>{
+            await store.dispatch('Retail_Outlets/updateState', {counterID: '', counterName: ""});
+            counterID.value = "";
+            counterName.value = "";
+        }
+
+        const fetchCounterChannels = async() =>{
+            if(counterID.value){
+                let formData = {
+                    company: companyID.value,
+                    outlet_counter: counterID.value
+                }
+                await store.dispatch("Counter_Channels/fetchChannels", formData)
+            }
+        }
+
+        const handleSelectedChannel = async(option) =>{
+            await store.dispatch('Counter_Channels/handleSelectedChannel', option)
+            channelID.value = store.state.Counter_Channels.channelID;
+            channelName.value = store.state.Counter_Channels.channelName;
+
+        };
+        const clearSelectedChannel = async() =>{
+            await store.dispatch('Counter_Channels/updateState', {channelID: '', channelName: ""});
+            channelID.value = "";
+            channelName.value = "";
+        }
+
         const showLoader = () =>{
             loader.value = "block";
         };
@@ -649,6 +767,22 @@ export default defineComponent({
                         vendorsOption.value = response.data[i].setting_value_name;
                     }else if(response.data[i].setting_name === 'Merge Tenants Ledgers in Reports'){
                         tenantsOption.value = response.data[i].setting_value_name;
+                    }
+                    
+                    else if(response.data[i].setting_name === 'Default Retail Outlet'){
+                        retailOutlet.value = response.data[i].setting_value_name;
+                    }else if(response.data[i].setting_name === 'Default Outlet Counter'){
+                        outletCounter.value = response.data[i].setting_value_name;
+                    }else if(response.data[i].setting_name === 'Default Counter Channel'){
+                        counterChannel.value = response.data[i].setting_value_name;
+                    }else if(response.data[i].setting_name === 'Inventory Stock Control A/c'){
+                        stockControl.value = response.data[i].setting_value_name;
+                    }else if(response.data[i].setting_name === 'Default Stock Type'){
+                        stockType.value = response.data[i].setting_value_name;
+                    }else if(response.data[i].setting_name === 'Inventory Sales Income A/c'){
+                        salesIncome.value = response.data[i].setting_value_name;
+                    }else if(response.data[i].setting_name === 'Inventory Take On Balancing A/c'){
+                        invTakeOn.value = response.data[i].setting_value_name;
                     }
                 }
             })
@@ -734,10 +868,12 @@ export default defineComponent({
         return{
             loader,showLoader,hideLoader,hms_settings_options,inventory_settings_options,pms_settings_options,hr_settings_options,accounts_settings_options,
             settings_settings_options, showHMSSettings, showPMSSettings, showAccountsSettings, showInventorySettings, showHRSettings, showSettingsSettings,
-            dropdownWidth,incomePlaceholder, incomeLedgerArr, expenseLedgerArr, liabilityLedgerArr, cashbookLedgerArr, fetchIncomeLedgers, fetchExpenseLedgers,
-            fetchCashbookLedgers, fetchLiabilityLedgers, rentalIncome, rentalSecurityDeposit, rentalLeaseIncome, rentalPenaltyIncome,
+            dropdownWidth,incomePlaceholder, ledgerArr, incomeLedgerArr, expenseLedgerArr, liabilityLedgerArr, cashbookLedgerArr, fetchIncomeLedgers, fetchExpenseLedgers,
+            fetchCashbookLedgers, fetchLiabilityLedgers, rentalIncome, rentalSecurityDeposit, rentalLeaseIncome, rentalPenaltyIncome,fetchLedgers,
             ledgerID,ledgerName, handleSelectedLedger, clearSelectedLedger, saveDefaultSetting, removeDefaultSetting, tenantCodePrefix, tenantCodeCounter,
-            patientsOption, debtorsOption, vendorsOption, tenantsOption
+            patientsOption, debtorsOption, vendorsOption, tenantsOption, fetchRetailOutlets,handleSelectedOutlet, clearSelectedOutlet, fetchOutletCounters,
+            handleSelectedCounter, clearSelectedCounter, fetchCounterChannels,handleSelectedChannel, clearSelectedChannel,outletCounterArr,retailOutletArr,counterChannelArr,
+            retailOutlet, outletCounter, counterChannel, salesIncome, invTakeOn, stockControl, stockType
         }
     }
 });

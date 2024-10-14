@@ -2,16 +2,16 @@
     <PageComponent 
         :loader="loader" @showLoader="showLoader" @hideLoader="hideLoader"
         :addButtonLabel="addButtonLabel"
-        @handleAddNew="addNewOutlet"
+        @handleAddNew="addNewUom"
         :searchFilters="searchFilters"
-        @searchPage="searchOutlets"
+        @searchPage="searchUoms"
         @resetFilters="resetFilters"
-        @removeItem="removeOutlet"
-        @removeSelectedItems="removeOutlets"
+        @removeItem="removeUom"
+        @removeSelectedItems="removeUoms"
         :addingRight="addingRight"
         :rightsModule="rightsModule"
         :columns="tableColumns"
-        :rows="outletList"
+        :rows="uomList"
         :actions="actions"
         :idField="idField"
         @handleSelectionChange="handleSelectionChange"
@@ -30,7 +30,7 @@
         :loader="modal_loader" @showLoader="showModalLoader" @hideLoader="hideModalLoader" @closeModal="closeModal">
         <DynamicForm 
             :fields="formFields" :flex_basis="flex_basis" :flex_basis_percentage="flex_basis_percentage" 
-            :displayButtons="displayButtons" @handleSubmit="saveOutlet" @handleReset="handleReset"
+            :displayButtons="displayButtons" @handleSubmit="saveUom" @handleReset="handleReset"
         />
     </MovableModal>
 </template>
@@ -45,7 +45,7 @@ import { useStore } from "vuex";
 import { useToast } from "vue-toastification";
 
 export default{
-    name: 'Retail_Outlets',
+    name: 'Uom',
     components:{
         PageComponent,MovableModal,DynamicForm
     },
@@ -54,14 +54,14 @@ export default{
         const toast = useToast();
         const loader = ref('');
         const modal_loader = ref('none');
-        const title = ref('Outlet Details');
-        const addButtonLabel = ref('New Outlet');
-        const addingRight = ref('Adding Outlet Counter');
+        const title = ref('U.o.M Details');
+        const addButtonLabel = ref('New U.o.M');
+        const addingRight = ref('Adding Item Categories');
         const rightsModule = ref('Inventory');
-        const idField = 'warehouse_id';
+        const idField = 'uom_id';
         const selectedIds = ref([]);
         const depModalVisible = ref(false);
-        const outletList = ref([]);
+        const uomList = ref([]);
         const depResults = ref([]);
         const depArrLen = ref(0);
         const depCount = ref(0);
@@ -76,56 +76,46 @@ export default{
         const modal_top = ref('200px');
         const modal_left = ref('400px');
         const modal_width = ref('30vw');
-        const isEditing = computed(()=> store.state.Retail_Outlets.isEditing);
-        const selectedOutlet = computed(()=> store.state.Retail_Outlets.selectedOutlet);
+        const isEditing = computed(()=> store.state.Uom.isEditing);
+        const selectedUom = computed(()=> store.state.Uom.selectedUom);
         const tableColumns = ref([
             {type: "checkbox"},
-            {label: "Name", key: "warehouse_name", type: "text", editable: false},
-            {label: "Type", key: "area_location", type: "text", editable: false},
-            {label: "Location", key: "retail_type", type: "text", editable: false},
+            {label: "Name", key: "uom_name", type: "text", editable: false},
+            {label: "Abbr.", key: "abbreviation", type: "text", editable: false},
         ])
         const actions = ref([
-            {name: 'edit', icon: 'fa fa-edit', title: 'Edit Outlet', rightName: 'Editing Outlet Counter'},
-            {name: 'delete', icon: 'fa fa-trash', title: 'Delete Outlet', rightName: 'Deleting Outlet Counter'},
+            {name: 'edit', icon: 'fa fa-edit', title: 'Edit U.o.M', rightName: 'Editing Item Categories'},
+            {name: 'delete', icon: 'fa fa-trash', title: 'Delete U.o.M', rightName: 'Deleting Item Categories'},
         ])
         const companyID = computed(()=> store.state.userData.company_id);
-        const warehouse_name_search = computed({
-            get: () => store.state.Retail_Outlets.warehouse_name_search,
-            set: (value) => store.commit('Retail_Outlets/SET_SEARCH_FILTERS', {"warehouse_name_search":value}),
+        const uom_name_search = computed({
+            get: () => store.state.Uom.uom_name_search,
+            set: (value) => store.commit('Uom/SET_SEARCH_FILTERS', {"uom_name_search":value}),
         });
-        const retail_type_search = computed({
-            get: () => store.state.Retail_Outlets.retail_type_search,
-            set: (value) => store.commit('Retail_Outlets/SET_SEARCH_FILTERS', {"retail_type_search":value}),
+        const abbreviation_search = computed({
+            get: () => store.state.Uom.abbreviation_search,
+            set: (value) => store.commit('Uom/SET_SEARCH_FILTERS', {"abbreviation_search":value}),
         });
-        const area_location_search = computed({
-            get: () => store.state.Retail_Outlets.area_location_search,
-            set: (value) => store.commit('Retail_Outlets/SET_SEARCH_FILTERS', {"area_location_search":value}),
-        });
+
         const searchFilters = ref([
-            {type:'text', placeholder:"Search Name...", value: warehouse_name_search, width: 48},
-            {type:'text', placeholder:"Search Location...", value: area_location_search, width: 48},
-            {
-                type:'dropdown', placeholder:"Retail Type..", value: retail_type_search, width:40,
-                options: [{text:'Store',value:'Store'},{text:'Outlet',value:'Outlet'}]
-            },
+            {type:'text', placeholder:"Search Name...", value: uom_name_search, width: 56},
+            {type:'text', placeholder:"Search Abbreviation...", value: abbreviation_search, width: 56},
         ]);
         const formFields = ref([]);
         const updateFormFields = () => {
             formFields.value = [
-                { type: 'dropdown', name: 'retail_type',label: "Retail Type", value: selectedOutlet.value?.retail_type || '', placeholder: "", required: true, options: [{ text: 'Store', value: 'Store' }, { text: 'Outlet', value: 'Outlet' }] },
-                { type: 'text', name: 'warehouse_name',label: "Name", value: selectedOutlet.value?.warehouse_name || '', required: true },
-                { type: 'text', name: 'area_location',label: "Area Location", value: selectedOutlet.value?.area_location || '', required: true },
+                { type: 'text', name: 'uom_name',label: "Name", value: selectedUom.value?.uom_name || '', required: true },
+                { type: 'text', name: 'abbreviation',label: "Abbreviation", value: selectedUom.value?.abbreviation || '', required: true },
             ];
         };
-        watch([selectedOutlet], () => {
-            if(selectedOutlet.value){
+        watch([selectedUom], () => {
+            if(selectedUom.value){
                 updateFormFields();
             }      
         }, { immediate: true });
-        const addNewOutlet = async() =>{
+        const addNewUom = async() =>{
             updateFormFields();
-            await store.dispatch("Retail_Outlets/updateState",{isEditing:false, selectedOutlet:null})
-    
+            await store.dispatch("Uom/updateState",{isEditing:false, selectedUom:null})
             depModalVisible.value = true;
             handleReset();
             flex_basis.value = '1/2';
@@ -136,12 +126,12 @@ export default{
         };
         const handleActionClick = async(rowIndex, action, row) =>{
             if( action == 'edit'){
-                const outletID = row[idField];
+                const uomID = row[idField];
                 let formData = {
                     company: companyID.value,
-                    warehouse: outletID
+                    uom: uomID
                 }
-                await store.dispatch('Retail_Outlets/fetchOutlet',formData).
+                await store.dispatch('Uom/fetchUom',formData).
                 then(()=>{
                     depModalVisible.value = true;
                     flex_basis.value = '1/2';
@@ -149,13 +139,13 @@ export default{
                 })
                 
             }else if(action == 'delete'){
-                const outletID = [row['warehouse_id']];
+                const uomID = [row['uom_id']];
                 let formData = {
                     company: companyID.value,
-                    warehouse: outletID
+                    uom: uomID
                 }
-                await store.dispatch('Retail_Outlets/deleteOutlet',formData)
-                searchOutlets();
+                await store.dispatch('Uom/deleteUom',formData)
+                searchUoms();
             }
         } 
         const handleReset = () =>{
@@ -169,12 +159,11 @@ export default{
         const hideModalLoader = () =>{
             modal_loader.value = "none";
         }
-        const createOutlet = async() =>{
+        const createUom = async() =>{
             showModalLoader();
             let formData = {
-                warehouse_name: formFields.value[1].value,
-                area_location: formFields.value[2].value,
-                retail_type: formFields.value[0].value,
+                uom_name: formFields.value[0].value,
+                abbreviation: formFields.value[1].value,    
                 company: companyID.value
             }
             errors.value = [];
@@ -188,33 +177,32 @@ export default{
                 hideModalLoader();
             }else{
                 try {
-                    const response = await store.dispatch('Retail_Outlets/createOutlet', formData);
+                    const response = await store.dispatch('Uom/createUom', formData);
                     if(response && response.status === 200) {
                         hideModalLoader();
-                        toast.success('Outlet created successfully!');
+                        toast.success('U.o.M created successfully!');
                         handleReset();
                     }else {
-                        toast.error('An error occurred while creating the Outlet.');
+                        toast.error('An error occurred while creating the U.o.M.');
                     }
                 } catch (error) {
                     console.error(error.message);
-                    toast.error('Failed to create Outlet: ' + error.message);
+                    toast.error('Failed to create U.o.M: ' + error.message);
                 } finally {
                     hideModalLoader();
-                    searchOutlets();
+                    searchUoms();
                 }
             }
 
         }
-        const updateOutlet = async() =>{
+        const updateUom = async() =>{
             showModalLoader();
             errors.value = [];
             let formData = {
-                warehouse: selectedOutlet.value.warehouse_id,
-                warehouse_name: formFields.value[1].value,
-                area_location: formFields.value[2].value,
-                retail_type: formFields.value[0].value,
-                company: companyID.value
+                uom_name: formFields.value[0].value,
+                abbreviation: formFields.value[1].value, 
+                uom: selectedUom.value.uom_id,
+                company: companyID.value,
             }
             for(let i=0; i < formFields.value.length; i++){
                 if(formFields.value[i].value =='' && formFields.value[i].required == true){
@@ -225,78 +213,78 @@ export default{
                     toast.error('Fill In Required Fields');
             }else{
                 try {
-                    const response = await store.dispatch('Retail_Outlets/updateOutlet', formData);
+                    const response = await store.dispatch('Uom/updateUom', formData);
                     if (response && response.status === 200) {
                         hideModalLoader();
-                        toast.success("Outlet updated successfully!");
+                        toast.success("U.o.M updated successfully!");
                         handleReset();
                     } else {
-                        toast.error('An error occurred while updating the Outlet.');
+                        toast.error('An error occurred while updating the U.o.M.');
                     }
                 } catch (error) {
                     console.error(error.message);
-                    toast.error('Failed to update Outlet: ' + error.message);
+                    toast.error('Failed to update U.o.M: ' + error.message);
                 } finally {
                     hideModalLoader();
-                    searchOutlets();
+                    searchUoms();
                 }
             }
         }
-        const saveOutlet = () =>{
+        const saveUom = () =>{
             if(isEditing.value == true){
-                updateOutlet();
+                updateUom();
             }else{
-                createOutlet();
+                createUom();
             }
         }
-        const removeOutlet = async() =>{
+        const removeUom = async() =>{
             if(selectedIds.value.length == 1){
                 let formData = {
                     company: companyID.value,
-                    warehouse: selectedIds.value,
+                    uom: selectedIds.value,
                 }
                 try{
-                    const response = await store.dispatch('Retail_Outlets/deleteOutlet',formData)
+                    const response = await store.dispatch('Uom/deleteUom',formData)
                     if(response && response.status == 200){
-                        toast.success("Outlet Removed Succesfully");
-                        searchOutlets();
+                        toast.success("U.o.M Removed Succesfully");
+                        searchUoms();
                     }
                 }
                 catch(error){
                     console.error(error.message);
-                    toast.error('Failed to remove Outlet: ' + error.message);
+                    toast.error('Failed to remove U.o.M: ' + error.message);
                 }
                 finally{
                     selectedIds.value = [];
                 }
             }else if(selectedIds.value.length > 1){
-                toast.error("You have selected more than 1 Outlet") 
+                toast.error("You have selected more than 1 U.o.M") 
             }else{
-                toast.error("Please Select An Outlet To Remove")
+                toast.error("Please Select A U.o.M To Remove")
             }
         }
-        const removeOutlets = async() =>{
+        const removeUoms = async() =>{
             if(selectedIds.value.length){
                 let formData = {
                     company: companyID.value,
-                    warehouse: selectedIds.value,
+                    uom: selectedIds.value,
                 }
                 try{
-                    const response = await store.dispatch('Retail_Outlets/deleteOutlet',formData)
+                    const response = await store.dispatch('Uom/deleteUom',formData)
                     if(response && response.status == 200){
-                        toast.success("Outlet(s) Removed Succesfully");
-                        searchOutlets();
+                        toast.success("U.o.M(s) Removed Succesfully");
+                        searchUoms();
                     }
                 }
                 catch(error){
                     console.error(error.message);
-                    toast.error('Failed to remove Outlet(s): ' + error.message);
+                    toast.error('Failed to remove U.o.M(s): ' + error.message);
                 }
                 finally{
                     selectedIds.value = [];
                 }
             }else{
-                toast.error("Please Select An Outlet To Remove")
+                toast.error("Please Select A U.o.M To Remove")
             }
         }
         const showLoader = () =>{
@@ -305,23 +293,22 @@ export default{
         const hideLoader = () =>{
             loader.value = "none";
         }
-        const searchOutlets = () =>{
+        const searchUoms = () =>{
             showLoader();
             showNextBtn.value = false;
             showPreviousBtn.value = false;
             let formData = {
-                warehouse_name: warehouse_name_search.value,
-                area_location: area_location_search.value,
-                retail_type: retail_type_search.value,
+                uom_name: uom_name_search.value,
+                abbreviation: abbreviation_search.value,
                 company_id: companyID.value
             }
             axios
-            .post(`api/v1/warehouse-search/?page=${currentPage.value}`,formData)
+            .post(`api/v1/unit-of-measure-search/?page=${currentPage.value}`,formData)
             .then((response)=>{
-                outletList.value = response.data.results;
-                store.commit('Retail_Outlets/LIST_OUTLETS', outletList.value)
+                uomList.value = response.data.results;
+                store.commit('Item_Location/LIST_UOMS', uomList.value)
                 depResults.value = response.data;
-                depArrLen.value = outletList.value.length;
+                depArrLen.value = uomList.value.length;
                 depCount.value = depResults.value.count;
                 pageCount.value = Math.ceil(depCount.value / 50);
                 
@@ -346,7 +333,7 @@ export default{
                 currentPage.value -= 1;
             }
             
-            searchOutlets();
+            searchUoms();
         }
         const loadNext = () =>{
             if(currentPage.value >= pageCount.value){
@@ -355,34 +342,34 @@ export default{
                 currentPage.value += 1;
             }
             
-            searchOutlets();
+            searchUoms();
         }
         const firstPage = ()=>{
             currentPage.value = 1;
-            searchOutlets();
+            searchUoms();
         }
         const lastPage = () =>{
             currentPage.value = pageCount.value;
-            searchOutlets();
+            searchUoms();
         }
         const resetFilters = () =>{
-            store.commit('Retail_Outlets/RESET_SEARCH_FILTERS')
-            searchOutlets();
+            store.commit('Uom/RESET_SEARCH_FILTERS')
+            searchUoms();
         };
         const closeModal = async() =>{
-            await store.dispatch("Retail_Outlets/updateState",{isEditing:false, selectedOutlet:null})
+            await store.dispatch("Uom/updateState",{isEditing:false, selectedUom:null})
             depModalVisible.value = false;
             handleReset();
         }
         onMounted(()=>{
-            searchOutlets();
+            searchUoms();
         })
         return{
-            title,idField, searchOutlets, addButtonLabel, searchFilters, resetFilters, tableColumns, outletList,
+            title,idField, searchUoms, addButtonLabel, searchFilters, resetFilters, tableColumns, uomList,
             depResults, depArrLen, depCount, pageCount, showNextBtn, showPreviousBtn,modal_top, modal_left, modal_width,
-            loadPrev, loadNext, firstPage, lastPage, actions, formFields, depModalVisible, addNewOutlet,
-            displayButtons,flex_basis,flex_basis_percentage, handleActionClick, handleReset, saveOutlet,
-            showLoader, loader, hideLoader, modal_loader, showModalLoader, hideModalLoader, removeOutlet, removeOutlets,
+            loadPrev, loadNext, firstPage, lastPage, actions, formFields, depModalVisible, addNewUom,
+            displayButtons,flex_basis,flex_basis_percentage, handleActionClick, handleReset, saveUom,
+            showLoader, loader, hideLoader, modal_loader, showModalLoader, hideModalLoader, removeUom, removeUoms,
             addingRight,rightsModule,handleSelectionChange,closeModal
         }
     }
