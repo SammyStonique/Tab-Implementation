@@ -15,7 +15,15 @@ const state = {
   max_amount_search: "",
   customer_search: '',
   selectedSale: null,
-  isEditing: false
+  isEditing: false,
+  defaultOutlet: null,
+  defaultCounter: null,
+  defaultChannel: null,
+  defaultOutletID: null,
+  defaultCounterID: null,
+  defaultChannelID: null,
+  defaultCashbookID: null,
+  defaultStockType: null,
 };
   
 const mutations = {
@@ -31,6 +39,14 @@ const mutations = {
     state.max_amount_search = '';
     state.isEditing = false;
     state.selectedSale = null;
+    state.defaultOutlet = null;
+    state.defaultCounter = null;
+    state.defaultChannel = null;
+    state.defaultOutletID = null;
+    state.defaultCounterID = null;
+    state.defaultChannelID = null;
+    state.defaultCashbookID = null;
+    state.defaultStockType = null;
   },
   SET_SELECTED_SALE(state, sale) {
     state.selectedSale = sale;

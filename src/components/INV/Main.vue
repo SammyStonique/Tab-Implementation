@@ -40,6 +40,17 @@ import Uom from '@/components/INV/Uom.vue';
 import Outlet_Counters from '@/components/INV/Outlet_Counters.vue';
 import Direct_Sales from '@/components/INV/Direct_Sales.vue';
 import Sale_Details from '@/components/INV/Sale_Details.vue';
+import Sale_Items from '@/components/INV/Sale_Items.vue';
+import Invoices from '@/components/INV/Invoices.vue';
+import Invoice_Details from '@/components/INV/Invoice_Details.vue';
+import Receipts from '@/components/INV/Receipts.vue';
+import Receipt_Details from '@/components/INV/Receipt_Details.vue';
+import Customers from '@/components/INV/Customers.vue';
+import Bills from '@/components/INV/Bills.vue';
+import Bill_Details from '@/components/INV/Bill_Details.vue';
+import Payments from '@/components/INV/Payments.vue';
+import Payment_Details from '@/components/INV/Payment_Details.vue';
+import Vendors from '@/components/INV/Vendors.vue';
 
 import Default_Settings from '@/components/SET/Default_Settings.vue';
 
@@ -49,7 +60,8 @@ export default{
         NavBarINV,
         PagesTab,
         Dashboard,Item_Categories,Items_Catalog,Item_Details,Retail_Outlets,Catalog_By_Outlet,Fast_Moving_Items,Item_Location,Uom,
-        Outlet_Counters,Direct_Sales,Sale_Details,
+        Outlet_Counters,Direct_Sales,Sale_Details,Sale_Items,Invoices,Invoice_Details,Receipts,Receipt_Details,Customers,Bills,
+        Bill_Details,Payments,Payment_Details,Vendors,
 
         Default_Settings
     },

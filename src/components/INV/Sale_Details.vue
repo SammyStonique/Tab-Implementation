@@ -3,7 +3,13 @@
         <template v-slot:body>
             <div class="mt-6">
                 <DynamicForm  :fields="formFields" :flex_basis="flex_basis" :flex_basis_percentage="flex_basis_percentage" :displayButtons="displayButtons" @handleSubmit="createSaleReceipt" @handleReset="handleReset"> 
-                    <template v-slot:additional-content>                    
+                    <template v-slot:additional-content>   
+                        <div class="flex">
+                            <div class="basis-1/3"></div>
+                            <div class="basis-1/2 text-red-500 text-left">
+                                <p class="font-bold">BALANCE:  {{ Number(balance).toLocaleString() }}</p>
+                            </div>               
+                        </div>                 
                         <div class="min-h-[220px]">
                             <DynamicTable :key="tableKey" :showTotals="showTotals" :rightsModule="rightsModule" :columns="itemColumns" :rows="itemRows" :showActions="showActions" :idField="idField" :actions="actions" @action-click="deleteItemLine"/>
                         </div>
@@ -46,6 +52,7 @@ export default defineComponent({
         const receipt_totals = ref(0);
         const receiptTotals = ref(0);
         const discountTotals = ref(0);
+        const balance = ref(0);
         const tax_totals = ref(0);
         const saleItemsArray = ref([]);
         const title = ref('Add Prepayment');
@@ -56,20 +63,20 @@ export default defineComponent({
         const companyID = computed(()=> store.state.userData.company_id);
         const userID = computed(()=> store.state.userData.user_id);
         const defaultSettings = computed(()=> store.state.Default_Settings.settingsList);
-        const defaultOutlet = ref("");
-        const defaultCounter = ref("");
-        const defaultChannel = ref("");
-        const defaultStockType = ref("");
+        const defaultOutlet = computed(()=> store.state.Direct_Sales.defaultOutlet);
+        const defaultCounter = computed(()=> store.state.Direct_Sales.defaultCounter);
+        const defaultChannel = computed(()=> store.state.Direct_Sales.defaultChannel);
+        const defaultStockType = computed(()=> store.state.Direct_Sales.defaultStockType);
         const displayButtons = ref(true);
         const showActions = ref(true);
         const idField = ref('');
         const flex_basis = ref('');
         const flex_basis_percentage = ref('');
         const itemID = ref('');
-        const outletID = ref('');
-        const counterID = ref('');
-        const channelID = ref('');
-        const cashbookID = ref('');
+        const outletID = computed(()=> store.state.Direct_Sales.defaultOutletID);
+        const counterID = computed(()=> store.state.Direct_Sales.defaultCounterID);
+        const channelID = computed(()=> store.state.Direct_Sales.defaultChannelID);
+        const cashbookID = computed(()=> store.state.Direct_Sales.defaultChannelID);
         const itemArray = computed(() => store.state.Items_Catalog.itemsArr);
         const outletArray = computed(() => store.state.Retail_Outlets.outletArr);
         const counterArray = computed(() => store.state.Outlet_Counters.counterArr);
@@ -143,7 +150,7 @@ export default defineComponent({
         const handleSelectedChannel = async(option) =>{
             await store.dispatch('Counter_Channels/handleSelectedChannel', option)
             channelID.value = store.state.Counter_Channels.channelID;
-            cashbookID.value = store.state.Counter_Channels.ledgerID;
+            store.dispatch('Direct_Sales/updateState', {defaultChannelID: store.state.Counter_Channels.ledgerID})
         };
         const handleSelectedItem = async(option) =>{
             await store.dispatch('Items_Catalog/handleSelectedItem', option)
@@ -166,6 +173,13 @@ export default defineComponent({
         const fetchInventoryItems = (value) =>{
             itemComponentKey.value += 1;
             fetchItems(value);
+        };
+        const calculateBalance = (value) =>{
+            receiptTotals.value = 0;
+            for(let i=0; i<itemRows.value.length; i++){
+                receiptTotals.value += Number(itemRows.value[i].total_amount);
+            }
+            balance.value = value - receiptTotals.value;
         };
         const formFields = ref([]);
         const updateFormFields = () =>{
@@ -202,19 +216,13 @@ export default defineComponent({
                 { type: 'text', name: 'customer',label: "Customer", value: 'Walk-In Customer', required: true,},
                 { type: 'text', name: 'phone_number',label: "Phone No", value: '0', required: true,},
                 { type: 'text', name: 'reference_no',label: "Reference No", value: '', required: true,},
-                { type: 'number', name: 'total_amount',label: "Amount", value: receipt_totals.value || 0, required: true },                
+                { type: 'number', name: 'total_amount',label: "Amount", value: receipt_totals.value || 0, required: true, method: calculateBalance },                
             ]
         };
 
         watch([defaultOutlet, defaultCounter, defaultChannel, defaultStockType], () => {
-            if(defaultOutlet.value){
-                outComponentKey.value += 1;
-            }
-            if (defaultCounter.value) {
-                countComponentKey.value += 1;
-            }
-            if (defaultChannel.value) {
-                chanComponentKey.value += 1;
+            if(defaultOutlet.value != null){
+                outComponentKey.value += 1; 
             }
             
         }, { immediate: true });
@@ -222,18 +230,18 @@ export default defineComponent({
         const handleReset = () =>{
             store.dispatch('Items_Catalog/updateState', { lineItemsArray: []})
             mainComponentKey.value += 1;
-            for(let i=0; i < formFields.value.length; i++){
-                if(formFields.value[i].type == 'number'){
-                    formFields.value[i].value = 0;
-                }else{
-                    formFields.value[i].value = '';
-                }
-                
-            }
+            formFields.value[0].value = formatDate(current_date);
+            formFields.value[1].value = "";
+            formFields.value[5].value = defaultStockType.value;
+            formFields.value[7].value = "Walk-In Customer";
+            formFields.value[8].value = "0";
+            formFields.value[9].value = "";
+            formFields.value[10].value = 0;
             receipt_totals.value = 0;
             receiptTotals.value = 0;
             discountTotals.value = 0;
             tax_totals.value = 0;
+            balance.value = 0;
         }
 
         const showLoader = () =>{
@@ -319,7 +327,7 @@ export default defineComponent({
                 customer: formFields.value[7].value,
                 phone_number: formFields.value[8].value,
                 amount_received: formFields.value[10].value,
-                balance: formFields.value[10].value - receiptTotals.value,
+                balance: balance.value,
                 tax: tax_totals.value,
                 reference_no: formFields.value[9].value,
                 discount: discountTotals.value,
@@ -328,7 +336,7 @@ export default defineComponent({
                 company: companyID.value,
                 user: userID.value
             }
-            console.log("THE FORM DATA IS ",formData)
+       
             errors.value = [];
             for(let i=0; i < formFields.value.length ; i++){
                 if(formFields.value[i].type != "search-dropdown" && formFields.value[i].value =='' && formFields.value[i].required == true){
@@ -341,12 +349,10 @@ export default defineComponent({
 
             if(errors.value.length){
                 toast.error('Fill In Required Fields');
-                console.log("ERROR IS ",errors.value)
-                console.log("THE FORM FIELDS ARE ",formFields.value)
                 hideLoader();                 
             }
             else{
-                if(Number(receiptTotals.value) <= 0){
+                if(Number(receiptTotals.value) <= 0 || balance.value < 0){
                     toast.error('Invalid Sale Amount');
                     hideLoader();
                 }
@@ -387,40 +393,29 @@ export default defineComponent({
                     stock_control_account.value = defaultSettings.value[i].setting_value;
                 }else if(defaultSettings.value[i].setting_name === 'Inventory Sales Income A/c'){
                     sales_income_account.value = defaultSettings.value[i].setting_value;
-                }else if(defaultSettings.value[i].setting_name === 'Default Retail Outlet'){
-                    defaultOutlet.value = defaultSettings.value[i].setting_value_name;
-                }else if(defaultSettings.value[i].setting_name === 'Default Outlet Counter'){
-                    defaultCounter.value = defaultSettings.value[i].setting_value_name;
-                }else if(defaultSettings.value[i].setting_name === 'Default Counter Channel'){
-                    defaultChannel.value = defaultSettings.value[i].setting_value_name;
-                }else if(defaultSettings.value[i].setting_name === 'Default Stock Type'){
-                    defaultStockType.value = defaultSettings.value[i].setting_value_name;
                 }
             }
-            console.log("THE VALUE IS ",stock_control_account.value);
-            console.log("THE VALUE IS ",sales_income_account.value);
-            console.log("THE VALUE IS ",defaultOutlet.value);
-            console.log("THE VALUE IS ",defaultCounter.value);
-            console.log("THE VALUE IS ",defaultChannel.value);
-            console.log("THE VALUE IS ",defaultStockType.value);
         };
 
         onBeforeMount(()=>{ 
-            outletID.value = "";
             store.dispatch('Ledgers/updateState', { invoiceItemsArray: []})
             updateFormFields();
             flex_basis.value = '1/5';
             flex_basis_percentage.value = '20';
         })
-        onMounted(()=>{
+        onMounted(async()=>{
             fetchDefaultSettings();
             fetchTaxes();
+            if(defaultOutlet.value != null && defaultStockType.value != null){
+                fetchItems(defaultStockType.value)
+            }
+
         })
 
         return{
             formFields, flex_basis, flex_basis_percentage, displayButtons, createSaleReceipt, mainComponentKey,showTotals,
             handleReset, loader, showLoader, hideLoader, tableKey, itemColumns, itemRows, showActions, actions, deleteItemLine, idField,
-            title, modal_loader, modal_left, modal_top, modal_width, showModalLoader, hideModalLoader,rightsModule
+            title, modal_loader, modal_left, modal_top, modal_width, showModalLoader, hideModalLoader,rightsModule,balance
         }
     }
 })

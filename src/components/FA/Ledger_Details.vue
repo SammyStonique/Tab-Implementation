@@ -20,7 +20,7 @@
                                         <td></td>
                                         <td></td>
                                         <td class="font-bold">Ledger Name:</td>
-                                        <td>{{ ledgerDetails.ledger_name }}</td>
+                                        <td class="font-bold text-green-500 uppercase">{{ ledgerDetails.ledger_name }}</td>
                                     </tr>
                                     <tr class="text-left">
                                         <td class="font-bold pt-3">Ledger Type:</td>
@@ -36,13 +36,19 @@
                                         <td></td>
                                         <td></td>
                                         <td class="font-bold pt-3">Running Balance:</td>
-                                        <td>{{ ledgerDetails.running_balance }}</td>
+                                        <td class="font-bold text-red-500">{{ Number(ledgerRunningBalance).toLocaleString() }}</td>
                                     </tr>
                                 </table>
                             </div>
                         </div>
                     </div>
                     <div v-if="activeTab == 1">
+                        <FilterBar 
+                            :showAddButton="showAddButton"
+                            :filters="searchFilters" 
+                            @search="searchJournalEntries"
+                            @reset="resetFilters"
+                        />
                         <DynamicTable :key="statementTableKey" :columns="statementColumns" :rows="statementRows" :idField="idFieldStatement" :showActions="showActions" :actions="actionsStatement"/>
                     </div>             
                 </div>
@@ -67,13 +73,14 @@ import PageStyleComponent from "../PageStyleComponent.vue";
 import MovableModal from '@/components/MovableModal.vue'
 import DynamicForm from '../NewDynamicForm.vue';
 import DynamicTable from '@/components/DynamicTable.vue';
+import FilterBar from "@/components/FilterBar.vue";
 import { useToast } from "vue-toastification";
 
 export default{
     name: 'Ledger_Details',
     props: ['scrollToTop','loader','showLoader','hideLoader',],
     components:{
-        PageStyleComponent,MovableModal,DynamicForm,DynamicTable
+        PageStyleComponent,MovableModal,DynamicForm,DynamicTable,FilterBar
     },
     setup(){
         const store = useStore();
@@ -81,13 +88,13 @@ export default{
         const loader = ref('none');
         const modal_loader = ref('none');
         const activeTab = ref(0);
-        const addButtonLabel = ref('');
         const pageComponentKey = ref(0);
         const invComponentKey = ref(0);
         const title = ref('Move Transaction');
         const companyID = computed(()=> store.state.userData.company_id);
         const ledgerID = computed(()=> store.state.Ledgers.ledgerID);
         const ledgerDetails = computed(()=> store.state.Ledgers.ledgerDetails);
+        const ledgerRunningBalance = computed(()=> store.state.Ledgers.ledgerRunningBalance);
         const tabs = ref(['Ledger Details','Ledger Statement']);
         const idField = 'journal_id';
         const selectedIds = ref([]);
@@ -102,6 +109,7 @@ export default{
         const flex_basis = ref('');
         const flex_basis_percentage = ref('');
         const displayButtons = ref(true);
+        const showAddButton = ref(false);
         const modal_top = ref('150px');
         const modal_left = ref('400px');
         const modal_width = ref('35vw');
@@ -120,22 +128,10 @@ export default{
         const actions = ref([
             {name: 'delete', icon: 'fa fa-trash', title: 'Delete Allocation'},
         ])
-        const min_amount_search = computed({
-            get: () => store.state.Journals.min_amount_search,
-            set: (value) => store.commit('Journals/SET_SEARCH_FILTERS', {"min_amount_search":value}),
-        });
-        const max_amount_search = computed({
-            get: () => store.state.Journals.max_amount_search,
-            set: (value) => store.commit('Journals/SET_SEARCH_FILTERS', {"max_amount_search":value}),
-        });
-        const from_date_search = computed({
-            get: () => store.state.Journals.from_date_search,
-            set: (value) => store.commit('Journals/SET_SEARCH_FILTERS', {"from_date_search":value}),
-        });
-        const to_date_search = computed({
-            get: () => store.state.Journals.to_date_search,
-            set: (value) => store.commit('Journals/SET_SEARCH_FILTERS', {"to_date_search":value}),
-        });
+        const min_amount_search = ref("");
+        const max_amount_search = ref("");
+        const from_date_search = ref("");
+        const to_date_search = ref("");
         const searchFilters = ref([
             {type:'text', placeholder:"Min Amount...", value: min_amount_search, width:36},
             {type:'text', placeholder:"Max Amount...", value: max_amount_search, width:36},
@@ -154,6 +150,8 @@ export default{
                 company: companyID.value,
                 date_from: from_date_search.value,
                 date_to: to_date_search.value,
+                min_amount: min_amount_search.value == "" ? 0 : min_amount_search.value,
+                max_amount: max_amount_search.value == "" ? 0 : max_amount_search.value,
             }
             if(index == 1){
                 activeTab.value = index;
@@ -207,6 +205,8 @@ export default{
                 company: companyID.value,
                 date_from: from_date_search.value,
                 date_to: to_date_search.value,
+                min_amount: min_amount_search.value == "" ? 0 : min_amount_search.value,
+                max_amount: max_amount_search.value == "" ? 0 : max_amount_search.value,
             }
             try{
                 const response = await store.dispatch('Ledgers/fetchClientJournals', formData)
@@ -246,7 +246,10 @@ export default{
             searchJournalEntries();
         }
         const resetFilters = () =>{
-            store.commit('Journals/RESET_SEARCH_FILTERS')
+            min_amount_search.value = "";
+            max_amount_search.value = "";
+            from_date_search.value = "";
+            to_date_search.value = "";
             searchJournalEntries();
         }
         const closeModal = () =>{
@@ -258,10 +261,10 @@ export default{
         })
         return{
             tabs,title, searchJournalEntries, idField, selectedIds, actions, statementRows, appArrLen,appCount,appResults,appModalVisible,formFields,
-            addButtonLabel, searchFilters,statementColumns,resetFilters,loadPrev,loadNext,firstPage,lastPage,
+            showAddButton, searchFilters,statementColumns,resetFilters,loadPrev,loadNext,firstPage,lastPage,
             showNextBtn,showPreviousBtn, handleActionClick,displayButtons,handleReset,
             modal_top, modal_left, modal_width, showLoader, loader, hideLoader, modal_loader, showModalLoader, hideModalLoader,
-            closeModal, handleSelectionChange, pageComponentKey, flex_basis, flex_basis_percentage, ledgerDetails, selectTab, activeTab,showActions
+            closeModal, handleSelectionChange, pageComponentKey, flex_basis, flex_basis_percentage, ledgerDetails,ledgerRunningBalance, selectTab, activeTab,showActions
         }
     }
 }

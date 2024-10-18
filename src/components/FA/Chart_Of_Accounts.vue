@@ -615,7 +615,7 @@ export default{
                 store.commit('pageTab/ADD_PAGE', {'FA':'Ledger_Details'});
                 store.state.pageTab.faActiveTab = 'Ledger_Details'; 
                 await store.dispatch('Ledgers/fetchLedger', formData1)
-                await store.dispatch('Ledgers/updateState', {ledgerID: chartOfAccountsList.value[index].ledger_id })
+                await store.dispatch('Ledgers/updateState', {ledgerID: chartOfAccountsList.value[index].ledger_id, ledgerRunningBalance:0 })
             }
         }
         const removeLedger = async(index) =>{

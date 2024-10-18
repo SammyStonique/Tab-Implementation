@@ -8,6 +8,7 @@ const state = {
   expenseLedgerArr: [],
   cashbookLedgerArr: [],
   liabilityLedgerArr: [],
+  ledgerRunningBalance: 0,
   ledgerDetails: [],
   ledgerArray: [],
   ledgerID: '',
@@ -35,6 +36,7 @@ const mutations = {
     state.ledgerDetails = [];
     state.invoiceItemsArray = [];
     state.journalItemsArray = [];
+    state.ledgerRunningBalance = 0;
     state.ledgerID = '';
     state.ledgerName = '';
     state.ledgerTitle = '';
@@ -132,6 +134,7 @@ const actions = {
                 state.jnlArray.push(state.journalsArray[i])
             }
         }
+        state.ledgerRunningBalance = running_balance;
     })
     .catch((error)=>{
         console.log(error.message)

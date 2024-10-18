@@ -9,7 +9,7 @@
             @resetFilters="resetFilters"
             @removeItem="removeSale"
             @removeSelectedItems="removeSales"
-            @printList="printList"
+            @printList="printSalesList"
             :addingRight="addingRight"
             :rightsModule="rightsModule"
             :columns="tableColumns"
@@ -38,6 +38,7 @@ import { ref, computed, onMounted, onBeforeMount} from 'vue';
 import PageComponent from '@/components/PageComponent.vue'
 import { useStore } from "vuex";
 import { useToast } from "vue-toastification";
+import PrintJS from 'print-js';
 
 export default{
     name: 'Direct_Sales',
@@ -49,6 +50,7 @@ export default{
         const toast = useToast();
         const loader = ref('');
         const catComponentKey = ref('');
+        const defaultSettings = computed(()=> store.state.Default_Settings.settingsList);
         const idField = 'sale_id';
         const addButtonLabel = ref('New Direct Sale');
         const addingRight = ref('Adding Inventory Sale');
@@ -73,6 +75,8 @@ export default{
             {label: "Customer", key:"client"},
             {label: "Phone No", key:"client_phone_number"},
             {label: "Amount", key:"total_amount", type: "number"},
+            {label: "Paid", key:"total_paid", type: "number"},
+            {label: "Balance", key:"balance", type: "number"},
             {label: "Rcpt No", key:"receipt_no"},
             {label: "Done By", key:"done_by"},
         ]);
@@ -258,11 +262,25 @@ export default{
             currentPage.value = pageCount.value;
             searchSales();
             // scrollToTop();
-        }
-        const addNewSale = async() =>{
-            store.commit('Direct_Sales/initializeStore');
+        };
+        const fetchDefaultSettings = async() =>{
+            await store.dispatch('Default_Settings/fetchDefaultSettings', {company:companyID.value})
+            for(let i=0; i < defaultSettings.value.length; i++){
+                if(defaultSettings.value[i].setting_name === 'Default Retail Outlet'){
+                    store.dispatch('Direct_Sales/updateState', {defaultOutlet:defaultSettings.value[i].setting_value_name, defaultOutletID:defaultSettings.value[i].setting_value})
+                }else if(defaultSettings.value[i].setting_name === 'Default Outlet Counter'){
+                    store.dispatch('Direct_Sales/updateState', {defaultCounter:defaultSettings.value[i].setting_value_name, defaultCounterID:defaultSettings.value[i].setting_value})
+                }else if(defaultSettings.value[i].setting_name === 'Default Counter Channel'){
+                    store.dispatch('Direct_Sales/updateState', {defaultChannel:defaultSettings.value[i].setting_value_name, defaultChannelID:defaultSettings.value[i].setting_value})
+                }else if(defaultSettings.value[i].setting_name === 'Default Stock Type'){
+                    store.dispatch('Direct_Sales/updateState', {defaultStockType:defaultSettings.value[i].setting_value_name})
+                }
+            }
+        };
+        const addNewSale = () =>{
+            // store.commit('Direct_Sales/initializeStore');
             store.commit('pageTab/ADD_PAGE', {'INV':'Sale_Details'});
-            store.state.pageTab.invActiveTab = 'Sale_Details';          
+            store.state.pageTab.invActiveTab = 'Sale_Details';         
         }
         const handleActionClick = async(rowIndex, action, row) =>{
             if(action == 'delete'){
@@ -281,8 +299,43 @@ export default{
         }
         const closeModal = () =>{
             propModalVisible.value = false;
+        };
+        const printSalesList = () =>{
+            showLoader();
+
+            let formData = {
+                date_from: date_from_search.value,
+                date_to: date_to_search.value,
+                sale_code: sale_code_search.value,
+                sale_type: "Cash",
+                category: "Sale",
+                max_amount: max_amount_search.value,
+                min_amount: min_amount_search.value,
+                customer: customer_search.value,
+                done_by: done_by_search.value,
+                company_id: companyID.value
+            } 
+   
+            axios
+            .post("api/v1/export-inventory-sales-pdf/", formData, { responseType: 'blob' })
+                .then((response)=>{
+                    if(response.status == 200){
+                        const blob1 = new Blob([response.data]);
+                        // Convert blob to URL
+                        const url = URL.createObjectURL(blob1);
+                        PrintJS({printable: url, type: 'pdf'});
+                    }
+                })
+            .catch((error)=>{
+                console.log(error.message);
+            })
+            .finally(()=>{
+                hideLoader();
+            })
         }
+        
         onBeforeMount(()=>{
+            fetchDefaultSettings();
             searchSales();
             
         })
@@ -291,7 +344,7 @@ export default{
             propResults, propArrLen, propCount, pageCount, showNextBtn, showPreviousBtn,
             loadPrev, loadNext, firstPage, lastPage, idField, actions, handleActionClick, propModalVisible, closeModal,
             submitButtonLabel, showModal, addNewSale, showLoader, loader, hideLoader, removeSale, removeSales,
-            handleSelectionChange,addingRight,rightsModule
+            handleSelectionChange,addingRight,rightsModule,printSalesList
         }
     }
 };

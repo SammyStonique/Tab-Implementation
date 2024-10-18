@@ -153,6 +153,19 @@ const actions = {
     })
     
   },
+  handleSelectedInventoryItem({ commit, state }, option){
+    state.itemsArray = [];
+    console.log("THE OPTION IS ",option)
+    const selectedItem = state.itemsList.find(item => (item.item_code + " - " +item.item_name) === option);
+    if (selectedItem) {
+        console.log("THE selectedItem IS ",option)
+        state.itemID = selectedItem.inventory_item_id;
+        state.itemName = selectedItem.item_code + " - " + selectedItem.item_name;
+        state.itemsArray = [...state.itemsArray, selectedItem];
+    }
+    commit('ITEMS_ARRAY', state.itemsArray);
+      
+  },
   handleSelectedItem({ commit, state }, option){
     state.itemsArray = [];
     const selectedItem = state.itemsSaleList.find(item => (item.inventory_item_code + ' - ' + item.inventory_item_name) === option);

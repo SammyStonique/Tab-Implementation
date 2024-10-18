@@ -15,7 +15,7 @@
               <option v-for="(option, index) in filter.options" :key="index" :value="option.value">{{ option.text }}</option>
             </select>
           </div>
-          <div v-else-if="filter.type === 'search-dropdown'">
+          <div v-else-if="filter.type === 'search-dropdown'" class="text-sm">
             <SearchableDropdown  
               :key="filter.componentKey"         
               :options="filter.selectOptions"
