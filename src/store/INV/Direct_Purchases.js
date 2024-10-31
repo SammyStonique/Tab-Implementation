@@ -2,22 +2,22 @@ import axios from "axios";
 import Swal from 'sweetalert2';
 
 const state = {
-  salesList: [], 
-  saleOrderItems: [],
-  salesArr: [],
-  salesArray: [],
-  salesID: '',
-  customerID: null,
-  salesCode: '',
-  sale_code_search: '',
+  purchasesList: [], 
+  purchaseOrderItems: [],
+  purchasesArr: [],
+  purchasesArray: [],
+  purchasesID: '',
+  vendorID: null,
+  purchasesCode: '',
+  purchase_code_search: '',
   done_by_search: '',
   date_from_search: '',
   date_to_search: '',
   min_amount_search: '',
   max_amount_search: "",
-  customer_search: '',
-  selectedSale: null,
-  selectedCustomer: null,
+  vendor_search: '',
+  selectedPurchase: null,
+  selectedVendor: null,
   isEditing: false,
   isDelivering: false,
   defaultOutlet: null,
@@ -33,10 +33,10 @@ const state = {
   
 const mutations = {
   initializeStore(state){
-    state.salesList = [];
-    state.salesArr = [];
-    state.salesArray = [];
-    state.sale_code_search = '';;
+    state.purchasesList = [];
+    state.purchasesArr = [];
+    state.purchasesArray = [];
+    state.purchase_code_search = '';;
     state.done_by_search = '';
     state.date_from_search = '';
     state.date_to_search = '';
@@ -45,7 +45,7 @@ const mutations = {
     state.isEditing = false;
     state.isDelivering = false;
     state.saveButtonLabel = "Save";
-    state.selectedSale = null;
+    state.selectedPurchase = null;
     state.defaultOutlet = null;
     state.defaultCounter = null;
     state.defaultChannel = null;
@@ -55,27 +55,27 @@ const mutations = {
     state.defaultCashbookID = null;
     state.defaultStockType = null;
   },
-  SET_SELECTED_SALE(state, sale) {
-    state.selectedSale = sale;
+  SET_SELECTED_PURCHASE(state, purchase) {
+    state.selectedPurchase = purchase;
     state.isEditing = true;
     state.saveButtonLabel = "Save";
   },
-  DELIVER_SELECTED_SALE(state, sale) {
-    state.selectedSale = sale;
+  RECEIVE_SELECTED_PURCHASE(state, purchase) {
+    state.selectedPurchase = purchase;
     state.isDelivering = true;
-    state.saveButtonLabel = "Deliver";
+    state.saveButtonLabel = "Receive";
   },
-  SET_SELECTED_CUSTOMER(state, customer){
-    state.selectedCustomer = customer;
+  SET_SELECTED_VENDOR(state, vendor){
+    state.selectedVendor = vendor;
   },
-  LIST_SALES(state, sales) {
-    state.salesList = sales;
+  LIST_PURCHASES(state, purchases) {
+    state.purchasesList = purchases;
   },
-  LIST_SALE_ORDER_ITEMS(state, sales) {
-    state.saleOrderItems = sales;
+  LIST_PURCHASE_ORDER_ITEMS(state, purchases) {
+    state.purchaseOrderItems = purchases;
   },
-  SALES_ARRAY(state, sales){
-    state.salesArray = sales;
+  PURCHASES_ARRAY(state, purchases){
+    state.purchasesArray = purchases;
   },
   SET_STATE(state, payload) {
     for (const key in payload) {
@@ -86,8 +86,8 @@ const mutations = {
   },
   SET_SEARCH_FILTERS(state, search_filter){
     for(const [key, value] of Object.entries(search_filter)){
-      if(key == 'sale_code_search'){
-        state.sale_code_search = value;
+      if(key == 'purchase_code_search'){
+        state.purchase_code_search = value;
       }else if(key == 'done_by_search'){
         state.done_by_search = value;
       }else if(key == 'date_from_search'){
@@ -98,19 +98,19 @@ const mutations = {
         state.min_amount_search = value;
       }else if(key == 'max_amount_search'){
         state.max_amount_search = value;
-      }else if(key == 'customer_search'){
-        state.customer_search = value;
+      }else if(key == 'vendor_search'){
+        state.vendor_search = value;
       } 
     }
   },
   RESET_SEARCH_FILTERS(state){
-    state.sale_code_search = '';
-    state.sale_type_search = '';
+    state.purchase_code_search = '';
+    state.purchase_type_search = '';
     state.date_from_search = '';
     state.date_to_search = '';
     state.min_amount_search = '';
     state.max_amount_search = '';
-    state.customer_search = '';
+    state.vendor_search = '';
   }
 };
   
@@ -119,8 +119,8 @@ const actions = {
     commit('SET_STATE', newState);
   },
   
-  async createSale({ commit,state }, formData) {
-    return axios.post('api/v1/create-inventory-sale/', formData)
+  async createPurchase({ commit,state }, formData) {
+    return axios.post('api/v1/create-inventory-purchase/', formData)
     .then((response)=>{
       return response;
     })
@@ -130,8 +130,8 @@ const actions = {
     })
   },
 
-  async createSaleOrder({ commit,state }, formData) {
-    return axios.post('api/v1/create-inventory-sale-order/', formData)
+  async createPurchaseOrder({ commit,state }, formData) {
+    return axios.post('api/v1/create-inventory-purchase-order/', formData)
     .then((response)=>{
       return response;
     })
@@ -140,8 +140,8 @@ const actions = {
       throw error;
     })
   },
-  async createDeliveryOrder({ commit,state }, formData) {
-    return axios.post('api/v1/sale-order-delivery/', formData)
+  async receivePurchaseOrder({ commit,state }, formData) {
+    return axios.post('api/v1/receive-inventory-purchase-order/', formData)
     .then((response)=>{
       return response;
     })
@@ -151,57 +151,57 @@ const actions = {
     })
   },
 
-  async fetchSales({ commit,state }, formData) {
-    state.salesArr = [];
+  async fetchPurchases({ commit,state }, formData) {
+    state.purchasesArr = [];
     await axios.post(`api/v1/fetch-inventory-sales/`,formData)
     .then((response)=>{
       for(let i=0; i< response.data.length; i++){
-        state.salesArr.push((response.data[i].sale_code))
+        state.purchasesArr.push((response.data[i].sale_code))
       }
-      commit('LIST_SALES', response.data);
+      commit('LIST_PURCHASES', response.data);
     })
     .catch((error)=>{
       console.log(error.message);
     })
     
   },
-  fetchSale({ commit,state }, formData) {
+  fetchPurchase({ commit,state }, formData) {
     axios.post(`api/v1/fetch-inventory-sales/`,formData)
     .then((response)=>{
-      state.selectedSale = response.data;
-      const selectedCustomer = response.data.client;
-      commit('SET_SELECTED_CUSTOMER',selectedCustomer);
+      state.selectedPurchase = response.data;
+      const selectedVendor = response.data.client;
+      commit('SET_SELECTED_VENDOR',selectedVendor);
     })
     .catch((error)=>{
       console.log(error.message);
     })
     
   },
-  fetchSaleOrderItems({ commit,state }, formData) {
+  fetchPurchaseOrderItems({ commit,state }, formData) {
     axios.post(`api/v1/inventory-sale-items-search/`,formData)
     .then((response)=>{
-      const saleOrderItems = response.data.saleItems;
-      commit('LIST_SALE_ORDER_ITEMS',saleOrderItems);
+      const purchaseOrderItems = response.data.saleItems;
+      commit('LIST_PURCHASE_ORDER_ITEMS',purchaseOrderItems);
     })
     .catch((error)=>{
       console.log(error.message);
     })
     
   },
-  handleSelectedSale({ commit, state }, option){
-    state.salesArray = [];
-    const selectedSale = state.salesList.find(sales => (sales.sale_code) === option);
-    if (selectedSale) {
-        state.salesID = selectedSale.sale_id;
-        state.salesCode = selectedSale.sale_code;
-        state.salesArray = [...state.salesArray, selectedSale];
+  handleSelectedPurchase({ commit, state }, option){
+    state.purchasesArray = [];
+    const selectedPurchase = state.purchasesList.find(purchases => (purchases.sale_code) === option);
+    if (selectedPurchase) {
+        state.purchasesID = selectedPurchase.sale_id;
+        state.purchasesCode = selectedPurchase.sale_code;
+        state.purchasesArray = [...state.purchasesArray, selectedPurchase];
     }
-    commit('SALES_ARRAY', state.salesArray);
+    commit('PURCHASES_ARRAY', state.purchasesArray);
       
   },
 
-  async updateSaleOrder({ commit,state }, formData) {
-    return axios.put(`api/v1/update-inventory-sale-order/`,formData)
+  async updatePurchaseOrder({ commit,state }, formData) {
+    return axios.put(`api/v1/update-inventory-purchase-order/`,formData)
     .then((response)=>{
       return response;
     })
@@ -211,14 +211,14 @@ const actions = {
     })  
   },
 
-  deleteSale({ commit,state }, formData) {
+  deletePurchase({ commit,state }, formData) {
     Swal.fire({
       title: "Are you sure?",
-      text: `Do you wish to delete Sale?`,
+      text: `Do you wish to delete Purchase?`,
       type: 'warning',
       showCloseButton: true,
       showCancelButton: true,
-      confirmButtonText: 'Yes Delete Sale!',
+      confirmButtonText: 'Yes Delete Purchase!',
       cancelButtonText: 'Cancel!',
       customClass: {
           confirmButton: 'swal2-confirm-custom',
@@ -230,12 +230,12 @@ const actions = {
         axios.post(`api/v1/delete-inventory-sale/`,formData)
         .then((response)=>{
           if(response.data.msg == "Success"){
-              Swal.fire("Poof! Sale removed succesfully!", {
+              Swal.fire("Poof! Purchase removed succesfully!", {
                 icon: "success",
               }); 
           }else{
             Swal.fire({
-              title: "Error Deleting Sale",
+              title: "Error Deleting Purchase",
               icon: "warning",
             });
           }                   
@@ -248,18 +248,18 @@ const actions = {
           });
         })
       }else{
-        Swal.fire(`Sale has not been deleted!`);
+        Swal.fire(`Purchase has not been deleted!`);
       }
     })
   },
-  deleteSaleOrder({ commit,state }, formData) {
+  deletePurchaseOrder({ commit,state }, formData) {
     Swal.fire({
       title: "Are you sure?",
-      text: `Do you wish to delete Sale Order?`,
+      text: `Do you wish to delete Purchase Order?`,
       type: 'warning',
       showCloseButton: true,
       showCancelButton: true,
-      confirmButtonText: 'Yes Delete Sale Order!',
+      confirmButtonText: 'Yes Delete Purchase Order!',
       cancelButtonText: 'Cancel!',
       customClass: {
           confirmButton: 'swal2-confirm-custom',
@@ -271,12 +271,12 @@ const actions = {
         axios.post(`api/v1/delete-inventory-sale/`,formData)
         .then((response)=>{
           if(response.data.msg == "Success"){
-              Swal.fire("Poof! Sale Order removed succesfully!", {
+              Swal.fire("Poof! Purchase Order removed succesfully!", {
                 icon: "success",
               }); 
           }else{
             Swal.fire({
-              title: "Error Deleting Sale Order",
+              title: "Error Deleting Purchase Order",
               icon: "warning",
             });
           }                   
@@ -289,18 +289,18 @@ const actions = {
           });
         })
       }else{
-        Swal.fire(`Sale Order has not been deleted!`);
+        Swal.fire(`Purchase Order has not been deleted!`);
       }
     })
   },
-  deleteDeliveryOrder({ commit,state }, formData) {
+  deleteReceivedOrder({ commit,state }, formData) {
     Swal.fire({
       title: "Are you sure?",
-      text: `Do you wish to delete Delivery Order?`,
+      text: `Do you wish to delete Received Order?`,
       type: 'warning',
       showCloseButton: true,
       showCancelButton: true,
-      confirmButtonText: 'Yes Delete Delivery Order!',
+      confirmButtonText: 'Yes Delete Received Order!',
       cancelButtonText: 'Cancel!',
       customClass: {
           confirmButton: 'swal2-confirm-custom',
@@ -312,12 +312,12 @@ const actions = {
         axios.post(`api/v1/delete-inventory-sale/`,formData)
         .then((response)=>{
           if(response.data.msg == "Success"){
-              Swal.fire("Poof! Delivery Order removed succesfully!", {
+              Swal.fire("Poof! Received Order removed succesfully!", {
                 icon: "success",
               }); 
           }else{
             Swal.fire({
-              title: "Error Deleting Delivery Order",
+              title: "Error Deleting Received Order",
               icon: "warning",
             });
           }                   
@@ -330,7 +330,7 @@ const actions = {
           });
         })
       }else{
-        Swal.fire(`Delivery Order has not been deleted!`);
+        Swal.fire(`Received Order has not been deleted!`);
       }
     })
   },

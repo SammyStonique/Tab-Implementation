@@ -2,14 +2,8 @@
     <PageStyleComponent :key="mainComponentKey" :loader="loader" @showLoader="showLoader" @hideLoader="hideLoader">
         <template v-slot:body>
             <div class="mt-6">
-                <DynamicForm  :fields="formFields" :flex_basis="flex_basis" :flex_basis_percentage="flex_basis_percentage" :displayButtons="displayButtons" @handleSubmit="createSaleReceipt" @handleReset="handleReset"> 
-                    <template v-slot:additional-content>   
-                        <div class="flex">
-                            <div class="basis-1/3"></div>
-                            <div class="basis-1/2 text-red-500 text-left">
-                                <p class="font-bold">BALANCE:  {{ Number(balance).toLocaleString() }}</p>
-                            </div>               
-                        </div>                 
+                <DynamicForm  :fields="formFields" :flex_basis="flex_basis" :flex_basis_percentage="flex_basis_percentage" :displayButtons="displayButtons" @handleSubmit="createPurchaseVoucher" @handleReset="handleReset"> 
+                    <template v-slot:additional-content>                    
                         <div class="min-h-[220px]">
                             <DynamicTable :key="tableKey" :showTotals="showTotals" :rightsModule="rightsModule" :columns="itemColumns" :rows="itemRows" :showActions="showActions" :idField="idField" :actions="actions" @action-click="deleteItemLine"/>
                         </div>
@@ -31,7 +25,7 @@ import { useDateFormatter } from '@/composables/DateFormatter';
 import DynamicTable from '@/components/DynamicTable.vue';
 
 export default defineComponent({
-    name: 'Sale_Details',
+    name: 'Purchase_Details',
     components:{
         PageStyleComponent, DynamicForm, DynamicTable, MovableModal
     },
@@ -45,16 +39,16 @@ export default defineComponent({
         const modal_loader = ref('none');
         const tableKey = ref(0);
         const mainComponentKey = ref(0);
-        const countComponentKey = ref(0);
+        const ledComponentKey = ref(0);
         const outComponentKey = ref(0);
-        const chanComponentKey = ref(0);
         const itemComponentKey = ref(0);
         const receipt_totals = ref(0);
         const receiptTotals = ref(0);
         const discountTotals = ref(0);
-        const balance = ref(0);
         const tax_totals = ref(0);
         const saleItemsArray = ref([]);
+        const journalEntryArr = ref([]);
+        const taxTransactionArr = ref([]);
         const title = ref('Add Prepayment');
         const modal_top = ref('150px');
         const modal_left = ref('400px');
@@ -63,34 +57,32 @@ export default defineComponent({
         const companyID = computed(()=> store.state.userData.company_id);
         const userID = computed(()=> store.state.userData.user_id);
         const defaultSettings = computed(()=> store.state.Default_Settings.settingsList);
-        const defaultOutlet = computed(()=> store.state.Direct_Sales.defaultOutlet);
-        const defaultCounter = computed(()=> store.state.Direct_Sales.defaultCounter);
-        const defaultChannel = computed(()=> store.state.Direct_Sales.defaultChannel);
-        const defaultStockType = computed(()=> store.state.Direct_Sales.defaultStockType);
+        const defaultOutlet = computed(()=> store.state.Direct_Purchases.defaultOutlet);
+        const defaultCounter = computed(()=> store.state.Direct_Purchases.defaultCounter);
+        const defaultChannel = computed(()=> store.state.Direct_Purchases.defaultChannel);
+        const defaultStockType = computed(()=> store.state.Direct_Purchases.defaultStockType);
         const displayButtons = ref(true);
         const showActions = ref(true);
         const idField = ref('');
         const flex_basis = ref('');
         const flex_basis_percentage = ref('');
         const itemID = ref('');
-        const outletID = computed(()=> store.state.Direct_Sales.defaultOutletID);
-        const counterID = computed(()=> store.state.Direct_Sales.defaultCounterID);
-        const channelID = computed(()=> store.state.Direct_Sales.defaultChannelID);
-        const cashbookID = computed(()=> store.state.Direct_Sales.defaultChannelID);
+        const outletID = computed(()=> store.state.Direct_Purchases.defaultOutletID);
+        const counterID = computed(()=> store.state.Direct_Purchases.defaultCounterID);
+        const channelID = computed(()=> store.state.Direct_Purchases.defaultChannelID);
+        const cashbookID = ref("");
         const itemArray = computed(() => store.state.Items_Catalog.itemsArr);
         const outletArray = computed(() => store.state.Retail_Outlets.outletArr);
-        const counterArray = computed(() => store.state.Outlet_Counters.counterArr);
-        const channelArray = computed(() => store.state.Counter_Channels.channelArr);
+        const ledgerArray = computed(() => store.state.Ledgers.cashbookLedgerArr);
         const itemRows = computed(() => store.state.Items_Catalog.lineItemsArray);
         const stock_control_account = ref("");
         const sales_income_account = ref("");
         const taxRates = computed(() => store.getters['Taxes/getFormatedTax']);
         const itemColumns = ref([
-            {label: "Item Name", key:"inventory_item_name", type: "text", editable: false},
-            {label: "Avail.", key:"batch_count", type: "text", editable: false},
-            {label: "Batch", key: "available_batch_count", type: "text", editable: false,},
-            {label: "Qty", key: "quantity", type: "number", editable: true, minWidth:"50px", maxWidth:"50px"},
-            {label: "S.Price", key:"selling_price", type: "text", editable: false,},
+            {label: "Item Name", key:"item_name", type: "text", editable: false},
+            {label: "Qty", key:"quantity", type: "number", editable: true, minWidth:"50px", maxWidth:"50px"},
+            {label: "P.Price", key: "cost", type: "number", editable: true,},
+            {label: "S.Price", key:"selling_price", type: "number", editable: true,},
             {label: "Vat rate", key: "vat_rate", type: "select-dropdown", editable: false, options: taxRates, maxWidth:"50px"},
             {label: "Incl.", key: "vat_inclusivity", type: "select-dropdown", editable: false, maxWidth:"20px", options: [{ text: 'Yes', value: 'Inclusive' }, { text: 'No', value: 'Exclusive' }]},
             {label: "Vat Amnt", key: "vat_amount", type: "number", editable: false, maxWidth:"30px"},
@@ -109,64 +101,39 @@ export default defineComponent({
         const fetchTaxes = async() =>{
             await store.dispatch('Taxes/fetchTaxes', {company:companyID.value})
         };
-        const fetchCounters = async() =>{
-            if(outletID.value){
-                await store.dispatch('Outlet_Counters/fetchCounters', {company:companyID.value, outlet:outletID.value})
-            }
-        };
+
         const fetchAllItems = async() =>{
             await store.dispatch('Items_Catalog/fetchInventoryItems', {company:companyID.value})
         };
         const fetchItems = async(stock_type) =>{
-            if(outletID.value && stock_type){
-                await store.dispatch('Items_Catalog/fetchItems', {company_id:companyID.value, outlet:outletID.value, stock_type:stock_type})
-            }
+            await store.dispatch('Items_Catalog/fetchInventoryItems', {company:companyID.value})
         };
         const fetchOutlets = async() =>{
             await store.dispatch('Retail_Outlets/fetchOutlets', {company:companyID.value})
         };
-        const fetchChannels = async(outletCounter) =>{
-            if(outletID.value && outletCounter){
-                await store.dispatch('Counter_Channels/fetchChannels', {company:companyID.value, outlet_counter:outletCounter})
-            }
+        const fetchCashbooks = async(outletCounter) =>{
+            await store.dispatch('Ledgers/fetchCashbookLedgers', {company:companyID.value, ledger_type: "Cashbook"})
         };
-        watch([outletID, counterID], () => {
-            if(outletID.value && counterID.value){
-                fetchChannels(counterID.value);
-            }
-            if (outletID.value) {
-                fetchCounters();
-            }
-            
-        }, { immediate: true });
-        const handleSelectedCounter = async(option) =>{
-            await store.dispatch('Outlet_Counters/handleSelectedCounter', option)
-            counterID.value = store.state.Outlet_Counters.counterID;
-        };
+
         const handleSelectedOutlet = async(option) =>{
             await store.dispatch('Retail_Outlets/handleSelectedOutlet', option)
             outletID.value = store.state.Retail_Outlets.outletID;
         };
-        const handleSelectedChannel = async(option) =>{
-            await store.dispatch('Counter_Channels/handleSelectedChannel', option)
-            channelID.value = store.state.Counter_Channels.channelID;
-            store.dispatch('Direct_Sales/updateState', {defaultChannelID: store.state.Counter_Channels.ledgerID})
+        const handleSelectedCashbook = async(option) =>{
+            await store.dispatch('Ledgers/handleSelectedLedger', option)
+            cashbookID.value = store.state.Ledgers.ledgerID;
         };
         const handleSelectedItem = async(option) =>{
-            await store.dispatch('Items_Catalog/handleSelectedItem', option)
+            await store.dispatch('Items_Catalog/handleSelectedPurchaseItem', option)
             itemID.value = store.state.Items_Catalog.itemID;
             itemComponentKey.value += 1;
         };
-        const clearSelectedCounter = async() =>{
-            await store.dispatch('Outlet_Counters/updateState', {counterID: ''});
-            counterID.value = ""
-        }
         const clearSelectedOutlet = async() =>{
             await store.dispatch('Retail_Outlets/updateState', {outletID: ''});
             outletID.value = ""
         }
-        const clearSelectedChannel = async() =>{
-            await store.dispatch('Counter_Channels/updateState', {channelID: '', ledgerID: ''});
+        const clearSelectedCashbook = async() =>{
+            await store.dispatch('Ledgers/updateState', {ledgerID: ''});
             channelID.value = "";
             cashbookID.value = "";
         }
@@ -174,49 +141,32 @@ export default defineComponent({
             itemComponentKey.value += 1;
             fetchItems(value);
         };
-        const calculateBalance = (value) =>{
-            receiptTotals.value = 0;
-            for(let i=0; i<itemRows.value.length; i++){
-                receiptTotals.value += Number(itemRows.value[i].total_amount);
-            }
-            balance.value = value - receiptTotals.value;
-        };
         const formFields = ref([]);
         const updateFormFields = () =>{
             formFields.value = [
-                { type: 'date', name: 'issue_date',label: "Recording Date", value: formatDate(current_date), required: true, maxDate: formatDate(current_date) },
-                { type: 'date', name: 'banking_date',label: "Banking Date", value: '', required: true, maxDate: formatDate(current_date) },
-                
+                { type: 'date', name: 'issue_date',label: "Recording Date", value: formatDate(current_date), required: true, maxDate: formatDate(current_date) },        
                 {
                     type:'search-dropdown', label:"Outlet", value: outletID.value, componentKey: outComponentKey,
                     selectOptions: outletArray, optionSelected: handleSelectedOutlet, required: true,
-                    searchPlaceholder: 'Select Outlet...', dropdownWidth: '280px', updateValue: defaultOutlet.value,
+                    searchPlaceholder: 'Select Outlet...', dropdownWidth: '300px', updateValue: defaultOutlet.value,
                     fetchData: fetchOutlets(), clearSearch: clearSelectedOutlet()  
                 },
                 {
-                    type:'search-dropdown', label:"Counter", value: counterID.value, componentKey: countComponentKey,
-                    selectOptions: counterArray, optionSelected: handleSelectedCounter, required: true,
-                    searchPlaceholder: 'Select Counter...', dropdownWidth: '280px', updateValue: defaultCounter.value,
-                    fetchData: fetchCounters(), clearSearch: clearSelectedCounter()  
+                    type:'search-dropdown', label:"Cashbook", value: cashbookID.value, componentKey: ledComponentKey,
+                    selectOptions: ledgerArray, optionSelected: handleSelectedCashbook, required: true,
+                    searchPlaceholder: 'Select Cashbook...', dropdownWidth: '300px', updateValue: "",
+                    fetchData: fetchCashbooks(), clearSearch: clearSelectedCashbook()  
                 },
-                {
-                    type:'search-dropdown', label:"Channel", value: channelID.value, componentKey: chanComponentKey,
-                    selectOptions: channelArray, optionSelected: handleSelectedChannel, required: true,
-                    searchPlaceholder: 'Select Channel...', dropdownWidth: '250px', updateValue: defaultChannel.value,
-                    // fetchData: fetchChannels(), 
-                    clearSearch: clearSelectedChannel()  
-                },
-                { type: 'dropdown', name: 'stock_type',label: "Stock Type", value: defaultStockType.value, placeholder: "", required: true, method: fetchInventoryItems, options: [{ text: 'Stocked', value: 'Stocked' }, { text: 'Serialized', value: 'Serialized' },{ text: 'Non Stocked', value: 'Non Stocked' }, { text: 'Service', value: 'Service' }] },
                 {
                     type:'search-dropdown', label:"Item", value: itemID.value, componentKey: itemComponentKey,
                     selectOptions: itemArray, optionSelected: handleSelectedItem, required: true,
-                    searchPlaceholder: 'Select Item...', dropdownWidth: '350px', updateValue: "",
+                    searchPlaceholder: 'Select Item...', dropdownWidth: '380px', updateValue: "",
                     // fetchData: fetchItems(), clearSearch: clearSelectedItem()  
                 },
-                { type: 'text', name: 'customer',label: "Customer", value: 'Walk-In Customer', required: true,},
+                { type: 'text', name: 'customer',label: "Vendor", value: '', required: true,},
                 { type: 'text', name: 'phone_number',label: "Phone No", value: '0', required: true,},
                 { type: 'text', name: 'reference_no',label: "Reference No", value: '', required: true,},
-                { type: 'number', name: 'total_amount',label: "Amount", value: receipt_totals.value || 0, required: true, method: calculateBalance },                
+                { type: 'number', name: 'total_amount',label: "Amount", value: receipt_totals.value || 0, required: true, },                
             ]
         };
 
@@ -231,17 +181,13 @@ export default defineComponent({
             store.dispatch('Items_Catalog/updateState', { lineItemsArray: []})
             mainComponentKey.value += 1;
             formFields.value[0].value = formatDate(current_date);
-            formFields.value[1].value = "";
-            formFields.value[5].value = defaultStockType.value;
-            formFields.value[7].value = "Walk-In Customer";
-            formFields.value[8].value = "0";
-            formFields.value[9].value = "";
-            formFields.value[10].value = 0;
+            formFields.value[5].value = "0";
+            formFields.value[6].value = "";
+            formFields.value[7].value = 0;
             receipt_totals.value = 0;
             receiptTotals.value = 0;
             discountTotals.value = 0;
             tax_totals.value = 0;
-            balance.value = 0;
         }
 
         const showLoader = () =>{
@@ -250,7 +196,7 @@ export default defineComponent({
         const hideLoader = () =>{
             loader.value = "none";
         } 
-        const createSaleReceipt = async() =>{
+        const createPurchaseVoucher = async() =>{
             showLoader();
             saleItemsArray.value = [];
             receiptTotals.value = 0;
@@ -265,52 +211,92 @@ export default defineComponent({
                 discountTotals.value += Number(itemRows.value[i].discount);
 
                 if(itemRows.value[i].vat_rate){
-                    let saleItem ={
-                        "item_batch_id": itemRows.value[i].item_batch_id,
+                    let purchaseItem ={
                         "date": formFields.value[0].value,
                         "inventory_item": itemRows.value[i].item,
-                        "stock_at_hand": itemRows.value[i].stock_at_hand,
                         "adjusted_stock": itemRows.value[i].quantity,
-                        "batch_before_sale": itemRows.value[i].stock_after_adjustment,
+                        "batch_before_sale": itemRows.value[i].quantity,
                         "batch_count": itemRows.value[i].batch_count,
                         "discount": itemRows.value[i].discount,
                         "tax": parseFloat(itemRows.value[i].vat_amount),
-                        "profit": itemRows.value[i].item_sales_income,
                         "item_total": itemRows.value[i].total_amount,
-                        "batch_after_sale": itemRows.value[i].available_batch_count - itemRows.value[i].quantity,
+                        "batch_after_sale": itemRows.value[i].quantity,
                         "purchase_price": parseFloat(itemRows.value[i].purchase_price),
                         "selling_price": parseFloat(itemRows.value[i].selling_price),
-                        "quantity": itemRows.value[i].stock_after_adjustment,
+                        "quantity": itemRows.value[i].quantity,
                         "tax_type": itemRows.value[i].vat_rate.tax_id,
                         "tax_inclusivity": itemRows.value[i].vat_inclusivity,
-                        "output_vat_id": itemRows.value[i].vat_rate.tax_output_account.ledger_id
                     }        
-                    saleItemsArray.value.push(saleItem);
+                    saleItemsArray.value.push(purchaseItem);
                     
                 }else{
-                    let saleItem ={
-                        "item_batch_id": itemRows.value[i].item_batch_id,
+                    let purchaseItem ={
                         "date": formFields.value[0].value,
                         "inventory_item": itemRows.value[i].item,
-                        "stock_at_hand": itemRows.value[i].stock_at_hand,
                         "adjusted_stock": itemRows.value[i].quantity,
-                        "batch_before_sale": itemRows.value[i].stock_after_adjustment,
+                        "batch_before_sale": itemRows.value[i].quantity,
                         "batch_count": itemRows.value[i].batch_count,
                         "discount": itemRows.value[i].discount,
-                        "tax": itemRows.value[i].vat_amount,
-                        "profit": itemRows.value[i].item_sales_income,
+                        "tax": parseFloat(itemRows.value[i].vat_amount),
                         "item_total": itemRows.value[i].total_amount,
-                        "batch_after_sale": itemRows.value[i].available_batch_count - itemRows.value[i].quantity,
+                        "batch_after_sale": itemRows.value[i].quantity,
                         "purchase_price": parseFloat(itemRows.value[i].purchase_price),
                         "selling_price": parseFloat(itemRows.value[i].selling_price),
-                        "quantity": itemRows.value[i].stock_after_adjustment,
+                        "quantity": itemRows.value[i].quantity,
                         "tax_type": "",
                         "tax_inclusivity": "",
-                        "output_vat_id": ""
                     } 
-                    saleItemsArray.value.push(saleItem);
+                    saleItemsArray.value.push(purchaseItem);
+                }
+                if(itemRows.value[i].vat_amount > 0){
+                    let jnlEntry1 ={
+                        "date": formFields.value[0].value,
+                        "txn_type": "JNL",
+                        "posting_account": stock_control_account.value,
+                        "credit_amount": 0,
+                        "description": "Purchase of "+ itemRows.value[i].quantity+' '+ itemRows.value[i].item_name,
+                        "debit_amount": itemRows.value[i].sub_total,
+                    }     
+                    let jnlEntry2 ={
+                        "date": formFields.value[0].value,
+                        "txn_type": "JNL",
+                        "posting_account": itemRows.value[i].input_vat_id,
+                        "credit_amount": 0,
+                        "description": "Purchase of "+ itemRows.value[i].item_name+", Tax payable",
+                        "debit_amount": Math.abs(itemRows.value[i].tax_amount),
+                    }    
+                    let taxTxn ={
+                        "tax": itemRows.value[i].vat_rate.tax_id,
+                        "client": formFields.value[4].value,
+                        "amount": itemRows.value[i].tax_amount,
+                        "description": "Purchase of "+ itemRows.value[i].item_name+", Tax payable",
+                        "tax_inclusive": itemRows.value[i].vat_inclusivity,
+                        "tax_category": 'Input'
+                    }               
+                    journalEntryArr.value.push(jnlEntry1, jnlEntry2);
+                    taxTransactionArr.value.push(taxTxn);
+                }else{
+                    let jnlEntry1 ={
+                        "date": formFields.value[0].value,
+                        "txn_type": "JNL",
+                        "posting_account": stock_control_account.value,
+                        "credit_amount": 0,
+                        "description": "Purchase of "+ itemRows.value[i].quantity+' '+ itemRows.value[i].item_name,
+                        "debit_amount": itemRows.value[i].sub_total,
+                    }                       
+                    journalEntryArr.value.push(jnlEntry1);
                 }
             }
+
+            let jnlEntry3 ={
+                "date": formFields.value[0].value,
+                "txn_type": "JNL",
+                "posting_account": cashbookID.value,
+                "debit_amount": 0,
+                "description": "Inventory Purchase",
+                "credit_amount": Math.abs(receiptTotals.value),
+            }
+            journalEntryArr.value.push(jnlEntry3);
 
             let formData = {
                 outlet: outletID.value,
@@ -318,24 +304,25 @@ export default defineComponent({
                 outlet_counter: counterID.value,
                 notes: "",
                 date: formFields.value[0].value,
-                sale_items_array: saleItemsArray.value,
+                purchase_items_array: saleItemsArray.value,
+                journal_entry_array: journalEntryArr.value,
+                tax_transaction_array: taxTransactionArr.value,
                 txn_type: "JNL",
                 issue_date: formFields.value[0].value,
-                banking_date: formFields.value[1].value,
+                banking_date: formFields.value[0].value,
                 total_amount: receiptTotals.value,
                 sale_type: "Cash",
-                customer: formFields.value[7].value,
-                phone_number: formFields.value[8].value,
-                amount_received: formFields.value[10].value,
-                balance: balance.value,
+                vendor: formFields.value[4].value,
+                phone_number: formFields.value[5].value,
+                amount_paid: formFields.value[7].value,
+                balance: formFields.value[7].value - receiptTotals.value,
                 tax: tax_totals.value,
-                reference_no: formFields.value[9].value,
+                reference_no: formFields.value[6].value,
                 discount: discountTotals.value,
-                inventory_account: stock_control_account.value,
-                income_account: sales_income_account.value,
                 company: companyID.value,
                 user: userID.value
             }
+            console.log("THE FORM DATA IS ",formData)
        
             errors.value = [];
             for(let i=0; i < formFields.value.length ; i++){
@@ -343,7 +330,7 @@ export default defineComponent({
                     errors.value.push(formFields.value[i].label);
                 }
             }
-            if(outletID.value == '' || counterID.value == '' || channelID.value == ''){
+            if(outletID.value == '' || cashbookID.value == ''){
                 errors.value.push('Error');
             }
 
@@ -352,25 +339,28 @@ export default defineComponent({
                 hideLoader();                 
             }
             else{
-                if(Number(receiptTotals.value) <= 0 || balance.value < 0){
-                    toast.error('Invalid Sale Amount');
+                if(Number(receiptTotals.value) <= 0){
+                    toast.error('Invalid Purchase Amount');
+                    hideLoader();
+                }else if(Number(receiptTotals.value) != formFields.value[7].value){
+                    toast.error('Invalid Purchase Amount');
                     hideLoader();
                 }
                 else{            
                     try {
-                        const response = await store.dispatch('Direct_Sales/createSale', formData);
+                        const response = await store.dispatch('Direct_Purchases/createPurchase', formData);
                         if (response && response.status === 200) {
                             hideLoader();
-                            toast.success('Sale created successfully!');
+                            toast.success('Purchase created successfully!');
                             handleReset();
                             mainComponentKey.value += 1;
                         } else {
-                            toast.error('An error occurred while creating the Sale.');
+                            toast.error('An error occurred while creating the Purchase.');
                             hideLoader();
                         }
                     } catch (error) {
                         console.error(error.message);
-                        toast.error('Failed to create Sale: ' + error.message);
+                        toast.error('Failed to create Purchase: ' + error.message);
                     } finally {
                         hideLoader();
                     }              
@@ -398,6 +388,7 @@ export default defineComponent({
         };
 
         onBeforeMount(()=>{ 
+            store.dispatch('Ledgers/fetchLedgers', {company: companyID.value})
             store.dispatch('Ledgers/updateState', { invoiceItemsArray: []})
             updateFormFields();
             flex_basis.value = '1/5';
@@ -413,9 +404,9 @@ export default defineComponent({
         })
 
         return{
-            formFields, flex_basis, flex_basis_percentage, displayButtons, createSaleReceipt, mainComponentKey,showTotals,
+            formFields, flex_basis, flex_basis_percentage, displayButtons, createPurchaseVoucher, mainComponentKey,showTotals,
             handleReset, loader, showLoader, hideLoader, tableKey, itemColumns, itemRows, showActions, actions, deleteItemLine, idField,
-            title, modal_loader, modal_left, modal_top, modal_width, showModalLoader, hideModalLoader,rightsModule,balance
+            title, modal_loader, modal_left, modal_top, modal_width, showModalLoader, hideModalLoader,rightsModule,
         }
     }
 })

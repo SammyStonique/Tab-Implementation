@@ -35,7 +35,7 @@
             <div v-else>
               <label for="">{{ field.label }}:</label><br />
             </div>
-            <input v-model="field.value" :name="field.name" type="time" :class="`bg-slate-50 rounded pl-3 border border-gray-400 text-base w-full`" :placeholder="field.placeholder"/>
+            <input v-model="field.value" :name="field.name" type="time" :disabled="field.disabled" :class="`bg-slate-50 rounded pl-3 border border-gray-400 text-base w-full`" :placeholder="field.placeholder"/>
           </div>
           <div v-else-if="field.type === 'dropdown'" class="mr-2 text-left">
             <div v-if="field.required">
@@ -44,12 +44,12 @@
             <div v-else>
               <label for="">{{ field.label }}:</label><br />
             </div>
-            <select @change="handleChange($event, field)" v-model="field.value" :name="field.name" class="bg-slate-50 rounded border border-gray-400 text-sm pl-2 pt-2 w-full">
+            <select @change="handleChange($event, field)" v-model="field.value" :name="field.name" :disabled="field.disabled" class="bg-slate-50 rounded border border-gray-400 text-sm pl-2 pt-2 w-full">
               <option value="" selected disabled>{{ field.placeholder }}</option>
               <option v-for="(option, index) in field.options" :key="index" :value="option.value">{{ option.text }}</option>
             </select>
           </div>
-          <div v-else-if="field.type === 'search-dropdown'" class="mr-2 text-left">
+          <div v-else-if="field.type === 'search-dropdown'" class="mr-2 text-left" :disabled="field.disabled">
             <div v-if="field.required">
               <label for="">{{ field.label }} : <em>*</em></label><br />
             </div>
@@ -74,7 +74,7 @@
             <div v-else>
               <label for="">{{ field.label }}:</label><br />
             </div>
-            <textarea v-model="field.value" :name="field.name" class="bg-slate-50 rounded border border-gray-400 text-sm pl-2 pt-2" :rows="field.textarea_rows" :cols="field.textarea_cols"></textarea>
+            <textarea v-model="field.value" :name="field.name" :disabled="field.disabled" class="bg-slate-50 rounded border border-gray-400 text-sm pl-2 pt-2" :rows="field.textarea_rows" :cols="field.textarea_cols"></textarea>
           </div>
         </div>
         <div class="flex-1 basis-full p-2">

@@ -3,13 +3,7 @@
         <template v-slot:body>
             <div class="mt-6">
                 <DynamicForm  :fields="formFields" :flex_basis="flex_basis" :flex_basis_percentage="flex_basis_percentage" :displayButtons="displayButtons" @handleSubmit="createSaleReceipt" @handleReset="handleReset"> 
-                    <template v-slot:additional-content>   
-                        <div class="flex">
-                            <div class="basis-1/3"></div>
-                            <div class="basis-1/2 text-red-500 text-left">
-                                <p class="font-bold">BALANCE:  {{ Number(balance).toLocaleString() }}</p>
-                            </div>               
-                        </div>                 
+                    <template v-slot:additional-content>                    
                         <div class="min-h-[220px]">
                             <DynamicTable :key="tableKey" :showTotals="showTotals" :rightsModule="rightsModule" :columns="itemColumns" :rows="itemRows" :showActions="showActions" :idField="idField" :actions="actions" @action-click="deleteItemLine"/>
                         </div>
@@ -31,7 +25,7 @@ import { useDateFormatter } from '@/composables/DateFormatter';
 import DynamicTable from '@/components/DynamicTable.vue';
 
 export default defineComponent({
-    name: 'Sale_Details',
+    name: 'Delivery_Order_Details',
     components:{
         PageStyleComponent, DynamicForm, DynamicTable, MovableModal
     },
@@ -45,14 +39,13 @@ export default defineComponent({
         const modal_loader = ref('none');
         const tableKey = ref(0);
         const mainComponentKey = ref(0);
-        const countComponentKey = ref(0);
+        const custComponentKey = ref(0);
         const outComponentKey = ref(0);
         const chanComponentKey = ref(0);
         const itemComponentKey = ref(0);
         const receipt_totals = ref(0);
         const receiptTotals = ref(0);
         const discountTotals = ref(0);
-        const balance = ref(0);
         const tax_totals = ref(0);
         const saleItemsArray = ref([]);
         const title = ref('Add Prepayment');
@@ -64,9 +57,10 @@ export default defineComponent({
         const userID = computed(()=> store.state.userData.user_id);
         const defaultSettings = computed(()=> store.state.Default_Settings.settingsList);
         const defaultOutlet = computed(()=> store.state.Direct_Sales.defaultOutlet);
-        const defaultCounter = computed(()=> store.state.Direct_Sales.defaultCounter);
-        const defaultChannel = computed(()=> store.state.Direct_Sales.defaultChannel);
         const defaultStockType = computed(()=> store.state.Direct_Sales.defaultStockType);
+        const selectedSale = computed(()=> store.state.Direct_Sales.selectedSale);
+        const selectedCustomer = computed(()=> store.state.Direct_Sales.selectedCustomer);
+        const isEditing = computed(()=> store.state.Direct_Sales.isEditing);
         const displayButtons = ref(true);
         const showActions = ref(true);
         const idField = ref('');
@@ -74,16 +68,11 @@ export default defineComponent({
         const flex_basis_percentage = ref('');
         const itemID = ref('');
         const outletID = computed(()=> store.state.Direct_Sales.defaultOutletID);
-        const counterID = computed(()=> store.state.Direct_Sales.defaultCounterID);
-        const channelID = computed(()=> store.state.Direct_Sales.defaultChannelID);
-        const cashbookID = computed(()=> store.state.Direct_Sales.defaultChannelID);
         const itemArray = computed(() => store.state.Items_Catalog.itemsArr);
         const outletArray = computed(() => store.state.Retail_Outlets.outletArr);
-        const counterArray = computed(() => store.state.Outlet_Counters.counterArr);
-        const channelArray = computed(() => store.state.Counter_Channels.channelArr);
+        const customerArray = computed(() => store.state.Customers.customerArr);
+        const customerID = ref(null);
         const itemRows = computed(() => store.state.Items_Catalog.lineItemsArray);
-        const stock_control_account = ref("");
-        const sales_income_account = ref("");
         const taxRates = computed(() => store.getters['Taxes/getFormatedTax']);
         const itemColumns = ref([
             {label: "Item Name", key:"inventory_item_name", type: "text", editable: false},
@@ -91,7 +80,7 @@ export default defineComponent({
             {label: "Batch", key: "available_batch_count", type: "text", editable: false,},
             {label: "Qty", key: "quantity", type: "number", editable: true, minWidth:"50px", maxWidth:"50px"},
             {label: "S.Price", key:"selling_price", type: "text", editable: false,},
-            {label: "Vat rate", key: "vat_rate", type: "select-dropdown", editable: false, options: taxRates, maxWidth:"50px"},
+            {label: "Vat rate", key: "tax_name", type: "select-dropdown", editable: false, options: taxRates, maxWidth:"50px"},
             {label: "Incl.", key: "vat_inclusivity", type: "select-dropdown", editable: false, maxWidth:"20px", options: [{ text: 'Yes', value: 'Inclusive' }, { text: 'No', value: 'Exclusive' }]},
             {label: "Vat Amnt", key: "vat_amount", type: "number", editable: false, maxWidth:"30px"},
             {label: "Total", key: "total_amount", type: "number", editable: false},
@@ -109,11 +98,10 @@ export default defineComponent({
         const fetchTaxes = async() =>{
             await store.dispatch('Taxes/fetchTaxes', {company:companyID.value})
         };
-        const fetchCounters = async() =>{
-            if(outletID.value){
-                await store.dispatch('Outlet_Counters/fetchCounters', {company:companyID.value, outlet:outletID.value})
-            }
+        const fetchCustomers = async() =>{
+            await store.dispatch('Customers/fetchCustomers', {company:companyID.value})
         };
+
         const fetchAllItems = async() =>{
             await store.dispatch('Items_Catalog/fetchInventoryItems', {company:companyID.value})
         };
@@ -125,104 +113,67 @@ export default defineComponent({
         const fetchOutlets = async() =>{
             await store.dispatch('Retail_Outlets/fetchOutlets', {company:companyID.value})
         };
-        const fetchChannels = async(outletCounter) =>{
-            if(outletID.value && outletCounter){
-                await store.dispatch('Counter_Channels/fetchChannels', {company:companyID.value, outlet_counter:outletCounter})
-            }
-        };
-        watch([outletID, counterID], () => {
-            if(outletID.value && counterID.value){
-                fetchChannels(counterID.value);
-            }
-            if (outletID.value) {
-                fetchCounters();
-            }
+        watch([outletID,], () => {
             
         }, { immediate: true });
-        const handleSelectedCounter = async(option) =>{
-            await store.dispatch('Outlet_Counters/handleSelectedCounter', option)
-            counterID.value = store.state.Outlet_Counters.counterID;
-        };
         const handleSelectedOutlet = async(option) =>{
             await store.dispatch('Retail_Outlets/handleSelectedOutlet', option)
             outletID.value = store.state.Retail_Outlets.outletID;
         };
-        const handleSelectedChannel = async(option) =>{
-            await store.dispatch('Counter_Channels/handleSelectedChannel', option)
-            channelID.value = store.state.Counter_Channels.channelID;
-            store.dispatch('Direct_Sales/updateState', {defaultChannelID: store.state.Counter_Channels.ledgerID})
+        const handleSelectedCustomer = async(option) =>{
+            await store.dispatch('Customers/handleSelectedCustomer', option)
+            customerID.value = store.state.Customers.customerID;
         };
         const handleSelectedItem = async(option) =>{
             await store.dispatch('Items_Catalog/handleSelectedItem', option)
             itemID.value = store.state.Items_Catalog.itemID;
             itemComponentKey.value += 1;
+            console.log("THE ITEMS ROW IS ",itemRows.value)
         };
-        const clearSelectedCounter = async() =>{
-            await store.dispatch('Outlet_Counters/updateState', {counterID: ''});
-            counterID.value = ""
-        }
         const clearSelectedOutlet = async() =>{
             await store.dispatch('Retail_Outlets/updateState', {outletID: ''});
             outletID.value = ""
-        }
-        const clearSelectedChannel = async() =>{
-            await store.dispatch('Counter_Channels/updateState', {channelID: '', ledgerID: ''});
-            channelID.value = "";
-            cashbookID.value = "";
-        }
+        };
+        const clearSelectedCustomer = async() =>{
+            await store.dispatch('Customers/updateState', {customerID: ''});
+            customerID.value = ""
+        };
+
         const fetchInventoryItems = (value) =>{
             itemComponentKey.value += 1;
             fetchItems(value);
         };
-        const calculateBalance = (value) =>{
-            receiptTotals.value = 0;
-            for(let i=0; i<itemRows.value.length; i++){
-                receiptTotals.value += Number(itemRows.value[i].total_amount);
-            }
-            balance.value = value - receiptTotals.value;
-        };
+
         const formFields = ref([]);
         const updateFormFields = () =>{
             formFields.value = [
-                { type: 'date', name: 'issue_date',label: "Recording Date", value: formatDate(current_date), required: true, maxDate: formatDate(current_date) },
-                { type: 'date', name: 'banking_date',label: "Banking Date", value: '', required: true, maxDate: formatDate(current_date) },
-                
+                { type: 'date', name: 'issue_date',label: "Date", value: selectedSale.value?.date || formatDate(current_date), required: true, maxDate: formatDate(current_date) },                
                 {
                     type:'search-dropdown', label:"Outlet", value: outletID.value, componentKey: outComponentKey,
                     selectOptions: outletArray, optionSelected: handleSelectedOutlet, required: true,
-                    searchPlaceholder: 'Select Outlet...', dropdownWidth: '280px', updateValue: defaultOutlet.value,
+                    searchPlaceholder: 'Select Outlet...', dropdownWidth: '500px', updateValue: defaultOutlet.value,
                     fetchData: fetchOutlets(), clearSearch: clearSelectedOutlet()  
                 },
                 {
-                    type:'search-dropdown', label:"Counter", value: counterID.value, componentKey: countComponentKey,
-                    selectOptions: counterArray, optionSelected: handleSelectedCounter, required: true,
-                    searchPlaceholder: 'Select Counter...', dropdownWidth: '280px', updateValue: defaultCounter.value,
-                    fetchData: fetchCounters(), clearSearch: clearSelectedCounter()  
-                },
-                {
-                    type:'search-dropdown', label:"Channel", value: channelID.value, componentKey: chanComponentKey,
-                    selectOptions: channelArray, optionSelected: handleSelectedChannel, required: true,
-                    searchPlaceholder: 'Select Channel...', dropdownWidth: '250px', updateValue: defaultChannel.value,
-                    // fetchData: fetchChannels(), 
-                    clearSearch: clearSelectedChannel()  
+                    type:'search-dropdown', label:"Customer", value: customerID.value, componentKey: custComponentKey,
+                    selectOptions: customerArray, optionSelected: handleSelectedCustomer, required: true,
+                    searchPlaceholder: 'Select Customer...', dropdownWidth: '500px', updateValue: selectedCustomer.value,
+                    fetchData: fetchCustomers(), clearSearch: clearSelectedCustomer()  
                 },
                 { type: 'dropdown', name: 'stock_type',label: "Stock Type", value: defaultStockType.value, placeholder: "", required: true, method: fetchInventoryItems, options: [{ text: 'Stocked', value: 'Stocked' }, { text: 'Serialized', value: 'Serialized' },{ text: 'Non Stocked', value: 'Non Stocked' }, { text: 'Service', value: 'Service' }] },
                 {
                     type:'search-dropdown', label:"Item", value: itemID.value, componentKey: itemComponentKey,
                     selectOptions: itemArray, optionSelected: handleSelectedItem, required: true,
-                    searchPlaceholder: 'Select Item...', dropdownWidth: '350px', updateValue: "",
+                    searchPlaceholder: 'Select Item...', dropdownWidth: '500px', updateValue: "",
                     // fetchData: fetchItems(), clearSearch: clearSelectedItem()  
-                },
-                { type: 'text', name: 'customer',label: "Customer", value: 'Walk-In Customer', required: true,},
-                { type: 'text', name: 'phone_number',label: "Phone No", value: '0', required: true,},
-                { type: 'text', name: 'reference_no',label: "Reference No", value: '', required: true,},
-                { type: 'number', name: 'total_amount',label: "Amount", value: receipt_totals.value || 0, required: true, method: calculateBalance },                
+                },            
             ]
         };
 
-        watch([defaultOutlet, defaultCounter, defaultChannel, defaultStockType], () => {
-            if(defaultOutlet.value != null){
-                outComponentKey.value += 1; 
+        watch([selectedSale,selectedCustomer], () => {
+            if(selectedSale.value && selectedCustomer.value){
+                custComponentKey.value += 1; 
+                updateFormFields();
             }
             
         }, { immediate: true });
@@ -231,17 +182,13 @@ export default defineComponent({
             store.dispatch('Items_Catalog/updateState', { lineItemsArray: []})
             mainComponentKey.value += 1;
             formFields.value[0].value = formatDate(current_date);
-            formFields.value[1].value = "";
-            formFields.value[5].value = defaultStockType.value;
-            formFields.value[7].value = "Walk-In Customer";
-            formFields.value[8].value = "0";
-            formFields.value[9].value = "";
-            formFields.value[10].value = 0;
+            formFields.value[3].value = defaultStockType.value;
             receipt_totals.value = 0;
             receiptTotals.value = 0;
             discountTotals.value = 0;
             tax_totals.value = 0;
-            balance.value = 0;
+            custComponentKey.value += 1;
+            customerID.value = null;
         }
 
         const showLoader = () =>{
@@ -314,25 +261,15 @@ export default defineComponent({
 
             let formData = {
                 outlet: outletID.value,
-                cashbook: cashbookID.value,
-                outlet_counter: counterID.value,
                 notes: "",
                 date: formFields.value[0].value,
                 sale_items_array: saleItemsArray.value,
-                txn_type: "JNL",
-                issue_date: formFields.value[0].value,
-                banking_date: formFields.value[1].value,
                 total_amount: receiptTotals.value,
-                sale_type: "Cash",
-                customer: formFields.value[7].value,
-                phone_number: formFields.value[8].value,
-                amount_received: formFields.value[10].value,
-                balance: balance.value,
+                sale_type: "Credit",
+                sale_delivery: "Not Delivered",
+                customer: customerID.value,
                 tax: tax_totals.value,
-                reference_no: formFields.value[9].value,
                 discount: discountTotals.value,
-                inventory_account: stock_control_account.value,
-                income_account: sales_income_account.value,
                 company: companyID.value,
                 user: userID.value
             }
@@ -343,7 +280,7 @@ export default defineComponent({
                     errors.value.push(formFields.value[i].label);
                 }
             }
-            if(outletID.value == '' || counterID.value == '' || channelID.value == ''){
+            if(outletID.value == '' || customerID.value == ''){
                 errors.value.push('Error');
             }
 
@@ -352,25 +289,25 @@ export default defineComponent({
                 hideLoader();                 
             }
             else{
-                if(Number(receiptTotals.value) <= 0 || balance.value < 0){
+                if(Number(receiptTotals.value) <= 0){
                     toast.error('Invalid Sale Amount');
                     hideLoader();
                 }
                 else{            
                     try {
-                        const response = await store.dispatch('Direct_Sales/createSale', formData);
+                        const response = await store.dispatch('Direct_Sales/createSaleOrder', formData);
                         if (response && response.status === 200) {
                             hideLoader();
-                            toast.success('Sale created successfully!');
+                            toast.success('Sale Order created successfully!');
                             handleReset();
                             mainComponentKey.value += 1;
                         } else {
-                            toast.error('An error occurred while creating the Sale.');
+                            toast.error('An error occurred while creating the Sale Order.');
                             hideLoader();
                         }
                     } catch (error) {
                         console.error(error.message);
-                        toast.error('Failed to create Sale: ' + error.message);
+                        toast.error('Failed to create Sale Order: ' + error.message);
                     } finally {
                         hideLoader();
                     }              
@@ -388,13 +325,6 @@ export default defineComponent({
 
         const fetchDefaultSettings = async() =>{
             await store.dispatch('Default_Settings/fetchDefaultSettings', {company:companyID.value})
-            for(let i=0; i < defaultSettings.value.length; i++){
-                if(defaultSettings.value[i].setting_name === 'Inventory Stock Control A/c'){
-                    stock_control_account.value = defaultSettings.value[i].setting_value;
-                }else if(defaultSettings.value[i].setting_name === 'Inventory Sales Income A/c'){
-                    sales_income_account.value = defaultSettings.value[i].setting_value;
-                }
-            }
         };
 
         onBeforeMount(()=>{ 
@@ -415,7 +345,7 @@ export default defineComponent({
         return{
             formFields, flex_basis, flex_basis_percentage, displayButtons, createSaleReceipt, mainComponentKey,showTotals,
             handleReset, loader, showLoader, hideLoader, tableKey, itemColumns, itemRows, showActions, actions, deleteItemLine, idField,
-            title, modal_loader, modal_left, modal_top, modal_width, showModalLoader, hideModalLoader,rightsModule,balance
+            title, modal_loader, modal_left, modal_top, modal_width, showModalLoader, hideModalLoader,rightsModule
         }
     }
 })

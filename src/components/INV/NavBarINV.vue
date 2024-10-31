@@ -94,15 +94,15 @@
                         </button>  
                     </div>
                     <div class="py-2 px-3 pl-4 w-full hover:bg-slate-500 hover:w-full">
-                        <button class="flex text-sm w-full" @click="openPage({'INV':'Sales_Order'})">
+                        <button class="flex text-sm w-full" @click="openPage({'INV':'Sale_Orders'})">
                             <i class="fa fa-shopping-cart pt-2 mr-2" aria-hidden="true"></i>
-                            <p class="">Sales Order</p>
+                            <p class="">Sale Orders</p>
                         </button>
                     </div>
                     <div class="py-2 px-3 pl-4 w-full hover:bg-slate-500 hover:w-full">
-                        <button class="flex text-sm w-full" @click="openPage({'INV':'Delivery_Order'})">
+                        <button class="flex text-sm w-full" @click="openPage({'INV':'Delivery_Orders'})">
                             <i class="fa fa-truck pt-2 mr-2" aria-hidden="true"></i>
-                            <p class="">Delivery Order</p>
+                            <p class="">Delivery Orders</p>
                         </button>
                     </div>
                     <div class="py-2 px-3 pl-4 w-full hover:bg-slate-500 hover:w-full">
@@ -125,12 +125,6 @@
                     </div>
                 </div>
             </div>
-            <!-- <div class="web-links py-1.5 px-2.5 w-32 h-full hover:bg-slate-500 hover:rounded">
-                    <button class="flex" @click="openPage({'PMS':'Doctors'})">
-                        <i class="fa fa-user-md pt-2 mr-2" aria-hidden="true"></i>
-                        <p class="pt-1.5">Doctors</p>
-                    </button>
-            </div> -->
             <div class="web-links dropdown w-32">
                 <div class="py-1.5 px-2.5 h-full hover:bg-slate-500 hover:rounded">
                     <button class="flex w-full" @click="showPurchasesDropdown">

@@ -45,6 +45,7 @@ import Item_Location from './INV/Item_Location';
 import Outlet_Counters from './INV/Outlet_Counters';
 import Direct_Sales from './INV/Direct_Sales';
 import Counter_Channels from './INV/Counter_Channels';
+import Direct_Purchases from './INV/Direct_Purchases';
 
 import Default_Settings from './SET/Default_Settings';
 
@@ -60,7 +61,7 @@ export default createStore({
     Properties_List, Zones, Landlords_List, Units_List, Active_Tenants, Utilities,Security_Deposits,Variation_Periods, Tenant_Deposits,
     Meter_Setup, Meter_Readings,Tenant_Prepayments,Prepayment_Allocations,Statement_Transactions,Property_Statements,Tenant_Arrears,Lease_Fees,
 
-    Item_Categories,Items_Catalog,Uom,Retail_Outlets,Item_Location,Outlet_Counters,Direct_Sales,Counter_Channels,
+    Item_Categories,Items_Catalog,Uom,Retail_Outlets,Item_Location,Outlet_Counters,Direct_Sales,Counter_Channels,Direct_Purchases,
     
     Ledgers, Currencies, Taxes, Journals, Customers, Vendors,Fiscal_Periods,
 

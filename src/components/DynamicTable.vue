@@ -174,7 +174,7 @@ export default defineComponent({
     }
     //DIRECT SALES
     const availableItemQuantityCheck = (row) =>{
-      let availQuant = parseFloat(row.available_batch_count) || 0;
+      let availQuant = parseFloat(row.batch_count) || 0;
       let quantity = parseFloat(row.quantity) || 0;
       if(quantity > availQuant){
         row.quantity = 1;
@@ -190,13 +190,17 @@ export default defineComponent({
         row.discount = 0;
         row.total_amount = row.cost;
         row.item_sales_income = (parseFloat(row.selling_price) - parseFloat(row.purchase_price)) * row.quantity;
+      }else{
+        row.total_amount = row.cost * row.quantity;
       }
     }
     //DIRECT SALES
     const saleDiscount = (row) =>{
       let totalAmount = parseFloat(row.total_amount) || 0;
+      console.log("THE TOTAL IS ",totalAmount)
       let quantity = parseFloat(row.quantity) || 0;
       let subTotal = parseFloat(row.sub_total) || 0;
+      console.log("THE SUBTOTAL IS ",subTotal)
       let discount = parseFloat(row.discount) || 0;
       totalAmount = totalAmount - discount;
       subTotal = subTotal - discount;

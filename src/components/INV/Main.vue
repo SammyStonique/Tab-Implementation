@@ -51,6 +51,13 @@ import Bill_Details from '@/components/INV/Bill_Details.vue';
 import Payments from '@/components/INV/Payments.vue';
 import Payment_Details from '@/components/INV/Payment_Details.vue';
 import Vendors from '@/components/INV/Vendors.vue';
+import Sale_Orders from '@/components/INV/Sale_Orders.vue';
+import Sale_Order_Details from '@/components/INV/Sale_Order_Details.vue';
+import Delivery_Orders from '@/components/INV/Delivery_Orders.vue';
+import Delivery_Order_Details from '@/components/INV/Delivery_Order_Details.vue';
+import Direct_Purchases from '@/components/INV/Direct_Purchases.vue';
+import Purchase_Details from '@/components/INV/Purchase_Details.vue';
+import Purchase_Items from '@/components/INV/Purchase_Items.vue';
 
 import Default_Settings from '@/components/SET/Default_Settings.vue';
 
@@ -61,7 +68,8 @@ export default{
         PagesTab,
         Dashboard,Item_Categories,Items_Catalog,Item_Details,Retail_Outlets,Catalog_By_Outlet,Fast_Moving_Items,Item_Location,Uom,
         Outlet_Counters,Direct_Sales,Sale_Details,Sale_Items,Invoices,Invoice_Details,Receipts,Receipt_Details,Customers,Bills,
-        Bill_Details,Payments,Payment_Details,Vendors,
+        Bill_Details,Payments,Payment_Details,Vendors,Sale_Orders,Sale_Order_Details,Delivery_Orders,Delivery_Order_Details,Direct_Purchases,
+        Purchase_Details,Purchase_Items,
 
         Default_Settings
     },
