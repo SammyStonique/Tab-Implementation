@@ -181,6 +181,7 @@ export default defineComponent({
             store.dispatch('Items_Catalog/updateState', { lineItemsArray: []})
             mainComponentKey.value += 1;
             formFields.value[0].value = formatDate(current_date);
+            formFields.value[5].value = "";
             formFields.value[5].value = "0";
             formFields.value[6].value = "";
             formFields.value[7].value = 0;
@@ -199,6 +200,8 @@ export default defineComponent({
         const createPurchaseVoucher = async() =>{
             showLoader();
             saleItemsArray.value = [];
+            journalEntryArr.value = [];
+            taxTransactionArr.value = [];
             receiptTotals.value = 0;
             receipt_totals.value = 0;
             discountTotals.value = 0;
@@ -221,7 +224,7 @@ export default defineComponent({
                         "tax": parseFloat(itemRows.value[i].vat_amount),
                         "item_total": itemRows.value[i].total_amount,
                         "batch_after_sale": itemRows.value[i].quantity,
-                        "purchase_price": parseFloat(itemRows.value[i].purchase_price),
+                        "purchase_price": parseFloat(itemRows.value[i].cost),
                         "selling_price": parseFloat(itemRows.value[i].selling_price),
                         "quantity": itemRows.value[i].quantity,
                         "tax_type": itemRows.value[i].vat_rate.tax_id,
@@ -260,15 +263,15 @@ export default defineComponent({
                     let jnlEntry2 ={
                         "date": formFields.value[0].value,
                         "txn_type": "JNL",
-                        "posting_account": itemRows.value[i].input_vat_id,
+                        "posting_account": itemRows.value[i].vat_rate.tax_input_account.ledger_id,
                         "credit_amount": 0,
                         "description": "Purchase of "+ itemRows.value[i].item_name+", Tax payable",
-                        "debit_amount": Math.abs(itemRows.value[i].tax_amount),
+                        "debit_amount": Math.abs(itemRows.value[i].vat_amount),
                     }    
                     let taxTxn ={
                         "tax": itemRows.value[i].vat_rate.tax_id,
                         "client": formFields.value[4].value,
-                        "amount": itemRows.value[i].tax_amount,
+                        "amount": itemRows.value[i].vat_amount,
                         "description": "Purchase of "+ itemRows.value[i].item_name+", Tax payable",
                         "tax_inclusive": itemRows.value[i].vat_inclusivity,
                         "tax_category": 'Input'
@@ -322,7 +325,6 @@ export default defineComponent({
                 company: companyID.value,
                 user: userID.value
             }
-            console.log("THE FORM DATA IS ",formData)
        
             errors.value = [];
             for(let i=0; i < formFields.value.length ; i++){

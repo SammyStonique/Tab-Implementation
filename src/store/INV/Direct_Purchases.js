@@ -18,6 +18,7 @@ const state = {
   vendor_search: '',
   selectedPurchase: null,
   selectedVendor: null,
+  selectedOutlet: null,
   isEditing: false,
   isDelivering: false,
   defaultOutlet: null,
@@ -46,6 +47,8 @@ const mutations = {
     state.isDelivering = false;
     state.saveButtonLabel = "Save";
     state.selectedPurchase = null;
+    state.selectedVendor = null;
+    state.selectedOutlet = null;
     state.defaultOutlet = null;
     state.defaultCounter = null;
     state.defaultChannel = null;
@@ -67,6 +70,9 @@ const mutations = {
   },
   SET_SELECTED_VENDOR(state, vendor){
     state.selectedVendor = vendor;
+  },
+  SET_SELECTED_OUTLET(state, outlet){
+    state.selectedOutlet = outlet;
   },
   LIST_PURCHASES(state, purchases) {
     state.purchasesList = purchases;
@@ -170,7 +176,9 @@ const actions = {
     .then((response)=>{
       state.selectedPurchase = response.data;
       const selectedVendor = response.data.client;
+      const selectedOutlet = response.data.outlet;
       commit('SET_SELECTED_VENDOR',selectedVendor);
+      commit('SET_SELECTED_OUTLET',selectedOutlet);
     })
     .catch((error)=>{
       console.log(error.message);
@@ -227,7 +235,7 @@ const actions = {
       showLoaderOnConfirm: true,
     }).then((result) => {
       if (result.value) {
-        axios.post(`api/v1/delete-inventory-sale/`,formData)
+        axios.post(`api/v1/delete-inventory-purchase/`,formData)
         .then((response)=>{
           if(response.data.msg == "Success"){
               Swal.fire("Poof! Purchase removed succesfully!", {
@@ -268,7 +276,7 @@ const actions = {
       showLoaderOnConfirm: true,
     }).then((result) => {
       if (result.value) {
-        axios.post(`api/v1/delete-inventory-sale/`,formData)
+        axios.post(`api/v1/delete-inventory-purchase-order/`,formData)
         .then((response)=>{
           if(response.data.msg == "Success"){
               Swal.fire("Poof! Purchase Order removed succesfully!", {
@@ -309,7 +317,7 @@ const actions = {
       showLoaderOnConfirm: true,
     }).then((result) => {
       if (result.value) {
-        axios.post(`api/v1/delete-inventory-sale/`,formData)
+        axios.post(`api/v1/delete-inventory-purchase/`,formData)
         .then((response)=>{
           if(response.data.msg == "Success"){
               Swal.fire("Poof! Received Order removed succesfully!", {

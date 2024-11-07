@@ -33,7 +33,7 @@
               </select>
             </template>
             <template v-else >            
-              <div v-if="column.editable === true && column.type === 'number'" class="max-w-[100px]">
+              <div v-if="column.editable === true && column.type === 'number'" class="max-w-[100px]" :class="`text-${column.textColor}-800 font-bold`">
                 <input :type="column.type" @change="handleInputChange($event, row)" pattern="[0-9]*" oninput="this.value = this.value.replace(/[^0-9]/g, '')" class="w-full" v-model="row[column.key]" />             
               </div>
               <div v-else-if="column.editable === true">
@@ -176,6 +176,8 @@ export default defineComponent({
     const availableItemQuantityCheck = (row) =>{
       let availQuant = parseFloat(row.batch_count) || 0;
       let quantity = parseFloat(row.quantity) || 0;
+      let taxAmount = parseFloat(row.vat_amount) || 0;
+      let vat_inclusivity = row.vat_inclusivity || "Inclusive";
       if(quantity > availQuant){
         row.quantity = 1;
         row.vat_rate = null;
@@ -191,16 +193,20 @@ export default defineComponent({
         row.total_amount = row.cost;
         row.item_sales_income = (parseFloat(row.selling_price) - parseFloat(row.purchase_price)) * row.quantity;
       }else{
-        row.total_amount = row.cost * row.quantity;
+        if(taxAmount > 0 && vat_inclusivity == "Inclusive"){
+          row.total_amount = row.cost * row.quantity;
+        }else if(taxAmount > 0 && vat_inclusivity == "Exclusive"){
+          row.total_amount = parseFloat(row.cost * row.quantity) + parseFloat(row.vat_amount);
+        }else{
+          row.total_amount = row.cost * row.quantity;
+        }     
       }
     }
     //DIRECT SALES
     const saleDiscount = (row) =>{
       let totalAmount = parseFloat(row.total_amount) || 0;
-      console.log("THE TOTAL IS ",totalAmount)
       let quantity = parseFloat(row.quantity) || 0;
       let subTotal = parseFloat(row.sub_total) || 0;
-      console.log("THE SUBTOTAL IS ",subTotal)
       let discount = parseFloat(row.discount) || 0;
       totalAmount = totalAmount - discount;
       subTotal = subTotal - discount;

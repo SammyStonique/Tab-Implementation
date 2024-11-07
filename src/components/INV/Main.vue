@@ -38,6 +38,7 @@ import Fast_Moving_Items from '@/components/INV/Fast_Moving_Items.vue';
 import Item_Location from '@/components/INV/Item_Location.vue';
 import Uom from '@/components/INV/Uom.vue';
 import Outlet_Counters from '@/components/INV/Outlet_Counters.vue';
+import Counter_Channels from '@/components/INV/Counter_Channels.vue';
 import Direct_Sales from '@/components/INV/Direct_Sales.vue';
 import Sale_Details from '@/components/INV/Sale_Details.vue';
 import Sale_Items from '@/components/INV/Sale_Items.vue';
@@ -58,6 +59,8 @@ import Delivery_Order_Details from '@/components/INV/Delivery_Order_Details.vue'
 import Direct_Purchases from '@/components/INV/Direct_Purchases.vue';
 import Purchase_Details from '@/components/INV/Purchase_Details.vue';
 import Purchase_Items from '@/components/INV/Purchase_Items.vue';
+import Purchase_Orders from '@/components/INV/Purchase_Orders.vue';
+import Purchase_Order_Details from '@/components/INV/Purchase_Order_Details.vue';
 
 import Default_Settings from '@/components/SET/Default_Settings.vue';
 
@@ -69,7 +72,7 @@ export default{
         Dashboard,Item_Categories,Items_Catalog,Item_Details,Retail_Outlets,Catalog_By_Outlet,Fast_Moving_Items,Item_Location,Uom,
         Outlet_Counters,Direct_Sales,Sale_Details,Sale_Items,Invoices,Invoice_Details,Receipts,Receipt_Details,Customers,Bills,
         Bill_Details,Payments,Payment_Details,Vendors,Sale_Orders,Sale_Order_Details,Delivery_Orders,Delivery_Order_Details,Direct_Purchases,
-        Purchase_Details,Purchase_Items,
+        Purchase_Details,Purchase_Items,Purchase_Orders,Purchase_Order_Details,Counter_Channels,
 
         Default_Settings
     },

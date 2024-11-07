@@ -101,7 +101,7 @@ export default defineComponent({
         };
         const fetchCustomerInvoices = async() =>{
             if(customerID.value){
-                await store.dispatch('Journals/fetchJournalsClient', {company:companyID.value, txn_type:"INV", customer:customerID.value, status:"Open"})
+                await store.dispatch('Journals/fetchJournalsClient', {company:companyID.value, txn_type:["INV", "DBN"], customer:customerID.value, status:"Open"})
             }       
         };
         const handleSelectedCustomer = async(option) =>{

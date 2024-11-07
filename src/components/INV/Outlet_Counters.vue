@@ -33,6 +33,13 @@
             :displayButtons="displayButtons" @handleSubmit="saveCounter" @handleReset="handleReset"
         />
     </MovableModal>
+    <MovableModal v-model:visible="chanModalVisible" :title="title1" :modal_top="modal_top" :modal_left="modal_left" :modal_width="modal_width"
+        :loader="modal_loader1" @showLoader="showChanModalLoader" @hideLoader="hideChanModalLoader" @closeModal="closeChanModal">
+        <DynamicForm 
+            :fields="formFields1" :flex_basis="flex_basis" :flex_basis_percentage="flex_basis_percentage" 
+            :displayButtons="displayButtons" @handleSubmit="createChannel" @handleReset="handleChanReset"
+        />
+    </MovableModal>
 </template>
 
 <script>
@@ -54,14 +61,18 @@ export default{
         const toast = useToast();
         const loader = ref('');
         const modal_loader = ref('none');
+        const modal_loader1 = ref('none');
         const title = ref('Counter Details');
+        const title1 = ref('Channel Details');
         const outComponentKey = ref(0);
+        const ledComponentKey = ref(0);
         const addButtonLabel = ref('New Counter');
         const addingRight = ref('Adding Outlet Counter');
         const rightsModule = ref('Inventory');
         const idField = 'outlet_counter_id';
         const selectedIds = ref([]);
         const depModalVisible = ref(false);
+        const chanModalVisible = ref(false);
         const counterList = ref([]);
         const depResults = ref([]);
         const depArrLen = ref(0);
@@ -80,7 +91,12 @@ export default{
         const outlets_array = computed({
             get: () => store.state.Retail_Outlets.outletArr,
         });
+        const ledgers_array = computed({
+            get: () => store.state.Ledgers.cashbookLedgerArr,
+        });
         const outletID = ref('');
+        const ledgerID = ref('');
+        const counterID = ref('');
         const outletSearchID = ref('');
         const isEditing = computed(()=> store.state.Outlet_Counters.isEditing);
         const selectedCounter = computed(()=> store.state.Outlet_Counters.selectedCounter);
@@ -92,6 +108,7 @@ export default{
         ])
         const actions = ref([
             {name: 'edit', icon: 'fa fa-edit', title: 'Edit Counter', rightName: 'Editing Outlet Counter'},
+            {name: 'channel', icon: 'fa fa-check-circle', title: 'Assign Channel', rightName: 'Editing Outlet Counter'},
             {name: 'delete', icon: 'fa fa-trash', title: 'Delete Counter', rightName: 'Deleting Outlet Counter'},
         ])
         const companyID = computed(()=> store.state.userData.company_id);
@@ -117,6 +134,20 @@ export default{
         const clearSelectedOutlet= async() =>{
             await store.dispatch('Retail_Outlets/updateState', {outletID: ''});
             outletID.value = store.state.Retail_Outlets.outletID;
+        };
+        const fetchAllLedgers = async() =>{
+            await store.dispatch('Ledgers/fetchLedgers', {company:companyID.value});
+        };
+        const fetchLedgers = async() =>{
+            await store.dispatch('Ledgers/fetchCashbookLedgers', {company:companyID.value, ledger_type: "Cashbook"});
+        };
+        const handleSelectedLedger= async(option) =>{
+            await store.dispatch('Ledgers/handleSelectedLedger', option)
+            ledgerID.value = store.state.Ledgers.ledgerID;
+        };
+        const clearSelectedLedger= async() =>{
+            await store.dispatch('Ledgers/updateState', {ledgerID: ''});
+            ledgerID.value = store.state.Ledgers.ledgerID;
         };
         const searchFilters = ref([
             {type:'text', placeholder:"Search Name...", value: counter_name_search, width: 56},
@@ -147,6 +178,18 @@ export default{
                 updateFormFields();
             }      
         }, { immediate: true });
+        const formFields1 = ref([]);
+        const updateFormFields1 = () => {
+            formFields1.value = [
+                { type: 'text', name: 'channel_name',label: "Channel Name", value: '', required: true },
+                {
+                    type:'search-dropdown', value: ledgerID.value, width:48, componentKey: ledComponentKey,
+                    selectOptions: ledgers_array,optionSelected: handleSelectedLedger,
+                    label: 'Ledger', dropdownWidth: '380px', required: true,
+                    fetchData: fetchLedgers(), clearSearch: clearSelectedLedger()
+                },
+            ];
+        };
         const addNewCounter = async() =>{
             updateFormFields();
             await store.dispatch("Outlet_Counters/updateState",{isEditing:false, selectedCounter:null, selectedOutlet:null})
@@ -172,7 +215,16 @@ export default{
                     flex_basis_percentage.value = '50';
                 })
                 
-            }else if(action == 'delete'){
+            }else if( action == 'channel'){
+                fetchAllLedgers();
+                counterID.value = row[idField];
+                updateFormFields1();
+                handleChanReset();
+                chanModalVisible.value = true;
+                flex_basis.value = '1/2';
+                flex_basis_percentage.value = '50';
+            }
+            else if(action == 'delete'){
                 const counterID = [row['outlet_counter_id']];
                 let formData = {
                     company: companyID.value,
@@ -190,11 +242,63 @@ export default{
             outletValue.value = "";
             outComponentKey.value += 1;
         }
+        const handleChanReset = () =>{
+            for(let i=0; i < formFields1.value.length; i++){
+                formFields1.value[i].value = '';
+            }
+            ledgerID.value = "";
+            ledComponentKey.value += 1;
+        }
         const showModalLoader = () =>{
             modal_loader.value = "block";
         }
         const hideModalLoader = () =>{
             modal_loader.value = "none";
+        }
+        const showChanModalLoader = () =>{
+            modal_loader1.value = "block";
+        }
+        const hideChanModalLoader = () =>{
+            modal_loader1.value = "none";
+        }
+        const createChannel = async() =>{
+            showChanModalLoader();
+            let formData = {
+                channel_name: formFields1.value[0].value,
+                outlet_counter: counterID.value,
+                posting_account: ledgerID.value,
+                outlet_counter_id: counterID.value,
+                posting_account_id: ledgerID.value,
+                company: companyID.value
+            }
+            errors.value = [];
+            for(let i=0; i < (formFields1.value.length -1); i++){
+                if(formFields1.value[i].value =='' && formFields1.value[i].required == true){
+                    errors.value.push('Error');
+                }
+            }
+            if(errors.value.length){
+                toast.error('Fill In Required Fields');
+                hideChanModalLoader();
+            }else{
+                try {
+                    const response = await store.dispatch('Counter_Channels/createChannel', formData);
+                    if(response && response.status === 200) {
+                        hideChanModalLoader();
+                        toast.success('Channel created successfully!');
+                        handleChanReset();
+                    }else {
+                        toast.error('An error occurred while creating the Channel.');
+                    }
+                } catch (error) {
+                    console.error(error.message);
+                    toast.error('Failed to create Channel: ' + error.message);
+                } finally {
+                    hideChanModalLoader();
+                    searchCounters();
+                }
+            }
+
         }
         const createCounter = async() =>{
             showModalLoader();
@@ -399,17 +503,21 @@ export default{
             await store.dispatch("Outlet_Counters/updateState",{isEditing:false, selectedCounter:null, selectedOutlet:null})
             depModalVisible.value = false;
             handleReset();
-        }
+        };
+        const closeChanModal = () =>{
+            chanModalVisible.value = false;
+            handleChanReset();
+        };
         onMounted(()=>{
             searchCounters();
         })
         return{
-            title,idField, searchCounters, addButtonLabel, searchFilters, resetFilters, tableColumns, counterList,
+            title,title1,idField, searchCounters, addButtonLabel, searchFilters, resetFilters, tableColumns, counterList,
             depResults, depArrLen, depCount, pageCount, showNextBtn, showPreviousBtn,modal_top, modal_left, modal_width,
-            loadPrev, loadNext, firstPage, lastPage, actions, formFields, depModalVisible, addNewCounter,
-            displayButtons,flex_basis,flex_basis_percentage, handleActionClick, handleReset, saveCounter,
-            showLoader, loader, hideLoader, modal_loader, showModalLoader, hideModalLoader, removeCounter, removeCounters,
-            addingRight,rightsModule,handleSelectionChange,closeModal
+            loadPrev, loadNext, firstPage, lastPage, actions, formFields, formFields1, depModalVisible, chanModalVisible, addNewCounter,
+            displayButtons,flex_basis,flex_basis_percentage, handleActionClick, handleReset, handleChanReset, saveCounter,
+            showLoader, loader, hideLoader, modal_loader, modal_loader1, showModalLoader, showChanModalLoader, hideModalLoader, hideChanModalLoader, removeCounter, removeCounters,
+            addingRight,rightsModule,handleSelectionChange,closeModal,closeChanModal,createChannel
         }
     }
 }

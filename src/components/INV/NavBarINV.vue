@@ -70,6 +70,12 @@
                             <p class="">Outlet Counters</p>
                         </button>
                     </div>
+                    <div class="py-2 px-3 pl-4 w-full hover:bg-slate-500 hover:w-full">
+                        <button class="flex text-sm w-full" @click="openPage({'INV':'Counter_Channels'})">
+                            <i class="fa fa-credit-card  pt-2 mr-2" aria-hidden="true"></i>
+                            <p class="">Counter Channels</p>
+                        </button>
+                    </div>
                 </div>
             </div>
             <div class="web-links dropdown w-36">

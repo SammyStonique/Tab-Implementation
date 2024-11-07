@@ -54,6 +54,9 @@ const mutations = {
   LIST_SALE_ORDER_ITEMS(state, sales) {
     state.saleOrderItems = sales;
   },
+  LIST_PURCHASE_ORDER_ITEMS(state, purchases) {
+    state.purchaseOrderItems = purchases;
+  },
   LIST_SALE_ITEMS(state, items) {
     state.itemsSaleList = items;
   },
@@ -202,6 +205,53 @@ const actions = {
             batch_after_sale: saleOrderItems[i].batch_after_sale,
             available_batch_count: saleOrderItems[i].batch_before_sale,
             item_sales_income: (Number(saleOrderItems[i].selling_price) - Number(saleOrderItems[i].purchase_price)) * saleOrderItems[i].quantity
+        }
+        state.lineItemsArray.push(obj)
+      }
+
+    })
+    .catch((error)=>{
+      console.log(error.message);
+    })
+    
+  },
+  fetchPurchaseOrderItems({ commit,state }, formData) {
+    axios.post(`api/v1/inventory-sale-items-search/`,formData)
+    .then((response)=>{
+      const purchaseOrderItems = response.data.saleItems;
+      commit('LIST_PURCHASE_ORDER_ITEMS',purchaseOrderItems);
+      for(let i=0; i< purchaseOrderItems.length; i++){
+        let obj = {
+            item_batch_id: purchaseOrderItems[i].item_batch_data,
+            item: purchaseOrderItems[i].inventory_item_id, 
+            quantity: purchaseOrderItems[i].quantity, 
+            discount: purchaseOrderItems[i].discount, 
+            cost: Number(purchaseOrderItems[i].purchase_price), 
+            selling_price: Number(purchaseOrderItems[i].selling_price), 
+            sub_total: Number(purchaseOrderItems[i].total_amount) - Number(purchaseOrderItems[i].tax),
+            item_name: purchaseOrderItems[i].inventory_item_name,
+            inventory_item_name: purchaseOrderItems[i].inventory_item_name,
+            stock_after_adjustment: purchaseOrderItems[i].batch_after_sale - purchaseOrderItems[i].quantity,
+            selected_vat: {
+                "tax_rate": purchaseOrderItems[i].tax_rate,
+                "tax_input_id": purchaseOrderItems[i].tax_input_id,
+                "tax_id": purchaseOrderItems[i].tax_id,
+                "tax_name": purchaseOrderItems[i].tax_name,
+            },
+            vat_rate: {
+              text: (purchaseOrderItems[i].tax_name),
+              value: {
+                "tax_rate": purchaseOrderItems[i].tax_rate,
+                "tax_input_id": purchaseOrderItems[i].tax_input_id,
+                "tax_id": purchaseOrderItems[i].tax_id,
+                "tax_name": purchaseOrderItems[i].tax_name,
+              },
+            },
+            input_vat_id: purchaseOrderItems[i].tax_input_id,
+            vat_inclusivity: purchaseOrderItems[i].tax_inclusivity,
+            tax_id: purchaseOrderItems[i].tax_id,
+            vat_amount: purchaseOrderItems[i].tax,
+            total_amount: Number(purchaseOrderItems[i].total_amount),
         }
         state.lineItemsArray.push(obj)
       }

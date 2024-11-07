@@ -4,13 +4,13 @@
       <div class="flex text-base flex-wrap gap-x-3 max-w-[800px]">
         <div v-for="(filter, index) in filters" :key="index" class="filter items-end pt-1.5" :class="{'w-full sm:w-1/2 md:w-1/3 lg:w-1/4' : filters.length > 4 && index > 3}">
           <div v-if="filter.type === 'text'" class="mr-2 text-sm">
-            <input v-model="filter.value" type="text" :class="`bg-slate-100 rounded pl-3 border border-gray-400 w-${filter.width}`" :placeholder="filter.placeholder"/>
+            <input v-model="filter.value" type="text" :class="`bg-slate-100 rounded pl-3 pt-1 border border-gray-400 w-${filter.width}`" :placeholder="filter.placeholder"/>
           </div>
           <div v-if="filter.type === 'date'" class="mr-2 text-sm">
-            <input v-model="filter.value" type="date" :class="`bg-slate-100 rounded pl-3 border border-gray-400 text-sm w-${filter.width}`" :placeholder="filter.placeholder" :title="filter.title"/>
+            <input v-model="filter.value" type="date" :class="`bg-slate-100 rounded pl-3 pt-1 border border-gray-400 text-sm w-${filter.width}`" :placeholder="filter.placeholder" :title="filter.title"/>
           </div>
           <div v-else-if="filter.type === 'dropdown'" class="text-sm">
-            <select v-model="filter.value" :class="`rounded border border-gray-400 bg-slate-100 text-sm pl-2 pt-2 w-${filter.width}`">
+            <select v-model="filter.value" :class="`rounded border border-gray-400 bg-slate-100 text-sm pl-2 pt-1 w-${filter.width}`">
               <option value="" selected disabled>{{ filter.placeholder }}</option>
               <option v-for="(option, index) in filter.options" :key="index" :value="option.value">{{ option.text }}</option>
             </select>

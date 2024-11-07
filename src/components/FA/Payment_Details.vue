@@ -101,7 +101,7 @@ export default defineComponent({
         };
         const fetchVendorBills = async() =>{
             if(vendorID.value){
-                await store.dispatch('Journals/fetchJournalsClient', {company:companyID.value, txn_type:"BIL", customer:vendorID.value, status:"Open"})
+                await store.dispatch('Journals/fetchJournalsClient', {company:companyID.value, txn_type:["BIL"], customer:vendorID.value, status:"Open"})
             }       
         };
         const handleSelectedVendor = async(option) =>{

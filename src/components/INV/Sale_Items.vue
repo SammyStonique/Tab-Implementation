@@ -107,8 +107,8 @@ export default{
             {label: "Item Name", key:"inventory_item_name"},
             {label: "Qty", key:"quantity", type: "number"},
             {label: "Amnt", key:"total_amount", type: "number"},
-            {label: "Discnt", key:"discount", type: "number"},
-            {label: "Profit", key:"profit", type: "number"},
+            {label: "Discnt", key:"discount", type: "number", textColor: "red"},
+            {label: "Profit", key:"profit", type: "number", textColor: "green"},
             {label: "Rcpt#", key:"receipt_no"},
             {label: "Done By", key:"done_by"},
         ])

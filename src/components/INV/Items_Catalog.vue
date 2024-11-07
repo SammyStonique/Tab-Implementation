@@ -72,10 +72,10 @@ export default{
             {label: "Item Name", key:"item_name"},
             {label: "Category", key: "item_category"},
             {label: "Type", key:"inventory_type"},
-            {label: "Stock", key:"available_stock", type: "number"},
+            {label: "Stock", key:"available_stock", type: "number", textColor: "green"},
             {label: "P.Price", key:"default_purchase_price"},
             {label: "S.Price", key:"default_selling_price"},
-            {label: "Sold", key:"quantity_sold", type: "number"},
+            {label: "Sold", key:"quantity_sold", type: "number", textColor: "red"},
             {label: "Reorder", key:"reorder_level"},
         ]);
         const showTotals = ref(true);
