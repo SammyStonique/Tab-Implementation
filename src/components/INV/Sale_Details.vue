@@ -141,11 +141,11 @@ export default defineComponent({
         }, { immediate: true });
         const handleSelectedCounter = async(option) =>{
             await store.dispatch('Outlet_Counters/handleSelectedCounter', option)
-            counterID.value = store.state.Outlet_Counters.counterID;
+            await store.dispatch('Direct_Sales/updateState', {defaultCounterID: store.state.Outlet_Counters.counterID})
         };
         const handleSelectedOutlet = async(option) =>{
             await store.dispatch('Retail_Outlets/handleSelectedOutlet', option)
-            outletID.value = store.state.Retail_Outlets.outletID;
+            await store.dispatch('Direct_Sales/updateState', {defaultOutletID: store.state.Retail_Outlets.outletID})
         };
         const handleSelectedChannel = async(option) =>{
             await store.dispatch('Counter_Channels/handleSelectedChannel', option)
@@ -271,6 +271,7 @@ export default defineComponent({
                         "inventory_item": itemRows.value[i].item,
                         "stock_at_hand": itemRows.value[i].stock_at_hand,
                         "adjusted_stock": itemRows.value[i].quantity,
+                        "stock_type": itemRows.value[i].stock_type,
                         "batch_before_sale": itemRows.value[i].stock_after_adjustment,
                         "batch_count": itemRows.value[i].batch_count,
                         "discount": itemRows.value[i].discount,
@@ -294,6 +295,7 @@ export default defineComponent({
                         "inventory_item": itemRows.value[i].item,
                         "stock_at_hand": itemRows.value[i].stock_at_hand,
                         "adjusted_stock": itemRows.value[i].quantity,
+                        "stock_type": itemRows.value[i].stock_type,
                         "batch_before_sale": itemRows.value[i].stock_after_adjustment,
                         "batch_count": itemRows.value[i].batch_count,
                         "discount": itemRows.value[i].discount,

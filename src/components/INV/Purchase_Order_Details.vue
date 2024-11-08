@@ -147,7 +147,7 @@ export default defineComponent({
                 {
                     type:'search-dropdown', label:"Outlet", value: outletID.value, componentKey: outComponentKey,
                     selectOptions: outletArray, optionSelected: handleSelectedOutlet, required: true,
-                    searchPlaceholder: 'Select Outlet...', dropdownWidth: '500px', updateValue: defaultOutlet.value,
+                    searchPlaceholder: 'Select Outlet...', dropdownWidth: '500px', updateValue: selectedOutlet.value,
                     fetchData: fetchOutlets(), clearSearch: clearSelectedOutlet()  
                 },
                 {

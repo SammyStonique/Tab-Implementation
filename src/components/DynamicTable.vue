@@ -174,32 +174,35 @@ export default defineComponent({
     }
     //DIRECT SALES
     const availableItemQuantityCheck = (row) =>{
+      let stockType = row.stock_type || "";
       let availQuant = parseFloat(row.batch_count) || 0;
       let quantity = parseFloat(row.quantity) || 0;
       let taxAmount = parseFloat(row.vat_amount) || 0;
       let vat_inclusivity = row.vat_inclusivity || "Inclusive";
-      if(quantity > availQuant){
-        row.quantity = 1;
-        row.vat_rate = null;
-        row.vat_amount = 0;
-        row.discount = 0;
-        row.total_amount = row.cost;
-        row.item_sales_income = (parseFloat(row.selling_price) - parseFloat(row.purchase_price)) * row.quantity;
-      }else if(quantity <= 0){
-        row.quantity = 1;
-        row.vat_rate = null;
-        row.vat_amount = 0;
-        row.discount = 0;
-        row.total_amount = row.cost;
-        row.item_sales_income = (parseFloat(row.selling_price) - parseFloat(row.purchase_price)) * row.quantity;
-      }else{
-        if(taxAmount > 0 && vat_inclusivity == "Inclusive"){
-          row.total_amount = row.cost * row.quantity;
-        }else if(taxAmount > 0 && vat_inclusivity == "Exclusive"){
-          row.total_amount = parseFloat(row.cost * row.quantity) + parseFloat(row.vat_amount);
+      if (stockType != "Non Stocked"){
+        if(quantity > availQuant){
+          row.quantity = 1;
+          row.vat_rate = null;
+          row.vat_amount = 0;
+          row.discount = 0;
+          row.total_amount = row.cost;
+          row.item_sales_income = (parseFloat(row.selling_price) - parseFloat(row.purchase_price)) * row.quantity;
+        }else if(quantity <= 0){
+          row.quantity = 1;
+          row.vat_rate = null;
+          row.vat_amount = 0;
+          row.discount = 0;
+          row.total_amount = row.cost;
+          row.item_sales_income = (parseFloat(row.selling_price) - parseFloat(row.purchase_price)) * row.quantity;
         }else{
-          row.total_amount = row.cost * row.quantity;
-        }     
+          if(taxAmount > 0 && vat_inclusivity == "Inclusive"){
+            row.total_amount = row.cost * row.quantity;
+          }else if(taxAmount > 0 && vat_inclusivity == "Exclusive"){
+            row.total_amount = parseFloat(row.cost * row.quantity) + parseFloat(row.vat_amount);
+          }else{
+            row.total_amount = row.cost * row.quantity;
+          }     
+        }
       }
     }
     //DIRECT SALES

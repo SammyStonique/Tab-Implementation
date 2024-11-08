@@ -3,17 +3,17 @@
         <PageComponent 
             :loader="loader" @showLoader="showLoader" @hideLoader="hideLoader"
             :addButtonLabel="addButtonLabel"
-            @handleAddNew="addNewSale"
+            @handleAddNew="addNewAdjustment"
             :searchFilters="searchFilters"
-            @searchPage="searchSales"
+            @searchPage="searchAdjustments"
             @resetFilters="resetFilters"
-            @removeItem="removeSale"
-            @removeSelectedItems="removeSales"
-            @printList="printSalesList"
+            @removeItem="removeAdjustment"
+            @removeSelectedItems="removeAdjustments"
+            @printList="printAdjustmentsList"
             :addingRight="addingRight"
             :rightsModule="rightsModule"
             :columns="tableColumns"
-            :rows="salesList"
+            :rows="adjustmentsList"
             :actions="actions"
             :showTotals="showTotals"
             :idField="idField"
@@ -41,7 +41,7 @@ import { useToast } from "vue-toastification";
 import PrintJS from 'print-js';
 
 export default{
-    name: 'Delivery_Orders',
+    name: 'Stock_Adjustments',
     components:{
         PageComponent
     },
@@ -51,13 +51,13 @@ export default{
         const loader = ref('');
         const catComponentKey = ref('');
         const defaultSettings = computed(()=> store.state.Default_Settings.settingsList);
-        const idField = 'sale_id';
-        const addButtonLabel = ref('New Delivery Order');
-        const addingRight = ref('Deliver Sale Order');
+        const idField = 'adjustment_id';
+        const addButtonLabel = ref('New Stock Adjustment');
+        const addingRight = ref('Adding Stock Adjustment');
         const rightsModule = ref('Inventory');
         const submitButtonLabel = ref('Add');
         const selectedIds = ref([]);
-        const salesList = ref([]);
+        const adjustmentsList = ref([]);
         const propResults = ref([]);
         const propArrLen = ref(0);
         const propCount = ref(0);
@@ -69,95 +69,100 @@ export default{
         const showModal = ref(false);
         const tableColumns = ref([
             {type: "checkbox"},
-            {label: "Code", key:"sale_code"},
+            {label: "Code", key:"adjustment_code"},
             {label: "Date", key:"date"},
-            {label: "Outlet", key: "outlet_name"},
-            {label: "Customer", key:"client"},
-            {label: "Phone No", key:"client_phone_number"},
+            {label: "Outlet Name", key: "warehouse_name"},
             {label: "Amount", key:"total_amount", type: "number"},
-            {label: "Paid", key:"total_paid", type: "number"},
-            {label: "Balance", key:"balance", type: "number"},
-            {label: "Invoice#", key:"txn_no"},
             {label: "Done By", key:"done_by"},
         ]);
         const showTotals = ref(true);
         const actions = ref([
-            {name: 'print', icon: 'fa fa-print', title: 'Print Delivery Order', rightName: 'Print Inventory Delivery Orders'},
-            {name: 'view', icon: 'fa fa-edit', title: 'View Order Items', rightName: 'View Delivery Order Items'},
-            {name: 'delete', icon: 'fa fa-trash', title: 'Delete Delivery Order', rightName: 'Deleting Inventory Delivery Order'},
+            {name: 'delete', icon: 'fa fa-trash', title: 'Delete Adjustment', rightName: 'Deleting Stock Adjustment'},
         ])
         const companyID = computed(()=> store.state.userData.company_id);
         const categoryID = ref(null);
-        const sale_code_search = ref("");
-        const min_amount_search = ref("");
-        const max_amount_search = ref("");
-        const done_by_search = ref("");
-        const date_from_search = ref("");
-        const date_to_search = ref("");
-        const customer_search = ref("");
+        const adjustment_code_search = computed({
+            get: () => store.state.Stock_Adjustments.adjustment_code_search,
+            set: (value) => store.commit('Stock_Adjustments/SET_SEARCH_FILTERS', {"adjustment_code_search":value}),
+        });
+
+        const done_by_search = computed({
+            get: () => store.state.Stock_Adjustments.done_by_search,
+            set: (value) => store.commit('Stock_Adjustments/SET_SEARCH_FILTERS', {"done_by_search":value}),
+        });
+        const date_from_search = computed({
+            get: () => store.state.Stock_Adjustments.date_from_search,
+            set: (value) => store.commit('Stock_Adjustments/SET_SEARCH_FILTERS', {"date_from_search":value}),
+        });
+        const date_to_search = computed({
+            get: () => store.state.Stock_Adjustments.date_to_search,
+            set: (value) => store.commit('Stock_Adjustments/SET_SEARCH_FILTERS', {"date_to_search":value}),
+        });
+        const warehouse_search = computed({
+            get: () => store.state.Stock_Adjustments.warehouse_search,
+            set: (value) => store.commit('Stock_Adjustments/SET_SEARCH_FILTERS', {"warehouse_search":value}),
+        });
 
         const searchFilters = ref([
-            {type:'text', placeholder:"Code...", value: sale_code_search, width:40,},
-            {type:'text', placeholder:"Customer...", value: customer_search, width:48,},
+            {type:'text', placeholder:"Code...", value: adjustment_code_search, width:40,},
+            {type:'text', placeholder:"Outlet...", value: warehouse_search, width:48,},
             {type:'date', placeholder:"From Date...", value: date_from_search, width:30,},
             {type:'date', placeholder:"To Date...", value: date_to_search, width:30,},
-            {type:'text', placeholder:"Min Amount...", value: min_amount_search, width:36,},
-            {type:'text', placeholder:"Max Amount...", value: max_amount_search, width:36,},
             {type:'text', placeholder:"Done By...", value: done_by_search, width:48,},
         ]);
         const handleSelectionChange = (ids) => {
             selectedIds.value = ids;
         };
 
-        const removeSale = async() =>{
+        const removeAdjustment = async() =>{
             if(selectedIds.value.length == 1){
                 let formData = {
                     company: companyID.value,
-                    sales_array: selectedIds.value
+                    adjustment_array: selectedIds.value
                 }
                 try{
-                    const response = await store.dispatch('Direct_Sales/deleteDeliveryOrder',formData)
+                    const response = await store.dispatch('Stock_Adjustments/deleteStockAdjustment',formData)
                     if(response && response.data.msg == "Success"){
-                        toast.success("Delivery Order Removed Succesfully");
-                        searchSales();
+                        toast.success("Adjustment Removed Succesfully");
+                        searchAdjustments();
                     }
                 }
                 catch(error){
                     console.error(error.message);
-                    toast.error('Failed to remove Delivery Order: ' + error.message);
+                    toast.error('Failed to remove Adjustment: ' + error.message);
                 }
                 finally{
                     selectedIds.value = [];
                 }
             }else if(selectedIds.value.length > 1){
-                toast.error("You have selected more than 1 Delivery Order") 
+                toast.error("You have selected more than 1 Adjustment") 
             }else{
-                toast.error("Please Select A Delivery Order To Remove")
+                toast.error("Please Select An Adjustment To Remove")
             }
         }
-        const removeSales = async() =>{
+        const removeAdjustments = async() =>{
             if(selectedIds.value.length){
                 let formData = {
                     company: companyID.value,
-                    sales_array: selectedIds.value
+                    adjustment_array: selectedIds.value
                 }
                 try{
-                    const response = await store.dispatch('Direct_Sales/deleteDeliveryOrder',formData)
+                    const response = await store.dispatch('Stock_Adjustments/deleteStockAdjustment',formData)
                     if(response && response.data.msg == "Success"){
-                        toast.success("Delivery Order(s) Removed Succesfully");
-                        searchSales();
+                        toast.success("Adjustment(s) Removed Succesfully");
+                        searchAdjustments();
                     }
                 }
                 catch(error){
                     console.error(error.message);
-                    toast.error('Failed to remove Delivery Order: ' + error.message);
+                    toast.error('Failed to remove Adjustments: ' + error.message);
                 }
                 finally{
                     selectedIds.value = [];
 
                 }
             }else{
-                toast.error("Please Select Delivery Order To Remove")
+                toast.error("Please Select Adjustments To Remove")
             }
         }
         const showLoader = () =>{
@@ -167,29 +172,26 @@ export default{
             loader.value = "none";
         }
        
-        const searchSales = () =>{
+        const searchAdjustments = () =>{
             showLoader();
             showNextBtn.value = false;
             showPreviousBtn.value = false;
             let formData = {
                 date_from: date_from_search.value,
                 date_to: date_to_search.value,
-                sale_code: sale_code_search.value,
-                sale_type: "Delivery",
-                category: "Sale",
-                max_amount: max_amount_search.value,
-                min_amount: min_amount_search.value,
-                customer: customer_search.value,
+                adjustment_code: adjustment_code_search.value,
+                warehouse: warehouse_search.value,
+                inventory_item: "",
                 done_by: done_by_search.value,
                 company_id: companyID.value
             } 
             axios
-            .post(`api/v1/inventory-sale-search/?page=${currentPage.value}`,formData)
+            .post(`api/v1/stock-adjustment-search/?page=${currentPage.value}`,formData)
             .then((response)=>{
-                salesList.value = response.data.results;
-                store.commit('Direct_Sales/LIST_SALES', salesList.value)
+                adjustmentsList.value = response.data.results;
+                store.commit('Stock_Adjustments/LIST_ADJUSTMENTS', adjustmentsList.value)
                 propResults.value = response.data;
-                propArrLen.value = salesList.value.length;
+                propArrLen.value = adjustmentsList.value.length;
                 propCount.value = propResults.value.count;
                 pageCount.value = Math.ceil(propCount.value / 50);
                 if(response.data.next){
@@ -207,14 +209,8 @@ export default{
             })
         }
         const resetFilters = () =>{
-            date_from_search.value = "",
-            date_to_search.value = "",
-            sale_code_search.value = "",
-            max_amount_search.value = "",
-            min_amount_search.value = "",
-            customer_search.value = "",
-            done_by_search.value = "",
-            searchSales();
+            store.commit('Stock_Adjustments/RESET_SEARCH_FILTERS')
+            searchAdjustments();
         }
         const loadPrev = () =>{
             if (currentPage.value <= 1){
@@ -223,7 +219,7 @@ export default{
                 currentPage.value -= 1;
             }
             
-            searchSales();
+            searchAdjustments();
             // scrollToTop();
         }
         const loadNext = () =>{
@@ -233,48 +229,34 @@ export default{
                 currentPage.value += 1;
             }
             
-            searchSales();
+            searchAdjustments();
             // scrollToTop(); 
         }
         const firstPage = ()=>{
             currentPage.value = 1;
-            searchSales();
+            searchAdjustments();
             // scrollToTop();
         }
         const lastPage = () =>{
             currentPage.value = pageCount.value;
-            searchSales();
+            searchAdjustments();
             // scrollToTop();
         };
-        const fetchDefaultSettings = async() =>{
-            await store.dispatch('Default_Settings/fetchDefaultSettings', {company:companyID.value})
-            for(let i=0; i < defaultSettings.value.length; i++){
-                if(defaultSettings.value[i].setting_name === 'Default Retail Outlet'){
-                    store.dispatch('Direct_Sales/updateState', {defaultOutlet:defaultSettings.value[i].setting_value_name, defaultOutletID:defaultSettings.value[i].setting_value})
-                }else if(defaultSettings.value[i].setting_name === 'Default Outlet Counter'){
-                    store.dispatch('Direct_Sales/updateState', {defaultCounter:defaultSettings.value[i].setting_value_name, defaultCounterID:defaultSettings.value[i].setting_value})
-                }else if(defaultSettings.value[i].setting_name === 'Default Counter Channel'){
-                    store.dispatch('Direct_Sales/updateState', {defaultChannel:defaultSettings.value[i].setting_value_name, defaultChannelID:defaultSettings.value[i].setting_value})
-                }else if(defaultSettings.value[i].setting_name === 'Default Stock Type'){
-                    store.dispatch('Direct_Sales/updateState', {defaultStockType:defaultSettings.value[i].setting_value_name})
-                }
-            }
-        };
-        const addNewSale = () =>{
-            // store.commit('Direct_Sales/initializeStore');
-            store.commit('pageTab/ADD_PAGE', {'INV':'Delivery_Order_Details'});
-            store.state.pageTab.invActiveTab = 'Delivery_Order_Details';         
+        const addNewAdjustment = () =>{
+            store.commit('Stock_Adjustments/initializeStore');
+            store.commit('pageTab/ADD_PAGE', {'INV':'Stock_Adjustment_Details'});
+            store.state.pageTab.invActiveTab = 'Stock_Adjustment_Details';         
         }
         const handleActionClick = async(rowIndex, action, row) =>{
             if(action == 'delete'){
-                const saleID = [row[idField]];
+                const adjustmentID = [row[idField]];
                 let formData = {
                     company: companyID.value,
-                    sales_array: saleID
+                    adjustment_array: adjustmentID
                 }
-                await store.dispatch('Direct_Sales/deleteSaleOrder',formData).
+                await store.dispatch('Stock_Adjustments/deleteStockAdjustment',formData).
                 then(()=>{
-                    searchSales();
+                    searchAdjustments();
                 })
             }else if(action == 'view'){
                 console.log("VIEWING TAKING PLACE");
@@ -283,24 +265,21 @@ export default{
         const closeModal = () =>{
             propModalVisible.value = false;
         };
-        const printSalesList = () =>{
+        const printAdjustmentsList = () =>{
             showLoader();
 
             let formData = {
                 date_from: date_from_search.value,
                 date_to: date_to_search.value,
-                sale_code: sale_code_search.value,
-                sale_type: "Delivery",
-                category: "Sale",
-                max_amount: max_amount_search.value,
-                min_amount: min_amount_search.value,
-                customer: customer_search.value,
+                adjustment_code: adjustment_code_search.value,
+                warehouse: warehouse_search.value,
+                inventory_item: "",
                 done_by: done_by_search.value,
                 company_id: companyID.value
             } 
    
             axios
-            .post("api/v1/export-inventory-sales-pdf/", formData, { responseType: 'blob' })
+            .post("api/v1/export-stock-adjustments-pdf/", formData, { responseType: 'blob' })
                 .then((response)=>{
                     if(response.status == 200){
                         const blob1 = new Blob([response.data]);
@@ -318,16 +297,15 @@ export default{
         }
         
         onBeforeMount(()=>{
-            fetchDefaultSettings();
-            searchSales();
+            searchAdjustments();
             
         })
         return{
-            showTotals,searchSales,resetFilters, addButtonLabel, searchFilters, tableColumns, salesList,
+            showTotals,searchAdjustments,resetFilters, addButtonLabel, searchFilters, tableColumns, adjustmentsList,
             propResults, propArrLen, propCount, pageCount, showNextBtn, showPreviousBtn,
             loadPrev, loadNext, firstPage, lastPage, idField, actions, handleActionClick, propModalVisible, closeModal,
-            submitButtonLabel, showModal, addNewSale, showLoader, loader, hideLoader, removeSale, removeSales,
-            handleSelectionChange,addingRight,rightsModule,printSalesList
+            submitButtonLabel, showModal, addNewAdjustment, showLoader, loader, hideLoader, removeAdjustment, removeAdjustments,
+            handleSelectionChange,addingRight,rightsModule,printAdjustmentsList
         }
     }
 };

@@ -2,7 +2,7 @@
     <PageStyleComponent :key="mainComponentKey" :loader="loader" @showLoader="showLoader" @hideLoader="hideLoader">
         <template v-slot:body>
             <div class="mt-6">
-                <DynamicForm  :fields="formFields" :flex_basis="flex_basis" :flex_basis_percentage="flex_basis_percentage" :displayButtons="displayButtons" @handleSubmit="createPurchaseVoucher" @handleReset="handleReset"> 
+                <DynamicForm  :fields="formFields" :flex_basis="flex_basis" :flex_basis_percentage="flex_basis_percentage" :displayButtons="displayButtons" @handleSubmit="createSaleReceipt" @handleReset="handleReset"> 
                     <template v-slot:additional-content>                    
                         <div class="min-h-[220px]">
                             <DynamicTable :key="tableKey" :showTotals="showTotals" :rightsModule="rightsModule" :columns="itemColumns" :rows="itemRows" :showActions="showActions" :idField="idField" :actions="actions" @action-click="deleteItemLine"/>
@@ -25,7 +25,7 @@ import { useDateFormatter } from '@/composables/DateFormatter';
 import DynamicTable from '@/components/DynamicTable.vue';
 
 export default defineComponent({
-    name: 'Purchase_Details',
+    name: 'Received_Order_Details',
     components:{
         PageStyleComponent, DynamicForm, DynamicTable, MovableModal
     },
@@ -39,16 +39,15 @@ export default defineComponent({
         const modal_loader = ref('none');
         const tableKey = ref(0);
         const mainComponentKey = ref(0);
-        const ledComponentKey = ref(0);
+        const custComponentKey = ref(0);
         const outComponentKey = ref(0);
+        const chanComponentKey = ref(0);
         const itemComponentKey = ref(0);
         const receipt_totals = ref(0);
         const receiptTotals = ref(0);
         const discountTotals = ref(0);
         const tax_totals = ref(0);
         const saleItemsArray = ref([]);
-        const journalEntryArr = ref([]);
-        const taxTransactionArr = ref([]);
         const title = ref('Add Prepayment');
         const modal_top = ref('150px');
         const modal_left = ref('400px');
@@ -58,9 +57,10 @@ export default defineComponent({
         const userID = computed(()=> store.state.userData.user_id);
         const defaultSettings = computed(()=> store.state.Default_Settings.settingsList);
         const defaultOutlet = computed(()=> store.state.Direct_Purchases.defaultOutlet);
-        const defaultCounter = computed(()=> store.state.Direct_Purchases.defaultCounter);
-        const defaultChannel = computed(()=> store.state.Direct_Purchases.defaultChannel);
         const defaultStockType = computed(()=> store.state.Direct_Purchases.defaultStockType);
+        const selectedPurchase = computed(()=> store.state.Direct_Purchases.selectedPurchase);
+        const selectedCustomer = computed(()=> store.state.Direct_Purchases.selectedCustomer);
+        const isEditing = computed(()=> store.state.Direct_Purchases.isEditing);
         const displayButtons = ref(true);
         const showActions = ref(true);
         const idField = ref('');
@@ -68,15 +68,11 @@ export default defineComponent({
         const flex_basis_percentage = ref('');
         const itemID = ref('');
         const outletID = computed(()=> store.state.Direct_Purchases.defaultOutletID);
-        const counterID = computed(()=> store.state.Direct_Purchases.defaultCounterID);
-        const channelID = computed(()=> store.state.Direct_Purchases.defaultChannelID);
-        const cashbookID = ref("");
         const itemArray = computed(() => store.state.Items_Catalog.itemsArr);
         const outletArray = computed(() => store.state.Retail_Outlets.outletArr);
-        const ledgerArray = computed(() => store.state.Ledgers.cashbookLedgerArr);
+        const customerArray = computed(() => store.state.Customers.customerArr);
+        const customerID = ref(null);
         const itemRows = computed(() => store.state.Items_Catalog.lineItemsArray);
-        const stock_control_account = ref("");
-        const sales_income_account = ref("");
         const taxRates = computed(() => store.getters['Taxes/getFormatedTax']);
         const itemColumns = ref([
             {label: "Item Name", key:"item_name", type: "text", editable: false},
@@ -101,78 +97,81 @@ export default defineComponent({
         const fetchTaxes = async() =>{
             await store.dispatch('Taxes/fetchTaxes', {company:companyID.value})
         };
+        const fetchCustomers = async() =>{
+            await store.dispatch('Customers/fetchCustomers', {company:companyID.value})
+        };
 
         const fetchAllItems = async() =>{
             await store.dispatch('Items_Catalog/fetchInventoryItems', {company:companyID.value})
         };
-        const fetchItems = async() =>{
-            await store.dispatch('Items_Catalog/fetchInventoryItems', {company:companyID.value})
+        const fetchItems = async(stock_type) =>{
+            if(outletID.value && stock_type){
+                await store.dispatch('Items_Catalog/fetchItems', {company_id:companyID.value, outlet:outletID.value, stock_type:stock_type})
+            }
         };
         const fetchOutlets = async() =>{
             await store.dispatch('Retail_Outlets/fetchOutlets', {company:companyID.value})
         };
-        const fetchCashbooks = async(outletCounter) =>{
-            await store.dispatch('Ledgers/fetchCashbookLedgers', {company:companyID.value, ledger_type: "Cashbook"})
-        };
-
+        watch([outletID,], () => {
+            
+        }, { immediate: true });
         const handleSelectedOutlet = async(option) =>{
             await store.dispatch('Retail_Outlets/handleSelectedOutlet', option)
             outletID.value = store.state.Retail_Outlets.outletID;
         };
-        const handleSelectedCashbook = async(option) =>{
-            await store.dispatch('Ledgers/handleSelectedLedger', option)
-            cashbookID.value = store.state.Ledgers.ledgerID;
+        const handleSelectedCustomer = async(option) =>{
+            await store.dispatch('Customers/handleSelectedCustomer', option)
+            customerID.value = store.state.Customers.customerID;
         };
         const handleSelectedItem = async(option) =>{
-            await store.dispatch('Items_Catalog/handleSelectedPurchaseItem', option)
+            await store.dispatch('Items_Catalog/handleSelectedItem', option)
             itemID.value = store.state.Items_Catalog.itemID;
             itemComponentKey.value += 1;
         };
         const clearSelectedOutlet = async() =>{
             await store.dispatch('Retail_Outlets/updateState', {outletID: ''});
             outletID.value = ""
-        }
-        const clearSelectedCashbook = async() =>{
-            await store.dispatch('Ledgers/updateState', {ledgerID: ''});
-            channelID.value = "";
-            cashbookID.value = "";
-        }
+        };
+        const clearSelectedCustomer = async() =>{
+            await store.dispatch('Customers/updateState', {customerID: ''});
+            customerID.value = ""
+        };
+
         const fetchInventoryItems = (value) =>{
             itemComponentKey.value += 1;
             fetchItems(value);
         };
+
         const formFields = ref([]);
         const updateFormFields = () =>{
             formFields.value = [
-                { type: 'date', name: 'issue_date',label: "Recording Date", value: formatDate(current_date), required: true, maxDate: formatDate(current_date) },        
+                { type: 'date', name: 'issue_date',label: "Date", value: selectedPurchase.value?.date || formatDate(current_date), required: true, maxDate: formatDate(current_date) },                
                 {
                     type:'search-dropdown', label:"Outlet", value: outletID.value, componentKey: outComponentKey,
                     selectOptions: outletArray, optionSelected: handleSelectedOutlet, required: true,
-                    searchPlaceholder: 'Select Outlet...', dropdownWidth: '300px', updateValue: defaultOutlet.value,
+                    searchPlaceholder: 'Select Outlet...', dropdownWidth: '500px', updateValue: defaultOutlet.value,
                     fetchData: fetchOutlets(), clearSearch: clearSelectedOutlet()  
                 },
                 {
-                    type:'search-dropdown', label:"Cashbook", value: cashbookID.value, componentKey: ledComponentKey,
-                    selectOptions: ledgerArray, optionSelected: handleSelectedCashbook, required: true,
-                    searchPlaceholder: 'Select Cashbook...', dropdownWidth: '300px', updateValue: "",
-                    fetchData: fetchCashbooks(), clearSearch: clearSelectedCashbook()  
+                    type:'search-dropdown', label:"Customer", value: customerID.value, componentKey: custComponentKey,
+                    selectOptions: customerArray, optionSelected: handleSelectedCustomer, required: true,
+                    searchPlaceholder: 'Select Customer...', dropdownWidth: '500px', updateValue: selectedCustomer.value,
+                    fetchData: fetchCustomers(), clearSearch: clearSelectedCustomer()  
                 },
+                { type: 'dropdown', name: 'stock_type',label: "Stock Type", value: defaultStockType.value, placeholder: "", required: true, method: fetchInventoryItems, options: [{ text: 'Stocked', value: 'Stocked' }, { text: 'Serialized', value: 'Serialized' },{ text: 'Non Stocked', value: 'Non Stocked' }, { text: 'Service', value: 'Service' }] },
                 {
                     type:'search-dropdown', label:"Item", value: itemID.value, componentKey: itemComponentKey,
                     selectOptions: itemArray, optionSelected: handleSelectedItem, required: true,
-                    searchPlaceholder: 'Select Item...', dropdownWidth: '380px', updateValue: "",
+                    searchPlaceholder: 'Select Item...', dropdownWidth: '500px', updateValue: "",
                     // fetchData: fetchItems(), clearSearch: clearSelectedItem()  
-                },
-                { type: 'text', name: 'customer',label: "Vendor", value: '', required: true,},
-                { type: 'text', name: 'phone_number',label: "Phone No", value: '0', required: true,},
-                { type: 'text', name: 'reference_no',label: "Reference No", value: '', required: true,},
-                { type: 'number', name: 'total_amount',label: "Amount", value: receipt_totals.value || 0, required: true, },                
+                },            
             ]
         };
 
-        watch([defaultOutlet, defaultCounter, defaultChannel, defaultStockType], () => {
-            if(defaultOutlet.value != null){
-                outComponentKey.value += 1; 
+        watch([selectedPurchase,selectedCustomer], () => {
+            if(selectedPurchase.value && selectedCustomer.value){
+                custComponentKey.value += 1; 
+                updateFormFields();
             }
             
         }, { immediate: true });
@@ -181,14 +180,13 @@ export default defineComponent({
             store.dispatch('Items_Catalog/updateState', { lineItemsArray: []})
             mainComponentKey.value += 1;
             formFields.value[0].value = formatDate(current_date);
-            formFields.value[5].value = "";
-            formFields.value[5].value = "0";
-            formFields.value[6].value = "";
-            formFields.value[7].value = 0;
+            formFields.value[3].value = defaultStockType.value;
             receipt_totals.value = 0;
             receiptTotals.value = 0;
             discountTotals.value = 0;
             tax_totals.value = 0;
+            custComponentKey.value += 1;
+            customerID.value = null;
         }
 
         const showLoader = () =>{
@@ -197,11 +195,9 @@ export default defineComponent({
         const hideLoader = () =>{
             loader.value = "none";
         } 
-        const createPurchaseVoucher = async() =>{
+        const createSaleReceipt = async() =>{
             showLoader();
             saleItemsArray.value = [];
-            journalEntryArr.value = [];
-            taxTransactionArr.value = [];
             receiptTotals.value = 0;
             receipt_totals.value = 0;
             discountTotals.value = 0;
@@ -214,115 +210,63 @@ export default defineComponent({
                 discountTotals.value += Number(itemRows.value[i].discount);
 
                 if(itemRows.value[i].vat_rate){
-                    let purchaseItem ={
+                    let saleItem ={
+                        "item_batch_id": itemRows.value[i].item_batch_id,
                         "date": formFields.value[0].value,
                         "inventory_item": itemRows.value[i].item,
+                        "stock_at_hand": itemRows.value[i].stock_at_hand,
                         "adjusted_stock": itemRows.value[i].quantity,
-                        "stock_type": itemRows.value[i].stock_type,
-                        "batch_before_sale": itemRows.value[i].quantity,
+                        "batch_before_sale": itemRows.value[i].stock_after_adjustment,
                         "batch_count": itemRows.value[i].batch_count,
                         "discount": itemRows.value[i].discount,
                         "tax": parseFloat(itemRows.value[i].vat_amount),
+                        "profit": itemRows.value[i].item_sales_income,
                         "item_total": itemRows.value[i].total_amount,
-                        "batch_after_sale": itemRows.value[i].quantity,
-                        "purchase_price": parseFloat(itemRows.value[i].cost),
-                        "selling_price": parseFloat(itemRows.value[i].selling_price),
-                        "quantity": itemRows.value[i].quantity,
-                        "tax_type": itemRows.value[i].vat_rate.tax_id,
-                        "tax_inclusivity": itemRows.value[i].vat_inclusivity,
-                    }        
-                    saleItemsArray.value.push(purchaseItem);
-                    
-                }else{
-                    let purchaseItem ={
-                        "date": formFields.value[0].value,
-                        "inventory_item": itemRows.value[i].item,
-                        "adjusted_stock": itemRows.value[i].quantity,
-                        "stock_type": itemRows.value[i].stock_type,
-                        "batch_before_sale": itemRows.value[i].quantity,
-                        "batch_count": itemRows.value[i].batch_count,
-                        "discount": itemRows.value[i].discount,
-                        "tax": parseFloat(itemRows.value[i].vat_amount),
-                        "item_total": itemRows.value[i].total_amount,
-                        "batch_after_sale": itemRows.value[i].quantity,
+                        "batch_after_sale": itemRows.value[i].available_batch_count - itemRows.value[i].quantity,
                         "purchase_price": parseFloat(itemRows.value[i].purchase_price),
                         "selling_price": parseFloat(itemRows.value[i].selling_price),
-                        "quantity": itemRows.value[i].quantity,
+                        "quantity": itemRows.value[i].stock_after_adjustment,
+                        "tax_type": itemRows.value[i].vat_rate.tax_id,
+                        "tax_inclusivity": itemRows.value[i].vat_inclusivity,
+                        "output_vat_id": itemRows.value[i].vat_rate.tax_output_account.ledger_id
+                    }        
+                    saleItemsArray.value.push(saleItem);
+                    
+                }else{
+                    let saleItem ={
+                        "item_batch_id": itemRows.value[i].item_batch_id,
+                        "date": formFields.value[0].value,
+                        "inventory_item": itemRows.value[i].item,
+                        "stock_at_hand": itemRows.value[i].stock_at_hand,
+                        "adjusted_stock": itemRows.value[i].quantity,
+                        "batch_before_sale": itemRows.value[i].stock_after_adjustment,
+                        "batch_count": itemRows.value[i].batch_count,
+                        "discount": itemRows.value[i].discount,
+                        "tax": itemRows.value[i].vat_amount,
+                        "profit": itemRows.value[i].item_sales_income,
+                        "item_total": itemRows.value[i].total_amount,
+                        "batch_after_sale": itemRows.value[i].available_batch_count - itemRows.value[i].quantity,
+                        "purchase_price": parseFloat(itemRows.value[i].purchase_price),
+                        "selling_price": parseFloat(itemRows.value[i].selling_price),
+                        "quantity": itemRows.value[i].stock_after_adjustment,
                         "tax_type": "",
                         "tax_inclusivity": "",
+                        "output_vat_id": ""
                     } 
-                    saleItemsArray.value.push(purchaseItem);
-                }
-                if(itemRows.value[i].vat_amount > 0){
-                    let jnlEntry1 ={
-                        "date": formFields.value[0].value,
-                        "txn_type": "JNL",
-                        "posting_account": stock_control_account.value,
-                        "credit_amount": 0,
-                        "description": "Purchase of "+ itemRows.value[i].quantity+' '+ itemRows.value[i].item_name,
-                        "debit_amount": itemRows.value[i].sub_total,
-                    }     
-                    let jnlEntry2 ={
-                        "date": formFields.value[0].value,
-                        "txn_type": "JNL",
-                        "posting_account": itemRows.value[i].vat_rate.tax_input_account.ledger_id,
-                        "credit_amount": 0,
-                        "description": "Purchase of "+ itemRows.value[i].item_name+", Tax payable",
-                        "debit_amount": Math.abs(itemRows.value[i].vat_amount),
-                    }    
-                    let taxTxn ={
-                        "tax": itemRows.value[i].vat_rate.tax_id,
-                        "client": formFields.value[4].value,
-                        "amount": itemRows.value[i].vat_amount,
-                        "description": "Purchase of "+ itemRows.value[i].item_name+", Tax payable",
-                        "tax_inclusive": itemRows.value[i].vat_inclusivity,
-                        "tax_category": 'Input'
-                    }               
-                    journalEntryArr.value.push(jnlEntry1, jnlEntry2);
-                    taxTransactionArr.value.push(taxTxn);
-                }else{
-                    let jnlEntry1 ={
-                        "date": formFields.value[0].value,
-                        "txn_type": "JNL",
-                        "posting_account": stock_control_account.value,
-                        "credit_amount": 0,
-                        "description": "Purchase of "+ itemRows.value[i].quantity+' '+ itemRows.value[i].item_name,
-                        "debit_amount": itemRows.value[i].sub_total,
-                    }                       
-                    journalEntryArr.value.push(jnlEntry1);
+                    saleItemsArray.value.push(saleItem);
                 }
             }
-
-            let jnlEntry3 ={
-                "date": formFields.value[0].value,
-                "txn_type": "JNL",
-                "posting_account": cashbookID.value,
-                "debit_amount": 0,
-                "description": "Inventory Purchase",
-                "credit_amount": Math.abs(receiptTotals.value),
-            }
-            journalEntryArr.value.push(jnlEntry3);
 
             let formData = {
                 outlet: outletID.value,
-                cashbook: cashbookID.value,
-                outlet_counter: counterID.value,
                 notes: "",
                 date: formFields.value[0].value,
-                purchase_items_array: saleItemsArray.value,
-                journal_entry_array: journalEntryArr.value,
-                tax_transaction_array: taxTransactionArr.value,
-                txn_type: "JNL",
-                issue_date: formFields.value[0].value,
-                banking_date: formFields.value[0].value,
+                sale_items_array: saleItemsArray.value,
                 total_amount: receiptTotals.value,
-                sale_type: "Cash",
-                vendor: formFields.value[4].value,
-                phone_number: formFields.value[5].value,
-                amount_paid: formFields.value[7].value,
-                balance: formFields.value[7].value - receiptTotals.value,
+                sale_type: "Credit",
+                sale_delivery: "Not Delivered",
+                customer: customerID.value,
                 tax: tax_totals.value,
-                reference_no: formFields.value[6].value,
                 discount: discountTotals.value,
                 company: companyID.value,
                 user: userID.value
@@ -334,7 +278,7 @@ export default defineComponent({
                     errors.value.push(formFields.value[i].label);
                 }
             }
-            if(outletID.value == '' || cashbookID.value == ''){
+            if(outletID.value == '' || customerID.value == ''){
                 errors.value.push('Error');
             }
 
@@ -344,27 +288,24 @@ export default defineComponent({
             }
             else{
                 if(Number(receiptTotals.value) <= 0){
-                    toast.error('Invalid Purchase Amount');
-                    hideLoader();
-                }else if(Number(receiptTotals.value) != formFields.value[7].value){
-                    toast.error('Invalid Purchase Amount');
+                    toast.error('Invalid Sale Amount');
                     hideLoader();
                 }
                 else{            
                     try {
-                        const response = await store.dispatch('Direct_Purchases/createPurchase', formData);
+                        const response = await store.dispatch('Direct_Purchases/createSaleOrder', formData);
                         if (response && response.status === 200) {
                             hideLoader();
-                            toast.success('Purchase created successfully!');
+                            toast.success('Sale Order created successfully!');
                             handleReset();
                             mainComponentKey.value += 1;
                         } else {
-                            toast.error('An error occurred while creating the Purchase.');
+                            toast.error('An error occurred while creating the Sale Order.');
                             hideLoader();
                         }
                     } catch (error) {
                         console.error(error.message);
-                        toast.error('Failed to create Purchase: ' + error.message);
+                        toast.error('Failed to create Sale Order: ' + error.message);
                     } finally {
                         hideLoader();
                     }              
@@ -382,17 +323,9 @@ export default defineComponent({
 
         const fetchDefaultSettings = async() =>{
             await store.dispatch('Default_Settings/fetchDefaultSettings', {company:companyID.value})
-            for(let i=0; i < defaultSettings.value.length; i++){
-                if(defaultSettings.value[i].setting_name === 'Inventory Stock Control A/c'){
-                    stock_control_account.value = defaultSettings.value[i].setting_value;
-                }else if(defaultSettings.value[i].setting_name === 'Inventory Sales Income A/c'){
-                    sales_income_account.value = defaultSettings.value[i].setting_value;
-                }
-            }
         };
 
         onBeforeMount(()=>{ 
-            store.dispatch('Ledgers/fetchLedgers', {company: companyID.value})
             store.dispatch('Ledgers/updateState', { invoiceItemsArray: []})
             updateFormFields();
             flex_basis.value = '1/5';
@@ -401,14 +334,16 @@ export default defineComponent({
         onMounted(async()=>{
             fetchDefaultSettings();
             fetchTaxes();
-            fetchItems();
+            if(defaultOutlet.value != null && defaultStockType.value != null){
+                fetchItems(defaultStockType.value)
+            }
 
         })
 
         return{
-            formFields, flex_basis, flex_basis_percentage, displayButtons, createPurchaseVoucher, mainComponentKey,showTotals,
+            formFields, flex_basis, flex_basis_percentage, displayButtons, createSaleReceipt, mainComponentKey,showTotals,
             handleReset, loader, showLoader, hideLoader, tableKey, itemColumns, itemRows, showActions, actions, deleteItemLine, idField,
-            title, modal_loader, modal_left, modal_top, modal_width, showModalLoader, hideModalLoader,rightsModule,
+            title, modal_loader, modal_left, modal_top, modal_width, showModalLoader, hideModalLoader,rightsModule
         }
     }
 })

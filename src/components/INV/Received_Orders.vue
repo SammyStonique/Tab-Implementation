@@ -3,17 +3,17 @@
         <PageComponent 
             :loader="loader" @showLoader="showLoader" @hideLoader="hideLoader"
             :addButtonLabel="addButtonLabel"
-            @handleAddNew="addNewSale"
+            @handleAddNew="addNewPurchase"
             :searchFilters="searchFilters"
-            @searchPage="searchSales"
+            @searchPage="searchPurchases"
             @resetFilters="resetFilters"
-            @removeItem="removeSale"
-            @removeSelectedItems="removeSales"
-            @printList="printSalesList"
+            @removeItem="removePurchase"
+            @removeSelectedItems="removePurchases"
+            @printList="printPurchasesList"
             :addingRight="addingRight"
             :rightsModule="rightsModule"
             :columns="tableColumns"
-            :rows="salesList"
+            :rows="purchasesList"
             :actions="actions"
             :showTotals="showTotals"
             :idField="idField"
@@ -41,7 +41,7 @@ import { useToast } from "vue-toastification";
 import PrintJS from 'print-js';
 
 export default{
-    name: 'Sale_Orders',
+    name: 'Received_Orders',
     components:{
         PageComponent
     },
@@ -52,12 +52,12 @@ export default{
         const catComponentKey = ref('');
         const defaultSettings = computed(()=> store.state.Default_Settings.settingsList);
         const idField = 'sale_id';
-        const addButtonLabel = ref('New Sale Order');
-        const addingRight = ref('Adding Inventory Sale Order');
+        const addButtonLabel = ref('New Received Order');
+        const addingRight = ref('Deliver Sale Order');
         const rightsModule = ref('Inventory');
         const submitButtonLabel = ref('Add');
         const selectedIds = ref([]);
-        const salesList = ref([]);
+        const purchasesList = ref([]);
         const propResults = ref([]);
         const propArrLen = ref(0);
         const propCount = ref(0);
@@ -72,20 +72,19 @@ export default{
             {label: "Code", key:"sale_code"},
             {label: "Date", key:"date"},
             {label: "Outlet", key: "outlet_name"},
-            {label: "Customer", key:"client"},
+            {label: "Vendor", key:"client"},
             {label: "Phone No", key:"client_phone_number"},
             {label: "Amount", key:"total_amount", type: "number"},
             {label: "Paid", key:"total_paid", type: "number"},
             {label: "Balance", key:"balance", type: "number"},
-            {label: "Status", key:"status"},
+            {label: "Bill#", key:"txn_no"},
             {label: "Done By", key:"done_by"},
         ]);
         const showTotals = ref(true);
         const actions = ref([
-            {name: 'edit', icon: 'fa fa-edit', title: 'Edit Sale Order', rightName: 'Editing Inventory Sale Order'},
-            {name: 'deliver', icon: 'fa fa-truck', title: 'Deliver Sale Order', rightName: 'Deliver Sale Order'},
-            {name: 'print', icon: 'fa fa-print', title: 'Print Sale Order', rightName: 'Print Inventory Sales'},
-            {name: 'delete', icon: 'fa fa-trash', title: 'Delete Sale Order', rightName: 'Deleting Inventory Sale Order'},
+            {name: 'print', icon: 'fa fa-print', title: 'Print Delivery Order', rightName: 'Print Inventory Delivery Orders'},
+            {name: 'view', icon: 'fa fa-edit', title: 'View Order Items', rightName: 'View Delivery Order Items'},
+            {name: 'delete', icon: 'fa fa-trash', title: 'Delete Delivery Order', rightName: 'Deleting Inventory Delivery Order'},
         ])
         const companyID = computed(()=> store.state.userData.company_id);
         const categoryID = ref(null);
@@ -110,55 +109,55 @@ export default{
             selectedIds.value = ids;
         };
 
-        const removeSale = async() =>{
+        const removePurchase = async() =>{
             if(selectedIds.value.length == 1){
                 let formData = {
                     company: companyID.value,
-                    sales_array: selectedIds.value
+                    purchases_array: selectedIds.value
                 }
                 try{
-                    const response = await store.dispatch('Direct_Sales/deleteSaleOrder',formData)
+                    const response = await store.dispatch('Direct_Purchases/deleteReceivedOrder',formData)
                     if(response && response.data.msg == "Success"){
-                        toast.success("Sale Order Removed Succesfully");
-                        searchSales();
+                        toast.success("Received Order Removed Succesfully");
+                        searchPurchases();
                     }
                 }
                 catch(error){
                     console.error(error.message);
-                    toast.error('Failed to remove Sale Order: ' + error.message);
+                    toast.error('Failed to remove Received Order: ' + error.message);
                 }
                 finally{
                     selectedIds.value = [];
                 }
             }else if(selectedIds.value.length > 1){
-                toast.error("You have selected more than 1 Sale Order") 
+                toast.error("You have selected more than 1 Received Order") 
             }else{
-                toast.error("Please Select A Sale Order To Remove")
+                toast.error("Please Select A Received Order To Remove")
             }
         }
-        const removeSales = async() =>{
+        const removePurchases = async() =>{
             if(selectedIds.value.length){
                 let formData = {
                     company: companyID.value,
-                    sales_array: selectedIds.value
+                    purchases_array: selectedIds.value
                 }
                 try{
-                    const response = await store.dispatch('Direct_Sales/deleteSaleOrder',formData)
+                    const response = await store.dispatch('Direct_Purchases/deleteReceivedOrder',formData)
                     if(response && response.data.msg == "Success"){
-                        toast.success("Sale Order(s) Removed Succesfully");
-                        searchSales();
+                        toast.success("Received Order(s) Removed Succesfully");
+                        searchPurchases();
                     }
                 }
                 catch(error){
                     console.error(error.message);
-                    toast.error('Failed to remove Sale Orders: ' + error.message);
+                    toast.error('Failed to remove Received Order: ' + error.message);
                 }
                 finally{
                     selectedIds.value = [];
 
                 }
             }else{
-                toast.error("Please Select Sale Orders To Remove")
+                toast.error("Please Select Received Order To Remove")
             }
         }
         const showLoader = () =>{
@@ -168,7 +167,7 @@ export default{
             loader.value = "none";
         }
        
-        const searchSales = () =>{
+        const searchPurchases = () =>{
             showLoader();
             showNextBtn.value = false;
             showPreviousBtn.value = false;
@@ -176,8 +175,8 @@ export default{
                 date_from: date_from_search.value,
                 date_to: date_to_search.value,
                 sale_code: sale_code_search.value,
-                sale_type: "Credit",
-                category: "Sale",
+                sale_type: "Delivery",
+                category: "Purchase",
                 max_amount: max_amount_search.value,
                 min_amount: min_amount_search.value,
                 customer: customer_search.value,
@@ -187,9 +186,9 @@ export default{
             axios
             .post(`api/v1/inventory-sale-search/?page=${currentPage.value}`,formData)
             .then((response)=>{
-                salesList.value = response.data.results;
+                purchasesList.value = response.data.results;
                 propResults.value = response.data;
-                propArrLen.value = salesList.value.length;
+                propArrLen.value = purchasesList.value.length;
                 propCount.value = propResults.value.count;
                 pageCount.value = Math.ceil(propCount.value / 50);
                 if(response.data.next){
@@ -214,7 +213,7 @@ export default{
             min_amount_search.value = "",
             customer_search.value = "",
             done_by_search.value = "",
-            searchSales();
+            searchPurchases();
         }
         const loadPrev = () =>{
             if (currentPage.value <= 1){
@@ -223,7 +222,7 @@ export default{
                 currentPage.value -= 1;
             }
             
-            searchSales();
+            searchPurchases();
             // scrollToTop();
         }
         const loadNext = () =>{
@@ -233,17 +232,17 @@ export default{
                 currentPage.value += 1;
             }
             
-            searchSales();
+            searchPurchases();
             // scrollToTop(); 
         }
         const firstPage = ()=>{
             currentPage.value = 1;
-            searchSales();
+            searchPurchases();
             // scrollToTop();
         }
         const lastPage = () =>{
             currentPage.value = pageCount.value;
-            searchSales();
+            searchPurchases();
             // scrollToTop();
         };
         const fetchDefaultSettings = async() =>{
@@ -260,85 +259,38 @@ export default{
                 }
             }
         };
-        const addNewSale = async() =>{
+        const addNewPurchase = () =>{
             // store.commit('Direct_Sales/initializeStore');
-            await store.dispatch('Direct_Sales/updateState',{saveButtonLabel: 'Save', selectedCustomer: null, isEditing: false, isDelivering:false})
-            await store.dispatch('Items_Catalog/updateState',{lineItemsArray:[]})
-            store.commit('pageTab/ADD_PAGE', {'INV':'Sale_Order_Details'});
-            store.state.pageTab.invActiveTab = 'Sale_Order_Details';         
-        };
-        const fetchSaleOrderItems = async(saleID) =>{
-            let formData = {
-                sale: saleID,
-                inventory_item: "",
-                company_id: companyID.value
-            }
-            await store.dispatch('Items_Catalog/fetchSaleOrderItems',formData)
-        };
+            store.commit('pageTab/ADD_PAGE', {'INV':'Received_Order_Details'});
+            store.state.pageTab.invActiveTab = 'Received_Order_Details';         
+        }
         const handleActionClick = async(rowIndex, action, row) =>{
-            if(action == 'edit'){
-                const order_delivery = row['sale_delivery'];
-                if(order_delivery == "Delivered"){
-                    toast.error("Cannot Edit Delivered Order")
-                }else{
-                    await store.dispatch('Direct_Sales/updateState',{saveButtonLabel: 'Save', isEditing: true})
-                    await store.dispatch('Items_Catalog/updateState',{lineItemsArray:[]})
-                    const saleID = row[idField];
-                    let formData = {
-                        company: companyID.value,
-                        inventory_sale: saleID
-                    }
-                    fetchSaleOrderItems(saleID);
-                    await store.dispatch('Direct_Sales/fetchSale',formData);
-                    store.commit('pageTab/ADD_PAGE', {'INV':'Sale_Order_Details'});
-                    store.state.pageTab.invActiveTab = 'Sale_Order_Details';
-                }
-            }
-            else if(action == 'deliver'){
-                const order_delivery = row['sale_delivery'];
-                if(order_delivery == "Delivered"){
-                    toast.error("Order Already Delivered")
-                }else{
-                    await store.dispatch('Direct_Sales/updateState',{saveButtonLabel: 'Deliver', isDelivering: true})
-                    await store.dispatch('Items_Catalog/updateState',{lineItemsArray:[]})
-                    const saleID = row[idField];
-                    let formData = {
-                        company: companyID.value,
-                        inventory_sale: saleID
-                    }
-                    fetchSaleOrderItems(saleID);
-                    await store.dispatch('Direct_Sales/fetchSale',formData);
-                    store.commit('pageTab/ADD_PAGE', {'INV':'Sale_Order_Details'});
-                    store.state.pageTab.invActiveTab = 'Sale_Order_Details';
-                }             
-            }
-            else if(action == 'delete'){
+            if(action == 'delete'){
                 const saleID = [row[idField]];
                 let formData = {
                     company: companyID.value,
                     sales_array: saleID
                 }
-                await store.dispatch('Direct_Sales/deleteSaleOrder',formData).
+                await store.dispatch('Direct_Purchases/deleteReceivedOrder',formData).
                 then(()=>{
-                    searchSales();
+                    searchPurchases();
                 })
-            }
-            else if(action == 'view'){
+            }else if(action == 'view'){
                 console.log("VIEWING TAKING PLACE");
             }
         }
         const closeModal = () =>{
             propModalVisible.value = false;
         };
-        const printSalesList = () =>{
+        const printPurchasesList = () =>{
             showLoader();
 
             let formData = {
                 date_from: date_from_search.value,
                 date_to: date_to_search.value,
                 sale_code: sale_code_search.value,
-                sale_type: "Credit",
-                category: "Sale",
+                sale_type: "Delivery",
+                category: "Purchase",
                 max_amount: max_amount_search.value,
                 min_amount: min_amount_search.value,
                 customer: customer_search.value,
@@ -366,15 +318,15 @@ export default{
         
         onBeforeMount(()=>{
             fetchDefaultSettings();
-            searchSales();
+            searchPurchases();
             
         })
         return{
-            showTotals,searchSales,resetFilters, addButtonLabel, searchFilters, tableColumns, salesList,
+            showTotals,searchPurchases,resetFilters, addButtonLabel, searchFilters, tableColumns, purchasesList,
             propResults, propArrLen, propCount, pageCount, showNextBtn, showPreviousBtn,
             loadPrev, loadNext, firstPage, lastPage, idField, actions, handleActionClick, propModalVisible, closeModal,
-            submitButtonLabel, showModal, addNewSale, showLoader, loader, hideLoader, removeSale, removeSales,
-            handleSelectionChange,addingRight,rightsModule,printSalesList
+            submitButtonLabel, showModal, addNewPurchase, showLoader, loader, hideLoader, removePurchase, removePurchases,
+            handleSelectionChange,addingRight,rightsModule,printPurchasesList
         }
     }
 };

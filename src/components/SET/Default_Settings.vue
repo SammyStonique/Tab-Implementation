@@ -365,7 +365,7 @@
                                     @clearSearch="clearSelectedCounter"
                                     @fetchData="fetchOutletCounters"   
                                 />
-                                <button type="button" class="absolute ml-4 rounded px-2 bg-green-500 text-white" @click="saveDefaultSetting('Inventory','Default Outlet Counter',outletID,outletName)"><i class="fa fa-check"></i></button>
+                                <button type="button" class="absolute ml-4 rounded px-2 bg-green-500 text-white" @click="saveDefaultSetting('Inventory','Default Outlet Counter',counterID,counterName)"><i class="fa fa-check"></i></button>
                             </div>
                             <div class="basis-1/3 mr-3 relative">
                                 <label for="">Inventory Take On Balancing A/c:<em>*</em></label><br />
@@ -391,11 +391,12 @@
                             <div class="basis-1/4 mr-3 relative">
                                 <label for="">Default Counter Channel:<em>*</em></label><br />
                                 <SearchableDropdown
-                                    :options="incomeLedgerArr"
-                                    :updateValue="selectedBalancingAccount"
+                                    :options="counterChannelArr"
+                                    :updateValue="selectedCounterChannel"
                                     :dropdownWidth="dropdownWidth"
-                                    @option-selected="handleSelectedLedger"
-                                    @clearSearch="clearSelectedLedger"
+                                    @option-selected="handleSelectedChannel"
+                                    @clearSearch="clearSelectedChannel"
+                                    @fetchData="fetchCounterChannels" 
                                 />
                                 <button type="button" class="absolute ml-4 rounded px-2 bg-green-500 text-white" @click="saveDefaultSetting('Inventory','Default Counter Channel',channelID,channelName)"><i class="fa fa-check"></i></button>
                             </div>
@@ -582,6 +583,7 @@ export default defineComponent({
             accounts_settings_options.value  = !accounts_settings_options.value ;
         }
         const showInventorySettings = () =>{
+            fetchRetailOutlets();
             fetchDefaultSetting('Inventory');
             hms_settings_options.value = false;
             accounts_settings_options.value = false;
@@ -676,7 +678,7 @@ export default defineComponent({
             await store.dispatch('Retail_Outlets/handleSelectedOutlet', option)
             outletID.value = store.state.Retail_Outlets.outletID;
             outletName.value = store.state.Retail_Outlets.outletName;
-
+            fetchOutletCounters();
         };
         const clearSelectedOutlet = async() =>{
             await store.dispatch('Retail_Outlets/updateState', {outletID: '', outletName: ""});
@@ -698,7 +700,7 @@ export default defineComponent({
             await store.dispatch('Outlet_Counters/handleSelectedCounter', option)
             counterID.value = store.state.Outlet_Counters.counterID;
             counterName.value = store.state.Outlet_Counters.counterName;
-
+            fetchCounterChannels();
         };
         const clearSelectedCounter = async() =>{
             await store.dispatch('Retail_Outlets/updateState', {counterID: '', counterName: ""});
@@ -718,12 +720,12 @@ export default defineComponent({
 
         const handleSelectedChannel = async(option) =>{
             await store.dispatch('Counter_Channels/handleSelectedChannel', option)
-            channelID.value = store.state.Counter_Channels.channelID;
+            channelID.value = store.state.Counter_Channels.ledgerID;
             channelName.value = store.state.Counter_Channels.channelName;
 
         };
         const clearSelectedChannel = async() =>{
-            await store.dispatch('Counter_Channels/updateState', {channelID: '', channelName: ""});
+            await store.dispatch('Counter_Channels/updateState', {ledgerID: '', channelName: ""});
             channelID.value = "";
             channelName.value = "";
         }
@@ -871,8 +873,8 @@ export default defineComponent({
             dropdownWidth,incomePlaceholder, ledgerArr, incomeLedgerArr, expenseLedgerArr, liabilityLedgerArr, cashbookLedgerArr, fetchIncomeLedgers, fetchExpenseLedgers,
             fetchCashbookLedgers, fetchLiabilityLedgers, rentalIncome, rentalSecurityDeposit, rentalLeaseIncome, rentalPenaltyIncome,fetchLedgers,
             ledgerID,ledgerName, handleSelectedLedger, clearSelectedLedger, saveDefaultSetting, removeDefaultSetting, tenantCodePrefix, tenantCodeCounter,
-            patientsOption, debtorsOption, vendorsOption, tenantsOption, fetchRetailOutlets,handleSelectedOutlet, clearSelectedOutlet, fetchOutletCounters,
-            handleSelectedCounter, clearSelectedCounter, fetchCounterChannels,handleSelectedChannel, clearSelectedChannel,outletCounterArr,retailOutletArr,counterChannelArr,
+            patientsOption, debtorsOption, vendorsOption, tenantsOption, fetchRetailOutlets,handleSelectedOutlet, clearSelectedOutlet, fetchOutletCounters,outletID,outletName,counterID,counterName,
+            channelID,channelName,handleSelectedCounter, clearSelectedCounter, fetchCounterChannels,handleSelectedChannel, clearSelectedChannel,outletCounterArr,retailOutletArr,counterChannelArr,
             retailOutlet, outletCounter, counterChannel, salesIncome, invTakeOn, stockControl, stockType
         }
     }

@@ -72,12 +72,12 @@ export default{
             {label: "Code", key:"sale_code"},
             {label: "Date", key:"date"},
             {label: "Outlet", key: "outlet_name"},
-            {label: "Customer", key:"client"},
+            {label: "Vendor", key:"client"},
             {label: "Phone No", key:"client_phone_number"},
             {label: "Amount", key:"total_amount", type: "number"},
             {label: "Paid", key:"total_paid", type: "number"},
             {label: "Balance", key:"balance", type: "number"},
-            {label: "Rcpt No", key:"receipt_no"},
+            {label: "Status", key:"status"},
             {label: "Done By", key:"done_by"},
         ]);
         const showTotals = ref(true);
