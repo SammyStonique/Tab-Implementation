@@ -193,7 +193,6 @@
         allowedRights.value = [];
         let formData = {
           user: userID.value,
-          company: companyID.value,
           module: props.rightsModule
         }
         axios

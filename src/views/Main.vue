@@ -18,10 +18,10 @@
         </div>
         <!-- <div v-show="hmsOpen && selectedModule =='Human Resource'">
             <HR />
-        </div>
+        </div> -->
         <div v-show="hmsOpen && selectedModule =='Settings'">
             <SET />
-        </div> -->
+        </div>
         <div v-if="mainOpen" class="text-black h-screen bg-[url('@/assets/image1.jpg')] bg-cover bg-center px-12 w-full">
             <div class="border-b border-gray-300 py-2 w-full flex pl-6">
                 <p class="text-left basis-3/6">Welcome, {{ username }}</p>
@@ -66,12 +66,13 @@ import HMS from '@/components/HMS/Main.vue';
 import PMS from '@/components/PMS/Main.vue'
 import FA from '@/components/FA/Main.vue';
 import INV from '@/components/INV/Main.vue';
+import SET from '@/components/SET/Main.vue';
 import Loader from '@/components/Loader.vue';
 
 export default{
     components:{
         ModulesTab, Loader,
-        HMS, FA, INV, PMS
+        HMS, FA, INV, PMS, SET
     },
     setup(){
         const store = useStore();

@@ -185,7 +185,7 @@ export default defineComponent({
         const updateFormFields = () =>{
             formFields.value = [
                 { type: 'date', name: 'issue_date',label: "Recording Date", value: formatDate(current_date), required: true, maxDate: formatDate(current_date) },
-                { type: 'date', name: 'banking_date',label: "Banking Date", value: '', required: true, maxDate: formatDate(current_date) },
+                { type: 'date', name: 'banking_date',label: "Banking Date", value: formatDate(current_date), required: true, maxDate: formatDate(current_date) },
                 
                 {
                     type:'search-dropdown', label:"Outlet", value: outletID.value, componentKey: outComponentKey,
@@ -231,7 +231,7 @@ export default defineComponent({
             store.dispatch('Items_Catalog/updateState', { lineItemsArray: []})
             mainComponentKey.value += 1;
             formFields.value[0].value = formatDate(current_date);
-            formFields.value[1].value = "";
+            formFields.value[1].value = formatDate(current_date);
             formFields.value[5].value = defaultStockType.value;
             formFields.value[7].value = "Walk-In Customer";
             formFields.value[8].value = "0";

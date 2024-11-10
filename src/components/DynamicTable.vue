@@ -231,18 +231,21 @@ export default defineComponent({
       const taxIncl = row.vat_inclusivity || "Inclusive";
       let totalAmount = parseFloat(row.total_amount) || 0;
       let taxAmount = parseFloat(row.vat_amount) || 0;
+      let salesIncome = ((parseFloat(row.selling_price) - parseFloat(row.cost)) * parseFloat(row.quantity)) || 0;
       if(taxIncl == "Inclusive"){
         taxAmount = ((taxRate/100) * subTotal).toFixed(2);
         totalAmount = subTotal.toFixed(2);
         row.vat_amount = taxAmount;
         row.sub_total = (parseFloat(subTotal) - parseFloat(taxAmount)).toFixed(2);
         row.total_amount = totalAmount;
+        row.item_sales_income = salesIncome - taxAmount;
       }else{
         taxAmount = ((taxRate/100) * subTotal).toFixed(2);
         totalAmount = (parseFloat(subTotal) + parseFloat(taxAmount)).toFixed(2);
         row.sub_total = subTotal.toFixed(2);
         row.vat_amount = taxAmount;
         row.total_amount = totalAmount;
+        row.item_sales_income = salesIncome;
       }
     };
 
@@ -290,7 +293,6 @@ export default defineComponent({
         allowedRights.value = [];
         let formData = {
           user: userID.value,
-          company: companyID.value,
           module: props.rightsModule
         }
         axios

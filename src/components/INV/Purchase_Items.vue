@@ -106,6 +106,7 @@ export default{
             {label: "Vendor Name", key: "client"},
             {label: "Item Name", key:"inventory_item_name"},
             {label: "Qty", key:"quantity", type: "number"},
+            {label: "P.Price", key:"purchase_price", type: "number"},
             {label: "Amnt", key:"total_amount", type: "number"},
             {label: "PV#", key:"receipt_no"},
             {label: "Done By", key:"done_by"},

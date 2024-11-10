@@ -303,7 +303,7 @@ const actions = {
         selectedItem.sub_total = 0;
         selectedItem.total_amount = selectedItem.quantity * selectedItem.cost;
         selectedItem.available_batch_count = selectedItem.batch_before_sale,
-        selectedItem.item_sales_income = (parseFloat(selectedItem.selling_price) - parseFloat(selectedItem.selling_price)) * 1,
+        selectedItem.item_sales_income = (parseFloat(selectedItem.selling_price) - parseFloat(selectedItem.purchase_price)) * 1,
         state.itemsArray = [...state.itemsArray, selectedItem];
     }
     let itemExists = false;
@@ -340,6 +340,7 @@ const actions = {
         selectedItem.total_amount = selectedItem.quantity * selectedItem.cost;
         selectedItem.batch_count = 10000000,
         selectedItem.input_vat_id = null;
+        selectedItem.item_sales_income = (parseFloat(selectedItem.selling_price) - parseFloat(selectedItem.purchase_price)) * 1;
 
         state.itemsArray = [...state.itemsArray, selectedItem];
     }

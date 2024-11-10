@@ -50,6 +50,7 @@ import Stock_Adjustments from './INV/Stock_Adjustments';
 import Stock_Transfers from './INV/Stock_Transfers';
 
 import Default_Settings from './SET/Default_Settings';
+import Companies from './SET/Companies';
 
 export default createStore({
   modules: {
@@ -68,6 +69,6 @@ export default createStore({
     
     Ledgers, Currencies, Taxes, Journals, Customers, Vendors,Fiscal_Periods,
 
-    Default_Settings
+    Default_Settings,Companies
   },
 });

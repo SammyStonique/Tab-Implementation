@@ -106,6 +106,7 @@ export default{
             {label: "Customer Name", key: "client"},
             {label: "Item Name", key:"inventory_item_name"},
             {label: "Qty", key:"quantity", type: "number"},
+            {label: "S.Price", key:"selling_price", type: "number"},
             {label: "Amnt", key:"total_amount", type: "number"},
             {label: "Discnt", key:"discount", type: "number", textColor: "red"},
             {label: "Profit", key:"profit", type: "number", textColor: "green"},
