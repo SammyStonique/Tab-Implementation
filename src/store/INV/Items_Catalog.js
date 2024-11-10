@@ -144,6 +144,20 @@ const actions = {
     })
     
   },
+  async fetchItemsWithStock({ commit,state }, formData) {
+    state.itemsArr = [];
+    await axios.post(`api/v1/item-with-stock-search/`,formData)
+    .then((response)=>{
+      for(let i=0; i< response.data.items.length; i++){
+        state.itemsArr.push((response.data.items[i].item_code + ' - ' + response.data.items[i].item_name))
+      }
+      commit('LIST_ITEMS', response.data.items);
+    })
+    .catch((error)=>{
+      console.log(error.message);
+    })
+    
+  },
   fetchInventoryItem({ commit,state }, formData) {
     axios.post(`api/v1/fetch-inventory-items/`,formData)
     .then((response)=>{
@@ -326,6 +340,7 @@ const actions = {
         selectedItem.total_amount = selectedItem.quantity * selectedItem.cost;
         selectedItem.batch_count = 10000000,
         selectedItem.input_vat_id = null;
+
         state.itemsArray = [...state.itemsArray, selectedItem];
     }
     let itemExists = false;

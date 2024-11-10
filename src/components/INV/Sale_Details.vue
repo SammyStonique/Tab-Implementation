@@ -400,7 +400,7 @@ export default defineComponent({
         };
 
         onBeforeMount(()=>{ 
-            store.dispatch('Ledgers/updateState', { invoiceItemsArray: []})
+            store.dispatch('Items_Catalog/updateState', { lineItemsArray: []})
             updateFormFields();
             flex_basis.value = '1/5';
             flex_basis_percentage.value = '20';

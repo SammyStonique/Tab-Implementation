@@ -250,9 +250,11 @@ export default{
         const handleActionClick = async(rowIndex, action, row) =>{
             if(action == 'delete'){
                 const adjustmentID = [row[idField]];
+                const outletID = row['warehouse_id'];
                 let formData = {
                     company: companyID.value,
-                    adjustment_array: adjustmentID
+                    adjustment_array: adjustmentID,
+                    outlet: outletID
                 }
                 await store.dispatch('Stock_Adjustments/deleteStockAdjustment',formData).
                 then(()=>{
