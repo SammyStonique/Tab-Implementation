@@ -49,7 +49,7 @@
 
 <script>
 import axios from "axios";
-import { ref, defineComponent } from 'vue';
+import { ref, defineComponent, onBeforeMount, onMounted } from 'vue';
 import { useStore } from "vuex";
 import { useToast } from "vue-toastification";
 import Loader from "@/components/Loader.vue";
@@ -116,6 +116,12 @@ export default defineComponent({
             hideLoader();
         })
     }
+    onBeforeMount(()=>{
+        // store.commit('userData/reloadingPage');
+    })
+    onMounted(()=>{
+        store.dispatch('userData/reloadPage');
+    })
     return{
         email, password, errors, login, loader, showLoader, hideLoader
     }

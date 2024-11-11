@@ -266,9 +266,11 @@ export default{
         const handleActionClick = async(rowIndex, action, row) =>{
             if( action == 'edit'){
                 const userID = row[idField];
+                const departmentID = row['user_department_id'];
                 let formData = {
                     company: companyID.value,
-                    user: userID
+                    staff: userID,
+                    department: departmentID
                 }
                 await store.dispatch('userData/fetchUser',formData).
                 then(()=>{

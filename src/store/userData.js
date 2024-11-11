@@ -43,15 +43,17 @@ const mutations = {
         state.selectedUser = null;
         state.selectedDepartment = null;
     },
-    reloadingPage(state){
-        if (localStorage.getItem('reloaded')) {
-          localStorage.removeItem('reloaded', 'false');
-          console.log('Value of reload in store set to false')
-        }else {
-            // Set a flag so that we know not to reload the page twice.
+
+    reloadingPage(state) {
+        // Check if the page has already been reloaded
+        if (!localStorage.getItem('reloaded')) {
+            // Set the flag to prevent further reloads
             localStorage.setItem('reloaded', 'true');
-            console.log(state.reloaded,'Reload')
-            window.location.reload();
+            console.log(state.reloaded, 'Reloading the page...');
+            window.location.reload(); // Reload only once
+        } else {
+            // If the flag exists, do nothing
+            console.log('Page already reloaded. Skipping reload.');
         }
     },
     SET_STATE(state, payload){
@@ -70,7 +72,7 @@ const mutations = {
     USERS_ARRAY(state, users){
         state.userArray = users;
     },
-    SET_SELECTED_USERY(state, user) {
+    SET_SELECTED_USER(state, user) {
         state.selectedUser = user;
         state.isEditing = true;
     },
@@ -132,6 +134,19 @@ const actions = {
         })
         
     },
+    fetchUser({ commit,state }, formData) {
+        axios.post(`api/v1/department-staff-list/`,formData)
+        .then((response)=>{
+            const selectedDepartment = response.data.user_department.code + ' - ' + response.data.user_department.name;
+            commit('SET_SELECTED_DEPARTMENT',selectedDepartment);
+            state.selectedUser = response.data;
+            commit('SET_SELECTED_USER',response.data);
+        })
+        .catch((error)=>{
+          console.log(error.message);
+        })
+        
+      },
     handleSelectedUser({ commit, state }, option){
         state.userArray = [];
         const selectedUser = state.userList.find(user => (user.first_name + ' ' + user.last_name + ' - ' + user.email) === option);
@@ -145,7 +160,7 @@ const actions = {
             
     },
     async updateUser({ commit,state }, formData) {
-        return axios.put(`api/v1/update-user/`,formData)
+        return axios.put(`api/v1/users/${state.selectedUser.user_id}/`,formData)
         .then((response)=>{
           return response;
         })
@@ -254,7 +269,7 @@ const actions = {
             showLoaderOnConfirm: true,
         }).then((result) => {
             if (result.value) {
-                axios.delete(`api/v1/delete-user/`,formData)
+                axios.post(`api/v1/delete-user/`,formData)
                 .then((response)=>{
                     if(response.data.msg == "Success"){
                         Swal.fire("Poof! User removed succesfully!", {

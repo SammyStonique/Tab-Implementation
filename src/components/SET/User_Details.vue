@@ -53,18 +53,22 @@ export default defineComponent({
         const temporary_password = ref('');
         const userDetails = ref([]);
 
+        const fetchDepartments = () =>{
+            store.dispatch('Departments/fetchDepartments', {company: companyID.value})
+        }
+
         const handleSelectedDepartment = async(option) =>{
             await store.dispatch('Departments/handleSelectedDepartment', option)
             depID.value = store.state.Departments.depID;
             if(selectedUser.value){
-                selectedUser.value.user_department = depID.value;
-                depValue.value = depID.value
+                selectedUser.value.user_department.department_id = depID.value;
+                depValue.value = depID.value;
             }
         }
 
         const formFields = ref([]);
         const depValue = computed(() => {
-           return (selectedUser.value && selectedUser.value.user_department && !depID.value) ? selectedUser.value.user_department : depID.value;
+           return (selectedUser.value && selectedUser.value.user_department.department_id && !depID.value) ? selectedUser.value.user_department.department_id : depID.value;
 
         });
         const updateFormFields = () => {
@@ -74,7 +78,7 @@ export default defineComponent({
                 { type: 'text', name: 'identification_no',label: "ID Number", value: selectedUser.value?.identification_no || '', required: true },
                 { type: 'text', name: 'email',label: "Email", value: selectedUser.value?.email || '', required: true, placeholder: '' },
                 { type: 'text', name: 'phone_number',label: "Phone Number", value: selectedUser.value?.phone_number || '', required: true },
-                { type: 'date', name: 'dob',label: "D.O.B", value: selectedUser.value?.dob || '', required: true },
+                { type: 'date', name: 'birth_date',label: "D.O.B", value: selectedUser.value?.birth_date || '', required: true },
                 { type: 'dropdown', name: 'gender',label: "Gender", value: selectedUser.value?.gender || '', placeholder: "", required: true, options: [{ text: 'Male', value: 'Male' }, { text: 'Female', value: 'Female' }, { text: 'Other', value: 'Other' }] },
                 { type: 'dropdown', name: 'profile',label: "Profile", value: selectedUser.value?.profile || '', placeholder: "", required: true, options: [{text:'Admin',value:'Admin'},{text:'Doctor',value:'Doctor'},{text:'Patient',value:'Patient'},{text:'Accountant',value:'Accountant'},{text:'Human Resource',value:'Human Resource'},{text:'Nurse',value:'Nurse'},{text:'Lab Technician',value:'Lab Technician'},{text:'Office Clerk',value:'Office Clerk'},{text:'Clinical Officer',value:'Clinical Officer'}] },
 
@@ -94,6 +98,7 @@ export default defineComponent({
             for(let i=0; i < additionalFields.value.length; i++){
                 additionalFields.value[i].value = '';
             }
+            depComponentKey.value += 1;
         }
 
         watch([selectedUser, selectedDepartment], () => {
@@ -130,27 +135,6 @@ export default defineComponent({
         } 
         const createUser = async() =>{
             showLoader();
-            let formData = {
-                company: companyID.value,
-                first_name: formFields.value[0].value,
-                last_name: formFields.value[1].value,
-                is_staff: true,
-                is_active: true,
-                email: formFields.value[3].value,
-                identification_no: formFields.value[2].value,
-                birth_date: formFields.value[5].value,
-                gender: formFields.value[6].value,
-                phone_number: formFields.value[4].value,
-                profile: formFields.value[7].value,
-                pms_module: additionalFields.value[0].value,
-                hms_module: additionalFields.value[3].value,
-                accounts_module: additionalFields.value[1].value,
-                hr_module: additionalFields.value[4].value,
-                inventory_module: additionalFields.value[2].value,
-                settings_module: additionalFields.value[5].value,
-                user_department: depValue.value,
-                user_department_name: depValue.value,
-            }
 
             errors.value = [];
             for(let i=0; i < (formFields.value.length - 1); i++){
@@ -173,6 +157,28 @@ export default defineComponent({
                 try {
                     const response1 = await axios.get("api/v1/pass-gen/");
                     temporary_password.value = response1.data;
+
+                    let formData = {
+                        company: companyID.value,
+                        first_name: formFields.value[0].value,
+                        last_name: formFields.value[1].value,
+                        is_staff: true,
+                        is_active: true,
+                        email: formFields.value[3].value,
+                        identification_no: formFields.value[2].value,
+                        birth_date: formFields.value[5].value,
+                        gender: formFields.value[6].value,
+                        phone_number: formFields.value[4].value,
+                        profile: formFields.value[7].value,
+                        pms_module: additionalFields.value[0].value,
+                        hms_module: additionalFields.value[3].value,
+                        accounts_module: additionalFields.value[1].value,
+                        hr_module: additionalFields.value[4].value,
+                        inventory_module: additionalFields.value[2].value,
+                        settings_module: additionalFields.value[5].value,
+                        user_department: depValue.value,
+                        password: temporary_password.value
+                    }
 
                     const response2 = await axios.post("api/v1/users/", formData);
                     userDetails.value = response2.data;
@@ -200,16 +206,16 @@ export default defineComponent({
 
                     const response5 = await axios.put("api/v1/users/"+userDetails.value.user_id+"/", formData3);
                     // const response = await store.dispatch('userData/createUser', formData);
-                    // if (response && response.status === 200) {
-                    //     hideLoader();
-                    //     toast.success('User created successfully!');
-                    //     handleReset();
-                    //     mainComponentKey.value += 1;
-                    //     depComponentKey.value += 1;
-                    // } else {
-                    //     toast.error('An error occurred while creating the User.');
-                    //     hideLoader();
-                    // }
+                    if (response5) {
+                        hideLoader();
+                        toast.success('User created successfully!');
+                        handleReset();
+                        mainComponentKey.value += 1;
+                        depComponentKey.value += 1;
+                    } else {
+                        toast.error('An error occurred while creating the User.');
+                        hideLoader();
+                    }
                 } catch (error) {
                     console.error(error.message);
                     toast.error('Failed to create User: ' + error.message);
@@ -244,8 +250,8 @@ export default defineComponent({
                     company: companyID.value,
                     first_name: formFields.value[0].value,
                     last_name: formFields.value[1].value,
-                    is_staff: true,
-                    is_active: true,
+                    is_staff: selectedUser.value.is_staff,
+                    is_active: selectedUser.value.is_active,
                     email: formFields.value[3].value,
                     identification_no: formFields.value[2].value,
                     birth_date: formFields.value[5].value,
@@ -259,19 +265,18 @@ export default defineComponent({
                     inventory_module: additionalFields.value[2].value,
                     settings_module: additionalFields.value[5].value,
                     user_department: depValue.value,
-                    user_department_name: depValue.value,
                 };
 
                 try {
                         const response = await store.dispatch('userData/updateUser', updatedUser);
-                        if (response && response.status === 200) {
+                        if (response) {
                             hideLoader();
                             toast.success('User updated successfully!');
                             handleReset();
                             depComponentKey.value += 1;
                             mainComponentKey.value += 1;
                             store.dispatch('Departments/updateState',{depID:''})
-                            store.dispatch("userData/updateState",{selectedUser:null,selectedDepartment:null})
+                            store.dispatch("userData/updateState",{selectedUser:null, selectedDepartment:null})
                         } else {
                             toast.error('An error occurred while updating the User.');
                             hideLoader();
@@ -301,6 +306,7 @@ export default defineComponent({
             flex_basis_percentage.value = '25';
             additional_flex_basis.value = '1/4';
             additional_flex_basis_percentage.value = '25';
+            fetchDepartments();
         })
         onMounted(()=>{
 

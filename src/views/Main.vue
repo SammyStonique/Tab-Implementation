@@ -61,7 +61,7 @@ import axios from 'axios';
 import { useFetchSessionData } from '@/composables/SessionData';
 import ModulesTab from '@/components/ModulesTab.vue'
 import { useStore } from 'vuex';
-import { ref, reactive, computed,onBeforeMount } from 'vue';
+import { ref, reactive, computed,onBeforeMount, onMounted } from 'vue';
 import HMS from '@/components/HMS/Main.vue';
 import PMS from '@/components/PMS/Main.vue'
 import FA from '@/components/FA/Main.vue';
@@ -140,11 +140,15 @@ export default{
 
         const logout = () =>{
             store.dispatch("userData/logout");
+            store.dispatch('userData/reloadingPage');
         }
 
         onBeforeMount(()=>{
             const { fetchSessionData } = useFetchSessionData()
             fetchSessionData();
+        })
+        onMounted(()=>{
+            store.dispatch('userData/reloadPage');
         })
         return{
             openModule, hmsOpen, mainOpen, selectedModule, company_modules, getImagePath, username, company_name, logout,

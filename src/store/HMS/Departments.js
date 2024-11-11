@@ -41,6 +41,9 @@ const state = {
       state.selectedDepartment = department;
       state.isEditing = true;
     },
+    DEPARTMENTS_ARRAY(state, departments){
+      state.depArray = departments;
+    },
     SET_STATE(state, payload) {
       for (const key in payload) {
           if (payload.hasOwnProperty(key) && key in state) {
