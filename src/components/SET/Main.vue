@@ -32,15 +32,19 @@ import Dashboard from '@/components/SET/Dashboard.vue';
 import Companies from '@/components/SET/Companies.vue';
 import Company_Details from '@/components/SET/Company_Details.vue';
 import Company_Info from '@/components/SET/Company_Info.vue';
-
+import Departments from '@/components/SET/Departments.vue';
 import Default_Settings from '@/components/SET/Default_Settings.vue';
+import Branches from '@/components/SET/Branches.vue';
+import Users from '@/components/SET/Users.vue';
+import User_Details from '@/components/SET/User_Details.vue';
 
 export default{
     components:{
         NavBar,
         NavBarSET,
         PagesTab,
-        Dashboard,Companies,Company_Details,Default_Settings,Company_Info,
+        Dashboard,Companies,Company_Details,Default_Settings,Company_Info,Departments,Branches,Users,
+        User_Details
     },
     props: {
         title: {

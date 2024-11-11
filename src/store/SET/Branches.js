@@ -2,31 +2,16 @@ import axios from "axios";
 import Swal from 'sweetalert2';
 
 const state = {
-    depList: [],
-    depArr: [],
-    depArray: [],
-    depID: '',
-    depName: '',
+    branchesList: [],
     code_search: '',
     name_search: '',
-    selectedDepartment: null,
+    selectedBranch: null,
     isEditing: false
   };
   
   const mutations = {
-    initializeStore(state){
-      state.depList = [];
-      state.depArr = [];
-      state.depArray = [];
-      state.depID = '';
-      state.depName = '';
-      state.code_search = '';
-      state.name_search = '';;
-      state.isEditing = false;
-      state.selectedDepartment = null;
-  },
-    LIST_DEPARTMENTS(state, departments) {
-      state.depList = departments;
+    LIST_BRANCHES(state, branches) {
+      state.branchesList = branches;
     },
     SET_SEARCH_FILTERS(state, search_filter){
       for(const [key, value] of Object.entries(search_filter)){
@@ -37,8 +22,8 @@ const state = {
         } 
       }
     },
-    SET_SELECTED_DEPARTMENT(state, department) {
-      state.selectedDepartment = department;
+    SET_SELECTED_BRANCH(state, branch) {
+      state.selectedBranch = branch;
       state.isEditing = true;
     },
     SET_STATE(state, payload) {
@@ -59,8 +44,8 @@ const state = {
       commit('SET_STATE', newState);
     },
 
-    async createDepartment({ commit,state }, formData) {
-      return axios.post('api/v1/create-department/', formData)
+    async createBranch({ commit,state }, formData) {
+      return axios.post('api/v1/create-company-branch/', formData)
       .then((response)=>{
         return response;
       })
@@ -70,14 +55,11 @@ const state = {
       })
     },
 
-    fetchDepartments({ commit,state }, formData) {
-      state.depArr = [];
-      axios.post(`api/v1/fetch-departments/`,formData)
+    fetchBranch({ commit,state }, formData) {
+      axios.post(`api/v1/fetch-company-branches/`,formData)
       .then((response)=>{
-        for(let i=0; i< response.data.length; i++){
-          state.depArr.push((response.data[i].code  + ' - ' + response.data[i].name))
-        }
-        commit('LIST_DEPARTMENTS', response.data);
+        state.selectedBranch = response.data;
+        commit('SET_SELECTED_BRANCH',response.data);
       })
       .catch((error)=>{
         console.log(error.message);
@@ -85,32 +67,8 @@ const state = {
       
     },
 
-    fetchDepartment({ commit,state }, formData) {
-      axios.post(`api/v1/fetch-departments/`,formData)
-      .then((response)=>{
-        state.selectedDepartment = response.data;
-        commit('SET_SELECTED_DEPARTMENT',response.data);
-      })
-      .catch((error)=>{
-        console.log(error.message);
-      })
-      
-    },
-
-    handleSelectedDepartment({ commit, state }, option){
-      state.depArray = [];
-      const selectedDepartment = state.depList.find(dep => (dep.code + ' - ' + dep.name) === option);
-      if (selectedDepartment) {
-          state.depID = selectedDepartment.department_id;
-          state.depName = selectedDepartment.name;
-          state.depArray = [...state.depArray, selectedDepartment];
-      }
-      commit('DEPARTMENTS_ARRAY', state.depArray);
-          
-  },
-
-    async updateDepartment({ commit,state }, formData) {
-      return axios.put(`api/v1/update-department/`,formData)
+    async updateBranch({ commit,state }, formData) {
+      return axios.put(`api/v1/update-company-branch/`,formData)
       .then((response)=>{
         return response;  
       })
@@ -121,14 +79,14 @@ const state = {
       
     },
 
-    deleteDepartment({ commit,state }, formData) {
+    deleteBranch({ commit,state }, formData) {
       Swal.fire({
         title: "Are you sure?",
-        text: `Do you wish to delete Department?`,
+        text: `Do you wish to delete Branch?`,
         type: 'warning',
         showCloseButton: true,
         showCancelButton: true,
-        confirmButtonText: 'Yes Delete Department!',
+        confirmButtonText: 'Yes Delete Branch!',
         cancelButtonText: 'Cancel!',
         customClass: {
             confirmButton: 'swal2-confirm-custom',
@@ -137,15 +95,15 @@ const state = {
         showLoaderOnConfirm: true,
       }).then((result) => {
         if (result.value) {
-          axios.post(`api/v1/delete-department/`,formData)
+          axios.post(`api/v1/delete-company-branch/`,formData)
           .then((response)=>{
             if(response.status == 200){
-              Swal.fire("Poof! Department removed succesfully!", {
+              Swal.fire("Poof! Branch removed succesfully!", {
                   icon: "success",
               }); 
             }else{
               Swal.fire({
-                title: "Error Deleting Department",
+                title: "Error Deleting Branch",
                 icon: "warning",
               });
             }       
@@ -158,7 +116,7 @@ const state = {
             });
           })
         }else{
-          Swal.fire(`Department has not been deleted!`);
+          Swal.fire(`Branch has not been deleted!`);
         }
       })
     },
