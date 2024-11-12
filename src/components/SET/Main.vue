@@ -37,6 +37,7 @@ import Default_Settings from '@/components/SET/Default_Settings.vue';
 import Branches from '@/components/SET/Branches.vue';
 import Users from '@/components/SET/Users.vue';
 import User_Details from '@/components/SET/User_Details.vue';
+import User_Rights from '@/components/SET/User_Rights.vue';
 
 export default{
     components:{
@@ -44,7 +45,7 @@ export default{
         NavBarSET,
         PagesTab,
         Dashboard,Companies,Company_Details,Default_Settings,Company_Info,Departments,Branches,Users,
-        User_Details
+        User_Details,User_Rights
     },
     props: {
         title: {
