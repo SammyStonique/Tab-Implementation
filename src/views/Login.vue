@@ -114,7 +114,7 @@ export default defineComponent({
         })
         .finally(()=>{
             hideLoader();
-            store.dispatch('userData/reloadPage');
+            // store.dispatch('userData/reloadPage');
         })
     }
     onBeforeMount(()=>{

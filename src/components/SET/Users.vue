@@ -29,7 +29,7 @@
             :showPreviousBtn="showPreviousBtn"
         />
         <MovableModal v-model:visible="propModalVisible" :title="title" :modal_top="modal_top" :modal_left="modal_left" :modal_width="modal_width"
-            :loader="modal_loader" @showLoader="showModalLoader" @hideLoader="hideModalLoader" >
+            :loader="modal_loader" @showLoader="showModalLoader" @hideLoader="hideModalLoader" @closeModal="closeModal" >
             <div class="flex mb-3 items-end px-2">
                 <div class="basis-1/4 mr-3">
                     <input type="text" class="rounded pl-3 border-2 border-gray-200 text-sm w-full" name="name" id="" placeholder="Permission Name...." v-model="permission_name_search">
@@ -53,6 +53,23 @@
                 <DynamicTable :key="tableKey" :columns="rightsColumns" :rows="filterPermissions" :showActions="showActions" :idField="rightIdField" @selection-changed="selectionChanged" />
             </div>
         </MovableModal>
+        <MovableModal v-model:visible="compModalVisible" :title="title1" :modal_top="modal_top" :modal_left="modal_left1" :modal_width="modal_width1"
+            :loader="modal_loader1" @showLoader="showCompModalLoader" @hideLoader="hideCompModalLoader" @closeModal="closeCompModal">
+            <div class="relative mb-6 mt-3 min-w-[500px]">
+                <SearchableDropdown
+                    :key="compComponentKey"
+                    :options="companiesArr"
+                    :dropdownWidth="dropdownWidth"
+                    @option-selected="handleSelectedCompany"
+                    @clearSearch="clearSelectedCompany"   
+                    @fetchData="fetchCompanies"                              
+                />
+                <button type="button" class="absolute ml-4 rounded px-2 bg-green-500 text-white" @click="addUserCompany()"><i class="fa fa-check"></i></button>
+            </div>
+            <div class="min-h-[200px]">
+                <DynamicTable :key="tableCompKey" :columns="companyColumns" :rows="companyRows" :idField="compIdField" @selection-changed="selectionCompChanged" :rightsModule="rightsModule" :actions="compActions" @action-click="removeUserCompany()" />
+            </div>
+        </MovableModal>
     </div>
 </template>
 
@@ -61,7 +78,9 @@ import axios from "axios";
 import { ref, computed, onMounted, onBeforeMount} from 'vue';
 import PageComponent from '@/components/PageComponent.vue'
 import MovableModal from '@/components/MovableModal.vue';
+import SearchableDropdown from '@/components/SearchableDropdown.vue';
 import DynamicTable from '../DynamicTable.vue';
+
 import { useStore } from "vuex";
 import { useToast } from "vue-toastification";
 import Swal from 'sweetalert2';
@@ -70,26 +89,34 @@ import Swal from 'sweetalert2';
 export default{
     name: 'Users',
     components:{
-        PageComponent,MovableModal,DynamicTable
+        PageComponent,MovableModal,DynamicTable,SearchableDropdown
     },
     setup(){
         const store = useStore();
         const toast = useToast();
         const loader = ref('');
         const tableKey = ref(0);
+        const compComponentKey = ref(0);
         const modal_loader = ref('none');
+        const tableCompKey = ref(0);
+        const modal_loader1 = ref('none');
         const modal_top = ref('120px');
         const modal_left = ref('250px');
-        const modal_width = ref('70vw');
+        const modal_left1 = ref('400px');
+        const modal_width = ref('40vw');
+        const modal_width1 = ref('40vw');
         const title = ref('Assign User Rights');
+        const title1 = ref('User Allowed Companies');
         const addButtonLabel = ref('Add New User');
         const idField = 'user_id';
         const rightIdField = 'permission_id';
+        const compIdField = 'company_id';
         const addingRight = ref('Adding User');
         const rightsModule = ref('Settings');
         const submitButtonLabel = ref('Add');
         const selectedIds = ref([]);
         const selectedPermissions = ref([]);
+        const selectedCompanies = ref([]);
         const userList = ref([]);
         const propResults = ref([]);
         const propArrLen = ref(0);
@@ -99,8 +126,10 @@ export default{
         const showNextBtn = ref(false);
         const showPreviousBtn = ref(false);
         const propModalVisible = ref(false);
-        const displayModal = ref(false);
+        const compModalVisible = ref(false);
         const showModal = ref(false);
+        const companiesArr = computed(() => store.state.Companies.companyArr);
+        const dropdownWidth = ref("320px");
         const permissionsArray = computed(()=> store.state.User_Rights.rightsList);
         const companyModulesArray = computed(()=> store.state.Companies.companyModulesArray);
         const permission_name_search = ref('');
@@ -128,6 +157,7 @@ export default{
         const actions = ref([
             {name: 'edit', icon: 'fa fa-edit', title: 'Edit User', rightName: 'Editing User'},
             {name: 'assign', icon: 'fa fa-check-circle', title: 'Assign Rights', rightName: 'Assigning User Rights'},
+            {name: 'allowed-company', icon: 'fa fa-key', title: 'Assign Company', rightName: 'User Allowed Companies'},
             {name: 'lock', icon: 'fa fa-lock', title: 'Lock User', rightName: 'Locking User'},
             {name: 'delete', icon: 'fa fa-trash', title: 'Delete User', rightName: 'Deleting User'},
         ]);
@@ -139,8 +169,19 @@ export default{
             {label: "Status", key: "status", type: "text", editable: false}
         ]);
         const rightsRows = computed(() => store.state.User_Rights.rightsList);
+
+        const companyColumns = ref([
+            {type: "checkbox"},
+            {label: "Company Name", key:"company_name",type: "text", editable: false},
+        ]);
+        const compActions = ref([
+            {name: 'delete', icon: 'fa fa-trash', title: 'Delete Company', rightName: 'User Allowed Companies'},
+        ]);
+        const companyRows = ref([]);
         const companyID = computed(()=> store.state.userData.company_id);
         const staffID = ref(null);
+        const userCompID = ref(null);
+        const userCompName = ref(null);
         const name_search = computed({
             get: () => store.state.userData.name_search,
             set: (value) => store.commit('userData/SET_SEARCH_FILTERS', {"name_search":value}),
@@ -189,6 +230,9 @@ export default{
         };
         const selectionChanged = (ids) => {
             selectedPermissions.value = ids;
+        };
+        const selectionCompChanged = (ids) => {
+            selectedCompanies.value = ids;
         };
 
         const removeUser = async() =>{
@@ -332,7 +376,26 @@ export default{
                 user: userID
             }
             await store.dispatch('User_Rights/fetchRights',formData)
-        }
+        };
+        const fetchCompanies = async() =>{
+            let formData = {
+                company_name: "",
+                status: "Active"
+            }
+            await store.dispatch("Companies/fetchCompanies", formData)
+        };
+        const fetchUserCompanies = async(userID) =>{
+            let formData = {
+                user: userID,
+            }
+            axios.post("api/v1/user-companies-search/", formData)
+            .then((response)=>{
+                companyRows.value = response.data.companies;
+            })
+            .catch((error)=>{
+                console.log(error.message)
+            })
+        };
         const handleActionClick = async(rowIndex, action, row) =>{
             if( action == 'edit'){
                 const userID = row[idField];
@@ -382,6 +445,18 @@ export default{
                     propModalVisible.value = true;
                 } catch (error) {
                     console.error('Error fetching system rights:', error);
+                }
+                
+            }
+            else if(action == 'allowed-company'){
+                fetchCompanies();
+                const userID = row[idField];
+                staffID.value = userID;
+                try {
+                    await fetchUserCompanies(userID);
+                    compModalVisible.value = true;
+                } catch (error) {
+                    console.error('Error fetching user companies:', error);
                 }
                 
             }
@@ -488,6 +563,98 @@ export default{
         };
         const closeModal = () =>{
             propModalVisible.value = false;
+        };
+
+        const handleSelectedCompany = async(option) =>{
+            await store.dispatch('Companies/handleSelectedCompany', option)
+            userCompID.value = store.state.Companies.companyID;
+            userCompName.value = store.state.Companies.companyName;
+
+        };
+        const clearSelectedCompany = async() =>{
+            await store.dispatch('Companies/updateState', {companyID: '', companyName: ""});
+            userCompID.value = "";
+            userCompName.value = "";
+        }
+
+        const showCompModalLoader = () =>{
+            modal_loader.value = "block";
+        }
+        const hideCompModalLoader = () =>{
+            modal_loader.value = "none";
+        };
+        const addUserCompany = () =>{
+            let formData = {
+                user: staffID.value,
+                company: userCompID.value
+            }
+            axios.post("api/v1/create-user-company/", formData)
+            .then((response)=>{
+                if(response.data.msg === "Failed"){
+                    toast.error("User Already Assigned This Company") 
+                    compComponentKey.value += 1;
+                }
+                else{
+                    toast.success("User Company Added Succesfully")
+                    compComponentKey.value += 1;
+                    fetchUserCompanies(staffID.value);
+                }
+                
+            })
+            .catch((error)=>{
+                console.log(error.message);
+                toast.error(error.message) 
+            })
+        };
+        const removeUserCompany = (rowIndex, action, row) =>{
+            Swal.fire({
+            title: "Are you sure?",
+            text: `Do you wish to Remove Company?`,
+            type: 'warning',
+            showCloseButton: true,
+            showCancelButton: true,
+            confirmButtonText: 'Yes Remove Company!',
+            cancelButtonText: 'Cancel!',
+            customClass: {
+                confirmButton: 'swal2-confirm-custom',
+                cancelButton: 'swal2-cancel-custom',
+            },
+            showLoaderOnConfirm: true,
+            }).then((result) => {
+            if (result.value) {
+                let formData ={
+                    user: staffID.value,
+                    user_company: row['company_id']
+                }
+                axios.post(`api/v1/delete-user-company/`,formData)
+                .then((response)=>{
+                    if(response.data.msg == "Success"){
+                        Swal.fire("Company Removed succesfully!", {
+                            icon: "success",
+                        }); 
+                        fetchUserCompanies(staffID.value); 
+                        selectedPermissions.value = [];
+                    }else{
+                        Swal.fire({
+                            title: "Error Removing Company",
+                            icon: "warning",
+                        });
+                    }                
+                })
+                .catch((error)=>{
+                console.log(error.message);
+                Swal.fire({
+                    title: error.message,
+                    icon: "warning",
+                });
+                })
+            }else{
+                Swal.fire(`Company Not Removed!`);
+            }
+            })
+        };
+        const closeCompModal = () =>{
+            compModalVisible.value = false;
         }
         onBeforeMount(()=>{
             searchUsers();
@@ -497,13 +664,14 @@ export default{
             store.dispatch('Companies/getCompanyModules')
         });
         return{
-            title,searchUsers,resetFilters, addButtonLabel, searchFilters, tableColumns, userList,
+            title, title1,searchUsers,resetFilters, addButtonLabel, searchFilters, tableColumns, userList,
             propResults, propArrLen, propCount, pageCount, showNextBtn, showPreviousBtn,
-            loadPrev, loadNext, firstPage, lastPage, idField, actions, handleActionClick, propModalVisible, closeModal,
+            loadPrev, loadNext, firstPage, lastPage, idField, actions, handleActionClick, propModalVisible, compModalVisible, closeModal,closeCompModal,
             submitButtonLabel, showModal, addNewUser, showLoader, loader, hideLoader, removeUser, removeUsers,
-            handleSelectionChange,addingRight,rightsModule,showModalLoader,hideModalLoader,modal_loader,permission_name_search,
-            module_name_search,rights_status_search,assignRights,disableRights,rightsColumns,rightsRows,modal_top,modal_left,modal_width,
-            showActions,tableKey,filterPermissions,rightIdField,selectionChanged
+            handleSelectionChange,addingRight,rightsModule,showModalLoader,showCompModalLoader,hideModalLoader,hideCompModalLoader,modal_loader,modal_loader1,permission_name_search,
+            module_name_search,rights_status_search,assignRights,disableRights,rightsColumns,rightsRows,modal_top,modal_left,modal_left1,modal_width,modal_width1,
+            showActions,tableKey,tableCompKey,filterPermissions,rightIdField,compIdField,selectionChanged,selectionCompChanged,addUserCompany,removeUserCompany,
+            companiesArr,dropdownWidth,companyColumns,companyRows,handleSelectedCompany,clearSelectedCompany,compActions,compComponentKey
         }
     }
 };

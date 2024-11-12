@@ -42,10 +42,13 @@
             <div class="w-full grid grid-cols-4 gap-4 pt-8">
                 <div class="text-left" v-for="mod,index in company_modules" :key="index">
                     <button @click="openModule(mod.module_name)">
-                        <div class="rounded-full w-24 h-24 overflow-hidden mb-2">
+                        <div class="text-center rounded-full w-24 h-24 overflow-hidden mb-2">
                             <img :src="getImagePath(mod.module_logo)" alt="Module Icon" class="w-full h-full object-cover">
                         </div>
-                        <div class="text-left">
+                        <div class="text-left" v-if="mod.module_name != 'Settings'">
+                            <button class="underline"> {{ mod.module_name }} </button>
+                        </div>
+                        <div class="text-center" v-else>
                             <button class="underline"> {{ mod.module_name }} </button>
                         </div>
                     </button>          
@@ -142,7 +145,7 @@ export default{
             await store.dispatch('userData/reloadPage');
             await store.dispatch("userData/logout").
             then(()=>{
-                store.dispatch('userData/reloadPage');
+                // store.dispatch('userData/reloadPage');
             })
         }
 

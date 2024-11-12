@@ -37,6 +37,7 @@ export default defineComponent({
         const loader = ref('none');
         const modal_loader = ref('none');
         const tableKey = ref(0);
+        const rightsModule = ref('Accounts');
         const mainComponentKey = ref(0);
         const custComponentKey = ref(0);
         const currComponentKey = ref(0);
@@ -84,7 +85,7 @@ export default defineComponent({
         ]);
 
         const actions = ref([
-            {name: 'delete', icon: 'fa fa-minus-circle', title: 'Remove Invoice Line'},
+            {name: 'delete', icon: 'fa fa-minus-circle', title: 'Remove Invoice Line', rightName: "Adding Invoice"},
         ])
 
         const deleteInvoiceLIne = (rowIndex, action, row) =>{
@@ -142,7 +143,7 @@ export default defineComponent({
                     fetchData: fetchCustomers(), clearSearch: clearSelectedCustomer()  
                 },
                 { type: 'date', name: 'issue_date',label: "Issue Date", value: formatDate(current_date), required: true, maxDate: formatDate(current_date) },
-                { type: 'date', name: 'due_date',label: "Due Date", value: '', required: true, maxDate: formatDate(current_date) },
+                { type: 'date', name: 'due_date',label: "Due Date", value: '', required: true, },
                 {
                     type:'search-dropdown', label:"Currency", value: currencyID.value, componentKey: currComponentKey,
                     selectOptions: currencyArray, optionSelected: handleSelectedCurrency, required: true,
@@ -351,7 +352,7 @@ export default defineComponent({
         return{
             formFields, flex_basis, flex_basis_percentage, displayButtons, createInvoice, mainComponentKey,
             handleReset, loader, showLoader, hideLoader, tableKey, invoiceColumns, invoiceRows, showActions, actions, deleteInvoiceLIne, idField,
-            title, modal_loader, modal_left, modal_top, modal_width, showModalLoader, hideModalLoader,
+            title, modal_loader, modal_left, modal_top, modal_width, showModalLoader, hideModalLoader,rightsModule
         }
     }
 })

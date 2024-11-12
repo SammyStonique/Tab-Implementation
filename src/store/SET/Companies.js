@@ -3,6 +3,7 @@ import Swal from 'sweetalert2';
 
 const state = {
   companiesList: [], 
+  userCompanyList: [],
   companyArr: [],
   companyArray: [],
   companyID: '',
@@ -18,6 +19,7 @@ const state = {
 const mutations = {
   initializeStore(state){
     state.companiesList = [];
+    state.userCompanyList = [];
     state.companyArr = [];
     state.companyArray = [];
     state.company_id = '';
@@ -82,7 +84,7 @@ const actions = {
       for(let i=0; i< response.data.results.length; i++){
         state.companyArr.push((response.data.results[i].name))
       }
-      commit('LIST_COMPANIES', response.data);
+      commit('LIST_COMPANIES', response.data.results);
     })
     .catch((error)=>{
       console.log(error.message);
