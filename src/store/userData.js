@@ -44,18 +44,20 @@ const mutations = {
         state.selectedDepartment = null;
     },
 
-    reloadingPage(state) {
-        // Check if the page has already been reloaded
-        if (!localStorage.getItem('reloaded')) {
-            // Set the flag to prevent further reloads
-            localStorage.setItem('reloaded', 'true');
-            console.log(state.reloaded, 'Reloading the page...');
-            window.location.reload(); // Reload only once
+    reloadingPage(state){
+        if (localStorage.getItem('reloaded')) {
+          // The page was just reloaded. Clear the value from local storage
+          // so that it will reload the next time this page is visited.
+          localStorage.removeItem('reloaded', 'false');
+          console.log('Value of reload in store set to false')
         } else {
-            // If the flag exists, do nothing
-            console.log('Page already reloaded. Skipping reload.');
+            // Set a flag so that we know not to reload the page twice.
+            localStorage.setItem('reloaded', 'true');
+            console.log(state.reloaded,'Reload')
+            window.location.reload();
         }
     },
+
     SET_STATE(state, payload){
         for (const key in payload) {
             if (payload.hasOwnProperty(key) && key in state) {

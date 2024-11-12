@@ -138,9 +138,12 @@ export default{
             }
         }
 
-        const logout = () =>{
-            store.dispatch("userData/logout");
-            store.dispatch('userData/reloadingPage');
+        const logout = async() =>{
+            await store.dispatch('userData/reloadPage');
+            await store.dispatch("userData/logout").
+            then(()=>{
+                store.dispatch('userData/reloadPage');
+            })
         }
 
         onBeforeMount(()=>{
@@ -148,7 +151,7 @@ export default{
             fetchSessionData();
         })
         onMounted(()=>{
-            store.dispatch('userData/reloadPage');
+            // store.dispatch('userData/reloadPage');
         })
         return{
             openModule, hmsOpen, mainOpen, selectedModule, company_modules, getImagePath, username, company_name, logout,

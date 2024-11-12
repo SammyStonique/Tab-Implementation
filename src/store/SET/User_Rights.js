@@ -87,6 +87,20 @@ const actions = {
     })
     
   },
+  async fetchUserRights({ commit,state }, formData) {
+    state.rightArr = [];
+    await axios.post(`api/v1/get-permissions/`,formData)
+    .then((response)=>{
+      for(let i=0; i< response.data.length; i++){
+        state.rightArr.push((response.data[i].permission_name))
+      }
+      commit('LIST_RIGHTS', response.data);
+    })
+    .catch((error)=>{
+      console.log(error.message);
+    })
+    
+  },
   fetchRight({ commit,state }, formData) {
     axios.post(`api/v1/permissions-search/`,formData)
     .then((response)=>{

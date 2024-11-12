@@ -72,7 +72,7 @@ export default{
         const modal_top = ref('200px');
         const modal_left = ref('400px');
         const modal_width = ref('30vw');
-        const isEditing = computed(()=> store.state.User_Rights.isEditing)
+        const isEditing = computed(()=> store.state.User_Rights.isEditing);
         const selectedRight = computed(()=> store.state.User_Rights.selectedRight);
         const tableColumns = ref([
             {type: "checkbox"},
@@ -115,7 +115,8 @@ export default{
             store.dispatch("User_Rights/updateState",{isEditing:false})
             flex_basis.value = '1/2';
             flex_basis_percentage.value = '50';
-        }
+        };
+        
         const handleActionClick = async(rowIndex, action, row) =>{
             if( action == 'edit'){
                 const rightID = row['permission_id'];

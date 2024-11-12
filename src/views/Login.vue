@@ -114,13 +114,14 @@ export default defineComponent({
         })
         .finally(()=>{
             hideLoader();
+            store.dispatch('userData/reloadPage');
         })
     }
     onBeforeMount(()=>{
-        // store.commit('userData/reloadingPage');
+
     })
     onMounted(()=>{
-        store.dispatch('userData/reloadPage');
+        
     })
     return{
         email, password, errors, login, loader, showLoader, hideLoader

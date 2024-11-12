@@ -28,6 +28,31 @@
             :showNextBtn="showNextBtn"
             :showPreviousBtn="showPreviousBtn"
         />
+        <MovableModal v-model:visible="propModalVisible" :title="title" :modal_top="modal_top" :modal_left="modal_left" :modal_width="modal_width"
+            :loader="modal_loader" @showLoader="showModalLoader" @hideLoader="hideModalLoader" >
+            <div class="flex mb-3 items-end px-2">
+                <div class="basis-1/4 mr-3">
+                    <input type="text" class="rounded pl-3 border-2 border-gray-200 text-sm w-full" name="name" id="" placeholder="Permission Name...." v-model="permission_name_search">
+                </div>
+                <div class="basis-1/4 mr-3">
+                    <input type="text" class="rounded pl-3 border-2 border-gray-200 text-sm w-full" name="name" id="" placeholder="Module Name...." v-model="module_name_search">
+                </div>
+                <div class="basis-1/4 mr-3">
+                    <input type="text" class="rounded pl-3 border-2 border-gray-200 text-sm w-full" name="name" id="" placeholder="Status...." v-model="rights_status_search">
+                </div>
+                <div class="basis-1/4 flex">
+                    <div class="basis-1/2 mr-2">
+                    <button class="rounded bg-green-400 text-sm text-white px-3 py-2" @click="assignRights"><i class="fa fa-check-circle" aria-hidden="true"></i>Assign</button>
+                    </div>
+                    <div class="basis-1/2">
+                    <button class="rounded bg-red-400 text-sm px-3 py-2" @click="disableRights"><i class="fa fa-times-circle" aria-hidden="true"></i>Disable</button>
+                    </div>
+                </div>
+            </div>
+            <div class="min-h-[350px]">
+                <DynamicTable :key="tableKey" :columns="rightsColumns" :rows="filterPermissions" :showActions="showActions" :idField="rightIdField" @selection-changed="selectionChanged" />
+            </div>
+        </MovableModal>
     </div>
 </template>
 
@@ -35,24 +60,36 @@
 import axios from "axios";
 import { ref, computed, onMounted, onBeforeMount} from 'vue';
 import PageComponent from '@/components/PageComponent.vue'
+import MovableModal from '@/components/MovableModal.vue';
+import DynamicTable from '../DynamicTable.vue';
 import { useStore } from "vuex";
 import { useToast } from "vue-toastification";
+import Swal from 'sweetalert2';
+
 
 export default{
     name: 'Users',
     components:{
-        PageComponent
+        PageComponent,MovableModal,DynamicTable
     },
     setup(){
         const store = useStore();
         const toast = useToast();
         const loader = ref('');
+        const tableKey = ref(0);
+        const modal_loader = ref('none');
+        const modal_top = ref('120px');
+        const modal_left = ref('250px');
+        const modal_width = ref('70vw');
+        const title = ref('Assign User Rights');
+        const addButtonLabel = ref('Add New User');
         const idField = 'user_id';
-        const addButtonLabel = ref('New User');
+        const rightIdField = 'permission_id';
         const addingRight = ref('Adding User');
         const rightsModule = ref('Settings');
         const submitButtonLabel = ref('Add');
         const selectedIds = ref([]);
+        const selectedPermissions = ref([]);
         const userList = ref([]);
         const propResults = ref([]);
         const propArrLen = ref(0);
@@ -62,7 +99,21 @@ export default{
         const showNextBtn = ref(false);
         const showPreviousBtn = ref(false);
         const propModalVisible = ref(false);
+        const displayModal = ref(false);
         const showModal = ref(false);
+        const permissionsArray = computed(()=> store.state.User_Rights.rightsList);
+        const companyModulesArray = computed(()=> store.state.Companies.companyModulesArray);
+        const permission_name_search = ref('');
+        const module_name_search = ref('');
+        const rights_status_search = ref('');
+        const filterPermissions = computed(() => {
+            return permissionsArray.value.filter(perm => {
+                const permissionName = perm.permission_name.toLowerCase().includes(permission_name_search.value.toLowerCase());
+                const moduleName = perm.module.toLowerCase().includes(module_name_search.value.toLowerCase());
+                const statusName = perm.status.toLowerCase().includes(rights_status_search.value.toLowerCase());
+                return permissionName && moduleName && statusName;
+            });
+        });
         const tableColumns = ref([
             {type: "checkbox"},
             {label: "F. Name", key:"first_name"},
@@ -79,9 +130,17 @@ export default{
             {name: 'assign', icon: 'fa fa-check-circle', title: 'Assign Rights', rightName: 'Assigning User Rights'},
             {name: 'lock', icon: 'fa fa-lock', title: 'Lock User', rightName: 'Locking User'},
             {name: 'delete', icon: 'fa fa-trash', title: 'Delete User', rightName: 'Deleting User'},
-        ])
+        ]);
+        const showActions = ref(false);
+        const rightsColumns = ref([
+            {type: "checkbox"},
+            {label: "Name", key:"permission_name",type: "text", editable: false},
+            {label: "Module", key: "module", type: "text", editable: false},
+            {label: "Status", key: "status", type: "text", editable: false}
+        ]);
+        const rightsRows = computed(() => store.state.User_Rights.rightsList);
         const companyID = computed(()=> store.state.userData.company_id);
-        const depID = ref(null);
+        const staffID = ref(null);
         const name_search = computed({
             get: () => store.state.userData.name_search,
             set: (value) => store.commit('userData/SET_SEARCH_FILTERS', {"name_search":value}),
@@ -127,6 +186,9 @@ export default{
         ]);
         const handleSelectionChange = (ids) => {
             selectedIds.value = ids;
+        };
+        const selectionChanged = (ids) => {
+            selectedPermissions.value = ids;
         };
 
         const removeUser = async() =>{
@@ -224,7 +286,8 @@ export default{
             })
         }
         const resetFilters = () =>{
-            store.commit('userData/RESET_SEARCH_FILTERS')
+            store.commit('userData/RESET_SEARCH_FILTERS');
+            staffID.value = "";
             searchUsers();
         }
         const loadPrev = () =>{
@@ -262,6 +325,13 @@ export default{
             await store.dispatch('userData/updateState', {selectedUser: null,selectedDepartment:null, isEditing: false});
             store.commit('pageTab/ADD_PAGE', {'SET':'User_Details'});
             store.state.pageTab.setActiveTab = 'User_Details';          
+        };
+        const fetchSystemRights = async(userID) =>{
+            let formData = {
+                company_modules: companyModulesArray.value,
+                user: userID
+            }
+            await store.dispatch('User_Rights/fetchRights',formData)
         }
         const handleActionClick = async(rowIndex, action, row) =>{
             if( action == 'edit'){
@@ -302,23 +372,138 @@ export default{
                     then(()=>{
                         searchUsers();
                     })
+                }  
+            }
+            else if(action == 'assign'){
+                const userID = row[idField];
+                staffID.value = userID;
+                try {
+                    await fetchSystemRights(userID);
+                    propModalVisible.value = true;
+                } catch (error) {
+                    console.error('Error fetching system rights:', error);
                 }
                 
             }
         }
+        const showModalLoader = () =>{
+            modal_loader.value = "block";
+        }
+        const hideModalLoader = () =>{
+            modal_loader.value = "none";
+        };
+        const assignRights = () =>{
+            Swal.fire({
+            title: "Are you sure?",
+            text: `Do you wish to Assign Right(s)?`,
+            type: 'warning',
+            showCloseButton: true,
+            showCancelButton: true,
+            confirmButtonText: 'Yes Assign Right(s)!',
+            cancelButtonText: 'Cancel!',
+            customClass: {
+                confirmButton: 'swal2-confirm-custom',
+                cancelButton: 'swal2-cancel-custom',
+            },
+            showLoaderOnConfirm: true,
+            }).then((result) => {
+            if (result.value) {
+                let formData ={
+                    user: staffID.value,
+                    permission_array: selectedPermissions.value
+                }
+                axios.post(`api/v1/create-user-permission/`,formData)
+                .then((response)=>{
+                    if(response.data.msg == "Success"){
+                        Swal.fire("Right(s) Assigned succesfully!", {
+                            icon: "success",
+                        }); 
+                        fetchSystemRights(staffID.value);  
+                        selectedPermissions.value = [];
+                    }else{
+                        Swal.fire({
+                            title: "Error Assigning Right(s)",
+                            icon: "warning",
+                        });
+                    }                
+                })
+                .catch((error)=>{
+                console.log(error.message);
+                Swal.fire({
+                    title: error.message,
+                    icon: "warning",
+                });
+                })
+            }else{
+                Swal.fire(`Right(s) Not Assigned!`);
+            }
+            })
+        };
+        const disableRights = () =>{
+            Swal.fire({
+            title: "Are you sure?",
+            text: `Do you wish to Disable Right(s)?`,
+            type: 'warning',
+            showCloseButton: true,
+            showCancelButton: true,
+            confirmButtonText: 'Yes Disable Right(s)!',
+            cancelButtonText: 'Cancel!',
+            customClass: {
+                confirmButton: 'swal2-confirm-custom',
+                cancelButton: 'swal2-cancel-custom',
+            },
+            showLoaderOnConfirm: true,
+            }).then((result) => {
+            if (result.value) {
+                let formData ={
+                    user: staffID.value,
+                    permission_array: selectedPermissions.value
+                }
+                axios.post(`api/v1/disable-user-permission/`,formData)
+                .then((response)=>{
+                    if(response.data.msg == "Success"){
+                        Swal.fire("Right(s) Disabled succesfully!", {
+                            icon: "success",
+                        }); 
+                        fetchSystemRights(staffID.value); 
+                        selectedPermissions.value = [];
+                    }else{
+                        Swal.fire({
+                            title: "Error Disabling Right(s)",
+                            icon: "warning",
+                        });
+                    }                
+                })
+                .catch((error)=>{
+                console.log(error.message);
+                Swal.fire({
+                    title: error.message,
+                    icon: "warning",
+                });
+                })
+            }else{
+                Swal.fire(`Right(s) Not Disabled!`);
+            }
+            })
+        };
         const closeModal = () =>{
             propModalVisible.value = false;
         }
         onBeforeMount(()=>{
             searchUsers();
-            
-        })
+            store.dispatch('Companies/updateState', {companyID: companyID.value})
+        });
+        onMounted(() =>{
+            store.dispatch('Companies/getCompanyModules')
+        });
         return{
-            searchUsers,resetFilters, addButtonLabel, searchFilters, tableColumns, userList,
+            title,searchUsers,resetFilters, addButtonLabel, searchFilters, tableColumns, userList,
             propResults, propArrLen, propCount, pageCount, showNextBtn, showPreviousBtn,
             loadPrev, loadNext, firstPage, lastPage, idField, actions, handleActionClick, propModalVisible, closeModal,
             submitButtonLabel, showModal, addNewUser, showLoader, loader, hideLoader, removeUser, removeUsers,
-            handleSelectionChange,addingRight,rightsModule
+            handleSelectionChange,addingRight,rightsModule,showModalLoader,hideModalLoader,modal_loader,permission_name_search,
+            module_name_search,rights_status_search,assignRights,disableRights,rightsColumns,rightsRows,modal_top,modal_left,modal_width,
+            showActions,tableKey,filterPermissions,rightIdField,selectionChanged
         }
     }
 };

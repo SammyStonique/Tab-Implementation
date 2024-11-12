@@ -11,6 +11,7 @@ const state = {
   name_search: '',
   status_search: '',
   selectedCompany: null,
+  companyModulesArray: [],
   isEditing: false
 };
   
@@ -24,6 +25,7 @@ const mutations = {
     state.status_search = '';
     state.isEditing = false;
     state.selectedCompany = null;
+    state.companyModulesArray = [];
   },
   SET_SELECTED_COMPANY(state, company) {
     state.selectedCompany = company;
@@ -99,6 +101,24 @@ const actions = {
       console.log(error.message);
     })
     
+  },
+  getCompanyModules({ commit,state }){
+      state.companyModulesArray = [];
+      axios.get("api/v1/company-details/"+state.companyID+"/")
+      .then((response)=>{
+          let obj = {
+            "HMS": response.data.hms_module,
+            "PMS": response.data.pms_module,
+            "Accounts": response.data.accounts_module,
+            "Inventory": response.data.inventory_module,
+            "HR": response.data.hr_module,
+            "Settings": response.data.settings_module,
+          }
+          state.companyModulesArray = obj;
+      })
+      .catch((error)=>{
+      console.log(error)
+      })
   },
   handleSelectedCompany({ commit, state }, option){
     state.companyArray = [];
