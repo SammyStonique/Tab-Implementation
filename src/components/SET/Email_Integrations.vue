@@ -2,9 +2,9 @@
     <PageComponent 
         :loader="loader" @showLoader="showLoader" @hideLoader="hideLoader"
         :addButtonLabel="addButtonLabel"
-        @handleAddNew="addNewDepartment"
+        @handleAddNew="addNewEmail"
         :searchFilters="searchFilters"
-        @searchPage="searchDepartments"
+        @searchPage="searchEmails"
         @resetFilters="resetFilters"
         :addingRight="addingRight"
         :rightsModule="rightsModule"
@@ -27,7 +27,7 @@
         :loader="modal_loader" @showLoader="showModalLoader" @hideLoader="hideModalLoader" >
         <DynamicForm 
             :fields="formFields" :flex_basis="flex_basis" :flex_basis_percentage="flex_basis_percentage" 
-            :displayButtons="displayButtons" @handleSubmit="saveDepartment" @handleReset="handleReset"
+            :displayButtons="displayButtons" @handleSubmit="saveEmailProvider" @handleReset="handleReset"
         />
     </MovableModal>
 </template>
@@ -42,7 +42,7 @@ import { useStore } from "vuex";
 import { useToast } from "vue-toastification";
 
 export default{
-    name: 'Departments',
+    name: 'Email_Integrations',
     components:{
         PageComponent,MovableModal,DynamicForm
     },
@@ -51,11 +51,11 @@ export default{
         const toast = useToast();
         const loader = ref('');
         const modal_loader = ref('none');
-        const title = ref('Department Details');
-        const addButtonLabel = ref('New Department');
-        const addingRight = ref('Add Company Department');
+        const title = ref('Email Integration Details');
+        const addButtonLabel = ref('New Email Provider');
+        const addingRight = ref('Email Integrations');
         const rightsModule = ref('Settings');
-        const idField = 'department_id';
+        const idField = 'email_integration_id';
         const depModalVisible = ref(false);
         const depList = ref([]);
         const depResults = ref([]);
@@ -69,58 +69,61 @@ export default{
         const flex_basis_percentage = ref('');
         const displayButtons = ref(true);
         const errors = ref([]);
-        const modal_top = ref('200px');
+        const modal_top = ref('100px');
         const modal_left = ref('400px');
         const modal_width = ref('30vw');
-        const isEditing = computed(()=> store.state.Departments.isEditing)
-        const selectedDepartment = computed(()=> store.state.Departments.selectedDepartment);
+        const isEditing = computed(()=> store.state.Email_Integrations.isEditing)
+        const selectedEmail = computed(()=> store.state.Email_Integrations.selectedEmail);
         const tableColumns = ref([
             {type: "checkbox"},
-            {label: "Code", key:"code",type: "text", editable: false},
-            {label: "Name", key: "name", type: "text", editable: false}
+            {label: "Email Name", key:"email_name",type: "text", editable: false},
+            {label: "SMTP Type", key: "smtp_type", type: "text", editable: false},
+            {label: "Username", key:"username",type: "text", editable: false},
+            {label: "Port", key:"port",type: "text", editable: false},
+            {label: "Status", key:"status",type: "text", editable: false},
         ])
         const actions = ref([
-            {name: 'edit', icon: 'fa fa-edit', title: 'Edit Department', rightName: 'Edit Company Department'},
-            {name: 'delete', icon: 'fa fa-trash', title: 'Delete Department', rightName: 'Delete Company Department'},
+            {name: 'edit', icon: 'fa fa-edit', title: 'Edit Email Provider', rightName: 'Email Integrations'},
+            {name: 'delete', icon: 'fa fa-trash', title: 'Delete Email Provider', rightName: 'Email Integrations'},
         ])
         const companyID = computed(()=> store.state.userData.company_id);
-        const code_search = computed({
-            get: () => store.state.Departments.code_search,
-            set: (value) => store.commit('Departments/SET_SEARCH_FILTERS', {"code_search":value}),
-        });
-        const name_search = computed({
-            get: () => store.state.Departments.name_search,
-            set: (value) => store.commit('Departments/SET_SEARCH_FILTERS', {"name_search":value}),
-        });
+
         const searchFilters = ref([
-            {type:'text', placeholder:"Search Code...", value: code_search},
-            {type:'text', placeholder:"Search Name...", value: name_search}
+            
         ]);
         const formFields = ref([]);
-        const updateFormFields = (department) => {
+        const updateFormFields = () => {
             formFields.value = [
-                { type: 'text', name: 'code',label: "Code", value: department?.code || '', required: true },
-                { type: 'text', name: 'name',label: "Name", value: department?.name || '', required: true },
+                { type: 'text', name: 'email_name',label: "Email Name", value: selectedEmail.value?.email_name || '', required: true },
+                { type: 'dropdown', name: 'smtp_type',label: "SMTP Type", value: selectedEmail.value?.smtp_type || 'Gmail SMTP', placeholder: "", required: true, options: [{ text: 'Local SMTP', value: 'Local SMTP' }, { text: 'Gmail SMTP', value: 'Gmail SMTP' }, { text: 'Yahoo SMTP', value: 'Yahoo SMTP' }] },
+                { type: 'text', name: 'host',label: "Host", value: selectedEmail.value?.host || 'smtp.gmail.com', required: false },
+                { type: 'text', name: 'username',label: "Username", value: selectedEmail.value?.username || '', required: true },
+                { type: 'password', name: 'password',label: "Password", value: selectedEmail.value?.password || '', required: true },
+                { type: 'text', name: 'port',label: "Port", value: selectedEmail.value?.port || '587', required: true },
+                { type: 'dropdown', name: 'status',label: "Status", value: selectedEmail.value?.status || 'Active', placeholder: "", required: true, options: [{ text: 'Active', value: 'Active' }, { text: 'Inactive', value: 'Inactive' }] },
             ];
         };
-        watch(selectedDepartment, (newDepartment) => {
-            updateFormFields(newDepartment);
+        watch([selectedEmail], () => {
+            if(selectedEmail.value){
+                updateFormFields();
+            }
         }, { immediate: true });
-        const addNewDepartment = () =>{
+        const addNewEmail = () =>{
+            updateFormFields();
             depModalVisible.value = true;
             handleReset();
-            store.dispatch("Departments/updateState",{isEditing:false})
+            store.dispatch("Email_Integrations/updateState",{isEditing:false})
             flex_basis.value = '1/2';
             flex_basis_percentage.value = '50';
         }
         const handleActionClick = async(rowIndex, action, row) =>{
             if( action == 'edit'){
-                const depID = row[idField];
+                const emailID = row[idField];
                 let formData = {
                     company: companyID.value,
-                    department: depID
+                    email_integration: emailID
                 }
-                await store.dispatch('Departments/fetchDepartment',formData).
+                await store.dispatch('Email_Integrations/fetchEmailProvider',formData).
                 then(()=>{
                     depModalVisible.value = true;
                     flex_basis.value = '1/2';
@@ -128,14 +131,14 @@ export default{
                 })
                 
             }else if(action == 'delete'){
-                const depID = row[idField];
+                const emailID = row[idField];
                 let formData = {
                     company: companyID.value,
-                    department: depID
+                    email_integration: emailID
                 }
-                await store.dispatch('Departments/deleteDepartment',formData).
+                await store.dispatch('Email_Integrations/deleteEmailProvider',formData).
                 then(()=>{
-                    searchDepartments();
+                    searchEmails();
                 })
             }
         } 
@@ -150,11 +153,16 @@ export default{
         const hideModalLoader = () =>{
             modal_loader.value = "none";
         }
-        const createDepartment = async() =>{
+        const createEmailProvider = async() =>{
             showModalLoader();
             let formData = {
-                code: formFields.value[0].value,
-                name: formFields.value[1].value,
+                smtp_type: formFields.value[1].value,
+                username: formFields.value[3].value,
+                host: formFields.value[2].value, 
+                email_name: formFields.value[0].value,
+                password: formFields.value[4].value,
+                port: formFields.value[5].value,
+                status: formFields.value[6].value,
                 company: companyID.value
             }
             errors.value = [];
@@ -168,31 +176,36 @@ export default{
                 hideModalLoader();
             }else{
                 try {
-                    const response = await store.dispatch('Departments/createDepartment', formData);
+                    const response = await store.dispatch('Email_Integrations/createEmailProvider', formData);
                     if(response && response.status === 200) {
                         hideModalLoader();
-                        toast.success('Department created successfully!');
+                        toast.success('Email Provider created successfully!');
                         handleReset();
                     }else {
-                        toast.error('An error occurred while creating the department.');
+                        toast.error('An error occurred while creating the Email Provider.');
                     }
                 } catch (error) {
                     console.error(error.message);
-                    toast.error('Failed to create department: ' + error.message);
+                    toast.error('Failed to create Email Provider: ' + error.message);
                 } finally {
                     hideModalLoader();
                 }
             }
 
         }
-        const updateDepartment = async() =>{
+        const updateEmailProvider = async() =>{
             showModalLoader();
             errors.value = [];
             let formData = {
-                code: formFields.value[0].value,
-                name: formFields.value[1].value,
+                smtp_type: formFields.value[1].value,
+                username: formFields.value[3].value,
+                host: formFields.value[2].value, 
+                email_name: formFields.value[0].value,
+                password: formFields.value[4].value,
+                port: formFields.value[5].value,
+                status: formFields.value[6].value,
                 company: companyID.value,
-                department: selectedDepartment.value.department_id
+                email_integration: selectedEmail.value.email_integration_id
             }
             for(let i=0; i < formFields.value.length; i++){
                 if(formFields.value[i].value =='' && formFields.value[i].required == true){
@@ -203,27 +216,28 @@ export default{
                     toast.error('Fill In Required Fields');
             }else{
                 try {
-                    const response = await store.dispatch('Departments/updateDepartment', formData);
+                    const response = await store.dispatch('Email_Integrations/updateEmailProvider', formData);
                     if (response && response.status === 200) {
                         hideModalLoader();
-                        toast.success("Department updated successfully!");
+                        toast.success("Email Provider updated successfully!");
                         handleReset();
+                        searchEmails();
                     } else {
-                        toast.error('An error occurred while updating the department.');
+                        toast.error('An error occurred while updating the Email Provider.');
                     }
                 } catch (error) {
                     console.error(error.message);
-                    toast.error('Failed to update department: ' + error.message);
+                    toast.error('Failed to update Email Provider: ' + error.message);
                 } finally {
                     hideModalLoader();
                 }
             }
         }
-        const saveDepartment = () =>{
+        const saveEmailProvider = () =>{
             if(isEditing.value == true){
-                updateDepartment();
+                updateEmailProvider();
             }else{
-                createDepartment();
+                createEmailProvider();
             }
         }
         const showLoader = () =>{
@@ -232,20 +246,18 @@ export default{
         const hideLoader = () =>{
             loader.value = "none";
         }
-        const searchDepartments = () =>{
+        const searchEmails = () =>{
             showLoader();
             showNextBtn.value = false;
             showPreviousBtn.value = false;
             let formData = {
-                code: code_search.value,
-                name: name_search.value,
-                company_id: companyID.value
+                company: companyID.value
             }
             axios
-            .post(`api/v1/department-search/?page=${currentPage.value}`,formData)
+            .post(`api/v1/email-integration-search/?page=${currentPage.value}`,formData)
             .then((response)=>{
                 depList.value = response.data.results;
-                store.commit('Departments/LIST_DEPARTMENTS', depList.value)
+                store.commit('Email_Integrations/LIST_EMAILS', depList.value)
                 depResults.value = response.data;
                 depArrLen.value = depList.value.length;
                 depCount.value = depResults.value.count;
@@ -272,7 +284,7 @@ export default{
                 currentPage.value -= 1;
             }
             
-            searchDepartments();
+            searchEmails();
         }
         const loadNext = () =>{
             if(currentPage.value >= pageCount.value){
@@ -281,28 +293,28 @@ export default{
                 currentPage.value += 1;
             }
             
-            searchDepartments();
+            searchEmails();
         }
         const firstPage = ()=>{
             currentPage.value = 1;
-            searchDepartments();
+            searchEmails();
         }
         const lastPage = () =>{
             currentPage.value = pageCount.value;
-            searchDepartments();
+            searchEmails();
         }
         const resetFilters = () =>{
-            store.commit('Departments/RESET_SEARCH_FILTERS')
-            searchDepartments();
+            store.commit('Email_Integrations/RESET_SEARCH_FILTERS')
+            searchEmails();
         }
         onMounted(()=>{
-            searchDepartments();
+            searchEmails();
         })
         return{
-            title,idField, searchDepartments, addButtonLabel, searchFilters, resetFilters, tableColumns, depList,
+            title,idField, searchEmails, addButtonLabel, searchFilters, resetFilters, tableColumns, depList,
             depResults, depArrLen, depCount, pageCount, showNextBtn, showPreviousBtn,modal_top, modal_left, modal_width,
-            loadPrev, loadNext, firstPage, lastPage, actions, formFields, depModalVisible, addNewDepartment,
-            displayButtons,flex_basis,flex_basis_percentage, handleActionClick, handleReset, saveDepartment,
+            loadPrev, loadNext, firstPage, lastPage, actions, formFields, depModalVisible, addNewEmail,
+            displayButtons,flex_basis,flex_basis_percentage, handleActionClick, handleReset, saveEmailProvider,
             showLoader, loader, hideLoader, modal_loader, showModalLoader, hideModalLoader,addingRight,rightsModule
         }
     }

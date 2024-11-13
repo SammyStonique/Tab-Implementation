@@ -111,12 +111,12 @@ export default defineComponent({
         const additionalFields = ref([]);
         const updateAdditionalFormFields = () => {
             additionalFields.value = [
-            { type: 'dropdown', name: 'pms_module',label: "Property Management", value: selectedUser.value?.pms_module || '', placeholder: "", required: true, options: [{ text: 'Enabled', value: 'Enabled' }, { text: 'Disabled', value: 'Disabled' }] },
-                { type: 'dropdown', name: 'accounts_module',label: "Financial Accounts", value: selectedUser.value?.accounts_module || '', placeholder: "", required: true, options: [{ text: 'Enabled', value: 'Enabled' }, { text: 'Disabled', value: 'Disabled' }] },
-                { type: 'dropdown', name: 'inventory_module',label: "Inventory Management", value: selectedUser.value?.inventory_module || '', placeholder: "", required: true, options: [{ text: 'Enabled', value: 'Enabled' }, { text: 'Disabled', value: 'Disabled' }] },
-                { type: 'dropdown', name: 'hms_module',label: "Hospital Management", value: selectedUser.value?.hms_module || '', placeholder: "", required: true, options: [{ text: 'Enabled', value: 'Enabled' }, { text: 'Disabled', value: 'Disabled' }] },
-                { type: 'dropdown', name: 'hr_module',label: "Human Resource", value: selectedUser.value?.hr_module || '', placeholder: "", required: true, options: [{ text: 'Enabled', value: 'Enabled' }, { text: 'Disabled', value: 'Disabled' }] },
-                { type: 'dropdown', name: 'settings_module',label: "Settings", value: selectedUser.value?.settings_module || '', placeholder: "", required: true, options: [{ text: 'Enabled', value: 'Enabled' }, { text: 'Disabled', value: 'Disabled' }] },
+            { type: 'dropdown', name: 'pms_module',label: "Property Management", value: selectedUser.value?.pms_module || 'Disabled', placeholder: "", required: true, options: [{ text: 'Enabled', value: 'Enabled' }, { text: 'Disabled', value: 'Disabled' }] },
+                { type: 'dropdown', name: 'accounts_module',label: "Financial Accounts", value: selectedUser.value?.accounts_module || 'Disabled', placeholder: "", required: true, options: [{ text: 'Enabled', value: 'Enabled' }, { text: 'Disabled', value: 'Disabled' }] },
+                { type: 'dropdown', name: 'inventory_module',label: "Inventory Management", value: selectedUser.value?.inventory_module || 'Disabled', placeholder: "", required: true, options: [{ text: 'Enabled', value: 'Enabled' }, { text: 'Disabled', value: 'Disabled' }] },
+                { type: 'dropdown', name: 'hms_module',label: "Hospital Management", value: selectedUser.value?.hms_module || 'Disabled', placeholder: "", required: true, options: [{ text: 'Enabled', value: 'Enabled' }, { text: 'Disabled', value: 'Disabled' }] },
+                { type: 'dropdown', name: 'hr_module',label: "Human Resource", value: selectedUser.value?.hr_module || 'Disabled', placeholder: "", required: true, options: [{ text: 'Enabled', value: 'Enabled' }, { text: 'Disabled', value: 'Disabled' }] },
+                { type: 'dropdown', name: 'settings_module',label: "Settings", value: selectedUser.value?.settings_module || 'Disabled', placeholder: "", required: true, options: [{ text: 'Enabled', value: 'Enabled' }, { text: 'Disabled', value: 'Disabled' }] },
             ];
         };
         watch([selectedUser, selectedDepartment], () => {

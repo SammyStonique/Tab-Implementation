@@ -75,11 +75,7 @@ export default defineComponent({
           dropdown.value = !dropdown.value;
       }
       const logout = async() =>{
-          await store.dispatch('userData/reloadPage');
-          await store.dispatch("userData/logout").
-          then(()=>{
-              store.dispatch('userData/reloadPage');
-          })
+            await store.dispatch("userData/logout")
       }
       const minimize = () =>{
         emit('minimize');

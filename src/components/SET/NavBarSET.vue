@@ -57,19 +57,25 @@
                 </div>
                 <div class="dropdown-content w-52 absolute rounded border border-gray-200 bg-white shadow-slate-400 shadow-sm pt-2" v-if="integrations_dropdown">
                     <div class="py-2 px-3 pl-4 w-full hover:bg-slate-500 hover:w-full">
-                        <button class="flex text-sm w-full" @click="openPage({'SET':'Mpesa_Integration'})">
+                        <button class="flex text-sm w-full" @click="openPage({'SET':'Mpesa_Authentication'})">
                             <i class="fa fa-money pt-2 mr-2" aria-hidden="true"></i>
-                            <p class="">Mpesa Integration</p>
+                            <p class="">Mpesa Authentication</p>
                         </button>
                     </div>
                     <div class="py-2 px-3 pl-4 w-full hover:bg-slate-500 hover:w-full">
-                        <button class="flex text-sm w-full" @click="openPage({'SET':'SMS_Integration'})">
+                        <button class="flex text-sm w-full" @click="openPage({'SET':'Mpesa_Endpoints'})">
+                            <i class="fa fa-money pt-2 mr-2" aria-hidden="true"></i>
+                            <p class="">Mpesa EndPoints</p>
+                        </button>
+                    </div>
+                    <div class="py-2 px-3 pl-4 w-full hover:bg-slate-500 hover:w-full">
+                        <button class="flex text-sm w-full" @click="openPage({'SET':'SMS_Integrations'})">
                             <i class="fa fa-comment pt-2 mr-2" aria-hidden="true"></i>
                             <p class="">SMS Integration</p>
                         </button>
                     </div>
                     <div class="py-2 px-3 pl-4 w-full hover:bg-slate-500 hover:w-full">
-                        <button class="flex text-sm w-full" @click="openPage({'SET':'Email_Integration'})">
+                        <button class="flex text-sm w-full" @click="openPage({'SET':'Email_Integrations'})">
                             <i class="fa fa-envelope pt-2 mr-2" aria-hidden="true"></i>
                             <p class="">Email Integration</p>
                         </button>

@@ -22,7 +22,7 @@ import PageStyleComponent from '@/components/PageStyleComponent.vue';
 import { useStore } from "vuex";
 import { useToast } from "vue-toastification";
 import { useDateFormatter } from '@/composables/DateFormatter';
-import DynamicTable from '@/components/DynamicTable.vue';
+import DynamicTable from '../DynamicTable.vue';
 
 export default defineComponent({
     name: 'Purchase_Details',

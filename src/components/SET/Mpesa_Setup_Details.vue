@@ -2,10 +2,10 @@
     <PageStyleComponent :key="mainComponentKey" :loader="loader" @showLoader="showLoader" @hideLoader="hideLoader">
         <template v-slot:body>
             <div class="mt-6">
-                <DynamicForm  :fields="formFields" :flex_basis="flex_basis" :flex_basis_percentage="flex_basis_percentage" :displayButtons="displayButtons" @handleSubmit="saveCompany" @handleReset="handleReset"> 
+                <DynamicForm  :fields="formFields" :flex_basis="flex_basis" :flex_basis_percentage="flex_basis_percentage" :displayButtons="displayButtons" @handleSubmit="saveSetup" @handleReset="handleReset"> 
                     <template v-slot:additional-content>
                         <div class="border border-slate-200 rounded relative py-3 mt-3 px-2 flex">
-                            <h1 class="font-bold absolute top-[-13px] left-5 bg-white">Company Modules</h1>
+                            <h1 class="font-bold absolute top-[-13px] left-5 bg-white">STK Push Setup</h1>
                             <div class="px-3">
                                 <DynamicForm :fields="additionalFields" :flex_basis="additional_flex_basis" :flex_basis_percentage="additional_flex_basis_percentage" @handleReset="handleReset"/>
                             </div>
@@ -26,7 +26,7 @@ import { useDateFormatter } from '@/composables/DateFormatter';
 import { useToast } from "vue-toastification";
 
 export default defineComponent({
-    name: 'Company_Details',
+    name: 'Mpesa_Setup_Details',
     components:{
         PageStyleComponent, DynamicForm
     },
@@ -36,6 +36,8 @@ export default defineComponent({
         const loader = ref('none');
         const mainComponentKey = ref(0);
         const componentKey = ref(0);
+        const keyComponentKey = ref(0);
+        const ledComponentKey = ref(0);
         const errors = ref([]);
         const companyID = computed(()=> store.state.userData.company_id);
         const displayButtons = ref(true);
@@ -44,20 +46,59 @@ export default defineComponent({
         const flex_basis_percentage = ref('');
         const additional_flex_basis = ref('');
         const additional_flex_basis_percentage = ref('');
-        const selectedCompany = computed(()=> store.state.Companies.selectedCompany);
+        const selectedSetup = computed(()=> store.state.Mpesa_Integrations.selectedSetup);
+        const selectedCashbook = computed(()=> store.state.Mpesa_Integrations.selectedCashbook);
+        const selectedKey = computed(()=> store.state.Mpesa_Integrations.selectedKey);
+        const keyArray = computed(() => store.state.Mpesa_Integrations.mpesaArr);
+        const ledgerArray = computed(() => store.state.Ledgers.ledgerArr);
+        const ledgerID = ref('');
+        const keyID = ref('');
+
+        const fetchLedgers = async() =>{
+            await store.dispatch('Ledgers/fetchLedgers', {company:companyID.value, ledger_type: 'Cashbook'})
+        };
+        const handleSelectedLedger = async(option) =>{
+            await store.dispatch('Ledgers/handleSelectedLedger', option)
+            ledgerID.value = store.state.Ledgers.ledgerID;
+        };
+        const clearSelectedLedger = async() =>{
+            await store.dispatch('Ledgers/updateState', {ledgerID: ''});
+            ledgerID.value = ""
+        }
+        const fetchKeys = async() =>{
+            await store.dispatch('Mpesa_Integrations/fetchMpesaAuthentications', {company:companyID.value})
+        };
+        const handleSelectedKey = async(option) =>{
+            await store.dispatch('Mpesa_Integrations/handleSelectedLedger', option)
+            keyID.value = store.state.Mpesa_Integrations.mpesaID;
+        };
+        const clearSelectedKey = async() =>{
+            await store.dispatch('Mpesa_Integrations/updateState', {mpesaID: ''});
+            keyID.value = ""
+        }
 
         const formFields = ref([]);
         const updateFormFields = () => {
             formFields.value = [
-                { type: 'text', name: 'name',label: "Name", value: selectedCompany.value?.name || '', required: true },
-                { type: 'text', name: 'registration_number',label: "Reg. Number", value: selectedCompany.value?.registration_number || '', required: true },
-                { type: 'text', name: 'email',label: "Email", value: selectedCompany.value?.email || '', required: true, placeholder: '' },
-                { type: 'text', name: 'phone_number',label: "Phone Number", value: selectedCompany.value?.phone_number || '', required: true },
-                { type: 'text', name: 'kra_pin',label: "Tax Pin", value: selectedCompany.value?.kra_pin || '', required: true },
-                { type: 'text', name: 'address',label: "Address", value: selectedCompany.value?.address || '', required: true },
-                { type: 'text', name: 'town',label: "Town", value: selectedCompany.value?.town || '', required: true },
-                { type: 'text', name: 'country',label: "Country", value: selectedCompany.value?.country || 'Kenya', required: true },
-                {required: false}
+                { type: 'text', name: 'short_code',label: "Short Code", value: selectedSetup.value?.short_code || '', required: true },
+                { type: 'dropdown', name: 'config_type',label: "Type", value: selectedSetup.value?.config_type || 'Primary', placeholder: "", required: true, options: [{ text: 'Primary', value: 'Primary' }, { text: 'Secondary', value: 'Secondary' }] },
+                { type: 'dropdown', name: 'transaction_type',label: "Transaction Type", value: selectedSetup.value?.transaction_type || 'Business Buy Goods', placeholder: "", required: true, options: [{ text: 'Business Pay Bill', value: 'Business Pay Bill' }, { text: 'Business Buy Goods', value: 'Business Buy Goods' }] },
+                { type: 'text', name: 'confirmation_url',label: "Confirmation URL", value: selectedSetup.value?.confirmation_url || '', required: true },
+                { type: 'text', name: 'validation_url',label: "Validation URL", value: selectedSetup.value?.validation_url || '', required: true },
+                { type: 'text', name: 'register_url',label: "Register URL", value: selectedSetup.value?.register_url || 'https://api.safaricom.co.ke/mpesa/c2b/v2/registerurl', required: true },
+                { type: 'text', name: 'response_type',label: "Response Type", value: selectedSetup.value?.response_type || 'Cancelled', required: true },
+                {
+                    type:'search-dropdown', label:"Consumer Key", value: keyID.value, componentKey: keyComponentKey,
+                    selectOptions: keyArray, optionSelected: handleSelectedKey, required: true,
+                    searchPlaceholder: 'Select Consumer Key...', dropdownWidth: '400px', updateValue: "",
+                    fetchData: fetchKeys(), clearSearch: clearSelectedKey()  
+                },
+                {
+                    type:'search-dropdown', label:"Cashbook", value: ledgerID.value, componentKey: ledComponentKey,
+                    selectOptions: ledgerArray, optionSelected: handleSelectedLedger, required: true,
+                    searchPlaceholder: 'Select Cashbook...', dropdownWidth: '400px', updateValue: selectedCashbook.value,
+                    fetchData: fetchLedgers(), clearSearch: clearSelectedLedger()  
+                },
             ];
         };
         const handleReset = () =>{
@@ -70,8 +111,8 @@ export default defineComponent({
             }
         }
 
-        watch([selectedCompany], () => {
-            if (selectedCompany.value) {
+        watch([selectedSetup], () => {
+            if (selectedSetup.value) {
                 updateFormFields();
             }
         }, { immediate: true });
@@ -79,16 +120,13 @@ export default defineComponent({
         const additionalFields = ref([]);
         const updateAdditionalFormFields = () => {
             additionalFields.value = [
-                { type: 'dropdown', name: 'pms_module',label: "Property Management", value: selectedCompany.value?.pms_module || 'Disabled', placeholder: "", required: true, options: [{ text: 'Enabled', value: 'Enabled' }, { text: 'Disabled', value: 'Disabled' }] },
-                { type: 'dropdown', name: 'accounts_module',label: "Financial Accounts", value: selectedCompany.value?.accounts_module || 'Disabled', placeholder: "", required: true, options: [{ text: 'Enabled', value: 'Enabled' }, { text: 'Disabled', value: 'Disabled' }] },
-                { type: 'dropdown', name: 'inventory_module',label: "Inventory Management", value: selectedCompany.value?.inventory_module || 'Disabled', placeholder: "", required: true, options: [{ text: 'Enabled', value: 'Enabled' }, { text: 'Disabled', value: 'Disabled' }] },
-                { type: 'dropdown', name: 'hms_module',label: "Hospital Management", value: selectedCompany.value?.hms_module || 'Disabled', placeholder: "", required: true, options: [{ text: 'Enabled', value: 'Enabled' }, { text: 'Disabled', value: 'Disabled' }] },
-                { type: 'dropdown', name: 'hr_module',label: "Human Resource", value: selectedCompany.value?.hr_module || 'Disabled', placeholder: "", required: true, options: [{ text: 'Enabled', value: 'Enabled' }, { text: 'Disabled', value: 'Disabled' }] },
-                { type: 'dropdown', name: 'settings_module',label: "Settings", value: selectedCompany.value?.settings_module || 'Disabled', placeholder: "", required: true, options: [{ text: 'Enabled', value: 'Enabled' }, { text: 'Disabled', value: 'Disabled' }] },
+                { type: 'text', name: 'stk_pass_key',label: "STK Push Pass Key", value: selectedSetup.value?.stk_pass_key || '', placeholder: "", required: false },
+                { type: 'text', name: 'stk_callback_url',label: "STK Push Callback URL", value: selectedSetup.value?.stk_callback_url || '', placeholder: "", required: false },
+                { type: 'text', name: 'stk_process_url',label: "STK Push Process URL", value: selectedSetup.value?.stk_process_url || 'https://api.safaricom.co.ke/mpesa/stkpush/v1/processrequest', placeholder: "", required: false },
             ];
         };
-        watch([selectedCompany], () => {
-            if(selectedCompany.value){
+        watch([selectedSetup], () => {
+            if(selectedSetup.value){
                 updateAdditionalFormFields();
             }
             
@@ -100,7 +138,7 @@ export default defineComponent({
         const hideLoader = () =>{
             loader.value = "none";
         } 
-        const createCompany = async() =>{
+        const createSetup = async() =>{
             showLoader();
             let formData = {
                 name: formFields.value[0].value,
@@ -137,26 +175,26 @@ export default defineComponent({
                 hideLoader();                 
             }else{            
                 try {
-                    const response = await store.dispatch('Companies/createCompany', formData);
+                    const response = await store.dispatch('Mpesa_Integrations/createMpesaEndpoint', formData);
                     if (response) {
                         hideLoader();
-                        toast.success('Company created successfully!');
+                        toast.success('Setup created successfully!');
                         handleReset();
                         mainComponentKey.value += 1;
                     } else {
-                        toast.error('An error occurred while creating the Company.');
+                        toast.error('An error occurred while creating the Setup.');
                         hideLoader();
                     }
                 } catch (error) {
                     console.error(error.message);
-                    toast.error('Failed to create Company: ' + error.message);
+                    toast.error('Failed to create Setup: ' + error.message);
                 } finally {
                     hideLoader();
                 }              
             }
         }
 
-        const updateCompany = async() => {
+        const updateSetup = async() => {
             showLoader();
             errors.value = [];
             for(let i=0; i < (formFields.value.length); i++){
@@ -174,7 +212,7 @@ export default defineComponent({
                     hideLoader();
             }else{
                 const updatedCompany = {
-                    company: selectedCompany.value.company_id,
+                    company: selectedSetup.value.company_id,
                     name: formFields.value[0].value,
                     kra_pin: formFields.value[4].value,
                     town: formFields.value[6].value,
@@ -183,7 +221,7 @@ export default defineComponent({
                     phone_number: formFields.value[3].value,
                     registration_number: formFields.value[1].value,
                     country: formFields.value[7].value,
-                    status: selectedCompany.value.status,
+                    status: selectedSetup.value.status,
                     pms_module: additionalFields.value[0].value,
                     accounts_module: additionalFields.value[1].value,
                     hr_module: additionalFields.value[4].value,
@@ -193,31 +231,31 @@ export default defineComponent({
                 };
 
                 try {
-                        const response = await store.dispatch('Companies/updateCompany', updatedCompany);
+                        const response = await store.dispatch('Mpesa_Integrations/updateMpesaEndpoint', updatedCompany);
                         if (response) {
                             hideLoader();
-                            toast.success('Company updated successfully!');
+                            toast.success('Setup updated successfully!');
                             handleReset();
                             mainComponentKey.value += 1;
-                            store.dispatch("Companies/updateState",{selectedCompany:null})
+                            store.dispatch("Mpesa_Integrations/updateState",{selectedSetup:null})
                         } else {
-                            toast.error('An error occurred while updating the Company.');
+                            toast.error('An error occurred while updating the Setup.');
                             hideLoader();
                         }
                     } catch (error) {
                         console.error(error.message);
-                        toast.error('Failed to update Company: ' + error.message);
+                        toast.error('Failed to update Setup: ' + error.message);
                     } finally {
                         hideLoader();
                     }
             }                    
         };
 
-        const saveCompany = () =>{
+        const saveSetup = () =>{
             if(isEditing.value == true){
-                updateCompany();
+                updateSetup();
             }else{
-                createCompany();
+                createSetup();
             }
         }
         
@@ -226,8 +264,8 @@ export default defineComponent({
             updateAdditionalFormFields();
             flex_basis.value = '1/4';
             flex_basis_percentage.value = '25';
-            additional_flex_basis.value = '1/4';
-            additional_flex_basis_percentage.value = '25';
+            additional_flex_basis.value = '1/3';
+            additional_flex_basis_percentage.value = '33.333';
         })
         onMounted(()=>{
 
@@ -235,7 +273,7 @@ export default defineComponent({
 
         return{
             componentKey, formFields, additionalFields, flex_basis, flex_basis_percentage, additional_flex_basis,
-            additional_flex_basis_percentage, displayButtons, saveCompany, mainComponentKey,
+            additional_flex_basis_percentage, displayButtons, saveSetup, mainComponentKey,
             handleReset, isEditing, loader, showLoader, hideLoader
         }
     }

@@ -38,7 +38,7 @@
         <button @click="showDropdown" class="rounded bg-green-400 text-sm  text-white px-2 py-1.5">{{ actionsButtonLabel }} <i class="fa fa-caret-down pl-2" aria-hidden="true"></i></button>
         <button class="fixed inset-0 bg-gray-50 opacity-15 cursor-default w-full" v-if="dropdown" @click="dropdown = !dropdown"></button>
         <div class=" text-left text-sm mt-1.5 absolute rounded bg-white w-36 py-1.5 px-1.5 shadow-md shadow-slate-500" v-if="dropdown">
-          <div>
+          <div class="actionsDropdown">
             <button @click="importData">Import</button><br />
             <button @click="removeItem">Remove</button><br />
             <button @click="removeSelectedItems">Remove Multiple</button><br />
@@ -222,6 +222,9 @@
   </script>
   
   <style scoped>
+  .actionsDropdown{
+    z-index: 10000 !important;
+  }
   .disabled {
     opacity: 0.5;
     pointer-events: none;
@@ -231,6 +234,7 @@
     /* align-items: center; */
     justify-content: space-between;
     padding: 10px;
+    z-index: 1000;
   }
   
   .filters {

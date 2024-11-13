@@ -71,6 +71,7 @@ import { defineComponent, ref, onMounted, computed} from 'vue';
 import axios from "axios";
 import { useStore } from "vuex";
 
+
 export default defineComponent({
   name: 'DynamicTable',
   props: {
@@ -115,6 +116,16 @@ export default defineComponent({
     const allowedRights = ref([]);
     const companyID = computed(()=> store.state.userData.company_id);
     const userID = computed(()=> store.state.userData.user_id);
+
+    // Deep clone the rows to avoid shared references between rows
+    // const rows = computed(() => {
+    //   return props.rows.map(row => ({
+    //     ...row,
+    //     // Clone any complex properties, for example, if `itemData` is shared
+    //     itemData: JSON.parse(JSON.stringify(row.itemData || {})),
+    //     // Similarly, you can deep clone any other nested data like `row[column.key]` or `row.specificProperty`
+    //   }));
+    // });
 
     // Initialize selected state for each row
     props.rows.forEach(row => {
@@ -162,6 +173,7 @@ export default defineComponent({
     const getNestedValue = (row, key) => {
       return key.split('.').reduce((obj, keyPart) => obj && obj[keyPart], row);
     };
+
     //JOURNALS
     const journalLineCheck = (row) =>{
       let debitAmount = parseFloat(row.debit_amount) || 0;
@@ -172,51 +184,6 @@ export default defineComponent({
         row.debit_amount = 0;
       }
     }
-    //DIRECT SALES
-    const availableItemQuantityCheck = (row) =>{
-      let stockType = row.stock_type || "";
-      let availQuant = parseFloat(row.batch_count) || 0;
-      let quantity = parseFloat(row.quantity) || 0;
-      let taxAmount = parseFloat(row.vat_amount) || 0;
-      let vat_inclusivity = row.vat_inclusivity || "Inclusive";
-      if (stockType != "Non Stocked"){
-        if(quantity > availQuant){
-          row.quantity = 1;
-          row.vat_rate = null;
-          row.vat_amount = 0;
-          row.discount = 0;
-          row.total_amount = row.cost;
-          row.item_sales_income = (parseFloat(row.selling_price) - parseFloat(row.purchase_price)) * row.quantity;
-        }else if(quantity <= 0){
-          row.quantity = 1;
-          row.vat_rate = null;
-          row.vat_amount = 0;
-          row.discount = 0;
-          row.total_amount = row.cost;
-          row.item_sales_income = (parseFloat(row.selling_price) - parseFloat(row.purchase_price)) * row.quantity;
-        }else{
-          if(taxAmount > 0 && vat_inclusivity == "Inclusive"){
-            row.total_amount = row.cost * row.quantity;
-          }else if(taxAmount > 0 && vat_inclusivity == "Exclusive"){
-            row.total_amount = parseFloat(row.cost * row.quantity) + parseFloat(row.vat_amount);
-          }else{
-            row.total_amount = row.cost * row.quantity;
-          }     
-        }
-      }
-    }
-    //DIRECT SALES
-    const saleDiscount = (row) =>{
-      let totalAmount = parseFloat(row.total_amount) || 0;
-      let quantity = parseFloat(row.quantity) || 0;
-      let subTotal = parseFloat(row.sub_total) || 0;
-      let discount = parseFloat(row.discount) || 0;
-      totalAmount = totalAmount - discount;
-      subTotal = subTotal - discount;
-      row.total_amount = totalAmount;
-      row.sub_total = subTotal;
-      row.item_sales_income = ((parseFloat(row.selling_price) - parseFloat(row.purchase_price)) * quantity) - discount;
-    };
     //TABLE TOTALS
     const calculateColumnTotal =(columnKey) =>{
         return props.rows.reduce((total, row) => {
@@ -264,9 +231,9 @@ export default defineComponent({
       updateUnits(row);
       receiptAllocation(row);
       journalLineCheck(row);
-      availableItemQuantityCheck(row);
-      saleDiscount(row);
-    }
+    };
+
+
     //METER READING
     const updateUnits = (row) =>{
       const prevReading = parseFloat(row.prev_reading) || 0;

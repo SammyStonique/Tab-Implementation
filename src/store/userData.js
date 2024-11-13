@@ -296,17 +296,31 @@ const actions = {
             }
         })
     },
-    logout({ commit,state }){
-        axios.post('api/v1/auth-token/logout/',{headers: {'Authorization': `Token ${state.token}`}})
+    deleteCookie({ commit }, name) {
+        document.cookie = `${name}=; Max-Age=0; path=/;`;
+    },
+
+    // Action to delete CSRF and session cookies
+    deleteCSRFAndSessionCookies({ dispatch }) {
+        dispatch('deleteCookie', 'csrftoken');
+        dispatch('deleteCookie', 'sessionid');
+    },
+    logout({ commit,state,dispatch }){
+        axios.post('api/v1/auth-token/logout/',{headers: {'Content-Type': 'application/json','Authorization': `Token ${state.token}`}})
         .then((response)=>{
             const newState ={
                 activeComponent:"Login",
                 isAuthenticated: false,
             }
             commit('SET_STATE',newState); 
+            commit('reloadingPage');
         })
         .catch((error)=>{
-            console.log(error.message)
+            console.log(error.message);
+            throw error;
+        })
+        .finally(()=>{
+            dispatch('deleteCSRFAndSessionCookies');
         })
     }
 }

@@ -38,6 +38,11 @@ import Branches from '@/components/SET/Branches.vue';
 import Users from '@/components/SET/Users.vue';
 import User_Details from '@/components/SET/User_Details.vue';
 import User_Rights from '@/components/SET/User_Rights.vue';
+import SMS_Integrations from '@/components/SET/SMS_Integrations.vue';
+import Email_Integrations from '@/components/SET/Email_Integrations.vue';
+import Mpesa_Authentication from '@/components/SET/Mpesa_Authentication.vue';
+import Mpesa_Endpoints from '@/components/SET/Mpesa_Endpoints.vue';
+import Mpesa_Setup_Details from '@/components/SET/Mpesa_Setup_Details.vue';
 
 export default{
     components:{
@@ -45,7 +50,7 @@ export default{
         NavBarSET,
         PagesTab,
         Dashboard,Companies,Company_Details,Default_Settings,Company_Info,Departments,Branches,Users,
-        User_Details,User_Rights
+        User_Details,User_Rights,SMS_Integrations,Email_Integrations,Mpesa_Authentication,Mpesa_Endpoints,Mpesa_Setup_Details
     },
     props: {
         title: {

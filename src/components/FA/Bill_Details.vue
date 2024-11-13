@@ -5,7 +5,7 @@
                 <DynamicForm  :fields="formFields" :flex_basis="flex_basis" :flex_basis_percentage="flex_basis_percentage" :displayButtons="displayButtons" @handleSubmit="createBill" @handleReset="handleReset"> 
                     <template v-slot:additional-content>                    
                         <div class="px-3 min-h-[220px]">
-                            <DynamicTable :key="tableKey" :columns="invoiceColumns" :rows="invoiceRows" :showActions="showActions" :idField="idField" :actions="actions" @action-click="deleteInvoiceLIne"/>
+                            <DynamicTable :key="tableKey" :columns="invoiceColumns" :rows="invoiceRows" :showActions="showActions" :idField="idField" :rightsModule="rightsModule" :actions="actions" @action-click="deleteInvoiceLIne"/>
                         </div>
                     </template>
                 </DynamicForm>
@@ -36,6 +36,7 @@ export default defineComponent({
         const current_date = new Date();
         const loader = ref('none');
         const modal_loader = ref('none');
+        const rightsModule = ref('Accounts');
         const tableKey = ref(0);
         const mainComponentKey = ref(0);
         const custComponentKey = ref(0);
@@ -84,7 +85,7 @@ export default defineComponent({
         ]);
 
         const actions = ref([
-            {name: 'delete', icon: 'fa fa-minus-circle', title: 'Remove Bill Line'},
+            {name: 'delete', icon: 'fa fa-minus-circle', title: 'Remove Bill Line', rightName: "Adding Bills"},
         ])
 
         const deleteInvoiceLIne = (rowIndex, action, row) =>{
@@ -350,7 +351,7 @@ export default defineComponent({
         return{
             formFields, flex_basis, flex_basis_percentage, displayButtons, createBill, mainComponentKey,
             handleReset, loader, showLoader, hideLoader, tableKey, invoiceColumns, invoiceRows, showActions, actions, deleteInvoiceLIne, idField,
-            title, modal_loader, modal_left, modal_top, modal_width, showModalLoader, hideModalLoader,
+            title, modal_loader, modal_left, modal_top, modal_width, showModalLoader, hideModalLoader,rightsModule
         }
     }
 })

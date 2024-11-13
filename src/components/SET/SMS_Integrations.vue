@@ -2,9 +2,9 @@
     <PageComponent 
         :loader="loader" @showLoader="showLoader" @hideLoader="hideLoader"
         :addButtonLabel="addButtonLabel"
-        @handleAddNew="addNewDepartment"
+        @handleAddNew="addNewBulkSMS"
         :searchFilters="searchFilters"
-        @searchPage="searchDepartments"
+        @searchPage="searchBulkSMS"
         @resetFilters="resetFilters"
         :addingRight="addingRight"
         :rightsModule="rightsModule"
@@ -27,7 +27,7 @@
         :loader="modal_loader" @showLoader="showModalLoader" @hideLoader="hideModalLoader" >
         <DynamicForm 
             :fields="formFields" :flex_basis="flex_basis" :flex_basis_percentage="flex_basis_percentage" 
-            :displayButtons="displayButtons" @handleSubmit="saveDepartment" @handleReset="handleReset"
+            :displayButtons="displayButtons" @handleSubmit="saveSMSProvider" @handleReset="handleReset"
         />
     </MovableModal>
 </template>
@@ -42,7 +42,7 @@ import { useStore } from "vuex";
 import { useToast } from "vue-toastification";
 
 export default{
-    name: 'Departments',
+    name: 'SMS_Integrations',
     components:{
         PageComponent,MovableModal,DynamicForm
     },
@@ -51,11 +51,11 @@ export default{
         const toast = useToast();
         const loader = ref('');
         const modal_loader = ref('none');
-        const title = ref('Department Details');
-        const addButtonLabel = ref('New Department');
-        const addingRight = ref('Add Company Department');
+        const title = ref('SMS Provider Details');
+        const addButtonLabel = ref('New SMS Provider');
+        const addingRight = ref('SMS Integrations');
         const rightsModule = ref('Settings');
-        const idField = 'department_id';
+        const idField = 'bulk_sms_id';
         const depModalVisible = ref(false);
         const depList = ref([]);
         const depResults = ref([]);
@@ -69,58 +69,58 @@ export default{
         const flex_basis_percentage = ref('');
         const displayButtons = ref(true);
         const errors = ref([]);
-        const modal_top = ref('200px');
+        const modal_top = ref('120px');
         const modal_left = ref('400px');
         const modal_width = ref('30vw');
-        const isEditing = computed(()=> store.state.Departments.isEditing)
-        const selectedDepartment = computed(()=> store.state.Departments.selectedDepartment);
+        const isEditing = computed(()=> store.state.SMS_Integrations.isEditing)
+        const selectedBulkSMS = computed(()=> store.state.SMS_Integrations.selectedBulkSMS);
         const tableColumns = ref([
             {type: "checkbox"},
-            {label: "Code", key:"code",type: "text", editable: false},
-            {label: "Name", key: "name", type: "text", editable: false}
+            {label: "Service Provider", key:"service_provider",type: "text", editable: false},
+            {label: "Username", key: "username", type: "text", editable: false},
+            {label: "Sender ID", key:"sender_id",type: "text", editable: false},
+            {label: "Status", key:"status",type: "text", editable: false},
         ])
         const actions = ref([
-            {name: 'edit', icon: 'fa fa-edit', title: 'Edit Department', rightName: 'Edit Company Department'},
-            {name: 'delete', icon: 'fa fa-trash', title: 'Delete Department', rightName: 'Delete Company Department'},
+            {name: 'edit', icon: 'fa fa-edit', title: 'Edit SMS Provider', rightName: 'SMS Integrations'},
+            {name: 'delete', icon: 'fa fa-trash', title: 'Delete SMS Provider', rightName: 'SMS Integrations'},
         ])
         const companyID = computed(()=> store.state.userData.company_id);
-        const code_search = computed({
-            get: () => store.state.Departments.code_search,
-            set: (value) => store.commit('Departments/SET_SEARCH_FILTERS', {"code_search":value}),
-        });
-        const name_search = computed({
-            get: () => store.state.Departments.name_search,
-            set: (value) => store.commit('Departments/SET_SEARCH_FILTERS', {"name_search":value}),
-        });
+
         const searchFilters = ref([
-            {type:'text', placeholder:"Search Code...", value: code_search},
-            {type:'text', placeholder:"Search Name...", value: name_search}
+            
         ]);
         const formFields = ref([]);
-        const updateFormFields = (department) => {
+        const updateFormFields = () => {
             formFields.value = [
-                { type: 'text', name: 'code',label: "Code", value: department?.code || '', required: true },
-                { type: 'text', name: 'name',label: "Name", value: department?.name || '', required: true },
+                { type: 'dropdown', name: 'service_provider',label: "Service Provider", value: selectedBulkSMS.value?.service_provider || '', placeholder: "", required: true, options: [{ text: 'Africastalking', value: 'Africastalking' }, { text: 'MTECH', value: 'MTECH' }] },
+                { type: 'text', name: 'username',label: "Username", value: selectedBulkSMS.value?.username || '', required: true },
+                { type: 'text', name: 'sender_id',label: "Sender ID:", value: selectedBulkSMS.value?.sender_id || '', required: false },
+                { type: 'text', name: 'api_key',label: "API Key", value: selectedBulkSMS.value?.api_key || '', required: true },
+                { type: 'dropdown', name: 'status',label: "Status", value: selectedBulkSMS.value?.status || 'Active', placeholder: "", required: true, options: [{ text: 'Active', value: 'Active' }, { text: 'Inactive', value: 'Inactive' }] },
             ];
         };
-        watch(selectedDepartment, (newDepartment) => {
-            updateFormFields(newDepartment);
+        watch([selectedBulkSMS], () => {
+            if(selectedBulkSMS.value){
+                updateFormFields();
+            }
         }, { immediate: true });
-        const addNewDepartment = () =>{
+        const addNewBulkSMS = () =>{
+            updateFormFields();
             depModalVisible.value = true;
             handleReset();
-            store.dispatch("Departments/updateState",{isEditing:false})
+            store.dispatch("SMS_Integrations/updateState",{isEditing:false})
             flex_basis.value = '1/2';
             flex_basis_percentage.value = '50';
         }
         const handleActionClick = async(rowIndex, action, row) =>{
             if( action == 'edit'){
-                const depID = row[idField];
+                const bulkSMSID = row[idField];
                 let formData = {
                     company: companyID.value,
-                    department: depID
+                    bulk_sms: bulkSMSID
                 }
-                await store.dispatch('Departments/fetchDepartment',formData).
+                await store.dispatch('SMS_Integrations/fetchSMS',formData).
                 then(()=>{
                     depModalVisible.value = true;
                     flex_basis.value = '1/2';
@@ -128,14 +128,14 @@ export default{
                 })
                 
             }else if(action == 'delete'){
-                const depID = row[idField];
+                const bulkSMSID = row[idField];
                 let formData = {
                     company: companyID.value,
-                    department: depID
+                    bulk_sms: bulkSMSID
                 }
-                await store.dispatch('Departments/deleteDepartment',formData).
+                await store.dispatch('SMS_Integrations/deleteBulkSMS',formData).
                 then(()=>{
-                    searchDepartments();
+                    searchBulkSMS();
                 })
             }
         } 
@@ -150,11 +150,14 @@ export default{
         const hideModalLoader = () =>{
             modal_loader.value = "none";
         }
-        const createDepartment = async() =>{
+        const createSMSProvider = async() =>{
             showModalLoader();
             let formData = {
-                code: formFields.value[0].value,
-                name: formFields.value[1].value,
+                service_provider: formFields.value[0].value,
+                username: formFields.value[1].value,
+                sender_id: formFields.value[2].value, 
+                api_key: formFields.value[3].value,
+                status: formFields.value[4].value,
                 company: companyID.value
             }
             errors.value = [];
@@ -168,31 +171,35 @@ export default{
                 hideModalLoader();
             }else{
                 try {
-                    const response = await store.dispatch('Departments/createDepartment', formData);
+                    const response = await store.dispatch('SMS_Integrations/createBulkSMS', formData);
                     if(response && response.status === 200) {
                         hideModalLoader();
-                        toast.success('Department created successfully!');
+                        toast.success('SMS Provider created successfully!');
                         handleReset();
+                        searchBulkSMS();
                     }else {
-                        toast.error('An error occurred while creating the department.');
+                        toast.error('An error occurred while creating the SMS Provider.');
                     }
                 } catch (error) {
                     console.error(error.message);
-                    toast.error('Failed to create department: ' + error.message);
+                    toast.error('Failed to create SMS Provider: ' + error.message);
                 } finally {
                     hideModalLoader();
                 }
             }
 
         }
-        const updateDepartment = async() =>{
+        const updateSMSProvider = async() =>{
             showModalLoader();
             errors.value = [];
             let formData = {
-                code: formFields.value[0].value,
-                name: formFields.value[1].value,
+                service_provider: formFields.value[0].value,
+                username: formFields.value[1].value,
+                sender_id: formFields.value[2].value, 
+                api_key: formFields.value[3].value,
+                status: formFields.value[4].value,
                 company: companyID.value,
-                department: selectedDepartment.value.department_id
+                bulk_sms: selectedBulkSMS.value.bulk_sms_id
             }
             for(let i=0; i < formFields.value.length; i++){
                 if(formFields.value[i].value =='' && formFields.value[i].required == true){
@@ -203,27 +210,27 @@ export default{
                     toast.error('Fill In Required Fields');
             }else{
                 try {
-                    const response = await store.dispatch('Departments/updateDepartment', formData);
+                    const response = await store.dispatch('SMS_Integrations/updateBulkSMS', formData);
                     if (response && response.status === 200) {
                         hideModalLoader();
-                        toast.success("Department updated successfully!");
+                        toast.success("SMS Provider updated successfully!");
                         handleReset();
                     } else {
-                        toast.error('An error occurred while updating the department.');
+                        toast.error('An error occurred while updating the SMS Provider.');
                     }
                 } catch (error) {
                     console.error(error.message);
-                    toast.error('Failed to update department: ' + error.message);
+                    toast.error('Failed to update SMS Provider: ' + error.message);
                 } finally {
                     hideModalLoader();
                 }
             }
         }
-        const saveDepartment = () =>{
+        const saveSMSProvider = () =>{
             if(isEditing.value == true){
-                updateDepartment();
+                updateSMSProvider();
             }else{
-                createDepartment();
+                createSMSProvider();
             }
         }
         const showLoader = () =>{
@@ -232,20 +239,18 @@ export default{
         const hideLoader = () =>{
             loader.value = "none";
         }
-        const searchDepartments = () =>{
+        const searchBulkSMS = () =>{
             showLoader();
             showNextBtn.value = false;
             showPreviousBtn.value = false;
             let formData = {
-                code: code_search.value,
-                name: name_search.value,
-                company_id: companyID.value
+                company: companyID.value
             }
             axios
-            .post(`api/v1/department-search/?page=${currentPage.value}`,formData)
+            .post(`api/v1/bulk-sms-search/?page=${currentPage.value}`,formData)
             .then((response)=>{
                 depList.value = response.data.results;
-                store.commit('Departments/LIST_DEPARTMENTS', depList.value)
+                store.commit('SMS_Integrations/LIST_SMS', depList.value)
                 depResults.value = response.data;
                 depArrLen.value = depList.value.length;
                 depCount.value = depResults.value.count;
@@ -272,7 +277,7 @@ export default{
                 currentPage.value -= 1;
             }
             
-            searchDepartments();
+            searchBulkSMS();
         }
         const loadNext = () =>{
             if(currentPage.value >= pageCount.value){
@@ -281,28 +286,28 @@ export default{
                 currentPage.value += 1;
             }
             
-            searchDepartments();
+            searchBulkSMS();
         }
         const firstPage = ()=>{
             currentPage.value = 1;
-            searchDepartments();
+            searchBulkSMS();
         }
         const lastPage = () =>{
             currentPage.value = pageCount.value;
-            searchDepartments();
+            searchBulkSMS();
         }
         const resetFilters = () =>{
-            store.commit('Departments/RESET_SEARCH_FILTERS')
-            searchDepartments();
+            store.commit('SMS_Integrations/RESET_SEARCH_FILTERS')
+            searchBulkSMS();
         }
         onMounted(()=>{
-            searchDepartments();
+            searchBulkSMS();
         })
         return{
-            title,idField, searchDepartments, addButtonLabel, searchFilters, resetFilters, tableColumns, depList,
+            title,idField, searchBulkSMS, addButtonLabel, searchFilters, resetFilters, tableColumns, depList,
             depResults, depArrLen, depCount, pageCount, showNextBtn, showPreviousBtn,modal_top, modal_left, modal_width,
-            loadPrev, loadNext, firstPage, lastPage, actions, formFields, depModalVisible, addNewDepartment,
-            displayButtons,flex_basis,flex_basis_percentage, handleActionClick, handleReset, saveDepartment,
+            loadPrev, loadNext, firstPage, lastPage, actions, formFields, depModalVisible, addNewBulkSMS,
+            displayButtons,flex_basis,flex_basis_percentage, handleActionClick, handleReset, saveSMSProvider,
             showLoader, loader, hideLoader, modal_loader, showModalLoader, hideModalLoader,addingRight,rightsModule
         }
     }

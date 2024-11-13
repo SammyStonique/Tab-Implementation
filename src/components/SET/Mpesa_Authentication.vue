@@ -2,9 +2,9 @@
     <PageComponent 
         :loader="loader" @showLoader="showLoader" @hideLoader="hideLoader"
         :addButtonLabel="addButtonLabel"
-        @handleAddNew="addNewDepartment"
+        @handleAddNew="addNewMpesaAuth"
         :searchFilters="searchFilters"
-        @searchPage="searchDepartments"
+        @searchPage="searchMpesaAuths"
         @resetFilters="resetFilters"
         :addingRight="addingRight"
         :rightsModule="rightsModule"
@@ -27,7 +27,7 @@
         :loader="modal_loader" @showLoader="showModalLoader" @hideLoader="hideModalLoader" >
         <DynamicForm 
             :fields="formFields" :flex_basis="flex_basis" :flex_basis_percentage="flex_basis_percentage" 
-            :displayButtons="displayButtons" @handleSubmit="saveDepartment" @handleReset="handleReset"
+            :displayButtons="displayButtons" @handleSubmit="saveMpesaAuth" @handleReset="handleReset"
         />
     </MovableModal>
 </template>
@@ -40,9 +40,10 @@ import MovableModal from '@/components/MovableModal.vue'
 import DynamicForm from '../NewDynamicForm.vue';
 import { useStore } from "vuex";
 import { useToast } from "vue-toastification";
+import Swal from 'sweetalert2';
 
 export default{
-    name: 'Departments',
+    name: 'Mpesa_Integrations',
     components:{
         PageComponent,MovableModal,DynamicForm
     },
@@ -51,11 +52,11 @@ export default{
         const toast = useToast();
         const loader = ref('');
         const modal_loader = ref('none');
-        const title = ref('Department Details');
-        const addButtonLabel = ref('New Department');
-        const addingRight = ref('Add Company Department');
+        const title = ref('Mpesa Auth Details');
+        const addButtonLabel = ref('New Mpesa Auth');
+        const addingRight = ref('Payment Integrations');
         const rightsModule = ref('Settings');
-        const idField = 'department_id';
+        const idField = 'authentication_id';
         const depModalVisible = ref(false);
         const depList = ref([]);
         const depResults = ref([]);
@@ -72,55 +73,65 @@ export default{
         const modal_top = ref('200px');
         const modal_left = ref('400px');
         const modal_width = ref('30vw');
-        const isEditing = computed(()=> store.state.Departments.isEditing)
-        const selectedDepartment = computed(()=> store.state.Departments.selectedDepartment);
+        const isEditing = computed(()=> store.state.Mpesa_Integrations.isEditing)
+        const selectedMpesa = computed(()=> store.state.Mpesa_Integrations.selectedMpesa);
         const tableColumns = ref([
             {type: "checkbox"},
-            {label: "Code", key:"code",type: "text", editable: false},
-            {label: "Name", key: "name", type: "text", editable: false}
+            {label: "Consumer Key", key:"consumer_key",type: "text", editable: false},
+            {label: "Consumer Secret", key: "consumer_secret", type: "text", editable: false},
         ])
         const actions = ref([
-            {name: 'edit', icon: 'fa fa-edit', title: 'Edit Department', rightName: 'Edit Company Department'},
-            {name: 'delete', icon: 'fa fa-trash', title: 'Delete Department', rightName: 'Delete Company Department'},
+            {name: 'edit', icon: 'fa fa-edit', title: 'Edit Mpesa Auth', rightName: 'Payment Integrations'},
+            {name: 'test', icon: 'fa fa-check-circle', title: 'Test Get Access Token', rightName: 'Payment Integrations'},
+            {name: 'delete', icon: 'fa fa-trash', title: 'Delete Mpesa Auth', rightName: 'Payment Integrations'},
         ])
         const companyID = computed(()=> store.state.userData.company_id);
-        const code_search = computed({
-            get: () => store.state.Departments.code_search,
-            set: (value) => store.commit('Departments/SET_SEARCH_FILTERS', {"code_search":value}),
-        });
-        const name_search = computed({
-            get: () => store.state.Departments.name_search,
-            set: (value) => store.commit('Departments/SET_SEARCH_FILTERS', {"name_search":value}),
-        });
+
         const searchFilters = ref([
-            {type:'text', placeholder:"Search Code...", value: code_search},
-            {type:'text', placeholder:"Search Name...", value: name_search}
+            
         ]);
         const formFields = ref([]);
-        const updateFormFields = (department) => {
+        const updateFormFields = () => {
             formFields.value = [
-                { type: 'text', name: 'code',label: "Code", value: department?.code || '', required: true },
-                { type: 'text', name: 'name',label: "Name", value: department?.name || '', required: true },
+                { type: 'text', name: 'consumer_key',label: "Consumer Key", value: selectedMpesa.value?.consumer_key || '', required: true },
+                { type: 'text', name: 'consumer_secret',label: "Consumer Secret", value: selectedMpesa.value?.consumer_secret || '', required: true },
+                {type:'text-area', label:"OAuth Url", value: selectedMpesa.value?.oauth || '', textarea_rows: '3', textarea_cols: '56', required: true},
             ];
         };
-        watch(selectedDepartment, (newDepartment) => {
-            updateFormFields(newDepartment);
+        watch([selectedMpesa], () => {
+            if(selectedMpesa.value){
+                updateFormFields();
+            }
         }, { immediate: true });
-        const addNewDepartment = () =>{
+        const addNewMpesaAuth = () =>{
+            updateFormFields();
             depModalVisible.value = true;
             handleReset();
-            store.dispatch("Departments/updateState",{isEditing:false})
+            store.dispatch("Mpesa_Integrations/updateState",{isEditing:false})
             flex_basis.value = '1/2';
             flex_basis_percentage.value = '50';
-        }
+        };
+        const testAuthentication = async(formData) =>{
+            await axios.post("api/v1/test-get-access-token/", formData)
+            .then((response)=>{
+                Swal.fire("Access Token Is ",response.data.access_token, {
+                    icon: "success",
+                });
+                
+            })
+            .catch((error)=>{
+                console.log(error.message);
+                toast.error(error.message);
+            })
+        };
         const handleActionClick = async(rowIndex, action, row) =>{
             if( action == 'edit'){
-                const depID = row[idField];
+                const mpesaID = row[idField];
                 let formData = {
                     company: companyID.value,
-                    department: depID
+                    authentication: mpesaID
                 }
-                await store.dispatch('Departments/fetchDepartment',formData).
+                await store.dispatch('Mpesa_Integrations/fetchMpesaAuthentication',formData).
                 then(()=>{
                     depModalVisible.value = true;
                     flex_basis.value = '1/2';
@@ -128,15 +139,22 @@ export default{
                 })
                 
             }else if(action == 'delete'){
-                const depID = row[idField];
+                const mpesaID = row[idField];
                 let formData = {
                     company: companyID.value,
-                    department: depID
+                    authentication: mpesaID
                 }
-                await store.dispatch('Departments/deleteDepartment',formData).
+                await store.dispatch('Mpesa_Integrations/deleteMpesaAuthentication',formData).
                 then(()=>{
-                    searchDepartments();
+                    searchMpesaAuths();
                 })
+            }else if(action == 'test'){
+                const mpesaID = row[idField];
+                let formData = {
+                    company: companyID.value,
+                    authentication: mpesaID
+                }
+                await testAuthentication(formData);
             }
         } 
         const handleReset = () =>{
@@ -150,11 +168,13 @@ export default{
         const hideModalLoader = () =>{
             modal_loader.value = "none";
         }
-        const createDepartment = async() =>{
+        const createMpesaAuth = async() =>{
             showModalLoader();
             let formData = {
-                code: formFields.value[0].value,
-                name: formFields.value[1].value,
+                consumer_key: formFields.value[0].value,
+                consumer_secret: formFields.value[1].value,
+                oauth: formFields.value[2].value, 
+                environment: 'sandbox',
                 company: companyID.value
             }
             errors.value = [];
@@ -168,31 +188,33 @@ export default{
                 hideModalLoader();
             }else{
                 try {
-                    const response = await store.dispatch('Departments/createDepartment', formData);
+                    const response = await store.dispatch('Mpesa_Integrations/createMpesaAuthentication', formData);
                     if(response && response.status === 200) {
                         hideModalLoader();
-                        toast.success('Department created successfully!');
+                        toast.success('Mpesa Authentication created successfully!');
                         handleReset();
                     }else {
-                        toast.error('An error occurred while creating the department.');
+                        toast.error('An error occurred while creating the Mpesa Authentication.');
                     }
                 } catch (error) {
                     console.error(error.message);
-                    toast.error('Failed to create department: ' + error.message);
+                    toast.error('Failed to create Mpesa Authentication: ' + error.message);
                 } finally {
                     hideModalLoader();
                 }
             }
 
         }
-        const updateDepartment = async() =>{
+        const updateMpesaAuth = async() =>{
             showModalLoader();
             errors.value = [];
             let formData = {
-                code: formFields.value[0].value,
-                name: formFields.value[1].value,
+                consumer_key: formFields.value[0].value,
+                consumer_secret: formFields.value[1].value,
+                oauth: formFields.value[2].value, 
+                environment: 'sandbox',
                 company: companyID.value,
-                department: selectedDepartment.value.department_id
+                authentication: selectedMpesa.value.authentication_id
             }
             for(let i=0; i < formFields.value.length; i++){
                 if(formFields.value[i].value =='' && formFields.value[i].required == true){
@@ -203,27 +225,28 @@ export default{
                     toast.error('Fill In Required Fields');
             }else{
                 try {
-                    const response = await store.dispatch('Departments/updateDepartment', formData);
+                    const response = await store.dispatch('Mpesa_Integrations/updateMpesaAuthentication', formData);
                     if (response && response.status === 200) {
                         hideModalLoader();
-                        toast.success("Department updated successfully!");
+                        toast.success("Mpesa Authentication updated successfully!");
                         handleReset();
+                        searchMpesaAuths();
                     } else {
-                        toast.error('An error occurred while updating the department.');
+                        toast.error('An error occurred while updating the Mpesa Authentication.');
                     }
                 } catch (error) {
                     console.error(error.message);
-                    toast.error('Failed to update department: ' + error.message);
+                    toast.error('Failed to update Mpesa Authentication: ' + error.message);
                 } finally {
                     hideModalLoader();
                 }
             }
         }
-        const saveDepartment = () =>{
+        const saveMpesaAuth = () =>{
             if(isEditing.value == true){
-                updateDepartment();
+                updateMpesaAuth();
             }else{
-                createDepartment();
+                createMpesaAuth();
             }
         }
         const showLoader = () =>{
@@ -232,20 +255,18 @@ export default{
         const hideLoader = () =>{
             loader.value = "none";
         }
-        const searchDepartments = () =>{
+        const searchMpesaAuths = () =>{
             showLoader();
             showNextBtn.value = false;
             showPreviousBtn.value = false;
             let formData = {
-                code: code_search.value,
-                name: name_search.value,
-                company_id: companyID.value
+                company: companyID.value
             }
             axios
-            .post(`api/v1/department-search/?page=${currentPage.value}`,formData)
+            .post(`api/v1/mpesa-authentication-search/?page=${currentPage.value}`,formData)
             .then((response)=>{
                 depList.value = response.data.results;
-                store.commit('Departments/LIST_DEPARTMENTS', depList.value)
+                store.commit('Mpesa_Integrations/LIST_MPESA', depList.value)
                 depResults.value = response.data;
                 depArrLen.value = depList.value.length;
                 depCount.value = depResults.value.count;
@@ -272,7 +293,7 @@ export default{
                 currentPage.value -= 1;
             }
             
-            searchDepartments();
+            searchMpesaAuths();
         }
         const loadNext = () =>{
             if(currentPage.value >= pageCount.value){
@@ -281,28 +302,28 @@ export default{
                 currentPage.value += 1;
             }
             
-            searchDepartments();
+            searchMpesaAuths();
         }
         const firstPage = ()=>{
             currentPage.value = 1;
-            searchDepartments();
+            searchMpesaAuths();
         }
         const lastPage = () =>{
             currentPage.value = pageCount.value;
-            searchDepartments();
+            searchMpesaAuths();
         }
         const resetFilters = () =>{
-            store.commit('Departments/RESET_SEARCH_FILTERS')
-            searchDepartments();
+            store.commit('Mpesa_Integrations/RESET_SEARCH_FILTERS')
+            searchMpesaAuths();
         }
         onMounted(()=>{
-            searchDepartments();
+            searchMpesaAuths();
         })
         return{
-            title,idField, searchDepartments, addButtonLabel, searchFilters, resetFilters, tableColumns, depList,
+            title,idField, searchMpesaAuths, addButtonLabel, searchFilters, resetFilters, tableColumns, depList,
             depResults, depArrLen, depCount, pageCount, showNextBtn, showPreviousBtn,modal_top, modal_left, modal_width,
-            loadPrev, loadNext, firstPage, lastPage, actions, formFields, depModalVisible, addNewDepartment,
-            displayButtons,flex_basis,flex_basis_percentage, handleActionClick, handleReset, saveDepartment,
+            loadPrev, loadNext, firstPage, lastPage, actions, formFields, depModalVisible, addNewMpesaAuth,
+            displayButtons,flex_basis,flex_basis_percentage, handleActionClick, handleReset, saveMpesaAuth,
             showLoader, loader, hideLoader, modal_loader, showModalLoader, hideModalLoader,addingRight,rightsModule
         }
     }

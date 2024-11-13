@@ -43,13 +43,17 @@
                         </div>
                     </div>
                     <div v-if="activeTab == 1">
-                        <FilterBar 
-                            :showAddButton="showAddButton"
-                            :filters="searchFilters" 
-                            @search="searchJournalEntries"
-                            @reset="resetFilters"
-                        />
-                        <DynamicTable :key="statementTableKey" :columns="statementColumns" :rows="statementRows" :idField="idFieldStatement" :showActions="showActions" :actions="actionsStatement"/>
+                        <div class="bg-white z-50">
+                            <FilterBar 
+                                :showAddButton="showAddButton"
+                                :filters="searchFilters" 
+                                @search="searchJournalEntries"
+                                @reset="resetFilters"
+                            />
+                        </div>
+                        <div class="bg-white z-30">
+                            <DynamicTable :key="statementTableKey" :columns="statementColumns" :rows="statementRows" :idField="idFieldStatement" :showActions="showActions" :actions="actionsStatement"/>
+                        </div>
                     </div>             
                 </div>
             </div>

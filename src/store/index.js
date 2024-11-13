@@ -53,6 +53,9 @@ import Default_Settings from './SET/Default_Settings';
 import Companies from './SET/Companies';
 import Branches from './SET/Branches';
 import User_Rights from './SET/User_Rights';
+import SMS_Integrations from './SET/SMS_Integrations';
+import Email_Integrations from './SET/Email_Integrations';
+import Mpesa_Integrations from './SET/Mpesa_Integrations';
 
 export default createStore({
   modules: {
@@ -71,6 +74,6 @@ export default createStore({
     
     Ledgers, Currencies, Taxes, Journals, Customers, Vendors,Fiscal_Periods,
 
-    Default_Settings,Companies,Branches,User_Rights
+    Default_Settings,Companies,Branches,User_Rights,SMS_Integrations,Email_Integrations,Mpesa_Integrations
   },
 });

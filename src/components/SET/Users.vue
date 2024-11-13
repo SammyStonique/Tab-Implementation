@@ -103,7 +103,7 @@ export default{
         const modal_top = ref('120px');
         const modal_left = ref('250px');
         const modal_left1 = ref('400px');
-        const modal_width = ref('40vw');
+        const modal_width = ref('55vw');
         const modal_width1 = ref('40vw');
         const title = ref('Assign User Rights');
         const title1 = ref('User Allowed Companies');
