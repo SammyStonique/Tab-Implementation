@@ -65,14 +65,15 @@ export default{
         const showModal = ref(false);
         const tableColumns = ref([
             {type: "checkbox"},
-            {label: "Short Code", key:"name"},
-            {label: "Cashbook", key:"email"},
-            {label: "Type", key:"phone_number"},
-            {label: "Consumer Key", key:"registration_number"},
-            {label: "Status", key: "status"},
+            {label: "Short Code", key:"short_code"},
+            {label: "Txn Type", key:"transaction_type"},
+            {label: "Cashbook", key:"cashbook"},
+            {label: "Type", key:"config_type"},
+            {label: "Consumer Key", key:"authentication"},
         ])
         const actions = ref([
             {name: 'edit', icon: 'fa fa-edit', title: 'Edit Setup', rightName: 'Payment Integrations'},
+            {name: 'register', icon: 'fa fa-check-circle', title: 'Register Url', rightName: 'Payment Integrations'},
             {name: 'delete', icon: 'fa fa-trash', title: 'Delete Setup', rightName: 'Payment Integrations'},
         ])
         const companyID = computed(()=> store.state.userData.company_id);
@@ -86,10 +87,11 @@ export default{
         const removeEndpoint = async() =>{
             if(selectedIds.value.length == 1){
                 let formData = {
-                    company: selectedIds.value
+                    mpesa_setup: selectedIds.value,
+                    company: companyID.value
                 }
                 try{
-                    const response = await store.dispatch('Mpesa_Integrations/deleteMpesaEndpoint',formData)
+                    const response = await store.dispatch('Mpesa_Integrations/deleteMpesaSetup',formData)
                     if(response && response.status == 200){
                         toast.success("Setup Removed Succesfully");
                         searchSetups();
@@ -111,10 +113,11 @@ export default{
         const removeEndpoints = async() =>{
             if(selectedIds.value.length){
                 let formData = {
-                    company: selectedIds.value
+                    mpesa_setup: selectedIds.value,
+                    company: companyID.value
                 }
                 try{
-                    const response = await store.dispatch('Mpesa_Integrations/deleteMpesaEndpoint',formData)
+                    const response = await store.dispatch('Mpesa_Integrations/deleteMpesaSetup',formData)
                     if(response && response.status == 200){
                         toast.success("Setup(s) Removed Succesfully");
                         searchCompanies();
@@ -147,10 +150,10 @@ export default{
                 company: companyID.value
             } 
             axios
-            .post(`api/v1/companies-search/?page=${currentPage.value}`,formData)
+            .post(`api/v1/mpesa-setup-search/?page=${currentPage.value}`,formData)
             .then((response)=>{
                 mpesaList.value = response.data.results;
-                store.commit('Mpesa_Integrations/LIST_ENDPOINTS', mpesaList.value)
+                store.commit('Mpesa_Integrations/LIST_SETUPS', mpesaList.value)
                 propResults.value = response.data;
                 propArrLen.value = mpesaList.value.length;
                 propCount.value = propResults.value.count;
@@ -205,32 +208,56 @@ export default{
         }
         const addNewEndpoint = async() =>{
             store.commit('Mpesa_Integrations/initializeStore');
-            await store.dispatch('Mpesa_Integrations/updateState', {selectedCompany: null, isEditing: false});
+            await store.dispatch('Mpesa_Integrations/updateState', {selectedSetup: null, isEditing: false, selectedCashbook: null, selectedKey: null, });
             store.commit('pageTab/ADD_PAGE', {'SET':'Mpesa_Setup_Details'});
             store.state.pageTab.setActiveTab = 'Mpesa_Setup_Details';          
-        }
+        };
+
+        const registerUrl = async(formData) =>{
+            await axios.post("api/v1/register-callback-url/", formData)
+            .then((response)=>{
+                if(response.data.ResponseDescription == "Success"){
+                    toast.success("Success")
+                }else{
+                    toast.error("Failed")
+                }
+                
+            })
+            .catch((error)=>{
+                console.log(error.message);
+                toast.error(error.message);
+            })
+        };
+
         const handleActionClick = async(rowIndex, action, row) =>{
             if( action == 'edit'){
-                const companyName = row['name'];
-                const companyStatus = row['status'];
+                const setupID = row['mpesa_setup_id'];
                 let formData = {
-                    company_name: companyName,
-                    status: companyStatus
+                    company: companyID.value,
+                    mpesa_setup: setupID
                 }
-                await store.dispatch('Mpesa_Integrations/fetchMpesaEndpoint',formData).
+                await store.dispatch('Mpesa_Integrations/fetchMpesaSetup',formData).
                 then(()=>{
                     store.commit('pageTab/ADD_PAGE', {'SET':'Mpesa_Setup_Details'})
                     store.state.pageTab.setActiveTab = 'Mpesa_Setup_Details';
                 })
             }else if(action == 'delete'){
-                const companyID = row['company_id'];
+                const setupID = row['mpesa_setup_id'];
                 let formData = {
-                    company: companyID
+                    company: companyID.value,
+                    mpesa_setup: setupID
                 }
-                await store.dispatch('Mpesa_Integrations/deleteMpesaEndpoint',formData).
+                await store.dispatch('Mpesa_Integrations/deleteMpesaSetup',formData).
                 then(()=>{
                     searchSetups();
                 })
+            }else if(action == 'register'){
+                const mpesaID = row['authentication_id'];
+                let formData = {
+                    company: companyID.value,
+                    authentication: mpesaID
+                }
+                await registerUrl(formData);
             }
         }
         const closeModal = () =>{
