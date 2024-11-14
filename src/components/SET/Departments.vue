@@ -24,7 +24,7 @@
         :showPreviousBtn="showPreviousBtn"
     />
     <MovableModal v-model:visible="depModalVisible" :title="title" :modal_top="modal_top" :modal_left="modal_left" :modal_width="modal_width"
-        :loader="modal_loader" @showLoader="showModalLoader" @hideLoader="hideModalLoader" >
+        :loader="modal_loader" @showLoader="showModalLoader" @hideLoader="hideModalLoader" @closeModal="closeModal">
         <DynamicForm 
             :fields="formFields" :flex_basis="flex_basis" :flex_basis_percentage="flex_basis_percentage" 
             :displayButtons="displayButtons" @handleSubmit="saveDepartment" @handleReset="handleReset"
@@ -303,7 +303,7 @@ export default{
             depResults, depArrLen, depCount, pageCount, showNextBtn, showPreviousBtn,modal_top, modal_left, modal_width,
             loadPrev, loadNext, firstPage, lastPage, actions, formFields, depModalVisible, addNewDepartment,
             displayButtons,flex_basis,flex_basis_percentage, handleActionClick, handleReset, saveDepartment,
-            showLoader, loader, hideLoader, modal_loader, showModalLoader, hideModalLoader,addingRight,rightsModule
+            showLoader, loader, hideLoader, modal_loader, showModalLoader, hideModalLoader,addingRight,rightsModule,closeModal
         }
     }
 }

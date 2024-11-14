@@ -28,25 +28,38 @@
             :showNextBtn="showNextBtn"
             :showPreviousBtn="showPreviousBtn"
         />
+        <MovableModal v-model:visible="depModalVisible" :title="title" :modal_top="modal_top" :modal_left="modal_left" :modal_width="modal_width"
+            :loader="modal_loader" @showLoader="showModalLoader" @hideLoader="hideModalLoader" @closeModal="closeModal">
+            <DynamicForm 
+                :fields="formFields" :flex_basis="flex_basis" :flex_basis_percentage="flex_basis_percentage" 
+                :displayButtons="displayButtons" @handleSubmit="simulateSTKPush" @handleReset="handleReset"
+            />
+        </MovableModal>
     </div>
 </template>
 
 <script>
 import axios from "axios";
 import { ref, computed, onMounted, onBeforeMount} from 'vue';
-import PageComponent from '@/components/PageComponent.vue'
+import PageComponent from '@/components/PageComponent.vue';
+import MovableModal from '@/components/MovableModal.vue'
+import DynamicForm from '../NewDynamicForm.vue';
 import { useStore } from "vuex";
 import { useToast } from "vue-toastification";
 
 export default{
     name: 'Mpesa_Endpoints',
     components:{
-        PageComponent
+        PageComponent,MovableModal,DynamicForm
     },
     setup(){
         const store = useStore();
         const toast = useToast();
         const loader = ref('');
+        const modal_loader = ref('none');
+        const title = ref('Simulate STK Push');
+        const depModalVisible = ref(false);
+        const displayButtons = ref(true);
         const idField = 'endpoint_id';
         const addButtonLabel = ref('New Setup');
         const addingRight = ref('Payment Integrations');
@@ -62,7 +75,15 @@ export default{
         const showNextBtn = ref(false);
         const showPreviousBtn = ref(false);
         const propModalVisible = ref(false);
+        const flex_basis = ref('');
+        const flex_basis_percentage = ref('');
+        const modal_top = ref('200px');
+        const modal_left = ref('400px');
+        const modal_width = ref('30vw');
         const showModal = ref(false);
+        const mpesaID = ref('');
+        const stkPassKey = ref('');
+        const short_code = ref('');
         const tableColumns = ref([
             {type: "checkbox"},
             {label: "Short Code", key:"short_code"},
@@ -70,10 +91,12 @@ export default{
             {label: "Cashbook", key:"cashbook"},
             {label: "Type", key:"config_type"},
             {label: "Consumer Key", key:"authentication"},
+            {label: "Status", key:"status"},
         ])
         const actions = ref([
             {name: 'edit', icon: 'fa fa-edit', title: 'Edit Setup', rightName: 'Payment Integrations'},
             {name: 'register', icon: 'fa fa-check-circle', title: 'Register Url', rightName: 'Payment Integrations'},
+            {name: 'simulate', icon: 'fa fa-link', title: 'Simulate STK', rightName: 'Payment Integrations'},
             {name: 'delete', icon: 'fa fa-trash', title: 'Delete Setup', rightName: 'Payment Integrations'},
         ])
         const companyID = computed(()=> store.state.userData.company_id);
@@ -81,6 +104,14 @@ export default{
         const searchFilters = ref([
 
         ]);
+        const formFields = ref([]);
+        const updateFormFields = () => {
+            formFields.value = [
+                { type: 'text', name: 'phone_number',label: "Phone Number", value: '', required: true, placeholder: "2547XXXX" },
+                { type: 'text', name: 'amount',label: "Amount", value: '', required: true },
+                { type: 'text', name: 'account_reference',label: "Account Number", value: '', required: true },
+            ];
+        };
         const handleSelectionChange = (ids) => {
             selectedIds.value = ids;
         };
@@ -213,11 +244,45 @@ export default{
             store.state.pageTab.setActiveTab = 'Mpesa_Setup_Details';          
         };
 
+        const simulateSTKPush = async() =>{
+            showModalLoader();
+            let formData = {
+                company: companyID.value,
+                authentication: mpesaID.value,
+                short_code: short_code.value,
+                stk_pass_key: stkPassKey.value,
+                transaction_desc: "Test STK Push",
+                phone_number : formFields.value[0].value,
+                amount : formFields.value[1].value,
+                account_reference : formFields.value[2].value,
+            } 
+            await axios.post("api/v1/simulate-stk-push/", formData)
+            .then((response)=>{
+                if(response.data.ResponseCode == "0"){
+                    toast.success("Success")
+                    handleReset();
+                    hideModalLoader();
+                }else{
+                    toast.error("Failed");
+                    hideModalLoader();
+                }
+                
+            })
+            .catch((error)=>{
+                console.log(error.message);
+                toast.error(error.message);
+            })
+            .finally(()=>{
+                hideModalLoader();
+            })
+        };
+
         const registerUrl = async(formData) =>{
             await axios.post("api/v1/register-callback-url/", formData)
             .then((response)=>{
-                if(response.data.ResponseDescription == "Success"){
+                if(response.data.ResponseCode == "0"){
                     toast.success("Success")
+                    searchSetups();
                 }else{
                     toast.error("Failed")
                 }
@@ -228,6 +293,12 @@ export default{
                 toast.error(error.message);
             })
         };
+
+        const handleReset = () =>{
+            for(let i=0; i < formFields.value.length; i++){
+                formFields.value[i].value = '';
+            }
+        }
 
         const handleActionClick = async(rowIndex, action, row) =>{
             if( action == 'edit'){
@@ -253,26 +324,52 @@ export default{
                 })
             }else if(action == 'register'){
                 const mpesaID = row['authentication_id'];
-                let formData = {
-                    company: companyID.value,
-                    authentication: mpesaID
+                const regStatus = row['status'];
+                if (regStatus == "Success"){
+                    toast.error("Endpoints Already Registered")
+                }else{
+                    let formData = {
+                        company: companyID.value,
+                        authentication: mpesaID
+                    }
+                    await registerUrl(formData);
                 }
-                await registerUrl(formData);
+                
+            }else if(action == 'simulate'){
+                updateFormFields();
+                depModalVisible.value = true;
+                handleReset();
+                flex_basis.value = '1/2';
+                flex_basis_percentage.value = '50';
+                mpesaID.value = row['authentication_id'];
+                stkPassKey.value = row['stk_pass_key'];
+                short_code.value = row['short_code'];
+                        
             }
+        }
+        const showModalLoader = () =>{
+            modal_loader.value = "block";
+        }
+        const hideModalLoader = () =>{
+            modal_loader.value = "none";
         }
         const closeModal = () =>{
             propModalVisible.value = false;
+            mpesaID.value = "";
+            stkPassKey.value = "";
+            short_code.value = "";
         }
         onBeforeMount(()=>{
             searchSetups();
             
         })
         return{
-            searchSetups,resetFilters, addButtonLabel, searchFilters, tableColumns, mpesaList,
+            searchSetups,resetFilters, addButtonLabel, searchFilters, tableColumns, mpesaList,displayButtons,handleReset,
             propResults, propArrLen, propCount, pageCount, showNextBtn, showPreviousBtn,
             loadPrev, loadNext, firstPage, lastPage, idField, actions, handleActionClick, propModalVisible, closeModal,
             submitButtonLabel, showModal, addNewEndpoint, showLoader, loader, hideLoader, removeEndpoint, removeEndpoints,
-            handleSelectionChange,addingRight,rightsModule
+            handleSelectionChange,addingRight,rightsModule,showModalLoader,hideModalLoader,modal_loader,title,flex_basis,flex_basis_percentage,
+            modal_left,modal_top,modal_width,depModalVisible,formFields,simulateSTKPush
         }
     }
 };
