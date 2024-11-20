@@ -11,7 +11,7 @@
             @resetFilters="resetFilters"
             @removeItem="removeLeaseFee"
             @removeSelectedItems="removeLeaseFees"
-            @printList="printList"
+            @printList="printLeaseFeesList"
             :addingRight="addingRight"
             :rightsModule="rightsModule"
             :columns="tableColumns"
@@ -51,6 +51,7 @@ import DynamicForm from '../NewDynamicForm.vue';
 import { useStore } from "vuex";
 import { useToast } from "vue-toastification";
 import { useDateFormatter } from '@/composables/DateFormatter';
+import PrintJS from 'print-js';
 
 export default{
     name: 'Lease_Fees',
@@ -107,7 +108,8 @@ export default{
         ])
         const showTotals = ref(true);
         const actions = ref([
-            {name: 'print', icon: 'fa fa-print', title: 'Print Invoice', rightName: 'Print Lease Invoice'},
+            {name: 'print', icon: 'fa fa-print', title: 'Print Invoice', rightName: 'Print Tenant Invoice'},
+            {name: 'delete', icon: 'fa fa-trash', title: 'Delete Lease Fee', rightName: 'Deleting Tenant Invoice'},
         ])
         const companyID = computed(()=> store.state.userData.company_id);
         const fetchProperties = async() =>{
@@ -345,7 +347,29 @@ export default{
             flex_basis_percentage.value = '25';
         }
         const handleActionClick = async(rowIndex, action, row) =>{
-            
+            if(action == 'delete'){
+                const feeID = [row['lease_fee_id']];
+                let formData = {
+                    company: companyID.value,
+                    lease_fee: feeID,
+                }
+                await store.dispatch('Lease_Fees/deleteLeaseFees',formData).
+                then(()=>{
+                    searchInvoices();
+                })
+            }
+            else if(action == 'print'){
+                showLoader();
+                const journalID = row['journal_id'];
+                let formData = {
+                    invoice: journalID,
+                    company: companyID.value
+                }
+                await store.dispatch('Journals/previewTenantInvoice',formData).
+                then(()=>{
+                    hideLoader();
+                })
+            }
         }
         const closeModal = async() =>{
             invModalVisible.value = false;
@@ -364,6 +388,34 @@ export default{
                 store.commit('pageTab/ADD_PAGE', {'PMS':'Batch_Readings'})
                 store.state.pageTab.pmsActiveTab = 'Batch_Readings';
             }
+        };
+        const printLeaseFeesList = () =>{
+            showLoader();
+            let formData = {
+                tenant_name: tenant_name_search.value,
+                tenant_code: tenant_code_search.value,
+                from_date: from_date_search.value,
+                to_date: to_date_search.value,
+                property: propertyID.value,
+                company: companyID.value
+            } 
+
+            axios
+            .post("api/v1/export-lease-fees-pdf/", formData, { responseType: 'blob' })
+                .then((response)=>{
+                    if(response.status == 200){
+                        const blob1 = new Blob([response.data]);
+                        // Convert blob to URL
+                        const url = URL.createObjectURL(blob1);
+                        PrintJS({printable: url, type: 'pdf'});
+                    }
+                })
+            .catch((error)=>{
+                console.log(error.message);
+            })
+            .finally(()=>{
+                hideLoader();
+            })
         }
         onBeforeMount(()=>{
             searchLeaseFees();
@@ -375,7 +427,7 @@ export default{
             loadPrev, loadNext, firstPage, lastPage, idField, actions, handleActionClick, propModalVisible, closeModal,
             submitButtonLabel, showModal, addNewLeaseFee, showLoader, loader, hideLoader, modal_loader, modal_top, modal_left, modal_width,displayButtons,
             showModalLoader, hideModalLoader, formFields, handleSelectionChange, flex_basis,flex_basis_percentage,
-            dropdownOptions, handleDynamicOption, createLeaseFee,addingRight,rightsModule
+            dropdownOptions, handleDynamicOption, createLeaseFee,addingRight,rightsModule,printLeaseFeesList
         }
     }
 };

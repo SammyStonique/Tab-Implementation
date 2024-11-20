@@ -10,7 +10,7 @@
             @importData="importProperties"
             @removeItem="removeProperty"
             @removeSelectedItems="removeProperties"
-            @printList="printList"
+            @printList="printPropertiesList"
             :addingRight="addingRight"
             :rightsModule="rightsModule"
             :columns="tableColumns"
@@ -38,6 +38,7 @@ import { ref, computed, onMounted, onBeforeMount} from 'vue';
 import PageComponent from '@/components/PageComponent.vue'
 import { useStore } from "vuex";
 import { useToast } from "vue-toastification";
+import PrintJS from 'print-js';
 
 export default{
     name: 'Properties_List',
@@ -297,6 +298,35 @@ export default{
         }
         const closeModal = () =>{
             propModalVisible.value = false;
+        };
+        const printPropertiesList = () =>{
+            showLoader();
+            let formData = {
+                name: name_search.value,
+                property_code: property_code_search.value,
+                status: status_search.value,
+                landlord: landlordID.value,
+                zone: zoneID.value,
+                property_type: property_type_search.value,
+                company_id: companyID.value
+            } 
+
+            axios
+            .post("api/v1/export-properties-pdf/", formData, { responseType: 'blob' })
+                .then((response)=>{
+                    if(response.status == 200){
+                        const blob1 = new Blob([response.data]);
+                        // Convert blob to URL
+                        const url = URL.createObjectURL(blob1);
+                        PrintJS({printable: url, type: 'pdf'});
+                    }
+                })
+            .catch((error)=>{
+                console.log(error.message);
+            })
+            .finally(()=>{
+                hideLoader();
+            })
         }
         onBeforeMount(()=>{
             searchProperties();
@@ -307,7 +337,7 @@ export default{
             propResults, propArrLen, propCount, pageCount, showNextBtn, showPreviousBtn,
             loadPrev, loadNext, firstPage, lastPage, idField, actions, handleActionClick, propModalVisible, closeModal,
             submitButtonLabel, showModal, addNewProperty, showLoader, loader, hideLoader, importProperties, removeProperty, removeProperties,
-            handleSelectionChange,addingRight,rightsModule
+            handleSelectionChange,addingRight,rightsModule,printPropertiesList
         }
     }
 };

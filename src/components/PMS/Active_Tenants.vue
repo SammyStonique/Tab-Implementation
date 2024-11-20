@@ -10,7 +10,7 @@
             @importData="importTenants"
             @removeItem="removeTenant"
             @removeSelectedItems="removeTenants"
-            @printList="printList"
+            @printList="printTenantsList"
             :addingRight="addingRight"
             :rightsModule="rightsModule"
             :columns="tableColumns"
@@ -38,6 +38,7 @@ import { ref, computed, onMounted, onBeforeMount} from 'vue';
 import PageComponent from '@/components/PageComponent.vue'
 import { useStore } from "vuex";
 import { useToast } from "vue-toastification";
+import PrintJS from 'print-js';
 
 export default{
     name: 'Active_Tenants',
@@ -300,6 +301,34 @@ export default{
         }
         const closeModal = () =>{
             propModalVisible.value = false;
+        };
+        const printTenantsList = () =>{
+            showLoader();
+            let formData = {
+                tenant_name: name_search.value,
+                tenant_code: tenant_code_search.value,
+                unit_number: unit_number_search.value,
+                property: propertyID.value,
+                phone_number: phone_number_search.value,
+                company_id: companyID.value
+            } 
+
+            axios
+            .post("api/v1/export-tenant-leases-pdf/", formData, { responseType: 'blob' })
+                .then((response)=>{
+                    if(response.status == 200){
+                        const blob1 = new Blob([response.data]);
+                        // Convert blob to URL
+                        const url = URL.createObjectURL(blob1);
+                        PrintJS({printable: url, type: 'pdf'});
+                    }
+                })
+            .catch((error)=>{
+                console.log(error.message);
+            })
+            .finally(()=>{
+                hideLoader();
+            })
         }
         onBeforeMount(()=>{
             searchTenants();
@@ -310,7 +339,7 @@ export default{
             propResults, propArrLen, propCount, pageCount, showNextBtn, showPreviousBtn,
             loadPrev, loadNext, firstPage, lastPage, idField, actions, handleActionClick, propModalVisible, closeModal,
             submitButtonLabel, showModal, addNewTenant, showLoader, loader, hideLoader, importTenants, removeTenant, removeTenants,
-            handleSelectionChange,addingRight,rightsModule
+            handleSelectionChange,addingRight,rightsModule,printTenantsList
         }
     }
 };

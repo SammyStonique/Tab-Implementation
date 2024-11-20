@@ -10,6 +10,8 @@
             @removeItem="removeUser"
             @removeSelectedItems="removeUsers"
             @printList="printList"
+            :dropdownOptions="dropdownOptions"
+            @handleDynamicOption="handleDynamicOption"
             :addingRight="addingRight"
             :rightsModule="rightsModule"
             :columns="tableColumns"
@@ -655,7 +657,54 @@ export default{
         };
         const closeCompModal = () =>{
             compModalVisible.value = false;
-        }
+        };
+        const dropdownOptions = ref([
+            {label: 'Reset Password', action: 'reset-password'},
+        ]);
+        const handleDynamicOption = (option) =>{
+            if(option == 'reset-password'){
+                Swal.fire({
+                    title: "Are you sure?",
+                    text: `Do you wish to Reset Password?`,
+                    type: 'warning',
+                    showCloseButton: true,
+                    showCancelButton: true,
+                    confirmButtonText: 'Yes Reset Password!',
+                    cancelButtonText: 'Cancel!',
+                    customClass: {
+                        confirmButton: 'swal2-confirm-custom',
+                        cancelButton: 'swal2-cancel-custom',
+                    },
+                    showLoaderOnConfirm: true,
+                    }).then((result) => {
+                    if (result.value) {
+                        let formData ={
+                            users: selectedIds.value,
+                            company: companyID.value
+                        }
+                        axios.post(`api/v1/user-reset-password/`,formData)
+                        .then((response)=>{                       
+                            Swal.fire(response.data.msg, {
+                                icon: "success",
+                            });                  
+                        })
+                        .catch((error)=>{
+                            console.log(error.message);
+                            Swal.fire({
+                                title: error.message,
+                                icon: "warning",
+                            });
+                        })
+                        .finally(()=>{
+                            searchUsers();
+                        })
+
+                    }else{
+                        Swal.fire(`Password has not been reset!`);
+                    }           
+                })
+            }
+        };
         onBeforeMount(()=>{
             searchUsers();
             store.dispatch('Companies/updateState', {companyID: companyID.value})
@@ -671,7 +720,7 @@ export default{
             handleSelectionChange,addingRight,rightsModule,showModalLoader,showCompModalLoader,hideModalLoader,hideCompModalLoader,modal_loader,modal_loader1,permission_name_search,
             module_name_search,rights_status_search,assignRights,disableRights,rightsColumns,rightsRows,modal_top,modal_left,modal_left1,modal_width,modal_width1,
             showActions,tableKey,tableCompKey,filterPermissions,rightIdField,compIdField,selectionChanged,selectionCompChanged,addUserCompany,removeUserCompany,
-            companiesArr,dropdownWidth,companyColumns,companyRows,handleSelectedCompany,clearSelectedCompany,compActions,compComponentKey
+            companiesArr,dropdownWidth,companyColumns,companyRows,handleSelectedCompany,clearSelectedCompany,compActions,compComponentKey,handleDynamicOption,dropdownOptions
         }
     }
 };

@@ -148,11 +148,11 @@ export default{
             selectedIds.value = ids;
         };
         const checkPrepaymentLimit = (value) =>{
-            if(invoiceDueAmount.value < value){
+            if(parseFloat(invoiceDueAmount.value) < parseFloat(value)){
                 toast.error(`Invoice Balance is ${invoiceDueAmount.value}`)
                 formFields.value[2].value = 0;
             }
-            else if(prepaymentAmount.value < value){
+            else if(parseFloat(prepaymentAmount.value) < parseFloat(value)){
                 toast.error(`Cannot Allocate More Than ${prepaymentAmount.value}`)
                 formFields.value[2].value = 0;
             }
@@ -217,7 +217,7 @@ export default{
             }
             errors.value = [];
             for(let i=1; i < formFields.value.length; i++){
-                if(formFields.value[i].value =='' && formFields.value[i].type != "number" && formFields.value[i].required == true){
+                if(formFields.value[i].value =='' && (formFields.value[i].type != "number" || formFields.value[i].type != "search-dropdown") && formFields.value[i].required == true){
                     errors.value.push(formFields.value[i].label);
                 }else if(formFields.value[i].value == 0 && formFields.value[i].type == "number"){
                     prepaymentAllocError.value = true;

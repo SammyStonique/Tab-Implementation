@@ -1,10 +1,11 @@
 <template>
-  <div class="table-container">
-    <table ref="tableRef" class="dynamic-table rounded">
+  <div class="table-container overflow-x-auto">
+    <table ref="tableRef" class="dynamic-table rounded min-w-full">
       <thead class="bg-gray-800 text-white">
-        <tr class="rounded bg-slate-800 text-white font-semibold text-sm uppercase">
-          <th v-for="(column, index) in columns" :key="index" :class="`min-w-[${column.minWidth}] max-w-[${column.maxWidth}]`">
-            <template v-if="column.type === 'checkbox'" >
+        <tr class="rounded bg-slate-800 text-white font-semibold text-xs sm:text-sm uppercase">
+          <th v-for="(column, index) in columns" :key="index" 
+              :class="`min-w-[${column.minWidth}] max-w-[${column.maxWidth}]`">
+            <template v-if="column.type === 'checkbox'">
               <input type="checkbox" @change="toggleSelectAll" :checked="allSelected" />
             </template>
             <template v-else>
@@ -17,22 +18,23 @@
         </tr>
       </thead>
       <tbody class="table-body">
-        <tr v-for="(row, rowIndex) in rows" :key="rowIndex" @dblclick="handleRowClick(row)" class="cursor-pointer even:bg-gray-100 text-xxs uppercase">
-          <td v-for="(column, colIndex) in columns" :key="colIndex" :class="[{'ellipsis': column.maxWidth}, { 'max-width': column.maxWidth },{ 'min-width': column.minWidth }]" >
+        <tr v-for="(row, rowIndex) in rows" :key="rowIndex" @dblclick="handleRowClick(row)" class="cursor-pointer even:bg-gray-100 text-xxs sm:text-xs uppercase">
+          <td v-for="(column, colIndex) in columns" :key="colIndex" 
+              :class="[{'ellipsis': column.maxWidth}, { 'max-w-[300px]': column.maxWidth }, { 'min-w-[120px]': column.minWidth }]">
             <template v-if="column.type === 'checkbox'">
               <input type="checkbox" v-model="row.selected" class="checkbox" @change="updateSelectedIds(row)"/>
             </template>
             <template v-else-if="column.type === 'dropdown'">
-              <select @change="handleChange($event, row)" v-model="row[column.key]" :name="row[column.key]" class="bg-inherit outline-none h-full text-xxs w-full uppercase">
+              <select @change="handleChange($event, row)" v-model="row[column.key]" :name="row[column.key]" class="bg-inherit outline-none h-full text-xxs sm:text-xs w-full uppercase">
                 <option v-for="(option, index) in row.options" :key="index" :value="option.value">{{ option.text }}</option>
               </select>
             </template>
             <template v-else-if="column.type === 'select-dropdown'">
-              <select @change="handleChange($event, row)" v-model="row[column.key]" :name="row[column.key]" class="bg-inherit outline-none h-full text-xxs w-full uppercase">
+              <select @change="handleChange($event, row)" v-model="row[column.key]" :name="row[column.key]" class="bg-inherit outline-none h-full text-xxs sm:text-xs w-full uppercase">
                 <option v-for="(option, index) in column.options" :key="index" :value="option.value">{{ option.text }}</option>
               </select>
             </template>
-            <template v-else >            
+            <template v-else>
               <div v-if="column.editable === true && column.type === 'number'" class="max-w-[100px]" :class="`text-${column.textColor}-800 font-bold`">
                 <input :type="column.type" @change="handleInputChange($event, row)" pattern="[0-9]*" oninput="this.value = this.value.replace(/[^0-9]/g, '')" class="w-full" v-model="row[column.key]" />             
               </div>
@@ -40,31 +42,32 @@
                 <input :type="column.type" @change="handleInputChange($event, row)" class="w-inherit" v-model="row[column.key]" /> 
               </div>
               <div v-else :class="`text-${column.textColor}-500`">
-                <!-- {{ row[column.key] }} -->
                 {{ getNestedValue(row, column.key) }}
               </div>
             </template>
           </td>
           <td class="actions flex gap-2 border-0" v-if="showActions">
             <div v-for="action in actions">
-              <button :class="{ 'disabled': isDisabled(`${action.rightName}`) }" @click.stop="handleAction(rowIndex,action.name,action.rightName, row)" :title="action.title"><i :class="action.icon"></i></button>
+              <button :class="{ 'disabled': isDisabled(`${action.rightName}`) }" @click.stop="handleAction(rowIndex, action.name, action.rightName, row)" :title="action.title">
+                <i :class="action.icon"></i>
+              </button>
             </div>
           </td>
         </tr>
-        <tr class="font-bold text-xs" v-if="showTotals && rows.length">
-          <td v-for="(column, colIndex) in columns" :key="colIndex" :class="[{'ellipsis': column.maxWidth}, { 'max-width': column.maxWidth }, { 'min-width': column.minWidth }]">
-              <template v-if="column.type === 'number'">
-                  {{ Number(calculateColumnTotal(column.key)).toLocaleString() }}
-              </template>
+        <tr class="font-bold text-xs sm:text-sm" v-if="showTotals && rows.length">
+          <td v-for="(column, colIndex) in columns" :key="colIndex" 
+              :class="[{'ellipsis': column.maxWidth}, { 'max-w-[300px]': column.maxWidth }, { 'min-w-[120px]': column.minWidth }]">
+            <template v-if="column.type === 'number'">
+              {{ Number(calculateColumnTotal(column.key)).toLocaleString() }}
+            </template>
           </td>
-          <td class="actions" v-if="showActions">
-            
-        </td>
-      </tr>
+          <td class="actions" v-if="showActions"></td>
+        </tr>
       </tbody>
     </table>
   </div>
 </template>
+
 
 <script>
 import { defineComponent, ref, onMounted, computed} from 'vue';

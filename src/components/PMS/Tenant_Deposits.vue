@@ -9,7 +9,7 @@
         @resetFilters="resetFilters"
         @removeItem="removeDeposit"
         @removeSelectedItems="removeDeposits"
-        @printList="printList"
+        @printList="printDepositsList"
         :addingRight="addingRight"
         :rightsModule="rightsModule"
         :columns="tableColumns"
@@ -48,6 +48,7 @@ import MovableModal from '@/components/MovableModal.vue'
 import DynamicForm from '../NewDynamicForm.vue';
 import { useDateFormatter } from '@/composables/DateFormatter';
 import { useToast } from "vue-toastification";
+import PrintJS from 'print-js';
 
 export default{
     name: 'Tenant_Deposits',
@@ -413,6 +414,36 @@ export default{
             tenantID.value = "";
             store.dispatch('Tenant_Deposits/updateState',{tenantLeaseID:''})
             store.dispatch('Security_Deposits/updateState',{depositID:''})
+        };
+        const printDepositsList = () =>{
+            showLoader();
+            let formData = {
+                tenant_code: tenant_code_search.value,
+                tenant_name: tenant_name_search.value,
+                from_date: from_date_search.value,
+                to_date: to_date_search.value,
+                property: propertyID.value,
+                deposit: depositID.value,
+                posted: posted_search.value,
+                company_id: companyID.value
+            } 
+
+            axios
+            .post("api/v1/export-tenant-deposits-pdf/", formData, { responseType: 'blob' })
+                .then((response)=>{
+                    if(response.status == 200){
+                        const blob1 = new Blob([response.data]);
+                        // Convert blob to URL
+                        const url = URL.createObjectURL(blob1);
+                        PrintJS({printable: url, type: 'pdf'});
+                    }
+                })
+            .catch((error)=>{
+                console.log(error.message);
+            })
+            .finally(()=>{
+                hideLoader();
+            })
         }
         onMounted(() =>{
             searchDeposits();
@@ -423,7 +454,7 @@ export default{
             showNextBtn,showPreviousBtn,addNewDeposit, handleActionClick,createTenantDeposit,displayButtons,handleReset,
             modal_top, modal_left, modal_width, showLoader, loader, hideLoader, modal_loader, showModalLoader, hideModalLoader,
             closeModal, handleSelectionChange, removeDeposit, removeDeposits, pageComponentKey, flex_basis, flex_basis_percentage,
-            addingRight,rightsModule
+            addingRight,rightsModule,printDepositsList
         }
     }
 }

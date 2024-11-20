@@ -10,7 +10,7 @@
             @importData="importItems"
             @removeItem="removeItem"
             @removeSelectedItems="removeItems"
-            @printList="printList"
+            @printList="printItemsList"
             :addingRight="addingRight"
             :rightsModule="rightsModule"
             :columns="tableColumns"
@@ -39,6 +39,7 @@ import { ref, computed, onMounted, onBeforeMount} from 'vue';
 import PageComponent from '@/components/PageComponent.vue'
 import { useStore } from "vuex";
 import { useToast } from "vue-toastification";
+import PrintJS from 'print-js';
 
 export default{
     name: 'Items_Catalog',
@@ -291,6 +292,33 @@ export default{
         }
         const closeModal = () =>{
             propModalVisible.value = false;
+        };
+        const printItemsList = () =>{
+            showLoader();
+            let formData = {
+                item_name: item_name_search.value,
+                item_code: item_code_search.value,
+                stock_type: stock_type_search.value,
+                item_category: categoryID.value,
+                company_id: companyID.value
+            } 
+
+            axios
+            .post("api/v1/export-inventory-items-pdf/", formData, { responseType: 'blob' })
+                .then((response)=>{
+                    if(response.status == 200){
+                        const blob1 = new Blob([response.data]);
+                        // Convert blob to URL
+                        const url = URL.createObjectURL(blob1);
+                        PrintJS({printable: url, type: 'pdf'});
+                    }
+                })
+            .catch((error)=>{
+                console.log(error.message);
+            })
+            .finally(()=>{
+                hideLoader();
+            })
         }
         onBeforeMount(()=>{
             searchItems();
@@ -301,7 +329,7 @@ export default{
             propResults, propArrLen, propCount, pageCount, showNextBtn, showPreviousBtn,
             loadPrev, loadNext, firstPage, lastPage, idField, actions, handleActionClick, propModalVisible, closeModal,
             submitButtonLabel, showModal, addNewItem, showLoader, loader, hideLoader, importItems, removeItem, removeItems,
-            handleSelectionChange,addingRight,rightsModule
+            handleSelectionChange,addingRight,rightsModule,printItemsList
         }
     }
 };

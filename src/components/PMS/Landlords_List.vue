@@ -10,7 +10,7 @@
             @importData="importLandlords"
             @removeItem="removeLandlord"
             @removeSelectedItems="removeLandlords"
-            @printList="printList"
+            @printList="printLandlordsList"
             :addingRight="addingRight"
             :rightsModule="rightsModule"
             :columns="tableColumns"
@@ -47,6 +47,7 @@ import MovableModal from '@/components/MovableModal.vue'
 import DynamicForm from '../NewDynamicForm.vue';
 import { useStore } from "vuex";
 import { useToast } from "vue-toastification";
+import PrintJS from 'print-js';
 
 export default{
     name: 'Landlords_List',
@@ -406,6 +407,31 @@ export default{
         }
         const closeModal = () =>{
             propModalVisible.value = false;
+        };
+        const printLandlordsList = () =>{
+            showLoader();
+            let formData = {
+                name: name_search.value,
+                landlord_code: landlord_code_search.value,
+                company_id: companyID.value
+            } 
+
+            axios
+            .post("api/v1/export-landlords-pdf/", formData, { responseType: 'blob' })
+                .then((response)=>{
+                    if(response.status == 200){
+                        const blob1 = new Blob([response.data]);
+                        // Convert blob to URL
+                        const url = URL.createObjectURL(blob1);
+                        PrintJS({printable: url, type: 'pdf'});
+                    }
+                })
+            .catch((error)=>{
+                console.log(error.message);
+            })
+            .finally(()=>{
+                hideLoader();
+            })
         }
         onBeforeMount(()=>{
             searchLandlords();
@@ -417,7 +443,7 @@ export default{
             loadPrev, loadNext, firstPage, lastPage, idField, actions, handleActionClick, propModalVisible, closeModal,
             submitButtonLabel, showModal, addNewLandlord, showLoader, loader, hideLoader, modal_loader, modal_top, modal_left, modal_width,displayButtons,
             showModalLoader, hideModalLoader, saveLandlord, formFields, handleSelectionChange, flex_basis,flex_basis_percentage,
-            importLandlords, removeLandlord, removeLandlords,addingRight,rightsModule
+            importLandlords, removeLandlord, removeLandlords,addingRight,rightsModule,printLandlordsList
         }
     }
 };

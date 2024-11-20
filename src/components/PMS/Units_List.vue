@@ -10,7 +10,7 @@
             @importData="importUnits"
             @removeItem="removeUnit"
             @removeSelectedItems="removeUnits"
-            @printList="printList"
+            @printList="printUnitsList"
             :addingRight="addingRight"
             :rightsModule="rightsModule"
             :columns="tableColumns"
@@ -47,6 +47,7 @@ import MovableModal from '@/components/MovableModal.vue'
 import DynamicForm from '../NewDynamicForm.vue';
 import { useStore } from "vuex";
 import { useToast } from "vue-toastification";
+import PrintJS from 'print-js';
 
 export default{
     name: 'Units_List',
@@ -507,6 +508,36 @@ export default{
         }
         const closeModal = () =>{
             propModalVisible.value = false;
+        };
+        const printUnitsList = () =>{
+            showLoader();
+            let formData = {
+                unit_number: unit_number_search.value,
+                status: status_search.value,
+                vacancy: vacancy_status_search.value,
+                owner_occupied: owner_occupied_search.value,
+                property: propertySearchID.value,
+                landlord: landlordSearchID.value,
+                zone: zoneSearchID.value,
+                company_id: companyID.value
+            } 
+
+            axios
+            .post("api/v1/export-property-units-pdf/", formData, { responseType: 'blob' })
+                .then((response)=>{
+                    if(response.status == 200){
+                        const blob1 = new Blob([response.data]);
+                        // Convert blob to URL
+                        const url = URL.createObjectURL(blob1);
+                        PrintJS({printable: url, type: 'pdf'});
+                    }
+                })
+            .catch((error)=>{
+                console.log(error.message);
+            })
+            .finally(()=>{
+                hideLoader();
+            })
         }
         onBeforeMount(()=>{
             searchUnits();
@@ -518,7 +549,7 @@ export default{
             loadPrev, loadNext, firstPage, lastPage, idField, actions, handleActionClick, propModalVisible, closeModal,
             submitButtonLabel, showModal, addNewUnit, showLoader, loader, hideLoader, modal_loader, modal_top, modal_left, modal_width,displayButtons,
             showModalLoader, hideModalLoader, saveUnit, formFields, handleSelectionChange, flex_basis,flex_basis_percentage,
-            importUnits, removeUnit, removeUnits,addingRight,rightsModule
+            importUnits, removeUnit, removeUnits,addingRight,rightsModule,printUnitsList
         }
     }
 };

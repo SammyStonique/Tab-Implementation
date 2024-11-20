@@ -1,8 +1,9 @@
 <template>
     <div class="navbar flex top-0 w-full text-sm sticky-navbar bg-white border-b border-slate-300 shadow-sm shadow-slate-200 px-6 h-10">
+        <button class="fixed inset-0 bg-gray-50 opacity-15 cursor-default w-full" v-if="dropdown" @click="closeDropdown"></button>
         <div class="flex">
             <div class="web-links py-1.5 px-2.5 w-32 h-full hover:bg-slate-500 hover:rounded">
-                <button class="flex">
+                <button class="flex" @click="showHomePage">
                     <i class="fa fa-home pt-2 mr-2" aria-hidden="true"></i>
                     <p class="pt-1.5">Home Page</p>
                 </button>
@@ -172,36 +173,51 @@ export default defineComponent({
         const financials_dropdown = ref(false);
         const department_dropdown = ref(false);
         const patients_dropdown = ref(false);
+        const dropdown = ref(false);
+
         const userDetails = ref([]);
 
         const showDepartmentDropdown = () =>{
             financials_dropdown.value = false;
             patients_dropdown.value  = false;
+            dropdown.value = true;
             department_dropdown.value  = !department_dropdown.value ;
         }
         const showPatientsDropdown = () =>{
             financials_dropdown.value = false;
             department_dropdown.value  = false;
+            dropdown.value = true;
             patients_dropdown.value  = !patients_dropdown.value ;
         }
         const showFinancialsDropdown = () =>{
             department_dropdown.value  = false;
             patients_dropdown.value  = false;
+            dropdown.value = true;
             financials_dropdown.value  = !financials_dropdown.value ;
+        };
+        const closeDropdown = () =>{
+            financials_dropdown.value = false;
+            department_dropdown.value  = false;
+            patients_dropdown.value  = false;
+            dropdown.value = false;
         }
         const openPage = (pageName) =>{
+            closeDropdown();
             store.commit('pageTab/ADD_PAGE', pageName);
             emit('openPage', pageName)
-        }
+        };
+        const showHomePage = () =>{
+            store.commit('modulesTab/MINIMIZE_TAB')
+        };
         return{
-            financials_dropdown,
+            dropdown,financials_dropdown,closeDropdown,
             department_dropdown,
             patients_dropdown,
             userDetails,
             showDepartmentDropdown,
             showPatientsDropdown,
             showFinancialsDropdown,
-            openPage
+            openPage,showHomePage
         }
     },
 

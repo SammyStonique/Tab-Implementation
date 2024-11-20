@@ -73,8 +73,50 @@ const state = {
         })
         
     },
+    deleteLeaseFees({ commit,state }, formData) {
+      Swal.fire({
+        title: "Are you sure?",
+        text: `Do you wish to delete Lease Fee(s)?`,
+        type: 'warning',
+        showCloseButton: true,
+        showCancelButton: true,
+        confirmButtonText: 'Yes Delete Lease Fee(s)!',
+        cancelButtonText: 'Cancel!',
+        customClass: {
+            confirmButton: 'swal2-confirm-custom',
+            cancelButton: 'swal2-cancel-custom',
+        },
+        showLoaderOnConfirm: true,
+      }).then((result) => {
+        if (result.value) {
+          axios.post(`api/v1/delete-lease-fee/`,formData)
+          .then((response)=>{
+            if(response.data.msg == "Success"){
+                Swal.fire("Poof! Lease Fee(s) removed succesfully!", {
+                  icon: "success",
+                }); 
+            }else if(response.data.msg == "Failed"){
+              Swal.fire({
+                title: "The Lease Fee(s) Has An Invoice",
+                icon: "warning",
+              });
+            }                   
+          })
+          .catch((error)=>{
+            console.log(error.message);
+            Swal.fire({
+              title: error.message,
+              icon: "warning",
+            });
+          })
+        }else{
+          Swal.fire(`Lease Fee(s) has not been deleted!`);
+        }
+      })
+    },
 
   };
+  
   
   const getters = {
 

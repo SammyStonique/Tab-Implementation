@@ -5,6 +5,7 @@
                 <div class="flex h-16">
                     <DynamicForm  :fields="formFields" :flex_basis="flex_basis" :flex_basis_percentage="flex_basis_percentage"  @handleSubmit="createTenantReceipt" @handleReset="handleReset" /> 
                     <button @click="fetchTransactions" class="rounded bg-green-400 text-sm h-8 w-24 mt-2 text-white px-1.5 py-1.5"><i class="fa fa-check-circle text-xs mr-1.5" aria-hidden="true"></i>Load</button>
+                    <button @click="previewStatement" class="rounded bg-green-400 text-sm h-8 w-24 ml-1.5 mt-2 text-white px-1.5 py-1.5"><i class="fa fa-eye text-xs mr-1.5" aria-hidden="true"></i>Preview</button>
                 </div>
             </div>
             <div class="table-container capitalize text-xs min-h-[330px] mt-3">
@@ -81,6 +82,7 @@ import { useToast } from "vue-toastification";
 import { useDateFormatter } from '@/composables/DateFormatter';
 import axios from 'axios';
 import DynamicTable from '@/components/DynamicTable.vue';
+import PrintJS from 'print-js';
 
 export default defineComponent({
     name: 'Statement_Processing',
@@ -98,7 +100,7 @@ export default defineComponent({
         const modal_loader = ref('none');
         const tableKey = ref(0);
         const subHeaders = ref({
-            invoiced: computed(()=> store.state.Property_Statements.subHeaders),
+            invoiced: computed(()=> store.state.Property_Statements.newSubHeaders),
             paid: computed(()=> store.state.Property_Statements.subHeaders),
         });
         const tableData = computed(()=> store.state.Property_Statements.tableData);
@@ -151,7 +153,6 @@ export default defineComponent({
                 company: companyID.value
             }
             const response = await axios.post("api/v1/previous-statement-date/",formData)
-            console.log("THE RESPONSE IS ",response.data.date)
             formFields.value[3].value = response.data.date;
             if(response.data.date != ""){
                 formFields.value[3].disabled = true;
@@ -268,9 +269,20 @@ export default defineComponent({
                 statement_transactions: statementTransactions.value
             }
 
+            let formData1 = {
+                month: formFields.value[1].value,
+                year: formFields.value[2].value,
+                with_effect_from: formFields.value[3].value,
+                with_effect_to: formFields.value[4].value,
+                property: propertyID.value,
+                company: companyID.value,
+                user: userID.value,
+            }
+
             try{
+                const response1 = await store.dispatch('Property_Statements/processPropertyStatementPDF', formData1)
                 const response = await store.dispatch('Property_Statements/createPropertyStatement', formData)
-                if(response && response.status == 200){
+                if(response && response.status == 200 && response1){ 
                     toast.success("Statement Processed Succesfully")
                     hideLoader();
                     handleReset();
@@ -283,6 +295,34 @@ export default defineComponent({
                 hideLoader();
             }
 
+        };
+        const previewStatement = () =>{
+            showLoader();
+            let formData = {
+                month: formFields.value[1].value,
+                year: formFields.value[2].value,
+                with_effect_from: formFields.value[3].value,
+                with_effect_to: formFields.value[4].value,
+                property: propertyID.value,
+                company: companyID.value
+            } 
+
+            axios
+            .post("api/v1/export-landlord-statement-pdf/", formData, { responseType: 'blob' })
+                .then((response)=>{
+                    if(response.status == 200){
+                        const blob1 = new Blob([response.data]);
+                        // Convert blob to URL
+                        const url = URL.createObjectURL(blob1);
+                        PrintJS({printable: url, type: 'pdf'});
+                    }
+                })
+            .catch((error)=>{
+                console.log(error.message);
+            })
+            .finally(()=>{
+                hideLoader();
+            })
         }
 
         onBeforeMount(()=>{ 
@@ -301,7 +341,7 @@ export default defineComponent({
             subHeaders, tableData, balanceBfTotals, statementInvoicedTotals, statementPaidTotals, balanceTotals, invoicedSum, paidSum, formFields, flex_basis, 
             flex_basis_percentage, displayButtons, mainComponentKey, handleReset, loader, showLoader, hideLoader, tableKey, showActions, idField,          
             title, modal_loader, modal_left, modal_top, modal_width, prepModalVisible, showModalLoader, hideModalLoader, closeModal,
-            fetchTransactions, processStatement
+            fetchTransactions, processStatement,previewStatement
         }
     }
 })

@@ -188,13 +188,13 @@ export default defineComponent({
                 {
                     type:'search-dropdown', label:"Customer", value: customerID.value, componentKey: tntComponentKey,
                     selectOptions: customerArray, optionSelected: handleSelectedCustomer, required: true,
-                    searchPlaceholder: 'Select Customer...', dropdownWidth: '400px', updateValue: "",
+                    searchPlaceholder: 'Select Customer...', dropdownWidth: '450px', updateValue: "",
                     fetchData: fetchCustomers(), clearSearch: clearSelectedCustomer()  
                 },
                 {
                     type:'search-dropdown', label:"Cashbook", value: ledgerID.value, componentKey: ledComponentKey,
                     selectOptions: ledgerArray, optionSelected: handleSelectedLedger, required: true,
-                    searchPlaceholder: 'Select Cashbook...', dropdownWidth: '400px', updateValue: "",
+                    searchPlaceholder: 'Select Cashbook...', dropdownWidth: '450px', updateValue: "",
                     fetchData: fetchLedgers(), clearSearch: clearSelectedLedger()  
                 },
                 { type: 'date', name: 'issue_date',label: "Recording Date", value: formatDate(current_date), required: true, maxDate: formatDate(current_date) },
@@ -202,7 +202,8 @@ export default defineComponent({
                 { type: 'dropdown', name: 'payment_method',label: "Payment Method", value: '', placeholder: "", required: true, options: [{ text: 'Cash', value: 'Cash' }, { text: 'Mpesa', value: 'Mpesa' },{ text: 'Bank Deposit', value: 'Bank Deposit' }, { text: 'Cheque', value: 'Cheque' },{ text: 'Check-off', value: 'Check-off' }, { text: 'RTGS', value: 'RTGS' },{ text: 'EFT', value: 'EFT' }, { text: 'Not Applicable', value: 'Not Applicable' }] },
                 { type: 'text', name: 'reference_no',label: "Reference No", value: '', required: true,},
                 { type: 'number', name: 'total_amount',label: "Amount", value: receipt_totals.value || 0, required: true, method: allocateReceivedAmount },
-                {type:'text-area', label:"Memo", value: receipt_memo.value, textarea_rows: '2', textarea_cols: '40', required: true},
+                {type:'text-area', label:"Memo", value: receipt_memo.value, textarea_rows: '2', textarea_cols: '50', required: true},
+                {required:false}
                 
             ]
         };
@@ -415,8 +416,8 @@ export default defineComponent({
             ledComponentKey.value += 1;
             propComponentKey.value += 1;
             tntComponentKey.value += 1;
-            flex_basis.value = '1/5';
-            flex_basis_percentage.value = '20';
+            flex_basis.value = '1/4';
+            flex_basis_percentage.value = '25';
         })
         onMounted(()=>{
 

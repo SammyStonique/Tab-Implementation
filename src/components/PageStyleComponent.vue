@@ -57,7 +57,7 @@ export default defineComponent({
 .main-content{
     z-index: -1;
     margin-left: 1px;
-    margin-top: 64px;
+    margin-top: 74px;
     min-height: 90vh;
 }
 .subsection{

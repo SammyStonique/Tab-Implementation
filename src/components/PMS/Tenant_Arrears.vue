@@ -9,7 +9,7 @@
         @resetFilters="resetFilters"
         @removeItem="removeAllocation"
         @removeSelectedItems="removeAllocations"
-        @printList="printList"
+        @printList="printArrearsList"
         :columns="tableColumns"
         :rows="arrearsList"
         :actions="actions"
@@ -45,6 +45,7 @@ import PageComponent from "../PageComponent.vue";
 import MovableModal from '@/components/MovableModal.vue'
 import DynamicForm from '../NewDynamicForm.vue';
 import { useToast } from "vue-toastification";
+import PrintJS from 'print-js';
 
 export default{
     name: 'Tenant_Arrears',
@@ -206,6 +207,32 @@ export default{
         const resetFilters = () =>{
             store.commit('Tenant_Arrears/RESET_SEARCH_FILTERS')
             searchTenantArrears();
+        };
+        const printArrearsList = () =>{
+            showLoader();
+            let formData = {
+                client_code: tenant_code_search.value,
+                client_name: tenant_name_search.value,
+                date: date_search.value,
+                company: companyID.value
+            } 
+
+            axios
+            .post("api/v1/export-tenant-arrears-pdf/", formData, { responseType: 'blob' })
+                .then((response)=>{
+                    if(response.status == 200){
+                        const blob1 = new Blob([response.data]);
+                        // Convert blob to URL
+                        const url = URL.createObjectURL(blob1);
+                        PrintJS({printable: url, type: 'pdf'});
+                    }
+                })
+            .catch((error)=>{
+                console.log(error.message);
+            })
+            .finally(()=>{
+                hideLoader();
+            })
         }
 
         onMounted(() =>{
@@ -216,7 +243,7 @@ export default{
             searchFilters,tableColumns,resetFilters,loadPrev,loadNext,firstPage,lastPage,
             showNextBtn,showPreviousBtn, handleActionClick,displayButtons,
             modal_top, modal_left, modal_width, showLoader, loader, hideLoader, modal_loader, showModalLoader, hideModalLoader,
-            handleSelectionChange, pageComponentKey, flex_basis, flex_basis_percentage,showTotals
+            handleSelectionChange, pageComponentKey, flex_basis, flex_basis_percentage,showTotals,printArrearsList
         }
     }
 }

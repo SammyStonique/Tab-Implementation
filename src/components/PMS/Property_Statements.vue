@@ -12,7 +12,7 @@
             @resetFilters="resetFilters"
             @removeItem="removeStatement"
             @removeSelectedItems="removeStatements"
-            @printList="printList"
+            @printList="printStatementsList"
             :addingRight="addingRight"
             :rightsModule="rightsModule"
             :columns="tableColumns"
@@ -41,6 +41,8 @@ import PageComponent from '@/components/PageComponent.vue';
 import { useStore } from "vuex";
 import { useToast } from "vue-toastification";
 import { useDateFormatter } from '@/composables/DateFormatter';
+import PrintJS from 'print-js';
+import Swal from 'sweetalert2';
 
 export default{
     name: 'Property_Statements',
@@ -102,6 +104,8 @@ export default{
         
         const actions = ref([ 
             {name: 'approve', icon: 'fa fa-check-circle', title: 'Approve Statement', rightName: 'Approve Property Statement'},
+            {name: 'preview', icon: 'fa fa-print', title: 'View Statement', rightName: 'Print Property Statement'},
+            {name: 'download', icon: 'fa fa-download', title: 'Download Statement', rightName: 'Print Property Statement'},
             {name: 'delete', icon: 'fa fa-trash', title: 'Delete Statement', rightName: 'Deleting Property Statement'},
         ])
         const companyID = computed(()=> store.state.userData.company_id);
@@ -326,7 +330,26 @@ export default{
         const addNewStatement = async() =>{
             store.commit('pageTab/ADD_PAGE', {'PMS':'Statement_Processing'});
             store.state.pageTab.pmsActiveTab = 'Statement_Processing'; 
-        }
+        };
+        const previewStatement = (formData) =>{
+            showLoader();
+            axios
+            .post("api/v1/preview-landlord-statement-pdf/", formData, { responseType: 'blob' })
+                .then((response)=>{
+                    if(response.status == 200){
+                        const blob1 = new Blob([response.data]);
+                        // Convert blob to URL
+                        const url = URL.createObjectURL(blob1);
+                        PrintJS({printable: url, type: 'pdf'});
+                    }
+                })
+            .catch((error)=>{
+                console.log(error.message);
+            })
+            .finally(()=>{
+                hideLoader();
+            })
+        };
         const handleActionClick = async(rowIndex, action, row) =>{
             if(action == 'delete'){
                 const statementID = [row['landlord_statement_id']];
@@ -340,40 +363,103 @@ export default{
             }else if(action == 'approve'){
                 if(row['approval_status'] == 'No'){
                     const statementID = row['landlord_statement_id'];
+                    const statMonth = row['month'];
+                    const statYear = row['year'];
+                    const statWEF = row['with_effect_from'];
+                    const statWET = row['with_effect_to'];
+                    const periodColl = row['period_collection'];
+                    const periodExp = row['period_expenses'];
+                    const statTrans = row['statement_transactions'];
+                    const statProperty = row['property_id'];
                     let formData = {
+                        month: statMonth,
+                        year: statYear,
+                        with_effect_from: statWEF,
+                        with_effect_to: statWET,
+                        property: statProperty,
                         company: companyID.value,
-                        landlord_statement: statementID,
-                        prepared_by: row['prepared_by_id'],
-                        prepared_by_id: row['prepared_by_id'],
-                        date_prepared: row['date_prepared'],
-                        with_effect_from: row['with_effect_from'],
-                        with_effect_to: row['with_effect_to'],
-                        statement_type: row['statement_type'],
+                        user: userID.value,
+                    } 
+                    let formData1 = {
+                        with_effect_from: statWEF,
+                        with_effect_to: statWET,
+                        month: statMonth,
+                        year: statYear,
+                        period_collection: periodColl,
+                        period_expenses: periodExp,
+                        statement_transactions: statTrans,
+                        date_approved: formatDate(current_date),
                         approval_status: "Yes",
-                        month: row['month'],
-                        year: row['year'],
-                        period_collection: row['period_collection'],
-                        period_expenses: row['period_expenses'],
                         approved_by: userID.value,
                         approved_by_id: userID.value,
-                        date_approved: formatDate(current_date),
-                        property: row['property_id'],
-                        property_id: row['property_id'],
-                        statement_transactions: row['statement_transactions']
-                    }
-                    try{
-                        await store.dispatch('Property_Statements/approvePropertyStatement',formData)
-    
-                    }
-                    catch(error){
-                        console.error(error.message);
-                        toast.error('Failed to approve Statement(s): ' + error.message);
-                    }finally{
-                        searchStatements();
-                    }
+                        property: statProperty,
+                        property_id: statProperty,
+                        landlord_statement: statementID,
+                        company: companyID.value,
+                    } 
+                    Swal.fire({
+                        title: "Are you sure?",
+                        text: `Do you wish to approve Statement?`,
+                        type: 'warning',
+                        showCloseButton: true,
+                        showCancelButton: true,
+                        confirmButtonText: 'Yes Approve Statement!',
+                        cancelButtonText: 'Cancel!',
+                        customClass: {
+                            confirmButton: 'swal2-confirm-custom',
+                            cancelButton: 'swal2-cancel-custom',
+                        },
+                        showLoaderOnConfirm: true,
+                        }).then((result) => {
+                        if (result.value) {
+                            axios.put(`api/v1/update-landlord-statement/`,formData1)
+                            .then((response)=>{
+                                const response1 = axios.post('api/v1/approve-landlord-statement-pdf/', formData);
+                                if(response.status == 200 && response1){                       
+                                    Swal.fire("Statement approved succesfully!", {
+                                        icon: "success",
+                                    }); 
+                                    
+                                }else{
+                                    Swal.fire({
+                                    title: "Error Approving Statement",
+                                    icon: "warning",
+                                    });
+                                }                   
+                            })
+                            .catch((error)=>{
+                                console.log(error.message);
+                                Swal.fire({
+                                    title: error.message,
+                                    icon: "warning",
+                                });
+                            })
+                            .finally(()=>{
+                                searchStatements();
+                            })
+
+                        }else{
+                            Swal.fire(`Statement has not been approved!`);
+                        }           
+                    })
                 }else{
                     toast.error('Statement Already Approved');
                 }             
+            }else if(action == 'preview'){
+                const statMonth = row['month'];
+                const statYear = row['year'];
+                const statWEF = row['with_effect_from'];
+                const statWET = row['with_effect_to'];
+                const statProperty = row['property_id'];
+                let formData = {
+                    month: statMonth,
+                    year: statYear,
+                    with_effect_from: statWEF,
+                    with_effect_to: statWET,
+                    property: statProperty,
+                    company: companyID.value
+                } 
+                previewStatement(formData);    
             }
         }
         const closeModal = async() =>{
@@ -388,6 +474,35 @@ export default{
                 store.commit('pageTab/ADD_PAGE', {'PMS':'Statement_Details'})
                 store.state.pageTab.pmsActiveTab = 'Statement_Details';
             }
+        };
+        const printStatementsList = () =>{
+            showLoader();
+            let formData = {
+                month: month_search.value,
+                year: year_search.value,
+                approval_status: approval_status_search.value,
+                statement_type: statement_type_search.value,
+                landlord: landlordSearchID.value,
+                property: propertySearchID.value,
+                company: companyID.value
+            } 
+
+            axios
+            .post("api/v1/export-property-statements-pdf/", formData, { responseType: 'blob' })
+                .then((response)=>{
+                    if(response.status == 200){
+                        const blob1 = new Blob([response.data]);
+                        // Convert blob to URL
+                        const url = URL.createObjectURL(blob1);
+                        PrintJS({printable: url, type: 'pdf'});
+                    }
+                })
+            .catch((error)=>{
+                console.log(error.message);
+            })
+            .finally(()=>{
+                hideLoader();
+            })
         }
         onBeforeMount(()=>{
             searchStatements();
@@ -399,7 +514,7 @@ export default{
             loadPrev, loadNext, firstPage, lastPage, idField, actions, handleActionClick, propModalVisible, closeModal,
             submitButtonLabel, showModal, addNewStatement, showLoader, loader, hideLoader, modal_loader, modal_top, modal_left, modal_width,displayButtons,
             showModalLoader, hideModalLoader, handleSelectionChange, flex_basis,flex_basis_percentage,
-            removeStatement, removeStatements, dropdownOptions, handleDynamicOption,addingRight,rightsModule
+            removeStatement, removeStatements, dropdownOptions, handleDynamicOption,addingRight,rightsModule,printStatementsList
         }
     }
 };

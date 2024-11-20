@@ -3,7 +3,7 @@
         <button class="fixed inset-0 bg-gray-50 opacity-15 cursor-default w-full" v-if="dropdown" @click="closeDropdown"></button>
         <div class="flex">
             <div class="web-links py-1.5 px-2.5 w-32 h-full hover:bg-slate-500 hover:rounded">
-                <button class="flex">
+                <button class="flex" @click="showHomePage">
                     <i class="fa fa-home pt-2 mr-2" aria-hidden="true"></i>
                     <p class="pt-1.5">Home Page</p>
                 </button>
@@ -258,7 +258,10 @@ export default defineComponent({
             closeDropdown();
             store.commit('pageTab/ADD_PAGE', pageName);
             emit('openPage', pageName)
-        }
+        };
+        const showHomePage = () =>{
+            store.commit('modulesTab/MINIMIZE_TAB')
+        };
         return{
             dropdown, settings_dropdown, sms_integrations_dropdown,email_integrations_dropdown,mpesa_integrations_dropdown,
             company_dropdown,users_dropdown, 
@@ -266,7 +269,7 @@ export default defineComponent({
             showCompanyDropdown, showEmailIntegrationsDropdown,showMpesaIntegrationsDropdown,showSMSIntegrationsDropdown,
             showUsersDropdown,
             showSettingsDropdown,
-            openPage
+            openPage,showHomePage
         }
     },
 

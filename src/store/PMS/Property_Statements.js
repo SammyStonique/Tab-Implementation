@@ -12,6 +12,7 @@ const state = {
   statement_type_search: '',
   selectedStatement: null,
   isEditing: false,
+  newSubHeaders: [],
   subHeaders: [],
   tableData: [],
   statementTransactions: [],
@@ -36,6 +37,7 @@ const mutations = {
     state.selectedStatement = null;
     state.isEditing = false;
     state.subHeaders = [];
+    state.newSubHeaders = [];
     state.tableData = [];
     state.statementTransactions = [];
     state.statementInvoicedTotals = [];
@@ -99,6 +101,28 @@ const actions = {
     })
   },
 
+  async processPropertyStatementPDF({ commit,state }, formData) {
+    return axios.post('api/v1/process-landlord-statement-pdf/', formData)
+    .then((response)=>{
+      return response;
+    })
+    .catch((error)=>{
+      console.log(error.message);
+      throw error;
+    })
+  },
+
+  async approvePropertyStatementPDF({ commit,state }, formData) {
+    return axios.post('api/v1/approve-landlord-statement/', formData)
+    .then((response)=>{
+      return response;
+    })
+    .catch((error)=>{
+      console.log(error.message);
+      throw error;
+    })
+  },
+
   async fetchPropertyStatements({ commit,state }, formData) {
     state.statementArr = [];
     await axios.post(`api/v1/get-landlord-statements/`,formData)
@@ -136,11 +160,12 @@ const actions = {
     state.paidSum = 0;
     axios.post(`api/v1/statement-processing-search/`,formData)
     .then((response)=>{
+        let newArr = []
         for(let i=0; i<response.data.items.length; i++){
-            if(response.data.items[i] == "Service Charge"){
-                response.data.items[i] = "S. Charge"
-            }else if(response.data.items[i] == "Prepayment"){
-                response.data.items[i] = "Prepymt"
+            if(response.data.items[i] == "Prepayment"){
+              response.data.items[i] = "Prepymt"
+            }else{
+              newArr.push(response.data.items[i] )
             }
         }
         for(let i=0; i<response.data.invoicedTotals.length; i++){
@@ -149,6 +174,8 @@ const actions = {
         for(let i=0; i<response.data.paidTotals.length; i++){
             state.paidSum += response.data.paidTotals[i];
         }
+
+        state.newSubHeaders = newArr;
         state.subHeaders = response.data.items;
         state.tableData = response.data.tableData;
         state.statementTransactions = response.data.statementTransactions;
@@ -228,11 +255,11 @@ const actions = {
   deletePropertyStatement({ commit,state }, formData) {
     Swal.fire({
       title: "Are you sure?",
-      text: `Do you wish to delete Statement?`,
+      text: `Do you wish to delete Statement(s)?`,
       type: 'warning',
       showCloseButton: true,
       showCancelButton: true,
-      confirmButtonText: 'Yes Delete Statement!',
+      confirmButtonText: 'Yes Delete Statement(s)!',
       cancelButtonText: 'Cancel!',
       customClass: {
           confirmButton: 'swal2-confirm-custom',
@@ -244,12 +271,12 @@ const actions = {
         axios.post(`api/v1/delete-landlord-statement/`,formData)
         .then((response)=>{
           if(response.status == 200){
-              Swal.fire("Poof! Statement removed succesfully!", {
+              Swal.fire("Poof! Statement(s) removed succesfully!", {
                 icon: "success",
               }); 
           }else{
             Swal.fire({
-              title: "Error Deleting Statement",
+              title: "Error Deleting Statement(s)",
               icon: "warning",
             });
           }                   
@@ -262,7 +289,7 @@ const actions = {
           });
         })
       }else{
-        Swal.fire(`Statement has not been deleted!`);
+        Swal.fire(`Statement(s) has not been deleted!`);
       }
     })
   },

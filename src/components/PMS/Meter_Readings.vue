@@ -12,7 +12,7 @@
             @importData="importMeterReadings"
             @removeItem="removeMeterReading"
             @removeSelectedItems="removeMeterReadings"
-            @printList="printList"
+            @printList="printReadingsList"
             :addingRight="addingRight"
             :rightsModule="rightsModule"
             :columns="tableColumns"
@@ -50,6 +50,7 @@ import MovableModal from '@/components/MovableModal.vue'
 import DynamicForm from '../NewDynamicForm.vue';
 import { useStore } from "vuex";
 import { useToast } from "vue-toastification";
+import PrintJS from 'print-js';
 
 export default{
     name: 'Meter_Readings',
@@ -523,6 +524,35 @@ export default{
                 store.commit('pageTab/ADD_PAGE', {'PMS':'Batch_Readings'})
                 store.state.pageTab.pmsActiveTab = 'Batch_Readings';
             }
+        };
+        const printReadingsList = () =>{
+            showLoader();
+            let formData = {
+                tenant_name: tenant_name_search.value,
+                tenant_code: tenant_code_search.value,
+                from_date: from_date_search.value,
+                to_date: to_date_search.value,
+                property: propertySearchID.value,
+                utility: utilitySearchID.value,
+                company_id: companyID.value
+            } 
+
+            axios
+            .post("api/v1/export-meter-readings-pdf/", formData, { responseType: 'blob' })
+                .then((response)=>{
+                    if(response.status == 200){
+                        const blob1 = new Blob([response.data]);
+                        // Convert blob to URL
+                        const url = URL.createObjectURL(blob1);
+                        PrintJS({printable: url, type: 'pdf'});
+                    }
+                })
+            .catch((error)=>{
+                console.log(error.message);
+            })
+            .finally(()=>{
+                hideLoader();
+            })
         }
         onBeforeMount(()=>{
             searchMeterReadings();
@@ -534,7 +564,7 @@ export default{
             loadPrev, loadNext, firstPage, lastPage, idField, actions, handleActionClick, propModalVisible, closeModal,
             submitButtonLabel, showModal, addNewReading, showLoader, loader, hideLoader, modal_loader, modal_top, modal_left, modal_width,displayButtons,
             showModalLoader, hideModalLoader, saveMeterReading, formFields, handleSelectionChange, flex_basis,flex_basis_percentage,
-            removeMeterReading, removeMeterReadings, dropdownOptions, handleDynamicOption,addingRight,rightsModule
+            removeMeterReading, removeMeterReadings, dropdownOptions, handleDynamicOption,addingRight,rightsModule,printReadingsList
         }
     }
 };

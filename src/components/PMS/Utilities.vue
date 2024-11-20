@@ -131,7 +131,7 @@ export default{
                 {  
                     type:'search-dropdown', label:"Posting Account", value: ledgerValue.value, componentKey: ledComponentKey,
                     selectOptions: ledgerArray, optionSelected: handleSelectedLedger, required: true,
-                    searchPlaceholder: 'Select Posting Account...', dropdownWidth: '400px', updateValue: selectedLedger.value,
+                    searchPlaceholder: 'Select Posting Account...', dropdownWidth: '500px', updateValue: selectedLedger.value,
                     fetchData: store.dispatch('Ledgers/fetchLedgers', {company:companyID.value})
                 },
             ];

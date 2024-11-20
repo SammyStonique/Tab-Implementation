@@ -36,8 +36,8 @@ function getCSRFToken() {
     if (parts.length === 2) return parts.pop().split(';').shift();
   }
 
-// axios.defaults.baseURL = 'http://127.0.0.1:8000/'
-axios.defaults.baseURL = 'https://bc47-197-248-34-79.ngrok-free.app/'
+axios.defaults.baseURL = process.env.VUE_APP_API_URL
+// axios.defaults.baseURL = 'https://4456-197-248-34-79.ngrok-free.app/'
 axios.defaults.withCredentials = true
 // axios.defaults.headers.common['X-CSRFToken'] = getCookie('csrftoken');
 

@@ -95,9 +95,9 @@ export default{
         ])
         const showTotals = ref(true);
         const actions = ref([
-            {name: 'print', icon: 'fa fa-print', title: 'Print Receipt', rightName: 'Print Tenant Receipt'},
-            {name: 'download', icon: 'fa fa-download', title: 'Download Receipt', rightName: 'Print Tenant Receipt'},
-            {name: 'delete', icon: 'fa fa-trash', title: 'Delete Receipt', rightName: 'Deleting Tenant Receipt'},
+            {name: 'print', icon: 'fa fa-print', title: 'Print Credit Note', rightName: 'Print Tenant Receipt'},
+            {name: 'download', icon: 'fa fa-download', title: 'Download Credit Note', rightName: 'Print Tenant Receipt'},
+            {name: 'delete', icon: 'fa fa-trash', title: 'Delete Credit Note', rightName: 'Deleting Tenant Receipt'},
         ])
         const companyID = computed(()=> store.state.userData.company_id);
         const fetchProperties = async() =>{
@@ -308,6 +308,32 @@ export default{
                 await store.dispatch('Journals/deleteCreditNote',formData)
                 mainComponentKey.value += 1;
                 searchReceipts();       
+            }else if(action == 'print'){
+                showLoader();
+                const journalID = row['journal_id'];
+                let formData = {
+                    receipt: journalID,
+                    client: row['customer_id'],
+                    type: "CDN",
+                    company: companyID.value
+                }
+                await store.dispatch('Journals/previewTenantReceipt',formData).
+                then(()=>{
+                    hideLoader();
+                })
+            }else if(action == 'download'){
+                showLoader();
+                const journalID = row['journal_id'];
+                let formData = {
+                    receipt: journalID,
+                    client: row['customer_id'],
+                    type: "CDN",
+                    company: companyID.value
+                }
+                await store.dispatch('Journals/downloadTenantReceipt',formData).
+                then(()=>{
+                    hideLoader();
+                })
             }
         }
         const closeModal = async() =>{

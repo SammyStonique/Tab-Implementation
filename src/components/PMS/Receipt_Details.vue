@@ -209,13 +209,13 @@ export default defineComponent({
                 {
                     type:'search-dropdown', label:"Property", value: propertyID.value, componentKey: propComponentKey,
                     selectOptions: propertyArray, optionSelected: handleSelectedProperty, required: false,
-                    searchPlaceholder: 'Select Property...', dropdownWidth: '400px', updateValue: "",
+                    searchPlaceholder: 'Select Property...', dropdownWidth: '450px', updateValue: "",
                     fetchData: fetchProperties(), clearSearch: clearSelectedProperty()            
                 },
                 {
                     type:'search-dropdown', label:"Tenant", value: tenantID.value, componentKey: tntComponentKey,
                     selectOptions: tenantArray, optionSelected: handleSelectedTenant, required: true,
-                    searchPlaceholder: 'Select Tenant...', dropdownWidth: '400px', updateValue: "",
+                    searchPlaceholder: 'Select Tenant...', dropdownWidth: '450px', updateValue: "",
                     fetchData: fetchTenants(), clearSearch: clearSelectedTenant()  
                 },
                 { type: 'date', name: 'issue_date',label: "Recording Date", value: formatDate(current_date), required: true, maxDate: formatDate(current_date) },
@@ -226,10 +226,10 @@ export default defineComponent({
                 {
                     type:'search-dropdown', label:"Cashbook", value: ledgerID.value, componentKey: ledComponentKey,
                     selectOptions: ledgerArray, optionSelected: handleSelectedLedger, required: true,
-                    searchPlaceholder: 'Select Cashbook...', dropdownWidth: '250px', updateValue: "",
+                    searchPlaceholder: 'Select Cashbook...', dropdownWidth: '450px', updateValue: "",
                     fetchData: fetchLedgers(), clearSearch: clearSelectedLedger()  
                 },
-                {type:'text-area', label:"Memo", value: receipt_memo.value, textarea_rows: '2', textarea_cols: '40', required: true},
+                {type:'text-area', label:"Memo", value: receipt_memo.value, textarea_rows: '2', textarea_cols: '50', required: true},
                 
             ]
         };
@@ -457,8 +457,8 @@ export default defineComponent({
             ledComponentKey.value += 1;
             propComponentKey.value += 1;
             tntComponentKey.value += 1;
-            flex_basis.value = '1/5';
-            flex_basis_percentage.value = '20';
+            flex_basis.value = '1/4';
+            flex_basis_percentage.value = '25';
         })
         onMounted(()=>{
 
