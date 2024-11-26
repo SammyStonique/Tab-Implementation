@@ -24,7 +24,7 @@
         :showPreviousBtn="showPreviousBtn"
     />
     <MovableModal v-model:visible="depModalVisible" :title="title" :modal_top="modal_top" :modal_left="modal_left" :modal_width="modal_width"
-        :loader="modal_loader" @showLoader="showModalLoader" @hideLoader="hideModalLoader" >
+        :loader="modal_loader" @showLoader="showModalLoader" @hideLoader="hideModalLoader" @closeModal="closeModal">
         <DynamicForm 
             :fields="formFields" :flex_basis="flex_basis" :flex_basis_percentage="flex_basis_percentage" 
             :displayButtons="displayButtons" @handleSubmit="saveMpesaAuth" @handleReset="handleReset"
@@ -95,6 +95,7 @@ export default{
             formFields.value = [
                 { type: 'text', name: 'consumer_key',label: "Consumer Key", value: selectedMpesa.value?.consumer_key || '', required: true },
                 { type: 'text', name: 'consumer_secret',label: "Consumer Secret", value: selectedMpesa.value?.consumer_secret || '', required: true },
+                { type: 'dropdown', name: 'environment',label: "Environment", value: selectedMpesa.value?.environment || '', placeholder: "", required: true, options: [{ text: 'Sandbox', value: 'sandbox' }, { text: 'Production', value: 'production' }] },
                 {type:'text-area', label:"OAuth Url", value: selectedMpesa.value?.oauth || '', textarea_rows: '3', textarea_cols: '56', required: true},
             ];
         };
@@ -173,8 +174,8 @@ export default{
             let formData = {
                 consumer_key: formFields.value[0].value,
                 consumer_secret: formFields.value[1].value,
-                oauth: formFields.value[2].value, 
-                environment: 'sandbox',
+                oauth: formFields.value[3].value, 
+                environment: formFields.value[2].value,
                 company: companyID.value
             }
             errors.value = [];
@@ -211,8 +212,8 @@ export default{
             let formData = {
                 consumer_key: formFields.value[0].value,
                 consumer_secret: formFields.value[1].value,
-                oauth: formFields.value[2].value, 
-                environment: 'sandbox',
+                oauth: formFields.value[3].value, 
+                environment: formFields.value[2].value,
                 company: companyID.value,
                 authentication: selectedMpesa.value.authentication_id
             }
@@ -316,6 +317,11 @@ export default{
             store.commit('Mpesa_Integrations/RESET_SEARCH_FILTERS')
             searchMpesaAuths();
         }
+        const closeModal = async() =>{
+            await store.dispatch("Mpesa_Integrations/updateState",{isEditing:false, selectedMpesa:null})
+            depModalVisible.value = false;
+            handleReset();
+        }
         onMounted(()=>{
             searchMpesaAuths();
         })
@@ -324,7 +330,7 @@ export default{
             depResults, depArrLen, depCount, pageCount, showNextBtn, showPreviousBtn,modal_top, modal_left, modal_width,
             loadPrev, loadNext, firstPage, lastPage, actions, formFields, depModalVisible, addNewMpesaAuth,
             displayButtons,flex_basis,flex_basis_percentage, handleActionClick, handleReset, saveMpesaAuth,
-            showLoader, loader, hideLoader, modal_loader, showModalLoader, hideModalLoader,addingRight,rightsModule
+            showLoader, loader, hideLoader, modal_loader, showModalLoader, hideModalLoader,addingRight,rightsModule,closeModal
         }
     }
 }

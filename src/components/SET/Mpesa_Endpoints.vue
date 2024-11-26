@@ -83,6 +83,7 @@ export default{
         const showModal = ref(false);
         const mpesaID = ref('');
         const stkPassKey = ref('');
+        const stkCallUrl = ref('');
         const short_code = ref('');
         const tableColumns = ref([
             {type: "checkbox"},
@@ -251,6 +252,7 @@ export default{
                 authentication: mpesaID.value,
                 short_code: short_code.value,
                 stk_pass_key: stkPassKey.value,
+                stk_callback_url: stkCallUrl.value,
                 transaction_desc: "Test STK Push",
                 phone_number : formFields.value[0].value,
                 amount : formFields.value[1].value,
@@ -344,6 +346,7 @@ export default{
                 mpesaID.value = row['authentication_id'];
                 stkPassKey.value = row['stk_pass_key'];
                 short_code.value = row['short_code'];
+                stkCallUrl.value = row['stk_callback_url'];
                         
             }
         }

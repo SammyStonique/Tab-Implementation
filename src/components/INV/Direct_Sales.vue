@@ -74,10 +74,11 @@ export default{
             {label: "Outlet", key: "outlet_name"},
             {label: "Customer", key:"client"},
             {label: "Phone No", key:"client_phone_number"},
-            {label: "Amount", key:"total_amount", type: "number"},
+            {label: "Amnt", key:"total_amount", type: "number"},
             {label: "Paid", key:"total_paid", type: "number"},
-            {label: "Balance", key:"balance", type: "number"},
+            {label: "Bal.", key:"balance", type: "number"},
             {label: "Rcpt No", key:"receipt_no"},
+            {label: "Ref No", key:"reference_no"},
             {label: "Done By", key:"done_by"},
         ]);
         const showTotals = ref(true);
@@ -324,7 +325,7 @@ export default{
                         // Convert blob to URL
                         const url = URL.createObjectURL(blob1);
                         PrintJS({printable: url, type: 'pdf'});
-                    }
+                    }               
                 })
             .catch((error)=>{
                 console.log(error.message);

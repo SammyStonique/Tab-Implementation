@@ -61,10 +61,13 @@ export default defineComponent({
     min-height: 90vh;
 }
 .subsection{
-    max-height: 70vh;
+    /* max-height: 70vh; */
+    height: 92%;
 }
 .content{
-    max-height: 75vh;
+    /* max-height: 75vh; */
+    min-height: 80%;
+    max-height: 80%;
     overflow-y: scroll;
 }
 

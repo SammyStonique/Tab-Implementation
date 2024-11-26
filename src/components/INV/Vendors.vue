@@ -459,8 +459,8 @@ export default{
                     vendor: vendorID
                 }
                 await store.dispatch('Vendors/fetchVendor',formData)
-                store.commit('pageTab/ADD_PAGE', {'FA':'Vendor_Statement'})
-                store.state.pageTab.faActiveTab = 'Vendor_Statement';
+                store.commit('pageTab/ADD_PAGE', {'INV':'Vendor_Statement'})
+                store.state.pageTab.invActiveTab = 'Vendor_Statement';
             }
         }
         const closeModal = () =>{

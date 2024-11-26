@@ -459,8 +459,8 @@ export default{
                     customer: customerID
                 }
                 await store.dispatch('Customers/fetchCustomer',formData)
-                store.commit('pageTab/ADD_PAGE', {'FA':'Debtor_Statement'})
-                store.state.pageTab.faActiveTab = 'Debtor_Statement';
+                store.commit('pageTab/ADD_PAGE', {'INV':'Debtor_Statement'})
+                store.state.pageTab.invActiveTab = 'Debtor_Statement';
             }
         }
         const closeModal = () =>{

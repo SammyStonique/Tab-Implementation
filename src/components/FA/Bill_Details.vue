@@ -5,7 +5,7 @@
                 <DynamicForm  :fields="formFields" :flex_basis="flex_basis" :flex_basis_percentage="flex_basis_percentage" :displayButtons="displayButtons" @handleSubmit="createBill" @handleReset="handleReset"> 
                     <template v-slot:additional-content>                    
                         <div class="px-3 min-h-[220px]">
-                            <DynamicTable :key="tableKey" :columns="invoiceColumns" :rows="invoiceRows" :showActions="showActions" :idField="idField" :rightsModule="rightsModule" :actions="actions" @action-click="deleteInvoiceLIne"/>
+                            <DynamicTable :key="tableKey" :columns="invoiceColumns" :rows="invoiceRows" :showActions="showActions" :idField="idField" :rightsModule="rightsModule" :actions="actions" @action-click="deleteBillLine"/>
                         </div>
                     </template>
                 </DynamicForm>
@@ -66,11 +66,11 @@ export default defineComponent({
         const vendorName = ref('');
         const vendorLedger = ref('');
         const currencyID = ref('');
-        const ledgerArray = computed(() => store.state.Ledgers.ledgerArr);
+        const ledgerArray = computed(() => store.state.Ledgers.expenseLedgerArr);
         const currencyArray = computed(() => store.state.Currencies.currencyArr);
         const vendorArray = computed(() => store.state.Vendors.vendorArr);
         const invoiceRows = computed(() => {
-            return store.state.Ledgers.invoiceItemsArray;
+            return store.state.Ledgers.billItemsArray;
         });
         const taxRates = computed(() => store.getters['Taxes/getFormatedTax']);
         const invoiceColumns = ref([
@@ -88,17 +88,20 @@ export default defineComponent({
             {name: 'delete', icon: 'fa fa-minus-circle', title: 'Remove Bill Line', rightName: "Adding Bills"},
         ])
 
-        const deleteInvoiceLIne = (rowIndex, action, row) =>{
-            store.dispatch('Ledgers/removeInvoiceLine', rowIndex);
+        const deleteBillLine = (rowIndex, action, row) =>{
+            store.dispatch('Ledgers/removeBillLine', rowIndex);
         }
         const fetchTaxes = async() =>{
             await store.dispatch('Taxes/fetchTaxes', {company:companyID.value})
         };
+        const fetchAllLedgers = async() =>{
+            await store.dispatch('Ledgers/fetchLedgers', {company:companyID.value})
+        };
         const fetchLedgers = async() =>{
-            await store.dispatch('Ledgers/fetchLedgers', {company:companyID.value, ledger_type: 'Expenses'})
+            await store.dispatch('Ledgers/fetchExpenseLedgers', {company:companyID.value, ledger_type: 'Expenses'})
         };
         const handleSelectedLedger = async(option) =>{
-            await store.dispatch('Ledgers/handleSelectedLedger', option)
+            await store.dispatch('Ledgers/handleSelectedLedgerBill', option)
             ledgerID.value = store.state.Ledgers.ledgerID;
             ledComponentKey.value += 1;
      
@@ -156,7 +159,7 @@ export default defineComponent({
                     searchPlaceholder: 'Select Expense Account...', dropdownWidth: '400px', updateValue: "",
                     fetchData: fetchLedgers(), clearSearch: clearSelectedLedger()  
                 },
-                {type:'text-area', label:"Memo", value: invoice_memo.value, textarea_rows: '2', textarea_cols: '40', required: true},
+                {type:'text-area', label:"Memo", value: invoice_memo.value, textarea_rows: '2', textarea_cols: '56', required: true},
                 
             ]
         };
@@ -346,11 +349,12 @@ export default defineComponent({
         })
         onMounted(()=>{
             fetchTaxes();
+            fetchAllLedgers();
         })
 
         return{
             formFields, flex_basis, flex_basis_percentage, displayButtons, createBill, mainComponentKey,
-            handleReset, loader, showLoader, hideLoader, tableKey, invoiceColumns, invoiceRows, showActions, actions, deleteInvoiceLIne, idField,
+            handleReset, loader, showLoader, hideLoader, tableKey, invoiceColumns, invoiceRows, showActions, actions, deleteBillLine, idField,
             title, modal_loader, modal_left, modal_top, modal_width, showModalLoader, hideModalLoader,rightsModule
         }
     }

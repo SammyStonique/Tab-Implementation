@@ -47,11 +47,13 @@ import Invoice_Details from '@/components/INV/Invoice_Details.vue';
 import Receipts from '@/components/INV/Receipts.vue';
 import Receipt_Details from '@/components/INV/Receipt_Details.vue';
 import Customers from '@/components/INV/Customers.vue';
+import Debtor_Statement from '@/components/INV/Debtor_Statement.vue';
 import Bills from '@/components/INV/Bills.vue';
 import Bill_Details from '@/components/INV/Bill_Details.vue';
 import Payments from '@/components/INV/Payments.vue';
 import Payment_Details from '@/components/INV/Payment_Details.vue';
 import Vendors from '@/components/INV/Vendors.vue';
+import Vendor_Statement from '@/components/INV/Vendor_Statement.vue';
 import Sale_Orders from '@/components/INV/Sale_Orders.vue';
 import Sale_Order_Details from '@/components/INV/Sale_Order_Details.vue';
 import Delivery_Orders from '@/components/INV/Delivery_Orders.vue';
@@ -79,7 +81,7 @@ export default{
         Outlet_Counters,Direct_Sales,Sale_Details,Sale_Items,Invoices,Invoice_Details,Receipts,Receipt_Details,Customers,Bills,
         Bill_Details,Payments,Payment_Details,Vendors,Sale_Orders,Sale_Order_Details,Delivery_Orders,Delivery_Order_Details,Direct_Purchases,
         Purchase_Details,Purchase_Items,Purchase_Orders,Purchase_Order_Details,Counter_Channels,Received_Orders,Received_Order_Details,
-        Stock_Adjustments,Stock_Transfers,Stock_Transfer_Details,Stock_Adjustment_Details,
+        Stock_Adjustments,Stock_Transfers,Stock_Transfer_Details,Stock_Adjustment_Details,Debtor_Statement,Vendor_Statement,
 
         Default_Settings
     },

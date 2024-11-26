@@ -75,8 +75,6 @@ export default{
             {label: "Customer", key:"client"},
             {label: "Phone No", key:"client_phone_number"},
             {label: "Amount", key:"total_amount", type: "number"},
-            {label: "Paid", key:"total_paid", type: "number"},
-            {label: "Balance", key:"balance", type: "number"},
             {label: "Status", key:"status"},
             {label: "Done By", key:"done_by"},
         ]);
@@ -314,14 +312,20 @@ export default{
             }
             else if(action == 'delete'){
                 const saleID = [row[idField]];
-                let formData = {
-                    company: companyID.value,
-                    sales_array: saleID
-                }
+                const order_delivery = row['sale_delivery'];
+                if(order_delivery == "Delivered"){
+                    toast.error("Cannot Delete Delivered Sale Order")
+                }else{
+                    let formData = {
+                        company: companyID.value,
+                        sales_array: saleID
+                    }
                 await store.dispatch('Direct_Sales/deleteSaleOrder',formData).
                 then(()=>{
                     searchSales();
                 })
+                }
+                
             }
             else if(action == 'view'){
                 console.log("VIEWING TAKING PLACE");

@@ -8,6 +8,10 @@ const toast = useToast();
 const state = {
   journalsList: [], 
   journalsClientList: [], 
+  inventoryRcptList: [],
+  inventoryPvList: [],
+  accountsRcptList: [],
+  accountsPvList: [],
   journalArr: [],
   journalArray: [],
   journalsArray: [],
@@ -40,6 +44,10 @@ const mutations = {
   initializeStore(state){
     state.journalsList = [];
     state.journalsClientList = [];
+    state.inventoryRcptList = [];
+    state.inventoryPvList = [];
+    state.accountsRcptList = [];
+    state.accountsPvList = [];
     state.journalArr = [];
     state.journalArray = [];
     state.journalsArray = [];
@@ -76,6 +84,18 @@ const mutations = {
   },
   LIST_JOURNALS_CLIENT(state, journals) {
     state.journalsClientList = journals;
+  },
+  LIST_INVENTORY_INVOICES(state, journals) {
+    state.inventoryRcptList = journals;
+  },
+  LIST_INVENTORY_BILLS(state, journals) {
+    state.inventoryPvList = journals;
+  },
+  LIST_ACCOUNTS_INVOICES(state, journals) {
+    state.accountsRcptList = journals;
+  },
+  LIST_ACCOUNTS_BILLS(state, journals) {
+    state.accountsPvList = journals;
   },
   CLIENT_OUTSTANDING_AMOUNT(state, amount){
     state.outstandingBalance = amount;
@@ -227,6 +247,94 @@ const actions = {
           allocation_status: false
       }));
       commit('LIST_JOURNALS_CLIENT', transformedInvoiceArray);
+      commit('CLIENT_OUTSTANDING_AMOUNT', state.outstandingBalance);
+    })
+    .catch((error)=>{
+      console.log(error.message);
+    })
+    
+  },
+  fetchInventoryInvoices({ commit,state }, formData) {
+    state.outstandingBalance = 0;
+    axios.post(`api/v1/fetch-journals/`,formData)
+    .then((response)=>{
+      const clientInvoices = response.data;
+      for(let i=0; i<response.data.length; i++){
+        state.outstandingBalance += Number(response.data[i].due_amount);
+      }
+      const transformedInvoiceArray = clientInvoices.map(clientInvoice =>({
+          ...clientInvoice,
+          payment_allocation: 0,
+          bal_after_alloc: "",
+          allocation_status: false
+      }));
+      commit('LIST_INVENTORY_INVOICES', transformedInvoiceArray);
+      commit('CLIENT_OUTSTANDING_AMOUNT', state.outstandingBalance);
+    })
+    .catch((error)=>{
+      console.log(error.message);
+    })
+    
+  },
+  fetchInventoryBills({ commit,state }, formData) {
+    state.outstandingBalance = 0;
+    axios.post(`api/v1/fetch-journals/`,formData)
+    .then((response)=>{
+      const clientInvoices = response.data;
+      for(let i=0; i<response.data.length; i++){
+        state.outstandingBalance += Number(response.data[i].due_amount);
+      }
+      const transformedInvoiceArray = clientInvoices.map(clientInvoice =>({
+          ...clientInvoice,
+          payment_allocation: 0,
+          bal_after_alloc: "",
+          allocation_status: false
+      }));
+      commit('LIST_INVENTORY_BILLS', transformedInvoiceArray);
+      commit('CLIENT_OUTSTANDING_AMOUNT', state.outstandingBalance);
+    })
+    .catch((error)=>{
+      console.log(error.message);
+    })
+    
+  },
+  fetchAccountsInvoices({ commit,state }, formData) {
+    state.outstandingBalance = 0;
+    axios.post(`api/v1/fetch-journals/`,formData)
+    .then((response)=>{
+      const clientInvoices = response.data;
+      for(let i=0; i<response.data.length; i++){
+        state.outstandingBalance += Number(response.data[i].due_amount);
+      }
+      const transformedInvoiceArray = clientInvoices.map(clientInvoice =>({
+          ...clientInvoice,
+          payment_allocation: 0,
+          bal_after_alloc: "",
+          allocation_status: false
+      }));
+      commit('LIST_ACCOUNTS_INVOICES', transformedInvoiceArray);
+      commit('CLIENT_OUTSTANDING_AMOUNT', state.outstandingBalance);
+    })
+    .catch((error)=>{
+      console.log(error.message);
+    })
+    
+  },
+  fetchAccountsBills({ commit,state }, formData) {
+    state.outstandingBalance = 0;
+    axios.post(`api/v1/fetch-journals/`,formData)
+    .then((response)=>{
+      const clientInvoices = response.data;
+      for(let i=0; i<response.data.length; i++){
+        state.outstandingBalance += Number(response.data[i].due_amount);
+      }
+      const transformedInvoiceArray = clientInvoices.map(clientInvoice =>({
+          ...clientInvoice,
+          payment_allocation: 0,
+          bal_after_alloc: "",
+          allocation_status: false
+      }));
+      commit('LIST_ACCOUNTS_BILLS', transformedInvoiceArray);
       commit('CLIENT_OUTSTANDING_AMOUNT', state.outstandingBalance);
     })
     .catch((error)=>{

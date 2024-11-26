@@ -395,8 +395,8 @@ export default defineComponent({
             store.dispatch('Ledgers/fetchLedgers', {company: companyID.value})
             store.dispatch('Ledgers/updateState', { invoiceItemsArray: []})
             updateFormFields();
-            flex_basis.value = '1/5';
-            flex_basis_percentage.value = '20';
+            flex_basis.value = '1/4';
+            flex_basis_percentage.value = '25';
         })
         onMounted(async()=>{
             fetchDefaultSettings();

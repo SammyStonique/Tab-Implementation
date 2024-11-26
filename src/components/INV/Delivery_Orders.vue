@@ -272,7 +272,7 @@ export default{
                     company: companyID.value,
                     sales_array: saleID
                 }
-                await store.dispatch('Direct_Sales/deleteSaleOrder',formData).
+                await store.dispatch('Direct_Sales/deleteDeliveryOrder',formData).
                 then(()=>{
                     searchSales();
                 })

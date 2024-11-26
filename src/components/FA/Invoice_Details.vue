@@ -5,7 +5,7 @@
                 <DynamicForm  :fields="formFields" :flex_basis="flex_basis" :flex_basis_percentage="flex_basis_percentage" :displayButtons="displayButtons" @handleSubmit="createInvoice" @handleReset="handleReset"> 
                     <template v-slot:additional-content>                    
                         <div class="px-3 min-h-[220px]">
-                            <DynamicTable :key="tableKey" :columns="invoiceColumns" :rows="invoiceRows" :showActions="showActions" :idField="idField" :rightsModule="rightsModule" :actions="actions" @action-click="deleteInvoiceLIne"/>
+                            <DynamicTable :key="tableKey" :columns="invoiceColumns" :rows="invoiceRows" :showActions="showActions" :idField="idField" :rightsModule="rightsModule" :actions="actions" @action-click="deleteInvoiceLine"/>
                         </div>
                     </template>
                 </DynamicForm>
@@ -66,7 +66,7 @@ export default defineComponent({
         const customerName = ref('');
         const customerLedger = ref('');
         const currencyID = ref('');
-        const ledgerArray = computed(() => store.state.Ledgers.ledgerArr);
+        const ledgerArray = computed(() => store.state.Ledgers.incomeLedgerArr);
         const currencyArray = computed(() => store.state.Currencies.currencyArr);
         const customerArray = computed(() => store.state.Customers.customerArr);
         const invoiceRows = computed(() => {
@@ -88,17 +88,20 @@ export default defineComponent({
             {name: 'delete', icon: 'fa fa-minus-circle', title: 'Remove Invoice Line', rightName: "Adding Invoice"},
         ])
 
-        const deleteInvoiceLIne = (rowIndex, action, row) =>{
+        const deleteInvoiceLine = (rowIndex, action, row) =>{
             store.dispatch('Ledgers/removeInvoiceLine', rowIndex);
         }
         const fetchTaxes = async() =>{
             await store.dispatch('Taxes/fetchTaxes', {company:companyID.value})
         };
+        const fetchAllLedgers = async() =>{
+            await store.dispatch('Ledgers/fetchLedgers', {company:companyID.value})
+        };
         const fetchLedgers = async() =>{
-            await store.dispatch('Ledgers/fetchLedgers', {company:companyID.value, ledger_type: 'Income'})
+            await store.dispatch('Ledgers/fetchIncomeLedgers', {company:companyID.value, ledger_type: 'Income'})
         };
         const handleSelectedLedger = async(option) =>{
-            await store.dispatch('Ledgers/handleSelectedLedger', option)
+            await store.dispatch('Ledgers/handleSelectedLedgerInvoice', option)
             ledgerID.value = store.state.Ledgers.ledgerID;
             ledComponentKey.value += 1;
      
@@ -156,7 +159,7 @@ export default defineComponent({
                     searchPlaceholder: 'Select Income Account...', dropdownWidth: '400px', updateValue: "",
                     fetchData: fetchLedgers(), clearSearch: clearSelectedLedger()  
                 },
-                {type:'text-area', label:"Memo", value: invoice_memo.value, textarea_rows: '2', textarea_cols: '40', required: true},
+                {type:'text-area', label:"Memo", value: invoice_memo.value, textarea_rows: '2', textarea_cols: '56', required: true},
                 
             ]
         };
@@ -283,7 +286,7 @@ export default defineComponent({
                 journals_array: journalsArray.value,
                 user: userID.value
             }
-            console.log("THE FORM DATA IS ",formData)
+ 
             errors.value = [];
             for(let i=1; i < (formFields.value.length - 3); i++){
                 if(formFields.value[i].value =='' && formFields.value[i].required == true){
@@ -347,11 +350,12 @@ export default defineComponent({
         })
         onMounted(()=>{
             fetchTaxes();
+            fetchAllLedgers();
         })
 
         return{
             formFields, flex_basis, flex_basis_percentage, displayButtons, createInvoice, mainComponentKey,
-            handleReset, loader, showLoader, hideLoader, tableKey, invoiceColumns, invoiceRows, showActions, actions, deleteInvoiceLIne, idField,
+            handleReset, loader, showLoader, hideLoader, tableKey, invoiceColumns, invoiceRows, showActions, actions, deleteInvoiceLine, idField,
             title, modal_loader, modal_left, modal_top, modal_width, showModalLoader, hideModalLoader,rightsModule
         }
     }

@@ -8,7 +8,6 @@ export function useFetchSessionData() {
   const fetchSessionData = async() => {
     await axios.get('api/v1/get-session-data')
     .then((response)=>{
-        console.log("THE SESSION DATA IS ",response.data);
         const company_modules = {
           "company_modules": response.data.modules
         }

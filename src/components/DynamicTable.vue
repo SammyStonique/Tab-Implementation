@@ -309,7 +309,8 @@ input {
 }
 .table-container {
   position: relative;
-  max-height: 59vh;
+  /* max-height: 59vh; */
+  max-height: 68vh;
   min-height: 20vh;
   overflow-y: auto;
   overflow-x: auto;

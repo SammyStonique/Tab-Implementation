@@ -22,7 +22,7 @@ import PageStyleComponent from '@/components/PageStyleComponent.vue';
 import { useStore } from "vuex";
 import { useToast } from "vue-toastification";
 import { useDateFormatter } from '@/composables/DateFormatter';
-import DynamicTable from '../DynamicTable.vue';
+import DynamicTable from '@/components/INV/DynamicTable.vue';
 
 export default defineComponent({
     name: 'Sale_Order_Details',
@@ -219,6 +219,7 @@ export default defineComponent({
                         "inventory_item": itemRows.value[i].item,
                         "stock_at_hand": itemRows.value[i].stock_at_hand,
                         "adjusted_stock": itemRows.value[i].quantity,
+                        "stock_type": itemRows.value[i].stock_type,
                         "batch_before_sale": itemRows.value[i].stock_after_adjustment,
                         "batch_count": itemRows.value[i].batch_count,
                         "discount": itemRows.value[i].discount,
@@ -242,6 +243,7 @@ export default defineComponent({
                         "inventory_item": itemRows.value[i].item,
                         "stock_at_hand": itemRows.value[i].stock_at_hand,
                         "adjusted_stock": itemRows.value[i].quantity,
+                        "stock_type": itemRows.value[i].stock_type,
                         "batch_before_sale": itemRows.value[i].stock_after_adjustment,
                         "batch_count": itemRows.value[i].batch_count,
                         "discount": itemRows.value[i].discount,

@@ -34,7 +34,6 @@ export default{
               isAuthenticated: true,
               activeComponent: "Main"
           }
-          console.log("THE USER DATAA IS ",userData)
           store.dispatch("userData/updateState",userData);
           if (response.data.token) {
             axios.defaults.headers.common["Authorization"] = "Token " + response.data.token;

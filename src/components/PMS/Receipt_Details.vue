@@ -132,7 +132,10 @@ export default defineComponent({
         const clearSelectedTenant = async() =>{
             await store.dispatch('Active_Tenants/updateState', {tenantID: ''});
             tenantID.value = ""
-        }
+        };
+        const fetchAllLedgers = async() =>{
+            await store.dispatch('Ledgers/fetchLedgers', {company:companyID.value})
+        };
         const fetchLedgers = async() =>{
             await store.dispatch('Ledgers/fetchLedgers', {company:companyID.value, ledger_type: 'Cashbook'})
         };
@@ -461,7 +464,7 @@ export default defineComponent({
             flex_basis_percentage.value = '25';
         })
         onMounted(()=>{
-
+            fetchAllLedgers();
         })
 
         return{

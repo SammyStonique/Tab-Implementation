@@ -110,6 +110,7 @@ export default defineComponent({
             ];
         };
         const handleReset = () =>{
+            store.dispatch('Mpesa_Integrations/updateState',{selectedKey: null, selectedCashbook: null})
             for(let i=0; i < formFields.value.length; i++){
                 formFields.value[i].value = '';
             }
@@ -133,6 +134,9 @@ export default defineComponent({
                 { type: 'text', name: 'stk_pass_key',label: "STK Push Pass Key", value: selectedSetup.value?.stk_pass_key || '', placeholder: "", required: false },
                 { type: 'text', name: 'stk_callback_url',label: "STK Push Callback URL", value: selectedSetup.value?.stk_callback_url || '', placeholder: "", required: false },
                 { type: 'text', name: 'stk_process_url',label: "STK Push Process URL", value: selectedSetup.value?.stk_process_url || 'https://api.safaricom.co.ke/mpesa/stkpush/v1/processrequest', placeholder: "", required: false },
+                { type: 'dropdown', name: 'limit_group',label: "Limit To", value: selectedSetup.value?.limit_group || 'All', required: true, options: [{ text: 'All', value: 'All' }, { text: 'Customers', value: 'Customers' }, { text: 'Debtors', value: 'Debtors' }, { text: 'Tenants', value: 'Tenants' }]  },
+                { type: 'dropdown', name: 'auto_receipt',label: "Auto Receipt", value: selectedSetup.value?.auto_receipt || 'Yes', required: true, options: [{ text: 'Yes', value: 'Yes' }, { text: 'No', value: 'No' }]  },
+                {required: false}
             ];
         };
         watch([selectedSetup], () => {
@@ -161,6 +165,8 @@ export default defineComponent({
                 stk_process_url: additionalFields.value[2].value,
                 transaction_type: formFields.value[2].value,
                 config_type: formFields.value[1].value,
+                limit_group: additionalFields.value[3].value,
+                auto_receipt: additionalFields.value[4].value,
                 cashbook: ledgerValue.value,
                 cashbook_id: ledgerValue.value,
                 authentication: keyValue.value,
@@ -234,6 +240,8 @@ export default defineComponent({
                     stk_process_url: additionalFields.value[2].value,
                     transaction_type: formFields.value[2].value,
                     config_type: formFields.value[1].value,
+                    limit_group: additionalFields.value[3].value,
+                    auto_receipt: additionalFields.value[4].value,
                     cashbook: ledgerValue.value,
                     cashbook_id: ledgerValue.value,
                     authentication: keyValue.value,

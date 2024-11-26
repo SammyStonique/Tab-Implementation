@@ -81,9 +81,9 @@ export default defineComponent({
         const flex_basis_percentage_additional = ref('');
         const ledgerID = ref('');
         const customerID = ref('');
-        const ledgerArray = computed(() => store.state.Ledgers.ledgerArr);
+        const ledgerArray = computed(() => store.state.Ledgers.cashbookLedgerArr);
         const customerArray = computed(() => store.state.Customers.customerArr);
-        const receiptRows = computed(() => store.state.Journals.journalsClientList);
+        const receiptRows = computed(() => store.state.Journals.accountsRcptList);
         const receiptColumns = ref([
             {type: "checkbox"},
             {label: "Invoice", key:"journal_no", type: "text", editable: false},
@@ -101,7 +101,7 @@ export default defineComponent({
         };
         const fetchCustomerInvoices = async() =>{
             if(customerID.value){
-                await store.dispatch('Journals/fetchJournalsClient', {company:companyID.value, txn_type:["INV", "DBN"], customer:customerID.value, status:"Open"})
+                await store.dispatch('Journals/fetchAccountsInvoices', {company:companyID.value, txn_type:["INV", "DBN"], customer:customerID.value, status:"Open"})
             }       
         };
         const handleSelectedCustomer = async(option) =>{
@@ -111,9 +111,12 @@ export default defineComponent({
         const clearSelectedCustomer = async() =>{
             await store.dispatch('Customers/updateState', {customerID: ''});
             customerID.value = ""
-        }
+        };
+        const fetchAllLedgers = async() =>{
+            await store.dispatch('Ledgers/fetchLedgers', {company:companyID.value})
+        };
         const fetchLedgers = async() =>{
-            await store.dispatch('Ledgers/fetchLedgers', {company:companyID.value, ledger_type: 'Cashbook'})
+            await store.dispatch('Ledgers/fetchCashbookLedgers', {company:companyID.value, ledger_type: 'Cashbook'})
         };
         const handleSelectedLedger = async(option) =>{
             await store.dispatch('Ledgers/handleSelectedLedger', option)
@@ -198,7 +201,7 @@ export default defineComponent({
                     fetchData: fetchLedgers(), clearSearch: clearSelectedLedger()  
                 },
                 { type: 'date', name: 'issue_date',label: "Recording Date", value: formatDate(current_date), required: true, maxDate: formatDate(current_date) },
-                { type: 'date', name: 'banking_date',label: "Banking Date", value: '', required: true, maxDate: formatDate(current_date) },
+                { type: 'date', name: 'banking_date',label: "Banking Date", value: formatDate(current_date), required: true, maxDate: formatDate(current_date) },
                 { type: 'dropdown', name: 'payment_method',label: "Payment Method", value: '', placeholder: "", required: true, options: [{ text: 'Cash', value: 'Cash' }, { text: 'Mpesa', value: 'Mpesa' },{ text: 'Bank Deposit', value: 'Bank Deposit' }, { text: 'Cheque', value: 'Cheque' },{ text: 'Check-off', value: 'Check-off' }, { text: 'RTGS', value: 'RTGS' },{ text: 'EFT', value: 'EFT' }, { text: 'Not Applicable', value: 'Not Applicable' }] },
                 { type: 'text', name: 'reference_no',label: "Reference No", value: '', required: true,},
                 { type: 'number', name: 'total_amount',label: "Amount", value: receipt_totals.value || 0, required: true, method: allocateReceivedAmount },
@@ -215,7 +218,7 @@ export default defineComponent({
             }
         }, { immediate: true })
         const handleReset = () =>{
-            store.dispatch('Journals/updateState', {journalsClientList: [], outstandingBalance: 0})
+            store.dispatch('Journals/updateState', {accountsRcptList: [], outstandingBalance: 0})
             mainComponentKey.value += 1;
             for(let i=0; i < formFields.value.length; i++){
                 if(formFields.value[i].type == 'number'){
@@ -234,6 +237,9 @@ export default defineComponent({
             receiptTotals.value = 0;
             prepaymentAmount.value = 0;
             hasPrepayment.value = false;
+            receipt_memo.value = "";
+            formFields.value[2].value = formatDate(current_date);
+            formFields.value[3].value = formatDate(current_date);
         }
         watch([customerID], () => {
             if(customerID.value){
@@ -420,7 +426,7 @@ export default defineComponent({
             flex_basis_percentage.value = '25';
         })
         onMounted(()=>{
-
+            fetchAllLedgers();
         })
 
         return{

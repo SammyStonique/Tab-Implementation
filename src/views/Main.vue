@@ -26,7 +26,7 @@
     <div v-if="mainOpen" class="text-black h-screen bg-[url('@/assets/image1.jpg')] bg-cover bg-center px-4 sm:px-12 w-full">
         <div class="border-b border-gray-300 py-2 w-full flex pl-6 sm:pl-8">
             <p class="text-left basis-1/3 sm:basis-3/6 text-sm sm:text-base">Welcome, <strong class="uppercase">{{ username }}</strong></p>
-            <p class="text-left basis-1/3 sm:basis-2/6 uppercase font-semibold text-sm sm:text-base"><strong>{{ company_name }}</strong></p>
+            <p class="text-left basis-1/3 sm:basis-2/6 uppercase font-semibold text-sm sm:text-base"><strong>{{ company_name }}</strong> <em class="hidden">{{ isIdle }}</em></p>
             <div class="basis-1/3 sm:basis-1/6 flex items-center justify-end space-x-4">
                 <button type="button" @click="showDropdown" class="text-sm sm:text-base">
                     Switch Company <i class="fa fa-caret-down pl-2" aria-hidden="true"></i>
@@ -83,6 +83,7 @@ export default {
         const store = useStore();
         const loader = ref('none');
         const username = computed(() => store.state.userData.user_names);
+        const companyID = computed(() => store.state.userData.company_id);
         const company_name = computed(() => store.state.userData.company_name);
         const companyList = computed(() => store.state.userData.user_companies);
         const hmsOpen = computed(() => store.state.modulesTab.modulePage);
@@ -91,6 +92,20 @@ export default {
         const company_modules = computed(() => store.state.userData.company_modules);
 
         const selectedModule = computed(() => store.state.modulesTab.selectedModule);
+
+
+        const isIdle = computed(() => {
+            // Check if the user is idle
+            const idleStatus = store.state.idleVue.isIdle;
+            const companyID = store.state.userData.company_id;
+
+            // Commit mutation if the user is idle
+            if (idleStatus == true && companyID != "") {
+                store.dispatch('userData/logout');
+            }
+
+            return idleStatus;
+        });
 
         const getImagePath = (imageName) => {
             try {
@@ -150,7 +165,7 @@ export default {
         });
 
         return {
-            openModule, hmsOpen, mainOpen, selectedModule, company_modules, getImagePath, username, company_name, logout,
+            isIdle,openModule, hmsOpen, mainOpen, selectedModule, company_modules, getImagePath, username, company_name, logout,
             showOptions, showDropdown, companyList, switchCompany, loader, showLoader, hideLoader
         };
     }

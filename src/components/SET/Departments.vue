@@ -294,6 +294,11 @@ export default{
         const resetFilters = () =>{
             store.commit('Departments/RESET_SEARCH_FILTERS')
             searchDepartments();
+        };
+        const closeModal = async() =>{
+            await store.dispatch("Departments/updateState",{isEditing:false, selectedDepartment:null})
+            depModalVisible.value = false;
+            handleReset();
         }
         onMounted(()=>{
             searchDepartments();

@@ -25,6 +25,7 @@ const state = {
   jnlSortedArr: [],
   jnlArray: [],
   invoiceItemsArray: [],
+  billItemsArray: [],
   journalItemsArray: [],
 };
   
@@ -35,7 +36,8 @@ const mutations = {
     state.ledgerArray = [];
     state.ledgerDetails = [];
     state.invoiceItemsArray = [];
-    state.journalItemsArray = [];
+    state.accInvoiceItemsArray = [];
+    state.billItemsArray = [];
     state.ledgerRunningBalance = 0;
     state.ledgerID = '';
     state.ledgerName = '';
@@ -223,8 +225,6 @@ const actions = {
     })
     
   },
-
-
   handleSelectedLedger({ commit, state }, option){
     state.ledgerArray = [];
     const selectedLedger = state.ledgersList.find(ledger => (ledger.ledger_code + " - " +ledger.ledger_name) === option);
@@ -243,8 +243,49 @@ const actions = {
         selectedLedger.total_amount = 0;
         state.ledgerArray = [...state.ledgerArray, selectedLedger];
     }
+      
+  },
+
+  handleSelectedLedgerInvoice({ commit, state }, option){
+    state.ledgerArray = [];
+    const selectedLedger = state.ledgersList.find(ledger => (ledger.ledger_code + " - " +ledger.ledger_name) === option);
+    if (selectedLedger) {
+        state.ledgerID = selectedLedger.ledger_id;
+        state.ledgerName = selectedLedger.ledger_code + " - " + selectedLedger.ledger_name;
+        selectedLedger.posting_account = selectedLedger.ledger_code + " - " + selectedLedger.ledger_name;
+        selectedLedger.charge_type = "";
+        selectedLedger.description = "";
+        selectedLedger.cost = 0;
+        selectedLedger.quantity = 1;
+        selectedLedger.vat_rate = null;
+        selectedLedger.vat_inclusivity = "Inclusive";
+        selectedLedger.vat_amount = 0;
+        selectedLedger.sub_total = 0;
+        selectedLedger.total_amount = 0;
+        state.ledgerArray = [...state.ledgerArray, selectedLedger];
+    }
     state.invoiceItemsArray.push(selectedLedger);
-    commit('LEDGERS_ARRAY', state.ledgerArray);
+      
+  },
+  handleSelectedLedgerBill({ commit, state }, option){
+    state.ledgerArray = [];
+    const selectedLedger = state.ledgersList.find(ledger => (ledger.ledger_code + " - " +ledger.ledger_name) === option);
+    if (selectedLedger) {
+        state.ledgerID = selectedLedger.ledger_id;
+        state.ledgerName = selectedLedger.ledger_code + " - " + selectedLedger.ledger_name;
+        selectedLedger.posting_account = selectedLedger.ledger_code + " - " + selectedLedger.ledger_name;
+        selectedLedger.charge_type = "";
+        selectedLedger.description = "";
+        selectedLedger.cost = 0;
+        selectedLedger.quantity = 1;
+        selectedLedger.vat_rate = null;
+        selectedLedger.vat_inclusivity = "Inclusive";
+        selectedLedger.vat_amount = 0;
+        selectedLedger.sub_total = 0;
+        selectedLedger.total_amount = 0;
+        state.ledgerArray = [...state.ledgerArray, selectedLedger];
+    }
+    state.billItemsArray.push(selectedLedger);
       
   },
 
@@ -318,6 +359,9 @@ const actions = {
   },
   removeInvoiceLine({commit, state}, index){
     state.invoiceItemsArray.splice(index, 1); 
+  },
+  removeBillLine({commit, state}, index){
+    state.billItemsArray.splice(index, 1); 
   },
   removeJournalLine({commit, state}, index){
     state.journalItemsArray.splice(index, 1); 

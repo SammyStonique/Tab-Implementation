@@ -18,17 +18,21 @@
             </div>
         </template>
     </PageStyleComponent>
+    <MovableModal v-model:visible="depModalVisible" :title="title" :modal_top="modal_top" :modal_left="modal_left" :modal_width="modal_width"
+        :loader="modal_loader" @showLoader="showModalLoader" @hideLoader="hideModalLoader" @closeModal="closeModal">
+        
+    </MovableModal>
 </template>
 
 <script>
-import { defineComponent, ref, onBeforeMount, onMounted, computed, watch } from 'vue';
+import { defineComponent, ref, onBeforeUnmount, onBeforeMount, onMounted, computed, watch } from 'vue';
 import DynamicForm from '@/components/NewDynamicForm.vue';
 import MovableModal from '@/components/MovableModal.vue';
 import PageStyleComponent from '@/components/PageStyleComponent.vue';
 import { useStore } from "vuex";
 import { useToast } from "vue-toastification";
 import { useDateFormatter } from '@/composables/DateFormatter';
-import DynamicTable from '../DynamicTable.vue';
+import DynamicTable from '@/components/INV/DynamicTable.vue';
 
 export default defineComponent({
     name: 'Sale_Details',
@@ -36,6 +40,7 @@ export default defineComponent({
         PageStyleComponent, DynamicForm, DynamicTable, MovableModal
     },
     setup(){
+        const socket = ref(null);
         const store = useStore();
         const toast = useToast();
         const { formatDate } = useDateFormatter();
@@ -55,7 +60,8 @@ export default defineComponent({
         const balance = ref(0);
         const tax_totals = ref(0);
         const saleItemsArray = ref([]);
-        const title = ref('Add Prepayment');
+        const title = ref('Mpesa Payment Notification');
+        const depModalVisible = ref(false);
         const modal_top = ref('150px');
         const modal_left = ref('400px');
         const modal_width = ref('32vw');
@@ -399,25 +405,68 @@ export default defineComponent({
             }
         };
 
+        // Function to handle incoming WebSocket messages (transaction creation)
+        const handleMessage = (event) => {
+            const message = JSON.parse(event.data).message;
+            alert(message);  // Show an alert when a new transaction is created
+        };
+
+        // Establish WebSocket connection when component is mounted
+        onMounted(() => {
+            fetchDefaultSettings();
+            fetchTaxes();
+            if(defaultOutlet.value != null && defaultStockType.value != null){
+                fetchItems(defaultStockType.value)
+            }
+            // Connect to the Django WebSocket endpoint (adjust the URL as necessary)
+            socket.value = new WebSocket("ws://127.0.0.1:8000/ws/notifications/");
+
+            // When WebSocket connection is established
+            socket.value.onopen = () => {
+                console.log("WebSocket connection established.");
+            };
+
+            // Handle incoming messages (e.g., a new transaction)
+            socket.value.onmessage = handleMessage;
+
+            // Handle any WebSocket errors
+            socket.value.onerror = (error) => {
+                console.error("WebSocket error:", error);
+            };
+
+            // When the WebSocket connection is closed
+            socket.value.onclose = () => {
+                console.log("WebSocket connection closed.");
+            };
+        });
+
+        // Clean up WebSocket connection when component is destroyed
+        onBeforeUnmount(() => {
+        if (socket.value) {
+            socket.value.close();  // Close WebSocket when the component is unmounted
+        }
+        });
+
         onBeforeMount(()=>{ 
             store.dispatch('Items_Catalog/updateState', { lineItemsArray: []})
             updateFormFields();
             flex_basis.value = '1/5';
             flex_basis_percentage.value = '20';
         })
-        onMounted(async()=>{
-            fetchDefaultSettings();
-            fetchTaxes();
-            if(defaultOutlet.value != null && defaultStockType.value != null){
-                fetchItems(defaultStockType.value)
-            }
+        // onMounted(async()=>{
+        //     fetchDefaultSettings();
+        //     fetchTaxes();
+        //     if(defaultOutlet.value != null && defaultStockType.value != null){
+        //         fetchItems(defaultStockType.value)
+        //     }
 
-        })
+        // });
+
 
         return{
             formFields, flex_basis, flex_basis_percentage, displayButtons, createSaleReceipt, mainComponentKey,showTotals,
             handleReset, loader, showLoader, hideLoader, tableKey, itemColumns, itemRows, showActions, actions, deleteItemLine, idField,
-            title, modal_loader, modal_left, modal_top, modal_width, showModalLoader, hideModalLoader,rightsModule,balance
+            title, modal_loader, modal_left, modal_top, modal_width, showModalLoader, hideModalLoader,rightsModule,balance,depModalVisible
         }
     }
 })

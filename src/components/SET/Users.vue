@@ -69,7 +69,7 @@
                 <button type="button" class="absolute ml-4 rounded px-2 bg-green-500 text-white" @click="addUserCompany()"><i class="fa fa-check"></i></button>
             </div>
             <div class="min-h-[200px]">
-                <DynamicTable :key="tableCompKey" :columns="companyColumns" :rows="companyRows" :idField="compIdField" @selection-changed="selectionCompChanged" :rightsModule="rightsModule" :actions="compActions" @action-click="removeUserCompany()" />
+                <DynamicTable :key="tableCompKey" :columns="companyColumns" :rows="companyRows" :idField="compIdField" @selection-changed="selectionCompChanged" :rightsModule="rightsModule" :actions="compActions" @action-click="removeUserCompany" />
             </div>
         </MovableModal>
     </div>
@@ -609,6 +609,7 @@ export default{
             })
         };
         const removeUserCompany = (rowIndex, action, row) =>{
+            console.log("THE ROW IS ",row)
             Swal.fire({
             title: "Are you sure?",
             text: `Do you wish to Remove Company?`,
@@ -626,7 +627,7 @@ export default{
             if (result.value) {
                 let formData ={
                     user: staffID.value,
-                    user_company: row['company_id']
+                    user_company: row['allowed_company_id']
                 }
                 axios.post(`api/v1/delete-user-company/`,formData)
                 .then((response)=>{
