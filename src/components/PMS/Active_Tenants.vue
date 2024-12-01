@@ -28,6 +28,8 @@
             @lastPage="lastPage"
             :showNextBtn="showNextBtn"
             :showPreviousBtn="showPreviousBtn"
+            :selectedValue="selectedValue"
+            @selectSearchQuantity="selectSearchQuantity"
         />
     </div>
 </template>
@@ -60,6 +62,7 @@ export default{
         const propArrLen = ref(0);
         const propCount = ref(0);
         const pageCount = ref(0);
+        const selectedValue = ref(50);
         const currentPage = ref(1);
         const showNextBtn = ref(false);
         const showPreviousBtn = ref(false);
@@ -201,7 +204,8 @@ export default{
                 unit_number: unit_number_search.value,
                 property: propertyID.value,
                 phone_number: phone_number_search.value,
-                company_id: companyID.value
+                company_id: companyID.value,
+                page_size: selectedValue.value
             } 
             axios
             .post(`api/v1/tenants-search/?page=${currentPage.value}`,formData)
@@ -211,7 +215,7 @@ export default{
                 propResults.value = response.data;
                 propArrLen.value = tenantList.value.length;
                 propCount.value = propResults.value.count;
-                pageCount.value = Math.ceil(propCount.value / 50);
+                pageCount.value = Math.ceil(propCount.value / selectedValue.value);
                 if(response.data.next){
                     showNextBtn.value = true;
                 }
@@ -225,7 +229,11 @@ export default{
             .finally(()=>{
                 hideLoader();
             })
-        }
+        };
+        const selectSearchQuantity = (newValue) =>{
+            selectedValue.value = newValue;
+            searchTenants(selectedValue.value);
+        };
         const resetFilters = () =>{
             store.commit('Active_Tenants/RESET_SEARCH_FILTERS')
             searchTenants();
@@ -339,7 +347,7 @@ export default{
             propResults, propArrLen, propCount, pageCount, showNextBtn, showPreviousBtn,
             loadPrev, loadNext, firstPage, lastPage, idField, actions, handleActionClick, propModalVisible, closeModal,
             submitButtonLabel, showModal, addNewTenant, showLoader, loader, hideLoader, importTenants, removeTenant, removeTenants,
-            handleSelectionChange,addingRight,rightsModule,printTenantsList
+            handleSelectionChange,addingRight,rightsModule,printTenantsList,selectSearchQuantity,selectedValue
         }
     }
 };

@@ -19,13 +19,17 @@
                         <button type="button" class="rounded bg-green-400 text-sm mr-2 w-30 text-white px-2 py-1.5" @click="downloadExcelTemplate"><i class="fa fa-download mr-1.5"></i>Download</button>
                         <label for="" class="mb-2 mr-3">Select Excel To Import:<em>*</em></label>
                         <input type="text" name="" class="rounded border-2 border-gray-600 text-gray-500 text-sm pl-2 mr-2 mb-4 w-80 h-8" placeholder="" v-model="filePath" >
-                        <input type="file" name="file-input" @change="onFileChange" id="file-input" accept=".csv, application/vnd.openxmlformats-officedocument.spreadsheetml.sheet, application/vnd.ms-excel">
+                        <input type="file" name="file-input" @change="onFileChange" id="file-input" accept=".csv, .xls, .xlsx, .xlsm, .xlsb, application/vnd.openxmlformats-officedocument.spreadsheetml.sheet, application/vnd.ms-excel">
                         <!-- <label class="rounded border bg-gray-200 px-2 py-1.5 w-30 cursor-pointer mr-6" for="file-input">Browse...</label> -->
                         <button type="button" class="rounded bg-green-400 text-sm mr-2 w-24 text-white px-2 py-1.5" @click="displayExcelData">Import</button>
                     </div>                   
                 </div>
-                <div class="mt-2">
-                    <DynamicTable :columns="columns" :rows="rows" :idField="idField"/>
+                <div class="mt-2 min-h-[50vh]">
+                    <DynamicTable :columns="columns" :rows="rows" :idField="idField" :showActions="showActions"/>
+                </div>
+                <div class="flex-1 basis-full px-2 mt-3">
+                    <button @click="handleSubmit" class="rounded bg-green-400 text-sm mr-2  text-white px-2 py-1.5"><i class="fa fa-check-circle text-xs mr-1.5" aria-hidden="true"></i>Save</button>
+                    <button @click="handleReset" class="rounded bg-green-400 text-sm mr-2  text-white px-2 py-1.5"><i class="fa fa-refresh text-xs mr-1.5" aria-hidden="true"></i>Reset</button>
                 </div>
             </div>
         </template>
@@ -73,16 +77,27 @@ export default defineComponent({
     setup(props,{emit}){
         const localFile = ref(null);
         const localFilePath = ref('');
+        const showActions = ref(false);
 
         const showLoader = () =>{
             emit('showLoader');
         }
         const hideLoader = () =>{
             emit('hideLoader');
-        }
+        };
+
+        const downloadExcelTemplate = () =>{
+            emit('downloadExcelTemplate');
+        };
 
         const displayExcelData = () =>{
             emit('displayExcelData');
+        };
+        const handleSubmit = () =>{
+            emit('handleSubmit');
+        }
+        const handleReset = () =>{
+            emit('handleReset');
         }
 
         const onFileChange = (e) => {
@@ -116,7 +131,8 @@ export default defineComponent({
         };     
 
         return{
-            showLoader, hideLoader, onFileAdd, displayExcelData, onFileChange
+            showLoader, hideLoader, onFileAdd, displayExcelData, onFileChange,showActions,handleSubmit,handleReset,
+            downloadExcelTemplate
         }
     }
 });

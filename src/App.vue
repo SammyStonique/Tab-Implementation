@@ -1,4 +1,5 @@
 <template>
+    <em class="hidden">{{ isIdle }}</em>
     <component 
       :is="activeComponent"
     />
@@ -17,10 +18,24 @@ export default{
   },
   setup(){
     const store = useStore();
-    const activeComponent = computed(() => store.state.userData.activeComponent)
+    const activeComponent = computed(() => store.state.userData.activeComponent);
+
+    const isIdle = computed(() => {
+        // Check if the user is idle
+        const idleStatus = store.state.idleVue.isIdle;
+        const companyID = store.state.userData.company_id;
+
+        // Commit mutation if the user is idle
+        if (idleStatus == true && companyID != "" && activeComponent != 'Login') {
+            store.dispatch('userData/logout');
+        }
+
+        return idleStatus;
+    });
 
     onBeforeMount(()=>{
       store.dispatch('userData/reloadPage');
+      store.state.idleVue.isIdle = false;
       axios.get('api/v1/get-session-data')
       .then((response)=>{
         if(response.status == 200){
@@ -50,7 +65,7 @@ export default{
       })
     })
     return{
-      activeComponent
+      activeComponent,isIdle
     }
   }
 }

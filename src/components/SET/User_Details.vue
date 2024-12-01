@@ -80,7 +80,7 @@ export default defineComponent({
                 { type: 'text', name: 'phone_number',label: "Phone Number", value: selectedUser.value?.phone_number || '', required: true },
                 { type: 'date', name: 'birth_date',label: "D.O.B", value: selectedUser.value?.birth_date || '', required: true },
                 { type: 'dropdown', name: 'gender',label: "Gender", value: selectedUser.value?.gender || '', placeholder: "", required: true, options: [{ text: 'Male', value: 'Male' }, { text: 'Female', value: 'Female' }, { text: 'Other', value: 'Other' }] },
-                { type: 'dropdown', name: 'profile',label: "Profile", value: selectedUser.value?.profile || '', placeholder: "", required: true, options: [{text:'Admin',value:'Admin'},{text:'Doctor',value:'Doctor'},{text:'Patient',value:'Patient'},{text:'Accountant',value:'Accountant'},{text:'Human Resource',value:'Human Resource'},{text:'Nurse',value:'Nurse'},{text:'Lab Technician',value:'Lab Technician'},{text:'Office Clerk',value:'Office Clerk'},{text:'Clinical Officer',value:'Clinical Officer'}] },
+                { type: 'dropdown', name: 'profile',label: "Profile", value: selectedUser.value?.profile || '', placeholder: "", required: true, options: [{text:'Admin',value:'Admin'},{text:'Doctor',value:'Doctor'},{text:'Accountant',value:'Accountant'},{text:'Human Resource',value:'Human Resource'},{text:'Nurse',value:'Nurse'},{text:'Lab Technician',value:'Lab Technician'},{text:'Office Clerk',value:'Office Clerk'},{text:'Clinical Officer',value:'Clinical Officer'}] },
 
                 {  
                     type:'search-dropdown', label:"Department", value: depValue.value, componentKey: depComponentKey,

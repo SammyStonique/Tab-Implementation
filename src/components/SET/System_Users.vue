@@ -159,6 +159,7 @@ export default{
         const actions = ref([
             {name: 'edit', icon: 'fa fa-edit', title: 'Edit User', rightName: 'Editing User'},
             {name: 'assign', icon: 'fa fa-check-circle', title: 'Assign Rights', rightName: 'Assigning User Rights'},
+            {name: 'allowed-company', icon: 'fa fa-key', title: 'Assign Company', rightName: 'User Allowed Companies'},
             {name: 'lock', icon: 'fa fa-lock', title: 'Lock User', rightName: 'Locking User'},
             {name: 'delete', icon: 'fa fa-trash', title: 'Delete User', rightName: 'Deleting User'},
         ]);
@@ -305,10 +306,9 @@ export default{
                 identification_no: id_number_search.value,
                 profile: profile_search.value,
                 phone_number: phone_number_search.value,
-                company_id: companyID.value,
             } 
             axios
-            .post(`api/v1/staff-search/?page=${currentPage.value}`,formData)
+            .post(`api/v1/users-search/?page=${currentPage.value}`,formData)
             .then((response)=>{
                 userList.value = response.data.results;
                 store.commit('userData/LIST_USERS', userList.value)

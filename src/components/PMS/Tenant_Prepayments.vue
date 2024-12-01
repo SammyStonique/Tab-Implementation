@@ -26,6 +26,8 @@
         @lastPage="lastPage"
         :showNextBtn="showNextBtn"
         :showPreviousBtn="showPreviousBtn"
+        :selectedValue="selectedValue"
+        @selectSearchQuantity="selectSearchQuantity"
     />
     <MovableModal v-model:visible="appModalVisible" :title="title" :modal_top="modal_top" :modal_left="modal_left" :modal_width="modal_width"
         :loader="modal_loader" @showLoader="showModalLoader" @hideLoader="hideModalLoader" @closeModal="closeModal"
@@ -80,6 +82,7 @@ export default{
         const appArrLen = ref(0);
         const appCount = ref(0);
         const pageCount = ref(0);
+        const selectedValue = ref(50);
         const currentPage = ref(1);
         const showNextBtn = ref(false);
         const showPreviousBtn = ref(false);
@@ -269,7 +272,8 @@ export default{
                 client_name: tenant_name_search.value,
                 from_date: from_date_search.value,
                 to_date: to_date_search.value,
-                company: companyID.value
+                company: companyID.value,
+                page_size: selectedValue.value
             }
  
             axios
@@ -280,7 +284,7 @@ export default{
                 appResults.value = response.data;
                 appArrLen.value = prepaymentsList.value.length;
                 appCount.value = appResults.value.count;
-                pageCount.value = Math.ceil(appCount.value / 50);
+                pageCount.value = Math.ceil(appCount.value / selectedValue.value);
                 
                 if(response.data.next){
                     showNextBtn.value = true;
@@ -295,7 +299,11 @@ export default{
             .finally(()=>{
                 hideLoader();
             })
-        }
+        };
+        const selectSearchQuantity = (newValue) =>{
+            selectedValue.value = newValue;
+            searchPrepayments(selectedValue.value);
+        };
         const loadPrev = () =>{
             if (currentPage.value <= 1){
                 currentPage.value = 1;
@@ -340,7 +348,7 @@ export default{
             showNextBtn,showPreviousBtn, handleActionClick,allocatePrepayment,displayButtons,handleReset,
             modal_top, modal_left, modal_width, showLoader, loader, hideLoader, modal_loader, showModalLoader, hideModalLoader,
             closeModal, handleSelectionChange, pageComponentKey, flex_basis, flex_basis_percentage, prepaymentAllocations,
-            addingRight,rightsModule
+            addingRight,rightsModule,selectSearchQuantity,selectedValue
         }
     }
 }

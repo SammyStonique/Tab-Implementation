@@ -6,6 +6,8 @@
         :searchFilters="searchFilters"
         @searchPage="searchDepartments"
         @resetFilters="resetFilters"
+        @importData="importDepartments"
+        @printList="printDepartmentsList"
         :addingRight="addingRight"
         :rightsModule="rightsModule"
         :columns="tableColumns"
@@ -225,6 +227,10 @@ export default{
             }else{
                 createDepartment();
             }
+        };
+        const importDepartments = () =>{
+            store.commit('pageTab/ADD_PAGE', {'SET':'Import_Departments'})
+            store.state.pageTab.setActiveTab = 'Import_Departments';
         }
         const showLoader = () =>{
             loader.value = "block";
@@ -299,7 +305,60 @@ export default{
             await store.dispatch("Departments/updateState",{isEditing:false, selectedDepartment:null})
             depModalVisible.value = false;
             handleReset();
+        };
+        const printDepartmentsList = () =>{
+            showLoader();
+            let formData = {
+                code: code_search.value,
+                name: name_search.value,
+                company_id: companyID.value
+            } 
+
+            axios
+            .post("api/v1/export-departments-excel/", formData, { responseType: 'blob' })
+                .then((response)=>{
+                    if(response.status == 200){
+                        const url = window.URL.createObjectURL(new Blob([response.data]));
+                        const link = document.createElement('a');
+                        link.href = url;
+                        link.setAttribute('download', 'Departments.xlsx');
+                        document.body.appendChild(link);
+                        link.click();
+                    }
+                })
+            .catch((error)=>{
+                console.log(error.message);
+            })
+            .finally(()=>{
+                hideLoader();
+            })
         }
+        // const printDepartmentsList = () =>{
+        //     showLoader();
+        //     let formData = {
+        //         code: code_search.value,
+        //         name: name_search.value,
+        //         company_id: companyID.value
+        //     } 
+
+        //     axios
+        //     .post("api/v1/export-departments-excel/", formData, { responseType: 'blob' })
+        //         .then((response)=>{
+        //             if(response.status == 200){
+        //                 const blob1 = new Blob([response.data]);
+        //                 // Convert blob to URL
+        //                 const url = URL.createObjectURL(blob1);
+        //                 PrintJS({printable: url, type: 'pdf'});
+        //             }
+        //         })
+        //     .catch((error)=>{
+        //         console.log(error.message);
+        //     })
+        //     .finally(()=>{
+        //         hideLoader();
+        //     })
+        // }
+
         onMounted(()=>{
             searchDepartments();
         })
@@ -308,7 +367,8 @@ export default{
             depResults, depArrLen, depCount, pageCount, showNextBtn, showPreviousBtn,modal_top, modal_left, modal_width,
             loadPrev, loadNext, firstPage, lastPage, actions, formFields, depModalVisible, addNewDepartment,
             displayButtons,flex_basis,flex_basis_percentage, handleActionClick, handleReset, saveDepartment,
-            showLoader, loader, hideLoader, modal_loader, showModalLoader, hideModalLoader,addingRight,rightsModule,closeModal
+            showLoader, loader, hideLoader, modal_loader, showModalLoader, hideModalLoader,addingRight,rightsModule,closeModal,
+            importDepartments,printDepartmentsList
         }
     }
 }

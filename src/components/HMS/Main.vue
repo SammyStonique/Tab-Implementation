@@ -11,6 +11,7 @@
                 <PagesTab @openPage="selectedTab" @closePage="closeTab"/>
             </div>
         </div>
+
         <div class="tab-content z-10 overflow-y-hidden">
             <keep-alive :include="cachedComponents">
                 <component 
@@ -30,6 +31,7 @@ import Dashboard from '@/components/HMS/Dashboard.vue'
 import Appointments from '@/components/HMS/Appointments.vue'
 import Doctors from '@/components/HMS/Doctors.vue'
 import Departments from '@/components/HMS/Departments.vue'
+import Import_Departments from '@/components/HMS/Import_Departments.vue'
 import Patients_List from '@/components/HMS/Patients_List.vue'
 import Patient_Details from '@/components/HMS/Patient_Details.vue'
 import Import_Appointments from '@/components/HMS/Import_Appointments.vue'
@@ -41,7 +43,8 @@ export default{
         NavBar,
         NavBarHMS,
         PagesTab,
-        Dashboard, Appointments, Departments, Doctors, Patients_List, Emergency_Contacts, Patient_Details, Import_Appointments
+        Dashboard, Appointments, Departments, Doctors, Patients_List, Emergency_Contacts, Patient_Details, Import_Appointments,
+        Import_Departments
     },
     props: {
         title: {
@@ -61,6 +64,7 @@ export default{
         const activeTab = computed(() => store.state.pageTab.hmsActiveTab);
     
         const activeComponent = computed(() => activeTab.value);
+
     
         const selectTab = (pageName) => {
             for(const [key, value] of Object.entries(pageName)){
@@ -98,12 +102,7 @@ export default{
             activeTab.value = store.state.pageTab.hmsActiveTab;
         }
         return{
-            close,
-            minimize,
-            title,
-            activeComponent,
-            selectTab, selectedTab, closeTab,
-            activeTab, cachedComponents
+            close,minimize,title,activeComponent,selectTab, selectedTab, closeTab,activeTab, cachedComponents
         }
     },
     mounted(){

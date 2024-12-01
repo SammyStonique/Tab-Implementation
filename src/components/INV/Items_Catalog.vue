@@ -27,6 +27,8 @@
             @loadNext="loadNext"
             @firstPage="firstPage"
             @lastPage="lastPage"
+            :selectedValue="selectedValue"
+            @selectSearchQuantity="selectSearchQuantity"
             :showNextBtn="showNextBtn"
             :showPreviousBtn="showPreviousBtn"
         />
@@ -60,6 +62,7 @@ export default{
         const itemsList = ref([]);
         const propResults = ref([]);
         const propArrLen = ref(0);
+        const selectedValue = ref(50);
         const propCount = ref(0);
         const pageCount = ref(0);
         const currentPage = ref(1);
@@ -197,7 +200,8 @@ export default{
                 item_code: item_code_search.value,
                 stock_type: stock_type_search.value,
                 item_category: categoryID.value,
-                company_id: companyID.value
+                company_id: companyID.value,
+                page_size: selectedValue.value
             } 
             axios
             .post(`api/v1/item-search/?page=${currentPage.value}`,formData)
@@ -207,7 +211,7 @@ export default{
                 propResults.value = response.data;
                 propArrLen.value = itemsList.value.length;
                 propCount.value = propResults.value.count;
-                pageCount.value = Math.ceil(propCount.value / 50);
+                pageCount.value = Math.ceil(propCount.value / selectedValue.value);
                 if(response.data.next){
                     showNextBtn.value = true;
                 }
@@ -221,7 +225,11 @@ export default{
             .finally(()=>{
                 hideLoader();
             })
-        }
+        };
+        const selectSearchQuantity = (newValue) =>{
+            selectedValue.value = newValue;
+            searchItems(selectedValue.value);
+        };
         const resetFilters = () =>{
             store.commit('Items_Catalog/RESET_SEARCH_FILTERS')
             
@@ -329,7 +337,7 @@ export default{
             propResults, propArrLen, propCount, pageCount, showNextBtn, showPreviousBtn,
             loadPrev, loadNext, firstPage, lastPage, idField, actions, handleActionClick, propModalVisible, closeModal,
             submitButtonLabel, showModal, addNewItem, showLoader, loader, hideLoader, importItems, removeItem, removeItems,
-            handleSelectionChange,addingRight,rightsModule,printItemsList
+            handleSelectionChange,addingRight,rightsModule,printItemsList,selectSearchQuantity,selectedValue
         }
     }
 };

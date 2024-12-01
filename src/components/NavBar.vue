@@ -1,5 +1,5 @@
 <template>
-  <div class="navbar flex z-30 h-12 top-0 w-full sticky-navbar bg-white border-b border-slate-300 shadow-sm shadow-slate-200 pl-6 py-1">
+  <div class="navbar flex z-30 h-12 top-0 w-full sticky-navbar bg-orange-400 border-b border-slate-300 shadow-sm shadow-slate-200 pl-6 py-1">
     <!-- Company Name Section -->
     <div class="w-full sm:w-1/4 flex items-center justify-between sm:justify-start">
       <h4 class="text-xs sm:text-sm font-bold uppercase py-2 ml-2">{{ company_name }}</h4>

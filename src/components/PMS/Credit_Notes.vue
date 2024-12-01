@@ -31,6 +31,8 @@
             @lastPage="lastPage"
             :showNextBtn="showNextBtn"
             :showPreviousBtn="showPreviousBtn"
+            :selectedValue="selectedValue"
+            @selectSearchQuantity="selectSearchQuantity"
         />
     </div>
 </template>
@@ -71,6 +73,7 @@ export default{
         const propArrLen = ref(0);
         const propCount = ref(0);
         const pageCount = ref(0);
+        const selectedValue = ref(50);
         const currentPage = ref(1);
         const showNextBtn = ref(false);
         const showPreviousBtn = ref(false);
@@ -233,7 +236,8 @@ export default{
                 from_date: from_date_search.value,
                 to_date: to_date_search.value,
                 property: propertySearchID.value,
-                company: companyID.value
+                company: companyID.value,
+                page_size: selectedValue.value
             } 
    
             axios
@@ -244,7 +248,7 @@ export default{
                 propResults.value = response.data;
                 propArrLen.value = receiptsList.value.length;
                 propCount.value = propResults.value.count;
-                pageCount.value = Math.ceil(propCount.value / 50);
+                pageCount.value = Math.ceil(propCount.value / selectedValue.value);
                 if(response.data.next){
                     showNextBtn.value = true;
                 }
@@ -258,7 +262,11 @@ export default{
             .finally(()=>{
                 hideLoader();
             })
-        }
+        };
+        const selectSearchQuantity = (newValue) =>{
+            selectedValue.value = newValue;
+            searchReceipts(selectedValue.value);
+        };
         const resetFilters = () =>{
             store.commit('Journals/RESET_SEARCH_FILTERS')
             searchReceipts();
@@ -359,7 +367,7 @@ export default{
             loadPrev, loadNext, firstPage, lastPage, idField, actions, handleActionClick, propModalVisible, closeModal,
             submitButtonLabel, showModal, addNewReceipt, showLoader, loader, hideLoader, modal_loader, modal_top, modal_left, modal_width,displayButtons,
             showModalLoader, hideModalLoader, handleSelectionChange, flex_basis,flex_basis_percentage,
-            removeReceipt, removeReceipts, dropdownOptions, handleDynamicOption,addingRight,rightsModule
+            removeReceipt, removeReceipts, dropdownOptions, handleDynamicOption,addingRight,rightsModule,selectSearchQuantity,selectedValue
         }
     }
 };

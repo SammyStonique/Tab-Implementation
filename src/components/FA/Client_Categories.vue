@@ -26,7 +26,7 @@
         :showPreviousBtn="showPreviousBtn"
     />
     <MovableModal v-model:visible="depModalVisible" :title="title" :modal_top="modal_top" :modal_left="modal_left" :modal_width="modal_width"
-        :loader="modal_loader" @showLoader="showModalLoader" @hideLoader="hideModalLoader" >
+        :loader="modal_loader" @showLoader="showModalLoader" @hideLoader="hideModalLoader"  @closeModal="closeModal">
         <DynamicForm 
             :fields="formFields" :flex_basis="flex_basis" :flex_basis_percentage="flex_basis_percentage" 
             :displayButtons="displayButtons" @handleSubmit="saveCategory" @handleReset="handleReset"
@@ -338,6 +338,10 @@ export default{
         const resetFilters = () =>{
             store.commit('Client_Categories/RESET_SEARCH_FILTERS')
             searchCategories();
+        };
+        const closeModal = async() =>{
+            depModalVisible.value = false;
+            handleReset();
         }
         onMounted(()=>{
             searchCategories();
@@ -348,7 +352,7 @@ export default{
             loadPrev, loadNext, firstPage, lastPage, actions, formFields, depModalVisible, addNewCategory,
             displayButtons,flex_basis,flex_basis_percentage, handleActionClick, handleReset, saveCategory,
             showLoader, loader, hideLoader, modal_loader, showModalLoader, hideModalLoader, removeCategory, removeCategories,
-            addingRight,rightsModule
+            addingRight,rightsModule, closeModal
         }
     }
 }

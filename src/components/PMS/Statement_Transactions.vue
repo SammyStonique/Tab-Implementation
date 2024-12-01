@@ -29,6 +29,8 @@
             @lastPage="lastPage"
             :showNextBtn="showNextBtn"
             :showPreviousBtn="showPreviousBtn"
+            :selectedValue="selectedValue"
+            @selectSearchQuantity="selectSearchQuantity"
         />
         <MovableModal v-model:visible="propModalVisible" :title="title" :modal_top="modal_top" :modal_left="modal_left" :modal_width="modal_width"
             :loader="modal_loader" @showLoader="showModalLoader" @hideLoader="hideModalLoader" @closeModal="closeModal">
@@ -75,6 +77,7 @@ export default{
         const propArrLen = ref(0);
         const propCount = ref(0);
         const pageCount = ref(0);
+        const selectedValue = ref(50);
         const currentPage = ref(1);
         const showNextBtn = ref(false);
         const showPreviousBtn = ref(false);
@@ -432,7 +435,8 @@ export default{
                     property: propertySearchID.value,
                     utility: utilitySearchID.value,
                     tenant: tenantID.value,
-                    company: companyID.value
+                    company: companyID.value,
+                    page_size: selectedValue.value
                 } 
                 axios
                 .post(`api/v1/tenant-statement-transactions-search/?page=${currentPage.value}`,formData)
@@ -442,7 +446,7 @@ export default{
                     propResults.value = response.data;
                     propArrLen.value = transactionsList.value.length;
                     propCount.value = propResults.value.count;
-                    pageCount.value = Math.ceil(propCount.value / 1000);
+                    pageCount.value = Math.ceil(propCount.value / selectedValue.value);
                     if(response.data.next){
                         showNextBtn.value = true;
                     }
@@ -458,7 +462,11 @@ export default{
                 })
             }
             
-        }
+        };
+        const selectSearchQuantity = (newValue) =>{
+            selectedValue.value = newValue;
+            searchStatementTransactions(selectedValue.value);
+        };
         const resetFilters = () =>{
             transactionsList.value = [];
             store.commit('Statement_Transactions/RESET_SEARCH_FILTERS')
@@ -545,7 +553,8 @@ export default{
             loadPrev, loadNext, firstPage, lastPage, idField, actions, handleActionClick, propModalVisible, closeModal,
             submitButtonLabel, showModal, addNewTransaction, showLoader, loader, hideLoader, modal_loader, modal_top, modal_left, modal_width,displayButtons,
             showModalLoader, hideModalLoader, saveTransaction, formFields, handleSelectionChange, flex_basis,flex_basis_percentage,
-            removeStatementTransaction, removeStatementTransactions, mainComponentKey, propComponentKey, tntComponentKey,addingRight,rightsModule
+            removeStatementTransaction, removeStatementTransactions, mainComponentKey, propComponentKey, tntComponentKey,addingRight,rightsModule,
+            selectSearchQuantity,selectedValue
         }
     }
 };

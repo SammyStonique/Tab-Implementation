@@ -28,6 +28,8 @@
             @lastPage="lastPage"
             :showNextBtn="showNextBtn"
             :showPreviousBtn="showPreviousBtn"
+            :selectedValue="selectedValue"
+            @selectSearchQuantity="selectSearchQuantity"
         />
     </div>
 </template>
@@ -62,6 +64,7 @@ export default{
         const propArrLen = ref(0);
         const propCount = ref(0);
         const pageCount = ref(0);
+        const selectedValue = ref(50);
         const currentPage = ref(1);
         const showNextBtn = ref(false);
         const showPreviousBtn = ref(false);
@@ -181,7 +184,8 @@ export default{
                 min_amount: min_amount_search.value,
                 customer: customer_search.value,
                 done_by: done_by_search.value,
-                company_id: companyID.value
+                company_id: companyID.value,
+                page_size: selectedValue.value
             } 
             axios
             .post(`api/v1/inventory-sale-search/?page=${currentPage.value}`,formData)
@@ -191,7 +195,7 @@ export default{
                 propResults.value = response.data;
                 propArrLen.value = salesList.value.length;
                 propCount.value = propResults.value.count;
-                pageCount.value = Math.ceil(propCount.value / 50);
+                pageCount.value = Math.ceil(propCount.value / selectedValue.value);
                 if(response.data.next){
                     showNextBtn.value = true;
                 }
@@ -205,7 +209,11 @@ export default{
             .finally(()=>{
                 hideLoader();
             })
-        }
+        };
+        const selectSearchQuantity = (newValue) =>{
+            selectedValue.value = newValue;
+            searchSales(selectedValue.value);
+        };
         const resetFilters = () =>{
             date_from_search.value = "",
             date_to_search.value = "",
@@ -327,7 +335,7 @@ export default{
             propResults, propArrLen, propCount, pageCount, showNextBtn, showPreviousBtn,
             loadPrev, loadNext, firstPage, lastPage, idField, actions, handleActionClick, propModalVisible, closeModal,
             submitButtonLabel, showModal, addNewSale, showLoader, loader, hideLoader, removeSale, removeSales,
-            handleSelectionChange,addingRight,rightsModule,printSalesList
+            handleSelectionChange,addingRight,rightsModule,printSalesList,selectSearchQuantity,selectedValue
         }
     }
 };

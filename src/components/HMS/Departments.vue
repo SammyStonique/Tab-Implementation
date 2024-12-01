@@ -6,6 +6,7 @@
         :searchFilters="searchFilters"
         @searchPage="searchDepartments"
         @resetFilters="resetFilters"
+        @importData="importDepartments"
         :columns="tableColumns"
         :rows="depList"
         :actions="actions"
@@ -221,6 +222,10 @@ export default{
             }else{
                 createDepartment();
             }
+        };
+        const importDepartments = () =>{
+            store.commit('pageTab/ADD_PAGE', {'HMS':'Import_Departments'})
+            store.state.pageTab.hmsActiveTab = 'Import_Departments';
         }
         const showLoader = () =>{
             loader.value = "block";
@@ -300,7 +305,7 @@ export default{
             depResults, depArrLen, depCount, pageCount, showNextBtn, showPreviousBtn,modal_top, modal_left, modal_width,
             loadPrev, loadNext, firstPage, lastPage, actions, formFields, depModalVisible, addNewDepartment,
             displayButtons,flex_basis,flex_basis_percentage, handleActionClick, handleReset, saveDepartment,
-            showLoader, loader, hideLoader, modal_loader, showModalLoader, hideModalLoader
+            showLoader, loader, hideLoader, modal_loader, showModalLoader, hideModalLoader,importDepartments
         }
     }
 }

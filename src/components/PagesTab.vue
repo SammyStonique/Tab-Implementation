@@ -1,6 +1,6 @@
 <template>
-    <div class="h-6 bg-gray-200 w-full flex">
-        <div v-for="page,index in pageArray" :key="index" class="bg-white rounded border border-slate-300 px-2">
+    <div class="h-6 bg-orange-200 w-full flex">
+        <div v-for="page,index in pageArray" :key="index" class="bg-green-200 rounded border border-slate-300 px-2">
             <button class="mr-2" @click="openPage(page)">{{ page }}</button>
             <button class="font-bold text-xs" @click="removePage(page)">x</button>
         </div>

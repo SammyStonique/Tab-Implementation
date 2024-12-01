@@ -28,6 +28,8 @@
         @lastPage="lastPage"
         :showNextBtn="showNextBtn"
         :showPreviousBtn="showPreviousBtn"
+        :selectedValue="selectedValue"
+        @selectSearchQuantity="selectSearchQuantity"
     />
     <MovableModal v-model:visible="appModalVisible" :title="title" :modal_top="modal_top" :modal_left="modal_left" :modal_width="modal_width"
         :loader="modal_loader" @showLoader="showModalLoader" @hideLoader="hideModalLoader" @closeModal="closeModal"
@@ -83,6 +85,7 @@ export default{
         const appArrLen = ref(0);
         const appCount = ref(0);
         const pageCount = ref(0);
+        const selectedValue = ref(50);
         const currentPage = ref(1);
         const showNextBtn = ref(false);
         const showPreviousBtn = ref(false);
@@ -351,7 +354,8 @@ export default{
                 property: propertyID.value,
                 deposit: depositID.value,
                 posted: posted_search.value,
-                company_id: companyID.value
+                company_id: companyID.value,
+                page_size: selectedValue.value
             }
  
             axios
@@ -362,7 +366,7 @@ export default{
                 appResults.value = response.data;
                 appArrLen.value = depositsList.value.length;
                 appCount.value = appResults.value.count;
-                pageCount.value = Math.ceil(appCount.value / 50);
+                pageCount.value = Math.ceil(appCount.value / selectedValue.value);
                 
                 if(response.data.next){
                     showNextBtn.value = true;
@@ -377,7 +381,11 @@ export default{
             .finally(()=>{
                 hideLoader();
             })
-        }
+        };
+        const selectSearchQuantity = (newValue) =>{
+            selectedValue.value = newValue;
+            searchDeposits(selectedValue.value);
+        };
         const loadPrev = () =>{
             if (currentPage.value <= 1){
                 currentPage.value = 1;
@@ -454,7 +462,7 @@ export default{
             showNextBtn,showPreviousBtn,addNewDeposit, handleActionClick,createTenantDeposit,displayButtons,handleReset,
             modal_top, modal_left, modal_width, showLoader, loader, hideLoader, modal_loader, showModalLoader, hideModalLoader,
             closeModal, handleSelectionChange, removeDeposit, removeDeposits, pageComponentKey, flex_basis, flex_basis_percentage,
-            addingRight,rightsModule,printDepositsList
+            addingRight,rightsModule,printDepositsList,selectSearchQuantity,selectedValue
         }
     }
 }

@@ -9,6 +9,8 @@
             @resetFilters="resetFilters"
             @removeItem="removeCompany"
             @removeSelectedItems="removeCompanies"
+            :dropdownOptions="dropdownOptions"
+            @handleDynamicOption="handleDynamicOption"
             @printList="printList"
             :addingRight="addingRight"
             :rightsModule="rightsModule"
@@ -29,6 +31,16 @@
             :showPreviousBtn="showPreviousBtn"
         />
     </div>
+    <MovableModal v-model:visible="depModalVisible" :title="title" :modal_top="modal_top" :modal_left="modal_left" :modal_width="modal_width"
+        :loader="modal_loader" @showLoader="showModalLoader" @hideLoader="hideModalLoader" @closeModal="closeModal">
+        <div>
+            <label for="" class="mb-2 mr-3">Select System Logo(png/jpg/jpeg):<em>*</em></label>
+            <input type="text" name="" class="rounded border-2 border-gray-600 text-gray-500 text-sm pl-2 mr-2 mb-4 w-80 h-8" placeholder="" v-model="imageName" >
+            <input type="file" name="file-input" @change="onFileChange" id="file-input" accept="image/jpg, image/png, image/jpeg"><br />
+            <!-- <label class="rounded border bg-gray-200 px-2 py-1.5 w-30 cursor-pointer mr-6" for="file-input">Browse...</label> -->
+            <button type="button" class="rounded bg-green-400 text-sm mt-3 w-24 text-white px-2 py-1.5" @click="uploadSystemImage">Upload</button>
+        </div>
+    </MovableModal>
 </template>
 
 <script>
@@ -37,16 +49,25 @@ import { ref, computed, onMounted, onBeforeMount} from 'vue';
 import PageComponent from '@/components/PageComponent.vue'
 import { useStore } from "vuex";
 import { useToast } from "vue-toastification";
+import MovableModal from '@/components/MovableModal.vue'
 
 export default{
     name: 'Companies',
     components:{
-        PageComponent
+        PageComponent,MovableModal
     },
     setup(){
         const store = useStore();
         const toast = useToast();
         const loader = ref('');
+        const modal_loader = ref('none');
+        const title = ref('Company Logo');
+        const depModalVisible = ref(false);
+        const modal_top = ref('200px');
+        const modal_left = ref('400px');
+        const modal_width = ref('30vw');
+        const imageLogo = ref('');
+        const imageName = ref('');
         const idField = 'company_id';
         const addButtonLabel = ref('New Company');
         const addingRight = ref('Adding Company');
@@ -61,7 +82,6 @@ export default{
         const currentPage = ref(1);
         const showNextBtn = ref(false);
         const showPreviousBtn = ref(false);
-        const propModalVisible = ref(false);
         const showModal = ref(false);
         const tableColumns = ref([
             {type: "checkbox"},
@@ -92,6 +112,40 @@ export default{
                 options: [{text:'Active',value:'Active'},{text:'Inactive',value:'Inactive'}]
             },
         ]);
+
+        const onFileChange = (e) =>{
+            imageLogo.value = e.target.files[0];
+            imageName.value = "C:\\fakepath\\" + imageLogo.value.name;
+            console.log(imageLogo.value)
+            console.log("IMAGE NAME IS ",imageName.value)
+        };
+
+        const showModalLoader = () =>{
+            modal_loader.value = "block";
+        }
+        const hideModalLoader = () =>{
+            modal_loader.value = "none";
+        };
+
+        const uploadSystemImage = () =>{
+            showModalLoader();
+            let formData = {
+                image: imageLogo.value
+            }
+            axios.post('api/v1/system-logo/', formData,{ headers: { "Content-Type": "multipart/form-data",}}).
+            then((response)=>{
+                toast.success('Success');
+                closeModal();
+            })
+            .catch((error)=>{
+                console.log(error.message);
+                toast.error(error.message);
+            })
+            .finally(()=>{
+                hideModalLoader();
+            })
+        };
+
         const handleSelectionChange = (ids) => {
             selectedIds.value = ids;
         };
@@ -282,8 +336,17 @@ export default{
             }
         }
         const closeModal = () =>{
-            propModalVisible.value = false;
-        }
+            depModalVisible.value = false;
+        };
+        const dropdownOptions = ref([
+            {label: 'System Logo', action: 'set-logo'},
+        ]);
+        const handleDynamicOption = (option) =>{
+            if(option == 'set-logo'){
+                depModalVisible.value = true;
+                imageLogo.value = "";
+            }
+        };
         onBeforeMount(()=>{
             searchCompanies();
             
@@ -291,9 +354,10 @@ export default{
         return{
             searchCompanies,resetFilters, addButtonLabel, searchFilters, tableColumns, companyList,
             propResults, propArrLen, propCount, pageCount, showNextBtn, showPreviousBtn,
-            loadPrev, loadNext, firstPage, lastPage, idField, actions, handleActionClick, propModalVisible, closeModal,
+            loadPrev, loadNext, firstPage, lastPage, idField, actions, handleActionClick, closeModal,
             submitButtonLabel, showModal, addNewCompany, showLoader, loader, hideLoader, removeCompany, removeCompanies,
-            handleSelectionChange,addingRight,rightsModule
+            handleSelectionChange,addingRight,rightsModule,dropdownOptions,handleDynamicOption,onFileChange,imageLogo,imageName,
+            depModalVisible,showModalLoader,hideModalLoader,uploadSystemImage,title,modal_top,modal_width,modal_left
         }
     }
 };

@@ -30,13 +30,15 @@
             @lastPage="lastPage"
             :showNextBtn="showNextBtn"
             :showPreviousBtn="showPreviousBtn"
+            :selectedValue="selectedValue"
+            @selectSearchQuantity="selectSearchQuantity"
         />
         <MovableModal v-model:visible="invModalVisible" :title="title" :modal_top="modal_top" :modal_left="modal_left" :modal_width="modal_width"
             :loader="modal_loader" @showLoader="showModalLoader" @hideLoader="hideModalLoader" @closeModal="closeModal"
         >
             <DynamicForm 
                 :fields="formFields" :flex_basis="flex_basis" :flex_basis_percentage="flex_basis_percentage" 
-                :displayButtons="displayButtons" @handleSubmit="saveBill" @handleReset="handleReset"
+                :displayButtons="displayButtons" @handleSubmit="createRecurringBill" @handleReset="handleReset"
             />
         </MovableModal>
     </div>
@@ -70,7 +72,7 @@ export default{
         const idField = 'journal_id';
         const addButtonLabel = ref('New Bill');
         const submitButtonLabel = ref('Add');
-        const title = ref('Invoice Booking');
+        const title = ref('Recurring Bill Details');
         const custComponentKey = ref(0);
         const invModalVisible = ref(false);
         const modal_top = ref('150px');
@@ -82,6 +84,7 @@ export default{
         const propArrLen = ref(0);
         const propCount = ref(0);
         const pageCount = ref(0);
+        const selectedValue = ref(50);
         const currentPage = ref(1);
         const showNextBtn = ref(false);
         const showPreviousBtn = ref(false);
@@ -91,6 +94,7 @@ export default{
         const displayButtons = ref(true);
         const errors = ref([]);
         const vendorID = ref('');
+        const billID = ref(null);
         const vendorArray = computed(() => store.state.Vendors.vendorArr);
         const showModal = ref(false);
         const tableColumns = ref([
@@ -109,6 +113,7 @@ export default{
         const actions = ref([
             {name: 'print', icon: 'fa fa-print', title: 'Print Bill', rightName: 'Print Bill'},
             {name: 'download', icon: 'fa fa-download', title: 'Download Bill', rightName: 'Print Bill'},
+            {name: 'reccur', icon: 'fa fa-repeat', title: 'Recurring Bill', rightName: 'Adding Bills'},
             {name: 'delete', icon: 'fa fa-trash', title: 'Delete Bill', rightName: 'Deleting Bills'},
         ])
         const companyID = computed(()=> store.state.userData.company_id);
@@ -147,7 +152,9 @@ export default{
         const formFields = ref([]);
         const updateFormFields = () =>{
             formFields.value = [
-
+                { type: 'dropdown', name: 'frequency',label: "Frequency", value: '', placeholder: "", required: true, options: [{ text: 'Daily', value: 'Daily' }, { text: 'Weekly', value: 'Weekly' }, { text: 'Monthly', value: 'Monthly' }, { text: 'Quarterly', value: 'Quarterly' }] },
+                { type: 'date', name: 'start_date',label: "Start Date", value: '', placeholder: "", required: true,},
+                { type: 'date', name: 'end_date',label: "End Date", value: '', placeholder: "", required: false},
             ]
         };
 
@@ -157,6 +164,7 @@ export default{
             }
             custComponentKey.value += 1;
             vendorID.value = '';
+            
         }
         
         const showModalLoader = () =>{
@@ -242,7 +250,8 @@ export default{
                 from_date: from_date_search.value,
                 to_date: to_date_search.value,
                 property: null,
-                company: companyID.value
+                company: companyID.value,
+                page_size: selectedValue.value
             } 
    
             axios
@@ -253,7 +262,7 @@ export default{
                 propResults.value = response.data;
                 propArrLen.value = billsList.value.length;
                 propCount.value = propResults.value.count;
-                pageCount.value = Math.ceil(propCount.value / 50);
+                pageCount.value = Math.ceil(propCount.value / selectedValue.value);
                 if(response.data.next){
                     showNextBtn.value = true;
                 }
@@ -267,7 +276,11 @@ export default{
             .finally(()=>{
                 hideLoader();
             })
-        }
+        };
+        const selectSearchQuantity = (newValue) =>{
+            selectedValue.value = newValue;
+            searchBills(selectedValue.value);
+        };
         const resetFilters = () =>{
             client_name_search.value = "";
             client_code_search.value = "";
@@ -304,7 +317,31 @@ export default{
             currentPage.value = pageCount.value;
             searchBills();
             // scrollToTop();
-        }
+        };
+        const createRecurringBill = ()=>{
+            showModalLoader();
+            let formData = {
+                bill: billID.value,
+                frequency: formFields.value[0].value,
+                start_date: formFields.value[1].value,
+                end_date: formFields.value[2].value,
+            }
+            axios.post('api/v1/create-recurring-bill/', formData)
+            .then((response)=>{
+                if(response.data.msg == "Success"){
+                    toast.success("Success");
+                    closeModal();
+                }else{
+                    toast.error("Failed")
+                }
+            })
+            .catch((error)=>{
+                toast.error(error.message)
+            })
+            .finally(()=>{
+                hideModalLoader();
+            })
+        };
         const handleActionClick = async(rowIndex, action, row) =>{
             if(action == 'delete'){
                 const journalID = [row['journal_id']];
@@ -339,10 +376,19 @@ export default{
                 then(()=>{
                     hideLoader();
                 })
+            }else if(action == 'reccur'){
+                updateFormFields();
+                billID.value= row['journal_id'];
+                invModalVisible.value = true;
+                handleReset();
+                flex_basis.value = '1/2';
+                flex_basis_percentage.value = '50';
+                
             }
         }
         const closeModal = async() =>{
             invModalVisible.value = false;
+            billID.value = null;
             handleReset();
         }
 
@@ -396,7 +442,8 @@ export default{
             loadPrev, loadNext, firstPage, lastPage, idField, actions, handleActionClick, propModalVisible, closeModal,
             submitButtonLabel, showModal, showLoader, loader, hideLoader, modal_loader, modal_top, modal_left, modal_width,displayButtons,
             showModalLoader, hideModalLoader, formFields, handleSelectionChange, flex_basis,flex_basis_percentage,
-            removeBill, removeBills, dropdownOptions, handleDynamicOption, addNewBill, printBillList, addingRight,rightsModule
+            removeBill, removeBills, dropdownOptions, handleDynamicOption, addNewBill, printBillList, addingRight,rightsModule,
+            createRecurringBill,selectSearchQuantity,selectedValue
         }
     }
 };

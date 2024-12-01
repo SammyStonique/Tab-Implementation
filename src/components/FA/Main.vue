@@ -11,6 +11,7 @@
                 <PagesTab @openPage="selectedTab" @closePage="closeTab"/>
             </div>
         </div>
+
         <div class="tab-content z-20 overflow-y-hidden">
             <keep-alive :include="cachedComponents">
                 <component 
@@ -86,6 +87,7 @@ export default{
         const activeTab = computed(() => store.state.pageTab.faActiveTab);
     
         const activeComponent = computed(() => activeTab.value);
+
     
         const selectTab = (pageName) => {
             for(const [key, value] of Object.entries(pageName)){
@@ -116,12 +118,7 @@ export default{
             activeTab.value = store.state.pageTab.faActiveTab;
         }
         return{
-            close,
-            minimize,
-            title,
-            activeComponent,
-            selectTab, selectedTab, closeTab,
-            activeTab, cachedComponents
+            close,minimize,title,activeComponent,selectTab, selectedTab, closeTab,activeTab, cachedComponents
         }
     },
     mounted(){

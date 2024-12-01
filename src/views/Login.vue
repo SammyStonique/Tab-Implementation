@@ -9,8 +9,8 @@
         <div class="w-full sm:w-3/4 md:w-1/3 lg:w-1/4 h-auto bg-white p-4 rounded-lg shadow-lg">
           <div class="text-center grid place-items-center">
             <div class="flex justify-center mb-6">
-              <div class="w-24 h-24 sm:w-32 sm:h-32 rounded-full overflow-hidden">
-                <img src="@/assets/kalitech.png" alt="Logo" class="object-cover w-full h-full">
+              <div class="w-24 h-24 sm:w-32 sm:h-32 rounded-full overflow-hidden" v-if="logo">
+                <img :src="getImagePath(logo)" alt="Logo" class="object-cover w-full h-full">
               </div>
             </div>
           </div>
@@ -56,7 +56,7 @@
   
   <script>
   import axios from "axios";
-  import { ref, defineComponent } from 'vue';
+  import { ref, defineComponent, onBeforeMount } from 'vue';
   import { useStore } from "vuex";
   import { useToast } from "vue-toastification";
   import Loader from "@/components/Loader.vue";
@@ -73,6 +73,7 @@
       const password = ref('');
       const errors = ref([]);
       const loader = ref('none');
+      const logo = ref('');
   
       const showLoader = () => {
         loader.value = "block";
@@ -80,6 +81,15 @@
   
       const hideLoader = () => {
         loader.value = "none";
+      };
+
+      const getImagePath = (imageName) => {
+          try {
+              return require(`@/assets/${imageName}`);
+          } catch (error) {
+              console.error(`Image not found: ${imageName}`);
+              return '';
+          }
       };
   
       const login = () => {
@@ -92,13 +102,14 @@
         axios.post('api/v1/auth-token/login/', formData)
           .then((response) => {
             if (response.status === 200) {
-              toast.success(`Welcome Back ${response.data.user_names}`);
+              toast.success(`Welcome Back, ${response.data.user_names}`);
               const userData = {
                 user_id: response.data.user_id,
                 company_id: response.data.company_id,
                 user_names: response.data.user_names,
                 user_profile: response.data.user_profile,
                 company_name: response.data.company_name,
+                system_timeout: response.data.system_timeout,
                 token: response.data.token,
                 isAuthenticated: true,
                 activeComponent: "Main"
@@ -120,15 +131,23 @@
             store.dispatch('userData/reloadPage');
           });
       };
+      onBeforeMount(()=>{
+        axios.get('api/v1/get-company-logo/')
+        .then((response)=>{
+          let logoName = String(response.data[0].image);
+          let newLogoName = logoName.slice(7,)
+          logo.value = newLogoName;
+        })
+        .catch((error)=>{
+          console.log(error.message);
+        })
+        .finally(()=>{
+
+        })
+      })
   
       return {
-        email,
-        password,
-        errors,
-        login,
-        loader,
-        showLoader,
-        hideLoader
+        email,password,errors,login,loader,showLoader,hideLoader,logo,getImagePath
       };
     }
   });

@@ -335,7 +335,8 @@ export default defineComponent({
             }
             let formData1 = {
                 company: companyID.value,
-                client: tenantDetails.value.tenant_id
+                client: tenantDetails.value.tenant_id,
+                page_size: "100"
             }
             if(index == 1){
                 activeTab.value = index;

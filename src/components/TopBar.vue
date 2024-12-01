@@ -1,5 +1,5 @@
 <template>
-    <div class="sticky-navbar bg-white flex justify-end p-2">
+    <div class="sticky-navbar bg-orange-400 flex justify-end p-2">
       <!-- Container for the buttons, keeping them horizontally aligned -->
       <div class="flex space-x-2">
         <!-- Minimize Button -->

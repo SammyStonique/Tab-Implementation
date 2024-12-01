@@ -49,6 +49,7 @@
                 @loadNext="loadNext"
                 @firstPage="firstPage"
                 @lastPage="lastPage"
+                @selectSearchQuantity="selectSearchQuantity"
                 :showNextBtn="showNextBtn"
                 :showPreviousBtn="showPreviousBtn"
             
@@ -60,7 +61,7 @@
 </template>
 
 <script>
-import { defineComponent} from 'vue';
+import { defineComponent, ref} from 'vue';
 import FilterBar from '@/components/FilterBar.vue'
 import Loader from '@/components/Loader.vue'
 import DynamicTable from '@/components/DynamicTable.vue'
@@ -121,6 +122,11 @@ export default defineComponent({
             type: Number,
             default: () => 1   
         },
+        selectedValue: {
+            type: Number,
+            required: true,
+            default: () => 50
+        },
         currentPage:{
             type: Number,
             default: () => 1   
@@ -175,6 +181,7 @@ export default defineComponent({
         FilterBar, DynamicTable, MyPagination, Loader, PageStyleComponent
     },
     setup(props, { emit }){
+        const selectedValue = ref(50);
         const searchPage = () =>{
             emit('searchPage')
         }
@@ -206,8 +213,11 @@ export default defineComponent({
             emit('firstPage')
         }
         const lastPage = () =>{
-            emit('lastPage')
-        }
+            emit('lastPage');
+        };const selectSearchQuantity = (newValue) =>{
+            selectedValue.value = newValue;
+            emit("selectSearchQuantity", selectedValue.value);
+        };
         const handleActionClick = (rowIndex, action, row) =>{
             emit('handleActionClick',rowIndex, action, row)
         }
@@ -226,7 +236,7 @@ export default defineComponent({
         return{
             searchPage, resetFilters, loadPrev, loadNext, firstPage, lastPage, handleActionClick, handleAddNew,
             showLoader, hideLoader, importData, removeItem, removeSelectedItems, printList, handleDynamicOption,
-            handleSelectionChange
+            handleSelectionChange,selectSearchQuantity,selectedValue
         }
     }
 })

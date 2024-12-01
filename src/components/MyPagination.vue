@@ -11,7 +11,14 @@
                 <button class="px-2  hover:bg-slate-800 hover:text-white" @click="lastPage"><i class="fa fa-angle-double-right" aria-hidden="true"></i></button>
             </div>
         </div>
-        <div class="basis-1/2 text-right">
+        <div class="basis-1/2 flex justify-end text-right">
+            <select @change="selectSearchQuantity" v-model="localValue" class="bg-slate-50 rounded border border-gray-400 text-sm pl-2 w-16 mr-3">
+                <option value="50" selected>50</option>
+                <option value="100">100</option>
+                <option value="200">200</option>
+                <option value="500">500</option>
+                <option value="1000">1000</option>
+            </select>
             <p style="font-size: 12px">
                 Showing {{ result }} records  of {{ count }} 
             </p>
@@ -20,10 +27,15 @@
 </template>
 
 <script>
-import { defineComponent, ref } from 'vue';
+import { defineComponent, ref, watch } from 'vue';
 
 export default defineComponent({
     props: {
+        selectedValue: {
+            type: Number,
+            required: true,
+            default: () => 50
+        },
         currentPage: {
             type: Number,
             required: true
@@ -54,6 +66,7 @@ export default defineComponent({
         },
     },
     setup(props, { emit }){
+        const localValue = ref(props.selectedValue);
         const loadPrev = () =>{
             emit("loadPrev");
         }
@@ -65,9 +78,16 @@ export default defineComponent({
         }
         const lastPage = () =>{
             emit("lastPage");
-        }
+        };
+        const selectSearchQuantity = () =>{
+            emit("selectSearchQuantity", localValue.value);
+        };
+        watch(() => props.selectedValue, (newValue) => {
+            console.log("THE NEW VALUE IS ",props.selectedValue);
+            localValue.value = newValue;
+        });
         return{
-            loadPrev, loadNext, firstPage, lastPage
+            loadPrev, loadNext, firstPage, lastPage, selectSearchQuantity,localValue
         }
     }
 })

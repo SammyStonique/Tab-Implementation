@@ -28,6 +28,8 @@
             @lastPage="lastPage"
             :showNextBtn="showNextBtn"
             :showPreviousBtn="showPreviousBtn"
+            :selectedValue="selectedValue"
+            @selectSearchQuantity="selectSearchQuantity"
         />
         <MovableModal v-model:visible="propModalVisible" :title="title" :modal_top="modal_top" :modal_left="modal_left" :modal_width="modal_width"
             :loader="modal_loader" @showLoader="showModalLoader" @hideLoader="hideModalLoader" @closeModal="closeModal">
@@ -71,6 +73,7 @@ export default{
         const propArrLen = ref(0);
         const propCount = ref(0);
         const pageCount = ref(0);
+        const selectedValue = ref(50);
         const currentPage = ref(1);
         const showNextBtn = ref(false);
         const showPreviousBtn = ref(false);
@@ -361,7 +364,8 @@ export default{
                 customer_name: customer_name_search.value,
                 customer_code: customer_code_search.value,
                 category: categorySearchID.value,
-                company_id: companyID.value
+                company_id: companyID.value,
+                page_size: selectedValue.value
             } 
             axios
             .post(`api/v1/customer-search/?page=${currentPage.value}`,formData)
@@ -371,7 +375,7 @@ export default{
                 propResults.value = response.data;
                 propArrLen.value = debtorList.value.length;
                 propCount.value = propResults.value.count;
-                pageCount.value = Math.ceil(propCount.value / 50);
+                pageCount.value = Math.ceil(propCount.value / selectedValue.value);
                 if(response.data.next){
                     showNextBtn.value = true;
                 }
@@ -385,7 +389,11 @@ export default{
             .finally(()=>{
                 hideLoader();
             })
-        }
+        };
+        const selectSearchQuantity = (newValue) =>{
+            selectedValue.value = newValue;
+            searchDebtors(selectedValue.value);
+        };
         const resetFilters = () =>{
             store.commit('Customers/RESET_SEARCH_FILTERS')
             catComponentKey.value += 1;
@@ -502,7 +510,7 @@ export default{
             loadPrev, loadNext, firstPage, lastPage, idField, actions, handleActionClick, propModalVisible, closeModal,
             submitButtonLabel, showModal, addNewDebtor, showLoader, loader, hideLoader, modal_loader, modal_top, modal_left, modal_width,displayButtons,
             showModalLoader, hideModalLoader, saveDebtor, formFields, handleSelectionChange, flex_basis,flex_basis_percentage,
-            importDebtors, removeDebtor, removeDebtors, handleReset,printCustomersList,addingRight,rightsModule
+            importDebtors, removeDebtor, removeDebtors, handleReset,printCustomersList,addingRight,rightsModule,selectSearchQuantity,selectedValue
         }
     }
 };

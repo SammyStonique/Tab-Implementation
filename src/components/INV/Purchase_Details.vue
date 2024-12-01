@@ -148,25 +148,26 @@ export default defineComponent({
                 {
                     type:'search-dropdown', label:"Outlet", value: outletID.value, componentKey: outComponentKey,
                     selectOptions: outletArray, optionSelected: handleSelectedOutlet, required: true,
-                    searchPlaceholder: 'Select Outlet...', dropdownWidth: '300px', updateValue: defaultOutlet.value,
+                    searchPlaceholder: 'Select Outlet...', dropdownWidth: '500px', updateValue: defaultOutlet.value,
                     fetchData: fetchOutlets(), clearSearch: clearSelectedOutlet()  
                 },
                 {
                     type:'search-dropdown', label:"Cashbook", value: cashbookID.value, componentKey: ledComponentKey,
                     selectOptions: ledgerArray, optionSelected: handleSelectedCashbook, required: true,
-                    searchPlaceholder: 'Select Cashbook...', dropdownWidth: '300px', updateValue: "",
+                    searchPlaceholder: 'Select Cashbook...', dropdownWidth: '400px', updateValue: "",
                     fetchData: fetchCashbooks(), clearSearch: clearSelectedCashbook()  
                 },
                 {
                     type:'search-dropdown', label:"Item", value: itemID.value, componentKey: itemComponentKey,
                     selectOptions: itemArray, optionSelected: handleSelectedItem, required: true,
-                    searchPlaceholder: 'Select Item...', dropdownWidth: '380px', updateValue: "",
+                    searchPlaceholder: 'Select Item...', dropdownWidth: '500px', updateValue: "",
                     // fetchData: fetchItems(), clearSearch: clearSelectedItem()  
                 },
                 { type: 'text', name: 'customer',label: "Vendor", value: '', required: true,},
                 { type: 'text', name: 'phone_number',label: "Phone No", value: '0', required: true,},
                 { type: 'text', name: 'reference_no',label: "Reference No", value: '', required: true,},
-                { type: 'number', name: 'total_amount',label: "Amount", value: receipt_totals.value || 0, required: true, },                
+                { type: 'number', name: 'total_amount',label: "Amount", value: receipt_totals.value || 0, required: true, },
+                {required: false,}                
             ]
         };
 

@@ -120,12 +120,7 @@ export default{
             activeTab.value = store.state.pageTab.pmsActiveTab;
         }
         return{
-            close,
-            minimize,
-            title,
-            activeComponent,
-            selectTab, selectedTab, closeTab,
-            activeTab, cachedComponents
+            close,minimize,title,activeComponent,selectTab, selectedTab, closeTab,activeTab, cachedComponents
         }
     },
     mounted(){

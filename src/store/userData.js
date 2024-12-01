@@ -10,6 +10,7 @@ const state = {
     departmentID: '',
     company_id: '',
     company_name: '',
+    system_timeout: 0,
     user_names: '',
     user_profile: '',
     token: '',
@@ -307,18 +308,19 @@ const actions = {
     logout({ commit,state,dispatch }){
         axios.post('api/v1/auth-token/logout/',{headers: {'Content-Type': 'application/json','Authorization': `Token ${state.token}`}})
         .then((response)=>{
-            const newState ={
-                activeComponent:"Login",
-                isAuthenticated: false,
-            }
-            commit('SET_STATE',newState); 
-            commit('reloadingPage');
+            
         })
         .catch((error)=>{
             console.log(error.message);
             throw error;
         })
         .finally(()=>{
+            const newState ={
+                activeComponent:"Login",
+                isAuthenticated: false,
+            }
+            commit('SET_STATE',newState); 
+            commit('reloadingPage');
             dispatch('deleteCSRFAndSessionCookies');
         })
     }

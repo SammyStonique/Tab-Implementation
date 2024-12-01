@@ -11,6 +11,7 @@
                 <PagesTab @openPage="selectedTab" @closePage="closeTab"/>
             </div>
         </div>
+
         <div class="tab-content z-20 overflow-y-hidden">
             <keep-alive :include="cachedComponents">
                 <component 
@@ -33,8 +34,10 @@ import Companies from '@/components/SET/Companies.vue';
 import Company_Details from '@/components/SET/Company_Details.vue';
 import Company_Info from '@/components/SET/Company_Info.vue';
 import Departments from '@/components/SET/Departments.vue';
+import Import_Departments from '@/components/SET/Import_Departments.vue';
 import Default_Settings from '@/components/SET/Default_Settings.vue';
 import Branches from '@/components/SET/Branches.vue';
+import System_Users from '@/components/SET/System_Users.vue';
 import Users from '@/components/SET/Users.vue';
 import User_Details from '@/components/SET/User_Details.vue';
 import User_Rights from '@/components/SET/User_Rights.vue';
@@ -50,8 +53,9 @@ export default{
         NavBar,
         NavBarSET,
         PagesTab,
-        Dashboard,Companies,Company_Details,Default_Settings,Company_Info,Departments,Branches,Users,
-        User_Details,User_Rights,SMS_Integrations,Email_Integrations,Mpesa_Authentication,Mpesa_Endpoints,Mpesa_Setup_Details,Mpesa_Transactions
+        Dashboard,Companies,Company_Details,Default_Settings,Company_Info,Departments,Branches,Users,System_Users,
+        User_Details,User_Rights,SMS_Integrations,Email_Integrations,Mpesa_Authentication,Mpesa_Endpoints,Mpesa_Setup_Details,Mpesa_Transactions,
+        Import_Departments
     },
     props: {
         title: {
@@ -100,12 +104,7 @@ export default{
             activeTab.value = store.state.pageTab.setActiveTab;
         }
         return{
-            close,
-            minimize,
-            title,
-            activeComponent,
-            selectTab, selectedTab, closeTab,
-            activeTab, cachedComponents
+            close,minimize,title,activeComponent,selectTab, selectedTab, closeTab,activeTab, cachedComponents
         }
     },
     mounted(){

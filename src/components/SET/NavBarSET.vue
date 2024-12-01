@@ -1,5 +1,5 @@
 <template>
-    <div class="navbar flex top-0 w-full text-sm sticky-navbar bg-white border-b border-slate-300 shadow-sm shadow-slate-200 px-6 h-10">
+    <div class="navbar flex top-0 w-full text-sm sticky-navbar bg-orange-400 border-b border-slate-300 shadow-sm shadow-slate-200 px-6 h-10">
         <button class="fixed inset-0 bg-gray-50 opacity-15 cursor-default w-full" v-if="dropdown" @click="closeDropdown"></button>
         <div class="flex">
             <div class="web-links py-1.5 px-2.5 w-32 h-full hover:bg-slate-500 hover:rounded">
@@ -22,7 +22,7 @@
                 </button>
                 </div>
                 <div class="dropdown-content w-52 absolute rounded border border-gray-200 bg-white shadow-slate-400 shadow-sm pt-2" v-if="company_dropdown">
-                    <div class="py-2 px-3 pl-4 w-full hover:bg-slate-500 hover:w-full">
+                    <div class="py-2 px-3 pl-4 w-full hover:bg-slate-500 hover:w-full" v-if="user_profile == 'Super Admin'">
                         <button class="flex text-sm w-full" @click="openPage({'SET':'Companies'})">
                             <i class="fa fa-newspaper-o pt-2 mr-2" aria-hidden="true"></i>
                             <p class="">Companies</p>
@@ -140,14 +140,20 @@
                         <p class="pt-1.5">User Management</p>
                     </button>
                 </div>
-                <div class="dropdown-content w-52 absolute rounded border border-gray-200 bg-white shadow-slate-400 shadow-sm pt-2" v-if="users_dropdown">       
+                <div class="dropdown-content w-52 absolute rounded border border-gray-200 bg-white shadow-slate-400 shadow-sm pt-2" v-if="users_dropdown"> 
+                    <div class="py-2 px-3 pl-4 w-full hover:bg-slate-500 hover:w-full" v-if="user_profile == 'Super Admin'">
+                        <button class="flex text-sm w-full" @click="openPage({'SET':'System_Users'})">
+                            <i class="fa fa-cogs pt-2 mr-2" aria-hidden="true"></i>
+                            <p class="">System Users</p>
+                        </button>
+                    </div>      
                     <div class="py-2 px-3 pl-4 w-full hover:bg-slate-500 hover:w-full">
                         <button class="flex text-sm w-full" @click="openPage({'SET':'Users'})">
                             <i class="fa fa-cogs pt-2 mr-2" aria-hidden="true"></i>
                             <p class="">Users</p>
                         </button>
                     </div>
-                    <div class="py-2 px-3 pl-4 w-full hover:bg-slate-500 hover:w-full">
+                    <div class="py-2 px-3 pl-4 w-full hover:bg-slate-500 hover:w-full" v-if="user_profile == 'Super Admin'">
                         <button class="flex text-sm w-full" @click="openPage({'SET':'User_Rights'})">
                             <i class="fa fa-archive pt-2 mr-2" aria-hidden="true"></i>
                             <p class="">User Rights</p>
@@ -178,12 +184,13 @@
 <script>
 import { ref } from 'vue';
 import { useStore } from 'vuex';
-import { defineComponent } from 'vue';
+import { defineComponent,computed } from 'vue';
 export default defineComponent({
     setup(_, { emit }){
         const store = useStore();
         const settings_dropdown = ref(false);
         const company_dropdown = ref(false);
+        const user_profile = computed(()=> store.state.userData.user_profile);
         const sms_integrations_dropdown = ref(false);
         const email_integrations_dropdown = ref(false);
         const mpesa_integrations_dropdown = ref(false);
@@ -264,7 +271,7 @@ export default defineComponent({
         };
         return{
             dropdown, settings_dropdown, sms_integrations_dropdown,email_integrations_dropdown,mpesa_integrations_dropdown,
-            company_dropdown,users_dropdown, 
+            company_dropdown,users_dropdown,user_profile,
             userDetails, closeDropdown,
             showCompanyDropdown, showEmailIntegrationsDropdown,showMpesaIntegrationsDropdown,showSMSIntegrationsDropdown,
             showUsersDropdown,

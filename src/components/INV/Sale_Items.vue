@@ -26,6 +26,8 @@
         @lastPage="lastPage"
         :showNextBtn="showNextBtn"
         :showPreviousBtn="showPreviousBtn"
+        :selectedValue="selectedValue"
+        @selectSearchQuantity="selectSearchQuantity"
     />
     <MovableModal v-model:visible="appModalVisible" :title="title" :modal_top="modal_top" :modal_left="modal_left" :modal_width="modal_width"
         :loader="modal_loader" @showLoader="showModalLoader" @hideLoader="hideModalLoader" @closeModal="closeModal"
@@ -65,6 +67,7 @@ export default{
         const chanComponentKey = ref(0);
         const itemComponentKey = ref(0);
         const title = ref('Sale Items');
+        const selectedValue = ref(50);
         const companyID = computed(()=> store.state.userData.company_id);
         const outletID = ref('');
         const counterID = ref(null);
@@ -231,7 +234,8 @@ export default{
                 done_by: done_by_search.value,
                 sale_category: "Sale",
                 outlet: outletID.value,
-                company_id: companyID.value
+                company_id: companyID.value,
+                page_size: selectedValue.value
             } 
             axios
             .post(`api/v1/sale-items-search/?page=${currentPage.value}`,formData)
@@ -240,7 +244,7 @@ export default{
                 propResults.value = response.data;
                 propArrLen.value = itemsList.value.length;
                 propCount.value = propResults.value.count;
-                pageCount.value = Math.ceil(propCount.value / 50);
+                pageCount.value = Math.ceil(propCount.value / selectedValue.value);
                 if(response.data.next){
                     showNextBtn.value = true;
                 }
@@ -254,6 +258,10 @@ export default{
             .finally(()=>{
                 hideLoader();
             })
+        };
+        const selectSearchQuantity = (newValue) =>{
+            selectedValue.value = newValue;
+            searchItems(selectedValue.value);
         }
         const loadPrev = () =>{
             if (currentPage.value <= 1){
@@ -337,7 +345,7 @@ export default{
             searchFilters,tableColumns,resetFilters,loadPrev,loadNext,firstPage,lastPage,
             showNextBtn,showPreviousBtn,displayButtons,
             modal_top, modal_left, modal_width, showLoader, loader, hideLoader, modal_loader, showModalLoader, hideModalLoader,
-            closeModal, handleSelectionChange, pageComponentKey, flex_basis, flex_basis_percentage,printItemsList
+            closeModal, handleSelectionChange, pageComponentKey, flex_basis, flex_basis_percentage,printItemsList,selectedValue,selectSearchQuantity
         }
     }
 }

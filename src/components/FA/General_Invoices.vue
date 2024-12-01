@@ -30,6 +30,8 @@
             @lastPage="lastPage"
             :showNextBtn="showNextBtn"
             :showPreviousBtn="showPreviousBtn"
+            :selectedValue="selectedValue"
+            @selectSearchQuantity="selectSearchQuantity"
         />
         <MovableModal v-model:visible="invModalVisible" :title="title" :modal_top="modal_top" :modal_left="modal_left" :modal_width="modal_width"
             :loader="modal_loader" @showLoader="showModalLoader" @hideLoader="hideModalLoader" @closeModal="closeModal"
@@ -83,6 +85,7 @@ export default{
         const propArrLen = ref(0);
         const propCount = ref(0);
         const pageCount = ref(0);
+        const selectedValue = ref(50);
         const currentPage = ref(1);
         const showNextBtn = ref(false);
         const showPreviousBtn = ref(false);
@@ -242,7 +245,8 @@ export default{
                 from_date: from_date_search.value,
                 to_date: to_date_search.value,
                 property: null,
-                company: companyID.value
+                company: companyID.value,
+                page_size: selectedValue.value
             } 
    
             axios
@@ -253,7 +257,7 @@ export default{
                 propResults.value = response.data;
                 propArrLen.value = invoicesList.value.length;
                 propCount.value = propResults.value.count;
-                pageCount.value = Math.ceil(propCount.value / 50);
+                pageCount.value = Math.ceil(propCount.value / selectedValue.value);
                 if(response.data.next){
                     showNextBtn.value = true;
                 }
@@ -267,7 +271,11 @@ export default{
             .finally(()=>{
                 hideLoader();
             })
-        }
+        };
+        const selectSearchQuantity = (newValue) =>{
+            selectedValue.value = newValue;
+            searchInvoices(selectedValue.value);
+        };
         const resetFilters = () =>{
             client_name_search.value = "";
             client_code_search.value = "";
@@ -397,7 +405,7 @@ export default{
             submitButtonLabel, showModal, showLoader, loader, hideLoader, modal_loader, modal_top, modal_left, modal_width,displayButtons,
             showModalLoader, hideModalLoader, formFields, handleSelectionChange, flex_basis,flex_basis_percentage,
             removeInvoice, removeInvoices, dropdownOptions, handleDynamicOption, addNewInvoice, printInvoiceList,
-            addingRight,rightsModule
+            addingRight,rightsModule,selectSearchQuantity,selectedValue
         }
     }
 };
