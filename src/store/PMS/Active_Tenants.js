@@ -7,6 +7,7 @@ const state = {
   tenantArray: [],
   tenantID: null,
   tenantUnitID: null,
+  tenantCompanyID: null,
   tenantName: '',
   tenantLedger: '',
   tenantCode: '',
@@ -15,12 +16,16 @@ const state = {
   phone_number_search: '',
   unit_number_search: '',
   selectedTenant: null,
-  selectedUnit: null,
-  selectedProperty: null,
+  selectedTenantLease: null,
+  selectedTenantLease: null,
+  selectedTenantProperty: null,
+  tenantProperty: null,
+  selectedTenantUnit: null,
+  selectedTenantCurrency: null,
+  tenantCurrency: null,
+  selectedTenantVat: null,
   selectedUtility: null,
   selectedDeposit: null,
-  selectedCurrency: null,
-  selectedVat: null,
   isEditing: false,
   rentSchedules: [],
   tenantLease: [],
@@ -46,12 +51,16 @@ const mutations = {
     state.phone_number_search = '';
     state.unit_number_search = '';
     state.selectedTenant = null;
-    state.selectedUnit = null;
-    state.selectedProperty = null;
+    state.tenantCompanyID = null;
+    state.selectedTenantLease = null;
+    state.selectedTenantCurrency = null;
+    state.selectedTenantProperty = null;
+    state.tenantCurrency = null;
+    state.tenantProperty = null;
+    state.selectedTenantUnit = null;
+    state.selectedTenantVat = null;
     state.selectedUtility = null;
     state.selectedDeposit = null;
-    state.selectedCurrency = null;
-    state.selectedVat = null;
     state.isEditing = false;
     state.rentSchedules = [];
     state.tenantLease = [];
@@ -65,6 +74,27 @@ const mutations = {
   SET_SELECTED_TENANT(state, tenant) {
     state.selectedTenant = tenant;
     state.isEditing = true;
+  },
+  SET_SELECTED_TENANT_LEASE(state, tenant) {
+    state.selectedTenantLease = tenant;
+  },
+  SET_SELECTED_TENANT_PROPERTY(state, property) {
+    state.selectedTenantProperty = property;
+  },
+  SET_TENANT_PROPERTY(state, property) {
+    state.tenantProperty = property;
+  },
+  SET_SELECTED_TENANT_UNIT(state, unit) {
+    state.selectedTenantUnit = unit;
+  },
+  SET_SELECTED_TENANT_CURRENCY(state, currency) {
+    state.selectedTenantCurrency = currency;
+  },
+  SET_TENANT_CURRENCY(state, currency) {
+    state.tenantCurrency = currency;
+  },
+  SET_SELECTED_TENANT_VAT(state, vat) {
+    state.selectedTenantVat = vat;
   },
   SET_RENT_SCHEDULES(state, schedules) {
     state.rentSchedules = schedules;
@@ -81,12 +111,7 @@ const mutations = {
   SET_TENANT_DETAILS(state, details){
     state.tenantDetails = details;
   },
-  SET_TENANT_CURRENCY(state, currency){
-    state.tenantCurrency = tenant;
-  },
-  SET_TENANT_PROPERTY(state, property){
-    state.tenanatProperty = property;
-  },
+
   SET_TENANT_VARIATIONS(state, variations){
     state.tenantVariations = variations
   },
@@ -140,6 +165,17 @@ const actions = {
     })
   },
 
+  async updateTenant({ commit,state }, formData) {
+    return axios.post('api/v1/update-tenant/', formData)
+    .then((response)=>{
+      return response;
+    })
+    .catch((error)=>{
+      console.log(error.message);
+      throw error;
+    })
+  },
+
   async createTenantDeposit({ commit,state }, formData) {
     return axios.post('api/v1/create-tenant-deposit/', formData)
     .then((response)=>{
@@ -180,6 +216,24 @@ const actions = {
     .then((response)=>{
       state.selectedTenant = response.data;
       commit('SET_SELECTED_TENANT',response.data);
+
+      let formData1 ={
+        tenant: state.selectedTenant.tenant_id,
+        company: state.tenantCompanyID
+      }
+      axios.post(`api/v1/get-tenant-leases/`,formData1)
+      .then((response)=>{
+        state.selectedTenantLease = response.data;
+        commit('SET_SELECTED_TENANT_LEASE',response.data);
+        commit('SET_SELECTED_TENANT_PROPERTY',response.data.property.name);
+        commit('SET_SELECTED_TENANT_UNIT',response.data);
+        commit('SET_SELECTED_TENANT_CURRENCY',response.data.lease_currency.name);
+        commit('SET_SELECTED_TENANT_VAT', (response.data.rent_vat != null) ? response.data.rent_vat.tax_name : "");
+        
+      })
+      .catch((error)=>{
+        console.log(error.message);
+      })
     })
     .catch((error)=>{
       console.log(error.message);
@@ -503,13 +557,13 @@ const actions = {
       if (result.value) {
         axios.post(`api/v1/delete-tenant/`,formData)
         .then((response)=>{
-          if(response.status == 200){
+          if(response.data.msg == "Success"){
               Swal.fire("Poof! Tenant removed succesfully!", {
                 icon: "success",
               }); 
           }else{
             Swal.fire({
-              title: "Error Deleting Tenant",
+              title: "Tenant Has Transactions",
               icon: "warning",
             });
           }                   

@@ -119,6 +119,9 @@
                                 </table>
                             </div>
                         </div>
+                        <div class="flex mb-1.5 mt-6">
+                            <button @click="editTenantDetails" :class="{ 'disabled': isDisabled('Editing Tenants') }" class="rounded bg-green-400 text-sm  text-white px-2 py-1.5"><i class="fa fa-edit" aria-hidden="true"></i>Edit Biodata</button>
+                        </div>
                     </div>
                     <div v-if="activeTab == 1">
                         <DynamicTable :key="statementTableKey" :rightsModule="rightsModule" :columns="statementColumns" :rows="statementRows" :idField="idFieldStatement" :showActions="showActions" :actions="actionsStatement"/>
@@ -170,6 +173,19 @@
             </div>
         </template>
     </PageStyleComponent>
+    <MovableModal v-model:visible="tntModalVisible" :title="tntTitle" :modal_top="modal_top" :modal_left="tnt_modal_left" :modal_width="tnt_modal_width"
+        :loader="tnt_modal_loader" @showLoader="showTntModalLoader" @hideLoader="hideTntModalLoader" @closeModal="closeTntModal">
+        <Tenant_Biodata
+            :formFields="tenantFormFields"
+            :additionalFields="tenantAdditionalFields" 
+            @update-form="updateTenantFormFields"
+            @reset-tenant-details="handleTntReset"
+        />
+        <div class="flex-1 px-2">
+            <button @click="updateTenantDetails" class="rounded bg-green-400 text-sm mr-2 w-24 text-white px-2 py-1.5"><i class="fa fa-check-circle text-xs mr-1.5" aria-hidden="true"></i>Save</button>
+            <button @click="handleTntReset" class="rounded bg-green-400 text-sm mr-2 w-24 text-white px-2 py-1.5"><i class="fa fa-refresh text-xs mr-1.5" aria-hidden="true"></i>Reset</button>
+        </div>
+    </MovableModal>
 </template>
 
 <script>
@@ -178,6 +194,7 @@ import PageStyleComponent from '../PageStyleComponent.vue';
 import DynamicTable from '@/components/DynamicTable.vue';
 import DynamicForm from '../NewDynamicForm.vue';
 import MovableModal from '@/components/MovableModal.vue';
+import Tenant_Biodata from '@/components/PMS/Tenant_Biodata.vue';
 import { useStore } from "vuex";
 import { useToast } from "vue-toastification";
 import axios from 'axios';
@@ -185,7 +202,7 @@ import axios from 'axios';
 export default defineComponent({
     name: 'Tenant_Statement',
     components:{
-        PageStyleComponent, DynamicTable, MovableModal, DynamicForm
+        PageStyleComponent, DynamicTable, MovableModal, DynamicForm,Tenant_Biodata
     },
     setup(props,{emit}){
         const store = useStore();
@@ -195,10 +212,12 @@ export default defineComponent({
         const dep_modal_loader = ref('none');
         const util_modal_loader = ref('none');
         const void_modal_loader = ref('none');
+        const tnt_modal_loader = ref('none');
         const rightsModule = ref('PMS');
         const allowedRights = ref([]);
         const voidModalVisible = ref(false);
         const depModalVisible = ref(false);
+        const tntModalVisible = ref(false);
         const depositID = ref('');
         const utilModalVisible = ref(false);
         const utilityID = ref('');
@@ -207,13 +226,18 @@ export default defineComponent({
         const depositTitle = ref('Security Deposit Details');
         const utilityTitle = ref('Utility Details');
         const voidTitle = ref('Void Utility');
+        const tntTitle = ref('Tenant Biodata');
         const utilityFormData = ref(null);
         const flex_basis = ref('');
         const flex_basis_percentage = ref('');
         const modal_top = ref('150px');
         const modal_left = ref('400px');
+        const tnt_modal_left = ref('200px');
         const modal_width = ref('30vw');
         const void_modal_width = ref('45vw');
+        const tnt_modal_width = ref('70vw');
+        const tenantFormFields = ref([]);
+        const tenantAdditionalFields = ref([]);
         const companyID = computed(()=> store.state.userData.company_id);
         const userID = computed(()=> store.state.userData.user_id);
         const depositArray = computed(() => store.state.Security_Deposits.depositArr);
@@ -241,6 +265,7 @@ export default defineComponent({
         const scheduleRows = computed(()=> store.state.Active_Tenants.rentSchedules);
         const statementRows = computed(()=> store.state.Journals.jnlArray);
         const variationRows = computed(()=> store.state.Active_Tenants.tenantVariations);
+        const selectedTenant = computed(()=> store.state.Active_Tenants.selectedTenant);
         const tenantLease = computed(()=> store.state.Active_Tenants.tenantLease);
         const tenantDetails = computed(()=> store.state.Active_Tenants.tenantDetails);
         const tenantCurrency = computed(()=> store.state.Active_Tenants.tenantCurrency);
@@ -609,6 +634,108 @@ export default defineComponent({
             { type: 'number', name: 'default_value',label: "Default Value", value: 0, required: true },
         ]);
 
+        const updateTenantFormFields = (fields,additionalFields) => {
+            tenantFormFields.value = fields;
+            tenantAdditionalFields.value = additionalFields;
+        };
+
+        watch([selectedTenant], () => {
+            if (selectedTenant.value) {
+                tenantFormFields.value[0].value = selectedTenant.value.tenant_code;
+                tenantFormFields.value[1].value = selectedTenant.value.tenant_name;
+                tenantFormFields.value[2].value = selectedTenant.value.phone_number;
+                tenantFormFields.value[3].value = selectedTenant.value.id_number;
+                tenantFormFields.value[4].value = selectedTenant.value.gender;
+                tenantFormFields.value[5].value = selectedTenant.value.email;
+                tenantFormFields.value[6].value = selectedTenant.value.kra_pin;
+                tenantFormFields.value[7].value = selectedTenant.value.tenant_type;
+                tenantFormFields.value[8].value = selectedTenant.value.country;
+                tenantFormFields.value[9].value = selectedTenant.value.address;
+                tenantAdditionalFields.value[0].value = selectedTenant.value.contact_names;
+                tenantAdditionalFields.value[1].value = selectedTenant.value.contact_phone_number;
+                tenantAdditionalFields.value[2].value = selectedTenant.value.contact_email;
+                tenantAdditionalFields.value[3].value = selectedTenant.value.contact_relationship;
+            }
+        }, { immediate: true });
+
+        const handleTntReset = () =>{
+            for(let i=0; i < tenantFormFields.value.length; i++){
+                tenantFormFields.value[i].value = '';
+            }
+            for(let i=0; i < tenantAdditionalFields.value.length; i++){
+                tenantAdditionalFields.value[i].value = '';
+            }
+            
+        }
+        const showTntModalLoader = () =>{
+            tnt_modal_loader.value = "block";
+        }
+        const hideTntModalLoader = () =>{
+            tnt_modal_loader.value = "none";
+        }
+        
+        const editTenantDetails = async() =>{
+            let formData = {
+                company: companyID.value,
+                tenant: tenantDetails.value.tenant_id
+            }
+            await store.dispatch('Active_Tenants/fetchTenant',formData)
+            tntModalVisible.value = true;
+        };
+        const updateTenantDetails = async() =>{
+            showTntModalLoader();
+            let formData = {
+                tenant_code: tenantFormFields.value[0].value,
+                tenant_name: tenantFormFields.value[1].value,
+                gender: tenantFormFields.value[4].value,
+                id_number: tenantFormFields.value[3].value,
+                kra_pin: tenantFormFields.value[6].value,
+                phone_number: tenantFormFields.value[2].value,
+                email: tenantFormFields.value[5].value,
+                country: tenantFormFields.value[8].value,
+                address: tenantFormFields.value[9].value,
+                tenant_type: tenantFormFields.value[7].value,
+                contact_phone_number: tenantAdditionalFields.value[1].value,
+                contact_email: tenantAdditionalFields.value[2].value,
+                contact_relationship: tenantAdditionalFields.value[3].value,
+                contact_names: tenantAdditionalFields.value[0].value,
+                ledger_id: tenantDetails.value.ledger_id,
+                tenant: tenantDetails.value.tenant_id,
+                company: companyID.value
+            }
+
+            errors.value = [];
+            for(let i=1; i < tenantFormFields.value.length; i++){
+                if(tenantFormFields.value[i].value =='' && tenantFormFields.value[i].required == true){
+                    errors.value.push(tenantFormFields.value[i].label);
+                }
+            }
+            if(errors.value.length){
+                toast.error('Fill In Required Fields');
+                hideTntModalLoader();
+            }else{
+                try {
+                    const response = await store.dispatch('Active_Tenants/updateTenant', formData);
+                    if (response && response.status === 200) {
+                        hideTntModalLoader();
+                        toast.success('Tenant Biodata updated successfully!');
+                        handleTntReset();
+                        tntModalVisible.value = false;
+                    } else {
+                        toast.error('An error occurred while updating the Tenant Biodata.');
+                    }
+                } catch (error) {
+                    console.error(error.message);
+                    toast.error('Failed to update Tenant Biodata: ' + error.message);
+                } finally {
+                    hideTntModalLoader();
+                }
+            }
+        }
+        const closeTntModal = () =>{
+            tntModalVisible.value = false;
+        };
+
         const handleDepReset = () =>{
             for(let i=0; i < formFields.value.length; i++){
                 formFields.value[i].value = '';
@@ -831,11 +958,11 @@ export default defineComponent({
             scheduleTableKey, idFieldSchedule, scheduleColumns, actionsSchedule, scheduleRows, statementTableKey, idFieldStatement, statementRows,showActions,
             statementColumns, actionsStatement, tenantLease, tenantDetails, tenantCurrency, tenantProperty, scheduleActionClick,
             depositActionClick, variationColumns, variationRows, variationTableKey, idFieldVariation, actionsVariation, variationActionClick,
-            addNewDeposit, addNewUtility, dep_modal_loader, util_modal_loader, depModalVisible, utilModalVisible, displayButtons, depositTitle, utilityTitle, 
-            modal_top, modal_left, modal_width, showDepModalLoader, hideDepModalLoader, showUtilModalLoader, hideUtilModalLoader, handleDepReset,
-            flex_basis, flex_basis_percentage, closeDepModal, closeUtilModal, handleUtilReset, createTenantDeposit, createTenantUtility, utilityActionClick,
-            void_date, voidTitle, void_modal_loader, voidModalVisible, void_modal_width, showVoidModalLoader, hideVoidModalLoader, closeVoidModal, voidUtility,
-            rightsModule,isDisabled
+            addNewDeposit, addNewUtility,tnt_modal_loader, dep_modal_loader, util_modal_loader, tntModalVisible, depModalVisible, utilModalVisible, displayButtons, depositTitle, utilityTitle,tntTitle,
+            tnt_modal_width,modal_top,tnt_modal_left, modal_left, modal_width, showDepModalLoader, hideDepModalLoader, showUtilModalLoader, hideUtilModalLoader, handleDepReset,showTntModalLoader,
+            flex_basis, flex_basis_percentage, closeDepModal, closeUtilModal, handleUtilReset, createTenantDeposit, createTenantUtility, utilityActionClick, closeTntModal,handleTntReset,
+            void_date, voidTitle, void_modal_loader, voidModalVisible, void_modal_width, showVoidModalLoader, hideVoidModalLoader, closeVoidModal, voidUtility,hideTntModalLoader,updateTenantDetails,
+            tenantFormFields,tenantAdditionalFields,updateTenantFormFields,editTenantDetails,rightsModule,isDisabled
         }
     }
 })

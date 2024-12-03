@@ -201,7 +201,7 @@ export default{
                 { type: 'dropdown', name: 'charge_frequency',label: "Charge Frequency", value: selectedUnit.value?.charge_frequency || '', placeholder: "", required: false, options: [{ text: 'One Off', value: 'One Off' }, { text: 'Weekly', value: 'Weekly' }, { text: 'Monthly', value: 'Monthly' }, { text: 'Quartely', value: 'Quartely' }, { text: 'Semi-Annually', value: 'Semi-Annually' }, { text: 'Annually', value: 'Annually' }] },
                 { type: 'dropdown', name: 'owner_occupied',label: "Owner Occupied", value: selectedUnit.value?.owner_occupied || 'False', placeholder: "", required: false, options: [{ text: 'Yes', value: 'True' }, { text: 'No', value: 'False' }] },
                 { type: 'dropdown', name: 'unit_type',label: "Unit Type", value: selectedUnit.value?.unit_type || '', placeholder: "", required: false, options: [{ text: 'Studio', value: 'Studio' }, { text: 'Bedsitter', value: 'Bedsitter' }, { text: 'Bedroomed', value: 'Bedroomed' },{ text: 'Shop', value: 'Shop' }, { text: 'Office', value: 'Office' }, { text: 'Other', value: 'Other' }] },                
-                { type: 'number', name: 'bedrooms',label: "Bedrooms", value: selectedUnit.value?.bedrooms || '', required: false },
+                { type: 'number', name: 'bedrooms',label: "Bedrooms", value: selectedUnit.value?.bedrooms || 0, required: false },
                 { type: 'text', name: 'electricity_meter_number',label: "Electricity Mtr No.", value: selectedUnit.value?.electricity_meter_number || '', required: false },
                 { type: 'text', name: 'water_meter_number',label: "Water Mtr No.", value: selectedUnit.value?.water_meter_number || '', required: false },
             ];
@@ -302,7 +302,7 @@ export default{
             }
 
             for(let i=0; i < formFields.value.length; i++){
-                if(formFields.value[i].value ==''){
+                if(formFields.value[i].value =='' && formFields.value[i].required == true){
                     errors.value.push('Error');
                 }
             }

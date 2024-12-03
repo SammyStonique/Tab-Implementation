@@ -97,10 +97,10 @@ export default defineComponent({
         const additional_flex_basis = ref('');
         const additional_flex_basis_percentage = ref('');
         const selectedTenant = computed(()=> store.state.Active_Tenants.selectedTenant);
-        const selectedProperty = computed(()=> store.state.Active_Tenants.selectedProperty);
-        const selectedUnit = computed(()=> store.state.Active_Tenants.selectedUnit);
-        const selectedCurrency = computed(()=> store.state.Active_Tenants.selectedCurrency);
-        const selectedTax = computed(()=> store.state.Active_Tenants.selectedTax);
+        const selectedTenantProperty = computed(()=> store.state.Active_Tenants.selectedTenantProperty);
+        const selectedTenantUnit = computed(()=> store.state.Active_Tenants.selectedTenantUnit);
+        const selectedTenantCurrency = computed(()=> store.state.Active_Tenants.selectedTenantCurrency);
+        const selectedTenantVat = computed(()=> store.state.Active_Tenants.selectedTenantVat);
         const selectedPeriod = computed(()=> store.state.Active_Tenants.selectedPeriod);
         const propertyArray = computed(() => store.state.Properties_List.propertyArr);
         const unitArray = computed(() => store.state.Units_List.unitArr);
@@ -236,13 +236,13 @@ export default defineComponent({
                 {  
                     type:'search-dropdown', label:"Property", value: propertyValue.value, componentKey: propComponentKey,
                     selectOptions: propertyArray, optionSelected: handleSelectedProperty, required: true,
-                    searchPlaceholder: 'Select Property...', dropdownWidth: '385px', updateValue: selectedProperty.value,
+                    searchPlaceholder: 'Select Property...', dropdownWidth: '385px', updateValue: selectedTenantProperty.value,
                     fetchData: fetchProperties(), clearSearch: clearSelectedProperty
                 },
                 {  
                     type:'search-dropdown', label:"Unit", value: unitValue.value, componentKey: unitComponentKey,
                     selectOptions: unitArray, optionSelected: handleSelectedUnit, required: true,
-                    searchPlaceholder: 'Select Unit...', dropdownWidth: '385px', updateValue: selectedUnit.value,
+                    searchPlaceholder: 'Select Unit...', dropdownWidth: '385px', updateValue: selectedTenantUnit.value,
                     fetchData: fetchUnits(), clearSearch: clearSelectedUnit
                 },
                 { type: 'date', name: 'lease_start_date',label: "Lease Start Date", value: selectedTenant.value?.lease_start_date || '', required: true },
@@ -266,11 +266,11 @@ export default defineComponent({
             emit('reset-lease-details')
         }
 
-        watch([selectedTenant, selectedProperty, selectedUnit], () => {
-            if (selectedTenant.value && selectedProperty.value && selectedUnit.value) {
+        watch([selectedTenant, selectedTenantProperty, selectedTenantUnit], () => {
+            if (selectedTenant.value && selectedTenantProperty.value && selectedTenantUnit.value) {
                 propComponentKey.value += 1;
                 unitComponentKey.value += 1;
-                updateFormFields();
+                // updateFormFields();
             }
         }, { immediate: true });
 
@@ -349,7 +349,7 @@ export default defineComponent({
                 {  
                     type:'search-dropdown', label:"Rent Currency", value: currencyValue.value, componentKey: currencyComponentKey,
                     selectOptions: currencyArray, optionSelected: handleSelectedCurrency, required: true,
-                    searchPlaceholder: 'Select Rent Currency...', dropdownWidth: '280px', updateValue: selectedCurrency.value,
+                    searchPlaceholder: 'Select Rent Currency...', dropdownWidth: '500px', updateValue: selectedTenantCurrency.value,
                     fetchData: fetchCurrencies(), clearSearch: clearSelectedCurrency
                 },
                 { type: 'number', name: 'rent_amount',label: "Rent Amount", value: selectedTenant.value?.rent_amount || unit_market_rent.value, required: true },
@@ -359,7 +359,7 @@ export default defineComponent({
                 {  
                     type:'search-dropdown', label:"Rent Vat", value: taxValue.value, componentKey: taxComponentKey,
                     selectOptions: taxArray, optionSelected: handleSelectedTax, required: false,
-                    searchPlaceholder: 'Select Rent Vat...', dropdownWidth: '280px', updateValue: selectedTax.value,
+                    searchPlaceholder: 'Select Rent Vat...', dropdownWidth: '500px', updateValue: selectedTenantVat.value,
                     fetchData: fetchTaxes(), clearSearch: clearSelectedTax
                 },
                 { type: 'dropdown', name: 'variation_type',label: "Variation Type", value: selectedTenant.value?.variation_type || '', placeholder: "", required: false, options: [{ text: 'Review', value: 'Review' }, { text: 'Escalation', value: 'Rent Escalation' }] },
@@ -367,14 +367,16 @@ export default defineComponent({
                 {  
                     type:'search-dropdown', label:"Variation Frequency", value: periodValue.value, componentKey: periodComponentKey,
                     selectOptions: periodArray, optionSelected: handleSelectedPeriod, required: false,
-                    searchPlaceholder: 'Select Variation...', dropdownWidth: '200px', updateValue: selectedPeriod.value,
+                    searchPlaceholder: 'Select Variation...', dropdownWidth: '500px', updateValue: selectedPeriod.value,
                     fetchData: fetchPeriods(), clearSearch: clearSelectedPeriod
                 },
                 { type: 'number', name: 'variation_value',label: "Variation Value", value: selectedTenant.value?.variation_value || 0, required: false },
+                {required:false},
+                {required:false}
             ];
         };
-        watch([selectedTenant, selectedCurrency, selectedTax, selectedPeriod, computed_billing_amount, unit_market_rent], () => {
-            if(selectedTenant.value  && selectedCurrency.value && selectedTax.value && selectedPeriod.value){
+        watch([selectedTenant, selectedTenantCurrency, selectedTenantVat, selectedPeriod, computed_billing_amount, unit_market_rent], () => {
+            if(selectedTenant.value  && selectedTenantCurrency.value && selectedTenantVat.value && selectedPeriod.value){
                 currencyComponentKey.value += 1;
                 taxComponentKey.value += 1;
                 periodComponentKey.value += 1;
@@ -438,7 +440,7 @@ export default defineComponent({
             periodComponentKey.value += 1;
             flex_basis.value = '1/4';
             flex_basis_percentage.value = '25';
-            additional_flex_basis.value = '1/6';
+            additional_flex_basis.value = '1/4';
             additional_flex_basis_percentage.value = '25';
         })
         onMounted(()=>{

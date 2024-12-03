@@ -32,6 +32,22 @@
             @selectSearchQuantity="selectSearchQuantity"
         />
     </div>
+    <MovableModal v-model:visible="transModalVisible" :title="transTitle" :modal_top="modal_top" :modal_left="modal_left" :modal_width="modal_width"
+        :loader="trans_modal_loader" @showLoader="showTransModalLoader" @hideLoader="hideTransModalLoader" @closeModal="closeModal">
+        <div class="mt-4 mb-3">
+            <label for="">Unit:</label><br />
+            <SearchableDropdown
+                :key="unitComponentKey"
+                :options="tenantUnitsArr"
+                :dropdownWidth="dropdownWidth"
+                @option-selected="handleSelectedTenantUnit"
+                @clearSearch="clearSelectedTenantUnit"                             
+            />
+        </div>
+        <div class="flex-1 basis-full px-2">
+            <button @click="transferUnit" class="rounded bg-green-400 text-sm mr-2  text-white px-2 py-1.5"><i class="fa fa-check-circle text-xs mr-1.5" aria-hidden="true"></i>Transfer</button>
+        </div>
+    </MovableModal>
 </template>
 
 <script>
@@ -41,16 +57,21 @@ import PageComponent from '@/components/PageComponent.vue'
 import { useStore } from "vuex";
 import { useToast } from "vue-toastification";
 import PrintJS from 'print-js';
+import MovableModal from '@/components/MovableModal.vue';
+import SearchableDropdown from '@/components/SearchableDropdown.vue';
+import Swal from 'sweetalert2';
 
 export default{
     name: 'Active_Tenants',
     components:{
-        PageComponent
+        PageComponent,MovableModal,SearchableDropdown
     },
     setup(){
         const store = useStore();
         const toast = useToast();
         const loader = ref('');
+        const unitComponentKey = ref(0);
+        const trans_modal_loader = ref('none');
         const idField = 'tenant_id';
         const addButtonLabel = ref('New Tenant');
         const addingRight = ref('Adding Tenants');
@@ -66,7 +87,13 @@ export default{
         const currentPage = ref(1);
         const showNextBtn = ref(false);
         const showPreviousBtn = ref(false);
-        const propModalVisible = ref(false);
+        const transTitle = ref('Transfer Unit');
+        const tenantUnitsArr = computed(() => store.state.Units_List.unitArr);
+        const transModalVisible = ref(false);
+        const dropdownWidth = ref("320px")
+        const modal_top = ref('200px');
+        const modal_left = ref('400px');
+        const modal_width = ref('50vw');
         const showModal = ref(false);
         const tableColumns = ref([
             {type: "checkbox"},
@@ -81,14 +108,13 @@ export default{
         const actions = ref([
             {name: 'edit', icon: 'fa fa-edit', title: 'Edit Tenant', rightName: 'Editing Tenants'},
             {name: 'view', icon: 'fa fa-file-pdf-o', title: 'View Statement', rightName: 'Viewing Tenant Statement'},
+            {name: 'transfer', icon: 'fa fa-exchange', title: 'Transfer Unit', rightName: 'Editing Tenants'},
             {name: 'delete', icon: 'fa fa-trash', title: 'Delete Tenant', rightName: 'Deleting Tenants'},
         ])
         const companyID = computed(()=> store.state.userData.company_id);
         const propertyID = ref(null);
         const unitID = ref(null);
-        const utilityID = ref(null);
-        const depositID = ref(null);
-        const currencyID = ref(null);
+        const tenantID = ref(null);
         const name_search = computed({
             get: () => store.state.Active_Tenants.name_search,
             set: (value) => store.commit('Active_Tenants/SET_SEARCH_FILTERS', {"name_search":value}),
@@ -129,6 +155,17 @@ export default{
             {type:'text', placeholder:"Unit No...", value: unit_number_search, width:48,},
             {type:'text', placeholder:"Phone No...", value: phone_number_search, width:48,},
         ]);
+        const fetchTenantUnits = async(propertyID) =>{
+            await store.dispatch('Units_List/fetchUnits', {company:companyID.value, property: propertyID, vacancy_status: "Vacant", owner_occupied:"False"});
+        };
+        const handleSelectedTenantUnit = async(option) =>{
+            await store.dispatch('Units_List/handleSelectedUnit', option)
+            unitID.value = store.state.Units_List.unitID;
+        }
+        const clearSelectedTenantUnit = async() =>{
+            await store.dispatch('Units_List/updateState', {unitID: ''});
+            unitID.value = store.state.Units_List.unitID;
+        }
         const handleSelectionChange = (ids) => {
             selectedIds.value = ids;
         };
@@ -186,7 +223,70 @@ export default{
             }else{
                 toast.error("Please Select A Tenant To Remove")
             }
+        };
+        const showTransModalLoader = () =>{
+            trans_modal_loader.value = "block";
         }
+        const hideTransModalLoader = () =>{
+            trans_modal_loader.value = "none";
+        }
+        const transferUnit = async() =>{
+            showTransModalLoader();
+            let formData = {
+                tenant_unit: unitID.value,
+                tenant: tenantID.value,
+                company: companyID.value
+            }
+            Swal.fire({
+            title: "Are you sure?",
+            text: `Do you wish to Transfer Unit?`,
+            type: 'warning',
+            showCloseButton: true,
+            showCancelButton: true,
+            confirmButtonText: 'Yes Transfer Unit!',
+            cancelButtonText: 'Cancel!',
+            customClass: {
+                confirmButton: 'swal2-confirm-custom',
+                cancelButton: 'swal2-cancel-custom',
+            },
+            showLoaderOnConfirm: true,
+            }).then((result) => {
+            if (result.value) {
+                axios.post(`api/v1/transfer-tenant-unit/`,formData)
+                .then((response)=>{
+                if(response.data.msg == "Success"){
+                    Swal.fire("Tenant transferred succesfully!", {
+                        icon: "success",
+                    }); 
+                    unitComponentKey.value += 1;
+                    closeTransModal();
+                    searchTenants();
+                }else{
+                    Swal.fire({
+                    title: "Error Transferring Unit",
+                    icon: "warning",
+                    });
+                }                   
+                })
+                .catch((error)=>{
+                    console.log(error.message);
+                    Swal.fire({
+                        title: error.message,
+                        icon: "warning",
+                    });
+                    hideTransModalLoader();
+                })
+            }else{
+                Swal.fire(`Tenant has not been transferred!`);
+                hideTransModalLoader();
+            }
+            })     
+        };
+        const closeTransModal = () =>{
+            transModalVisible.value = false;
+            tenantID.value = null;
+            hideTransModalLoader();
+        };
         const showLoader = () =>{
             loader.value = "block";
         }
@@ -270,12 +370,14 @@ export default{
         }
         const addNewTenant = async() =>{
             store.commit('Active_Tenants/initializeStore');
-            await store.dispatch('Active_Tenants/updateState', {currentTab: 'Tenant_Biodata',selectedTenant: null,selectedProperty: null,selectedUnit: null,selectedCurrency:null,selectedDeposit:null, isEditing: false});
+            await store.dispatch('Active_Tenants/updateState', {currentTab: 'Tenant_Biodata',selectedTenant: null,selectedTenantProperty: null,selectedTenantUnit: null,selectedTenantCurrency:null,selectedTenantVat:null,selectedDeposit:null, isEditing: false});
             store.commit('pageTab/ADD_PAGE', {'PMS':'Tenant_Details'});
             store.state.pageTab.pmsActiveTab = 'Tenant_Details';          
         }
         const handleActionClick = async(rowIndex, action, row) =>{
             if( action == 'edit'){
+                await store.dispatch('Active_Tenants/updateState', {currentTab: 'Tenant_Biodata',selectedTenant: null,selectedTenantProperty: null,selectedTenantUnit: null,selectedTenantCurrency:null,selectedTenantVat:null,selectedDeposit:null, isEditing: false});
+                store.dispatch('Active_Tenants/updateState', {tenantCompanyID: companyID.value})
                 const tenantID = row[idField];
                 let formData = {
                     company: companyID.value,
@@ -297,6 +399,7 @@ export default{
                     searchTenants();
                 })
             }else if(action == 'view'){
+                await store.dispatch('Active_Tenants/updateState', {currentTab: 'Tenant_Biodata',selectedTenant: null,selectedTenantProperty: null,selectedTenantUnit: null,selectedTenantCurrency:null,selectedTenantVat:null,selectedDeposit:null, isEditing: false});
                 const tenantID = row[idField];
                 let formData = {
                     company: companyID.value,
@@ -305,11 +408,17 @@ export default{
                 await store.dispatch('Active_Tenants/fetchTenantLease',formData)
                 store.commit('pageTab/ADD_PAGE', {'PMS':'Tenant_Statement'})
                 store.state.pageTab.pmsActiveTab = 'Tenant_Statement';
+            }else if(action == 'transfer'){
+                hideTransModalLoader();
+                const propID = row['property_id'];
+                tenantID.value = row['tenant_id'];
+                await fetchTenantUnits(propID).
+                then(()=>{
+                    transModalVisible.value = true;
+                })
             }
         }
-        const closeModal = () =>{
-            propModalVisible.value = false;
-        };
+        
         const printTenantsList = () =>{
             showLoader();
             let formData = {
@@ -343,11 +452,13 @@ export default{
             
         })
         return{
-            searchTenants,resetFilters, addButtonLabel, searchFilters, tableColumns, tenantList,
+            searchTenants,resetFilters, addButtonLabel, searchFilters, tableColumns, tenantList,dropdownWidth,
             propResults, propArrLen, propCount, pageCount, showNextBtn, showPreviousBtn,
-            loadPrev, loadNext, firstPage, lastPage, idField, actions, handleActionClick, propModalVisible, closeModal,
+            loadPrev, loadNext, firstPage, lastPage, idField, actions, handleActionClick,
             submitButtonLabel, showModal, addNewTenant, showLoader, loader, hideLoader, importTenants, removeTenant, removeTenants,
-            handleSelectionChange,addingRight,rightsModule,printTenantsList,selectSearchQuantity,selectedValue
+            handleSelectionChange,addingRight,rightsModule,printTenantsList,selectSearchQuantity,selectedValue,
+            modal_left,modal_top,modal_width,trans_modal_loader,transModalVisible,transTitle,showTransModalLoader,hideTransModalLoader,transferUnit,closeTransModal,
+            fetchTenantUnits, handleSelectedTenantUnit, clearSelectedTenantUnit,tenantUnitsArr,unitComponentKey
         }
     }
 };

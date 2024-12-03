@@ -42,21 +42,20 @@ export default defineComponent({
         const flex_basis_percentage = ref('');
         const additional_flex_basis = ref('');
         const additional_flex_basis_percentage = ref('');
-        const selectedTenant = computed(()=> store.state.Active_Tenants.selectedTenant);
         const isEditing = computed(()=> store.state.Active_Tenants.isEditing);
         const formFields = ref(props.formFields);
         const updateFormFields = () => {
             formFields.value = [
-                { type: 'text', name: 'tenant_code',label: "Code", value: selectedTenant.value?.tenant_code || '', required: false },
-                { type: 'text', name: 'tenant_name',label: "Tenant Name", value: selectedTenant.value?.tenant_name || '', required: true },
-                { type: 'text', name: 'phone_number',label: "Phone Number", value: selectedTenant.value?.phone_number || '', required: true, placeholder: '' },
-                { type: 'text', name: 'id_number',label: "ID Number", value: selectedTenant.value?.id_number || '', required: true, placeholder: '' },
-                { type: 'dropdown', name: 'gender',label: "Gender", value: selectedTenant.value?.gender || '', placeholder: "", required: true, options: [{ text: 'Male', value: 'Male' }, { text: 'Female', value: 'Female' }, { text: 'Others', value: 'Others' }] },
-                { type: 'text', name: 'email',label: "Email", value: selectedTenant.value?.email || '', required: true },
-                { type: 'text', name: 'kra_pin',label: "Tax Pin", value: selectedTenant.value?.kra_pin || '', required: true },
-                { type: 'dropdown', name: 'tenant_type',label: "Tenant Type", value: selectedTenant.value?.tenant_type || '', placeholder: "", required: true, options: [{ text: 'Individual', value: 'Individual' }, { text: 'Company', value: 'Company' }] },
-                { type: 'text', name: 'country',label: "Country", value: selectedTenant.value?.country || 'Kenya', required: true },
-                { type: 'text', name: 'address',label: "Address", value: selectedTenant.value?.address || '', required: false },
+                { type: 'text', name: 'tenant_code',label: "Code", value: '', required: false },
+                { type: 'text', name: 'tenant_name',label: "Tenant Name", value: '', required: true },
+                { type: 'text', name: 'phone_number',label: "Phone Number", value: '', required: true, placeholder: '' },
+                { type: 'text', name: 'id_number',label: "ID Number", value: '', required: true, placeholder: '' },
+                { type: 'dropdown', name: 'gender',label: "Gender", value: '', placeholder: "", required: true, options: [{ text: 'Male', value: 'Male' }, { text: 'Female', value: 'Female' }, { text: 'Others', value: 'Others' }] },
+                { type: 'text', name: 'email',label: "Email", value: '', required: true },
+                { type: 'text', name: 'kra_pin',label: "Tax Pin", value: '', required: true },
+                { type: 'dropdown', name: 'tenant_type',label: "Tenant Type", value: '', placeholder: "", required: true, options: [{ text: 'Individual', value: 'Individual' }, { text: 'Company', value: 'Company' }] },
+                { type: 'text', name: 'country',label: "Country", value: 'Kenya', required: true },
+                { type: 'text', name: 'address',label: "Address", value: '', required: false },
             ];
         };
         const handleReset = () =>{
@@ -71,27 +70,16 @@ export default defineComponent({
             emit('reset-tenant-details')
         }
 
-        watch([selectedTenant], () => {
-            if (selectedTenant.value) {
-                updateFormFields();
-            }
-        }, { immediate: true });
 
         const additionalFields = ref(props.additionalFields);
         const updateAdditionalFormFields = () => {
             additionalFields.value = [
-                { type: 'text', name: 'contact_names',label: "Name", value: selectedTenant.value?.contact_names || '', required: false },
-                { type: 'text', name: 'contact_phone_number',label: "Phone Number", value: selectedTenant.value?.contact_phone_number || '', required: false },
-                { type: 'text', name: 'contact_email',label: "Email", value: selectedTenant.value?.contact_email || '', required: false },
-                { type: 'text', name: 'contact_relationship',label: "Relationship", value: selectedTenant.value?.contact_relationship || '', required: false },
+                { type: 'text', name: 'contact_names',label: "Name", value: '', required: false },
+                { type: 'text', name: 'contact_phone_number',label: "Phone Number", value: '', required: false },
+                { type: 'text', name: 'contact_email',label: "Email", value: '', required: false },
+                { type: 'text', name: 'contact_relationship',label: "Relationship", value: '', required: false },
             ];
         };
-        watch([selectedTenant], () => {
-            if(selectedTenant.value){
-                updateAdditionalFormFields();
-            }
-            
-        }, { immediate: true });
         const emitUpdatedFields = () => {
             emit('update-form', formFields.value, additionalFields.value);
         };
