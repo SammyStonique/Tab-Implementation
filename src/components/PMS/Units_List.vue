@@ -197,7 +197,7 @@ export default{
                     fetchData: store.dispatch('Properties_List/fetchProperties', {company:companyID.value})
                 },
                 { type: 'text', name: 'unit_number',label: "Unit No.", value: selectedUnit.value?.unit_number || '', required: true },
-                { type: 'number', name: 'market_rent',label: "Rent Amount", value: selectedUnit.value?.market_rent || '', required: true },
+                { type: 'number', name: 'market_rent',label: "Rent Amount", value: selectedUnit.value?.market_rent || 0, required: true },
                 { type: 'dropdown', name: 'charge_frequency',label: "Charge Frequency", value: selectedUnit.value?.charge_frequency || '', placeholder: "", required: false, options: [{ text: 'One Off', value: 'One Off' }, { text: 'Weekly', value: 'Weekly' }, { text: 'Monthly', value: 'Monthly' }, { text: 'Quartely', value: 'Quartely' }, { text: 'Semi-Annually', value: 'Semi-Annually' }, { text: 'Annually', value: 'Annually' }] },
                 { type: 'dropdown', name: 'owner_occupied',label: "Owner Occupied", value: selectedUnit.value?.owner_occupied || 'False', placeholder: "", required: false, options: [{ text: 'Yes', value: 'True' }, { text: 'No', value: 'False' }] },
                 { type: 'dropdown', name: 'unit_type',label: "Unit Type", value: selectedUnit.value?.unit_type || '', placeholder: "", required: false, options: [{ text: 'Studio', value: 'Studio' }, { text: 'Bedsitter', value: 'Bedsitter' }, { text: 'Bedroomed', value: 'Bedroomed' },{ text: 'Shop', value: 'Shop' }, { text: 'Office', value: 'Office' }, { text: 'Other', value: 'Other' }] },                

@@ -267,6 +267,16 @@ const actions = {
     })
     
   },
+  async createTenantVariation({ commit,state }, formData) {
+    return axios.post('api/v1/create-rent-variation/', formData)
+    .then((response)=>{
+      return response;
+    })
+    .catch((error)=>{
+      console.log(error.message);
+      throw error;
+    })
+  },
   fetchTenantVariations({ commit,state }, formData) {
     axios.post(`api/v1/get-rent-variations/`,formData)
     .then((response)=>{

@@ -73,7 +73,7 @@
                                         <td></td>
                                         <td></td>
                                         <td class="font-bold">Occupied Unit(s):</td>
-                                        <td>{{ property_units }}</td>
+                                        <td>{{ tenantLease.unit }}</td>
                                     </tr>
                                     <tr class="text-left">
                                         <td class="font-bold pt-3">Agreement Date:</td>
@@ -166,8 +166,19 @@
                     <div v-show="activeTab == 4">                   
                         <DynamicTable :key="scheduleTableKey" :rightsModule="rightsModule" :columns="scheduleColumns" :rows="scheduleRows" :idField="idFieldSchedule" :actions="actionsSchedule" @action-click="scheduleActionClick" />
                     </div>  
-                    <div v-show="activeTab == 5">                   
+                    <div v-show="activeTab == 5">
+                        <div class="flex mb-1.5">
+                            <button @click="reviewRent" :class="{ 'disabled': isDisabled('Review Tenant Rent') }" class="rounded bg-green-400 text-sm  text-white px-2 py-1.5"><i class="fa fa-check-circle" aria-hidden="true"></i>Review</button>
+                        </div>                   
                         <DynamicTable :key="variationTableKey" :rightsModule="rightsModule" :columns="variationColumns" :rows="variationRows" :idField="idFieldVariation" :actions="actionsVariation" @action-click="variationActionClick" />
+                        <MovableModal v-model:visible="reviewModalVisible" :title="reviewTitle" :modal_top="modal_top" :modal_left="modal_left" :modal_width="modal_width"
+                            :loader="review_modal_loader" @showLoader="showReviewModalLoader" @hideLoader="hideReviewModalLoader" @closeModal="closeReviewModal"
+                        >
+                            <DynamicForm 
+                                :fields="additionalFields1" :flex_basis="flex_basis" :flex_basis_percentage="flex_basis_percentage" 
+                                :displayButtons="displayButtons" @handleSubmit="reviewTenantRent" @handleReset="handleReviewReset"
+                            />
+                        </MovableModal>
                     </div>    
                 </div>
             </div>
@@ -213,11 +224,13 @@ export default defineComponent({
         const util_modal_loader = ref('none');
         const void_modal_loader = ref('none');
         const tnt_modal_loader = ref('none');
+        const review_modal_loader = ref('none');
         const rightsModule = ref('PMS');
         const allowedRights = ref([]);
         const voidModalVisible = ref(false);
         const depModalVisible = ref(false);
         const tntModalVisible = ref(false);
+        const reviewModalVisible = ref(false);
         const depositID = ref('');
         const utilModalVisible = ref(false);
         const utilityID = ref('');
@@ -227,6 +240,7 @@ export default defineComponent({
         const utilityTitle = ref('Utility Details');
         const voidTitle = ref('Void Utility');
         const tntTitle = ref('Tenant Biodata');
+        const reviewTitle = ref('Revision Details');
         const utilityFormData = ref(null);
         const flex_basis = ref('');
         const flex_basis_percentage = ref('');
@@ -343,8 +357,11 @@ export default defineComponent({
         const variationColumns = ref([
             {type: "checkbox"},
             {label: "Variation Type", key: "variation_type", type: "text", editable: false},
+            {label: "From Date", key: "from_date", type: "text", editable: false},
+            {label: "To Date", key: "to_date", type: "text", editable: false},
             {label: "Variation Mode", key:"variation_mode", type: "text", editable: false},
             {label: "Variation Value", key: "variation_value", type: "text", editable: false},
+            {label: "Amount", key: "rent_amount", type: "text", editable: false},
         ]);
 
         const actionsVariation = ref([
@@ -595,10 +612,17 @@ export default defineComponent({
         const variationActionClick = async(rowIndex, action, row) =>{
             if( action === 'reset-schedules'){
                 showLoader();
+                const fromDate = row['from_date'];
+                const toDate = row['to_date'];
+                const rentAmount = row['rent_amount'];
                 const variationID = row['variation_id'];
+
                 let formData = {
                     company: companyID.value,
-                    variation: variationID
+                    variation: variationID,
+                    from_date: fromDate,
+                    to_date: toDate,
+                    rent_amount: rentAmount
                 }
                 try{
                     const response = await store.dispatch('Active_Tenants/resetSchedules',formData)
@@ -928,6 +952,76 @@ export default defineComponent({
             void_date.value = '';
             utilityFormData.value = null;
         };
+        const additionalFields1 = ref([
+            { type: 'date', name: 'from_date',label: "From Date", value: '', required: true },
+            { type: 'date', name: 'to_date',label: "To Date", value: '', required: true },
+            { type: 'number', name: 'rent_amount',label: "New Rent", value: 0, required: true },      
+        ]);
+        const handleReviewReset = () =>{
+            for(let i=0; i < additionalFields1.value.length; i++){
+                additionalFields1.value[i].value = '';
+            }
+            
+        }
+        const showReviewModalLoader = () =>{
+            review_modal_loader.value = "block";
+        }
+        const hideReviewModalLoader = () =>{
+            review_modal_loader.value = "none";
+        }
+        
+        const reviewRent = async() =>{
+            reviewModalVisible.value = true;
+            flex_basis.value = '1/2';
+            flex_basis_percentage.value = '50';
+        };
+        const reviewTenantRent = async() =>{
+            showReviewModalLoader();
+            let formData = {
+                variation_type: "Review",
+                variation_mode: null,
+                variation_value: 0,
+                rent_amount: additionalFields1.value[2].value,
+                from_date: additionalFields1.value[0].value,
+                to_date: additionalFields1.value[1].value,
+                frequency: null,
+                frequency_id: null,
+                tenant_lease: tenantLease.value.tenant_lease_id,
+                tenant_lease_id: tenantLease.value.tenant_lease_id,
+                company: companyID.value
+            }
+
+            errors.value = [];
+            for(let i=1; i < additionalFields1.value.length; i++){
+                if(additionalFields1.value[i].value =='' && additionalFields1.value[i].required == true){
+                    errors.value.push(additionalFields1.value[i].label);
+                }
+            }
+            if(errors.value.length){
+                toast.error('Fill In Required Fields');
+                hideReviewModalLoader();
+            }else{
+                try {
+                    const response = await store.dispatch('Active_Tenants/createTenantVariation', formData);
+                    if (response && response.status === 200) {
+                        hideReviewModalLoader();
+                        toast.success('Rent Review created successfully!');
+                        handleReviewReset();
+                        reviewModalVisible.value = false;
+                    } else {
+                        toast.error('An error occurred while creating the Rent Review.');
+                    }
+                } catch (error) {
+                    console.error(error.message);
+                    toast.error('Failed to create Rent Review: ' + error.message);
+                } finally {
+                    hideReviewModalLoader();
+                }
+            }
+        }
+        const closeReviewModal = () =>{
+            reviewModalVisible.value = false;
+        };
         const fetchEnabledRights = () =>{
             allowedRights.value = [];
             let formData = {
@@ -962,7 +1056,8 @@ export default defineComponent({
             tnt_modal_width,modal_top,tnt_modal_left, modal_left, modal_width, showDepModalLoader, hideDepModalLoader, showUtilModalLoader, hideUtilModalLoader, handleDepReset,showTntModalLoader,
             flex_basis, flex_basis_percentage, closeDepModal, closeUtilModal, handleUtilReset, createTenantDeposit, createTenantUtility, utilityActionClick, closeTntModal,handleTntReset,
             void_date, voidTitle, void_modal_loader, voidModalVisible, void_modal_width, showVoidModalLoader, hideVoidModalLoader, closeVoidModal, voidUtility,hideTntModalLoader,updateTenantDetails,
-            tenantFormFields,tenantAdditionalFields,updateTenantFormFields,editTenantDetails,rightsModule,isDisabled
+            tenantFormFields,tenantAdditionalFields,updateTenantFormFields,editTenantDetails,rightsModule,isDisabled,
+            reviewModalVisible,review_modal_loader,reviewTitle,reviewRent,reviewTenantRent,showReviewModalLoader,hideReviewModalLoader,closeReviewModal,handleReviewReset,additionalFields1
         }
     }
 })

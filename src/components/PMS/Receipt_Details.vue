@@ -212,13 +212,13 @@ export default defineComponent({
                 {
                     type:'search-dropdown', label:"Property", value: propertyID.value, componentKey: propComponentKey,
                     selectOptions: propertyArray, optionSelected: handleSelectedProperty, required: false,
-                    searchPlaceholder: 'Select Property...', dropdownWidth: '450px', updateValue: "",
+                    searchPlaceholder: 'Select Property...', dropdownWidth: '500px', updateValue: "",
                     fetchData: fetchProperties(), clearSearch: clearSelectedProperty()            
                 },
                 {
                     type:'search-dropdown', label:"Tenant", value: tenantID.value, componentKey: tntComponentKey,
                     selectOptions: tenantArray, optionSelected: handleSelectedTenant, required: true,
-                    searchPlaceholder: 'Select Tenant...', dropdownWidth: '450px', updateValue: "",
+                    searchPlaceholder: 'Select Tenant...', dropdownWidth: '500px', updateValue: "",
                     fetchData: fetchTenants(), clearSearch: clearSelectedTenant()  
                 },
                 { type: 'date', name: 'issue_date',label: "Recording Date", value: formatDate(current_date), required: true, maxDate: formatDate(current_date) },

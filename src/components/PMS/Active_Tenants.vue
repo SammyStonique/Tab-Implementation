@@ -103,7 +103,7 @@ export default{
             {label: "Property", key:"property_name"},
             {label: "Unit", key:"unit_number"},
             {label: "Rent Amnt", key:"current_rent"},
-            {label: "Balance", key:"rent_balance"},
+            {label: "Balance", key:"running_balance", type: "number", textColor: "black"},
         ])
         const actions = ref([
             {name: 'edit', icon: 'fa fa-edit', title: 'Edit Tenant', rightName: 'Editing Tenants'},
