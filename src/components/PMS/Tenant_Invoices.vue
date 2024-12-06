@@ -192,13 +192,13 @@ export default{
                 {
                     type:'search-dropdown', label:"Property", value: propertyID.value, componentKey: propComponentKey,
                     selectOptions: propertyArray, optionSelected: handleSelectedProperty, required: false,
-                    searchPlaceholder: 'Select Property...', dropdownWidth: '400px', updateValue: "",
+                    searchPlaceholder: 'Select Property...', dropdownWidth: '500px', updateValue: "",
                     fetchData: fetchProperties(), clearSearch: clearSelectedProperty()            
                 },
                 {
                     type:'search-dropdown', label:"Tenant", value: tenantID.value, componentKey: tntComponentKey,
                     selectOptions: tenantArray, optionSelected: handleSelectedTenant, required: false,
-                    searchPlaceholder: 'Select Tenant...', dropdownWidth: '400px', updateValue: "",
+                    searchPlaceholder: 'Select Tenant...', dropdownWidth: '500px', updateValue: "",
                     fetchData: fetchTenants(), clearSearch: clearSelectedTenant()            
                 },
                 { type: 'dropdown', name: 'period_month',label: "Month", value: '', placeholder: "", required: true, options: [{ text: 'January', value: 'January' }, { text: 'February', value: 'February' },{ text: 'March', value: 'March' }, { text: 'April', value: 'April' },{ text: 'May', value: 'May' }, { text: 'June', value: 'June' },{ text: 'July', value: 'July' }, { text: 'August', value: 'August' },{ text: 'September', value: 'September' }, { text: 'October', value: 'October' },{ text: 'November', value: 'November' }, { text: 'December', value: 'December' }] },

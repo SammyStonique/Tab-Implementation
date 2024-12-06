@@ -89,7 +89,7 @@ import Swal from 'sweetalert2';
 
 
 export default{
-    name: 'Users',
+    name: 'System_Users',
     components:{
         PageComponent,MovableModal,DynamicTable,SearchableDropdown
     },

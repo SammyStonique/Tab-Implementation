@@ -73,12 +73,7 @@
                     </div>
                 </div>
             </div>
-            <!-- <div class="web-links py-1.5 px-2.5 w-32 h-full hover:bg-slate-500 hover:rounded">
-                    <button class="flex" @click="openPage({'PMS':'Doctors'})">
-                        <i class="fa fa-user-md pt-2 mr-2" aria-hidden="true"></i>
-                        <p class="pt-1.5">Doctors</p>
-                    </button>
-            </div> -->
+
             <div class="web-links dropdown w-32">
                 <div class="py-1.5 px-2.5 h-full hover:bg-slate-500 hover:rounded">
                     <button class="flex w-full" @click="showTenantsDropdown">
@@ -91,6 +86,20 @@
                         <button class="flex text-sm w-full" @click="openPage({'PMS':'Active_Tenants'})">
                             <i class="fa fa-universal-access pt-2 mr-2" aria-hidden="true"></i>
                             <p class="">Tenants List</p>
+                        </button>
+    
+                    </div>
+                    <div class="py-2 px-3 pl-4 w-full hover:bg-slate-500 hover:w-full">
+                        <button class="flex text-sm w-full" @click="openPage({'PMS':'Terminated_Leases'})">
+                            <i class="fa fa-times pt-2 mr-2" aria-hidden="true"></i>
+                            <p class="">Terminated Leases</p>
+                        </button>
+    
+                    </div>
+                    <div class="py-2 px-3 pl-4 w-full hover:bg-slate-500 hover:w-full">
+                        <button class="flex text-sm w-full" @click="openPage({'PMS':'Tenant_Move_Out'})">
+                            <i class="fa fa-door-open pt-2 mr-2" aria-hidden="true"></i>
+                            <p class="">Tenant Move Out</p>
                         </button>
     
                     </div>
@@ -209,19 +218,25 @@
                     </div>
                     <div class="py-2 px-3 pl-4 w-full hover:bg-slate-500 hover:w-full">
                         <button class="flex text-sm" @click="openPage({'PMS':'Variation_Periods'})">
-                        <i class="fa fa-object-ungroup pt-2 mr-2" aria-hidden="true"></i>
+                        <i class="fa fa-layer-group pt-2 mr-2" aria-hidden="true"></i>
                         <p class="">Variation Period</p>
                         </button>
                     </div>
                     <div class="py-2 px-3 pl-4 w-full hover:bg-slate-500 hover:w-full">
                         <button class="flex text-sm" @click="openPage({'PMS':'Meter_Setup'})">
-                        <i class="fa fa-object-ungroup pt-2 mr-2" aria-hidden="true"></i>
+                        <i class="fa fa-sliders-h pt-2 mr-2" aria-hidden="true"></i>
                         <p class="">Meter Reading Setup</p>
                         </button>
                     </div>
                     <div class="py-2 px-3 pl-4 w-full hover:bg-slate-500 hover:w-full">
+                        <button class="flex text-sm" @click="openPage({'PMS':'Exit_Charges'})">
+                        <i class="fa fa-door-open pt-2 mr-2" aria-hidden="true"></i>
+                        <p class="">Exit Charges</p>
+                        </button>
+                    </div>
+                    <div class="py-2 px-3 pl-4 w-full hover:bg-slate-500 hover:w-full">
                         <button class="flex text-sm" @click="openPage({'PMS':'Default_Settings'})">
-                        <i class="fa fa-object-ungroup pt-2 mr-2" aria-hidden="true"></i>
+                        <i class="fa fa-link pt-2 mr-2" aria-hidden="true"></i>
                         <p class="">Posting Acc. Mapping</p>
                         </button>
                     </div>

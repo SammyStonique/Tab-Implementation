@@ -15,6 +15,7 @@ import Zones from './PMS/Zones';
 import Landlords_List from './PMS/Landlords_List';
 import Units_List from './PMS/Units_List';
 import Active_Tenants from './PMS/Active_Tenants';
+import Terminated_Leases from './PMS/Terminated_Leases';
 import Utilities from './PMS/Utilities';
 import Security_Deposits from './PMS/Security_Deposits';
 import Variation_Periods from './PMS/Variation_Periods';
@@ -27,6 +28,7 @@ import Statement_Transactions from './PMS/Statement_Transactions';
 import Property_Statements from './PMS/Property_Statements';
 import Tenant_Arrears from './PMS/Tenant_Arrears';
 import Lease_Fees from './PMS/Lease_Fees';
+import Exit_Charges from './PMS/Exit_Charges';
 
 import Client_Categories from './FA/Client_Categories';
 import Currencies from './FA/Currencies';
@@ -67,8 +69,8 @@ export default createStore({
     userData,
     Appointments,Client_Categories,Departments,Patients_List,Medical_Fees,Doctors,
     
-    Properties_List, Zones, Landlords_List, Units_List, Active_Tenants, Utilities,Security_Deposits,Variation_Periods, Tenant_Deposits,
-    Meter_Setup, Meter_Readings,Tenant_Prepayments,Prepayment_Allocations,Statement_Transactions,Property_Statements,Tenant_Arrears,Lease_Fees,
+    Properties_List, Zones, Landlords_List, Units_List, Active_Tenants, Utilities,Security_Deposits,Variation_Periods, Tenant_Deposits,Terminated_Leases,
+    Meter_Setup, Meter_Readings,Tenant_Prepayments,Prepayment_Allocations,Statement_Transactions,Property_Statements,Tenant_Arrears,Lease_Fees,Exit_Charges,
 
     Item_Categories,Items_Catalog,Uom,Retail_Outlets,Item_Location,Outlet_Counters,Direct_Sales,Counter_Channels,Direct_Purchases,
     Stock_Adjustments,Stock_Transfers,

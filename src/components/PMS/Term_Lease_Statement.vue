@@ -119,105 +119,20 @@
                                 </table>
                             </div>
                         </div>
-                        <div class="flex">
-                            <div class="basis-1/2 mb-1.5 mt-6">
-                                <button @click="editTenantDetails" :class="{ 'disabled': isDisabled('Editing Tenants') }" class="rounded bg-green-400 text-sm  text-white px-2 py-1.5"><i class="fa fa-edit" aria-hidden="true"></i> Edit Biodata</button>
-                            </div>
-                            <div class="basis-1/2 mb-1.5 mt-6">
-                                <button @click="terminateLease" :class="{ 'disabled': isDisabled('Terminate Lease') }" class="rounded bg-red-400 text-sm  text-white px-2 py-1.5"><i class="fa fa-times" aria-hidden="true"></i> Terminate Lease</button>
-                            </div>
-                        </div>
                     </div>
                     <div v-if="activeTab == 1">
                         <DynamicTable :key="statementTableKey" :rightsModule="rightsModule" :columns="statementColumns" :rows="statementRows" :idField="idFieldStatement" :showActions="showActions" :actions="actionsStatement"/>
-                    </div>          
-                    <div v-if="activeTab == 2"> 
-                        <div class="flex mb-1.5">
-                            <button @click="addNewDeposit" :class="{ 'disabled': isDisabled('Adding Tenant Deposit') }" class="rounded bg-green-400 text-sm  text-white px-2 py-1.5"><i class="fa fa-plus" aria-hidden="true"></i>New Deposit</button>
-                        </div>                    
-                        <DynamicTable :key="tableKey" :rightsModule="rightsModule" :columns="depositColumns" :rows="computedDepositRows" :idField="idFieldDeposit" :actions="actionsDeposit" @action-click="depositActionClick" />
-                        <MovableModal v-model:visible="depModalVisible" :title="depositTitle" :modal_top="modal_top" :modal_left="modal_left" :modal_width="modal_width"
-                            :loader="dep_modal_loader" @showLoader="showDepModalLoader" @hideLoader="hideDepModalLoader" @closeModal="closeDepModal"
-                        >
-                            <DynamicForm 
-                                :fields="formFields" :flex_basis="flex_basis" :flex_basis_percentage="flex_basis_percentage" 
-                                :displayButtons="displayButtons" @handleSubmit="createTenantDeposit" @handleReset="handleDepReset"
-                            />
-                        </MovableModal>
-                    </div>
-                    <div v-show="activeTab == 3"> 
-                        <div class="flex mb-1.5">
-                            <button @click="addNewUtility" :class="{ 'disabled': isDisabled('Adding Tenant Utility') }" class="rounded bg-green-400 text-sm  text-white px-2 py-1.5"><i class="fa fa-plus" aria-hidden="true"></i>New Utility</button>
-                        </div>                   
-                        <DynamicTable :key="utilityTableKey" :rightsModule="rightsModule" :columns="utilityColumns" :rows="computedUtilityRows" :idField="idFieldUtility" :actions="actionsUtility" @action-click="utilityActionClick" />
-                        <MovableModal v-model:visible="utilModalVisible" :title="utilityTitle" :modal_top="modal_top" :modal_left="modal_left" :modal_width="modal_width"
-                            :loader="util_modal_loader" @showLoader="showUtilModalLoader" @hideLoader="hideUtilModalLoader" @closeModal="closeUtilModal"
-                        >
-                            <DynamicForm 
-                                :fields="additionalFields" :flex_basis="flex_basis" :flex_basis_percentage="flex_basis_percentage" 
-                                :displayButtons="displayButtons" @handleSubmit="createTenantUtility" @handleReset="handleUtilReset"
-                            />
-                        </MovableModal>
-                        <MovableModal v-model:visible="voidModalVisible" :title="voidTitle" :modal_top="modal_top" :modal_left="modal_left" :modal_width="void_modal_width"
-                            :loader="void_modal_loader" @showLoader="showVoidModalLoader" @hideLoader="hideVoidModalLoader" @closeModal="closeVoidModal"
-                        >
-                            <div class="p-4 mb-3">
-                                <label for="">Date:<em class="text-red-600">*</em></label><br />
-                                <input v-model="void_date" type="date" class="`bg-slate-50 w-56 rounded pl-3 border border-gray-400 text-base w-full`"/>
-                            </div>
-                            <button @click="voidUtility" class="rounded bg-green-400 text-sm mr-2  text-white px-2 py-1.5"><i class="fa fa-check-circle text-xs mr-1.5" aria-hidden="true"></i>Void</button>
-                        </MovableModal>
-                    </div>
-                    <div v-show="activeTab == 4">                   
-                        <DynamicTable :key="scheduleTableKey" :rightsModule="rightsModule" :columns="scheduleColumns" :rows="scheduleRows" :idField="idFieldSchedule" :actions="actionsSchedule" @action-click="scheduleActionClick" />
-                    </div>  
-                    <div v-show="activeTab == 5">
-                        <div class="flex mb-1.5">
-                            <button @click="reviewRent" :class="{ 'disabled': isDisabled('Review Tenant Rent') }" class="rounded bg-green-400 text-sm  text-white px-2 py-1.5"><i class="fa fa-check-circle" aria-hidden="true"></i>Review</button>
-                        </div>                   
-                        <DynamicTable :key="variationTableKey" :rightsModule="rightsModule" :columns="variationColumns" :rows="variationRows" :idField="idFieldVariation" :actions="actionsVariation" @action-click="variationActionClick" />
-                        <MovableModal v-model:visible="reviewModalVisible" :title="reviewTitle" :modal_top="modal_top" :modal_left="modal_left" :modal_width="modal_width"
-                            :loader="review_modal_loader" @showLoader="showReviewModalLoader" @hideLoader="hideReviewModalLoader" @closeModal="closeReviewModal"
-                        >
-                            <DynamicForm 
-                                :fields="additionalFields1" :flex_basis="flex_basis" :flex_basis_percentage="flex_basis_percentage" 
-                                :displayButtons="displayButtons" @handleSubmit="reviewTenantRent" @handleReset="handleReviewReset"
-                            />
-                        </MovableModal>
-                    </div>    
+                    </div>              
                 </div>
             </div>
         </template>
     </PageStyleComponent>
-    <MovableModal v-model:visible="tntModalVisible" :title="tntTitle" :modal_top="modal_top" :modal_left="tnt_modal_left" :modal_width="tnt_modal_width"
-        :loader="tnt_modal_loader" @showLoader="showTntModalLoader" @hideLoader="hideTntModalLoader" @closeModal="closeTntModal">
-        <Tenant_Biodata
-            :formFields="tenantFormFields"
-            :additionalFields="tenantAdditionalFields" 
-            @update-form="updateTenantFormFields"
-            @reset-tenant-details="handleTntReset"
-        />
-        <div class="flex-1 px-2">
-            <button @click="updateTenantDetails" class="rounded bg-green-400 text-sm mr-2 w-24 text-white px-2 py-1.5"><i class="fa fa-check-circle text-xs mr-1.5" aria-hidden="true"></i>Save</button>
-            <button @click="handleTntReset" class="rounded bg-green-400 text-sm mr-2 w-24 text-white px-2 py-1.5"><i class="fa fa-refresh text-xs mr-1.5" aria-hidden="true"></i>Reset</button>
-        </div>
-    </MovableModal>
-    <MovableModal v-model:visible="termModalVisible" :title="termTitle" :modal_top="modal_top" :modal_left="modal_left" :modal_width="modal_width"
-        :loader="term_modal_loader" @showLoader="showTermModalLoader" @hideLoader="hideTermModalLoader" @closeModal="closeTermModal">
-        <DynamicForm 
-            :fields="additionalFields2" :flex_basis="flex_basis" :flex_basis_percentage="flex_basis_percentage" 
-            :displayButtons="displayButtons" @handleSubmit="terminateTenantLease" @handleReset="handleTermReset"
-        />
-    </MovableModal>
 </template>
 
 <script>
 import { defineComponent, ref, onBeforeMount, onMounted, computed, watch, reactive } from 'vue';
 import PageStyleComponent from '../PageStyleComponent.vue';
 import DynamicTable from '@/components/DynamicTable.vue';
-import DynamicForm from '../NewDynamicForm.vue';
-import MovableModal from '@/components/MovableModal.vue';
-import Tenant_Biodata from '@/components/PMS/Tenant_Biodata.vue';
 import { useStore } from "vuex";
 import { useToast } from "vue-toastification";
 import { useDateFormatter } from '@/composables/DateFormatter';
@@ -226,7 +141,7 @@ import axios from 'axios';
 export default defineComponent({
     name: 'Tenant_Statement',
     components:{
-        PageStyleComponent, DynamicTable, MovableModal, DynamicForm,Tenant_Biodata
+        PageStyleComponent, DynamicTable,
     },
     setup(props,{emit}){
         const store = useStore();
@@ -275,7 +190,7 @@ export default defineComponent({
         const depositArray = computed(() => store.state.Security_Deposits.depositArr);
         const utilityArray = computed(() => store.state.Utilities.utilityArr);
         const taxArray = computed(() => store.state.Taxes.taxArr);
-        const tabs = ref(['Tenant Details','Tenant Statement','Tenant Deposits','Tenant Utilities','Rent Schedules','Rent Variation']);
+        const tabs = ref(['Tenant Details','Tenant Statement']);
         const activeTab = ref(0);
         const mainComponentKey = ref(0);
         const depComponentKey = ref(0);
@@ -296,14 +211,14 @@ export default defineComponent({
         const idFieldStatement = ref('');
         const computedDepositRows = computed(()=> store.state.Security_Deposits.tenantDeposits);
         const computedUtilityRows = computed(()=> store.state.Utilities.tenantUtilities);
-        const scheduleRows = computed(()=> store.state.Active_Tenants.rentSchedules);
+        const scheduleRows = computed(()=> store.state.Terminated_Leases.rentSchedules);
         const statementRows = computed(()=> store.state.Journals.jnlArray);
-        const variationRows = computed(()=> store.state.Active_Tenants.tenantVariations);
-        const selectedTenant = computed(()=> store.state.Active_Tenants.selectedTenant);
-        const tenantLease = computed(()=> store.state.Active_Tenants.tenantLease);
-        const tenantDetails = computed(()=> store.state.Active_Tenants.tenantDetails);
-        const tenantCurrency = computed(()=> store.state.Active_Tenants.tenantCurrency);
-        const tenantProperty = computed(()=> store.state.Active_Tenants.tenantProperty);
+        const variationRows = computed(()=> store.state.Terminated_Leases.tenantVariations);
+        const selectedTenant = computed(()=> store.state.Terminated_Leases.selectedTenant);
+        const tenantLease = computed(()=> store.state.Terminated_Leases.tenantLease);
+        const tenantDetails = computed(()=> store.state.Terminated_Leases.tenantDetails);
+        const tenantCurrency = computed(()=> store.state.Terminated_Leases.tenantCurrency);
+        const tenantProperty = computed(()=> store.state.Terminated_Leases.tenantProperty);
         const depositColumns = ref([
             {type: "checkbox"},
             {label: "Deposit Name", key:"security_deposit.name", type: "text", editable: false},
@@ -422,7 +337,7 @@ export default defineComponent({
             }
             else if( index == 4){
                 activeTab.value = index;
-                await store.dispatch('Active_Tenants/fetchRentSchedules',formData)
+                await store.dispatch('Terminated_Leases/fetchRentSchedules',formData)
                 .then(()=>{
                     hideLoader();
                 })
@@ -430,7 +345,7 @@ export default defineComponent({
             }
             else if( index == 5){
                 activeTab.value = index;
-                await store.dispatch('Active_Tenants/fetchTenantVariations',formData)
+                await store.dispatch('Terminated_Leases/fetchTenantVariations',formData)
                 .then(()=>{
                     hideLoader();
                 })
@@ -457,7 +372,7 @@ export default defineComponent({
                         tenant_deposit: depositID
                     }
                     try{
-                        const response = await store.dispatch('Active_Tenants/bookDepositInvoice',formData)
+                        const response = await store.dispatch('Terminated_Leases/bookDepositInvoice',formData)
                         if(response && response.status == 200){
                             mainComponentKey.value += 1;
                         }
@@ -476,7 +391,7 @@ export default defineComponent({
                         tenant_deposit: depositID
                     }
                     try{
-                        const response = await store.dispatch('Active_Tenants/cancelDepositBooking',formData)
+                        const response = await store.dispatch('Terminated_Leases/cancelDepositBooking',formData)
                         if(response && response.status == 200){
                             mainComponentKey.value += 1;
                         }
@@ -497,7 +412,7 @@ export default defineComponent({
                 if(row['posted'] == 'Yes'){
                     toast.error("Cannot Remove Posted Deposit")
                 }else{
-                    await store.dispatch('Active_Tenants/deleteTenantDeposit',formData)
+                    await store.dispatch('Terminated_Leases/deleteTenantDeposit',formData)
                 }
                 
             }
@@ -541,7 +456,7 @@ export default defineComponent({
                         from_date: row['from_date'],
                         to_date: row['tenant']['lease_end_date']
                     }
-                    await store.dispatch('Active_Tenants/activateTenantUtility',formData)
+                    await store.dispatch('Terminated_Leases/activateTenantUtility',formData)
                 }else{
                     toast.error("Utility Already Active")
                 }
@@ -552,7 +467,7 @@ export default defineComponent({
                     company: companyID.value,
                     tenant_utility: tenant_utility
                 }
-                await store.dispatch('Active_Tenants/deleteTenantUtility',formData)
+                await store.dispatch('Terminated_Leases/deleteTenantUtility',formData)
             }
         }
 
@@ -561,7 +476,7 @@ export default defineComponent({
             if(void_date.value != ''){
                 utilityFormData.value['to_date'] = void_date.value;
                 try{
-                    const response = await store.dispatch('Active_Tenants/voidTenantUtility',utilityFormData.value)
+                    const response = await store.dispatch('Terminated_Leases/voidTenantUtility',utilityFormData.value)
                     if(response && response.status == 200){
                         toast.success("Utility Voided Succesfully")
                         mainComponentKey.value += 1;
@@ -589,7 +504,7 @@ export default defineComponent({
                         rent_schedule: scheduleID
                     }
                     try{
-                        const response = await store.dispatch('Active_Tenants/bookRentInvoice',formData)
+                        const response = await store.dispatch('Terminated_Leases/bookRentInvoice',formData)
                         if(response && response.status == 200){
                             mainComponentKey.value += 1;
                         }
@@ -608,7 +523,7 @@ export default defineComponent({
                         rent_schedule: scheduleID
                     }
                     try{
-                        const response = await store.dispatch('Active_Tenants/cancelInvoiceBooking',formData)
+                        const response = await store.dispatch('Terminated_Leases/cancelInvoiceBooking',formData)
                         if(response && response.status == 200){
                             mainComponentKey.value += 1;
                         }
@@ -626,7 +541,7 @@ export default defineComponent({
                     company: companyID.value,
                     rent_schedule: scheduleID
                 }
-                await store.dispatch('Active_Tenants/deleteTenant',formData)
+                await store.dispatch('Terminated_Leases/deleteTenant',formData)
             }
         }
         const variationActionClick = async(rowIndex, action, row) =>{
@@ -645,7 +560,7 @@ export default defineComponent({
                     rent_amount: rentAmount
                 }
                 try{
-                    const response = await store.dispatch('Active_Tenants/resetSchedules',formData)
+                    const response = await store.dispatch('Terminated_Leases/resetSchedules',formData)
                     if(response && response.status === 200){
                         mainComponentKey.value += 1
                         toast.success("Success")
@@ -723,7 +638,7 @@ export default defineComponent({
                 company: companyID.value,
                 tenant: tenantDetails.value.tenant_id
             }
-            await store.dispatch('Active_Tenants/fetchTenant',formData)
+            await store.dispatch('Terminated_Leases/fetchTenant',formData)
             tntModalVisible.value = true;
         };
         const updateTenantDetails = async() =>{
@@ -760,7 +675,7 @@ export default defineComponent({
                 hideTntModalLoader();
             }else{
                 try {
-                    const response = await store.dispatch('Active_Tenants/updateTenant', formData);
+                    const response = await store.dispatch('Terminated_Leases/updateTenant', formData);
                     if (response && response.status === 200) {
                         hideTntModalLoader();
                         toast.success('Tenant Biodata updated successfully!');
@@ -830,7 +745,7 @@ export default defineComponent({
                 hideDepModalLoader();
             }else{
                 try {
-                    const response = await store.dispatch('Active_Tenants/createTenantDeposit', formData);
+                    const response = await store.dispatch('Terminated_Leases/createTenantDeposit', formData);
                     if (response && response.status === 200) {
                         hideDepModalLoader();
                         toast.success('Security Deposit added successfully!');
@@ -938,7 +853,7 @@ export default defineComponent({
                 hideUtilModalLoader();
             }else{
                 try {
-                    const response = await store.dispatch('Active_Tenants/createTenantUtility', formData);
+                    const response = await store.dispatch('Terminated_Leases/createTenantUtility', formData);
                     if (response && response.status === 200) {
                         hideUtilModalLoader();
                         toast.success('Utility added successfully!');
@@ -1024,7 +939,7 @@ export default defineComponent({
                 hideReviewModalLoader();
             }else{
                 try {
-                    const response = await store.dispatch('Active_Tenants/createTenantVariation', formData);
+                    const response = await store.dispatch('Terminated_Leases/createTenantVariation', formData);
                     if (response && response.status === 200) {
                         hideReviewModalLoader();
                         toast.success('Rent Review created successfully!');
@@ -1084,7 +999,6 @@ export default defineComponent({
             showTermModalLoader();
             let formData = {
                 date: additionalFields2.value[0].value,
-                deposit_held: additionalFields2.value[1].value,
                 tenant_lease: tenantLease.value.tenant_lease_id,
                 company: companyID.value
             }
@@ -1100,7 +1014,7 @@ export default defineComponent({
                 hideTermModalLoader();
             }else{
                 try {
-                    const response = await store.dispatch('Active_Tenants/terminateTenantLease', formData);
+                    const response = await store.dispatch('Terminated_Leases/terminateTenantLease', formData);
                     if (response && response.status === 200) {
                         hideTermModalLoader();
                         toast.success('Termination successful!');

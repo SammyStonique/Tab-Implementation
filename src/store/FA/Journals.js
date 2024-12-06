@@ -694,7 +694,7 @@ const actions = {
               title: "Debit Note Has A Prepayment Allocation",
               icon: "warning",
             });
-          }                   
+          }                  
         })
         .catch((error)=>{
           console.log(error.message);

@@ -37,9 +37,11 @@ import Units_List from '@/components/PMS/Units_List.vue';
 import Utilities from '@/components/PMS/Utilities.vue';
 import Security_Deposits from '@/components/PMS/Security_Deposits.vue';
 import Active_Tenants from '@/components/PMS/Active_Tenants.vue';
+import Terminated_Leases from '@/components/PMS/Terminated_Leases.vue';
 import Tenant_Details from '@/components/PMS/Tenant_Details.vue';
 import Variation_Periods from '@/components/PMS/Variation_Periods.vue';
 import Tenant_Statement from '@/components/PMS/Tenant_Statement.vue';
+import Term_Lease_Statement from '@/components/PMS/Term_Lease_Statement.vue';
 import Tenant_Deposits from '@/components/PMS/Tenant_Deposits.vue';
 import Meter_Setup from '@/components/PMS/Meter_Setup.vue';
 import Meter_Readings from '@/components/PMS/Meter_Readings.vue';
@@ -58,6 +60,8 @@ import Debit_Notes from '@/components/PMS/Debit_Notes.vue';
 import Debit_Note_Details from '@/components/PMS/Debit_Note_Details.vue';
 import Credit_Notes from '@/components/PMS/Credit_Notes.vue';
 import Credit_Note_Details from '@/components/PMS/Credit_Note_Details.vue';
+import Exit_Charges from '@/components/PMS/Exit_Charges.vue';
+import Tenant_Move_Out from '@/components/PMS/Tenant_Move_Out.vue';
 
 import Default_Settings from '@/components/SET/Default_Settings.vue';
 
@@ -69,8 +73,9 @@ export default{
         Dashboard, Properties_List, Zones, Landlords_List, Units_List, Property_Details, Utilities, Security_Deposits, Active_Tenants,
         Meter_Setup, Meter_Readings,Batch_Readings,Tenant_Invoices,Tenant_Receipts,Receipt_Details, Tenant_Prepayments, Prepayment_Allocations,
         Tenant_Details, Variation_Periods, Tenant_Statement, Tenant_Deposits, Statement_Transactions, Property_Statements, Statement_Processing,
-        Tenant_Arrears,Lease_Fees,Debit_Notes,Credit_Notes,Debit_Note_Details,Credit_Note_Details,
-
+        Tenant_Arrears,Lease_Fees,Debit_Notes,Credit_Notes,Debit_Note_Details,Credit_Note_Details,Terminated_Leases,Term_Lease_Statement,
+        Exit_Charges,Tenant_Move_Out,
+        
         Default_Settings
     },
     props: {

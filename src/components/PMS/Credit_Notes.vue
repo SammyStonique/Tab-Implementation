@@ -92,7 +92,7 @@ export default{
             {label: "Tenant Name", key:"tenant_name"},
             {label: "Property Name", key:"property_name"},
             {label: "Unit", key:"unit_number"},
-            {label: "Description", key:"description"},
+            {label: "Description", key:"description",type: "text", editable: false, maxWidth:"700px"},
             {label: "Amount", key:"total_amount", type:"number"},
             {label: "Done By", key:"done_by"},
         ])
