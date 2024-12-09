@@ -111,14 +111,8 @@ export default{
         ])
         const companyID = computed(()=> store.state.userData.company_id);
         
-        const customer_code_search = computed({
-            get: () => store.state.Customers.customer_code_search,
-            set: (value) => store.commit('Customers/SET_SEARCH_FILTERS', {"customer_code_search":value}),
-        });
-        const customer_name_search = computed({
-            get: () => store.state.Customers.customer_name_search,
-            set: (value) => store.commit('Customers/SET_SEARCH_FILTERS', {"customer_name_search":value}),
-        });
+        const customer_code_search = ref("");
+        const customer_name_search = ref("");
         const fetchCategories = async() =>{
             await store.dispatch('Client_Categories/fetchClientCategories', {company:companyID.value})
         };
@@ -395,7 +389,8 @@ export default{
             searchDebtors(selectedValue.value);
         };
         const resetFilters = () =>{
-            store.commit('Customers/RESET_SEARCH_FILTERS')
+            customer_code_search.value = "";
+            customer_name_search.value = "";
             catComponentKey.value += 1;
             categorySearchID.value = "";
             searchDebtors();

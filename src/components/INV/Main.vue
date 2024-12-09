@@ -31,6 +31,7 @@ import PagesTab from '@/components/INV/PagesTab.vue';
 import Dashboard from '@/components/INV/Dashboard.vue';
 import Item_Categories from '@/components/INV/Item_Categories.vue';
 import Items_Catalog from '@/components/INV/Items_Catalog.vue';
+import Import_Item_Catalog from '@/components/INV/Import_Item_Catalog.vue';
 import Item_Details from '@/components/INV/Item_Details.vue';
 import Retail_Outlets from '@/components/INV/Retail_Outlets.vue';
 import Catalog_By_Outlet from '@/components/INV/Catalog_By_Outlet.vue';
@@ -77,7 +78,7 @@ export default{
         NavBar,
         NavBarINV,
         PagesTab,
-        Dashboard,Item_Categories,Items_Catalog,Item_Details,Retail_Outlets,Catalog_By_Outlet,Fast_Moving_Items,Item_Location,Uom,
+        Dashboard,Item_Categories,Items_Catalog,Import_Item_Catalog,Item_Details,Retail_Outlets,Catalog_By_Outlet,Fast_Moving_Items,Item_Location,Uom,
         Outlet_Counters,Direct_Sales,Sale_Details,Sale_Items,Invoices,Invoice_Details,Receipts,Receipt_Details,Customers,Bills,
         Bill_Details,Payments,Payment_Details,Vendors,Sale_Orders,Sale_Order_Details,Delivery_Orders,Delivery_Order_Details,Direct_Purchases,
         Purchase_Details,Purchase_Items,Purchase_Orders,Purchase_Order_Details,Counter_Channels,Received_Orders,Received_Order_Details,

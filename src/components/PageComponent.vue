@@ -16,6 +16,8 @@
                     @removeItem="removeItem"
                     @removeSelectedItems="removeSelectedItems"
                     @printList="printList"
+                    @printExcel="printExcel"
+                    @printCSV="printCSV"
                     :dropdownOptions="dropdownOptions"
                     @handleDynamicOption="handleDynamicOption"
                     :options="options"
@@ -202,7 +204,13 @@ export default defineComponent({
         }
         const printList = () =>{
             emit('printList');
-        }
+        };
+        const printExcel = () =>{
+            emit('printExcel');
+        };
+        const printCSV = () =>{
+            emit('printCSV');
+        };
         const loadPrev = () =>{
             emit('loadPrev')
         }
@@ -236,7 +244,7 @@ export default defineComponent({
         return{
             searchPage, resetFilters, loadPrev, loadNext, firstPage, lastPage, handleActionClick, handleAddNew,
             showLoader, hideLoader, importData, removeItem, removeSelectedItems, printList, handleDynamicOption,
-            handleSelectionChange,selectSearchQuantity,selectedValue
+            handleSelectionChange,selectSearchQuantity,selectedValue,printExcel,printCSV
         }
     }
 })

@@ -111,14 +111,8 @@ export default{
         ])
         const companyID = computed(()=> store.state.userData.company_id);
         
-        const vendor_code_search = computed({
-            get: () => store.state.Vendors.vendor_code_search,
-            set: (value) => store.commit('Vendors/SET_SEARCH_FILTERS', {"vendor_code_search":value}),
-        });
-        const vendor_name_search = computed({
-            get: () => store.state.Vendors.vendor_name_search,
-            set: (value) => store.commit('Vendors/SET_SEARCH_FILTERS', {"vendor_name_search":value}),
-        });
+        const vendor_code_search = ref("");
+        const vendor_name_search = ref("");
         const fetchCategories = async() =>{
             await store.dispatch('Client_Categories/fetchClientCategories', {company:companyID.value})
         };
@@ -395,7 +389,8 @@ export default{
             searchVendors(selectedValue.value);
         };
         const resetFilters = () =>{
-            store.commit('Vendors/RESET_SEARCH_FILTERS');
+            vendor_code_search.value = "";
+            vendor_name_search.value = "";
             catComponentKey.value += 1;
             categorySearchID.value = "";
             searchVendors();

@@ -31,9 +31,11 @@ import PagesTab from '@/components/PMS/PagesTab.vue'
 import Dashboard from '@/components/PMS/Dashboard.vue'
 import Properties_List from '@/components/PMS/Properties_List.vue';
 import Property_Details from '@/components/PMS/Property_Details.vue';
+import Import_Properties from '@/components/PMS/Import_Properties.vue';
 import Zones from '@/components/PMS/Zones.vue';
 import Landlords_List from '@/components/PMS/Landlords_List.vue'
 import Units_List from '@/components/PMS/Units_List.vue';
+import Import_Property_Units from '@/components/PMS/Import_Property_Units.vue';
 import Utilities from '@/components/PMS/Utilities.vue';
 import Security_Deposits from '@/components/PMS/Security_Deposits.vue';
 import Active_Tenants from '@/components/PMS/Active_Tenants.vue';
@@ -74,7 +76,7 @@ export default{
         Meter_Setup, Meter_Readings,Batch_Readings,Tenant_Invoices,Tenant_Receipts,Receipt_Details, Tenant_Prepayments, Prepayment_Allocations,
         Tenant_Details, Variation_Periods, Tenant_Statement, Tenant_Deposits, Statement_Transactions, Property_Statements, Statement_Processing,
         Tenant_Arrears,Lease_Fees,Debit_Notes,Credit_Notes,Debit_Note_Details,Credit_Note_Details,Terminated_Leases,Term_Lease_Statement,
-        Exit_Charges,Tenant_Move_Out,
+        Exit_Charges,Tenant_Move_Out,Import_Property_Units,Import_Properties,
         
         Default_Settings
     },

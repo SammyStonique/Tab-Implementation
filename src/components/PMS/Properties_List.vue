@@ -11,6 +11,8 @@
             @removeItem="removeProperty"
             @removeSelectedItems="removeProperties"
             @printList="printPropertiesList"
+            @printExcel="downloadPropertiesExcel"
+            @printCSV="downloadPropertiesCSV"
             :addingRight="addingRight"
             :rightsModule="rightsModule"
             :columns="tableColumns"
@@ -327,7 +329,65 @@ export default{
             .finally(()=>{
                 hideLoader();
             })
-        }
+        };
+        const downloadPropertiesExcel = () =>{
+            showLoader();
+            let formData = {
+                name: name_search.value,
+                property_code: property_code_search.value,
+                status: status_search.value,
+                landlord: landlordID.value,
+                zone: zoneID.value,
+                property_type: property_type_search.value,
+                company_id: companyID.value
+            }
+            axios.post("api/v1/export-properties-excel/", formData, { responseType: 'blob' })
+            .then((response)=>{
+                if(response.status == 200){
+                const url = window.URL.createObjectURL(new Blob([response.data]));
+                const link = document.createElement('a');
+                link.href = url;
+                link.setAttribute('download', 'Properties.xlsx');
+                document.body.appendChild(link);
+                link.click();
+                }
+            })
+            .catch((error)=>{
+                console.log(error);
+            })
+            .finally(()=>{
+                hideLoader();
+            })
+        };
+        const downloadPropertiesCSV = () =>{
+            showLoader();
+            let formData = {
+                name: name_search.value,
+                property_code: property_code_search.value,
+                status: status_search.value,
+                landlord: landlordID.value,
+                zone: zoneID.value,
+                property_type: property_type_search.value,
+                company_id: companyID.value
+            }
+            axios.post("api/v1/export-properties-csv/", formData, { responseType: 'blob' })
+            .then((response)=>{
+                if(response.status == 200){
+                const url = window.URL.createObjectURL(new Blob([response.data]));
+                const link = document.createElement('a');
+                link.href = url;
+                link.setAttribute('download', 'Properties.csv');
+                document.body.appendChild(link);
+                link.click();
+                }
+            })
+            .catch((error)=>{
+                console.log(error);
+            })
+            .finally(()=>{
+                hideLoader();
+            })
+        };
         onBeforeMount(()=>{
             searchProperties();
             
@@ -337,7 +397,7 @@ export default{
             propResults, propArrLen, propCount, pageCount, showNextBtn, showPreviousBtn,
             loadPrev, loadNext, firstPage, lastPage, idField, actions, handleActionClick, propModalVisible, closeModal,
             submitButtonLabel, showModal, addNewProperty, showLoader, loader, hideLoader, importProperties, removeProperty, removeProperties,
-            handleSelectionChange,addingRight,rightsModule,printPropertiesList
+            handleSelectionChange,addingRight,rightsModule,printPropertiesList,downloadPropertiesCSV,downloadPropertiesExcel
         }
     }
 };

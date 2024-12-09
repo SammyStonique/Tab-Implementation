@@ -27,7 +27,7 @@
         <div class="border-b border-gray-300 py-2 w-full flex pl-6 sm:pl-8">
             <p class="text-left basis-1/3 sm:basis-3/6 text-sm sm:text-base">Welcome, <strong class="uppercase">{{ username }}</strong></p>
             <p class="text-left basis-1/3 sm:basis-2/6 uppercase font-semibold text-sm sm:text-base"><strong>{{ company_name }}</strong></p>
-            <div class="basis-1/3 sm:basis-1/6 flex items-center justify-end space-x-4">
+            <div class="basis-1/2 sm:basis-1/6 flex items-center justify-end space-x-4">
                 <button type="button" @click="showDropdown" class="text-sm sm:text-base">
                     Switch Company <i class="fa fa-caret-down pl-2" aria-hidden="true"></i>
                 </button>
@@ -36,9 +36,10 @@
                 </button>
                 <div class="relative">
                     <button class="fixed inset-0 bg-gray-50 opacity-25 cursor-default w-full" v-if="showOptions" @click="showOptions = !showOptions"></button>
-                    <div class="text-left options-container absolute right-0 mt-3 pt-2 pb-2 w-60 rounded border border-gray-200 bg-white shadow-slate-400 shadow-lg" v-if="showOptions">
+                    <div class="text-left options-container absolute right-0 mt-3 pt-2 pb-2 w-80 rounded border border-gray-200 bg-white shadow-slate-400 shadow-lg" v-if="showOptions">
                         <ul v-for="(company, index) in companyList" :key="index">
-                            <li><button class="pl-3 hover:bg-slate-500 hover:rounded hover:w-full" @click="switchCompany(index)">{{ company.company_name }}</button></li>
+                            <li><button class="pl-3 hover:bg-slate-500 hover:rounded hover:w-full" @click="switchCompany(index)">{{ company.company_name.split(' ').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' ') }}
+                            </button></li>
                         </ul>
                     </div>
                 </div>

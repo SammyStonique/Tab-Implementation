@@ -42,10 +42,17 @@
           <button @click="importData">Import</button><br />
           <button @click="removeItem">Remove</button><br />
           <button @click="removeSelectedItems">Remove Multiple</button><br />
-          <button @click="printList">Print List</button><br />
+          <button @click="displaySideDropdown" @mouseover="hoverDropdown = true" @mouseleave="hoverDropdown = false"><i class="fa fa-caret-left pl-2" aria-hidden="true"></i> Print List</button><br />
         </div>
         <div v-for="(option, index) in dropdownOptions" :key="index">
           <button @click="handleDynamicOption(option.action)">{{ option.label }}</button><br />
+        </div>
+      </div>
+      <div class="relative">        
+        <div class="absolute left-[-140px] top-20 w-36 bg-white rounded shadow-md py-1.5 px-2 text-sm text-left" v-if="hoverDropdown" @mouseover="hoverDropdown = true" @mouseleave="hoverDropdown = false">
+          <button @click="printList">Print List PDF</button><br />
+          <button @click="printExcel">Download Excel</button><br />
+          <button @click="printCSV">Download CSV</button><br />
         </div>
       </div>
     </div>
@@ -145,6 +152,7 @@ export default defineComponent({
   setup(props,{emit}){
     const store = useStore(); 
     const dropdown = ref(false);
+    const hoverDropdown =  ref(false);
     const allowedRights = ref([]);
     const companyID = computed(()=> store.state.userData.company_id);
     const userID = computed(()=> store.state.userData.user_id);
@@ -167,28 +175,37 @@ export default defineComponent({
     }
     const removeItem = () =>{
       emit('removeItem');
-    }
+    };
     const removeSelectedItems = () =>{
       emit('removeSelectedItems');
+    };
+    const displaySideDropdown = () =>{
+      hoverDropdown.value = true;
     }
     const printList = () =>{
       emit('printList');
-    }
+    };
+    const printExcel = () =>{
+      emit('printExcel');
+    };
+    const printCSV = () =>{
+      emit('printCSV');
+    };
     const handleDynamicOption = (option) =>{
       emit('handleDynamicOption', option);
-    }
+    };
     const optionSelected = () =>{
       emit('option-selected');
-    }
+    };
     const clearSearch = () =>{
       emit('clearSearch');
-    }
+    };
     const showModalLoader = () =>{
       emit('showModalLoader')
-    }
+    };
     const hideModalLoader = () =>{
       emit('hideModalLoader')
-    }
+    };
     const fetchEnabledRights = () =>{
       allowedRights.value = [];
       let formData = {
@@ -215,7 +232,7 @@ export default defineComponent({
     return{
       dropdown, handleAddNew, handleReset, showDropdown, optionSelected, handleSearch, clearSearch,
       importData, removeItem, removeSelectedItems, printList, handleDynamicOption, showModalLoader,
-      hideModalLoader,isDisabled,
+      hideModalLoader,isDisabled,hoverDropdown,printExcel,printCSV,displaySideDropdown
     }
   },
 });

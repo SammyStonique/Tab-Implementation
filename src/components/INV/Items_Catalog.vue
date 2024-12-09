@@ -11,6 +11,8 @@
             @removeItem="removeItem"
             @removeSelectedItems="removeItems"
             @printList="printItemsList"
+            @printExcel="downloadItemsExcel"
+            @printCSV="downloadItemsCSV"
             :addingRight="addingRight"
             :rightsModule="rightsModule"
             :columns="tableColumns"
@@ -130,9 +132,9 @@ export default{
             selectedIds.value = ids;
         };
         const importItems = () =>{
-            store.commit('pageTab/ADD_PAGE', {'INV':'Import_Items'})
-            store.state.pageTab.invActiveTab = 'Import_Items';
-        }
+            store.commit('pageTab/ADD_PAGE', {'INV':'Import_Item_Catalog'})
+            store.state.pageTab.invActiveTab = 'Import_Item_Catalog';
+        };
         const removeItem = async() =>{
             if(selectedIds.value.length == 1){
                 let formData = {
@@ -327,7 +329,61 @@ export default{
             .finally(()=>{
                 hideLoader();
             })
-        }
+        };
+        const downloadItemsExcel = () =>{
+            showLoader();
+            let formData = {
+                item_name: item_name_search.value,
+                item_code: item_code_search.value,
+                stock_type: stock_type_search.value,
+                item_category: categoryID.value,
+                company_id: companyID.value
+            }
+            axios.post("api/v1/export-inventory-items-excel/", formData, { responseType: 'blob' })
+            .then((response)=>{
+                if(response.status == 200){
+                const url = window.URL.createObjectURL(new Blob([response.data]));
+                const link = document.createElement('a');
+                link.href = url;
+                link.setAttribute('download', 'Item Catalog.xlsx');
+                document.body.appendChild(link);
+                link.click();
+                }
+            })
+            .catch((error)=>{
+                console.log(error);
+            })
+            .finally(()=>{
+                hideLoader();
+            })
+        };
+        const downloadItemsCSV = () =>{
+            showLoader();
+            let formData = {
+                item_name: item_name_search.value,
+                item_code: item_code_search.value,
+                stock_type: stock_type_search.value,
+                item_category: categoryID.value,
+                company_id: companyID.value
+            }
+            axios.post("api/v1/export-inventory-items-csv/", formData, { responseType: 'blob' })
+            .then((response)=>{
+                if(response.status == 200){
+                const url = window.URL.createObjectURL(new Blob([response.data]));
+                const link = document.createElement('a');
+                link.href = url;
+                link.setAttribute('download', 'Item Catalog.csv');
+                document.body.appendChild(link);
+                link.click();
+                }
+            })
+            .catch((error)=>{
+                console.log(error);
+            })
+            .finally(()=>{
+                hideLoader();
+            })
+        };
         onBeforeMount(()=>{
             searchItems();
             
@@ -337,7 +393,8 @@ export default{
             propResults, propArrLen, propCount, pageCount, showNextBtn, showPreviousBtn,
             loadPrev, loadNext, firstPage, lastPage, idField, actions, handleActionClick, propModalVisible, closeModal,
             submitButtonLabel, showModal, addNewItem, showLoader, loader, hideLoader, importItems, removeItem, removeItems,
-            handleSelectionChange,addingRight,rightsModule,printItemsList,selectSearchQuantity,selectedValue
+            handleSelectionChange,addingRight,rightsModule,printItemsList,selectSearchQuantity,selectedValue,downloadItemsExcel,
+            downloadItemsCSV
         }
     }
 };

@@ -1,6 +1,6 @@
 <template>
     <ImportComponent 
-        :rows="excelDepList"
+        :rows="excelUnitsList"
         :columns="tableColumns"
         :idField="idField"
         :loader="loader"
@@ -10,7 +10,7 @@
         :filePath="filePath"
         @file-changed="handleFileChange"
         @displayExcelData="displayExcelData"
-        @handleSubmit="importDepartmentsExcel" 
+        @handleSubmit="importUnitsExcel" 
         @handleReset="handleReset" 
         @downloadExcelTemplate="downloadExcelTemplate"
     />
@@ -21,10 +21,10 @@ import axios from "axios";
 import { defineComponent, ref, computed } from 'vue';
 import { useStore } from "vuex";
 import { useToast } from "vue-toastification";
-import ImportComponent from '../ImportComponent.vue';
+import ImportComponent from '@/components/ImportComponent.vue';
 
 export default defineComponent({
-    name: 'Import_Appointments',
+    name: 'Import_Property_Units',
     components:{
         ImportComponent
     },
@@ -32,13 +32,17 @@ export default defineComponent({
         const store = useStore();
         const toast = useToast();
         const loader = ref('none');
-        const hospitalID = computed(()=> store.state.userData.company_id);
+        const companyID = computed(()=> store.state.userData.company_id);
         const tableColumns = ref([
-            {label: "Code", key:"code",type: "text", editable: false},
-            {label: "Department", key:"name",type: "text", editable: false},
+            {label: "Property Name", key:"property_name",type: "text", editable: false},
+            {label: "Unit No", key:"unit_number",type: "text", editable: false},
+            {label: "Market Rent", key:"market_rent",type: "text", editable: false},
+            {label: "Charge Freq.", key:"charge_frequency",type: "text", editable: false},
+            {label: "Owner Occ.", key:"owner_occupied",type: "text", editable: false},
+            {label: "Bedrooms", key:"bedrooms",type: "text", editable: false},
         ])
-        const excelDepList = ref([]);
-        const idField = 'department_id';
+        const excelUnitsList = ref([]);
+        const idField = 'property_unit_id';
         const excel_file = ref('');
         const filePath = ref('');
 
@@ -63,38 +67,40 @@ export default defineComponent({
                 hideLoader();
             }else{
                 let formData = new FormData()
-                formData.append("departments_excel", excel_file.value) 
+                formData.append("property_units_excel", excel_file.value) 
+                formData.append("company", companyID.value)
 
-                axios.post("api/v1/display-departments-import-excel/", formData)
+                axios.post("api/v1/display-property-units-import-excel/", formData)
                 .then((response)=>{
-                    excelDepList.value = response.data.departments;
-                    console.log(excelDepList.value);
+                    excelUnitsList.value = response.data.units;
+                    console.log(excelUnitsList.value);
                 })
                 .catch((error)=>{
                     console.log(error.message);
+                    toast.error(error.message)
                 })
                 .finally(()=>{
                     hideLoader();
                 })
             }
         };
-        const importDepartmentsExcel = () =>{
+        const importUnitsExcel = () =>{
             showLoader();
-            if(!excelDepList.value.length){
+            if(!excelUnitsList.value.length){
                 toast.error("Please Import Excel Template")
                 hideLoader();
             }
             else{
                 let formData = new FormData()
-                formData.append("departments_excel", excel_file.value)
-                formData.append("company_id", hospitalID.value)
+                formData.append("property_units_excel", excel_file.value)
+                formData.append("company", companyID.value)
 
-                axios.post("api/v1/import-departments-excel/", formData)
+                axios.post("api/v1/import-property-units-excel/", formData)
                 .then((response)=>{
                     if(response.data == "Success"){
-                        toast.success("Departments Imported Succesfully")
+                        toast.success("Property Units Imported Succesfully")
                         handleReset();
-                        excelDepList.value = [];
+                        excelUnitsList.value = [];
                         excel_file.value = "";
                     }else{
                         toast.error(response.data) 
@@ -115,13 +121,13 @@ export default defineComponent({
             let formData = {
 
             }
-            axios.post("api/v1/download-departments-excel/", formData, { responseType: 'blob' })
+            axios.post("api/v1/download-property-units-excel/", formData, { responseType: 'blob' })
                 .then((response)=>{
                     if(response.status == 200){
                         const url = window.URL.createObjectURL(new Blob([response.data]));
                         const link = document.createElement('a');
                         link.href = url;
-                        link.setAttribute('download', 'Departments_Import.xlsx');
+                        link.setAttribute('download', 'Property_Units_Import.xlsx');
                         document.body.appendChild(link);
                         link.click();
                     }
@@ -134,14 +140,14 @@ export default defineComponent({
             })
         }
         const handleReset = () =>{
-            excelDepList.value = [];
+            excelUnitsList.value = [];
             filePath.value = "";
             excel_file.value = "";
         }
 
         return{
-            tableColumns, excelDepList, idField, loader, showLoader, hideLoader, excel_file, filePath, displayExcelData, handleFileChange,
-            handleReset,importDepartmentsExcel,downloadExcelTemplate
+            tableColumns, excelUnitsList, idField, loader, showLoader, hideLoader, excel_file, filePath, displayExcelData, handleFileChange,
+            handleReset,importUnitsExcel,downloadExcelTemplate
         }
     }
 })

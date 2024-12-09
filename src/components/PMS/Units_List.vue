@@ -11,6 +11,8 @@
             @removeItem="removeUnit"
             @removeSelectedItems="removeUnits"
             @printList="printUnitsList"
+            @printExcel="downloadUnitsExcel"
+            @printCSV="downloadUnitsCSV"
             :addingRight="addingRight"
             :rightsModule="rightsModule"
             :columns="tableColumns"
@@ -62,6 +64,9 @@ export default{
         const loader = ref('none');
         const modal_loader = ref('none');
         const propComponentKey = ref(0);
+        const propSearchComponentKey = ref(0);
+        const zoneSearchComponentKey = ref(0);
+        const lldSearchComponentKey = ref(0);
         const idField = 'property_unit_id';
         const addButtonLabel = ref('New Unit');
         const addingRight = ref('Adding Property Unit');
@@ -138,13 +143,38 @@ export default{
             get: () => store.state.Units_List.owner_occupied_search,
             set: (value) => store.commit('Units_List/SET_SEARCH_FILTERS', {"owner_occupied_search":value}),
         });
+        const handleSearchProperty = async(option) =>{
+            await store.dispatch('Properties_List/handleSelectedProperty', option)
+            propertySearchID.value = store.state.Properties_List.propertyID;
+        };
+        const clearSearchProperty = async() =>{
+            await store.dispatch('Properties_List/updateState', {propertyID: ''});
+            propertySearchID.value = store.state.Properties_List.propertyID;
+        };
+        const handleSearchZone = async(option) =>{
+            await store.dispatch('Zones/handleSelectedZone', option)
+            zoneSearchID.value = store.state.Zones.zoneID;
+        };
+        const clearSearchZone = async() =>{
+            await store.dispatch('Zones/updateState', {zoneID: ''});
+            zoneSearchID.value = store.state.Zones.zoneID;
+        };
+        const handleSearchLandlord = async(option) =>{
+            await store.dispatch('Landlords_List/handleSelectedLandlord', option)
+            landlordSearchID.value = store.state.Landlords_List.landlordID;
+        };
+        const clearSearchLandlord = async() =>{
+            await store.dispatch('Landlords_List/updateState', {landlordID: ''});
+            landlordSearchID.value = store.state.Landlords_List.landlordID;
+        };
         const searchFilters = ref([
             {type:'text', placeholder:"Unit No...", value: unit_number_search, width:36,},
             {
                 type:'search-dropdown', value: landlords_array, width:48,
-                selectOptions: landlords_array,
+                selectOptions: landlords_array, optionSelected: handleSearchLandlord,
                 searchPlaceholder: 'Landlord...', dropdownWidth: '300px',
-                fetchData: store.dispatch('Landlords_List/fetchLandlords', {company:companyID.value})
+                fetchData: store.dispatch('Landlords_List/fetchLandlords', {company:companyID.value}),
+                clearSearch: clearSearchLandlord, componentKey: lldSearchComponentKey
             },
             {
                 type:'dropdown', placeholder:"Status..", value: status_search, width:40,
@@ -159,16 +189,18 @@ export default{
                 options: [{text:'Yes',value:'True'},{text:'No',value:'False'}]
             },
             {
-                type:'search-dropdown', value: properties_array, width:40,
-                selectOptions: properties_array,
+                type:'search-dropdown', value: properties_array, width:48,
+                selectOptions: properties_array, optionSelected: handleSearchProperty,
                 searchPlaceholder: 'Property...', dropdownWidth: '200px',
-                fetchData: store.dispatch('Properties_List/fetchProperties', {company:companyID.value})
+                fetchData: store.dispatch('Properties_List/fetchProperties', {company:companyID.value}),
+                clearSearch: clearSearchProperty, componentKey: propSearchComponentKey
             },        
             {
                 type:'search-dropdown', value: zones_array, width:36,
-                selectOptions: zones_array,
+                selectOptions: zones_array, optionSelected: handleSearchZone,
                 searchPlaceholder: 'Zone...', dropdownWidth: '150px',
-                fetchData: store.dispatch('Zones/fetchZones', {company:companyID.value})
+                fetchData: store.dispatch('Zones/fetchZones', {company:companyID.value}),
+                clearSearch: clearSearchZone, componentKey: zoneSearchComponentKey
             },
         ]);
         const handleSelectionChange = (ids) => {
@@ -342,8 +374,8 @@ export default{
             }
         }
         const importUnits = () =>{
-            store.commit('pageTab/ADD_PAGE', {'PMS':'Import_Units'})
-            store.state.pageTab.pmsActiveTab = 'Import_Units';
+            store.commit('pageTab/ADD_PAGE', {'PMS':'Import_Property_Units'})
+            store.state.pageTab.pmsActiveTab = 'Import_Property_Units';
         }
         const removeUnit = async() =>{
             if(selectedIds.value.length == 1){
@@ -446,6 +478,12 @@ export default{
         };
         const resetFilters = () =>{
             store.commit('Units_List/RESET_SEARCH_FILTERS')
+            propSearchComponentKey.value += 1;
+            propertySearchID.value = "";
+            zoneSearchID.value = "";
+            landlordSearchID.value = "";
+            lldSearchComponentKey.value += 1;
+            zoneSearchComponentKey.value += 1;
             searchUnits();
         }
         const loadPrev = () =>{
@@ -546,7 +584,67 @@ export default{
             .finally(()=>{
                 hideLoader();
             })
-        }
+        };
+        const downloadUnitsExcel = () =>{
+            showLoader();
+            let formData = {
+                unit_number: unit_number_search.value,
+                status: status_search.value,
+                vacancy: vacancy_status_search.value,
+                owner_occupied: owner_occupied_search.value,
+                property: propertySearchID.value,
+                landlord: landlordSearchID.value,
+                zone: zoneSearchID.value,
+                company_id: companyID.value
+            }
+            axios.post("api/v1/export-property-units-excel/", formData, { responseType: 'blob' })
+            .then((response)=>{
+                if(response.status == 200){
+                const url = window.URL.createObjectURL(new Blob([response.data]));
+                const link = document.createElement('a');
+                link.href = url;
+                link.setAttribute('download', 'Property Units.xlsx');
+                document.body.appendChild(link);
+                link.click();
+                }
+            })
+            .catch((error)=>{
+                console.log(error);
+            })
+            .finally(()=>{
+                hideLoader();
+            })
+        };
+        const downloadUnitsCSV = () =>{
+            showLoader();
+            let formData = {
+                unit_number: unit_number_search.value,
+                status: status_search.value,
+                vacancy: vacancy_status_search.value,
+                owner_occupied: owner_occupied_search.value,
+                property: propertySearchID.value,
+                landlord: landlordSearchID.value,
+                zone: zoneSearchID.value,
+                company_id: companyID.value
+            }
+            axios.post("api/v1/export-property-units-csv/", formData, { responseType: 'blob' })
+            .then((response)=>{
+                if(response.status == 200){
+                const url = window.URL.createObjectURL(new Blob([response.data]));
+                const link = document.createElement('a');
+                link.href = url;
+                link.setAttribute('download', 'Property Units.csv');
+                document.body.appendChild(link);
+                link.click();
+                }
+            })
+            .catch((error)=>{
+                console.log(error);
+            })
+            .finally(()=>{
+                hideLoader();
+            })
+        };
         onBeforeMount(()=>{
             searchUnits();
             
@@ -557,7 +655,8 @@ export default{
             loadPrev, loadNext, firstPage, lastPage, idField, actions, handleActionClick, propModalVisible, closeModal,
             submitButtonLabel, showModal, addNewUnit, showLoader, loader, hideLoader, modal_loader, modal_top, modal_left, modal_width,displayButtons,
             showModalLoader, hideModalLoader, saveUnit, formFields, handleSelectionChange, flex_basis,flex_basis_percentage,
-            importUnits, removeUnit, removeUnits,addingRight,rightsModule,printUnitsList,selectSearchQuantity,selectedValue
+            importUnits, removeUnit, removeUnits,addingRight,rightsModule,printUnitsList,selectSearchQuantity,selectedValue,
+            downloadUnitsCSV,downloadUnitsExcel
         }
     }
 };

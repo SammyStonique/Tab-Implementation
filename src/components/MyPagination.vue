@@ -83,7 +83,6 @@ export default defineComponent({
             emit("selectSearchQuantity", localValue.value);
         };
         watch(() => props.selectedValue, (newValue) => {
-            console.log("THE NEW VALUE IS ",props.selectedValue);
             localValue.value = newValue;
         });
         return{
