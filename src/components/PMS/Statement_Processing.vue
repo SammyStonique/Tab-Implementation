@@ -8,7 +8,7 @@
                     <button @click="previewStatement" class="rounded bg-green-400 text-sm h-8 w-24 ml-1.5 mt-2 text-white px-1.5 py-1.5"><i class="fa fa-eye text-xs mr-1.5" aria-hidden="true"></i>Preview</button>
                 </div>
             </div>
-            <div class="table-container capitalize text-xs min-h-[330px] mt-3">
+            <div class="table-container capitalize text-xs min-h-[480px] mt-3">
                 <table class="dynamic-table rounded">
                     <thead>
                         <tr>
@@ -22,8 +22,8 @@
                         </tr>
                         <tr>
                             <!-- Dynamic sub-column headers -->
-                            <th v-for="(subHeader, index) in subHeaders['invoiced']" :key="'invoiced-' + index">{{ subHeader }}</th>
-                            <th v-for="(subHeader, index) in subHeaders['paid']" :key="'paid-' + index">{{ subHeader }}</th>
+                            <th class="sticky" v-for="(subHeader, index) in subHeaders['invoiced']" :key="'invoiced-' + index">{{ subHeader }}</th>
+                            <th class="sticky" v-for="(subHeader, index) in subHeaders['paid']" :key="'paid-' + index">{{ subHeader }}</th>
 
                         </tr>
                     </thead>
@@ -37,7 +37,7 @@
                             <td class="font-bold">{{ Number(row.balanceCF).toLocaleString() }}</td>
                         </tr> 
                         <tr v-if="tableData.length" class="font-bold">
-                            <td></td>
+                            <td>{{ tableData.length }} Units</td>
                             <td></td>
                             <td>{{ Number(balanceBfTotals).toLocaleString() }}</td>
                             <td v-for="(subTotal, subIndex) in statementInvoicedTotals" :key="subIndex">{{ Number(subTotal).toLocaleString() }}</td>
@@ -56,7 +56,7 @@
                 </table>
             </div>
             
-            <div class="flex-1 basis-full px-2" v-if="displayButtons">
+            <div class="flex-1 basis-full px-2 mt-6" v-if="displayButtons">
                 <button @click="processStatement" class="rounded bg-green-400 text-sm mr-2  text-white px-2 py-1.5"><i class="fa fa-check-circle text-xs mr-1.5" aria-hidden="true"></i>Process</button>
                 <button @click="handleReset" class="rounded bg-green-400 text-sm mr-2  text-white px-2 py-1.5"><i class="fa fa-refresh text-xs mr-1.5" aria-hidden="true"></i>Reset</button>
             </div>
@@ -367,11 +367,13 @@ export default defineComponent({
   background-color: inherit;
 }
 /* Style for fixed header */
+
 .table-container thead th {
   position: sticky;
   top: 0;
   background: #3b4252;
   color: white;
+
 }
 
 .table-body tr:nth-child(even) {

@@ -5,6 +5,8 @@
             :addButtonLabel="addButtonLabel"
             @handleAddNew="addNewTenant"
             :searchFilters="searchFilters"
+            :dropdownOptions="dropdownOptions"
+            @handleDynamicOption="handleDynamicOption"
             @searchPage="searchTenants"
             @resetFilters="resetFilters"
             @importData="importTenants"
@@ -33,8 +35,8 @@
         />
     </div>
     <MovableModal v-model:visible="transModalVisible" :title="transTitle" :modal_top="modal_top" :modal_left="modal_left" :modal_width="modal_width"
-        :loader="trans_modal_loader" @showLoader="showTransModalLoader" @hideLoader="hideTransModalLoader" @closeModal="closeModal">
-        <div class="mt-4 mb-3">
+        :loader="trans_modal_loader" @showLoader="showTransModalLoader" @hideLoader="hideTransModalLoader" @closeModal="closeTransModal">
+        <div class="mt-4 mb-8">
             <label for="">Unit:</label><br />
             <SearchableDropdown
                 :key="unitComponentKey"
@@ -48,6 +50,13 @@
             <button @click="transferUnit" class="rounded bg-green-400 text-sm mr-2  text-white px-2 py-1.5"><i class="fa fa-check-circle text-xs mr-1.5" aria-hidden="true"></i>Transfer</button>
         </div>
     </MovableModal>
+    <MovableModal v-model:visible="utilModalVisible" :title="utilTitle" :modal_top="modal_top" :modal_left="modal_left" :modal_width="modal_width"
+        :loader="util_modal_loader" @showLoader="showUtilModalLoader" @hideLoader="hideUtilModalLoader" @closeModal="closeUtilModal">
+        <DynamicForm 
+            :fields="utilFormFields" :flex_basis="flex_basis" :flex_basis_percentage="flex_basis_percentage" 
+            :displayButtons="displayButtons" @handleSubmit="createTenantUtilities" @handleReset="handleUtilReset"
+        />
+    </MovableModal>
 </template>
 
 <script>
@@ -58,20 +67,25 @@ import { useStore } from "vuex";
 import { useToast } from "vue-toastification";
 import PrintJS from 'print-js';
 import MovableModal from '@/components/MovableModal.vue';
+import DynamicForm from '@/components/NewDynamicForm.vue';
 import SearchableDropdown from '@/components/SearchableDropdown.vue';
 import Swal from 'sweetalert2';
 
 export default{
     name: 'Active_Tenants',
     components:{
-        PageComponent,MovableModal,SearchableDropdown
+        PageComponent,MovableModal,SearchableDropdown,DynamicForm
     },
     setup(){
         const store = useStore();
         const toast = useToast();
         const loader = ref('');
+        const displayButtons = ref(true);
         const unitComponentKey = ref(0);
+        const utilComponentKey = ref(0);
+        const taxComponentKey = ref(0);
         const trans_modal_loader = ref('none');
+        const util_modal_loader = ref('none');
         const idField = 'tenant_id';
         const addButtonLabel = ref('New Tenant');
         const addingRight = ref('Adding Tenants');
@@ -88,12 +102,18 @@ export default{
         const showNextBtn = ref(false);
         const showPreviousBtn = ref(false);
         const transTitle = ref('Transfer Unit');
+        const utilTitle = ref('Adding Utility To Lease');
         const tenantUnitsArr = computed(() => store.state.Units_List.unitArr);
+        const utilityArray = computed(() => store.state.Utilities.utilityArr);
+        const taxArray = computed(() => store.state.Taxes.taxArr);
         const transModalVisible = ref(false);
-        const dropdownWidth = ref("320px")
+        const utilModalVisible = ref(false);
+        const dropdownWidth = ref("500px")
         const modal_top = ref('200px');
         const modal_left = ref('400px');
-        const modal_width = ref('50vw');
+        const modal_width = ref('30vw');
+        const flex_basis = ref('');
+        const flex_basis_percentage = ref('');
         const showModal = ref(false);
         const tableColumns = ref([
             {type: "checkbox"},
@@ -115,6 +135,12 @@ export default{
         const propertyID = ref(null);
         const unitID = ref(null);
         const tenantID = ref(null);
+        const utilityID = ref(null);
+        const utilityTaxID = ref(null);
+        const dropdownOptions = ref([
+            {label: 'Add Tenant Utilities', action: 'add-tenant-utilties'},
+        ]);
+        
         const name_search = computed({
             get: () => store.state.Active_Tenants.name_search,
             set: (value) => store.commit('Active_Tenants/SET_SEARCH_FILTERS', {"name_search":value}),
@@ -158,6 +184,45 @@ export default{
         const fetchTenantUnits = async(propertyID) =>{
             await store.dispatch('Units_List/fetchUnits', {company:companyID.value, property: propertyID, vacancy_status: "Vacant", owner_occupied:"False"});
         };
+        const fetchUtilities = async() =>{
+            await store.dispatch('Utilities/fetchUtilities', {company:companyID.value});
+        };
+        const handleSelectedUtility = async(option) =>{
+            await store.dispatch('Utilities/handleSelectedUtility', option)
+            utilityID.value = store.state.Utilities.utilityID;
+        };
+        const clearSelectedUtility = async() =>{
+            await store.dispatch('Utilities/updateState', {utilityID: ''});
+            utilityID.value = store.state.Utilities.utilityID;
+        }
+        const handleSelectedTax = async(option) =>{
+            await store.dispatch('Taxes/handleSelectedTax', option)
+            utilityTaxID.value = store.state.Taxes.taxID;
+        };
+        const clearSelectedTax = async() =>{
+            await store.dispatch('Taxes/updateState', {taxID: ''});
+            utilityTaxID.value = store.state.Taxes.taxID;
+        }
+        const fetchTaxes = async() =>{
+            await store.dispatch('Taxes/fetchTaxes', {company:companyID.value})
+        };
+        const utilFormFields = ref([
+            {  
+                type:'search-dropdown', label:"Utility", value: utilityID.value, componentKey: utilComponentKey,
+                selectOptions: utilityArray, optionSelected: handleSelectedUtility, required: true,
+                searchPlaceholder: 'Select Utility...', dropdownWidth: '500px', updateValue: "",
+                fetchData: fetchUtilities(), clearSearch: clearSelectedUtility
+            },
+            { type: 'dropdown', name: 'default_mode',label: "Charge Mode", value: '', placeholder: "", required: true, options: [{ text: 'Fixed Amount', value: 'Fixed Amount' }, { text: 'Rent Percentage', value: 'Rent Percentage' }, { text: 'Billed On Use', value: 'Billed On Use' }] },
+            { type: 'number', name: 'default_value',label: "Default Value", value: 0, required: true },
+            { type: 'date', name: 'from_date',label: "Effective Date", value: '', required: true },
+            {  
+                type:'search-dropdown', label:"Utility Vat", value: '', componentKey: taxComponentKey,
+                selectOptions: taxArray, optionSelected: handleSelectedTax, required: false,
+                searchPlaceholder: 'Select Vat...', dropdownWidth: '500px', updateValue: "",
+                fetchData: fetchTaxes(), clearSearch: clearSelectedTax
+            },
+        ]);
         const handleSelectedTenantUnit = async(option) =>{
             await store.dispatch('Units_List/handleSelectedUnit', option)
             unitID.value = store.state.Units_List.unitID;
@@ -165,7 +230,7 @@ export default{
         const clearSelectedTenantUnit = async() =>{
             await store.dispatch('Units_List/updateState', {unitID: ''});
             unitID.value = store.state.Units_List.unitID;
-        }
+        };
         const handleSelectionChange = (ids) => {
             selectedIds.value = ids;
         };
@@ -285,6 +350,61 @@ export default{
         const closeTransModal = () =>{
             transModalVisible.value = false;
             tenantID.value = null;
+            hideTransModalLoader();
+        };
+        const handleUtilReset = () =>{
+            for(let i=0; i < utilFormFields.value.length; i++){
+                utilFormFields.value[i].value = '';
+            }
+            utilityID.value = '';
+            utilityTaxID.value = null;
+            utilComponentKey.value += 1;
+            taxComponentKey.value +=1;
+        }
+        const showUtilModalLoader = () =>{
+            util_modal_loader.value = "block";
+        }
+        const hideUtilModalLoader = () =>{
+            util_modal_loader.value = "none";
+        }
+        const createTenantUtilities = async() =>{
+            if(selectedIds.value.length == 0){
+                toast.error("No Tenant Selected")
+            }else{
+                showUtilModalLoader();
+                let formData = {
+                    tenant_utility: utilityID.value,
+                    from_date: utilFormFields.value[3].value,
+                    tenant: selectedIds.value,
+                    charge_mode: utilFormFields.value[1].value,
+                    amount: utilFormFields.value[2].value,
+                    utility_vat: utilityTaxID.value,
+                    company: companyID.value
+                }
+                axios.post(`api/v1/adding-tenant-utility/`,formData)
+                .then((response)=>{
+                    if(response.data.msg == "Success"){
+                        toast.success("Utility Added Successfully")
+                        closeUtilModal();
+                        searchTenants();
+                    }else{
+                        toast.error("Error Adding Utility")
+                    }                   
+                })
+                .catch((error)=>{
+                    console.log(error.message);
+                    toast.error(error.message)
+                    hideUtilModalLoader();
+                })
+                .finally(()=>{
+                    hideUtilModalLoader();
+                })
+            }
+              
+        };
+        const closeUtilModal = () =>{
+            utilModalVisible.value = false;
+            handleUtilReset();
             hideTransModalLoader();
         };
         const showLoader = () =>{
@@ -418,7 +538,21 @@ export default{
                     transModalVisible.value = true;
                 })
             }
-        }
+        };
+
+        const handleDynamicOption = (option) =>{
+            if(option == 'add-tenant-utilties'){
+                fetchTaxes();
+                fetchUtilities();
+                store.dispatch("Utilities/updateState",{selectedUtility:null, isEditing:false})
+                utilityID.value = "";
+                utilityTaxID.value = "";
+                utilModalVisible.value = true;
+                handleUtilReset();
+                flex_basis.value = '1/2';
+                flex_basis_percentage.value = '50';
+            }
+        };
         
         const printTenantsList = () =>{
             showLoader();
@@ -453,13 +587,14 @@ export default{
             
         })
         return{
-            searchTenants,resetFilters, addButtonLabel, searchFilters, tableColumns, tenantList,dropdownWidth,
-            propResults, propArrLen, propCount, pageCount, showNextBtn, showPreviousBtn,
-            loadPrev, loadNext, firstPage, lastPage, idField, actions, handleActionClick,
+            searchTenants,resetFilters, addButtonLabel, searchFilters, tableColumns, tenantList,dropdownWidth,displayButtons,
+            propResults, propArrLen, propCount, pageCount, showNextBtn, showPreviousBtn,flex_basis,flex_basis_percentage,
+            loadPrev, loadNext, firstPage, lastPage, idField, actions, handleActionClick,utilFormFields,
             submitButtonLabel, showModal, addNewTenant, showLoader, loader, hideLoader, importTenants, removeTenant, removeTenants,
             handleSelectionChange,addingRight,rightsModule,printTenantsList,selectSearchQuantity,selectedValue,
             modal_left,modal_top,modal_width,trans_modal_loader,transModalVisible,transTitle,showTransModalLoader,hideTransModalLoader,transferUnit,closeTransModal,
-            fetchTenantUnits, handleSelectedTenantUnit, clearSelectedTenantUnit,tenantUnitsArr,unitComponentKey
+            fetchTenantUnits, handleSelectedTenantUnit, clearSelectedTenantUnit,tenantUnitsArr,unitComponentKey,dropdownOptions,handleDynamicOption,
+            util_modal_loader,utilTitle,utilModalVisible,showUtilModalLoader,hideUtilModalLoader,createTenantUtilities,closeUtilModal,handleUtilReset
         }
     }
 };
