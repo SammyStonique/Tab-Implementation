@@ -103,6 +103,7 @@ export default defineComponent({
                 })
                 .catch((error)=>{
                     console.log(error.message);
+                    toast.error(error.message);
                 })
                 .finally(()=>{
                     hideLoader();
@@ -121,7 +122,7 @@ export default defineComponent({
                         const url = window.URL.createObjectURL(new Blob([response.data]));
                         const link = document.createElement('a');
                         link.href = url;
-                        link.setAttribute('download', 'Departments_Import.xlsx');
+                        link.setAttribute('download', 'Departments_Import.xls');
                         document.body.appendChild(link);
                         link.click();
                     }

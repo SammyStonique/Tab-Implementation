@@ -1,6 +1,6 @@
 <template>
     <ImportComponent 
-        :rows="excelUnitsList"
+        :rows="excelTenantsList"
         :columns="tableColumns"
         :idField="idField"
         :loader="loader"
@@ -10,7 +10,7 @@
         :filePath="filePath"
         @file-changed="handleFileChange"
         @displayExcelData="displayExcelData"
-        @handleSubmit="importUnitsExcel" 
+        @handleSubmit="importTenantsExcel" 
         @handleReset="handleReset" 
         @downloadExcelTemplate="downloadExcelTemplate"
     />
@@ -24,7 +24,7 @@ import { useToast } from "vue-toastification";
 import ImportComponent from '@/components/ImportComponent.vue';
 
 export default defineComponent({
-    name: 'Import_Property_Units',
+    name: 'Import_Tenants',
     components:{
         ImportComponent
     },
@@ -34,15 +34,18 @@ export default defineComponent({
         const loader = ref('none');
         const companyID = computed(()=> store.state.userData.company_id);
         const tableColumns = ref([
-            {label: "Property Name", key:"property_name",type: "text", editable: false},
+            {label: "Tenant Code", key:"tenant_code",type: "text", editable: false},
+            {label: "Tenant Name", key:"tenant_name",type: "text", editable: false},
             {label: "Unit No", key:"unit_number",type: "text", editable: false},
-            {label: "Market Rent", key:"market_rent",type: "text", editable: false},
-            {label: "Charge Freq.", key:"charge_frequency",type: "text", editable: false},
-            {label: "Owner Occ.", key:"owner_occupied",type: "text", editable: false},
-            {label: "Bedrooms", key:"bedrooms",type: "text", editable: false},
+            {label: "Property Name", key:"property_name",type: "text", editable: false},
+            {label: "Rent Amount", key:"rent_amount",type: "text", editable: false},
+            {label: "Bill. Freq.", key:"billing_frequency",type: "text", editable: false},
+            {label: "Lease Start", key:"lease_start_date",type: "text", editable: false},
+            {label: "Lease End", key:"lease_end_date",type: "text", editable: false},
+            {label: "Term Type", key:"lease_term_type",type: "text", editable: false},
         ])
-        const excelUnitsList = ref([]);
-        const idField = 'property_unit_id';
+        const excelTenantsList = ref([]);
+        const idField = 'tenant_id';
         const excel_file = ref('');
         const filePath = ref('');
 
@@ -67,13 +70,13 @@ export default defineComponent({
                 hideLoader();
             }else{
                 let formData = new FormData()
-                formData.append("property_units_excel", excel_file.value) 
+                formData.append("tenants_excel", excel_file.value) 
                 formData.append("company", companyID.value)
 
-                axios.post("api/v1/display-property-units-import-excel/", formData)
+                axios.post("api/v1/display-tenants-import-excel/", formData)
                 .then((response)=>{
-                    excelUnitsList.value = response.data.units;
-                    console.log(excelUnitsList.value);
+                    excelTenantsList.value = response.data.tenants;
+                    console.log(excelTenantsList.value);
                 })
                 .catch((error)=>{
                     console.log(error.message);
@@ -84,23 +87,23 @@ export default defineComponent({
                 })
             }
         };
-        const importUnitsExcel = () =>{
+        const importTenantsExcel = () =>{
             showLoader();
-            if(!excelUnitsList.value.length){
+            if(!excelTenantsList.value.length){
                 toast.error("Please Import Excel Template")
                 hideLoader();
             }
             else{
                 let formData = new FormData()
-                formData.append("property_units_excel", excel_file.value)
+                formData.append("tenants_excel", excel_file.value)
                 formData.append("company", companyID.value)
 
-                axios.post("api/v1/import-property-units-excel/", formData)
+                axios.post("api/v1/import-tenants-excel/", formData)
                 .then((response)=>{
                     if(response.data == "Success"){
-                        toast.success("Property Units Imported Succesfully")
+                        toast.success("Tenants Imported Succesfully")
                         handleReset();
-                        excelUnitsList.value = [];
+                        excelTenantsList.value = [];
                         excel_file.value = "";
                     }else{
                         toast.error(response.data) 
@@ -122,13 +125,13 @@ export default defineComponent({
             let formData = {
 
             }
-            axios.post("api/v1/download-property-units-excel/", formData, { responseType: 'blob' })
+            axios.post("api/v1/download-tenants-import-excel/", formData, { responseType: 'blob' })
                 .then((response)=>{
                     if(response.status == 200){
                         const url = window.URL.createObjectURL(new Blob([response.data]));
                         const link = document.createElement('a');
                         link.href = url;
-                        link.setAttribute('download', 'Property_Units_Import.xls');
+                        link.setAttribute('download', 'Tenants_Import.xls');
                         document.body.appendChild(link);
                         link.click();
                     }
@@ -141,14 +144,14 @@ export default defineComponent({
             })
         }
         const handleReset = () =>{
-            excelUnitsList.value = [];
+            excelTenantsList.value = [];
             filePath.value = "";
             excel_file.value = "";
         }
 
         return{
-            tableColumns, excelUnitsList, idField, loader, showLoader, hideLoader, excel_file, filePath, displayExcelData, handleFileChange,
-            handleReset,importUnitsExcel,downloadExcelTemplate
+            tableColumns, excelTenantsList, idField, loader, showLoader, hideLoader, excel_file, filePath, displayExcelData, handleFileChange,
+            handleReset,importTenantsExcel,downloadExcelTemplate
         }
     }
 })

@@ -72,7 +72,7 @@
                                         <td>{{ tenantProperty.name }}</td>
                                         <td></td>
                                         <td></td>
-                                        <td class="font-bold">Occupied Unit(s):</td>
+                                        <td class="font-bold">Unit Number(s):</td>
                                         <td>{{ tenantLease.unit }}</td>
                                     </tr>
                                     <tr class="text-left">

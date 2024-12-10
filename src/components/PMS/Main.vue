@@ -39,6 +39,7 @@ import Import_Property_Units from '@/components/PMS/Import_Property_Units.vue';
 import Utilities from '@/components/PMS/Utilities.vue';
 import Security_Deposits from '@/components/PMS/Security_Deposits.vue';
 import Active_Tenants from '@/components/PMS/Active_Tenants.vue';
+import Import_Tenants from '@/components/PMS/Import_Tenants.vue';
 import Terminated_Leases from '@/components/PMS/Terminated_Leases.vue';
 import Tenant_Details from '@/components/PMS/Tenant_Details.vue';
 import Variation_Periods from '@/components/PMS/Variation_Periods.vue';
@@ -76,7 +77,7 @@ export default{
         Meter_Setup, Meter_Readings,Batch_Readings,Tenant_Invoices,Tenant_Receipts,Receipt_Details, Tenant_Prepayments, Prepayment_Allocations,
         Tenant_Details, Variation_Periods, Tenant_Statement, Tenant_Deposits, Statement_Transactions, Property_Statements, Statement_Processing,
         Tenant_Arrears,Lease_Fees,Debit_Notes,Credit_Notes,Debit_Note_Details,Credit_Note_Details,Terminated_Leases,Term_Lease_Statement,
-        Exit_Charges,Tenant_Move_Out,Import_Property_Units,Import_Properties,
+        Exit_Charges,Tenant_Move_Out,Import_Property_Units,Import_Properties,Import_Tenants,
         
         Default_Settings
     },
