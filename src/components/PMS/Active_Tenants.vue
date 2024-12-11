@@ -405,7 +405,7 @@ export default{
         const closeUtilModal = () =>{
             utilModalVisible.value = false;
             handleUtilReset();
-            hideTransModalLoader();
+            hideUtilModalLoader();
         };
         const showLoader = () =>{
             loader.value = "block";

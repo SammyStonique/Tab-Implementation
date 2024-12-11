@@ -48,6 +48,13 @@
             <button @click="billMoveOutCharges" class="rounded bg-green-400 text-sm mr-2  text-white px-2 py-1.5"><i class="fa fa-check-circle text-xs mr-1.5" aria-hidden="true"></i>Bill Charges</button>
         </div>
     </MovableModal>
+    <MovableModal v-model:visible="refModalVisible" :title="refTitle" :modal_top="modal_top" :modal_left="modal_left" :modal_width="modal_width"
+        :loader="ref_modal_loader" @showLoader="showRefModalLoader" @hideLoader="hideRefModalLoader" @closeModal="closeRefModal">
+        <DynamicForm 
+            :fields="refFormFields" :flex_basis="flex_basis" :flex_basis_percentage="flex_basis_percentage" 
+            :displayButtons="displayButtons" @handleSubmit="processTenantRefund" @handleReset="handleRefReset"
+        />
+    </MovableModal>
 </template>
 
 <script>
@@ -59,21 +66,28 @@ import { useToast } from "vue-toastification";
 import PrintJS from 'print-js';
 import MovableModal from '@/components/MovableModal.vue';
 import SearchableDropdown from '@/components/SearchableDropdown.vue';
+import DynamicForm from '@/components/NewDynamicForm.vue';
 import DynamicTable from '../DynamicTable.vue';
+import { useDateFormatter } from '@/composables/DateFormatter';
 import Swal from 'sweetalert2';
 
 export default{
     name: 'Tenant_Move_Out',
     components:{
-        PageComponent,MovableModal,SearchableDropdown,DynamicTable
+        PageComponent,MovableModal,SearchableDropdown,DynamicTable,DynamicForm
     },
     setup(){
         const store = useStore();
         const toast = useToast();
+        const { formatDate } = useDateFormatter();
+        const current_date = new Date();
         const loader = ref('');
         const tableCompKey = ref(0);
         const unitComponentKey = ref(0);
+        const ledComponentKey = ref(0);
         const trans_modal_loader = ref('none');
+        const ref_modal_loader = ref('none');
+        const displayButtons = ref(true);
         const idField = 'tenant_moveout_id';
         const chargeIdField = 'company_id';
         const showAddButton = ref(false);
@@ -91,12 +105,20 @@ export default{
         const showNextBtn = ref(false);
         const showPreviousBtn = ref(false);
         const title = ref('Bill Move Out Charges');
+        const refTitle = ref('Process Tenant Deposit Refund');
         const chargesArr = computed(() => store.state.Exit_Charges.chargeArr);
+        const cashbookArr = computed(() => store.state.Ledgers.cashbookLedgerArr);
         const transModalVisible = ref(false);
+        const refModalVisible = ref(false);
+        const netRefund = ref(0);
+        const depNetRefund = ref(0);
+        const computedNetRefund = computed(() => {return netRefund});
         const dropdownWidth = ref("320px")
         const modal_top = ref('200px');
         const modal_left = ref('400px');
-        const modal_width = ref('70vw');
+        const modal_width = ref('30vw');
+        const flex_basis = ref('');
+        const flex_basis_percentage = ref('');
         const showModal = ref(false);
         const tableColumns = ref([
             {type: "checkbox"},
@@ -109,9 +131,11 @@ export default{
             {label: "Deposit", key:"formatted_deposit_held"},
             {label: "Arrears", key:"outstanding_balance"},
             {label: "Charges", key:"exit_charges"},
-            {label: "Net Refund", key:"net_refund"},
+            {label: "Net Ref.", key:"formatted_net_refund"},
             {label: "Claim.", key:"deposit_claim_status"},
             {label: "Ref.", key:"refund_status"},
+            {label: "R.Amnt", key:"refunded_amount"},
+            {label: "P.V#", key:"voucher_no"},
         ])
         const actions = ref([
             {name: 'bill-charges', icon: 'fa fa-file-pdf-o', title: 'Add Charges', rightName: 'Tenant Move Out'},
@@ -134,6 +158,7 @@ export default{
         const chargeID = ref(null);
         const chargeName = ref(null);
         const tenantID = ref(null);
+        const cashbookID = ref(null);
         const tenantMoveOutID = ref(null);
         const billedStatus = ref(false);
         const name_search = ref('');
@@ -177,7 +202,93 @@ export default{
             await store.dispatch('Exit_Charges/updateState', {chargeID: '', chargeName: ""});
             chargeID.value = "";
             chargeName.value = "";
+        };
+        const fetchLedgers = async() =>{
+            await store.dispatch('Ledgers/fetchCashbookLedgers', {company:companyID.value, ledger_type: 'Cashbook'})
+        };
+        const fetchAllLedgers = async() =>{
+            await store.dispatch('Ledgers/fetchLedgers', {company:companyID.value})
+        };
+        const handleSelectedLedger = async(option) =>{
+            await store.dispatch('Ledgers/handleSelectedLedger', option)
+            cashbookID.value = store.state.Ledgers.ledgerID;
+        };
+        const clearSelectedLedger = async() =>{
+            await store.dispatch('Ledgers/updateState', {ledgerID: ''});
+            cashbookID.value = ""
+        };
+        const checkRefundLimit = (value) =>{
+
+            if(parseFloat(depNetRefund.value) < parseFloat(value)){
+                toast.error(`Refundable Deposit is ${depNetRefund.value}`)
+                refFormFields.value[5].value = depNetRefund.value;
+            }
         }
+        const refFormFields = ref([
+            {  
+                type:'search-dropdown', label:"Cashbook", value: cashbookID.value, componentKey: ledComponentKey,
+                selectOptions: cashbookArr, optionSelected: handleSelectedLedger, required: true,
+                searchPlaceholder: 'Select Cashbook...', dropdownWidth: '550px', updateValue: "",
+                fetchData: fetchLedgers(), clearSearch: clearSelectedLedger
+            },
+            { type: 'date', name: 'issue_date',label: "Recording Date", value: formatDate(current_date), required: true, maxDate: formatDate(current_date) },
+            { type: 'date', name: 'banking_date',label: "Banking Date", value: formatDate(current_date), required: true, maxDate: formatDate(current_date) },
+            { type: 'dropdown', name: 'payment_method',label: "Payment Method", value: '', placeholder: "", required: true, options: [{ text: 'Cash', value: 'Cash' }, { text: 'Mpesa', value: 'Mpesa' },{ text: 'Bank Deposit', value: 'Bank Deposit' }, { text: 'Cheque', value: 'Cheque' },{ text: 'Check-off', value: 'Check-off' }, { text: 'RTGS', value: 'RTGS' },{ text: 'EFT', value: 'EFT' }, { text: 'Not Applicable', value: 'Not Applicable' }] },
+            { type: 'text', name: 'reference_no',label: "Reference No", value: '', required: true,},
+            { type: 'number', name: 'total_amount',label: "Amount", value: computedNetRefund.value, required: true , method: checkRefundLimit},
+        ]);
+        const handleRefReset = () =>{
+            for(let i=0; i < refFormFields.value.length; i++){
+                refFormFields.value[i].value = '';
+            }
+            tenantID.value = null;
+            cashbookID.value = null;
+            ledComponentKey.value +=1;
+        }
+        const showRefModalLoader = () =>{
+            ref_modal_loader.value = "block";
+        }
+        const hideRefModalLoader = () =>{
+            ref_modal_loader.value = "none";
+        }
+        const processTenantRefund = async() =>{
+            showRefModalLoader();
+            let formData = {
+                cashbook: cashbookID.value,
+                issue_date: refFormFields.value[1].value,
+                tenant: tenantID.value,
+                banking_date: refFormFields.value[2].value,
+                amount: refFormFields.value[5].value,
+                payment_method: refFormFields.value[3].value,
+                reference_no: refFormFields.value[4].value,
+                user: userID.value,
+                company: companyID.value
+            }
+            axios.post(`api/v1/process-tenant-deposit-refund/`,formData)
+            .then((response)=>{
+                if(response.data.msg == "Success"){
+                    toast.success("Refund Added Successfully")
+                    closeRefModal();
+                    searchTenants();
+                }else{
+                    toast.error("Error Adding Refund")
+                }                   
+            })
+            .catch((error)=>{
+                console.log(error.message);
+                toast.error(error.message)
+                hideRefModalLoader();
+            })
+            .finally(()=>{
+                hideRefModalLoader();
+            })
+              
+        };
+        const closeRefModal = () =>{
+            refModalVisible.value = false;
+            handleRefReset();
+            hideRefModalLoader();
+        };
         const handleSelectionChange = (ids) => {
             selectedIds.value = ids;
         };
@@ -479,7 +590,23 @@ export default{
                 
 
             }else if( action == 'tenant-refund'){
+                tenantID.value = row['tenant_lease_id'];
+                netRefund.value = row['net_refund'];
+                depNetRefund.value = row['net_refund'];
+                const refundedAmnt = row['refunded_amount'];
+                const depClaim = row['deposit_claim_status'];
 
+                if (refundedAmnt == depNetRefund.value){
+                    toast.error("Refund Already Processed")
+                }else if (depClaim == "No"){
+                    toast.error("Deposit Claim Not Done")
+                }
+                else{
+                    refModalVisible.value = true;
+                    flex_basis.value = '1/3';
+                    flex_basis_percentage.value = '33.333';
+                }
+                
             }
         }
         
@@ -514,16 +641,20 @@ export default{
         onBeforeMount(()=>{
             searchTenants();
             
+        });
+        onMounted(()=>{
+            fetchAllLedgers();
         })
         return{
-            searchTenants,resetFilters, searchFilters, tableColumns, tenantList,dropdownWidth,showAddButton,
-            propResults, propArrLen, propCount, pageCount, showNextBtn, showPreviousBtn,
+            searchTenants,resetFilters, searchFilters, tableColumns, tenantList,dropdownWidth,showAddButton,displayButtons,
+            propResults, propArrLen, propCount, pageCount, showNextBtn, showPreviousBtn,flex_basis,flex_basis_percentage,
             loadPrev, loadNext, firstPage, lastPage, idField, actions, handleActionClick,
             submitButtonLabel, showModal, showLoader, loader, hideLoader,
             handleSelectionChange,rightsModule,printTenantsList,selectSearchQuantity,selectedValue,
             modal_left,modal_top,modal_width,trans_modal_loader,transModalVisible,title,showTransModalLoader,hideTransModalLoader,closeTransModal,
             fetchExitCharges, handleSelectedExitCharge, clearSelectedExitCharge,chargesArr,unitComponentKey,chargesColumns,chargeActions,chargesRows,
-            chargeIdField,selectionChargeChanged,handleExitChargeActions,tableCompKey,billMoveOutCharges,billedStatus
+            chargeIdField,selectionChargeChanged,handleExitChargeActions,tableCompKey,billMoveOutCharges,billedStatus,
+            refModalVisible,refTitle,showRefModalLoader,hideRefModalLoader,closeRefModal,processTenantRefund,refFormFields
         }
     }
 };
