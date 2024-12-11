@@ -106,12 +106,17 @@ export default{
             {label: "Phone Number", key: "phone_number"},
             {label: "Property Name", key:"property_name"},
             {label: "Unit", key:"unit_number"},
-            {label: "Deposit", key:"deposit_held"},
+            {label: "Deposit", key:"formatted_deposit_held"},
+            {label: "Arrears", key:"outstanding_balance"},
             {label: "Charges", key:"exit_charges"},
             {label: "Net Refund", key:"net_refund"},
+            {label: "Claim.", key:"deposit_claim_status"},
+            {label: "Ref.", key:"refund_status"},
         ])
         const actions = ref([
-            {name: 'bill-charges', icon: 'fa fa-file-pdf-o', title: 'Add Charges', rightName: 'Terminate Lease'},
+            {name: 'bill-charges', icon: 'fa fa-file-pdf-o', title: 'Add Charges', rightName: 'Tenant Move Out'},
+            {name: 'utilize-deposit', icon: 'fa fa-credit-card', title: 'Utilize Deposit', rightName: 'Tenant Move Out'},
+            {name: 'tenant-refund', icon: 'fa fa-hand-holding-usd', title: 'Refund Tenant', rightName: 'Tenant Move Out'},
         ]);
         const chargesColumns = ref([
             {type: "checkbox"},
@@ -119,11 +124,12 @@ export default{
             {label: "Amount", key:"value",type: "number", editable: true},
         ]);
         const chargeActions = ref([
-            {name: 'add-charge', icon: 'fa fa-check', title: 'Add Charge', rightName: 'Terminate Lease'},
-            {name: 'delete', icon: 'fa fa-trash', title: 'Delete Charge', rightName: 'Terminate Lease'},
+            {name: 'add-charge', icon: 'fa fa-check', title: 'Add Charge', rightName: 'Tenant Move Out'},
+            {name: 'delete', icon: 'fa fa-trash', title: 'Delete Charge', rightName: 'Tenant Move Out'},
         ]);
         const chargesRows = computed(()=> store.state.Exit_Charges.exitChargesArray);
         const companyID = computed(()=> store.state.userData.company_id);
+        const userID = computed(()=> store.state.userData.user_id);
         const propertyID = ref(null);
         const chargeID = ref(null);
         const chargeName = ref(null);
@@ -219,6 +225,7 @@ export default{
                 if(response.data.msg == "Success"){
                     toast.success("Succesfully Billed Exit Charges")
                     closeTransModal();
+                    searchTenants();
                 }else{
                     toast.error("Error Billing Charges")
                 }
@@ -407,6 +414,72 @@ export default{
                 tenantMoveOutID.value = row['tenant_moveout_id'];
                 tenantID.value = row['tenant_lease_id'];
                 await fetchTenantCharges(tenantID.value)
+            }else if( action == 'utilize-deposit'){
+                const outstBal = row['outstanding_balance'];
+                const exitCharges = row['exit_charges'];
+                const depHeld = row['deposit_held'];
+                const netRefund = row['net_refund'];
+                const depClaim = row['deposit_claim_status'];
+
+                if(depClaim == "Yes"){
+                    toast.error("Deposit Already Claimed")
+                }else{
+                    if(outstBal == 0 && exitCharges == 0){
+                        toast.error("Tenant Has No Outstanding Charge")
+                    }else{
+                        let formData = {
+                            tenant: row['tenant_id'],
+                            amount: depHeld,
+                            tenant_code: row['tenant_code'],
+                            user: userID.value,
+                            company: companyID.value
+                        }
+                        Swal.fire({
+                            title: "Are you sure?",
+                            text: `Do you wish to Utilize Deposit?`,
+                            type: 'warning',
+                            showCloseButton: true,
+                            showCancelButton: true,
+                            confirmButtonText: 'Yes Utilize Deposit!',
+                            cancelButtonText: 'Cancel!',
+                            customClass: {
+                                confirmButton: 'swal2-confirm-custom',
+                                cancelButton: 'swal2-cancel-custom',
+                            },
+                            showLoaderOnConfirm: true,
+                            }).then((result) => {
+                            if (result.value) {
+                                axios.post(`api/v1/utilize-tenant-deposit/`,formData)
+                                .then((response)=>{
+                                    if(response.data.msg == "Success"){
+                                        Swal.fire("Success!", {
+                                            icon: "success",
+                                        }); 
+                                        searchTenants();
+                                    }else{
+                                        Swal.fire({
+                                            title: "Error Utilizing Deposit",
+                                            icon: "warning",
+                                        });
+                                    }                   
+                                })
+                                .catch((error)=>{
+                                    console.log(error.message);
+                                    Swal.fire({
+                                        title: error.message,
+                                        icon: "warning",
+                                    });
+                                })
+                            }else{
+                                Swal.fire(`Deposit has not been utilized!`);
+                            }
+                        })
+                    }
+                }
+                
+
+            }else if( action == 'tenant-refund'){
+
             }
         }
         

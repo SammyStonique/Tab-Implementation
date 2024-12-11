@@ -335,7 +335,8 @@ export default{
                 const journalID = [row['journal_id']];
                 let formData = {
                     company: companyID.value,
-                    journal: journalID
+                    journal: journalID,
+                    txn_type: "RCPT",
                 }
                 await store.dispatch('Journals/deleteReceipt',formData)
                 mainComponentKey.value += 1;
