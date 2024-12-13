@@ -188,7 +188,7 @@
                             <p class="">Property Statements</p>
                         </button>
                     </div>
-                    <div class="py-2 px-3 pl-4 w-full hover:bg-slate-500 hover:w-full">
+                    <div class="py-2 px-3 pl-4 w-full hover:bg-slate-500 hover:w-full" v-if="user_profile == 'Super Admin'">
                         <button class="flex text-sm" @click="openPage({'PMS':'Statement_Transactions'})">
                         <i class="fa fa-money-bill pt-2 mr-2" aria-hidden="true"></i>
                         <p class="">Statement Transactions</p>
@@ -203,7 +203,7 @@
                         <p class="pt-1.5">Settings</p>
                     </button>
                 </div>
-                <div class="dropdown-content w-48 absolute rounded border border-gray-200 bg-white shadow-slate-400 shadow-sm" v-if="settings_dropdown">
+                <div class="dropdown-content w-56 absolute rounded border border-gray-200 bg-white shadow-slate-400 shadow-sm" v-if="settings_dropdown">
                     <div class="py-2 px-3 pl-4 w-full hover:bg-slate-500 hover:w-full">
                         <button class="flex text-sm" @click="openPage({'PMS':'Utilities'})">
                             <i class="fa fa-water pt-2 mr-2" aria-hidden="true"></i>
@@ -240,6 +240,12 @@
                         <p class="">Posting Acc. Mapping</p>
                         </button>
                     </div>
+                    <div class="py-2 px-3 pl-4 w-full hover:bg-slate-500 hover:w-full">
+                        <button class="flex text-sm" @click="openPage({'PMS':'Templates'})">
+                        <i class="fa fa-image pt-2 mr-2" aria-hidden="true"></i>
+                        <p class="">User Defined Templates</p>
+                        </button>
+                    </div>
                 </div>
             </div>        
         </div>
@@ -247,12 +253,13 @@
 </template>
 
 <script>
-import { ref } from 'vue';
+import { ref,computed } from 'vue';
 import { useStore } from 'vuex';
 import { defineComponent } from 'vue';
 export default defineComponent({
     setup(_, { emit }){
         const store = useStore();
+        const user_profile = computed(()=> store.state.userData.user_profile);
         const settings_dropdown = ref(false);
         const property_dropdown = ref(false);
         const units_dropdown = ref(false);
@@ -334,14 +341,9 @@ export default defineComponent({
             store.commit('modulesTab/MINIMIZE_TAB')
         };
         return{
-            dropdown, settings_dropdown, units_dropdown,
-            property_dropdown, finances_dropdown,
-            tenants_dropdown, statement_dropdown,
-            userDetails, closeDropdown,
-            showPropertyDropdown, showUnitsDropdown,
-            showTenantsDropdown, showFinancesDropdown,
-            showSettingsDropdown, showStatementDropdown,
-            openPage,showHomePage
+            dropdown, settings_dropdown, units_dropdown, property_dropdown, finances_dropdown,tenants_dropdown, statement_dropdown,
+            user_profile,userDetails, closeDropdown,showPropertyDropdown, showUnitsDropdown,showTenantsDropdown, showFinancesDropdown,
+            showSettingsDropdown, showStatementDropdown,openPage,showHomePage
         }
     },
 

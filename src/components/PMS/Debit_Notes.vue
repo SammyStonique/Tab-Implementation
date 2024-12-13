@@ -131,22 +131,10 @@ export default{
             await store.dispatch('Properties_List/updateState', {propertyID: ''});
             propertySearchID.value = ""
         }
-        const client_name_search = computed({
-            get: () => store.state.Journals.client_name_search,
-            set: (value) => store.commit('Journals/SET_SEARCH_FILTERS', {"client_name_search":value}),
-        });
-        const client_code_search = computed({
-            get: () => store.state.Journals.client_code_search,
-            set: (value) => store.commit('Journals/SET_SEARCH_FILTERS', {"client_code_search":value}),
-        });
-        const from_date_search = computed({
-            get: () => store.state.Journals.from_date_search,
-            set: (value) => store.commit('Journals/SET_SEARCH_FILTERS', {"from_date_search":value}),
-        });
-        const to_date_search = computed({
-            get: () => store.state.Journals.to_date_search,
-            set: (value) => store.commit('Journals/SET_SEARCH_FILTERS', {"to_date_search":value}),
-        });
+        const client_name_search = ref('');
+        const client_code_search = ref('');
+        const from_date_search = ref('');
+        const to_date_search = ref('');
         const searchFilters = ref([
             {type:'text', placeholder:"Tenant Code...", value: client_code_search, width:36},
             {type:'text', placeholder:"Tenant Name...", value: client_name_search, width:64},
@@ -293,6 +281,10 @@ export default{
             searchInvoices(selectedValue.value);
         };
         const resetFilters = () =>{
+            client_name_search.value = "";
+            client_code_search.value = "";
+            from_date_search.value = "";
+            to_date_search.value = "";
             store.commit('Journals/RESET_SEARCH_FILTERS')
             searchInvoices();
         }

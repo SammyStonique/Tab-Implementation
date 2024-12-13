@@ -81,6 +81,7 @@ export default{
         const toast = useToast();
         const loader = ref('');
         const displayButtons = ref(true);
+        const propComponentKey = ref(0);
         const unitComponentKey = ref(0);
         const utilComponentKey = ref(0);
         const taxComponentKey = ref(0);
@@ -172,7 +173,7 @@ export default{
             {type:'text', placeholder:"Name...", value: name_search, width:48,},
             {type:'text', placeholder:"Code...", value: tenant_code_search, width:48,},
             {
-                type:'search-dropdown', value: properties_array, width:48,
+                type:'search-dropdown', value: properties_array, width:48, componentKey: propComponentKey,
                 selectOptions: properties_array, optionSelected: handleSelectedProperty,
                 searchPlaceholder: 'Property...', dropdownWidth: '300px',
                 fetchData: store.dispatch('Properties_List/fetchProperties', {company:companyID.value}),
@@ -456,6 +457,8 @@ export default{
             searchTenants(selectedValue.value);
         };
         const resetFilters = () =>{
+            propComponentKey.value += 1;
+            propertyID.value = "";
             store.commit('Active_Tenants/RESET_SEARCH_FILTERS')
             searchTenants();
         }

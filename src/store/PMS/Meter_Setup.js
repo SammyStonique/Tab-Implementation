@@ -23,7 +23,6 @@ const state = {
     SET_SELECTED_SETUP(state, setup) {
       state.selectedSetup = setup;
       state.isEditing = true;
-      console.log("THE SELECTED SETUP IS ",state.selectedSetup)
     },
     SET_SELECTED_PROPERTY(state, property) {
       state.selectedProperty = property;

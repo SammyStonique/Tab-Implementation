@@ -4,15 +4,27 @@
             <div class="mt-6">
                 <DynamicForm  :fields="formFields" :flex_basis="flex_basis" :flex_basis_percentage="flex_basis_percentage" :displayButtons="displayButtons" @handleSubmit="saveProperty" @handleReset="handleReset"> 
                     <template v-slot:additional-content>
-                        <div class="border border-slate-200 rounded relative py-3 mt-3 px-2 flex">
+                        <div class="border border-slate-200 rounded relative py-3 mt-3 px-2 min-h-[450px]">
                             <h1 class="font-bold absolute top-[-13px] left-5 bg-white">Penalty & Payment Terms</h1>
-                            <div class="px-3">
+                            <div class="px-3 flex">
                                 <DynamicForm :fields="additionalFields" :flex_basis="additional_flex_basis" :flex_basis_percentage="additional_flex_basis_percentage" @handleReset="handleReset"/>
                             </div>
+                            <div class="px-3 flex">
+                                <div class="basis-1/2 text-left">
+                                    <label for="">Payment Info:</label><br />
+                                    <quill-editor :key="editorComponentKey" v-model:value="paymentInfo"></quill-editor>
+                                </div>
+                                <div class="basis-1/2 text-left">
+                                    <label for="" class="text-left">Payment Terms:</label><br />
+                                    <quill-editor :key="editorComponentKey" v-model:value="paymentTerms"></quill-editor>
+                                </div>
+                            </div>
+                            
                         </div>
                     </template>
                 </DynamicForm>
             </div>
+            
         </template>
     </PageStyleComponent>
 </template>
@@ -24,17 +36,19 @@ import PageStyleComponent from '@/components/PageStyleComponent.vue';
 import { useStore } from "vuex";
 import { useDateFormatter } from '@/composables/DateFormatter';
 import { useToast } from "vue-toastification";
+import { quillEditor } from 'vue3-quill'
 
 export default defineComponent({
     name: 'Property_Details',
     components:{
-        PageStyleComponent, DynamicForm
+        PageStyleComponent, DynamicForm,quillEditor
     },
     setup(){
         const store = useStore();
         const toast = useToast();
         const loader = ref('none');
         const mainComponentKey = ref(0);
+        const editorComponentKey = ref(0);
         const componentKey = ref(0);
         const landComponentKey = ref(0);
         const zoneComponentKey = ref(0);
@@ -53,6 +67,8 @@ export default defineComponent({
         const landlordID = ref('');
         const zoneArray = computed(() => store.state.Zones.zoneArr);
         const zoneID = ref('');
+        const paymentInfo = ref('');
+        const paymentTerms = ref('');
 
         const handleSelectedLandlord = async(option) =>{
             await store.dispatch('Landlords_List/handleSelectedLandlord', option)
@@ -110,12 +126,22 @@ export default defineComponent({
             for(let i=0; i < additionalFields.value.length; i++){
                 additionalFields.value[i].value = '';
             }
+            landComponentKey.value += 1;
+            zoneComponentKey.value += 1;
+            mainComponentKey.value += 1;
+            editorComponentKey.value += 1;
+            paymentInfo.value = "";
+            paymentTerms.value = "";
         }
 
         watch([selectedProperty, selectedLandlord, selectedZone], () => {
             if (selectedProperty.value && selectedLandlord.value && selectedZone.value) {
                 landComponentKey.value += 1;
                 zoneComponentKey.value += 1;
+                paymentInfo.value = selectedProperty.value.payment_info;
+                paymentTerms.value = selectedProperty.value.payment_terms;
+                mainComponentKey.value += 1;
+                editorComponentKey.value += 1;
                 updateFormFields();
             }
         }, { immediate: true });
@@ -126,14 +152,16 @@ export default defineComponent({
                 { type: 'dropdown', name: 'penalize',label: "Penalize", value: selectedProperty.value?.penalize || '', placeholder: "Penalize", required: false, options: [{ text: 'Yes', value: 'True' }, { text: 'No', value: 'False' }] },
                 { type: 'dropdown', name: 'penalty_charge_mode',label: "Penalty Charge Mode", value: selectedProperty.value?.penalty_charge_mode || '', placeholder: "Charge Mode", required: false, options: [{ text: 'Fixed Amount', value: 'Fixed Amount' }, { text: 'Rent Percentage', value: 'Rent Percentage' }] },
                 { type: 'text', name: 'penalty_day',label: "Penalty Day", value: selectedProperty.value?.penalty_day || '', required: false },
-                {type:'text-area', label:"Payment Info", value: selectedProperty.value?.payment_info || '', textarea_rows: '2', textarea_cols: '48', required: true},
-                {type:'text-area', label:"Payment Terms", value: selectedProperty.value?.payment_terms || '', textarea_rows: '2', textarea_cols: '48', required: true},
             ];
         };
         watch([selectedProperty, selectedLandlord, selectedZone], () => {
             if(selectedProperty.value  && selectedLandlord.value && selectedZone.value){
                 landComponentKey.value += 1;
                 zoneComponentKey.value += 1;
+                paymentInfo.value = selectedProperty.value.payment_info;
+                paymentTerms.value = selectedProperty.value.payment_terms;
+                mainComponentKey.value += 1;
+                editorComponentKey.value += 1;
                 updateAdditionalFormFields();
             }
             
@@ -159,8 +187,8 @@ export default defineComponent({
                 penalize: additionalFields.value[0].value,
                 penalty_charge_mode: additionalFields.value[1].value,
                 penalty_day: additionalFields.value[2].value,
-                payment_terms: additionalFields.value[4].value,
-                payment_info: additionalFields.value[3].value,
+                payment_terms: paymentTerms.value,
+                payment_info: paymentInfo.value,
                 zone: zoneID.value,
                 zone_id: zoneID.value,
                 landlord: landlordID.value,
@@ -183,7 +211,6 @@ export default defineComponent({
             }
             if(errors.value.length){
                 toast.error('Fill In Required Fields');
-                console.log("THE ERRORS ARRAY IS ",errors.value);
                 hideLoader();                 
             }else{            
                 try {
@@ -241,26 +268,26 @@ export default defineComponent({
                     penalize: additionalFields.value[0].value,
                     penalty_charge_mode: additionalFields.value[1].value,
                     penalty_day: additionalFields.value[2].value,
-                    payment_terms: additionalFields.value[4].value,
-                    payment_info: additionalFields.value[3].value,
+                    payment_terms: paymentTerms.value,
+                    payment_info: paymentInfo.value,
                     zone: zoneValue.value,
                     zone_id: zoneValue.value,
                     landlord: landlordValue.value,
                     landlord_id: landlordValue.value,
                 };
-                console.log("THE updatedProperty DAAATA IS ",updatedProperty)
+       
                 try {
                         const response = await store.dispatch('Properties_List/updateProperty', updatedProperty);
                         if (response && response.status === 200) {
                             hideLoader();
                             toast.success('Property updated successfully!');
                             handleReset();
+                            await store.dispatch('Landlords_List/updateState',{landlordID:''})
+                            await store.dispatch('Zones/updateState',{zoneID:''})
+                            await store.dispatch("Properties_List/updateState",{selectedProperty:null,selectedLandlord:null,selectedZone:null})
                             landComponentKey.value += 1;
                             zoneComponentKey.value += 1;
                             mainComponentKey.value += 1;
-                            store.dispatch('Landlords_List/updateState',{landlordID:''})
-                            store.dispatch('Zones/updateState',{zoneID:''})
-                            store.dispatch("Properties_List/updateState",{selectedProperty:null,selectedLandlord:null,selectedZone:null})
                         } else {
                             toast.error('An error occurred while updating the property.');
                             hideLoader();
@@ -298,8 +325,8 @@ export default defineComponent({
 
         return{
             componentKey, formFields, additionalFields, flex_basis, flex_basis_percentage, additional_flex_basis,
-            additional_flex_basis_percentage, displayButtons, saveProperty, mainComponentKey,
-            handleReset, isEditing, loader, showLoader, hideLoader
+            additional_flex_basis_percentage, displayButtons, saveProperty, mainComponentKey,editorComponentKey,
+            handleReset, isEditing, loader, showLoader, hideLoader,paymentInfo,paymentTerms
         }
     }
 })

@@ -6,10 +6,10 @@
                     <DynamicForm  :fields="formFields" :flex_basis="flex_basis" :flex_basis_percentage="flex_basis_percentage" @handleReset="handleReset" /> 
                     <button @click="fetchTenantReadings" class="rounded bg-green-400 text-sm h-8 w-24 mt-2 text-white px-1.5 py-1.5"><i class="fa fa-check-circle text-xs mr-1.5" aria-hidden="true"></i>Load</button>
                 </div>
-                <div class="min-h-[350px]">
+                <div class="min-h-[480px]">
                     <DynamicTable :key="tableKey" :columns="readingColumns" :rows="readingRows" :showActions="showActions" :idField="idField" :actions="actions" />
                 </div>
-                <div>
+                <div class="flex-1 basis-full px-2 mt-6">
                     <button @click="createBatchReading" class="rounded bg-green-400 text-sm mr-2  text-white px-2 py-1.5"><i class="fa fa-check-circle text-xs mr-1.5" aria-hidden="true"></i>Save</button>
                     <button @click="handleReset" class="rounded bg-green-400 text-sm mr-2  text-white px-2 py-1.5"><i class="fa fa-refresh text-xs mr-1.5" aria-hidden="true"></i>Reset</button>
                 </div>
@@ -161,12 +161,13 @@ export default defineComponent({
                 }
             }
             for(let i=0; i<readingRows.value.length; i++){
-                if(readingRows.value[i].total < 0){
+                if(parseFloat(readingRows.value[i].total) < 0){
                     tableValidation.push('Invalid Total');
-                }else if(readingRows.value[i].current_reading < readingRows.value[i].prev_reading){
+                }else if(parseFloat(readingRows.value[i].current_reading) < parseFloat(readingRows.value[i].prev_reading)){
                     tableValidation.push('Invalid Total');
                 }
             }
+  
             if(propertyID.value == '' || setupID.value == ''){
                 errors.value.push('Error');
             }

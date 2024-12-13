@@ -67,6 +67,8 @@ import Exit_Charges from '@/components/PMS/Exit_Charges.vue';
 import Tenant_Move_Out from '@/components/PMS/Tenant_Move_Out.vue';
 
 import Default_Settings from '@/components/SET/Default_Settings.vue';
+import Templates from '@/components/PMS/Templates.vue';
+import Design_Template from '@/components/PMS/Design_Template.vue';
 
 export default{
     components:{
@@ -79,7 +81,7 @@ export default{
         Tenant_Arrears,Lease_Fees,Debit_Notes,Credit_Notes,Debit_Note_Details,Credit_Note_Details,Terminated_Leases,Term_Lease_Statement,
         Exit_Charges,Tenant_Move_Out,Import_Property_Units,Import_Properties,Import_Tenants,
         
-        Default_Settings
+        Default_Settings,Templates,Design_Template
     },
     props: {
         title: {

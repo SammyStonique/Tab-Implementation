@@ -20,7 +20,7 @@
                     :searchPlaceholder="searchPlaceholder"
                     />
             </div>
-            <div class="table-container  min-h-[330px] text-xs mt-20 uppercase flex">
+            <div class="table-container  min-h-[600px] text-xs mt-20 uppercase flex">
                 <div class="basis-1/2">
                   <h3 class="font-bold uppercase text-center my-3">Assets</h3>
                   <table class="min-w-full bg-white chart-of-accounts-table" style="width: 50%;"> 

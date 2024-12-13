@@ -27,6 +27,8 @@
             @lastPage="lastPage"
             :showNextBtn="showNextBtn"
             :showPreviousBtn="showPreviousBtn"
+            :selectedValue="selectedValue"
+            @selectSearchQuantity="selectSearchQuantity"
         />
         <MovableModal v-model:visible="propModalVisible" :title="title" :modal_top="modal_top" :modal_left="modal_left" :modal_width="modal_width"
             :loader="modal_loader" @showLoader="showModalLoader" @hideLoader="hideModalLoader" @closeModal="closeModal">
@@ -71,6 +73,7 @@ export default{
         const propArrLen = ref(0);
         const propCount = ref(0);
         const pageCount = ref(0);
+        const selectedValue = ref(50);
         const currentPage = ref(1);
         const showNextBtn = ref(false);
         const showPreviousBtn = ref(false);
@@ -176,13 +179,13 @@ export default{
                 {
                     type:'search-dropdown', label:"Property", value: propertyValue.value, componentKey: propComponentKey,
                     selectOptions: propertyArray, optionSelected: handleSelectedProperty, required: true,
-                    searchPlaceholder: 'Select Property...', dropdownWidth: '420px', updateValue: selectedProperty.value,
+                    searchPlaceholder: 'Select Property...', dropdownWidth: '500px', updateValue: selectedProperty.value,
                     fetchData: fetchProperties(), clearSearch: clearSelectedProperty()            
                 },
                 {
                     type:'search-dropdown', label:"Utility", value: utilityValue.value, componentKey: utilComponentKey,
                     selectOptions: utilityArray, optionSelected: handleSelectedUtility, required: true,
-                    searchPlaceholder: 'Select Utility...', dropdownWidth: '420px', updateValue: selectedUtility.value,
+                    searchPlaceholder: 'Select Utility...', dropdownWidth: '500px', updateValue: selectedUtility.value,
                     fetchData: fetchUtilities(), clearSearch: clearSelectedUtility()  
                 },
                 { type: 'date', name: 'date',label: "Date", value: selectedSetup.value?.date || '', required: true },
@@ -384,7 +387,8 @@ export default{
             let formData = {
                 property: propertySearchID.value,
                 utility: utilitySearchID.value,
-                company_id: companyID.value
+                company_id: companyID.value,
+                page_size: selectedValue.value
             } 
             axios
             .post(`api/v1/meter-costings-search/?page=${currentPage.value}`,formData)
@@ -394,7 +398,7 @@ export default{
                 propResults.value = response.data;
                 propArrLen.value = setupList.value.length;
                 propCount.value = propResults.value.count;
-                pageCount.value = Math.ceil(propCount.value / 50);
+                pageCount.value = Math.ceil(propCount.value / selectedValue.value);
                 if(response.data.next){
                     showNextBtn.value = true;
                 }
@@ -408,7 +412,11 @@ export default{
             .finally(()=>{
                 hideLoader();
             })
-        }
+        };
+        const selectSearchQuantity = (newValue) =>{
+            selectedValue.value = newValue;
+            searchMeterSetups(selectedValue.value);
+        };
         const resetFilters = () =>{
             store.commit('Meter_Setup/RESET_SEARCH_FILTERS')
             searchMeterSetups();
@@ -491,7 +499,7 @@ export default{
         })
         return{
             title, searchMeterSetups,resetFilters, addButtonLabel, searchFilters, tableColumns, setupList,
-            propResults, propArrLen, propCount, pageCount, showNextBtn, showPreviousBtn,
+            propResults, propArrLen, propCount, pageCount, showNextBtn, showPreviousBtn,selectSearchQuantity,selectedValue,
             loadPrev, loadNext, firstPage, lastPage, idField, actions, handleActionClick, propModalVisible, closeModal,
             submitButtonLabel, showModal, addNewSetup, showLoader, loader, hideLoader, modal_loader, modal_top, modal_left, modal_width,displayButtons,
             showModalLoader, hideModalLoader, saveMeterSetup, formFields, handleSelectionChange, flex_basis,flex_basis_percentage,

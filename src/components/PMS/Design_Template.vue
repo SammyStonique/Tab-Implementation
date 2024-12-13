@@ -1,0 +1,196 @@
+<template>
+    <PageStyleComponent :key="mainComponentKey" :loader="loader" @showLoader="showLoader" @hideLoader="hideLoader">
+        <template v-slot:body>
+            <div class="mt-6">
+                <div class="flex text-left mb-6">
+                    <div class="basis-1/4"></div>
+                    <div class="basis-1/2 flex">
+                        <div class="basis-1/3 mr-6">
+                            <label for="">Template Name:<em>*</em></label><br />
+                            <input v-model="templateName" type="text" :class="`bg-slate-50 rounded pl-3 border border-gray-400 text-base w-full`"/>
+                        </div>
+                        <div class="basis-1/3 mr-6">
+                            <label for="">Template Type:<em>*</em></label><br />
+                            <select v-model="templateType" class="bg-slate-50 rounded border border-gray-400 text-sm pl-2 pt-2 w-full">
+                                <option value="" selected disabled></option>
+                                <option value="Tenancy Agreement">Tenancy Agreement</option>
+                                <option value="Termination Notice">Termination Notice</option>
+                                <option value="Eviction Notice">Eviction Notice</option>
+                                <option value="Vacation Notice">Vacation Notice</option>
+                                <option value="Repair Notice">Repair Notice</option>
+                            </select>
+                        </div>
+                        <div class="basis-1/3">
+                            <div class="flex-1 basis-full px-2 mt-6">
+                                <button @click="saveTemplate" class="rounded bg-green-400 text-sm mr-2  text-white px-2 py-1.5"><i class="fa fa-check-circle text-xs mr-1.5" aria-hidden="true"></i>Save</button>
+                                <button @click="handleReset" class="rounded bg-green-400 text-sm mr-2  text-white px-2 py-1.5"><i class="fa fa-refresh text-xs mr-1.5" aria-hidden="true"></i>Reset</button>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="basis-1/4">
+                    </div>
+                </div>
+                <div class="flex min-h-[550px]">
+                    <div class="basis-1/4"></div>
+                    <div class="basis-1/2 text-left">
+                        <quill-editor :key="editorComponentKey" v-model:value="templateContent"></quill-editor>
+                    </div>
+                    <div class="basis-1/4"></div>
+                </div>
+            </div>
+        </template>
+    </PageStyleComponent>
+</template>
+
+<script>
+import { defineComponent, ref, onBeforeMount, onMounted, computed, watch } from 'vue';
+import PageStyleComponent from '@/components/PageStyleComponent.vue';
+import { useStore } from "vuex";
+import { useToast } from "vue-toastification";
+import { quillEditor } from 'vue3-quill'
+
+export default defineComponent({
+    name: 'Design_Template',
+    components:{
+        PageStyleComponent, quillEditor
+    },
+    setup(){
+        const store = useStore();
+        const toast = useToast();
+        const loader = ref('none');
+        const mainComponentKey = ref(0);
+        const editorComponentKey = ref(0);
+        const errors = ref([]);
+        const companyID = computed(()=> store.state.userData.company_id);
+        const idField = ref('');
+        const selectedTemplate = computed(()=> store.state.Templates.selectedTemplate);
+        const isEditing = computed(()=> store.state.Templates.isEditing);
+        const templateContent = ref('');
+        const templateName = ref('');
+        const templateType = ref('');
+
+        const handleReset = async() =>{
+            editorComponentKey.value += 1;
+            templateContent.value = "";
+            templateName.value = "";
+            templateType.value = "";
+        }
+        watch([selectedTemplate], () => {
+            if (selectedTemplate.value) {
+                editorComponentKey.value += 1;
+                templateContent.value = selectedTemplate.value.template_content;
+                templateName.value = selectedTemplate.value.template_name;
+                templateType.value = selectedTemplate.value.template_type;
+            }
+            
+        }, { immediate: true });
+         
+        const showLoader = () =>{
+            loader.value = "block";
+        }
+        const hideLoader = () =>{
+            loader.value = "none";
+        } 
+        const createTemplate = async() =>{
+            showLoader();
+            let formData = {
+                company: companyID.value,
+                template_name: templateName.value,
+                template_type: templateType.value,
+                template_content: templateContent.value,
+            }
+
+            errors.value = [];
+            if(templateName.value == '' || templateType.value == ''){
+                errors.value.push('Error');
+            }
+            if(errors.value.length){
+                toast.error('Fill In Required Fields');
+                hideLoader();                 
+            }else{            
+                try {
+                    const response = await store.dispatch('Templates/createTemplate', formData);
+                    if (response && response.status === 200) {
+                        hideLoader();
+                        toast.success('Template created successfully!');
+                        handleReset();
+                        mainComponentKey.value += 1;
+                    } else {
+                        toast.error('An error occurred while creating the Template.');
+                        hideLoader();
+                    }
+                } catch (error) {
+                    console.error(error.message);
+                    toast.error('Failed to create Template: ' + error.message);
+                } finally {
+                    hideLoader();
+                }              
+            }
+        }
+        const updateTemplate = async() =>{
+            showLoader();
+            let formData = {
+                company: companyID.value,
+                template_name: templateName.value,
+                template_type: templateType.value,
+                template_content: templateContent.value,
+                property_template: selectedTemplate.value.property_template_id
+            }
+
+            errors.value = [];
+            if(templateName.value == '' || templateType.value == ''){
+                errors.value.push('Error');
+            }
+            if(errors.value.length){
+                toast.error('Fill In Required Fields');
+                hideLoader();                 
+            }else{            
+                try {
+                    const response = await store.dispatch('Templates/updateTemplate', formData);
+                    if (response && response.status === 200) {
+                        hideLoader();
+                        toast.success('Template update successfully!');
+                        handleReset();
+                        mainComponentKey.value += 1;
+                    } else {
+                        toast.error('An error occurred while updating the Template.');
+                        hideLoader();
+                    }
+                } catch (error) {
+                    console.error(error.message);
+                    toast.error('Failed to create Template: ' + error.message);
+                } finally {
+                    hideLoader();
+                }              
+            }
+        };
+        const saveTemplate = () =>{
+            if(isEditing.value == true){
+                updateTemplate();
+            }else{
+                createTemplate();
+            }
+        }
+        onBeforeMount(()=>{ 
+            editorComponentKey.value += 1;
+
+        })
+        onMounted(()=>{
+
+        })
+
+        return{
+            saveTemplate, mainComponentKey,handleReset, loader, showLoader, hideLoader, idField,
+            templateContent, templateName, templateType, editorComponentKey
+        }
+    }
+})
+</script>
+
+<style scoped>
+em{
+color: red;
+}
+
+
+</style>

@@ -12,7 +12,7 @@ import "vue-toastification/dist/index.css";
 import DropZone from 'dropzone-vue';
 import 'dropzone-vue/dist/dropzone-vue.common.css';
 import IdleVue from 'idle-vue'
-
+import { quillEditor } from 'vue3-quill'
 
 //SweetAlert Options
 const options = {
@@ -54,4 +54,4 @@ axios.interceptors.request.use(config => {
     return Promise.reject(error);
   });
 
-createApp(App).use(store).use(router).use(VueAxios, axios).use(Toast,toastOptions).use(VueSweetalert2, options).use(DropZone).use(IdleVue, {store, idleTime: 900000}).mount('#app')
+createApp(App).use(store).use(router).use(VueAxios, axios).use(Toast,toastOptions).use(VueSweetalert2, options).use(DropZone).use(IdleVue, {store, idleTime: 900000}).use(quillEditor).mount('#app')
