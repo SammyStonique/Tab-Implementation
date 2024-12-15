@@ -312,12 +312,14 @@ const actions = {
         })
         .catch((error)=>{
             console.log(error.message);
+            axios.get('api/v1/flush-request-session/')
             throw error;
         })
         .finally(()=>{
             const newState ={
                 activeComponent:"Login",
                 isAuthenticated: false,
+                token: ""
             }
             commit('SET_STATE',newState); 
             commit('reloadingPage');

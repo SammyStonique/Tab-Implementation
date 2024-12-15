@@ -92,7 +92,7 @@ export default{
             {type:'text', placeholder:"Template Name...", value: name_search, width:56,},
             {
                 type:'dropdown', placeholder:"Template Type..", value: type_search, width:56,
-                options: [{text:'Tenancy Agreement',value:'Tenancy Agreement'},{text:'Termination Notice',value:'Termination Notice'},{text:'Eviction Notice',value:'Eviction Notice'},{text:'Vacation Notice',value:'Vacation Notice'},{text:'Repair Notice',value:'Repair Notice'}]
+                options: [{text:'Tenancy Agreement',value:'Tenancy Agreement'},{text:'Deposit Return',value:'Deposit Return'},{text:'Termination Notice',value:'Termination Notice'},{text:'Eviction Notice',value:'Eviction Notice'},{text:'Vacation Notice',value:'Vacation Notice'},{text:'Repair Notice',value:'Repair Notice'}]
             },
         ]);
         const handleSelectionChange = (ids) => {

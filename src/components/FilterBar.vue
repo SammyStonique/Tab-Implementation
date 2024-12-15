@@ -39,20 +39,20 @@
       <button class="fixed inset-0 bg-gray-50 opacity-15 cursor-default w-full" v-if="dropdown" @click="dropdown = !dropdown"></button>
       <div class=" text-left text-sm mt-1.5 absolute rounded bg-white w-36 py-1.5 px-1.5 shadow-md shadow-slate-500" v-if="dropdown">
         <div class="actionsDropdown">
-          <button @click="importData">Import</button><br />
-          <button @click="removeItem">Remove</button><br />
-          <button @click="removeSelectedItems">Remove Multiple</button><br />
-          <button @click="displaySideDropdown" @mouseover="hoverDropdown = true" @mouseleave="hoverDropdown = false"><i class="fa fa-caret-left pl-2" aria-hidden="true"></i> Print List</button><br />
+          <button @click="importData" class="hover:bg-slate-500 hover:w-full">Import</button><br />
+          <button @click="removeItem" class="hover:bg-slate-500 hover:w-full">Remove</button><br />
+          <button @click="removeSelectedItems" class="hover:bg-slate-500 hover:w-full">Remove Multiple</button><br />
+          <button @click="displaySideDropdown"><i class="fa fa-caret-left pl-2" aria-hidden="true"></i> Print List</button><br />
         </div>
         <div v-for="(option, index) in dropdownOptions" :key="index">
-          <button @click="handleDynamicOption(option.action)">{{ option.label }}</button><br />
+          <button @click="handleDynamicOption(option.action)" class="hover:bg-slate-500 hover:w-full">{{ option.label }}</button><br />
         </div>
       </div>
       <div class="relative">        
         <div class="absolute left-[-140px] top-20 w-36 bg-white rounded shadow-md py-1.5 px-2 text-sm text-left" v-if="hoverDropdown" @mouseover="hoverDropdown = true" @mouseleave="hoverDropdown = false">
-          <button @click="printList">Print List PDF</button><br />
-          <button @click="printExcel">Download Excel</button><br />
-          <button @click="printCSV">Download CSV</button><br />
+          <button @click="printList" class="hover:bg-slate-500 hover:w-full">Print List PDF</button><br />
+          <button @click="printExcel" class="hover:bg-slate-500 hover:w-full">Download Excel</button><br />
+          <button @click="printCSV" class="hover:bg-slate-500 hover:w-full">Download CSV</button><br />
         </div>
       </div>
     </div>
@@ -180,7 +180,7 @@ export default defineComponent({
       emit('removeSelectedItems');
     };
     const displaySideDropdown = () =>{
-      hoverDropdown.value = true;
+      hoverDropdown.value = !hoverDropdown.value;
     }
     const printList = () =>{
       emit('printList');

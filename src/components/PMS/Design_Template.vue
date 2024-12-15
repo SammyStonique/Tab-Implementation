@@ -14,6 +14,7 @@
                             <select v-model="templateType" class="bg-slate-50 rounded border border-gray-400 text-sm pl-2 pt-2 w-full">
                                 <option value="" selected disabled></option>
                                 <option value="Tenancy Agreement">Tenancy Agreement</option>
+                                <option value="Deposit Return">Deposit Return</option>
                                 <option value="Termination Notice">Termination Notice</option>
                                 <option value="Eviction Notice">Eviction Notice</option>
                                 <option value="Vacation Notice">Vacation Notice</option>
@@ -31,11 +32,154 @@
                     </div>
                 </div>
                 <div class="flex min-h-[550px]">
-                    <div class="basis-1/4"></div>
+                    <div class="basis-1/4">
+                        <table class="text-left">
+                            <tr>
+                                <td class="font-semibold">Selected Date: </td>
+                                <td> &#123;&#123; selected_date &#125;&#125;</td>
+                            </tr>
+                            <h2 class="text-center font-bold uppercase mt-4 mb-4">Company</h2>
+                            <tr>
+                                <td class="font-semibold">Company Name: </td>
+                                <td> &#123;&#123; company_name &#125;&#125;</td>
+                            </tr>
+                            <tr>
+                                <td class="font-semibold">Company Email: </td>
+                                <td> &#123;&#123; company_email &#125;&#125;</td>
+                            </tr>
+                            <tr>
+                                <td class="font-semibold">Company Phone No: </td>
+                                <td> &#123;&#123; company_phone_number &#125;&#125;</td>
+                            </tr>
+                            <tr>
+                                <td class="font-semibold">Company Address: </td>
+                                <td> &#123;&#123; company_address &#125;&#125;</td>
+                            </tr>
+                            <tr>
+                                <td class="font-semibold">Company Town: </td>
+                                <td> &#123;&#123; company_town &#125;&#125;</td>
+                            </tr>
+                            <tr>
+                                <td class="font-semibold">Company Country: </td>
+                                <td> &#123;&#123; company_country &#125;&#125;</td>
+                            </tr>
+                            <tr>
+                                <td class="font-semibold">Company Tax Pin: </td>
+                                <td> &#123;&#123; company_kra_pin &#125;&#125;</td>
+                            </tr>
+                            <h2 class="text-center font-bold uppercase mb-4 mt-4">Tenants</h2>
+                            <tr>
+                                <td class="font-semibold">Tenant Name: </td>
+                                <td> &#123;&#123; tenant_name &#125;&#125;</td>
+                            </tr>
+                            <tr>
+                                <td class="font-semibold">Tenant Phone No: </td>
+                                <td> &#123;&#123; tenant_phone_number &#125;&#125;</td>
+                            </tr>
+                            <tr>
+                                <td class="font-semibold">Tenant Code: </td>
+                                <td> &#123;&#123; tenant_code &#125;&#125;</td>
+                            </tr>
+                            <tr>
+                                <td class="font-semibold">Tenant ID No: </td>
+                                <td> &#123;&#123; tenant_id_number &#125;&#125;</td>
+                            </tr>
+                            <tr>
+                                <td class="font-semibold">Tenant Email: </td>
+                                <td> &#123;&#123; tenant_email &#125;&#125;</td>
+                            </tr>
+                            <tr>
+                                <td class="font-semibold">Tenant Address: </td>
+                                <td> &#123;&#123; tenant_address &#125;&#125;</td>
+                            </tr>
+                            <tr>
+                                <td class="font-semibold">Lease Agreement Date: </td>
+                                <td> &#123;&#123; lease_agreement_date &#125;&#125;</td>
+                            </tr>
+                            <tr>
+                                <td class="font-semibold">Lease Start Date: </td>
+                                <td> &#123;&#123; lease_start_date &#125;&#125;</td>
+                            </tr>
+                            <tr>
+                                <td class="font-semibold">Lease End Date: </td>
+                                <td> &#123;&#123; lease_end_date &#125;&#125;</td>
+                            </tr>
+                            <tr>
+                                <td class="font-semibold">Lease Period: </td>
+                                <td> &#123;&#123; lease_period &#125;&#125;</td>
+                            </tr>
+                            <tr>
+                                <td class="font-semibold">Lease Currency: </td>
+                                <td> &#123;&#123; lease_currency_code &#125;&#125;</td>
+                            </tr>
+                            <tr>
+                                <td class="font-semibold">Rent Amount: </td>
+                                <td> &#123;&#123; rent_amount &#125;&#125;</td>
+                            </tr>
+                            <tr>
+                                <td class="font-semibold">Outstanding Balance: </td>
+                                <td> &#123;&#123; outstanding_balance &#125;&#125;</td>
+                            </tr>
+                            <tr>
+                                <td class="font-semibold">Deposit Held: </td>
+                                <td> &#123;&#123; deposit_held &#125;&#125;</td>
+                            </tr>
+                            <tr>
+                                <td class="font-semibold">Exit Charges: </td>
+                                <td> &#123;&#123; exit_charges&#125;&#125;</td>
+                            </tr>
+                            <tr>
+                                <td class="font-semibold">Termination Date: </td>
+                                <td> &#123;&#123; lease_termination_date &#125;&#125;</td>
+                            </tr>
+                            <tr>
+                                <td class="font-semibold">Net Refund: </td>
+                                <td> &#123;&#123; net_deposit_refund &#125;&#125;</td>
+                            </tr>
+                            
+                        </table>
+                    </div>
                     <div class="basis-1/2 text-left">
                         <quill-editor :key="editorComponentKey" v-model:value="templateContent"></quill-editor>
                     </div>
-                    <div class="basis-1/4"></div>
+                    <div class="basis-1/4 pl-6">
+                        <table class="text-left">
+                            <h2 class="text-center font-bold uppercase mt-4 mb-4">Landlord</h2>
+                            <tr>
+                                <td class="font-semibold">Landlord Name: </td>
+                                <td> &#123;&#123; landlord_name &#125;&#125;</td>
+                            </tr>
+                            <tr>
+                                <td class="font-semibold">Landlord Phone No: </td>
+                                <td> &#123;&#123; landlord_phone_number &#125;&#125;</td>
+                            </tr>
+                            <tr>
+                                <td class="font-semibold">Landlord Email: </td>
+                                <td> &#123;&#123; landlord_email &#125;&#125;</td>
+                            </tr>
+                            <tr>
+                                <td class="font-semibold">Landlord Address: </td>
+                                <td> &#123;&#123; landlord_address &#125;&#125;</td>
+                            </tr>
+                            <h2 class="text-center font-bold uppercase mt-4 mb-4">Property</h2>
+                            <tr>
+                                <td class="font-semibold">Property Name: </td>
+                                <td> &#123;&#123; property_name &#125;&#125;</td>
+                            </tr>
+                            <tr>
+                                <td class="font-semibold">Property L.R No: </td>
+                                <td> &#123;&#123; property_lr_number &#125;&#125;</td>
+                            </tr>
+                            <tr>
+                                <td class="font-semibold">Property Address: </td>
+                                <td> &#123;&#123; property_address &#125;&#125;</td>
+                            </tr>
+                            <tr>
+                                <td class="font-semibold">Property Unit: </td>
+                                <td> &#123;&#123; unit_number &#125;&#125;</td>
+                            </tr>
+                        </table>
+                    </div>
                 </div>
             </div>
         </template>
@@ -170,12 +314,9 @@ export default defineComponent({
             }else{
                 createTemplate();
             }
-        }
+        };
         onBeforeMount(()=>{ 
             editorComponentKey.value += 1;
-
-        })
-        onMounted(()=>{
 
         })
 

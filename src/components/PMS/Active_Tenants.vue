@@ -140,6 +140,7 @@ export default{
         const utilityTaxID = ref(null);
         const dropdownOptions = ref([
             {label: 'Add Tenant Utilities', action: 'add-tenant-utilties'},
+            {label: 'Tenancy Agreement', action: 'tenancy-agreement-report'},
         ]);
         
         const name_search = computed({
@@ -554,6 +555,35 @@ export default{
                 handleUtilReset();
                 flex_basis.value = '1/2';
                 flex_basis_percentage.value = '50';
+            }else if( option == 'tenancy-agreement-report'){
+                if(selectedIds.value.length == 1){
+                    showLoader();
+                    const tenantID = selectedIds.value;          
+                    let formData = {
+                        tenant: tenantID,
+                        date: "",
+                        company_id: companyID.value
+                    } 
+
+                    axios
+                    .post("api/v1/tenancy-agreement-pdf/", formData, { responseType: 'blob' })
+                        .then((response)=>{
+                            if(response.status == 200){
+                                const blob1 = new Blob([response.data]);
+                                // Convert blob to URL
+                                const url = URL.createObjectURL(blob1);
+                                PrintJS({printable: url, type: 'pdf'});
+                            }
+                        })
+                    .catch((error)=>{
+                        console.log(error.message);
+                    })
+                    .finally(()=>{
+                        hideLoader();
+                    })
+                }else{
+                    toast.error("You have Selected More Than 1 Tenant")
+                }
             }
         };
         

@@ -129,7 +129,7 @@ export default{
             {label: "Property Name", key:"property_name"},
             {label: "Unit", key:"unit_number"},
             {label: "Deposit", key:"formatted_deposit_held"},
-            {label: "Arrears", key:"outstanding_balance"},
+            {label: "Arrears", key:"formatted_outstanding_balance"},
             {label: "Charges", key:"exit_charges"},
             {label: "Net Ref.", key:"formatted_net_refund"},
             {label: "Claim.", key:"deposit_claim_status"},
@@ -138,9 +138,10 @@ export default{
             {label: "P.V#", key:"voucher_no"},
         ])
         const actions = ref([
-            {name: 'bill-charges', icon: 'fa fa-file-pdf-o', title: 'Add Charges', rightName: 'Tenant Move Out'},
+            {name: 'bill-charges', icon: 'fa fa-money', title: 'Add Charges', rightName: 'Tenant Move Out'},
             {name: 'utilize-deposit', icon: 'fa fa-credit-card', title: 'Utilize Deposit', rightName: 'Tenant Move Out'},
             {name: 'tenant-refund', icon: 'fa fa-hand-holding-usd', title: 'Refund Tenant', rightName: 'Tenant Move Out'},
+            {name: 'refund-report', icon: 'fa fa-file-pdf-o', title: 'Refund Report', rightName: 'Tenant Move Out'},
         ]);
         const chargesColumns = ref([
             {type: "checkbox"},
@@ -541,6 +542,7 @@ export default{
                         let formData = {
                             tenant: row['tenant_id'],
                             amount: depHeld,
+                            outstanding_balance: outstBal,
                             tenant_code: row['tenant_code'],
                             user: userID.value,
                             company: companyID.value
@@ -607,6 +609,31 @@ export default{
                     flex_basis_percentage.value = '33.333';
                 }
                 
+            }else if( action == 'refund-report'){
+                showLoader();
+                const tenantID = row['tenant_lease_id'];          
+                let formData = {
+                    tenant_lease: tenantID,
+                    date: "",
+                    company_id: companyID.value
+                } 
+
+                axios
+                .post("api/v1/tenant-deposit-refund-pdf/", formData, { responseType: 'blob' })
+                    .then((response)=>{
+                        if(response.status == 200){
+                            const blob1 = new Blob([response.data]);
+                            // Convert blob to URL
+                            const url = URL.createObjectURL(blob1);
+                            PrintJS({printable: url, type: 'pdf'});
+                        }
+                    })
+                .catch((error)=>{
+                    console.log(error.message);
+                })
+                .finally(()=>{
+                    hideLoader();
+                })
             }
         }
         
