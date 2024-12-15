@@ -4,27 +4,27 @@
       <div class="w-3/4 mr-3">
         <div class="flex mb-3">
           <div class="w-1/2 h-[300px] rounded-lg py-5 px-2 bg-white mr-2">
-            <h1 class="font-bold mb-10">Property Overview</h1>
+            <h1 class="font-bold mb-10">Finances Overview</h1>
             <div class="flex w-full mb-3">
               <div class="w-1/2 rounded-lg h-16 border-2 p-2 mr-4">
                 <div class="w-full flex">
                   <div class="w-1/4 rounded-lg bg-cyan-600 h-10 grid place-items-center">
-                    <i class="fa fa-home" aria-hidden="true"></i>
+                    <i class="fa fa-file-invoice" aria-hidden="true"></i>
                   </div>
                   <div class="w-3/4 px-2">
-                    <p class="font-bold">{{propertiesCount}}</p>
-                    <p class="font-light text-sm">Properties</p>
+                    <p class="font-bold">{{invoicesCount}}</p>
+                    <p class="font-light text-sm">Pending Invoices</p>
                   </div>
                 </div>
               </div>
               <div class="w-1/2 rounded-lg h-16 border-2 p-2">
                 <div class="w-full flex">
                   <div class="w-1/4 rounded-lg bg-orange-400 h-10 grid place-items-center">
-                    <i class="fa fa-hotel" aria-hidden="true"></i>
+                    <i class="fa fa-credit-card" aria-hidden="true"></i>
                   </div>
                   <div class="w-3/4 px-2">
-                    <p class="font-bold">{{unitsCount}}</p>
-                    <p class="font-light text-sm">Units</p>
+                    <p class="font-bold">{{billsCount}}</p>
+                    <p class="font-light text-sm">Pending Bills</p>
                   </div>
                 </div>
               </div>
@@ -33,22 +33,22 @@
               <div class="w-1/2 rounded-lg h-16 border-2 p-2 mr-4">
                 <div class="w-full flex">
                   <div class="w-1/4 rounded-lg bg-indigo-600 h-10 grid place-items-center">
-                    <i class="fa fa-users" aria-hidden="true"></i>
+                    <i class="fa fa-pencil-square-o" aria-hidden="true"></i>
                   </div>
                   <div class="w-3/4 px-2">
-                    <p class="font-bold">{{tenantsCount}}</p>
-                    <p class="font-light text-sm">Tenants</p>
+                    <p class="font-bold">{{receiptsCount}}</p>
+                    <p class="font-light text-sm">Receipts</p>
                   </div>
                 </div>
               </div>
               <div class="w-1/2 rounded-lg h-16 border-2 p-2">
                 <div class="w-full flex">
                   <div class="w-1/4 rounded-lg bg-rose-600 h-10 grid place-items-center">
-                    <i class="fa fa-file-alt" aria-hidden="true"></i>
+                    <i class="fa fa-money" aria-hidden="true"></i>
                   </div>
                   <div class="w-3/4 px-2">
-                    <p class="font-bold">{{ statementsCount }}</p>
-                    <p class="font-light text-sm">Statements</p>
+                    <p class="font-bold">{{ paymentsCount }}</p>
+                    <p class="font-light text-sm">Payments</p>
                   </div>
                 </div>
               </div>
@@ -57,7 +57,7 @@
           <div class="w-1/2 rounded-lg h-[300px] py-4 px-2 bg-white flex">
             <div class="basis-1/4"></div>
             <div class="basis-1/2 h-[250px]">
-              <h1 class="font-bold mb-2">Property Units</h1>
+              <h1 class="font-bold mb-2">Customers vs Vendors</h1>
               <Pie id="my-chart-id" :data="chartData" :options="chartOptions" />
             </div>
             <div class="basis-1/4"></div>
@@ -65,18 +65,18 @@
         </div>
 
         <div class="w-full rounded-lg py-3 px-8 bg-white appointments-table">
-            <h1 class="font-bold mb-3">Rent Collection</h1>
+            <h1 class="font-bold mb-3">Bills vs Payments</h1>
             <BarChart :data="barChartData" :options="barChartOptions" />
         </div>
       </div>
       <div class="w-1/4">
         <div class="rounded-lg bg-blue-900 h-64 p-2 mb-3 text-white">
-          <h1 class="font-bold mb-2">Tenant Rewards List</h1>
+          <h1 class="font-bold mb-2">Customers Ageing List</h1>
           <table class="table-auto border-collapse w-full">
             <thead class="font-thin text-left text-sm bg-blue-900">
               <th></th>
               <th>Name</th>
-              <th>Status</th>
+              <th>Amount</th>
           </thead>
           <tbody class="text-sm py-2">
             <tr class="py-8" v-for="doc,index in popularDoctors" :key="index">
@@ -91,7 +91,7 @@
           </table>
         </div>
         <div class="rounded-lg bg-white h-56 p-2 mb-3">
-          <h1 class="font-bold">Terminated Tenants</h1>
+          <h1 class="font-bold">Vendors Ageing List</h1>
         </div>
       </div>
     </div>
@@ -114,18 +114,18 @@ export default {
   },
   setup(){
     const store = useStore();
-    const propertiesCount = ref(0);
-    const unitsCount = ref(0);
-    const tenantsCount = ref(0);
-    const statementsCount = ref(0);
+    const invoicesCount = ref(0);
+    const billsCount = ref(0);
+    const receiptsCount = ref(0);
+    const paymentsCount = ref(0);
     const companyID = computed(()=> store.state.userData.company_id);
     const chartData = ref({
-      labels: ['Vacant', 'Owner Occupied', 'Occupied'], // Pie chart segments
-      datasets: [
-        {
-          label: 'Property Units',
-          data: [300, 50, 100], // Data for each segment
-          backgroundColor: ['#FF6384', '#36A2EB', '#FFCE56'], // Colors for each segment
+      labels: ['Customers', 'Vendors'], // Pie chart segments
+        datasets: [
+          {
+            label: 'Customers vs Vendors',
+          data: [300, 50], // Data for each segment
+          backgroundColor: ['#FFCE56', '#36A2EB'], // Colors for each segment
           hoverOffset: 4, // Hover effect
         },
       ],
@@ -134,7 +134,7 @@ export default {
       labels: ['January', 'February', 'March', 'April', 'May','June', 'July', 'August', 'September', 'October','November','December'], // X-axis labels
       datasets: [
         {
-          label: 'Rent Collection',
+          label: 'Bill Payments',
           data: [65, 59, 80, 81, 56], // Sales data points for each month
           backgroundColor: '#42A5F5', // Bar color
           borderColor: '#1E88E5', // Border color of bars
@@ -193,20 +193,20 @@ export default {
 
     onMounted(()=>{
 
-      axios.get('api/v1/property-management-dashboard/')
+      axios.get('api/v1/financial-accounts-dashboard/')
       .then((response)=>{
-        propertiesCount.value = response.data.dashboard[0].propertiesCount;
-        unitsCount.value = response.data.dashboard[0].unitsCount;
-        tenantsCount.value = response.data.dashboard[0].tenantsCount;
-        statementsCount.value = response.data.dashboard[0].statementsCount;
+        invoicesCount.value = response.data.dashboard[0].invoicesCount;
+        billsCount.value = response.data.dashboard[0].billsCount;
+        receiptsCount.value = response.data.dashboard[0].receiptsCount;
+        paymentsCount.value = response.data.dashboard[0].paymentsCount;
 
         chartData.value = {
-          labels: ['Vacant', 'Owner Occupied', 'Occupied'], // Pie chart segments
+          labels: ['Customers', 'Vendors'], // Pie chart segments
           datasets: [
             {
-              label: 'Property Units',
-              data: [response.data.dashboard[0].vacantUnitsCount, response.data.dashboard[0].ownerUnitsCount, response.data.dashboard[0].occUnitsCount], 
-              backgroundColor: ['#FF6384', '#FFCE56', '#36A2EB'], 
+              label: 'Customers vs Vendors',
+              data: [response.data.dashboard[0].customersCount, response.data.dashboard[0].vendorsCount], 
+              backgroundColor: [ '#FFCE56', '#36A2EB'], 
               hoverOffset: 4, 
             },
           ],
@@ -215,8 +215,15 @@ export default {
           labels: ['January', 'February', 'March', 'April', 'May','June', 'July', 'August', 'September', 'October','November','December'], // X-axis labels
           datasets: [
             {
-              label: 'Rent Collection',
-              data: response.data.dashboard[0].monthlyTotals, // Sales data points for each month
+              label: 'Bills Amount',
+              data: response.data.dashboard[0].monthlyBills, // Sales data points for each month
+              backgroundColor: '#FFA500', // Bar color
+              borderColor: '#1E88E5', // Border color of bars
+              borderWidth: 1,
+            },
+            {
+              label: 'Bill Payments',
+              data: response.data.dashboard[0].monthlyPayments, // Sales data points for each month
               backgroundColor: '#42A5F5', // Bar color
               borderColor: '#1E88E5', // Border color of bars
               borderWidth: 1,
@@ -230,7 +237,7 @@ export default {
     })
 
     return{
-      propertiesCount,unitsCount,tenantsCount,statementsCount,chartData,chartOptions,
+      invoicesCount,billsCount,receiptsCount,paymentsCount,chartData,chartOptions,
       barChartData,barChartOptions
     }
   }

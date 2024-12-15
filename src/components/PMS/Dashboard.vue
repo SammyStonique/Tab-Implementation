@@ -215,8 +215,15 @@ ChartJS.register(ArcElement, Tooltip, Legend, BarElement, CategoryScale, LinearS
             labels: ['January', 'February', 'March', 'April', 'May','June', 'July', 'August', 'September', 'October','November','December'], // X-axis labels
             datasets: [
               {
+                label: 'Rent Invoiced',
+                data: response.data.dashboard[0].monthlyInvoicedTotals, // Sales data points for each month
+                backgroundColor: '#FFA500', // Bar color
+                borderColor: '#1E88E5', // Border color of bars
+                borderWidth: 1,
+              },
+              {
                 label: 'Rent Collection',
-                data: response.data.dashboard[0].monthlyTotals, // Sales data points for each month
+                data: response.data.dashboard[0].monthlyReceiptTotals, // Sales data points for each month
                 backgroundColor: '#42A5F5', // Bar color
                 borderColor: '#1E88E5', // Border color of bars
                 borderWidth: 1,
