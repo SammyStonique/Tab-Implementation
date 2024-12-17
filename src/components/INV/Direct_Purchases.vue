@@ -19,6 +19,7 @@
             :idField="idField"
             @handleSelectionChange="handleSelectionChange"
             @handleActionClick="handleActionClick"
+            @handleShowDetails="handleShowDetails"
             :count="propCount"
             :currentPage="currentPage"
             :result="propArrLen"
@@ -30,7 +31,31 @@
             :showPreviousBtn="showPreviousBtn"
             :selectedValue="selectedValue"
             @selectSearchQuantity="selectSearchQuantity"
-        />
+            :showDetails="showDetails"
+            :detailsTitle="detailsTitle"
+            @hideDetails="hideDetails"
+            >
+            <div>
+                <div class="tabs pt-2">
+                    <button v-for="(tab, index) in tabs" :key="tab" :class="['tab', { active: activeTab === index }]"@click="selectTab(index)">
+                        {{ tab }}
+                    </button>
+                </div>
+                <div class="tab-content mt-3">
+                    <div v-if="activeTab == 0">
+                        <JournalEntries 
+                            :detailRows="journalEntries"
+                        />
+                    </div>
+                    <div v-if="activeTab == 1">
+                        <SaleItems 
+                            :saleItemsRows="itemLines"
+                        />
+                    </div>
+                </div>
+                
+            </div>
+        </PageComponent>
     </div>
 </template>
 
@@ -40,12 +65,14 @@ import { ref, computed, onMounted, onBeforeMount} from 'vue';
 import PageComponent from '@/components/PageComponent.vue'
 import { useStore } from "vuex";
 import { useToast } from "vue-toastification";
+import JournalEntries from "@/components/JournalEntries.vue";
+import SaleItems from "@/components/SaleItems.vue";
 import PrintJS from 'print-js';
 
 export default{
     name: 'Direct_Purchases',
     components:{
-        PageComponent
+        PageComponent,JournalEntries,SaleItems,
     },
     setup(){
         const store = useStore();
@@ -63,6 +90,13 @@ export default{
         const propResults = ref([]);
         const propArrLen = ref(0);
         const selectedValue = ref(50);
+        const detailsTitle = ref('Item Details');
+        const tabs = ref(['Journal Entries','Purchase Items']);
+        const activeTab = ref(0);
+        const saleID = ref(null);
+        const showDetails = ref(false);
+        const journalEntries = ref([]);
+        const itemLines = ref([]);
         const propCount = ref(0);
         const pageCount = ref(0);
         const currentPage = ref(1);
@@ -302,7 +336,47 @@ export default{
             }else if(action == 'view'){
                 console.log("VIEWING TAKING PLACE");
             }
-        }
+        };
+        const handleShowDetails = async(row) =>{
+            activeTab.value = 0;
+            saleID.value = row['sale_id'];
+            detailsTitle.value = row['sale_code'] + ' Details';
+            showDetails.value = true;
+            let formData = {
+                client_id: row['sale_id'],
+                company: companyID.value
+            }
+            axios.post('api/v1/inventory-journal-entries-search/',formData)
+            .then((response)=>{
+                journalEntries.value = response.data.journal_entries;
+            })
+            .catch((error)=>{
+                console.log(error.message)
+            })
+        };
+        const selectTab = async(index) => {
+            let formData = {
+                company: companyID.value,
+                sale: saleID.value,
+            }
+            if(index == 1){
+                activeTab.value = index;
+                await axios.post('api/v1/inventory-sale-items-search/',formData)
+                .then((response)=>{
+                    itemLines.value = response.data.saleItems;
+                })
+                .catch((error)=>{
+                    console.log(error.message)
+                })
+            }else{
+                activeTab.value = index;
+                hideLoader();
+            }
+
+        };
+        const hideDetails = async() =>{
+            showDetails.value = false;
+        };
         const closeModal = () =>{
             propModalVisible.value = false;
         };
@@ -350,8 +424,27 @@ export default{
             propResults, propArrLen, propCount, pageCount, showNextBtn, showPreviousBtn,
             loadPrev, loadNext, firstPage, lastPage, idField, actions, handleActionClick, propModalVisible, closeModal,
             submitButtonLabel, showModal, addNewPurchase, showLoader, loader, hideLoader, removePurchase, removePurchases,
-            handleSelectionChange,addingRight,rightsModule,printPurchasesList,selectedValue,selectSearchQuantity
+            handleSelectionChange,addingRight,rightsModule,printPurchasesList,selectedValue,selectSearchQuantity,showDetails,
+            detailsTitle,hideDetails,handleShowDetails,journalEntries,itemLines,tabs,selectTab,activeTab
         }
     }
 };
 </script>
+
+<style scoped>
+.tabs {
+    display: flex;
+    border-bottom: 1px solid #ccc;
+}
+.tab {
+    padding: 2px 20px 2px 20px;
+    cursor: pointer;
+}
+
+.tab.active {
+    border-bottom: 2px solid #000;
+}
+
+.tab-content {
+    padding: 1px;
+}</style>

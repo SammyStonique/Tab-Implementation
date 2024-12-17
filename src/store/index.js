@@ -52,6 +52,10 @@ import Direct_Purchases from './INV/Direct_Purchases';
 import Stock_Adjustments from './INV/Stock_Adjustments';
 import Stock_Transfers from './INV/Stock_Transfers';
 
+
+import Pay_Cycles from './HR/Pay_Cycles';
+
+
 import Default_Settings from './SET/Default_Settings';
 import Companies from './SET/Companies';
 import Branches from './SET/Branches';
@@ -60,6 +64,7 @@ import SMS_Integrations from './SET/SMS_Integrations';
 import Email_Integrations from './SET/Email_Integrations';
 import Mpesa_Integrations from './SET/Mpesa_Integrations';
 import Mpesa_Transactions from './SET/Mpesa_Transactions';
+
 
 export default createStore({
   modules: {
@@ -78,6 +83,8 @@ export default createStore({
     Stock_Adjustments,Stock_Transfers,
     
     Ledgers, Currencies, Taxes, Journals, Customers, Vendors,Fiscal_Periods,
+
+    Pay_Cycles,
 
     Default_Settings,Companies,Branches,User_Rights,SMS_Integrations,Email_Integrations,Mpesa_Integrations,Mpesa_Transactions
   },

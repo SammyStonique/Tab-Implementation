@@ -3,17 +3,17 @@
         <PageComponent 
             :loader="loader" @showLoader="showLoader" @hideLoader="hideLoader"
             :addButtonLabel="addButtonLabel"
-            @handleAddNew="addNewPeriod"
+            @handleAddNew="addNewCycle"
             :searchFilters="searchFilters"
-            @searchPage="searchPeriods"
+            @searchPage="searchCycles"
             @resetFilters="resetFilters"
-            @removeItem="removePeriod"
-            @removeSelectedItems="removePeriods"
+            @removeItem="removeCycle"
+            @removeSelectedItems="removeCycles"
             @printList="printList"
             :addingRight="addingRight"
             :rightsModule="rightsModule"
             :columns="tableColumns"
-            :rows="periodList"
+            :rows="cyclesList"
             :actions="actions"
             :idField="idField"
             @handleSelectionChange="handleSelectionChange"
@@ -27,12 +27,14 @@
             @lastPage="lastPage"
             :showNextBtn="showNextBtn"
             :showPreviousBtn="showPreviousBtn"
+            :selectedValue="selectedValue"
+            @selectSearchQuantity="selectSearchQuantity"
         />
         <MovableModal v-model:visible="propModalVisible" :title="title" :modal_top="modal_top" :modal_left="modal_left" :modal_width="modal_width"
             :loader="modal_loader" @showLoader="showModalLoader" @hideLoader="hideModalLoader" @closeModal="closeModal">
             <DynamicForm 
                 :fields="formFields" :flex_basis="flex_basis" :flex_basis_percentage="flex_basis_percentage" 
-                :displayButtons="displayButtons" @handleSubmit="savePeriod" @handleReset="handleReset"
+                :displayButtons="displayButtons" @handleSubmit="saveCycle" @handleReset="handleReset"
             />
         </MovableModal>
     </div>
@@ -48,7 +50,7 @@ import { useStore } from "vuex";
 import { useToast } from "vue-toastification";
 
 export default{
-    name: 'Variation_Periods',
+    name: 'Pay_Cycles',
     components:{
         PageComponent, MovableModal,DynamicForm
     },
@@ -57,15 +59,16 @@ export default{
         const toast = useToast();
         const loader = ref('none');
         const modal_loader = ref('none');
-        const idField = 'frequency_id';
-        const addButtonLabel = ref('New Variation Period');
-        const title = ref('Variation Details');
-        const addingRight = ref('Adding Lease Periods');
-        const rightsModule = ref('PMS');
+        const idField = 'pay_cycle_id';
+        const addButtonLabel = ref('New Pay Cycle');
+        const title = ref('Pay Cycle Details');
+        const addingRight = ref('Adding Pay Cycles');
+        const rightsModule = ref('HR');
         const submitButtonLabel = ref('Add');
         const ledComponentKey = ref(0);
         const selectedIds = ref([]);
-        const periodList = ref([]);
+        const selectedValue = ref(50);
+        const cyclesList = ref([]);
         const propResults = ref([]);
         const propArrLen = ref(0);
         const propCount = ref(0);
@@ -81,22 +84,22 @@ export default{
         const modal_top = ref('150px');
         const modal_left = ref('400px');
         const modal_width = ref('30vw');
-        const isEditing = computed(()=> store.state.Variation_Periods.isEditing);
-        const selectedPeriod = computed(()=> store.state.Variation_Periods.selectedPeriod);
+        const isEditing = computed(()=> store.state.Pay_Cycles.isEditing);
+        const selectedCycle = computed(()=> store.state.Pay_Cycles.selectedCycle);
         const showModal = ref(false);
         const tableColumns = ref([
             {type: "checkbox"},
-            {label: "Name", key:"name"},
-            {label: "Months", key: "value"},
+            {label: "Name", key:"pay_cycle_name"},
+            {label: "Interval", key: "interval"},
         ])
         const actions = ref([
-            {name: 'edit', icon: 'fa fa-edit', title: 'Edit Period', rightName: 'Editing Lease Periods'},
-            {name: 'delete', icon: 'fa fa-trash', title: 'Delete Period', rightName: 'Deleting Lease Periods'},
+            {name: 'edit', icon: 'fa fa-edit', title: 'Edit Pay Cycle', rightName: 'Editing Pay Cycles'},
+            {name: 'delete', icon: 'fa fa-trash', title: 'Delete Pay Cycle', rightName: 'Deleting Pay Cycles'},
         ])
         const companyID = computed(()=> store.state.userData.company_id);
         const name_search = computed({
-            get: () => store.state.Variation_Periods.name_search,
-            set: (value) => store.commit('Variation_Periods/SET_SEARCH_FILTERS', {"name_search":value}),
+            get: () => store.state.Pay_Cycles.name_search,
+            set: (value) => store.commit('Pay_Cycles/SET_SEARCH_FILTERS', {"name_search":value}),
         });
         const searchFilters = ref([
             {type:'text', placeholder:"Name...", value: name_search, width:60,},
@@ -108,8 +111,8 @@ export default{
         const formFields = ref([]);
         const updateFormFields = () => {
             formFields.value = [
-                { type: 'text', name: 'name',label: "Name", value: selectedPeriod.value?.name || '', required: true },
-                { type: 'number', name: 'value',label: "Months", value: selectedPeriod.value?.value || 0, required: true },
+                { type: 'text', name: 'pay_cycle_name',label: "Name", value: selectedCycle.value?.pay_cycle_name || '', required: true },
+                { type: 'dropdown', name: 'interval',label: "Interval", value: selectedCycle.value?.interval || 'Monthly', placeholder: "", required: true, options: [{ text: 'Daily', value: 'Daily' }, { text: 'Weekly', value: 'Weekly' },{ text: 'Monthly', value: 'Monthly' }, { text: 'Quarterly', value: 'Quarterly' }] },
             ];
         };
         const handleReset = () =>{
@@ -118,8 +121,8 @@ export default{
             }
         }
 
-        watch([selectedPeriod], () => {
-            if (selectedPeriod.value) {
+        watch([selectedCycle], () => {
+            if (selectedCycle.value) {
                 updateFormFields();
             }else{
                 updateFormFields();
@@ -133,11 +136,11 @@ export default{
         const hideModalLoader = () =>{
             modal_loader.value = "none";
         }
-        const createPeriod = async() =>{
+        const createCycle = async() =>{
             showModalLoader();
             let formData = {
-                name: formFields.value[0].value,
-                value: formFields.value[1].value,
+                pay_cycle_name: formFields.value[0].value,
+                interval: formFields.value[1].value,
                 company: companyID.value
             }
 
@@ -152,30 +155,30 @@ export default{
                 hideModalLoader();
             }else{
                 try {
-                    const response = await store.dispatch('Variation_Periods/createPeriod', formData);
+                    const response = await store.dispatch('Pay_Cycles/createPayCycle', formData);
                     if (response && response.status === 200) {
                         hideModalLoader();
-                        toast.success('Period created successfully!');
+                        toast.success('Pay Cycle created successfully!');
                         handleReset();
                     } else {
-                        toast.error('An error occurred while creating the period.');
+                        toast.error('An error occurred while creating the Pay Cycle.');
                     }
                 } catch (error) {
                     console.error(error.message);
-                    toast.error('Failed to create period: ' + error.message);
+                    toast.error('Failed to create Pay Cycle: ' + error.message);
                 } finally {
                     hideModalLoader();
-                    searchPeriods();
+                    searchCycles();
                 }
             }
         }
-        const updatePeriod= async() =>{
+        const updateCycle= async() =>{
             showModalLoader();
             errors.value = [];
             let formData = {
-                frequency: selectedPeriod.value.frequency_id,
-                name: formFields.value[0].value,
-                value: formFields.value[1].value,
+                pay_cycle: selectedCycle.value.pay_cycle_id,
+                pay_cycle_name: formFields.value[0].value,
+                interval: formFields.value[1].value,
                 company: companyID.value
             }
 
@@ -189,80 +192,80 @@ export default{
                 hideModalLoader();
             }else{
                 try {
-                    const response = await store.dispatch('Variation_Periods/updatePeriod', formData);
+                    const response = await store.dispatch('Pay_Cycles/updatePayCycle', formData);
                     if (response && response.status === 200) {
                         hideModalLoader();
                         handleReset();
-                        toast.success("Period updated successfully!");              
+                        toast.success("Pay Cycle updated successfully!");              
                     } else {
-                        toast.error('An error occurred while updating the period.');
+                        toast.error('An error occurred while updating the Pay Cycle.');
                     }
                 } catch (error) {
                     console.error(error.message);
-                    toast.error('Failed to update period: ' + error.message);
+                    toast.error('Failed to update Pay Cycle: ' + error.message);
                 } finally {
                     hideModalLoader();
                     propModalVisible.value = false;
-                    store.dispatch("Variation_Periods/updateState",{selectedPeriod:null})
-                    searchPeriods();
+                    store.dispatch("Pay_Cycles/updateState",{selectedCycle:null})
+                    searchCycles();
                 }             
             }
         }
-        const savePeriod = () =>{
+        const saveCycle = () =>{
             if(isEditing.value == true){
-                updatePeriod();
+                updateCycle();
             }else{
-                createPeriod();
+                createCycle();
             }
         }
-        const removePeriod = async() =>{
+        const removeCycle = async() =>{
             if(selectedIds.value.length == 1){
                 let formData = {
                     company: companyID.value,
-                    frequency: selectedIds.value
+                    pay_cycle: selectedIds.value
                 }
                 try{
-                    const response = await store.dispatch('Variation_Periods/deletePeriod',formData)
+                    const response = await store.dispatch('Pay_Cycles/deletePayCycle',formData)
                     if(response && response.status == 200){
-                        toast.success("Period Removed Succesfully");
-                        searchPeriods();
+                        toast.success("Pay Cycle Removed Succesfully");
+                        searchCycles();
                     }
                 }
                 catch(error){
                     console.error(error.message);
-                    toast.error('Failed to remove period: ' + error.message);
+                    toast.error('Failed to remove Pay Cycle: ' + error.message);
                 }
                 finally{
                     selectedIds.value = [];
                 }
             }else if(selectedIds.value.length > 1){
-                toast.error("You have selected more than 1 period") 
+                toast.error("You have selected more than 1 Pay Cycle") 
             }else{
-                toast.error("Please Select A Period To Remove")
+                toast.error("Please Select A Pay Cycle To Remove")
             }
         }
-        const removePeriods = async() =>{
+        const removeCycles = async() =>{
             if(selectedIds.value.length){
                 let formData = {
                     company: companyID.value,
-                    frequency: selectedIds.value
+                    pay_cycle: selectedIds.value
                 }
                 try{
-                    const response = await store.dispatch('Variation_Periods/deletePeriod',formData)
+                    const response = await store.dispatch('Pay_Cycles/deletePayCycle',formData)
                     if(response && response.status == 200){
-                        toast.success("Period(s) Removed Succesfully");
-                        searchPeriods();
+                        toast.success("Pay Cycle(s) Removed Succesfully");
+                        searchCycles();
                     }
                 }
                 catch(error){
                     console.error(error.message);
-                    toast.error('Failed to remove periods: ' + error.message);
+                    toast.error('Failed to remove PayCycle: ' + error.message);
                 }
                 finally{
                     selectedIds.value = [];
                 }
             }else{
-                toast.error("Please Select A Periods To Remove")
+                toast.error("Please Select A Pay Cycle To Remove")
             }
         }
         const showLoader = () =>{
@@ -271,23 +274,24 @@ export default{
         const hideLoader = () =>{
             loader.value = "none";
         }
-        const searchPeriods = () =>{
+        const searchCycles = () =>{
             showLoader();
             showNextBtn.value = false;
             showPreviousBtn.value = false;
             let formData = {
-                name: name_search.value,
-                company_id: companyID.value
+                pay_cycle_name: name_search.value,
+                company_id: companyID.value,
+                page_size: selectedValue.value
             } 
             axios
-            .post(`api/v1/escalation-frequencies-search/?page=${currentPage.value}`,formData)
+            .post(`api/v1/pay-cycles-search/?page=${currentPage.value}`,formData)
             .then((response)=>{
-                periodList.value = response.data.results;
-                store.commit('Variation_Periods/LIST_PERIODS', periodList.value)
+                cyclesList.value = response.data.results;
+                store.commit('Pay_Cycles/LIST_CYCLES', cyclesList.value)
                 propResults.value = response.data;
-                propArrLen.value = periodList.value.length;
+                propArrLen.value = cyclesList.value.length;
                 propCount.value = propResults.value.count;
-                pageCount.value = Math.ceil(propCount.value / 50);
+                pageCount.value = Math.ceil(propCount.value / selectedValue.value);
                 if(response.data.next){
                     showNextBtn.value = true;
                 }
@@ -301,10 +305,14 @@ export default{
             .finally(()=>{
                 hideLoader();
             })
-        }
+        };
+        const selectSearchQuantity = (newValue) =>{
+            selectedValue.value = newValue;
+            searchCycles(selectedValue.value);
+        };
         const resetFilters = () =>{
-            store.commit('Variation_Periods/RESET_SEARCH_FILTERS')
-            searchPeriods();
+            store.commit('Pay_Cycles/RESET_SEARCH_FILTERS')
+            searchCycles();
         }
         const loadPrev = () =>{
             if (currentPage.value <= 1){
@@ -313,7 +321,7 @@ export default{
                 currentPage.value -= 1;
             }
             
-            searchPeriods();
+            searchCycles();
             // scrollToTop();
         }
         const loadNext = () =>{
@@ -323,21 +331,21 @@ export default{
                 currentPage.value += 1;
             }
             
-            searchPeriods();
+            searchCycles();
             // scrollToTop(); 
         }
         const firstPage = ()=>{
             currentPage.value = 1;
-            searchPeriods();
+            searchCycles();
             // scrollToTop();
         }
         const lastPage = () =>{
             currentPage.value = pageCount.value;
-            searchPeriods();
+            searchCycles();
             // scrollToTop();
         }
-        const addNewPeriod = () =>{
-            store.dispatch("Variation_Periods/updateState",{selectedPeriod:null,isEditing:false})
+        const addNewCycle = () =>{
+            store.dispatch("Pay_Cycles/updateState",{selectedCycle:null,isEditing:false})
             propModalVisible.value = true;
             handleReset();
             flex_basis.value = '1/2';
@@ -345,25 +353,25 @@ export default{
         }
         const handleActionClick = async(rowIndex, action, row) =>{
             if( action == 'edit'){
-                const frequencyID = row[idField];
+                const cycleID = row[idField];
                 let formData = {
                     company: companyID.value,
-                    frequency: frequencyID
+                    pay_cycle: cycleID
                 }
-                await store.dispatch('Variation_Periods/fetchPeriod',formData)
+                await store.dispatch('Pay_Cycles/fetchPayCycle',formData)
                 propModalVisible.value = true;
                 flex_basis.value = '1/2';
                 flex_basis_percentage.value = '50';
 
             }else if(action == 'delete'){
-                const frequencyID = [row[idField]];
+                const cycleID = [row[idField]];
                 let formData = {
                     company: companyID.value,
-                    frequency: frequencyID
+                    pay_cycle: cycleID
                 }
-                await store.dispatch('Variation_Periods/deletePeriod',formData).
+                await store.dispatch('Pay_Cycles/deletePayCycle',formData).
                 then(()=>{
-                    searchPeriods();
+                    searchCycles();
                 })
             }else if(action == 'view'){
                 console.log("VIEWING TAKING PLACE");
@@ -373,16 +381,16 @@ export default{
             propModalVisible.value = false;
         }
         onBeforeMount(()=>{
-            searchPeriods();
+            searchCycles();
             
         })
         return{
-            title, searchPeriods,resetFilters, addButtonLabel, searchFilters, tableColumns, periodList,
+            title, searchCycles,resetFilters, addButtonLabel, searchFilters, tableColumns, cyclesList,selectSearchQuantity,selectedValue,
             propResults, propArrLen, propCount, pageCount, showNextBtn, showPreviousBtn,addingRight,rightsModule,
             loadPrev, loadNext, firstPage, lastPage, idField, actions, handleActionClick, propModalVisible, closeModal,
-            submitButtonLabel, showModal, addNewPeriod, showLoader, loader, hideLoader, modal_loader, modal_top, modal_left, modal_width,displayButtons,
-            showModalLoader, hideModalLoader, savePeriod, formFields, handleSelectionChange, flex_basis,flex_basis_percentage,
-            removePeriod, removePeriods
+            submitButtonLabel, showModal, addNewCycle, showLoader, loader, hideLoader, modal_loader, modal_top, modal_left, modal_width,displayButtons,
+            showModalLoader, hideModalLoader, saveCycle, formFields, handleSelectionChange, flex_basis,flex_basis_percentage,
+            removeCycle, removeCycles
         }
     }
 };

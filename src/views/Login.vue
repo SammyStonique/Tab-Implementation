@@ -17,32 +17,17 @@
             <form @submit.prevent="login">
               <div class="mb-4 flex flex-col sm:flex-row">
                 <label for="email" class="sm:w-1/4 sm:text-right mb-2 sm:mb-0">Username:</label>
-                <input 
-                  type="text" 
-                  id="email" 
-                  class="sm:w-3/4 w-full ml-2 rounded-lg border-gray-300 border-2 p-2" 
-                  v-model="email"
-                  placeholder="Enter your email"
-                >
+                <input type="text" id="email" class="sm:w-3/4 w-full ml-2 rounded-lg border-gray-300 border-2 p-2" v-model="email"placeholder="Enter your email">
               </div>
               <div class="mb-6 flex flex-col sm:flex-row">
                 <label for="password" class="sm:w-1/4 sm:text-right mb-2 sm:mb-0">Password:</label>
-                <input 
-                  type="password" 
-                  id="password" 
-                  class="sm:w-3/4 w-full ml-2 rounded-lg border-gray-300 border-2 p-2" 
-                  v-model="password"
-                  placeholder="Enter your password"
-                >
+                <input type="password" id="password" class="sm:w-3/4 w-full ml-2 rounded-lg border-gray-300 border-2 p-2" v-model="password"placeholder="Enter your password">
               </div>
               <div class="col-md-12 notification is-danger" v-if="errors.length">
                 <p style="color: red;" v-for="error in errors" :key="error">{{ error }}</p>
               </div>
               <div class="mt-4 text-right">
-                <button 
-                  type="submit" 
-                  class="bg-green-300 hover:bg-green-400 text-white px-6 py-2 rounded-lg w-32"
-                >
+                <button type="submit" class="bg-green-300 hover:bg-green-400 text-white px-6 py-2 rounded-lg w-32">
                   Login
                 </button>
               </div>
@@ -83,7 +68,10 @@
       };
   
       const login = () => {
-        showLoader();
+        if(email.value == "" || password.value == ""){
+          toast.error("Fill In The Required Fields");
+        }else{
+          showLoader();
         let formData = {
           email: email.value,
           password: password.value
@@ -120,6 +108,8 @@
             hideLoader();
             store.dispatch('userData/reloadPage');
           });
+        }
+        
       };
   
       return {

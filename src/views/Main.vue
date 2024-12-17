@@ -16,9 +16,9 @@
     <div v-show="hmsOpen && selectedModule === 'Inventory Management'">
         <INV />
     </div>
-    <!-- <div v-show="hmsOpen && selectedModule === 'Human Resource'">
+    <div v-show="hmsOpen && selectedModule === 'Human Resource'">
         <HR />
-    </div> -->
+    </div>
     <div v-show="hmsOpen && selectedModule === 'Settings'">
         <SET />
     </div>
@@ -73,12 +73,13 @@ import HMS from '@/components/HMS/Main.vue';
 import PMS from '@/components/PMS/Main.vue';
 import FA from '@/components/FA/Main.vue';
 import INV from '@/components/INV/Main.vue';
+import HR from '@/components/HR/Main.vue';
 import SET from '@/components/SET/Main.vue';
 import Loader from '@/components/Loader.vue';
 
 export default {
     components: {
-        ModulesTab, Loader, HMS, FA, INV, PMS, SET
+        ModulesTab, Loader, HMS, FA, INV, PMS, HR, SET
     },
     setup() {
         const store = useStore();

@@ -38,11 +38,21 @@
                     :showTotals="showTotals"
                     :showActions="showActions"
                     @action-click="handleActionClick"
+                    @row-db-click="handleShowDetails"
                     @selection-changed="handleSelectionChange"
                     :rightsModule="rightsModule"
                 />
             </div>
             <div class="fixed w-[93%] z-30 bottom-5 pb-2 bg-white">
+                <ShowDetails 
+                    v-model:visible="showDetails"
+                    :detailsTitle="detailsTitle"
+                    @hideDetails="hideDetails"
+                >
+                    <template v-slot:detailSlot>
+                        <slot></slot>
+                    </template>
+                </ShowDetails>
                 <MyPagination 
                 :count="count"
                 :currentPage="currentPage"
@@ -69,9 +79,18 @@ import Loader from '@/components/Loader.vue'
 import DynamicTable from '@/components/DynamicTable.vue'
 import MyPagination from '@/components/MyPagination.vue'
 import PageStyleComponent from './PageStyleComponent.vue';
+import ShowDetails from '@/components/ShowDetails.vue';
 
 export default defineComponent({
     props:{
+        showDetails: {
+            type: Boolean,
+            default: false
+        },
+        detailsTitle:{
+            type: String,
+            required: false
+        },
         pageTitle:{
             type: String,
             required: false,
@@ -180,7 +199,7 @@ export default defineComponent({
 
     },
     components:{
-        FilterBar, DynamicTable, MyPagination, Loader, PageStyleComponent
+        FilterBar, DynamicTable, MyPagination, Loader, PageStyleComponent,ShowDetails
     },
     setup(props, { emit }){
         const selectedValue = ref(50);
@@ -228,7 +247,10 @@ export default defineComponent({
         };
         const handleActionClick = (rowIndex, action, row) =>{
             emit('handleActionClick',rowIndex, action, row)
-        }
+        };
+        const handleShowDetails = (row) =>{
+            emit('handleShowDetails',row)
+        };
         const handleAddNew = () =>{
             emit('handleAddNew');
         }
@@ -240,11 +262,14 @@ export default defineComponent({
         }
         const handleSelectionChange = (selectedIds) =>{
             emit('handleSelectionChange', selectedIds);
-        }
+        };
+        const hideDetails = () =>{
+            emit('hideDetails');
+        };
         return{
             searchPage, resetFilters, loadPrev, loadNext, firstPage, lastPage, handleActionClick, handleAddNew,
             showLoader, hideLoader, importData, removeItem, removeSelectedItems, printList, handleDynamicOption,
-            handleSelectionChange,selectSearchQuantity,selectedValue,printExcel,printCSV
+            handleSelectionChange,selectSearchQuantity,selectedValue,printExcel,printCSV,hideDetails,handleShowDetails
         }
     }
 })

@@ -19,6 +19,7 @@
             :idField="idField"
             @handleSelectionChange="handleSelectionChange"
             @handleActionClick="handleActionClick"
+            @handleShowDetails="handleShowDetails"
             :count="propCount"
             :currentPage="currentPage"
             :result="propArrLen"
@@ -28,7 +29,33 @@
             @lastPage="lastPage"
             :showNextBtn="showNextBtn"
             :showPreviousBtn="showPreviousBtn"
-        />
+            :selectedValue="selectedValue"
+            @selectSearchQuantity="selectSearchQuantity"
+            :showDetails="showDetails"
+            :detailsTitle="detailsTitle"
+            @hideDetails="hideDetails"
+            >
+            <div>
+                <div class="tabs pt-2">
+                    <button v-for="(tab, index) in tabs" :key="tab" :class="['tab', { active: activeTab === index }]"@click="selectTab(index)">
+                        {{ tab }}
+                    </button>
+                </div>
+                <div class="tab-content mt-3">
+                    <div v-if="activeTab == 0">
+                        <JournalEntries 
+                            :detailRows="journalEntries"
+                        />
+                    </div>
+                    <div v-if="activeTab == 1">
+                        <StockAdjustments 
+                            :adjustmentItemsRows="itemLines"
+                        />
+                    </div>
+                </div>
+                
+            </div>
+        </PageComponent>
     </div>
 </template>
 
@@ -38,12 +65,14 @@ import { ref, computed, onMounted, onBeforeMount} from 'vue';
 import PageComponent from '@/components/PageComponent.vue'
 import { useStore } from "vuex";
 import { useToast } from "vue-toastification";
+import JournalEntries from "@/components/JournalEntries.vue";
+import StockAdjustments from "@/components/StockAdjustments.vue";
 import PrintJS from 'print-js';
 
 export default{
     name: 'Stock_Adjustments',
     components:{
-        PageComponent
+        PageComponent,JournalEntries,StockAdjustments,
     },
     setup(){
         const store = useStore();
@@ -61,6 +90,14 @@ export default{
         const propResults = ref([]);
         const propArrLen = ref(0);
         const propCount = ref(0);
+        const selectedValue = ref(50);
+        const detailsTitle = ref('Item Details');
+        const tabs = ref(['Journal Entries','Adjustment Items']);
+        const activeTab = ref(0);
+        const adjustmentID = ref(null);
+        const showDetails = ref(false);
+        const journalEntries = ref([]);
+        const itemLines = ref([]);
         const pageCount = ref(0);
         const currentPage = ref(1);
         const showNextBtn = ref(false);
@@ -183,7 +220,8 @@ export default{
                 warehouse: warehouse_search.value,
                 inventory_item: "",
                 done_by: done_by_search.value,
-                company_id: companyID.value
+                company_id: companyID.value,
+                page_size: selectedValue.value
             } 
             axios
             .post(`api/v1/stock-adjustment-search/?page=${currentPage.value}`,formData)
@@ -193,7 +231,7 @@ export default{
                 propResults.value = response.data;
                 propArrLen.value = adjustmentsList.value.length;
                 propCount.value = propResults.value.count;
-                pageCount.value = Math.ceil(propCount.value / 50);
+                pageCount.value = Math.ceil(propCount.value / selectedValue.value);
                 if(response.data.next){
                     showNextBtn.value = true;
                 }
@@ -207,6 +245,10 @@ export default{
             .finally(()=>{
                 hideLoader();
             })
+        };
+        const selectSearchQuantity = (newValue) =>{
+            selectedValue.value = newValue;
+            searchSales(selectedValue.value);
         }
         const resetFilters = () =>{
             store.commit('Stock_Adjustments/RESET_SEARCH_FILTERS')
@@ -263,7 +305,51 @@ export default{
             }else if(action == 'view'){
                 console.log("VIEWING TAKING PLACE");
             }
-        }
+        };
+        const handleShowDetails = async(row) =>{
+            activeTab.value = 0;
+            adjustmentID.value = row['adjustment_code'];
+            detailsTitle.value = row['adjustment_code'] + ' Details';
+            showDetails.value = true;
+            let formData = {
+                client_id: row['adjustment_id'],
+                company: companyID.value
+            }
+            axios.post('api/v1/inventory-journal-entries-search/',formData)
+            .then((response)=>{
+                journalEntries.value = response.data.journal_entries;
+            })
+            .catch((error)=>{
+                console.log(error.message)
+            })
+        };
+        const selectTab = async(index) => {
+            let formData = {
+                company: companyID.value,
+                date_from: "",
+                date_to: "",
+                adjustment_code: adjustmentID.value,
+                warehouse: "",
+                inventory_item: "",
+            }
+            if(index == 1){
+                activeTab.value = index;
+                await axios.post('api/v1/stock-adjustment-item-search/',formData)
+                .then((response)=>{
+                    itemLines.value = response.data.results;
+                })
+                .catch((error)=>{
+                    console.log(error.message)
+                })
+            }else{
+                activeTab.value = index;
+                hideLoader();
+            }
+
+        };
+        const hideDetails = async() =>{
+            showDetails.value = false;
+        };
         const closeModal = () =>{
             propModalVisible.value = false;
         };
@@ -307,8 +393,27 @@ export default{
             propResults, propArrLen, propCount, pageCount, showNextBtn, showPreviousBtn,
             loadPrev, loadNext, firstPage, lastPage, idField, actions, handleActionClick, propModalVisible, closeModal,
             submitButtonLabel, showModal, addNewAdjustment, showLoader, loader, hideLoader, removeAdjustment, removeAdjustments,
-            handleSelectionChange,addingRight,rightsModule,printAdjustmentsList
+            handleSelectionChange,addingRight,rightsModule,printAdjustmentsList,selectedValue,selectSearchQuantity,showDetails,
+            detailsTitle,hideDetails,handleShowDetails,journalEntries,itemLines,tabs,selectTab,activeTab
         }
     }
 };
 </script>
+
+<style scoped>
+.tabs {
+    display: flex;
+    border-bottom: 1px solid #ccc;
+}
+.tab {
+    padding: 2px 20px 2px 20px;
+    cursor: pointer;
+}
+
+.tab.active {
+    border-bottom: 2px solid #000;
+}
+
+.tab-content {
+    padding: 1px;
+}</style>

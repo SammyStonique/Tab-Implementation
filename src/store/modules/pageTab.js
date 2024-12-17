@@ -4,10 +4,12 @@ const state = {
     hmsArray: new Set(["Dashboard"]),
     pmsArray: new Set(["Dashboard"]),
     faArray: new Set(["Dashboard"]),
+    hrArray: new Set(["Dashboard"]),
     invArray: new Set(["Dashboard"]),
     setArray: new Set(["Dashboard"]),
     hmsActiveTab: 'Dashboard',
     pmsActiveTab: 'Dashboard',
+    hrActiveTab: 'Dashboard',
     faActiveTab: 'Dashboard',
     invActiveTab: 'Dashboard',
     setActiveTab: 'Dashboard',
@@ -28,6 +30,9 @@ const state = {
         }else if(key == 'PMS'){
           state.pmsArray.add(value);
           state.pmsActiveTab = value;
+        }else if(key == 'HR'){
+          state.hrArray.add(value);
+          state.hrActiveTab = value;
         }else if(key == 'SET'){
           state.setArray.add(value);
           state.setActiveTab = value;
@@ -61,6 +66,11 @@ const state = {
           let myArray = Array.from(state.pmsArray);
           state.pmsActiveTab = myArray[myArray.length - 1];
         }
+        else if(key == 'HR'){
+          state.hrArray.delete(value);
+          let myArray = Array.from(state.hrArray);
+          state.hrActiveTab = myArray[myArray.length - 1];
+        }
         else if(key == 'SET'){
           state.setArray.delete(value);
           let myArray = Array.from(state.setArray);
@@ -81,6 +91,9 @@ const state = {
       }else if(module == 'Property Management'){
         state.pmsArray = new Set(["Dashboard"]);
         state.pmsActiveTab = "Dashboard"; 
+      }else if(module == 'Human Resource'){
+        state.hrArray = new Set(["Dashboard"]);
+        state.hrActiveTab = "Dashboard"; 
       }else if(module == 'Settings'){
         state.setArray = new Set(["Dashboard"]);
         state.setActiveTab = "Dashboard"; 

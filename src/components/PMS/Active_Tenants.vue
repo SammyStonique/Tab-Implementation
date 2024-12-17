@@ -32,6 +32,9 @@
             :showPreviousBtn="showPreviousBtn"
             :selectedValue="selectedValue"
             @selectSearchQuantity="selectSearchQuantity"
+            :showDetails="showDetails"
+            :detailsTitle="detailsTitle"
+            @hideDetails="hideDetails"
         />
     </div>
     <MovableModal v-model:visible="transModalVisible" :title="transTitle" :modal_top="modal_top" :modal_left="modal_left" :modal_width="modal_width"
@@ -99,9 +102,11 @@ export default{
         const propCount = ref(0);
         const pageCount = ref(0);
         const selectedValue = ref(50);
+        const showDetails = ref(false);
         const currentPage = ref(1);
         const showNextBtn = ref(false);
         const showPreviousBtn = ref(false);
+        const detailsTitle = ref('Tenant Documents');
         const transTitle = ref('Transfer Unit');
         const utilTitle = ref('Adding Utility To Lease');
         const tenantUnitsArr = computed(() => store.state.Units_List.unitArr);
@@ -614,7 +619,10 @@ export default{
             .finally(()=>{
                 hideLoader();
             })
-        }
+        };
+        const hideDetails = async() =>{
+            showDetails.value = false;
+        };
         onBeforeMount(()=>{
             searchTenants();
             
@@ -622,7 +630,7 @@ export default{
         return{
             searchTenants,resetFilters, addButtonLabel, searchFilters, tableColumns, tenantList,dropdownWidth,displayButtons,
             propResults, propArrLen, propCount, pageCount, showNextBtn, showPreviousBtn,flex_basis,flex_basis_percentage,
-            loadPrev, loadNext, firstPage, lastPage, idField, actions, handleActionClick,utilFormFields,
+            loadPrev, loadNext, firstPage, lastPage, idField, actions, handleActionClick,utilFormFields,showDetails,detailsTitle,hideDetails,
             submitButtonLabel, showModal, addNewTenant, showLoader, loader, hideLoader, importTenants, removeTenant, removeTenants,
             handleSelectionChange,addingRight,rightsModule,printTenantsList,selectSearchQuantity,selectedValue,
             modal_left,modal_top,modal_width,trans_modal_loader,transModalVisible,transTitle,showTransModalLoader,hideTransModalLoader,transferUnit,closeTransModal,
