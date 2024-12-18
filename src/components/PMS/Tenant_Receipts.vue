@@ -59,6 +59,13 @@
                 
             </div>
         </PageComponent>
+        <MovableModal v-model:visible="propModalVisible" :title="title" :modal_top="modal_top" :modal_left="modal_left" :modal_width="modal_width"
+            :loader="modal_loader" @showLoader="showModalLoader" @hideLoader="hideModalLoader" @closeModal="closeModal">
+            <DynamicForm 
+                :fields="formFields" :flex_basis="flex_basis" :flex_basis_percentage="flex_basis_percentage" 
+                :displayButtons="displayButtons" @handleSubmit="reverseTenantReceipt" @handleReset="handleReset"
+            />
+        </MovableModal>
     </div>
 </template>
 
@@ -66,16 +73,19 @@
 import axios from "axios";
 import { ref, computed, onMounted, onBeforeMount, watch} from 'vue';
 import PageComponent from '@/components/PageComponent.vue';
+import MovableModal from '@/components/MovableModal.vue'
+import DynamicForm from '../NewDynamicForm.vue';
 import { useStore } from "vuex";
 import { useToast } from "vue-toastification";
 import JournalEntries from "@/components/JournalEntries.vue";
 import ReceiptLines from "@/components/ReceiptLines.vue";
 import PrintJS from 'print-js';
+import Swal from 'sweetalert2';
 
 export default{
     name: 'Tenant_Receipts',
     components:{
-        PageComponent,JournalEntries,ReceiptLines,
+        PageComponent, MovableModal,DynamicForm,JournalEntries,ReceiptLines,
     },
     setup(){
         const store = useStore();     
@@ -93,9 +103,10 @@ export default{
         const tabs = ref(['Journal Entries','Receipt Lines']);
         const activeTab = ref(0);
         const invoiceID = ref(null);
+        const receiptID = ref(null);
         const modal_top = ref('150px');
         const modal_left = ref('400px');
-        const modal_width = ref('32vw');
+        const modal_width = ref('30vw');
         const tntComponentKey = ref(0);
         const ledComponentKey = ref(0);
         const propComponentKey = ref(0);
@@ -135,14 +146,17 @@ export default{
             {label: "Ref No", key:"reference_no"},
             {label: "Amnt", key:"total_amount", type:"number"},
             {label: "Done By", key:"done_by"},
+            {label: "Reversed", key:"reversed"},
         ])
         const showTotals = ref(true);
         const actions = ref([
             {name: 'print', icon: 'fa fa-print', title: 'Print Receipt', rightName: 'Print Tenant Receipt'},
             {name: 'download', icon: 'fa fa-download', title: 'Download Receipt', rightName: 'Print Tenant Receipt'},
+            {name: 'reverse', icon: 'fa fa-undo', title: 'Reverse Receipt', rightName: 'Reversing Tenant Receipt'},
             {name: 'delete', icon: 'fa fa-trash', title: 'Delete Receipt', rightName: 'Deleting Tenant Receipt'},
         ])
         const companyID = computed(()=> store.state.userData.company_id);
+        const userID = computed(()=> store.state.userData.user_id);
         const fetchProperties = async() =>{
             await store.dispatch('Properties_List/fetchProperties', {company:companyID.value})
         };
@@ -165,22 +179,10 @@ export default{
             await store.dispatch('Ledgers/updateState', {ledgerID: ''});
             ledgerSearchID.value = ""
         }
-        const tenant_name_search = computed({
-            get: () => store.state.Journals.client_name_search,
-            set: (value) => store.commit('Journals/SET_SEARCH_FILTERS', {"client_name_search":value}),
-        });
-        const tenant_code_search = computed({
-            get: () => store.state.Journals.client_code_search,
-            set: (value) => store.commit('Journals/SET_SEARCH_FILTERS', {"client_code_search":value}),
-        });
-        const from_date_search = computed({
-            get: () => store.state.Journals.from_date_search,
-            set: (value) => store.commit('Journals/SET_SEARCH_FILTERS', {"from_date_search":value}),
-        });
-        const to_date_search = computed({
-            get: () => store.state.Journals.to_date_search,
-            set: (value) => store.commit('Journals/SET_SEARCH_FILTERS', {"to_date_search":value}),
-        });
+        const tenant_name_search = ref("");
+        const tenant_code_search = ref("");
+        const from_date_search = ref("");
+        const to_date_search = ref("");
         const searchFilters = ref([
             {type:'text', placeholder:"Tenant Code...", value: tenant_code_search, width:36},
             {type:'text', placeholder:"Tenant Name...", value: tenant_name_search, width:64},
@@ -203,17 +205,20 @@ export default{
             selectedIds.value = ids;
         };
         
-        
-        const handleReset = async() =>{
-            await store.dispatch('Active_Tenants/updateState', {tenantUnitsArr:[]});
-            propComponentKey.value += 1;
-            ledComponentKey.value += 1;
-            tntComponentKey.value += 1;
-            propertySearchID.value = '';
-            ledgerSearchID.value = '';
+        const formFields = ref([]);
+
+        const updateFormFields = () => {
+            formFields.value = [
+                
+                { type: 'date', name: 'date',label: "Date.", value: '', required: true },
+                {type:'text-area', label:"Reversal Reason", value: '', textarea_rows: '3', textarea_cols: '56', required: true},
+            ];
+        };
+        const handleReset = () =>{
+            for(let i=0; i < formFields.value.length; i++){
+                formFields.value[i].value = '';
+            }
         }
-
-
         
         const showModalLoader = () =>{
             modal_loader.value = "block";
@@ -229,21 +234,51 @@ export default{
                     journal: selectedIds.value,
                     txn_type: "RCPT"
                 }
-                try{
-                    const response = await store.dispatch('Journals/deleteReceipt',formData)
-                    if(response && response.status == 200){
-                        toast.success("Receipt Removed Succesfully");
-                        mainComponentKey.value += 1;
-                        searchReceipts();
+                Swal.fire({
+                    title: "Are you sure?",
+                    text: `Do you wish to delete Receipt?`,
+                    type: 'warning',
+                    showCloseButton: true,
+                    showCancelButton: true,
+                    confirmButtonText: 'Yes Delete Receipt!',
+                    cancelButtonText: 'Cancel!',
+                    customClass: {
+                        confirmButton: 'swal2-confirm-custom',
+                        cancelButton: 'swal2-cancel-custom',
+                    },
+                    showLoaderOnConfirm: true,
+                    }).then((result) => {
+                    if (result.value) {
+                        axios.post(`api/v1/delete-journal/`,formData)
+                        .then((response)=>{
+                        if(response.data.msg == "Success"){
+                            Swal.fire("Poof! Receipt(s) removed succesfully!", {
+                                icon: "success",
+                            }); 
+                            toast.success("Receipt(s) removed succesfully");
+                            searchReceipts();
+                        }else if(response.data.msg == "Reversed"){
+                            Swal.fire({
+                                title: "Cannot Delete Reversed Receipt",
+                                icon: "warning",
+                            });
+                        }                  
+                        })
+                        .catch((error)=>{
+                            console.log(error.message);
+                            Swal.fire({
+                                title: error.message,
+                                icon: "warning",
+                            });
+                        })
+                        .finally(()=>{
+                            searchReceipts();
+                            selectedIds.value = [];
+                        })
+                    }else{
+                        Swal.fire(`Receipt has not been deleted!`);
                     }
-                }
-                catch(error){
-                    console.error(error.message);
-                    toast.error('Failed to remove Receipt: ' + error.message);
-                }
-                finally{
-                    selectedIds.value = [];
-                }
+                })
             }else if(selectedIds.value.length > 1){
                 toast.error("You have selected more than 1 Receipt") 
             }else{
@@ -257,21 +292,51 @@ export default{
                     journal: selectedIds.value,
                     txn_type: "RCPT"
                 }
-                try{
-                    const response = await store.dispatch('Journals/deleteReceipt',formData)
-                    if(response && response.status == 200){
-                        toast.success("Receipt(s) Removed Succesfully");
-                        mainComponentKey.value += 1;
-                        searchReceipts();
+                Swal.fire({
+                    title: "Are you sure?",
+                    text: `Do you wish to delete Receipt?`,
+                    type: 'warning',
+                    showCloseButton: true,
+                    showCancelButton: true,
+                    confirmButtonText: 'Yes Delete Receipt!',
+                    cancelButtonText: 'Cancel!',
+                    customClass: {
+                        confirmButton: 'swal2-confirm-custom',
+                        cancelButton: 'swal2-cancel-custom',
+                    },
+                    showLoaderOnConfirm: true,
+                    }).then((result) => {
+                    if (result.value) {
+                        axios.post(`api/v1/delete-journal/`,formData)
+                        .then((response)=>{
+                        if(response.data.msg == "Success"){
+                            Swal.fire("Poof! Receipt(s) removed succesfully!", {
+                                icon: "success",
+                            }); 
+                            toast.success("Receipt(s) removed succesfully");
+                            searchReceipts();
+                        }else if(response.data.msg == "Reversed"){
+                            Swal.fire({
+                                title: "Cannot Delete Reversed Receipt",
+                                icon: "warning",
+                            });
+                        }                  
+                        })
+                        .catch((error)=>{
+                            console.log(error.message);
+                            Swal.fire({
+                                title: error.message,
+                                icon: "warning",
+                            });
+                        })
+                        .finally(()=>{
+                            searchReceipts();
+                            selectedIds.value = [];
+                        })
+                    }else{
+                        Swal.fire(`Receipt has not been deleted!`);
                     }
-                }
-                catch(error){
-                    console.error(error.message);
-                    toast.error('Failed to remove Receipt(s): ' + error.message);
-                }
-                finally{
-                    selectedIds.value = [];
-                }
+                }) 
             }else{
                 toast.error("Please Select A Receipt To Remove")
             }
@@ -326,7 +391,10 @@ export default{
             searchReceipts(selectedValue.value);
         };
         const resetFilters = () =>{
-            store.commit('Journals/RESET_SEARCH_FILTERS')
+            tenant_name_search.value = "";
+            tenant_code_search.value = "";
+            from_date_search.value= "";
+            to_date_search.value = "";
             searchReceipts();
         }
         const loadPrev = () =>{
@@ -337,7 +405,6 @@ export default{
             }
             
             searchReceipts();
-            // scrollToTop();
         }
         const loadNext = () =>{
             if(currentPage.value >= pageCount.value){
@@ -346,24 +413,56 @@ export default{
                 currentPage.value += 1;
             }
             
-            searchReceipts();
-            // scrollToTop(); 
+            searchReceipts(); 
         }
         const firstPage = ()=>{
             currentPage.value = 1;
             searchReceipts();
-            // scrollToTop();
+
         }
         const lastPage = () =>{
             currentPage.value = pageCount.value;
             searchReceipts();
-            // scrollToTop();
+
         }
         const addNewReceipt = async() =>{
             store.dispatch('Journals/updateState', {journalsClientList: [], outstandingBalance:0})
             store.commit('pageTab/ADD_PAGE', {'PMS':'Receipt_Details'});
             store.state.pageTab.pmsActiveTab = 'Receipt_Details'; 
-        }
+        };
+        const reverseTenantReceipt = async() =>{
+            if(formFields.value[0].value == '' || formFields.value[1].value == ''){
+                toast.error('Fill In Required Fields')
+            }else{
+                showModalLoader();
+                let formData = {
+                    receipt: receiptID.value,
+                    date: formFields.value[0].value,
+                    reversal_reason: formFields.value[1].value,
+                    user: userID.value,
+                    company: companyID.value
+                }
+                await axios.post('api/v1/reverse-tenant-receipt/',formData).
+                then((response)=>{
+                    if(response.data.msg == "Success"){
+                        toast.success("Receipt Reversal Successful")
+                        receiptID.value = null;
+                        handleReset();
+                    }else{
+                        toast.error("Error Reversing Receipt")
+                    }
+                    
+                })
+                .catch((error)=>{
+                    console.log(error.message)
+                    toast.error(error.message)
+                })
+                .finally(()=>{
+                    hideModalLoader();
+                })
+            }
+            
+        };
         const handleActionClick = async(rowIndex, action, row) =>{
             if(action == 'delete'){
                 const journalID = [row['journal_id']];
@@ -372,9 +471,50 @@ export default{
                     journal: journalID,
                     txn_type: "RCPT",
                 }
-                await store.dispatch('Journals/deleteReceipt',formData)
-                mainComponentKey.value += 1;
-                searchReceipts();       
+                Swal.fire({
+                    title: "Are you sure?",
+                    text: `Do you wish to delete Receipt?`,
+                    type: 'warning',
+                    showCloseButton: true,
+                    showCancelButton: true,
+                    confirmButtonText: 'Yes Delete Receipt!',
+                    cancelButtonText: 'Cancel!',
+                    customClass: {
+                        confirmButton: 'swal2-confirm-custom',
+                        cancelButton: 'swal2-cancel-custom',
+                    },
+                    showLoaderOnConfirm: true,
+                    }).then((result) => {
+                    if (result.value) {
+                        axios.post(`api/v1/delete-journal/`,formData)
+                        .then((response)=>{
+                        if(response.data.msg == "Success"){
+                            Swal.fire("Poof! Receipt(s) removed succesfully!", {
+                                icon: "success",
+                            }); 
+                            toast.success("Receipt(s) removed succesfully");
+                            searchReceipts();
+                        }else if(response.data.msg == "Reversed"){
+                            Swal.fire({
+                                title: "Cannot Delete Reversed Receipt",
+                                icon: "warning",
+                            });
+                        }                  
+                        })
+                        .catch((error)=>{
+                            console.log(error.message);
+                            Swal.fire({
+                                title: error.message,
+                                icon: "warning",
+                            });
+                        })
+                        .finally(()=>{
+                            searchReceipts();
+                        })
+                    }else{
+                        Swal.fire(`Receipt has not been deleted!`);
+                    }
+                })     
             }else if(action == 'print'){
                 showLoader();
                 const journalID = row['journal_id'];
@@ -401,6 +541,21 @@ export default{
                 then(()=>{
                     hideLoader();
                 })
+            }else if(action == 'reverse'){
+                const reversalStatus = row['reversed'];
+
+                if (reversalStatus == "Yes"){
+                    toast.error("Receipt Already Reversed")
+                }else{
+                    updateFormFields();
+                    receiptID.value = row['journal_id'];
+                    handleReset();
+                    flex_basis.value = '1/3';
+                    flex_basis_percentage.value = '33.333';
+                    propModalVisible.value = true;
+                }
+
+                    
             }
         };
         const handleShowDetails = async(row) =>{
@@ -448,12 +603,66 @@ export default{
         }
 
         const dropdownOptions = ref([
-            {label: 'Reverse Receipt', action: 'reverse-receipt'},
+            {label: 'Cancel Reversal', action: 'cancel-receipt-reversal'},
         ]);
         const handleDynamicOption = (option) =>{
-            if(option == 'batch-meter-reading'){
-                store.commit('pageTab/ADD_PAGE', {'PMS':'Batch_Readings'})
-                store.state.pageTab.pmsActiveTab = 'Batch_Readings';
+            
+            if(option == 'cancel-receipt-reversal'){
+                if(selectedIds.value.length > 1){
+                    toast.error('You Have Selected More Than 1 Receipt')
+                }else if(selectedIds.value.length == 0){
+                    toast.error('Please Select A Receipt')
+                }else{
+                    let formData = {
+                        receipt: selectedIds.value,
+                        company: companyID.value
+                    }
+                    Swal.fire({
+                        title: "Are you sure?",
+                        text: `Do you wish to Cancel Reversal?`,
+                        type: 'warning',
+                        showCloseButton: true,
+                        showCancelButton: true,
+                        confirmButtonText: 'Yes Cancel Reversal!',
+                        cancelButtonText: 'Cancel!',
+                        customClass: {
+                            confirmButton: 'swal2-confirm-custom',
+                            cancelButton: 'swal2-cancel-custom',
+                        },
+                        showLoaderOnConfirm: true,
+                        }).then((result) => {
+                        if (result.value) {
+                            axios.post(`api/v1/cancel-tenant-receipt-reversal/`,formData)
+                            .then((response)=>{
+                                if(response.data.msg == "Success"){
+                                    Swal.fire("Poof! Reversal canceled succesfully!", {
+                                        icon: "success",
+                                    }); 
+                                }else if(response.data.msg == "Failed"){
+                                    Swal.fire({
+                                        title: "Cannot Cancel Non Reversed Receipt",
+                                        icon: "warning",
+                                    });
+                                } else if(response.data.msg == "Error"){
+                                    Swal.fire({
+                                        title: "Invoice(s) Have Payment Allocation",
+                                        icon: "warning",
+                                    });
+                                }                   
+                            })
+                            .catch((error)=>{
+                            console.log(error.message);
+                            Swal.fire({
+                                title: error.message,
+                                icon: "warning",
+                            });
+                            })
+                        }else{
+                            Swal.fire(`Reversal has not been canceled!`);
+                        }
+                    })  
+                }
+                
             }
         };
         const printReceiptsList = () =>{
@@ -493,10 +702,10 @@ export default{
         })
         return{
             showTotals,mainComponentKey, title, searchReceipts,resetFilters, addButtonLabel, searchFilters, tableColumns, receiptsList,
-            propResults, propArrLen, propCount, pageCount, showNextBtn, showPreviousBtn,
-            loadPrev, loadNext, firstPage, lastPage, idField, actions, handleActionClick, propModalVisible, closeModal,
+            propResults, propArrLen, propCount, pageCount, showNextBtn, showPreviousBtn,formFields,
+            loadPrev, loadNext, firstPage, lastPage, idField, actions, handleActionClick, propModalVisible, closeModal,handleReset,
             submitButtonLabel, showModal, addNewReceipt, showLoader, loader, hideLoader, modal_loader, modal_top, modal_left, modal_width,displayButtons,
-            showModalLoader, hideModalLoader, handleSelectionChange, flex_basis,flex_basis_percentage,
+            showModalLoader, hideModalLoader, handleSelectionChange, flex_basis,flex_basis_percentage,reverseTenantReceipt,
             removeReceipt, removeReceipts, dropdownOptions, handleDynamicOption,addingRight,rightsModule,printReceiptsList,selectSearchQuantity,selectedValue,
             showDetails,detailsTitle,hideDetails,handleShowDetails,journalEntries,receiptLines,tabs,selectTab,activeTab
         }

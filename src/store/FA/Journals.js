@@ -514,12 +514,12 @@ const actions = {
                 icon: "success",
               }); 
               toast.success("Receipt(s) removed succesfully")
-          }else if(response.data.msg == "Paid"){
+          }else if(response.data.msg == "Reversed"){
             Swal.fire({
-              title: "Cannot Delete Paid Receipt",
+              title: "Cannot Delete Reversed Receipt",
               icon: "warning",
             });
-          }                   
+          }                  
         })
         .catch((error)=>{
           console.log(error.message);

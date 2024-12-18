@@ -86,7 +86,7 @@ export default defineComponent({
         const ledgerID = ref('');
         const tenantID = ref('');
         const propertyID = ref('');
-        const ledgerArray = computed(() => store.state.Ledgers.ledgerArr);
+        const ledgerArray = computed(() => store.state.Ledgers.cashbookLedgerArr);
         const propertyArray = computed(() => store.state.Properties_List.propertyArr);
         const tenantArray = computed(() => store.state.Active_Tenants.tenantUnitsArr);
         const receiptRows = computed(() => store.state.Journals.journalsClientList);
@@ -137,7 +137,7 @@ export default defineComponent({
             await store.dispatch('Ledgers/fetchLedgers', {company:companyID.value})
         };
         const fetchLedgers = async() =>{
-            await store.dispatch('Ledgers/fetchLedgers', {company:companyID.value, ledger_type: 'Cashbook'})
+            await store.dispatch('Ledgers/fetchCashbookLedgers', {company:companyID.value, ledger_type: 'Cashbook'})
         };
         const handleSelectedLedger = async(option) =>{
             await store.dispatch('Ledgers/handleSelectedLedger', option)
