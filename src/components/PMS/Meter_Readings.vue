@@ -72,6 +72,8 @@ export default{
         const submitButtonLabel = ref('Add');
         const setupComponentKey = ref(0);
         const propComponentKey = ref(0);
+        const propSearchComponentKey = ref(0);
+        const utilSearchComponentKey = ref(0);
         const unitComponentKey = ref(0);
         const selectedIds = ref([]);
         const readingsList = ref([]);
@@ -163,23 +165,26 @@ export default{
             get: () => store.state.Meter_Readings.to_date_search,
             set: (value) => store.commit('Meter_Readings/SET_SEARCH_FILTERS', {"to_date_search":value}),
         });
+        const unit_number_search = ref("");
         const searchFilters = ref([
             {type:'text', placeholder:"Tenant Code...", value: tenant_code_search, width:36},
             {type:'text', placeholder:"Tenant Name...", value: tenant_name_search, width:64},
             {type:'date', placeholder:"From Date...", value: from_date_search, width:36, title: "Date From Search"},
             {type:'date', placeholder:"To Date...", value: to_date_search, width:36, title: "Date To Search"},
+            {type:'text', placeholder:"Unit No...", value: unit_number_search, width:36},
             {
-                type:'search-dropdown', value: propertySearchID.value, width:64,
-                selectOptions: propertyArray, optionSelected: handleSearchProperty,
-                searchPlaceholder: 'Property Search...', dropdownWidth: '200px',
-                fetchData: fetchProperties(), clearSearch: clearSearchProperty()             
-            },
-            {
-                type:'search-dropdown', value: utilitySearchID.value, width:48,
+                type:'search-dropdown', value: utilitySearchID.value, width:48, componentKey: utilSearchComponentKey,
                 selectOptions: utilityArray, optionSelected: handleSearchUtility,
-                searchPlaceholder: 'Utility Search...', dropdownWidth: '250px',
-                fetchData: fetchUtilities(), clearSearch: clearSearchUtility()   
+                searchPlaceholder: 'Utility Search...', dropdownWidth: '200px',
+                fetchData: fetchUtilities(), clearSearch: clearSearchUtility 
             },
+            {
+                type:'search-dropdown', value: propertySearchID.value, width:64, componentKey:propSearchComponentKey,
+                selectOptions: propertyArray, optionSelected: handleSearchProperty,
+                searchPlaceholder: 'Property Search...', dropdownWidth: '400px',
+                fetchData: fetchProperties(), clearSearch: clearSearchProperty          
+            },
+            
         ]);
         const handleSelectionChange = (ids) => {
             selectedIds.value = ids;
@@ -418,6 +423,7 @@ export default{
                 from_date: from_date_search.value,
                 to_date: to_date_search.value,
                 property: propertySearchID.value,
+                unit_number: unit_number_search.value,
                 utility: utilitySearchID.value,
                 company_id: companyID.value,
                 page_size: selectedValue.value
@@ -450,7 +456,13 @@ export default{
             searchMeterReadings(selectedValue.value);
         };
         const resetFilters = () =>{
-            store.commit('Meter_Readings/RESET_SEARCH_FILTERS')
+            selectedValue.value = 50;
+            unit_number_search.value = "";
+            store.commit('Meter_Readings/RESET_SEARCH_FILTERS');
+            utilSearchComponentKey.value += 1;
+            propSearchComponentKey.value += 1;
+            propertySearchID.value = "";
+            utilitySearchID.value = "";
             searchMeterReadings();
         }
         const loadPrev = () =>{

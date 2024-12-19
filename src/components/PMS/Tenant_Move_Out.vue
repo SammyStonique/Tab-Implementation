@@ -83,6 +83,7 @@ export default{
         const current_date = new Date();
         const loader = ref('');
         const tableCompKey = ref(0);
+        const propComponentKey = ref(0);
         const unitComponentKey = ref(0);
         const ledComponentKey = ref(0);
         const trans_modal_loader = ref('none');
@@ -155,7 +156,7 @@ export default{
         const chargesRows = computed(()=> store.state.Exit_Charges.exitChargesArray);
         const companyID = computed(()=> store.state.userData.company_id);
         const userID = computed(()=> store.state.userData.user_id);
-        const propertyID = ref(null);
+        const propertyID = ref("");
         const chargeID = ref(null);
         const chargeName = ref(null);
         const tenantID = ref(null);
@@ -181,7 +182,7 @@ export default{
             {type:'text', placeholder:"Name...", value: name_search, width:48,},
             {type:'text', placeholder:"Code...", value: tenant_code_search, width:48,},
             {
-                type:'search-dropdown', value: properties_array, width:48,
+                type:'search-dropdown', value: propertyID.value, width:48, componentKey: propComponentKey,
                 selectOptions: properties_array, optionSelected: handleSelectedProperty,
                 searchPlaceholder: 'Property...', dropdownWidth: '300px',
                 fetchData: store.dispatch('Properties_List/fetchProperties', {company:companyID.value}),
@@ -484,9 +485,13 @@ export default{
             searchTenants(selectedValue.value);
         };
         const resetFilters = () =>{
+            selectedValue.value = 50;
             name_search.value = "";
             tenant_code_search.value = "";
             phone_number_search.value = "";
+            unit_number_search.value = "";
+            propComponentKey.value += 1;
+            propertyID.value = ""
             searchTenants();
         }
         const loadPrev = () =>{
@@ -538,7 +543,10 @@ export default{
                 }else{
                     if(outstBal == 0 && exitCharges == 0){
                         toast.error("Tenant Has No Outstanding Charge")
-                    }else{
+                    }else if(depHeld <= 0){
+                        toast.error("Tenant Has No Deposit Held")
+                    }
+                    else{
                         let formData = {
                             tenant: row['tenant_id'],
                             amount: depHeld,

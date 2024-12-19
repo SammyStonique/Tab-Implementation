@@ -22,6 +22,7 @@
             :idField="idField"
             @handleSelectionChange="handleSelectionChange"
             @handleActionClick="handleActionClick"
+            @handleShowDetails="handleShowDetails"
             :count="propCount"
             :currentPage="currentPage"
             :result="propArrLen"
@@ -33,7 +34,31 @@
             :showPreviousBtn="showPreviousBtn"
             :selectedValue="selectedValue"
             @selectSearchQuantity="selectSearchQuantity"
-        />
+            :showDetails="showDetails"
+            :detailsTitle="detailsTitle"
+            @hideDetails="hideDetails"
+            >
+            <div>
+                <div class="tabs pt-2">
+                    <button v-for="(tab, index) in tabs" :key="tab" :class="['tab', { active: activeTab === index }]"@click="selectTab(index)">
+                        {{ tab }}
+                    </button>
+                </div>
+                <div class="tab-content mt-3">
+                    <div v-if="activeTab == 0">
+                        <JournalEntries 
+                            :detailRows="journalEntries"
+                        />
+                    </div>
+                    <div v-if="activeTab == 1">
+                        <ReceiptLines 
+                            :rcptLinesRows="receiptLines"
+                        />
+                    </div>
+                </div>
+                
+            </div>
+        </PageComponent>
     </div>
 </template>
 
@@ -41,13 +66,15 @@
 import axios from "axios";
 import { ref, computed, onMounted, onBeforeMount, watch} from 'vue';
 import PageComponent from '@/components/PageComponent.vue';
+import JournalEntries from "@/components/JournalEntries.vue";
+import ReceiptLines from "@/components/ReceiptLines.vue";
 import { useStore } from "vuex";
 import { useToast } from "vue-toastification";
 
 export default{
     name: 'Credit_Notes',
     components:{
-        PageComponent
+        PageComponent,JournalEntries,ReceiptLines,
     },
     setup(){
         const store = useStore();     
@@ -61,6 +88,11 @@ export default{
         const rightsModule = ref('PMS');
         const submitButtonLabel = ref('Add');
         const title = ref('Receipt Reversal');
+        const detailsTitle = ref('Item Details');
+        const tabs = ref(['Journal Entries','Credit Note Lines']);
+        const activeTab = ref(0);
+        const invoiceID = ref(null);
+        const receiptID = ref(null);
         const modal_top = ref('150px');
         const modal_left = ref('400px');
         const modal_width = ref('32vw');
@@ -74,6 +106,9 @@ export default{
         const propCount = ref(0);
         const pageCount = ref(0);
         const selectedValue = ref(50);
+        const showDetails = ref(false);
+        const journalEntries = ref([]);
+        const receiptLines = ref([]);
         const currentPage = ref(1);
         const showNextBtn = ref(false);
         const showPreviousBtn = ref(false);
@@ -114,20 +149,23 @@ export default{
             await store.dispatch('Properties_List/updateState', {propertyID: ''});
             propertySearchID.value = ""
         }
+        const journal_no_search = ref("");
         const tenant_name_search = ref('');
         const tenant_code_search = ref('');
         const from_date_search = ref('');
         const to_date_search = ref('');
         const searchFilters = ref([
-            {type:'text', placeholder:"Tenant Code...", value: tenant_code_search, width:36},
+            {type:'text', placeholder:"CDN#...", value: journal_no_search, width:48},
+            {type:'text', placeholder:"Tenant Code...", value: tenant_code_search, width:48},
             {type:'text', placeholder:"Tenant Name...", value: tenant_name_search, width:64},
+            {},
             {type:'date', placeholder:"From Date...", value: from_date_search, width:36, title: "Date From Search"},
             {type:'date', placeholder:"To Date...", value: to_date_search, width:36, title: "Date To Search"},
             {
-                type:'search-dropdown', value: propertySearchID.value, width:64,
+                type:'search-dropdown', value: propertySearchID.value, width:64,componentKey: propComponentKey,
                 selectOptions: propertyArray, optionSelected: handleSearchProperty,
-                searchPlaceholder: 'Property Search...', dropdownWidth: '200px',
-                fetchData: fetchProperties(), clearSearch: clearSearchProperty()             
+                searchPlaceholder: 'Property Search...', dropdownWidth: '300px',
+                fetchData: fetchProperties(), clearSearch: clearSearchProperty             
             },
         ]);
         const handleSelectionChange = (ids) => {
@@ -223,6 +261,9 @@ export default{
                 client_code: tenant_code_search.value,
                 from_date: from_date_search.value,
                 to_date: to_date_search.value,
+                journal_no: journal_no_search.value,
+                status: "",
+                reversed: "No",
                 property: propertySearchID.value,
                 company: companyID.value,
                 page_size: selectedValue.value
@@ -256,11 +297,14 @@ export default{
             searchReceipts(selectedValue.value);
         };
         const resetFilters = () =>{
+            selectedValue.value = 50;
             tenant_name_search.value = "";
             tenant_code_search.value = "";
             from_date_search.value = "";
             to_date_search.value = "";
-            store.commit('Journals/RESET_SEARCH_FILTERS')
+            journal_no_search.value = "";
+            propComponentKey.value += 1;
+            propertySearchID.value = "";
             searchReceipts();
         }
         const loadPrev = () =>{
@@ -335,7 +379,47 @@ export default{
                     hideLoader();
                 })
             }
-        }
+        };
+        const handleShowDetails = async(row) =>{
+            activeTab.value = 0;
+            invoiceID.value = row['journal_id'];
+            detailsTitle.value = row['journal_no'] + ' Details';
+            showDetails.value = true;
+            let formData = {
+                journal: row['journal_id'],
+                company: companyID.value
+            }
+            axios.post('api/v1/journal-entries-search/',formData)
+            .then((response)=>{
+                journalEntries.value = response.data.journal_entries;
+            })
+            .catch((error)=>{
+                console.log(error.message)
+            })
+        };
+        const selectTab = async(index) => {
+            let formData = {
+                company: companyID.value,
+                journal: invoiceID.value,
+            }
+            if(index == 1){
+                activeTab.value = index;
+                await axios.post('api/v1/receipt-lines-search/',formData)
+                .then((response)=>{
+                    receiptLines.value = response.data.receipt_lines;
+                })
+                .catch((error)=>{
+                    console.log(error.message)
+                })
+            }else{
+                activeTab.value = index;
+                hideLoader();
+            }
+
+        };
+        const hideDetails = async() =>{
+            showDetails.value = false;
+        };
         const closeModal = async() =>{
             
         }
@@ -359,8 +443,28 @@ export default{
             loadPrev, loadNext, firstPage, lastPage, idField, actions, handleActionClick, propModalVisible, closeModal,
             submitButtonLabel, showModal, addNewReceipt, showLoader, loader, hideLoader, modal_loader, modal_top, modal_left, modal_width,displayButtons,
             showModalLoader, hideModalLoader, handleSelectionChange, flex_basis,flex_basis_percentage,
-            removeReceipt, removeReceipts, dropdownOptions, handleDynamicOption,addingRight,rightsModule,selectSearchQuantity,selectedValue
+            removeReceipt, removeReceipts, dropdownOptions, handleDynamicOption,addingRight,rightsModule,selectSearchQuantity,selectedValue,
+            showDetails,detailsTitle,hideDetails,handleShowDetails,journalEntries,receiptLines,tabs,selectTab,activeTab
         }
     }
 };
 </script>
+
+
+<style scoped>
+.tabs {
+    display: flex;
+    border-bottom: 1px solid #ccc;
+}
+.tab {
+    padding: 2px 20px 2px 20px;
+    cursor: pointer;
+}
+
+.tab.active {
+    border-bottom: 2px solid #000;
+}
+
+.tab-content {
+    padding: 1px;
+}</style>

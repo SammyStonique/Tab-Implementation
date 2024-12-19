@@ -72,6 +72,7 @@ export default{
         const submitButtonLabel = ref('Add');
         const title = ref('Lease Fee Details');
         const propComponentKey = ref(0);
+        const propSearchComponentKey = ref(0);
         const tntComponentKey = ref(0);
         const invModalVisible = ref(false);
         const modal_top = ref('150px');
@@ -148,10 +149,10 @@ export default{
             {type:'date', placeholder:"From Date...", value: from_date_search, width:36, title: "Date From Search"},
             {type:'date', placeholder:"To Date...", value: to_date_search, width:36, title: "Date To Search"},
             {
-                type:'search-dropdown', value: propertySearchID.value, width:64,
+                type:'search-dropdown', value: propertySearchID.value, width:64, componentKey: propSearchComponentKey,
                 selectOptions: propertyArray, optionSelected: handleSearchProperty,
-                searchPlaceholder: 'Property Search...', dropdownWidth: '200px',
-                fetchData: fetchProperties(), clearSearch: clearSearchProperty()             
+                searchPlaceholder: 'Property Search...', dropdownWidth: '400px',
+                fetchData: fetchProperties(), clearSearch: clearSearchProperty            
             },
         ]);
         const handleSelectionChange = (ids) => {
@@ -277,7 +278,7 @@ export default{
                 tenant_code: tenant_code_search.value,
                 from_date: from_date_search.value,
                 to_date: to_date_search.value,
-                property: propertyID.value,
+                property: propertySearchID.value,
                 company: companyID.value,
                 page_size: selectedValue.value
             } 
@@ -310,6 +311,9 @@ export default{
             searchLeaseFees(selectedValue.value);
         };
         const resetFilters = () =>{
+            selectedValue.value = 50;
+            propSearchComponentKey.value += 1;
+            propertySearchID.value  = "";
             store.commit('Lease_Fees/RESET_SEARCH_FILTERS')
             searchLeaseFees();
         }

@@ -21,6 +21,7 @@
             :idField="idField"
             @handleSelectionChange="handleSelectionChange"
             @handleActionClick="handleActionClick"
+            @handleShowDetails="handleShowDetails"
             :count="propCount"
             :currentPage="currentPage"
             :result="propArrLen"
@@ -32,7 +33,36 @@
             :showPreviousBtn="showPreviousBtn"
             :selectedValue="selectedValue"
             @selectSearchQuantity="selectSearchQuantity"
-        />
+            :showDetails="showDetails"
+            :detailsTitle="detailsTitle"
+            @hideDetails="hideDetails"
+            >
+            <div>
+                <div class="tabs pt-2">
+                    <button v-for="(tab, index) in tabs" :key="tab" :class="['tab', { active: activeTab === index }]"@click="selectTab(index)">
+                        {{ tab }}
+                    </button>
+                </div>
+                <div class="tab-content mt-3">
+                    <div v-if="activeTab == 0">
+                        <JournalEntries 
+                            :detailRows="journalEntries"
+                        />
+                    </div>
+                    <div v-if="activeTab == 1">
+                        <InvoiceLines 
+                            :invLinesRows="invoiceLines"
+                        />
+                    </div>
+                    <div v-if="activeTab == 2">
+                        <InvoicePayments 
+                            :invPayRows="invoicePayments"
+                        />
+                    </div>
+                </div>
+                
+            </div>
+        </PageComponent>
         <MovableModal v-model:visible="invModalVisible" :title="title" :modal_top="modal_top" :modal_left="modal_left" :modal_width="modal_width"
             :loader="modal_loader" @showLoader="showModalLoader" @hideLoader="hideModalLoader" @closeModal="closeModal"
         >
@@ -50,6 +80,9 @@ import { ref, computed, onMounted, onBeforeMount, watch} from 'vue';
 import PageComponent from '@/components/PageComponent.vue';
 import MovableModal from '@/components/MovableModal.vue';
 import DynamicForm from '../NewDynamicForm.vue';
+import JournalEntries from "@/components/JournalEntries.vue";
+import InvoiceLines from "@/components/InvoiceLines.vue";
+import InvoicePayments from "@/components/InvoicePayments.vue";
 import { useStore } from "vuex";
 import { useToast } from "vue-toastification";
 import { useDateFormatter } from '@/composables/DateFormatter';
@@ -58,7 +91,7 @@ import PrintJS from 'print-js';
 export default{
     name: 'Debit_Notes',
     components:{
-        PageComponent, MovableModal,DynamicForm
+        PageComponent, MovableModal,DynamicForm,JournalEntries,InvoiceLines,InvoicePayments
     },
     setup(){
         const store = useStore();     
@@ -74,6 +107,10 @@ export default{
         const addButtonLabel = ref('New Debit Note');
         const submitButtonLabel = ref('Add');
         const title = ref('Invoice Booking');
+        const detailsTitle = ref('Item Details');
+        const tabs = ref(['Journal Entries','Debit Note Lines','Debit Note Payments']);
+        const activeTab = ref(0);
+        const invoiceID = ref(null);
         const propComponentKey = ref(0);
         const invModalVisible = ref(false);
         const modal_top = ref('150px');
@@ -86,6 +123,10 @@ export default{
         const propCount = ref(0);
         const pageCount = ref(0);
         const selectedValue = ref(50);
+        const showDetails = ref(false);
+        const journalEntries = ref([]);
+        const invoiceLines = ref([]);
+        const invoicePayments = ref([]);
         const currentPage = ref(1);
         const showNextBtn = ref(false);
         const showPreviousBtn = ref(false);
@@ -130,21 +171,28 @@ export default{
         const clearSearchProperty = async() =>{
             await store.dispatch('Properties_List/updateState', {propertyID: ''});
             propertySearchID.value = ""
-        }
+        };
+        const journal_no_search = ref("");
         const client_name_search = ref('');
         const client_code_search = ref('');
         const from_date_search = ref('');
         const to_date_search = ref('');
+        const status_search = ref("");
         const searchFilters = ref([
+            {type:'text', placeholder:"DBN#...", value: journal_no_search, width:36},
             {type:'text', placeholder:"Tenant Code...", value: client_code_search, width:36},
             {type:'text', placeholder:"Tenant Name...", value: client_name_search, width:64},
+            {
+                type:'dropdown', placeholder:"Status..", value: status_search, width:32,
+                options: [{text:'Open',value:'Open'},{text:'Closed',value:'Closed'}]
+            },
             {type:'date', placeholder:"From Date...", value: from_date_search, width:36, title: "Date From Search"},
             {type:'date', placeholder:"To Date...", value: to_date_search, width:36, title: "Date To Search"},
             {
                 type:'search-dropdown', value: propertySearchID.value, width:64, componentKey: propComponentKey,
                 selectOptions: propertyArray, optionSelected: handleSearchProperty,
-                searchPlaceholder: 'Property Search...', dropdownWidth: '200px',
-                fetchData: fetchProperties(), clearSearch: clearSearchProperty()             
+                searchPlaceholder: 'Property Search...', dropdownWidth: '300px',
+                fetchData: fetchProperties(), clearSearch: clearSearchProperty            
             },
         ]);
         const handleSelectionChange = (ids) => {
@@ -248,6 +296,9 @@ export default{
                 client_code: client_code_search.value,
                 from_date: from_date_search.value,
                 to_date: to_date_search.value,
+                journal_no: journal_no_search.value,
+                status: status_search.value,
+                reversed: "No",
                 property: propertySearchID.value,
                 company: companyID.value,
                 page_size: selectedValue.value
@@ -281,11 +332,15 @@ export default{
             searchInvoices(selectedValue.value);
         };
         const resetFilters = () =>{
+            selectedValue.value = 50;
             client_name_search.value = "";
             client_code_search.value = "";
             from_date_search.value = "";
             to_date_search.value = "";
-            store.commit('Journals/RESET_SEARCH_FILTERS')
+            journal_no_search.value = "";
+            status_search.value = "";
+            propComponentKey.value += 1;
+            propertySearchID.value = "";
             searchInvoices();
         }
         const loadPrev = () =>{
@@ -353,7 +408,57 @@ export default{
                     hideLoader();
                 })
             }
-        }
+        };
+        const handleShowDetails = async(row) =>{
+            activeTab.value = 0;
+            invoiceID.value = row['journal_id'];
+            detailsTitle.value = row['journal_no'] + ' Details';
+            showDetails.value = true;
+            let formData = {
+                journal: row['journal_id'],
+                company: companyID.value
+            }
+            axios.post('api/v1/journal-entries-search/',formData)
+            .then((response)=>{
+                journalEntries.value = response.data.journal_entries;
+            })
+            .catch((error)=>{
+                console.log(error.message)
+            })
+        };
+        const selectTab = async(index) => {
+            let formData = {
+                company: companyID.value,
+                journal: invoiceID.value,
+            }
+            if(index == 1){
+                activeTab.value = index;
+                await axios.post('api/v1/invoice-lines-search/',formData)
+                .then((response)=>{
+                    invoiceLines.value = response.data.invoice_lines;
+                })
+                .catch((error)=>{
+                    console.log(error.message)
+                })
+            }else if( index == 2){
+                activeTab.value = index;
+                await axios.post('api/v1/invoice-payments-search/',formData)
+                .then((response)=>{
+                    invoicePayments.value = response.data.invoice_payments;
+                })
+                .catch((error)=>{
+                    console.log(error.message)
+                })
+                
+            }else{
+                activeTab.value = index;
+                hideLoader();
+            }
+
+        };
+        const hideDetails = async() =>{
+            showDetails.value = false;
+        };
         const closeModal = async() =>{
             invModalVisible.value = false;
             handleReset();
@@ -410,8 +515,28 @@ export default{
             submitButtonLabel, showModal, showLoader, loader, hideLoader, modal_loader, modal_top, modal_left, modal_width,displayButtons,
             showModalLoader, hideModalLoader, formFields, handleSelectionChange, flex_basis,flex_basis_percentage,
             removeInvoice, removeInvoices, dropdownOptions, handleDynamicOption, addNewInvoice, printInvoiceList,
-            addingRight,rightsModule,selectSearchQuantity,selectedValue
+            addingRight,rightsModule,selectSearchQuantity,selectedValue,showDetails,detailsTitle,hideDetails,handleShowDetails,journalEntries,
+            invoiceLines,invoicePayments,tabs,selectTab,activeTab
         }
     }
 };
 </script>
+
+
+<style scoped>
+.tabs {
+    display: flex;
+    border-bottom: 1px solid #ccc;
+}
+.tab {
+    padding: 2px 20px 2px 20px;
+    cursor: pointer;
+}
+
+.tab.active {
+    border-bottom: 2px solid #000;
+}
+
+.tab-content {
+    padding: 1px;
+}</style>

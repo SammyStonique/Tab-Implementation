@@ -30,6 +30,8 @@
             @lastPage="lastPage"
             :showNextBtn="showNextBtn"
             :showPreviousBtn="showPreviousBtn"
+            :selectedValue="selectedValue"
+            @selectSearchQuantity="selectSearchQuantity"
         />
     </div>
 </template>
@@ -56,12 +58,15 @@ export default{
         const addingRight = ref('Adding Property');
         const rightsModule = ref('PMS');
         const submitButtonLabel = ref('Add');
+        const lldSearchComponentKey = ref(0);
+        const zoneSearchComponentKey = ref(0);
         const selectedIds = ref([]);
         const propertyList = ref([]);
         const propResults = ref([]);
         const propArrLen = ref(0);
         const propCount = ref(0);
         const pageCount = ref(0);
+        const selectedValue = ref(50);
         const currentPage = ref(1);
         const showNextBtn = ref(false);
         const showPreviousBtn = ref(false);
@@ -82,8 +87,8 @@ export default{
             {name: 'delete', icon: 'fa fa-trash', title: 'Delete Property', rightName: 'Deleting Property'},
         ])
         const companyID = computed(()=> store.state.userData.company_id);
-        const landlordID = ref(null);
-        const zoneID = ref(null);
+        const landlordID = ref("");
+        const zoneID = ref("");
         const name_search = computed({
             get: () => store.state.Properties_List.name_search,
             set: (value) => store.commit('Properties_List/SET_SEARCH_FILTERS', {"name_search":value}),
@@ -106,14 +111,31 @@ export default{
         const zones_array = computed({
             get: () => store.state.Zones.zoneArr,
         });
+        const handleSearchLandlord = async(option) =>{
+            await store.dispatch('Landlords_List/handleSelectedLandlord', option)
+            landlordID.value = store.state.Landlords_List.landlordID;
+        };
+        const clearSearchLandlord = async() =>{
+            await store.dispatch('Landlords_List/updateState', {landlordID: ''});
+            landlordID.value = store.state.Landlords_List.landlordID;
+        };
+        const handleSearchZone = async(option) =>{
+            await store.dispatch('Zones/handleSelectedZone', option)
+            zoneID.value = store.state.Zones.zoneID;
+        };
+        const clearSearchZone = async() =>{
+            await store.dispatch('Zones/updateState', {zoneID: ''});
+            zoneID.value = store.state.Zones.zoneID;
+        };
         const searchFilters = ref([
             {type:'text', placeholder:"Name...", value: name_search, width:48,},
             {type:'text', placeholder:"Code...", value: property_code_search, width:48,},
             {
                 type:'search-dropdown', value: landlords_array, width:48,
-                selectOptions: landlords_array,
+                selectOptions: landlords_array, optionSelected: handleSearchLandlord,
                 searchPlaceholder: 'Landlord...', dropdownWidth: '300px',
-                fetchData: store.dispatch('Landlords_List/fetchLandlords', {company:companyID.value})
+                fetchData: store.dispatch('Landlords_List/fetchLandlords', {company:companyID.value}),
+                clearSearch: clearSearchLandlord, componentKey: lldSearchComponentKey
             },
             {
                 type:'dropdown', placeholder:"Status", value: status_search, width:48,
@@ -126,9 +148,10 @@ export default{
             
             {
                 type:'search-dropdown', value: zones_array, width:48,
-                selectOptions: zones_array,
-                searchPlaceholder: 'Zone...', dropdownWidth: '300px',
-                fetchData: store.dispatch('Zones/fetchZones', {company:companyID.value})
+                selectOptions: zones_array, optionSelected: handleSearchZone,
+                searchPlaceholder: 'Zone...', dropdownWidth: '200px',
+                fetchData: store.dispatch('Zones/fetchZones', {company:companyID.value}),
+                clearSearch: clearSearchZone, componentKey: zoneSearchComponentKey
             },
         ]);
         const handleSelectionChange = (ids) => {
@@ -174,7 +197,7 @@ export default{
                     const response = await store.dispatch('Properties_List/deleteProperty',formData)
                     if(response && response.status == 200){
                         toast.success("Property(s) Removed Succesfully");
-                        searchPropertys();
+                        searchProperties();
                     }
                 }
                 catch(error){
@@ -207,7 +230,8 @@ export default{
                 landlord: landlordID.value,
                 zone: zoneID.value,
                 property_type: property_type_search.value,
-                company_id: companyID.value
+                company_id: companyID.value,
+                page_size: selectedValue.value
             } 
             axios
             .post(`api/v1/properties-search/?page=${currentPage.value}`,formData)
@@ -217,7 +241,7 @@ export default{
                 propResults.value = response.data;
                 propArrLen.value = propertyList.value.length;
                 propCount.value = propResults.value.count;
-                pageCount.value = Math.ceil(propCount.value / 50);
+                pageCount.value = Math.ceil(propCount.value / selectedValue.value);
                 if(response.data.next){
                     showNextBtn.value = true;
                 }
@@ -232,7 +256,16 @@ export default{
                 hideLoader();
             })
         }
+        const selectSearchQuantity = (newValue) =>{
+            selectedValue.value = newValue;
+            searchProperties(selectedValue.value);
+        };
         const resetFilters = () =>{
+            selectedValue.value = 50;
+            zoneSearchComponentKey.value += 1;
+            lldSearchComponentKey.value += 1;
+            landlordID.value = "";
+            zoneID.value = "";
             store.commit('Properties_List/RESET_SEARCH_FILTERS')
             searchProperties();
         }
@@ -394,7 +427,7 @@ export default{
         })
         return{
             searchProperties,resetFilters, addButtonLabel, searchFilters, tableColumns, propertyList,
-            propResults, propArrLen, propCount, pageCount, showNextBtn, showPreviousBtn,
+            propResults, propArrLen, propCount, pageCount, showNextBtn, showPreviousBtn,selectSearchQuantity,selectedValue,
             loadPrev, loadNext, firstPage, lastPage, idField, actions, handleActionClick, propModalVisible, closeModal,
             submitButtonLabel, showModal, addNewProperty, showLoader, loader, hideLoader, importProperties, removeProperty, removeProperties,
             handleSelectionChange,addingRight,rightsModule,printPropertiesList,downloadPropertiesCSV,downloadPropertiesExcel

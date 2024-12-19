@@ -172,7 +172,7 @@ export default{
             {
                 type:'search-dropdown', value: landlords_array, width:48,
                 selectOptions: landlords_array, optionSelected: handleSearchLandlord,
-                searchPlaceholder: 'Landlord...', dropdownWidth: '300px',
+                searchPlaceholder: 'Landlord...', dropdownWidth: '200px',
                 fetchData: store.dispatch('Landlords_List/fetchLandlords', {company:companyID.value}),
                 clearSearch: clearSearchLandlord, componentKey: lldSearchComponentKey
             },
@@ -185,23 +185,25 @@ export default{
                 options: [{text:'Vacant',value:'Vacant'},{text:'Occupied',value:'Occupied'}]
             },
             {
-                type:'dropdown', placeholder:"Owner Occuppied..", value: owner_occupied_search, width:40,
-                options: [{text:'Yes',value:'True'},{text:'No',value:'False'}]
-            },
-            {
-                type:'search-dropdown', value: properties_array, width:48,
-                selectOptions: properties_array, optionSelected: handleSearchProperty,
-                searchPlaceholder: 'Property...', dropdownWidth: '200px',
-                fetchData: store.dispatch('Properties_List/fetchProperties', {company:companyID.value}),
-                clearSearch: clearSearchProperty, componentKey: propSearchComponentKey
-            },        
-            {
                 type:'search-dropdown', value: zones_array, width:36,
                 selectOptions: zones_array, optionSelected: handleSearchZone,
                 searchPlaceholder: 'Zone...', dropdownWidth: '150px',
                 fetchData: store.dispatch('Zones/fetchZones', {company:companyID.value}),
                 clearSearch: clearSearchZone, componentKey: zoneSearchComponentKey
             },
+             
+            {
+                type:'dropdown', placeholder:"Owner Occ...", value: owner_occupied_search, width:40,
+                options: [{text:'Yes',value:'True'},{text:'No',value:'False'}]
+            }, 
+            {
+                type:'search-dropdown', value: properties_array, width:48,
+                selectOptions: properties_array, optionSelected: handleSearchProperty,
+                searchPlaceholder: 'Property...', dropdownWidth: '300px',
+                fetchData: store.dispatch('Properties_List/fetchProperties', {company:companyID.value}),
+                clearSearch: clearSearchProperty, componentKey: propSearchComponentKey
+            },              
+            
         ]);
         const handleSelectionChange = (ids) => {
             selectedIds.value = ids;
@@ -477,6 +479,7 @@ export default{
             searchUnits(selectedValue.value);
         };
         const resetFilters = () =>{
+            selectedValue.value = 50;
             store.commit('Units_List/RESET_SEARCH_FILTERS')
             propSearchComponentKey.value += 1;
             propertySearchID.value = "";

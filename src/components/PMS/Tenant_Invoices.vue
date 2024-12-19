@@ -173,33 +173,28 @@ export default{
         const clearSearchProperty = async() =>{
             await store.dispatch('Properties_List/updateState', {propertyID: ''});
             propertySearchID.value = ""
-        }
-        const tenant_name_search = computed({
-            get: () => store.state.Journals.client_name_search,
-            set: (value) => store.commit('Journals/SET_SEARCH_FILTERS', {"client_name_search":value}),
-        });
-        const tenant_code_search = computed({
-            get: () => store.state.Journals.client_code_search,
-            set: (value) => store.commit('Journals/SET_SEARCH_FILTERS', {"client_code_search":value}),
-        });
-        const from_date_search = computed({
-            get: () => store.state.Journals.from_date_search,
-            set: (value) => store.commit('Journals/SET_SEARCH_FILTERS', {"from_date_search":value}),
-        });
-        const to_date_search = computed({
-            get: () => store.state.Journals.to_date_search,
-            set: (value) => store.commit('Journals/SET_SEARCH_FILTERS', {"to_date_search":value}),
-        });
+        };
+        const journal_no_search = ref("");
+        const tenant_name_search = ref("");
+        const tenant_code_search = ref("");
+        const from_date_search = ref("");
+        const to_date_search = ref("");
+        const status_search = ref("");
         const searchFilters = ref([
+            {type:'text', placeholder:"Invoice#...", value: journal_no_search, width:36},
             {type:'text', placeholder:"Tenant Code...", value: tenant_code_search, width:36},
             {type:'text', placeholder:"Tenant Name...", value: tenant_name_search, width:64},
+            {
+                type:'dropdown', placeholder:"Status..", value: status_search, width:32,
+                options: [{text:'Open',value:'Open'},{text:'Closed',value:'Closed'}]
+            },
             {type:'date', placeholder:"From Date...", value: from_date_search, width:36, title: "Date From Search"},
             {type:'date', placeholder:"To Date...", value: to_date_search, width:36, title: "Date To Search"},
             {
-                type:'search-dropdown', value: propertySearchID.value, width:64,
+                type:'search-dropdown', value: propertySearchID.value, width:64, componentKey: propComponentKey,
                 selectOptions: propertyArray, optionSelected: handleSearchProperty,
-                searchPlaceholder: 'Property Search...', dropdownWidth: '200px',
-                fetchData: fetchProperties(), clearSearch: clearSearchProperty()             
+                searchPlaceholder: 'Property Search...', dropdownWidth: '300px',
+                fetchData: fetchProperties(), clearSearch: clearSearchProperty           
             },
         ]);
         const handleSelectionChange = (ids) => {
@@ -384,7 +379,10 @@ export default{
                 client_code: tenant_code_search.value,
                 from_date: from_date_search.value,
                 to_date: to_date_search.value,
-                property: propertyID.value,
+                journal_no: journal_no_search.value,
+                status: status_search.value,
+                reversed: "No",
+                property: propertySearchID.value,
                 company: companyID.value,
                 page_size: selectedValue.value
             } 
@@ -417,7 +415,15 @@ export default{
             searchInvoices(selectedValue.value);
         };
         const resetFilters = () =>{
-            store.commit('Journals/RESET_SEARCH_FILTERS')
+            selectedValue.value = 50;
+            tenant_name_search.value = "";
+            tenant_code_search.value = "";
+            from_date_search.value= "";
+            to_date_search.value = "";
+            journal_no_search.value= "";
+            status_search.value = "";
+            propComponentKey.value += 1;
+            propertySearchID.value = "";
             searchInvoices();
         }
         const loadPrev = () =>{

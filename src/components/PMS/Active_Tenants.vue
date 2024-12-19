@@ -138,11 +138,11 @@ export default{
             {name: 'delete', icon: 'fa fa-trash', title: 'Delete Tenant', rightName: 'Deleting Tenants'},
         ])
         const companyID = computed(()=> store.state.userData.company_id);
-        const propertyID = ref(null);
-        const unitID = ref(null);
-        const tenantID = ref(null);
-        const utilityID = ref(null);
-        const utilityTaxID = ref(null);
+        const propertyID = ref("");
+        const unitID = ref("");
+        const tenantID = ref("");
+        const utilityID = ref("");
+        const utilityTaxID = ref("");
         const dropdownOptions = ref([
             {label: 'Add Tenant Utilities', action: 'add-tenant-utilties'},
             {label: 'Tenancy Agreement', action: 'tenancy-agreement-report'},
@@ -174,7 +174,7 @@ export default{
         const clearSelectedProperty = async() =>{
             await store.dispatch('Properties_List/updateState', {propertyID: ''});
             propertyID.value = store.state.Properties_List.propertyID;
-        }
+        };
         const searchFilters = ref([
             {type:'text', placeholder:"Name...", value: name_search, width:48,},
             {type:'text', placeholder:"Code...", value: tenant_code_search, width:48,},
@@ -463,6 +463,7 @@ export default{
             searchTenants(selectedValue.value);
         };
         const resetFilters = () =>{
+            selectedValue.value = 50;
             propComponentKey.value += 1;
             propertyID.value = "";
             store.commit('Active_Tenants/RESET_SEARCH_FILTERS')

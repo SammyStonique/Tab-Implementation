@@ -65,7 +65,6 @@ export default{
         const showAddButton = ref(false);
         const title = ref('Prepayment Allocation');
         const companyID = computed(()=> store.state.userData.company_id);
-        const propertyArray = computed(() => store.state.Properties_List.propertyArr);
         const idField = '';
         const propertyID = ref('');
         const selectedIds = ref([]);
@@ -112,19 +111,26 @@ export default{
             get: () => store.state.Tenant_Arrears.date_search,
             set: (value) => store.commit('Tenant_Arrears/SET_SEARCH_FILTERS', {"date_search":value}),
         });
-        const fetchProperties= async(tenantID) =>{
-            await store.dispatch('Properties_List/fetchProperties', {company:companyID.value})
-        };
+        const properties_array = computed({
+            get: () => store.state.Properties_List.propertyArr,
+        });
         const handleSelectedProperty = async(option) =>{
             await store.dispatch('Properties_List/handleSelectedProperty', option)
             propertyID.value = store.state.Properties_List.propertyID;
         };
-        const clearSelectedInvoice  = async() =>{
+        const clearSelectedProperty = async() =>{
             await store.dispatch('Properties_List/updateState', {propertyID: ''});
-            propertyID.value = ""
-        }
+            propertyID.value = store.state.Properties_List.propertyID;
+        };
         const searchFilters = ref([
-            {type:'text', placeholder:"Tenant Code...", value: tenant_code_search, width:36},
+            {
+                type:'search-dropdown', value: propertyID.value, width:48, componentKey: propComponentKey,
+                selectOptions: properties_array, optionSelected: handleSelectedProperty,
+                searchPlaceholder: 'Property...', dropdownWidth: '250px',
+                fetchData: store.dispatch('Properties_List/fetchProperties', {company:companyID.value}),
+                clearSearch: clearSelectedProperty
+            },
+            {type:'text', placeholder:"Tenant Code...", value: tenant_code_search, width:32},
             {type:'text', placeholder:"Tenant Name...", value: tenant_name_search, width:64},
             {type:'date', placeholder:"Date...", value: date_search, width:36, title: "As At Date Search"},
             
@@ -154,6 +160,7 @@ export default{
                 client_code: tenant_code_search.value,
                 client_name: tenant_name_search.value,
                 date: date_search.value,
+                property: propertyID.value,
                 company: companyID.value,
                 page_size: selectedValue.value
             }
@@ -213,6 +220,9 @@ export default{
             searchTenantArrears();
         }
         const resetFilters = () =>{
+            selectedValue.value = 50;
+            propComponentKey.value += 1;
+            propertyID.value = ""
             store.commit('Tenant_Arrears/RESET_SEARCH_FILTERS')
             searchTenantArrears();
         };

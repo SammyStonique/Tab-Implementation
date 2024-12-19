@@ -69,6 +69,7 @@ export default{
         const pageComponentKey = ref(0);
         const depComponentKey = ref(0);
         const tntComponentKey = ref(0);
+        const propComponentKey = ref(0);
         const title = ref('Deposit Details');
         const companyID = computed(()=> store.state.userData.company_id);
         const depositID = ref('');
@@ -98,7 +99,7 @@ export default{
         const modal_width = ref('35vw');
         const tableColumns = ref([
             {type: "checkbox"},
-            {label: "Date", key:"date",type: "text", editable: false},
+            {label: "Date", key:"formatted_date",type: "text", editable: false},
             {label: "Tenant", key:"tenant_name",type: "text", editable: false},
             {label: "Property", key:"property_name",type: "text", editable: false},
             {label: "Deposit", key: "security_deposit", type: "text", editable: false},
@@ -106,6 +107,7 @@ export default{
             {label: "Value", key: "deposit_value", type: "text", editable: false},
             {label: "Amount", key: "deposit_amount", type: "number", editable: false},
             {label: "Posted", key: "posted", type: "text", editable: false},
+            {label: "Invoice#", key: "invoice_no", type: "text", editable: false},
         ])
         const showTotals = ref(true);
         const actions = ref([
@@ -152,10 +154,10 @@ export default{
                 options: [{text:'Yes',value:'Yes'},{text:'No',value:'No'}]
             },
             {
-                type:'search-dropdown', value: propertyArray, width:72,
+                type:'search-dropdown', value: propertyID.value, width:72, componentKey: propComponentKey,
                 selectOptions: propertyArray, optionSelected: handleSelectedProperty,
                 searchPlaceholder: 'Property...', dropdownWidth: '350px',
-                fetchData: fetchProperties(), clearSearch: clearSelectedProperty()             
+                fetchData: fetchProperties(), clearSearch: clearSelectedProperty           
             },
             
         ]);
@@ -413,6 +415,9 @@ export default{
             searchDeposits();
         }
         const resetFilters = () =>{
+            selectedValue.value = 50;
+            propComponentKey.value += 1;
+            propertyID.value = "";
             store.commit('Tenant_Deposits/RESET_SEARCH_FILTERS')
             searchDeposits();
         }

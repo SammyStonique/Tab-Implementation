@@ -107,7 +107,6 @@ export default{
         const modal_top = ref('150px');
         const modal_left = ref('400px');
         const modal_width = ref('30vw');
-        const tntComponentKey = ref(0);
         const ledComponentKey = ref(0);
         const propComponentKey = ref(0);
         const selectedIds = ref([]);
@@ -179,27 +178,36 @@ export default{
             await store.dispatch('Ledgers/updateState', {ledgerID: ''});
             ledgerSearchID.value = ""
         }
+        const journal_no_search = ref("");
         const tenant_name_search = ref("");
         const tenant_code_search = ref("");
         const from_date_search = ref("");
         const to_date_search = ref("");
+        const reversal_status_search = ref("");
         const searchFilters = ref([
-            {type:'text', placeholder:"Tenant Code...", value: tenant_code_search, width:36},
-            {type:'text', placeholder:"Tenant Name...", value: tenant_name_search, width:64},
-            {type:'date', placeholder:"From Date...", value: from_date_search, width:36, title: "Date From Search"},
-            {type:'date', placeholder:"To Date...", value: to_date_search, width:36, title: "Date To Search"},
+            {type:'text', placeholder:"Receipt#...", value: journal_no_search, width:24},
+            {type:'date', placeholder:"From Date...", value: from_date_search, width:32, title: "Date From Search"},
+            {type:'date', placeholder:"To Date...", value: to_date_search, width:32, title: "Date To Search"},         
+            {type:'text', placeholder:"Tenant Code...", value: tenant_code_search, width:32},
+            {type:'text', placeholder:"Tenant Name...", value: tenant_name_search, width:72},
             {
-                type:'search-dropdown', value: propertySearchID.value, width:64,
-                selectOptions: propertyArray, optionSelected: handleSearchProperty,
-                searchPlaceholder: 'Property Search...', dropdownWidth: '200px',
-                fetchData: fetchProperties(), clearSearch: clearSearchProperty()             
-            },
-            {
-                type:'search-dropdown', value: ledgerSearchID.value, width:48,
+                type:'search-dropdown', value: ledgerSearchID.value, width:48,componentKey: ledComponentKey,
                 selectOptions: ledgerArray, optionSelected: handleSearchLedger,
-                searchPlaceholder: 'Cashbook Search...', dropdownWidth: '250px',
+                searchPlaceholder: 'Cashbook Search...', dropdownWidth: '200px',
                 fetchData: fetchLedgers(), clearSearch: clearSearchLedger()   
             },
+            {
+                type:'dropdown', placeholder:"Reversed..", value: reversal_status_search, width:32,
+                options: [{text:'Yes',value:'Yes'},{text:'No',value:'No'}]
+            },
+            
+            {
+                type:'search-dropdown', value: propertySearchID.value, width:92, componentKey: propComponentKey,
+                selectOptions: propertyArray, optionSelected: handleSearchProperty,
+                searchPlaceholder: 'Property Search...', dropdownWidth: '300px',
+                fetchData: fetchProperties(), clearSearch: clearSearchProperty           
+            },
+            
         ]);
         const handleSelectionChange = (ids) => {
             selectedIds.value = ids;
@@ -358,6 +366,9 @@ export default{
                 client_code: tenant_code_search.value,
                 from_date: from_date_search.value,
                 to_date: to_date_search.value,
+                journal_no: journal_no_search.value,
+                status: "",
+                reversed: reversal_status_search.value,
                 property: propertySearchID.value,
                 company: companyID.value,
                 page_size: selectedValue.value
@@ -391,10 +402,17 @@ export default{
             searchReceipts(selectedValue.value);
         };
         const resetFilters = () =>{
+            selectedValue.value = 50;
+            journal_no_search.value = "";
             tenant_name_search.value = "";
             tenant_code_search.value = "";
             from_date_search.value= "";
             to_date_search.value = "";
+            reversal_status_search.value = "";
+            ledComponentKey.value += 1;
+            propComponentKey.value += 1;
+            propertySearchID.value = "";
+            ledgerSearchID.value = "";
             searchReceipts();
         }
         const loadPrev = () =>{

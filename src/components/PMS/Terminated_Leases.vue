@@ -51,6 +51,7 @@ export default{
         const store = useStore();
         const toast = useToast();
         const loader = ref('');
+        const propComponentKey = ref(0);
         const unitComponentKey = ref(0);
         const trans_modal_loader = ref('none');
         const idField = 'tenant_id';
@@ -88,13 +89,11 @@ export default{
         ])
         const actions = ref([
             {name: 'restore', icon: 'fa fa-redo', title: 'Restore Tenant', rightName: 'Terminate Lease'},
-            // {name: 'edit', icon: 'fa fa-edit', title: 'Edit Tenant', rightName: 'Editing Tenants'},
             {name: 'view', icon: 'fa fa-file-pdf-o', title: 'View Statement', rightName: 'Viewing Tenant Statement'},
-            // {name: 'transfer', icon: 'fa fa-exchange', title: 'Transfer Unit', rightName: 'Editing Tenants'},
-            // {name: 'delete', icon: 'fa fa-trash', title: 'Delete Tenant', rightName: 'Deleting Tenants'},
+
         ])
         const companyID = computed(()=> store.state.userData.company_id);
-        const propertyID = ref(null);
+        const propertyID = ref("");
         const unitID = ref(null);
         const tenantID = ref(null);
         const name_search = ref('');
@@ -116,7 +115,7 @@ export default{
             {type:'text', placeholder:"Name...", value: name_search, width:48,},
             {type:'text', placeholder:"Code...", value: tenant_code_search, width:48,},
             {
-                type:'search-dropdown', value: properties_array, width:48,
+                type:'search-dropdown', value: propertyID.value, width:48, componentKey: propComponentKey,
                 selectOptions: properties_array, optionSelected: handleSelectedProperty,
                 searchPlaceholder: 'Property...', dropdownWidth: '300px',
                 fetchData: store.dispatch('Properties_List/fetchProperties', {company:companyID.value}),
@@ -246,10 +245,13 @@ export default{
             searchTenants(selectedValue.value);
         };
         const resetFilters = () =>{
+            selectedValue.value = 50;
             name_search.value = "";
             tenant_code_search.value = "";
             unit_number_search.value = "";
             phone_number_search.value = "";
+            propComponentKey.value += 1;
+            propertyID.value = "";
             searchTenants();
         }
         const loadPrev = () =>{
