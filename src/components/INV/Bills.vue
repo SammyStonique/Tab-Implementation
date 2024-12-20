@@ -68,7 +68,7 @@
         >
             <DynamicForm 
                 :fields="formFields" :flex_basis="flex_basis" :flex_basis_percentage="flex_basis_percentage" 
-                :displayButtons="displayButtons" @handleSubmit="saveBill" @handleReset="handleReset"
+                :displayButtons="displayButtons" @handleSubmit="createRecurringBill" @handleReset="handleReset"
             />
         </MovableModal>
     </div>
@@ -105,12 +105,12 @@ export default{
         const idField = 'journal_id';
         const addButtonLabel = ref('New Bill');
         const submitButtonLabel = ref('Add');
-        const title = ref('Invoice Booking');
+        const title = ref('Recurring Bill Details');
         const detailsTitle = ref('Item Details');
         const tabs = ref(['Journal Entries','Bill Lines','Bill Payments']);
         const activeTab = ref(0);
         const invoiceID = ref(null);
-        const custComponentKey = ref(0);
+        const vendComponentKey = ref(0);
         const invModalVisible = ref(false);
         const modal_top = ref('150px');
         const modal_left = ref('400px');
@@ -135,6 +135,7 @@ export default{
         const displayButtons = ref(true);
         const errors = ref([]);
         const vendorID = ref('');
+        const billID = ref(null);
         const vendorArray = computed(() => store.state.Vendors.vendorArr);
         const showModal = ref(false);
         const tableColumns = ref([
@@ -153,6 +154,7 @@ export default{
         const actions = ref([
             {name: 'print', icon: 'fa fa-print', title: 'Print Bill', rightName: 'Print Bill'},
             {name: 'download', icon: 'fa fa-download', title: 'Download Bill', rightName: 'Print Bill'},
+            {name: 'reccur', icon: 'fa fa-repeat', title: 'Recurring Bill', rightName: 'Adding Bills'},
             {name: 'delete', icon: 'fa fa-trash', title: 'Delete Bill', rightName: 'Deleting Bills'},
         ])
         const companyID = computed(()=> store.state.userData.company_id);
@@ -168,20 +170,27 @@ export default{
             await store.dispatch('Vendors/updateState', {vendorID: ''});
             vendorID.value = ""
         }
+        const journal_no_search = ref("");
         const client_name_search = ref("");
         const client_code_search = ref("");
         const from_date_search = ref("");
         const to_date_search = ref("");
+        const status_search = ref("");
         const searchFilters = ref([
+            {type:'text', placeholder:"Bill#...", value: journal_no_search, width:36},
             {type:'text', placeholder:"Client Code...", value: client_code_search, width:36},
             {type:'text', placeholder:"Client Name...", value: client_name_search, width:64},
+            {
+                type:'dropdown', placeholder:"Status..", value: status_search, width:32,
+                options: [{text:'Open',value:'Open'},{text:'Closed',value:'Closed'}]
+            },
             {type:'date', placeholder:"From Date...", value: from_date_search, width:36, title: "Date From Search"},
             {type:'date', placeholder:"To Date...", value: to_date_search, width:36, title: "Date To Search"},
             {
-                type:'search-dropdown', value: vendorID.value, width:64,
+                type:'search-dropdown', value: vendorID.value, width:64, componentKey: vendComponentKey,
                 selectOptions: vendorArray, optionSelected: handleSearchVendors,
                 searchPlaceholder: 'Vendor Search...', dropdownWidth: '400px',
-                fetchData: fetchVendors(), clearSearch: clearSearchVendor()             
+                fetchData: fetchVendors(), clearSearch: clearSearchVendor           
             },
         ]);
         const handleSelectionChange = (ids) => {
@@ -191,7 +200,9 @@ export default{
         const formFields = ref([]);
         const updateFormFields = () =>{
             formFields.value = [
-
+                { type: 'dropdown', name: 'frequency',label: "Frequency", value: '', placeholder: "", required: true, options: [{ text: 'Daily', value: 'Daily' }, { text: 'Weekly', value: 'Weekly' }, { text: 'Monthly', value: 'Monthly' }, { text: 'Quarterly', value: 'Quarterly' }] },
+                { type: 'date', name: 'start_date',label: "Start Date", value: '', placeholder: "", required: true,},
+                { type: 'date', name: 'end_date',label: "End Date", value: '', placeholder: "", required: false},
             ]
         };
 
@@ -199,8 +210,9 @@ export default{
             for(let i=0; i < formFields.value.length; i++){
                 formFields.value[i].value = '';
             }
-            custComponentKey.value += 1;
+            vendComponentKey.value += 1;
             vendorID.value = '';
+            
         }
         
         const showModalLoader = () =>{
@@ -210,8 +222,8 @@ export default{
             modal_loader.value = "none";
         }
         const addNewBill = () =>{
-            store.commit('pageTab/ADD_PAGE', {'INV':'Bill_Details'});
-            store.state.pageTab.invActiveTab = 'Bill_Details'; 
+            store.commit('pageTab/ADD_PAGE', {'FA':'Bill_Details'});
+            store.state.pageTab.faActiveTab = 'Bill_Details'; 
         }
         const removeBill = async() =>{
             if(selectedIds.value.length == 1){
@@ -285,7 +297,10 @@ export default{
                 client_code: client_code_search.value,
                 from_date: from_date_search.value,
                 to_date: to_date_search.value,
-                property: null,
+                journal_no: journal_no_search.value,
+                status: status_search.value,
+                reversed: "No",
+                property: vendorID.value,
                 company: companyID.value,
                 page_size: selectedValue.value
             } 
@@ -312,7 +327,7 @@ export default{
             .finally(()=>{
                 hideLoader();
             })
-        }
+        };
         const selectSearchQuantity = (newValue) =>{
             selectedValue.value = newValue;
             searchBills(selectedValue.value);
@@ -322,6 +337,10 @@ export default{
             client_code_search.value = "";
             from_date_search.value = "";
             to_date_search.value = "";
+            journal_no_search.value= "";
+            status_search.value = "";
+            vendComponentKey.value += 1;
+            vendorID.value = "";
             searchBills();
         }
         const loadPrev = () =>{
@@ -353,7 +372,31 @@ export default{
             currentPage.value = pageCount.value;
             searchBills();
             // scrollToTop();
-        }
+        };
+        const createRecurringBill = ()=>{
+            showModalLoader();
+            let formData = {
+                bill: billID.value,
+                frequency: formFields.value[0].value,
+                start_date: formFields.value[1].value,
+                end_date: formFields.value[2].value,
+            }
+            axios.post('api/v1/create-recurring-bill/', formData)
+            .then((response)=>{
+                if(response.data.msg == "Success"){
+                    toast.success("Success");
+                    closeModal();
+                }else{
+                    toast.error("Failed")
+                }
+            })
+            .catch((error)=>{
+                toast.error(error.message)
+            })
+            .finally(()=>{
+                hideModalLoader();
+            })
+        };
         const handleActionClick = async(rowIndex, action, row) =>{
             if(action == 'delete'){
                 const journalID = [row['journal_id']];
@@ -388,6 +431,14 @@ export default{
                 then(()=>{
                     hideLoader();
                 })
+            }else if(action == 'reccur'){
+                updateFormFields();
+                billID.value= row['journal_id'];
+                invModalVisible.value = true;
+                handleReset();
+                flex_basis.value = '1/2';
+                flex_basis_percentage.value = '50';
+                
             }
         };
         const handleShowDetails = async(row) =>{
@@ -442,6 +493,7 @@ export default{
         };
         const closeModal = async() =>{
             invModalVisible.value = false;
+            billID.value = null;
             handleReset();
         }
 
@@ -495,8 +547,9 @@ export default{
             loadPrev, loadNext, firstPage, lastPage, idField, actions, handleActionClick, propModalVisible, closeModal,
             submitButtonLabel, showModal, showLoader, loader, hideLoader, modal_loader, modal_top, modal_left, modal_width,displayButtons,
             showModalLoader, hideModalLoader, formFields, handleSelectionChange, flex_basis,flex_basis_percentage,
-            removeBill, removeBills, dropdownOptions, handleDynamicOption, addNewBill, printBillList, addingRight,rightsModule,selectSearchQuantity,selectedValue,
-            showDetails,detailsTitle,hideDetails,handleShowDetails,journalEntries,invoiceLines,invoicePayments,tabs,selectTab,activeTab
+            removeBill, removeBills, dropdownOptions, handleDynamicOption, addNewBill, printBillList, addingRight,rightsModule,
+            createRecurringBill,selectSearchQuantity,selectedValue,showDetails,detailsTitle,hideDetails,handleShowDetails,journalEntries,
+            invoiceLines,invoicePayments,tabs,selectTab,activeTab
         }
     }
 };

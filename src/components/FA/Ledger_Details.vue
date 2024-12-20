@@ -43,15 +43,18 @@
                         </div>
                     </div>
                     <div v-if="activeTab == 1">
-                        <div class="bg-white z-50">
+                        <div class="relative w-[90%] bg-white z-50">
                             <FilterBar 
                                 :showAddButton="showAddButton"
                                 :filters="searchFilters" 
                                 @search="searchJournalEntries"
                                 @reset="resetFilters"
+                                @printList="printList"
+                                @printExcel="printExcel"
+                                @printCSV="printCSV"
                             />
                         </div>
-                        <div class="bg-white z-30">
+                        <div class="table w-[90%] top-[17.1rem] z-30">
                             <DynamicTable :key="statementTableKey" :columns="statementColumns" :rows="statementRows" :idField="idFieldStatement" :showActions="showActions" :actions="actionsStatement"/>
                         </div>
                     </div>             
@@ -79,6 +82,7 @@ import DynamicForm from '../NewDynamicForm.vue';
 import DynamicTable from '@/components/DynamicTable.vue';
 import FilterBar from "@/components/FilterBar.vue";
 import { useToast } from "vue-toastification";
+import PrintJS from 'print-js';
 
 export default{
     name: 'Ledger_Details',
@@ -290,6 +294,13 @@ export default{
 
 .tab-content {
     padding: 1px;
+}
+
+.table{
+    min-height: 15vh;
+    max-height: 15vh;
+    overflow-y: scroll;
+    overflow-x: scroll;
 }
 
 </style>

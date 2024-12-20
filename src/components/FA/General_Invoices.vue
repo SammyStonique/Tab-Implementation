@@ -168,20 +168,27 @@ export default{
             await store.dispatch('Customers/updateState', {customerID: ''});
             customerID.value = ""
         }
+        const journal_no_search = ref("");
         const client_name_search = ref("");
         const client_code_search = ref("");
         const from_date_search = ref("");
         const to_date_search = ref("");
+        const status_search = ref("");
         const searchFilters = ref([
+            {type:'text', placeholder:"Invoice#...", value: journal_no_search, width:36},
             {type:'text', placeholder:"Client Code...", value: client_code_search, width:36},
             {type:'text', placeholder:"Client Name...", value: client_name_search, width:64},
+            {
+                type:'dropdown', placeholder:"Status..", value: status_search, width:32,
+                options: [{text:'Open',value:'Open'},{text:'Closed',value:'Closed'}]
+            },
             {type:'date', placeholder:"From Date...", value: from_date_search, width:36, title: "Date From Search"},
             {type:'date', placeholder:"To Date...", value: to_date_search, width:36, title: "Date To Search"},
             {
-                type:'search-dropdown', value: customerID.value, width:64,
+                type:'search-dropdown', value: customerID.value, width:64, componentKey: custComponentKey,
                 selectOptions: customerArray, optionSelected: handleSearchCustomers,
                 searchPlaceholder: 'Customer Search...', dropdownWidth: '400px',
-                fetchData: fetchCustomers(), clearSearch: clearSearchCustomer()             
+                fetchData: fetchCustomers(), clearSearch: clearSearchCustomer            
             },
         ]);
         const handleSelectionChange = (ids) => {
@@ -285,7 +292,10 @@ export default{
                 client_code: client_code_search.value,
                 from_date: from_date_search.value,
                 to_date: to_date_search.value,
-                property: null,
+                journal_no: journal_no_search.value,
+                status: status_search.value,
+                reversed: "No",
+                property: customerID.value,
                 company: companyID.value,
                 page_size: selectedValue.value
             } 
@@ -322,6 +332,10 @@ export default{
             client_code_search.value = "";
             from_date_search.value = "";
             to_date_search.value = "";
+            journal_no_search.value= "";
+            status_search.value = "";
+            custComponentKey.value += 1;
+            customerID.value = "";
             searchInvoices();
         }
         const loadPrev = () =>{

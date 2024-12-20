@@ -110,7 +110,7 @@ export default{
         const tabs = ref(['Journal Entries','Bill Lines','Bill Payments']);
         const activeTab = ref(0);
         const invoiceID = ref(null);
-        const custComponentKey = ref(0);
+        const vendComponentKey = ref(0);
         const invModalVisible = ref(false);
         const modal_top = ref('150px');
         const modal_left = ref('400px');
@@ -170,20 +170,27 @@ export default{
             await store.dispatch('Vendors/updateState', {vendorID: ''});
             vendorID.value = ""
         }
+        const journal_no_search = ref("");
         const client_name_search = ref("");
         const client_code_search = ref("");
         const from_date_search = ref("");
         const to_date_search = ref("");
+        const status_search = ref("");
         const searchFilters = ref([
+            {type:'text', placeholder:"Bill#...", value: journal_no_search, width:36},
             {type:'text', placeholder:"Client Code...", value: client_code_search, width:36},
             {type:'text', placeholder:"Client Name...", value: client_name_search, width:64},
+            {
+                type:'dropdown', placeholder:"Status..", value: status_search, width:32,
+                options: [{text:'Open',value:'Open'},{text:'Closed',value:'Closed'}]
+            },
             {type:'date', placeholder:"From Date...", value: from_date_search, width:36, title: "Date From Search"},
             {type:'date', placeholder:"To Date...", value: to_date_search, width:36, title: "Date To Search"},
             {
-                type:'search-dropdown', value: vendorID.value, width:64,
+                type:'search-dropdown', value: vendorID.value, width:64, componentKey: vendComponentKey,
                 selectOptions: vendorArray, optionSelected: handleSearchVendors,
                 searchPlaceholder: 'Vendor Search...', dropdownWidth: '400px',
-                fetchData: fetchVendors(), clearSearch: clearSearchVendor()             
+                fetchData: fetchVendors(), clearSearch: clearSearchVendor           
             },
         ]);
         const handleSelectionChange = (ids) => {
@@ -203,7 +210,7 @@ export default{
             for(let i=0; i < formFields.value.length; i++){
                 formFields.value[i].value = '';
             }
-            custComponentKey.value += 1;
+            vendComponentKey.value += 1;
             vendorID.value = '';
             
         }
@@ -290,7 +297,10 @@ export default{
                 client_code: client_code_search.value,
                 from_date: from_date_search.value,
                 to_date: to_date_search.value,
-                property: null,
+                journal_no: journal_no_search.value,
+                status: status_search.value,
+                reversed: "No",
+                property: vendorID.value,
                 company: companyID.value,
                 page_size: selectedValue.value
             } 
@@ -327,6 +337,10 @@ export default{
             client_code_search.value = "";
             from_date_search.value = "";
             to_date_search.value = "";
+            journal_no_search.value= "";
+            status_search.value = "";
+            vendComponentKey.value += 1;
+            vendorID.value = "";
             searchBills();
         }
         const loadPrev = () =>{

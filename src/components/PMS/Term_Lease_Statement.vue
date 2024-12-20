@@ -121,7 +121,20 @@
                         </div>
                     </div>
                     <div v-if="activeTab == 1">
-                        <DynamicTable :key="statementTableKey" :rightsModule="rightsModule" :columns="statementColumns" :rows="statementRows" :idField="idFieldStatement" :showActions="showActions" :actions="actionsStatement"/>
+                        <div class="relative w-[100%] bg-white z-50 px-6">
+                            <FilterBar 
+                                :showAddButton="showAddButton"
+                                :filters="searchFilters" 
+                                @search="searchTenantTransactions"
+                                @reset="resetFilters"
+                                @printList="printTenantStatement"
+                                @printExcel="printExcel"
+                                @printCSV="printCSV"
+                            />
+                        </div>
+                        <div class="table w-[100%] top-[17.1rem] z-30 px-6">
+                            <DynamicTable :key="statementTableKey" :rightsModule="rightsModule" :columns="statementColumns" :rows="statementRows" :idField="idFieldStatement" :showActions="showActions" :actions="actionsStatement"/>
+                        </div>
                     </div>              
                 </div>
             </div>
@@ -132,16 +145,18 @@
 <script>
 import { defineComponent, ref, onBeforeMount, onMounted, computed, watch, reactive } from 'vue';
 import PageStyleComponent from '../PageStyleComponent.vue';
+import FilterBar from "@/components/FilterBar.vue";
 import DynamicTable from '@/components/DynamicTable.vue';
 import { useStore } from "vuex";
 import { useToast } from "vue-toastification";
 import { useDateFormatter } from '@/composables/DateFormatter';
 import axios from 'axios';
+import PrintJS from 'print-js';
 
 export default defineComponent({
     name: 'Tenant_Statement',
     components:{
-        PageStyleComponent, DynamicTable,
+        PageStyleComponent, DynamicTable,FilterBar
     },
     setup(props,{emit}){
         const store = useStore();
@@ -149,6 +164,7 @@ export default defineComponent({
         const loader = ref('none');
         const { formatDate } = useDateFormatter();
         const current_date = new Date();
+        const showAddButton = ref(false);
         const errors = ref([]);
         const dep_modal_loader = ref('none');
         const util_modal_loader = ref('none');
@@ -288,6 +304,88 @@ export default defineComponent({
         const actionsStatement = ref([
             {name: 'delete', icon: 'fa fa-trash', title: 'Delete Transaction'},
         ]);
+
+        const from_date_search = ref("");
+        const to_date_search = ref("");
+        const searchFilters = ref([
+            {type:'date', placeholder:"From Date...", value: from_date_search, width:36, title: "Date From Search"},
+            {type:'date', placeholder:"To Date...", value: to_date_search, width:36, title: "Date To Search"},
+            
+        ]);
+        const searchTenantTransactions = async() =>{
+            showLoader();
+            let formData = {
+                client: tenantDetails.value.tenant_id,
+                company: companyID.value,
+                date_from: from_date_search.value,
+                date_to: to_date_search.value,
+                page_size: 1000
+            }
+            try{
+                const response = await store.dispatch('Ledgers/fetchClientJournals', formData)
+            }
+            catch(error){
+
+            }finally{
+                hideLoader();
+            }  
+        }
+        const printTenantStatement = () =>{
+            showLoader();
+            let formData = {
+                client: tenantDetails.value.tenant_id,
+                company: companyID.value,
+                date_from: from_date_search.value,
+                date_to: to_date_search.value,
+            }
+            axios
+            .post("api/v1/tenant-statement-pdf/", formData, { responseType: 'blob' })
+            .then((response)=>{
+                if(response.status == 200){
+                    const blob1 = new Blob([response.data]);
+                    // Convert blob to URL
+                    const url = URL.createObjectURL(blob1);
+                    PrintJS({printable: url, type: 'pdf'});
+                }
+            })
+            .catch((error)=>{
+                console.log(error.message);
+            })
+            .finally(()=>{
+                hideLoader();
+            })
+        }
+        const loadPrev = () =>{
+            if (currentPage.value <= 1){
+                currentPage.value = 1;
+            }else{
+                currentPage.value -= 1;
+            }
+            
+            searchTenantTransactions();
+        }
+        const loadNext = () =>{
+            if(currentPage.value >= pageCount.value){
+                currentPage.value = pageCount.value;
+            }else if(currentPage.value < pageCount.value){
+                currentPage.value += 1;
+            }
+            
+            searchTenantTransactions();
+        }
+        const firstPage = ()=>{
+            currentPage.value = 1;
+            searchTenantTransactions();
+        }
+        const lastPage = () =>{
+            currentPage.value = pageCount.value;
+            searchTenantTransactions();
+        }
+        const resetFilters = () =>{
+            from_date_search.value = "";
+            to_date_search.value = "";
+            searchTenantTransactions();
+        }
 
         const variationColumns = ref([
             {type: "checkbox"},
@@ -1063,8 +1161,8 @@ export default defineComponent({
         return{
             tabs, activeTab, mainComponentKey, depositColumns, utilityColumns, selectTab, loader, showLoader, hideLoader, formFields, additionalFields,
             tableKey,utilityTableKey, idFieldDeposit, idFieldUtility, actionsDeposit, actionsUtility, computedDepositRows, computedUtilityRows,
-            scheduleTableKey, idFieldSchedule, scheduleColumns, actionsSchedule, scheduleRows, statementTableKey, idFieldStatement, statementRows,showActions,
-            statementColumns, actionsStatement, tenantLease, tenantDetails, tenantCurrency, tenantProperty, scheduleActionClick,
+            scheduleTableKey, idFieldSchedule, scheduleColumns, actionsSchedule, scheduleRows, statementTableKey, idFieldStatement, statementRows,showActions,searchFilters,printTenantStatement,resetFilters,
+            statementColumns, actionsStatement, tenantLease, tenantDetails, tenantCurrency, tenantProperty, scheduleActionClick,showAddButton,
             depositActionClick, variationColumns, variationRows, variationTableKey, idFieldVariation, actionsVariation, variationActionClick,
             addNewDeposit, addNewUtility,tnt_modal_loader, dep_modal_loader, util_modal_loader, tntModalVisible, depModalVisible, utilModalVisible, displayButtons, depositTitle, utilityTitle,tntTitle,
             tnt_modal_width,modal_top,tnt_modal_left, modal_left, modal_width, showDepModalLoader, hideDepModalLoader, showUtilModalLoader, hideUtilModalLoader, handleDepReset,showTntModalLoader,
@@ -1098,6 +1196,12 @@ export default defineComponent({
 
 .tab-content {
     padding: 1px;
+}
+.table{
+    min-height: 15vh;
+    max-height: 15vh;
+    overflow-y: scroll;
+    overflow-x: scroll;
 }
 
 </style>

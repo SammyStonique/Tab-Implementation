@@ -275,7 +275,7 @@ export default defineComponent({
 })
 </script>
 
-<style>
+<style scoped>
 .subsection{
     min-height: 100vh;
 }

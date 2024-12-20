@@ -159,21 +159,28 @@ export default{
         const clearSearchCustomer = async() =>{
             await store.dispatch('Customers/updateState', {customerID: ''});
             customerID.value = ""
-        }
+        };
+        const journal_no_search = ref("");
         const client_name_search = ref("");
         const client_code_search = ref("");
         const from_date_search = ref("");
         const to_date_search = ref("");
+        const reversal_status_search = ref("");
         const searchFilters = ref([
+            {type:'text', placeholder:"Receipt#...", value: journal_no_search, width:24},
             {type:'text', placeholder:"Client Code...", value: client_code_search, width:36},
             {type:'text', placeholder:"Client Name...", value: client_name_search, width:64},
             {type:'date', placeholder:"From Date...", value: from_date_search, width:36, title: "Date From Search"},
             {type:'date', placeholder:"To Date...", value: to_date_search, width:36, title: "Date To Search"},
             {
-                type:'search-dropdown', value: customerID.value, width:64,
+                type:'search-dropdown', value: customerID.value, width:64, componentKey: custComponentKey,
                 selectOptions: customerArray, optionSelected: handleSearchCustomers,
                 searchPlaceholder: 'Customer Search...', dropdownWidth: '400px',
-                fetchData: fetchCustomers(), clearSearch: clearSearchCustomer()             
+                fetchData: fetchCustomers(), clearSearch: clearSearchCustomer          
+            },
+            {
+                type:'dropdown', placeholder:"Reversed..", value: reversal_status_search, width:32,
+                options: [{text:'Yes',value:'Yes'},{text:'No',value:'No'}]
             },
         ]);
         const handleSelectionChange = (ids) => {
@@ -187,8 +194,8 @@ export default{
             modal_loader.value = "none";
         }
         const addNewReceipt = () =>{
-            store.commit('pageTab/ADD_PAGE', {'INV':'Receipt_Details'});
-            store.state.pageTab.invActiveTab = 'Receipt_Details'; 
+            store.commit('pageTab/ADD_PAGE', {'FA':'Receipt_Details'});
+            store.state.pageTab.faActiveTab = 'Receipt_Details'; 
         }
         const removeReceipt = async() =>{
             if(selectedIds.value.length == 1){
@@ -262,7 +269,10 @@ export default{
                 client_code: client_code_search.value,
                 from_date: from_date_search.value,
                 to_date: to_date_search.value,
-                property: null,
+                journal_no: journal_no_search.value,
+                status: "",
+                reversed: reversal_status_search.value,
+                property: customerID.value,
                 company: companyID.value,
                 page_size: selectedValue.value
             } 
@@ -299,6 +309,10 @@ export default{
             client_code_search.value = "";
             from_date_search.value = "";
             to_date_search.value = "";
+            reversal_status_search.value = "";
+            journal_no_search.value= "";
+            custComponentKey.value += 1;
+            customerID.value = "";
             searchReceipts();
         }
         const loadPrev = () =>{
