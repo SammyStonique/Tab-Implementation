@@ -88,7 +88,7 @@ export default{
         const flex_basis_percentage = ref('');
         const displayButtons = ref(true);
         const errors = ref([]);
-        const modal_top = ref('120px');
+        const modal_top = ref('250px');
         const modal_left = ref('400px');
         const modal_width = ref('40vw');
         const propertyID = ref('');

@@ -54,6 +54,10 @@ import Stock_Transfers from './INV/Stock_Transfers';
 
 
 import Pay_Cycles from './HR/Pay_Cycles';
+import Pay_Groups from './HR/Pay_Groups';
+import Deductions from './HR/Deductions';
+import Leave_Types from './HR/Leave_Types';
+import Holidays from './HR/Holidays';
 
 
 import Default_Settings from './SET/Default_Settings';
@@ -84,7 +88,7 @@ export default createStore({
     
     Ledgers, Currencies, Taxes, Journals, Customers, Vendors,Fiscal_Periods,
 
-    Pay_Cycles,
+    Pay_Cycles,Pay_Groups,Deductions,Leave_Types,Holidays,
 
     Default_Settings,Companies,Branches,User_Rights,SMS_Integrations,Email_Integrations,Mpesa_Integrations,Mpesa_Transactions
   },

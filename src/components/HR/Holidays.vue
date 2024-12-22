@@ -3,17 +3,17 @@
         <PageComponent 
             :loader="loader" @showLoader="showLoader" @hideLoader="hideLoader"
             :addButtonLabel="addButtonLabel"
-            @handleAddNew="addNewCycle"
+            @handleAddNew="addNewHoliday"
             :searchFilters="searchFilters"
-            @searchPage="searchCycles"
+            @searchPage="searchHolidays"
             @resetFilters="resetFilters"
-            @removeItem="removeCycle"
-            @removeSelectedItems="removeCycles"
+            @removeItem="removeHoliday"
+            @removeSelectedItems="removeHolidays"
             @printList="printList"
             :addingRight="addingRight"
             :rightsModule="rightsModule"
             :columns="tableColumns"
-            :rows="cyclesList"
+            :rows="holidaysList"
             :actions="actions"
             :idField="idField"
             @handleSelectionChange="handleSelectionChange"
@@ -34,7 +34,7 @@
             :loader="modal_loader" @showLoader="showModalLoader" @hideLoader="hideModalLoader" @closeModal="closeModal">
             <DynamicForm 
                 :fields="formFields" :flex_basis="flex_basis" :flex_basis_percentage="flex_basis_percentage" 
-                :displayButtons="displayButtons" @handleSubmit="saveCycle" @handleReset="handleReset"
+                :displayButtons="displayButtons" @handleSubmit="saveHoliday" @handleReset="handleReset"
             />
         </MovableModal>
     </div>
@@ -50,7 +50,7 @@ import { useStore } from "vuex";
 import { useToast } from "vue-toastification";
 
 export default{
-    name: 'Pay_Cycles',
+    name: 'Holidays',
     components:{
         PageComponent, MovableModal,DynamicForm
     },
@@ -59,16 +59,16 @@ export default{
         const toast = useToast();
         const loader = ref('none');
         const modal_loader = ref('none');
-        const idField = 'pay_cycle_id';
-        const addButtonLabel = ref('New Pay Cycle');
-        const title = ref('Pay Cycle Details');
-        const addingRight = ref('Adding Pay Cycles');
+        const idField = 'holiday_id';
+        const addButtonLabel = ref('New Holiday');
+        const title = ref('Holiday Details');
+        const addingRight = ref('Adding Holidays');
         const rightsModule = ref('HR');
         const submitButtonLabel = ref('Add');
         const ledComponentKey = ref(0);
         const selectedIds = ref([]);
         const selectedValue = ref(50);
-        const cyclesList = ref([]);
+        const holidaysList = ref([]);
         const propResults = ref([]);
         const propArrLen = ref(0);
         const propCount = ref(0);
@@ -84,22 +84,23 @@ export default{
         const modal_top = ref('300px');
         const modal_left = ref('500px');
         const modal_width = ref('30vw');
-        const isEditing = computed(()=> store.state.Pay_Cycles.isEditing);
-        const selectedCycle = computed(()=> store.state.Pay_Cycles.selectedCycle);
+        const isEditing = computed(()=> store.state.Holidays.isEditing);
+        const selectedHoliday = computed(()=> store.state.Holidays.selectedHoliday);
         const showModal = ref(false);
         const tableColumns = ref([
             {type: "checkbox"},
-            {label: "Name", key:"pay_cycle_name"},
-            {label: "Interval", key: "interval"},
+            {label: "Name", key:"holiday_name"},
+            {label: "Day", key: "day"},
+            {label: "Month", key: "month"},
         ])
         const actions = ref([
-            {name: 'edit', icon: 'fa fa-edit', title: 'Edit Pay Cycle', rightName: 'Editing Pay Cycles'},
-            {name: 'delete', icon: 'fa fa-trash', title: 'Delete Pay Cycle', rightName: 'Deleting Pay Cycles'},
+            {name: 'edit', icon: 'fa fa-edit', title: 'Edit Holiday', rightName: 'Editing Holidays'},
+            {name: 'delete', icon: 'fa fa-trash', title: 'Delete Holiday', rightName: 'Deleting Holidays'},
         ])
         const companyID = computed(()=> store.state.userData.company_id);
         const name_search = computed({
-            get: () => store.state.Pay_Cycles.name_search,
-            set: (value) => store.commit('Pay_Cycles/SET_SEARCH_FILTERS', {"name_search":value}),
+            get: () => store.state.Holidays.name_search,
+            set: (value) => store.commit('Holidays/SET_SEARCH_FILTERS', {"name_search":value}),
         });
         const searchFilters = ref([
             {type:'text', placeholder:"Name...", value: name_search, width:60,},
@@ -111,8 +112,9 @@ export default{
         const formFields = ref([]);
         const updateFormFields = () => {
             formFields.value = [
-                { type: 'text', name: 'pay_cycle_name',label: "Name", value: selectedCycle.value?.pay_cycle_name || '', required: true },
-                { type: 'dropdown', name: 'interval',label: "Interval", value: selectedCycle.value?.interval || 'Monthly', placeholder: "", required: true, options: [{ text: 'Daily', value: 'Daily' }, { text: 'Weekly', value: 'Weekly' },{ text: 'Monthly', value: 'Monthly' }, { text: 'Quarterly', value: 'Quarterly' }] },
+                { type: 'text', name: 'holiday_name',label: "Name", value: selectedHoliday.value?.holiday_name || '', required: true },
+                { type: 'text', name: 'day',label: "Day", value: selectedHoliday.value?.day || '', required: true },
+                { type: 'dropdown', name: 'month',label: "Month", value: selectedHoliday.value?.month || '', placeholder: "", required: true, options: [{ text: 'January', value: 'January' }, { text: 'February', value: 'February' },{ text: 'March', value: 'March' }, { text: 'April', value: 'April' },{ text: 'May', value: 'May' }, { text: 'June', value: 'June' },{ text: 'July', value: 'July' }, { text: 'August', value: 'August' }, { text: 'September', value: 'September' },{ text: 'October', value: 'October' }, { text: 'November', value: 'November' },{ text: 'December', value: 'December' }] },
             ];
         };
         const handleReset = () =>{
@@ -121,8 +123,8 @@ export default{
             }
         }
 
-        watch([selectedCycle], () => {
-            if (selectedCycle.value) {
+        watch([selectedHoliday], () => {
+            if (selectedHoliday.value) {
                 updateFormFields();
             }else{
                 updateFormFields();
@@ -136,11 +138,12 @@ export default{
         const hideModalLoader = () =>{
             modal_loader.value = "none";
         }
-        const createCycle = async() =>{
+        const createHoliday = async() =>{
             showModalLoader();
             let formData = {
-                pay_cycle_name: formFields.value[0].value,
-                interval: formFields.value[1].value,
+                holiday_name: formFields.value[0].value,
+                day: formFields.value[1].value,
+                month: formFields.value[2].value,
                 company: companyID.value
             }
 
@@ -155,30 +158,31 @@ export default{
                 hideModalLoader();
             }else{
                 try {
-                    const response = await store.dispatch('Pay_Cycles/createPayCycle', formData);
+                    const response = await store.dispatch('Holidays/createHoliday', formData);
                     if (response && response.status === 200) {
                         hideModalLoader();
-                        toast.success('Pay Cycle created successfully!');
+                        toast.success('Holiday created successfully!');
                         handleReset();
                     } else {
-                        toast.error('An error occurred while creating the Pay Cycle.');
+                        toast.error('An error occurred while creating the Holiday.');
                     }
                 } catch (error) {
                     console.error(error.message);
-                    toast.error('Failed to create Pay Cycle: ' + error.message);
+                    toast.error('Failed to create Holiday: ' + error.message);
                 } finally {
                     hideModalLoader();
-                    searchCycles();
+                    searchHolidays();
                 }
             }
         }
-        const updateCycle= async() =>{
+        const updateHoliday= async() =>{
             showModalLoader();
             errors.value = [];
             let formData = {
-                pay_cycle: selectedCycle.value.pay_cycle_id,
-                pay_cycle_name: formFields.value[0].value,
-                interval: formFields.value[1].value,
+                holiday: selectedHoliday.value.holiday_id,
+                holiday_name: formFields.value[0].value,
+                day: formFields.value[1].value,
+                month: formFields.value[2].value,
                 company: companyID.value
             }
 
@@ -192,80 +196,80 @@ export default{
                 hideModalLoader();
             }else{
                 try {
-                    const response = await store.dispatch('Pay_Cycles/updatePayCycle', formData);
+                    const response = await store.dispatch('Holidays/updateHoliday', formData);
                     if (response && response.status === 200) {
                         hideModalLoader();
                         handleReset();
-                        toast.success("Pay Cycle updated successfully!");              
+                        toast.success("Holiday updated successfully!");              
                     } else {
-                        toast.error('An error occurred while updating the Pay Cycle.');
+                        toast.error('An error occurred while updating the Holiday.');
                     }
                 } catch (error) {
                     console.error(error.message);
-                    toast.error('Failed to update Pay Cycle: ' + error.message);
+                    toast.error('Failed to update Holiday: ' + error.message);
                 } finally {
                     hideModalLoader();
                     propModalVisible.value = false;
-                    store.dispatch("Pay_Cycles/updateState",{selectedCycle:null})
-                    searchCycles();
+                    store.dispatch("Holidays/updateState",{selectedHoliday:null})
+                    searchHolidays();
                 }             
             }
         }
-        const saveCycle = () =>{
+        const saveHoliday = () =>{
             if(isEditing.value == true){
-                updateCycle();
+                updateHoliday();
             }else{
-                createCycle();
+                createHoliday();
             }
         }
-        const removeCycle = async() =>{
+        const removeHoliday = async() =>{
             if(selectedIds.value.length == 1){
                 let formData = {
                     company: companyID.value,
-                    pay_cycle: selectedIds.value
+                    holiday: selectedIds.value
                 }
                 try{
-                    const response = await store.dispatch('Pay_Cycles/deletePayCycle',formData)
+                    const response = await store.dispatch('Holidays/deleteHoliday',formData)
                     if(response && response.status == 200){
-                        toast.success("Pay Cycle Removed Succesfully");
-                        searchCycles();
+                        toast.success("Holiday Removed Succesfully");
+                        searchHolidays();
                     }
                 }
                 catch(error){
                     console.error(error.message);
-                    toast.error('Failed to remove Pay Cycle: ' + error.message);
+                    toast.error('Failed to remove Holiday: ' + error.message);
                 }
                 finally{
                     selectedIds.value = [];
                 }
             }else if(selectedIds.value.length > 1){
-                toast.error("You have selected more than 1 Pay Cycle") 
+                toast.error("You have selected more than 1 Holiday") 
             }else{
-                toast.error("Please Select A Pay Cycle To Remove")
+                toast.error("Please Select A Holiday To Remove")
             }
         }
-        const removeCycles = async() =>{
+        const removeHolidays = async() =>{
             if(selectedIds.value.length){
                 let formData = {
                     company: companyID.value,
-                    pay_cycle: selectedIds.value
+                    holiday: selectedIds.value
                 }
                 try{
-                    const response = await store.dispatch('Pay_Cycles/deletePayCycle',formData)
+                    const response = await store.dispatch('Holidays/deleteHoliday',formData)
                     if(response && response.status == 200){
-                        toast.success("Pay Cycle(s) Removed Succesfully");
-                        searchCycles();
+                        toast.success("Holiday(s) Removed Succesfully");
+                        searchHolidays();
                     }
                 }
                 catch(error){
                     console.error(error.message);
-                    toast.error('Failed to remove Pay Cycle: ' + error.message);
+                    toast.error('Failed to remove Holiday: ' + error.message);
                 }
                 finally{
                     selectedIds.value = [];
                 }
             }else{
-                toast.error("Please Select A Pay Cycle To Remove")
+                toast.error("Please Select A Holiday To Remove")
             }
         }
         const showLoader = () =>{
@@ -274,22 +278,22 @@ export default{
         const hideLoader = () =>{
             loader.value = "none";
         }
-        const searchCycles = () =>{
+        const searchHolidays = () =>{
             showLoader();
             showNextBtn.value = false;
             showPreviousBtn.value = false;
             let formData = {
-                pay_cycle_name: name_search.value,
+                holiday_name: name_search.value,
                 company_id: companyID.value,
                 page_size: selectedValue.value
             } 
             axios
-            .post(`api/v1/pay-cycles-search/?page=${currentPage.value}`,formData)
+            .post(`api/v1/holidays-search/?page=${currentPage.value}`,formData)
             .then((response)=>{
-                cyclesList.value = response.data.results;
-                store.commit('Pay_Cycles/LIST_CYCLES', cyclesList.value)
+                holidaysList.value = response.data.results;
+                store.commit('Holidays/LIST_HOLIDAYS', holidaysList.value)
                 propResults.value = response.data;
-                propArrLen.value = cyclesList.value.length;
+                propArrLen.value = holidaysList.value.length;
                 propCount.value = propResults.value.count;
                 pageCount.value = Math.ceil(propCount.value / selectedValue.value);
                 if(response.data.next){
@@ -308,11 +312,11 @@ export default{
         };
         const selectSearchQuantity = (newValue) =>{
             selectedValue.value = newValue;
-            searchCycles(selectedValue.value);
+            searchHolidays(selectedValue.value);
         };
         const resetFilters = () =>{
-            store.commit('Pay_Cycles/RESET_SEARCH_FILTERS')
-            searchCycles();
+            name_search.value = "";
+            searchHolidays();
         }
         const loadPrev = () =>{
             if (currentPage.value <= 1){
@@ -321,7 +325,7 @@ export default{
                 currentPage.value -= 1;
             }
             
-            searchCycles();
+            searchHolidays();
             // scrollToTop();
         }
         const loadNext = () =>{
@@ -331,21 +335,21 @@ export default{
                 currentPage.value += 1;
             }
             
-            searchCycles();
+            searchHolidays();
             // scrollToTop(); 
         }
         const firstPage = ()=>{
             currentPage.value = 1;
-            searchCycles();
+            searchHolidays();
             // scrollToTop();
         }
         const lastPage = () =>{
             currentPage.value = pageCount.value;
-            searchCycles();
+            searchHolidays();
             // scrollToTop();
         }
-        const addNewCycle = () =>{
-            store.dispatch("Pay_Cycles/updateState",{selectedCycle:null,isEditing:false})
+        const addNewHoliday = () =>{
+            store.dispatch("Holidays/updateState",{selectedHoliday:null,isEditing:false})
             propModalVisible.value = true;
             handleReset();
             flex_basis.value = '1/2';
@@ -353,25 +357,25 @@ export default{
         }
         const handleActionClick = async(rowIndex, action, row) =>{
             if( action == 'edit'){
-                const cycleID = row[idField];
+                const holidayID = row[idField];
                 let formData = {
                     company: companyID.value,
-                    pay_cycle: cycleID
+                    holiday: holidayID
                 }
-                await store.dispatch('Pay_Cycles/fetchPayCycle',formData)
+                await store.dispatch('Holidays/fetchHoliday',formData)
                 propModalVisible.value = true;
                 flex_basis.value = '1/2';
                 flex_basis_percentage.value = '50';
 
             }else if(action == 'delete'){
-                const cycleID = [row[idField]];
+                const holidayID = [row[idField]];
                 let formData = {
                     company: companyID.value,
-                    pay_cycle: cycleID
+                    holiday: holidayID
                 }
-                await store.dispatch('Pay_Cycles/deletePayCycle',formData).
+                await store.dispatch('Holidays/deleteHoliday',formData).
                 then(()=>{
-                    searchCycles();
+                    searchHolidays();
                 })
             }else if(action == 'view'){
                 console.log("VIEWING TAKING PLACE");
@@ -381,16 +385,16 @@ export default{
             propModalVisible.value = false;
         }
         onBeforeMount(()=>{
-            searchCycles();
+            searchHolidays();
             
         })
         return{
-            title, searchCycles,resetFilters, addButtonLabel, searchFilters, tableColumns, cyclesList,selectSearchQuantity,selectedValue,
+            title, searchHolidays,resetFilters, addButtonLabel, searchFilters, tableColumns, holidaysList,selectSearchQuantity,selectedValue,
             propResults, propArrLen, propCount, pageCount, showNextBtn, showPreviousBtn,addingRight,rightsModule,
             loadPrev, loadNext, firstPage, lastPage, idField, actions, handleActionClick, propModalVisible, closeModal,
-            submitButtonLabel, showModal, addNewCycle, showLoader, loader, hideLoader, modal_loader, modal_top, modal_left, modal_width,displayButtons,
-            showModalLoader, hideModalLoader, saveCycle, formFields, handleSelectionChange, flex_basis,flex_basis_percentage,
-            removeCycle, removeCycles
+            submitButtonLabel, showModal, addNewHoliday, showLoader, loader, hideLoader, modal_loader, modal_top, modal_left, modal_width,displayButtons,
+            showModalLoader, hideModalLoader, saveHoliday, formFields, handleSelectionChange, flex_basis,flex_basis_percentage,
+            removeHoliday, removeHolidays
         }
     }
 };

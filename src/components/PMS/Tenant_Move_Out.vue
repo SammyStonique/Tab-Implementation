@@ -689,7 +689,7 @@ export default{
             modal_left,modal_top,modal_width,trans_modal_loader,transModalVisible,title,showTransModalLoader,hideTransModalLoader,closeTransModal,
             fetchExitCharges, handleSelectedExitCharge, clearSelectedExitCharge,chargesArr,unitComponentKey,chargesColumns,chargeActions,chargesRows,
             chargeIdField,selectionChargeChanged,handleExitChargeActions,tableCompKey,billMoveOutCharges,billedStatus,
-            refModalVisible,refTitle,showRefModalLoader,hideRefModalLoader,closeRefModal,processTenantRefund,refFormFields
+            ref_modal_loader,refModalVisible,refTitle,showRefModalLoader,hideRefModalLoader,closeRefModal,processTenantRefund,refFormFields
         }
     }
 };

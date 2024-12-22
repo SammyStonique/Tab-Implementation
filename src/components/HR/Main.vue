@@ -30,7 +30,10 @@ import NavBarHR from '@/components/HR/NavBarHR.vue'
 import PagesTab from '@/components/HR/PagesTab.vue'
 import Dashboard from '@/components/HR/Dashboard.vue'
 import Pay_Cycles from '@/components/HR/Pay_Cycles.vue'
-
+import Pay_Groups from '@/components/HR/Pay_Groups.vue'
+import Deductions from '@/components/HR/Deductions.vue'
+import Leave_Types from '@/components/HR/Leave_Types.vue'
+import Holidays from '@/components/HR/Holidays.vue'
 
 import Default_Settings from '@/components/SET/Default_Settings.vue';
 
@@ -40,7 +43,8 @@ export default{
         NavBarHR,
         PagesTab,
         Dashboard,
-        Pay_Cycles,
+        Pay_Cycles,Pay_Groups,Deductions,Leave_Types,Holidays,
+
         Default_Settings
     },
     props: {

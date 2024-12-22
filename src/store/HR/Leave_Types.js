@@ -2,34 +2,34 @@ import axios from "axios";
 import Swal from 'sweetalert2';
 
 const state = {
-  cyclesList: [], 
-  cycleArr: [],
-  cycleArray: [],
-  cycleID: '',
-  cycleName: '',
+  leavesList: [], 
+  leaveArr: [],
+  leaveArray: [],
+  leaveID: '',
+  leaveName: '',
   name_search: '',
-  selectedCycle: null,
+  selectedLeave: null,
   isEditing: false
 };
   
 const mutations = {
   initializeStore(state){
-    state.cyclesList = [];
-    state.cycleArr = [];
-    state.cycleArray = [];
+    state.leavesList = [];
+    state.leaveArr = [];
+    state.leaveArray = [];
     state.name_search = '';
     state.isEditing = false;
-    state.selectedCycle = null;
+    state.selectedLeave = null;
   },
-  SET_SELECTED_CYCLE(state, cycle) {
-    state.selectedCycle = cycle;
+  SET_SELECTED_LEAVE(state, leave) {
+    state.selectedLeave = leave;
     state.isEditing = true;
   },
-  LIST_CYCLES(state, cycles) {
-    state.cyclesList = cycles;
+  LIST_LEAVES(state, leaves) {
+    state.leavesList = leaves;
   },
-  CYCLES_ARRAY(state, cycles){
-    state.cycleArray = cycles;
+  LEAVES_ARRAY(state, leaves){
+    state.leaveArray = leaves;
   },
   SET_STATE(state, payload) {
     for (const key in payload) {
@@ -55,8 +55,8 @@ const actions = {
     commit('SET_STATE', newState);
   },
   
-  async createPayCycle({ commit,state }, formData) {
-    return axios.post('api/v1/create-pay-cycle/', formData)
+  async createLeaveType({ commit,state }, formData) {
+    return axios.post('api/v1/create-leave-type/', formData)
     .then((response)=>{
       return response;
     })
@@ -66,45 +66,45 @@ const actions = {
     })
   },
 
-  async fetchPayCycles({ commit,state }, formData) {
-    state.cycleArr = [];
-    await axios.post(`api/v1/get-pay-cycles/`,formData)
+  async fetchLeaveTypes({ commit,state }, formData) {
+    state.leaveArr = [];
+    await axios.post(`api/v1/get-leave-types/`,formData)
     .then((response)=>{
       for(let i=0; i< response.data.length; i++){
-        state.cycleArr.push((response.data[i].pay_cycle_name))
+        state.leaveArr.push((response.data[i].leave_name))
       }
-      commit('LIST_CYCLES', response.data);
+      commit('LIST_LEAVES', response.data);
     })
     .catch((error)=>{
       console.log(error.message);
     })
     
   },
-  fetchPayCycle({ commit,state }, formData) {
-    axios.post(`api/v1/get-pay-cycles/`,formData)
+  fetchLeaveType({ commit,state }, formData) {
+    axios.post(`api/v1/get-leave-types/`,formData)
     .then((response)=>{
-      state.selectedCycle = response.data;
-      commit('SET_SELECTED_CYCLE',response.data);
+      state.selectedLeave = response.data;
+      commit('SET_SELECTED_LEAVE',response.data);
     })
     .catch((error)=>{
       console.log(error.message);
     })
     
   },
-  handleSelectedPayCycle({ commit, state }, option){
-    state.cycleArray = [];
-    const selectedCycle = state.cyclesList.find(cycle => (cycle.pay_cycle_name) === option);
-    if (selectedCycle) {
-        state.cycleID = selectedCycle.pay_cycle_id;
-        state.cycleName = selectedCycle.pay_cycle_name;
-        state.cycleArray = [...state.cycleArray, selectedCycle];
+  handleSelectedLeaveType({ commit, state }, option){
+    state.leaveArray = [];
+    const selectedLeave = state.leavesList.find(leave => (leave.leave_name) === option);
+    if (selectedLeave) {
+        state.leaveID = selectedLeave.leave_type_id;
+        state.leaveName = selectedLeave.leave_name;
+        state.leaveArray = [...state.leaveArray, selectedLeave];
     }
-    commit('CYCLES_ARRAY', state.cycleArray);
+    commit('LEAVES_ARRAY', state.leaveArray);
       
   },
 
-  async updatePayCycle({ commit,state }, formData) {
-    return axios.put(`api/v1/update-pay-cycle/`,formData)
+  async updateLeaveType({ commit,state }, formData) {
+    return axios.put(`api/v1/update-leave-type/`,formData)
     .then((response)=>{
       return response;
     })
@@ -114,14 +114,14 @@ const actions = {
     })  
   },
 
-  deletePayCycle({ commit,state }, formData) {
+  deleteLeaveType({ commit,state }, formData) {
     Swal.fire({
       title: "Are you sure?",
-      text: `Do you wish to delete Pay Cycle?`,
+      text: `Do you wish to delete Leave Type?`,
       type: 'warning',
       showCloseButton: true,
       showCancelButton: true,
-      confirmButtonText: 'Yes Delete Pay Cycle!',
+      confirmButtonText: 'Yes Delete Leave Type!',
       cancelButtonText: 'Cancel!',
       customClass: {
           confirmButton: 'swal2-confirm-custom',
@@ -130,15 +130,15 @@ const actions = {
       showLoaderOnConfirm: true,
     }).then((result) => {
       if (result.value) {
-        axios.post(`api/v1/delete-pay-cycle/`,formData)
+        axios.post(`api/v1/delete-leave-type/`,formData)
         .then((response)=>{
           if(response.status == 200){
-              Swal.fire("Poof! Pay Cycle removed succesfully!", {
+              Swal.fire("Poof! Leave Type removed succesfully!", {
                 icon: "success",
               }); 
           }else{
             Swal.fire({
-              title: "Error Deleting Pay Cycle",
+              title: "Error Deleting Leave Type",
               icon: "warning",
             });
           }                   
@@ -151,7 +151,7 @@ const actions = {
           });
         })
       }else{
-        Swal.fire(`Pay Cycle has not been deleted!`);
+        Swal.fire(`Leave Type has not been deleted!`);
       }
     })
   },
