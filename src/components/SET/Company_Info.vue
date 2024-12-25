@@ -57,6 +57,7 @@ export default defineComponent({
                 { type: 'text', name: 'address',label: "Address", value: selectedCompany.value?.address || '', required: true },
                 { type: 'text', name: 'town',label: "Town", value: selectedCompany.value?.town || '', required: true },
                 { type: 'text', name: 'country',label: "Country", value: selectedCompany.value?.country || 'Kenya', required: true },
+                { type: 'dropdown', name: 'regime',label: "Tax Regime", value: selectedCompany.value?.regime || 'Kenya', placeholder: "", required: true, options: [{ text: 'Kenya', value: 'Kenya' }, { text: 'South Sudan', value: 'South Sudan' },{ text: 'Uganda', value: 'Uganda' }, { text: 'Tanzania', value: 'Tanzania' }] },
                 {required: false}
             ];
         };
@@ -128,6 +129,7 @@ export default defineComponent({
                     phone_number: formFields.value[3].value,
                     registration_number: formFields.value[1].value,
                     country: formFields.value[7].value,
+                    regime: formFields.value[8].value,
                     status: selectedCompany.value.status,
                     pms_module: additionalFields.value[0].value,
                     accounts_module: additionalFields.value[1].value,

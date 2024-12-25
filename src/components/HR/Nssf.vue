@@ -3,19 +3,16 @@
         <PageComponent 
             :loader="loader" @showLoader="showLoader" @hideLoader="hideLoader"
             :addButtonLabel="addButtonLabel"
-            @handleAddNew="addNewDeduction"
+            @handleAddNew="addNewNssf"
             :searchFilters="searchFilters"
-            @searchPage="searchDeductions"
+            @searchPage="searchNssfs"
             @resetFilters="resetFilters"
-            @removeItem="removeDeduction"
-            @removeSelectedItems="removeDeductions"
-            @printList="printDeductionsList"
-            @printExcel="downloadDeductionsExcel"
-            @printCSV="downloadDeductionsCSV"
+            @removeItem="removeNssf"
+            @removeSelectedItems="removeNssfs"
             :addingRight="addingRight"
             :rightsModule="rightsModule"
             :columns="tableColumns"
-            :rows="deductionsList"
+            :rows="nssfList"
             :actions="actions"
             :idField="idField"
             @handleSelectionChange="handleSelectionChange"
@@ -36,7 +33,7 @@
             :loader="modal_loader" @showLoader="showModalLoader" @hideLoader="hideModalLoader" @closeModal="closeModal">
             <DynamicForm 
                 :fields="formFields" :flex_basis="flex_basis" :flex_basis_percentage="flex_basis_percentage" 
-                :displayButtons="displayButtons" @handleSubmit="saveDeduction" @handleReset="handleReset"
+                :displayButtons="displayButtons" @handleSubmit="saveNssf" @handleReset="handleReset"
             />
         </MovableModal>
     </div>
@@ -53,7 +50,7 @@ import { useToast } from "vue-toastification";
 import PrintJS from 'print-js';
 
 export default{
-    name: 'Deductions',
+    name: 'Nssf',
     components:{
         PageComponent, MovableModal,DynamicForm
     },
@@ -63,14 +60,14 @@ export default{
         const loader = ref('none');
         const modal_loader = ref('none');
         const ledComponentKey = ref(0);
-        const idField = 'deduction_id';
-        const addButtonLabel = ref('New Earning/Deduction');
-        const addingRight = ref('Adding Earnings/Deductions');
+        const idField = 'nssf_id';
+        const addButtonLabel = ref('New NSSF');
+        const addingRight = ref('Adding Nssf');
         const rightsModule = ref('HR');
-        const title = ref('Earning/Deduction Details');
+        const title = ref('NSSF Details');
         const submitButtonLabel = ref('Add');
         const selectedIds = ref([]);
-        const deductionsList = ref([]);
+        const nssfList = ref([]);
         const propResults = ref([]);
         const propArrLen = ref(0);
         const propCount = ref(0);
@@ -86,38 +83,35 @@ export default{
         const errors = ref([]);
         const modal_top = ref('200px');
         const modal_left = ref('500px');
-        const modal_width = ref('30vw');
+        const modal_width = ref('40vw');
         const ledgerID = ref('');
-        const isEditing = computed(()=> store.state.Deductions.isEditing);
-        const selectedDeduction = computed(()=> store.state.Deductions.selectedDeduction);
-        const selectedLedger = computed(()=> store.state.Deductions.selectedLedger);
-        const ledgerArray = computed(() => store.state.Ledgers.ledgerArr);
+        const isEditing = computed(()=> store.state.Nssf.isEditing);
+        const selectedNssf = computed(()=> store.state.Nssf.selectedNssf);
+        const selectedLedger = computed(()=> store.state.Nssf.selectedLedger);
+        const ledgerArray = computed(() => store.state.Ledgers.liabilityLedgerArr);
         const showModal = ref(false);
         const tableColumns = ref([
             {type: "checkbox"},
-            {label: "Earning/Deduction Name", key:"deduction_name"},
-            {label: "Type", key: "deduction_type"},
+            {label: "Date", key:"date"},
+            {label: "Regime", key: "regime"},
             {label: "Taxed", key:"taxation_status"},
-            {label: "Charge Mode", key:"default_mode"},
-            {label: "Amount", key:"default_value"},
+            {label: "Charge Mode", key:"charge_mode"},
+            {label: "Year", key:"year"},
             {label: "Posting Account", key:"posting_account_name"},
         ])
         const actions = ref([
-            {name: 'edit', icon: 'fa fa-edit', title: 'Edit Earnings/Deductions', rightName: 'Editing Earnings/Deductions'},
-            {name: 'delete', icon: 'fa fa-trash', title: 'Delete Earnings/Deductions', rightName: 'Deleting Earnings/Deductions'},
+            {name: 'edit', icon: 'fa fa-edit', title: 'Edit Nssf', rightName: 'Editing Nssf'},
+            {name: 'delete', icon: 'fa fa-trash', title: 'Delete Nssf', rightName: 'Deleting Nssf'},
         ])
         const companyID = computed(()=> store.state.userData.company_id);
-        const deduction_name_search = ref('');
-        const deduction_type_search = ref('');
         const searchFilters = ref([
-            {type:'text', placeholder:"Group Name...", value: deduction_name_search, width:56,},
-            {
-                type:'dropdown', placeholder:"Type..", value: deduction_type_search, width:56,
-                options: [{text:'Earning',value:'Earning'},{text:'Deduction',value:'Deduction'}]
-            },
+        
         ]);
         const handleSelectionChange = (ids) => {
             selectedIds.value = ids;
+        };
+        const fetchAllLedgers = async() =>{
+            await store.dispatch('Ledgers/fetchLedgers', {company:companyID.value})
         };
         const handleSelectedLedger = async(option) =>{
             await store.dispatch('Ledgers/handleSelectedLedger', option)
@@ -129,22 +123,26 @@ export default{
         }
         const formFields = ref([]);
         const ledgerValue = computed(() => {
-           return (selectedDeduction.value && selectedDeduction.value.posting_account && !ledgerID.value) ? selectedDeduction.value.posting_account.ledger_id : ledgerID.value;
+           return (selectedNssf.value && selectedNssf.value.posting_account && !ledgerID.value) ? selectedNssf.value.posting_account.ledger_id : ledgerID.value;
 
         });
         const updateFormFields = () => {
-            formFields.value = [
-                
-                { type: 'text', name: 'deduction_name',label: "Name", value: selectedDeduction.value?.deduction_name || '', required: true },
-                { type: 'dropdown', name: 'deduction_type',label: "Type", value: selectedDeduction.value?.deduction_type || '', placeholder: "", required: true, options: [{ text: 'Earning', value: 'Earning' }, { text: 'Deduction', value: 'Deduction' }] },
-                { type: 'dropdown', name: 'default_mode',label: "Charge Mode", value: selectedDeduction.value?.default_mode || '', placeholder: "", required: true, options: [{ text: 'Fixed Amount', value: 'Fixed Amount' }, { text: 'Basic Percentage', value: 'Basic Percentage' },{ text: 'Gross Percentage', value: 'Gross Percentage' }, { text: 'Net Percentage', value: 'Net Percentage' }] },
-                { type: 'number', name: 'default_value',label: "Value", value: selectedDeduction.value?.default_value || 0, required: false },
-                { type: 'dropdown', name: 'taxation_status',label: "Taxed", value: selectedDeduction.value?.taxation_status || 'No', placeholder: "", required: true, options: [{ text: 'Yes', value: 'Yes' }, { text: 'No', value: 'No' }] },
+            formFields.value = [     
+                { type: 'date', name: 'date',label: "Effective Date", value: selectedNssf.value?.date || '', required: true },
+                { type: 'dropdown', name: 'regime',label: "Regime", value: selectedNssf.value?.regime || 'Kenya', placeholder: "", required: true, options: [{ text: 'Kenya', value: 'Kenya' }, { text: 'South Sudan', value: 'South Sudan' }] },
+                { type: 'dropdown', name: 'charge_mode',label: "Charge Mode", value: selectedNssf.value?.charge_mode || '', placeholder: "", required: true, options: [{ text: 'Monthly', value: 'Monthly' }, { text: 'Annually', value: 'Annually' }] },
+                { type: 'dropdown', name: 'taxation_status',label: "Taxation Status", value: selectedNssf.value?.taxation_status || 'No', placeholder: "", required: true, options: [{ text: 'Yes', value: 'Yes' }, { text: 'No', value: 'No' }]},
+                { type: 'number', name: 'max_amount',label: "Max Amount", value: selectedNssf.value?.max_amount || 0, required: true },
+                { type: 'number', name: 'employee_rate',label: "Employee Rate(%)", value: selectedNssf.value?.employee_rate || 0, required: true },
+                { type: 'number', name: 'employer_rate',label: "Employer Rate(%)", value: selectedNssf.value?.employer_rate || 0, required: true },
+                { type: 'number', name: 'lower_limit',label: "Lower Limit", value: selectedNssf.value?.lower_limit || 0, required: true },
+                { type: 'number', name: 'upper_limit',label: "Upper Limit", value: selectedNssf.value?.upper_limit || 0, required: true },
+                { type: 'text', name: 'year',label: "Year", value: selectedNssf.value?.year || '', required: true },
                 {  
                     type:'search-dropdown', label:"Posting Account", value: ledgerValue.value, componentKey: ledComponentKey,
                     selectOptions: ledgerArray, optionSelected: handleSelectedLedger, required: true,
                     searchPlaceholder: 'Select Posting Account...', dropdownWidth: '500px', updateValue: selectedLedger.value,
-                    fetchData: store.dispatch('Ledgers/fetchLedgers', {company:companyID.value}),
+                    fetchData: store.dispatch('Ledgers/fetchLiabilityLedgers', {company:companyID.value, ledger_type: 'Current Liability'}),
                     clearSearch: clearSelectedLedger
                 },
             ];
@@ -157,8 +155,8 @@ export default{
             ledgerID.value = '';
         }
 
-        watch([selectedDeduction, selectedLedger], () => {
-            if (selectedDeduction.value && selectedLedger.value) {
+        watch([selectedNssf, selectedLedger], () => {
+            if (selectedNssf.value && selectedLedger.value) {
                 ledComponentKey.value += 1;
                 updateFormFields();
             }
@@ -172,14 +170,19 @@ export default{
         const hideModalLoader = () =>{
             modal_loader.value = "none";
         }
-        const createDeduction = async() =>{
+        const createNssf = async() =>{
             showModalLoader();
             let formData = {
-                deduction_name: formFields.value[0].value,
-                deduction_type: formFields.value[1].value,
-                default_mode: formFields.value[2].value,
-                default_value: formFields.value[3].value,
-                taxation_status: formFields.value[4].value || 'No',
+                date: formFields.value[0].value,
+                employee_rate: formFields.value[5].value,
+                employer_rate: formFields.value[6].value,
+                regime: formFields.value[1].value,
+                taxation_status: formFields.value[3].value || 'No',
+                charge_mode: formFields.value[2].value,
+                max_amount: formFields.value[4].value,
+                lower_limit: formFields.value[7].value,
+                upper_limit: formFields.value[8].value,
+                year: formFields.value[9].value,
                 posting_account: ledgerID.value,
                 posting_account_id: ledgerID.value,
                 company: companyID.value
@@ -200,34 +203,39 @@ export default{
                 hideModalLoader();
             }else{
                 try {
-                    const response = await store.dispatch('Deductions/createDeduction', formData);
+                    const response = await store.dispatch('Nssf/createNssf', formData);
                     if (response && response.status === 200) {
                         hideModalLoader();
-                        toast.success('Earning/Deduction created successfully!');
+                        toast.success('Nssf created successfully!');
                         handleReset();
                         ledComponentKey.value += 1;
                     } else {
-                        toast.error('An error occurred while creating the Earning/Deduction.');
+                        toast.error('An error occurred while creating the Nssf.');
                     }
                 } catch (error) {
                     console.error(error.message);
-                    toast.error('Failed to create Earning/Deduction: ' + error.message);
+                    toast.error('Failed to create Nssf: ' + error.message);
                 } finally {
                     hideModalLoader();
-                    searchDeductions();
+                    searchNssfs();
                 }
             }
         }
-        const updateDeduction = async() =>{
+        const updateNssf = async() =>{
             showModalLoader();
             errors.value = [];
             let formData = {
-                deduction: selectedDeduction.value.deduction_id,
-                deduction_name: formFields.value[0].value,
-                deduction_type: formFields.value[1].value,
-                default_mode: formFields.value[2].value,
-                default_value: formFields.value[3].value,
-                taxation_status: formFields.value[4].value || 'No',
+                nssf: selectedNssf.value.nssf_id,
+                date: formFields.value[0].value,
+                employee_rate: formFields.value[5].value,
+                employer_rate: formFields.value[6].value,
+                regime: formFields.value[1].value,
+                taxation_status: formFields.value[3].value || 'No',
+                charge_mode: formFields.value[2].value,
+                max_amount: formFields.value[4].value,
+                lower_limit: formFields.value[7].value,
+                upper_limit: formFields.value[8].value,
+                year: formFields.value[9].value,
                 posting_account: ledgerValue.value,
                 posting_account_id: ledgerValue.value,
                 company: companyID.value
@@ -246,82 +254,82 @@ export default{
                 hideModalLoader();
             }else{
                 try {
-                    const response = await store.dispatch('Deductions/updateDeduction', formData);
+                    const response = await store.dispatch('Nssf/updateNssf', formData);
                     if (response && response.status === 200) {
                         hideModalLoader();
                         handleReset();
                         ledComponentKey.value += 1;
-                        toast.success("Earning/Deduction updated successfully!");              
+                        toast.success("Nssf updated successfully!");              
                     } else {
-                        toast.error('An error occurred while updating the Earning/Deduction.');
+                        toast.error('An error occurred while updating the Nssf.');
                     }
                 } catch (error) {
                     console.error(error.message);
-                    toast.error('Failed to update unit: ' + error.message);
+                    toast.error('Failed to update Nssf: ' + error.message);
                 } finally {
                     hideModalLoader();
                     propModalVisible.value = false;
-                    store.dispatch("Deductions/updateState",{selectedGroup:null})
-                    searchDeductions();
+                    store.dispatch("Nssf/updateState",{selectedNssf:null})
+                    searchNssfs();
                 }             
             }
         }
-        const saveDeduction = () =>{
+        const saveNssf = () =>{
             if(isEditing.value == true){
-                updateDeduction();
+                updateNssf();
             }else{
-                createDeduction();
+                createNssf();
             }
         }
-        const removeDeduction = async() =>{
+        const removeNssf = async() =>{
             if(selectedIds.value.length == 1){
                 let formData = {
                     company: companyID.value,
-                    deduction: selectedIds.value
+                    nssf: selectedIds.value
                 }
                 try{
-                    const response = await store.dispatch('Deductions/deleteDeduction',formData)
+                    const response = await store.dispatch('Nssf/deleteNssf',formData)
                     if(response && response.status == 200){
-                        toast.success("Earning/Deduction Removed Succesfully");
-                        searchDeductions();
+                        toast.success("Nssf Removed Succesfully");
+                        searchNssfs();
                     }
                 }
                 catch(error){
                     console.error(error.message);
-                    toast.error('Failed to remove Earning/Deduction: ' + error.message);
+                    toast.error('Failed to remove Nssf: ' + error.message);
                 }
                 finally{
                     selectedIds.value = [];
                 }
             }else if(selectedIds.value.length > 1){
-                toast.error("You have selected more than 1 Earning/Deduction") 
+                toast.error("You have selected more than 1 Nssf") 
             }else{
-                toast.error("Please Select An Earning/Deduction To Remove")
+                toast.error("Please Select An Nssf To Remove")
             }
         }
-        const removeDeductions = async() =>{
+        const removeNssfs = async() =>{
             if(selectedIds.value.length){
                 let formData = {
                     company: companyID.value,
-                    deduction: selectedIds.value
+                    nssf: selectedIds.value
                 }
                 try{
-                    const response = await store.dispatch('Deductions/deleteDeduction',formData)
+                    const response = await store.dispatch('Nssf/deleteNssf',formData)
                     if(response && response.status == 200){
-                        toast.success("Earning/Deduction(s) Removed Succesfully");
-                        searchDeductions();
+                        toast.success("Nssf(s) Removed Succesfully");
+                        searchNssfs();
                     }
                 }
                 catch(error){
                     console.error(error.message);
-                    toast.error('Failed to remove Earning/Deduction: ' + error.message);
+                    toast.error('Failed to remove Nssf: ' + error.message);
                 }
                 finally{
                     selectedIds.value = [];
 
                 }
             }else{
-                toast.error("Please Select An Earning/Deduction To Remove")
+                toast.error("Please Select A Nssf To Remove")
             }
         }
         const showLoader = () =>{
@@ -330,23 +338,21 @@ export default{
         const hideLoader = () =>{
             loader.value = "none";
         }
-        const searchDeductions = () =>{
+        const searchNssfs = () =>{
             showLoader();
             showNextBtn.value = false;
             showPreviousBtn.value = false;
             let formData = {
-                deduction_name: deduction_name_search.value,
-                deduction_type: deduction_type_search.value,
                 company_id: companyID.value,
                 page_size: selectedValue.value
             } 
             axios
-            .post(`api/v1/deductions-search/?page=${currentPage.value}`,formData)
+            .post(`api/v1/nssfs-search/?page=${currentPage.value}`,formData)
             .then((response)=>{
-                deductionsList.value = response.data.results;
-                store.commit('Deductions/LIST_DEDUCTIONS', deductionsList.value)
+                nssfList.value = response.data.results;
+                store.commit('Nssf/LIST_NSSF', nssfList.value)
                 propResults.value = response.data;
-                propArrLen.value = deductionsList.value.length;
+                propArrLen.value = nssfList.value.length;
                 propCount.value = propResults.value.count;
                 pageCount.value = Math.ceil(propCount.value / selectedValue.value);
                 if(response.data.next){
@@ -365,13 +371,11 @@ export default{
         };
         const selectSearchQuantity = (newValue) =>{
             selectedValue.value = newValue;
-            searchDeductions(selectedValue.value);
+            searchNssfs(selectedValue.value);
         };
         const resetFilters = () =>{
             selectedValue.value = 50;
-            deduction_name_search.value = "";
-            deduction_type_search.value = "";
-            searchDeductions();
+            searchNssfs();
         }
         const loadPrev = () =>{
             if (currentPage.value <= 1){
@@ -380,7 +384,7 @@ export default{
                 currentPage.value -= 1;
             }
             
-            searchDeductions();
+            searchNssfs();
             // scrollToTop();
         }
         const loadNext = () =>{
@@ -390,50 +394,52 @@ export default{
                 currentPage.value += 1;
             }
             
-            searchDeductions();
+            searchNssfs();
             // scrollToTop(); 
         }
         const firstPage = ()=>{
             currentPage.value = 1;
-            searchDeductions();
+            searchNssfs();
             // scrollToTop();
         }
         const lastPage = () =>{
             currentPage.value = pageCount.value;
-            searchDeductions();
+            searchNssfs();
             // scrollToTop();
         }
-        const addNewDeduction = () =>{
-            store.dispatch("Deductions/updateState",{selectedDeduction:null, selectedLedger:null});
+        const addNewNssf = () =>{
+            fetchAllLedgers();
+            store.dispatch("Nssf/updateState",{selectedNssf:null, selectedLedger:null});
             ledComponentKey.value += 1;
             handleReset();
             updateFormFields();
             propModalVisible.value = true;
-            store.dispatch("Deductions/updateState",{isEditing:false})
-            flex_basis.value = '1/2';
-            flex_basis_percentage.value = '50';
+            store.dispatch("Nssf/updateState",{isEditing:false})
+            flex_basis.value = '1/3';
+            flex_basis_percentage.value = '33.333';
         }
         const handleActionClick = async(rowIndex, action, row) =>{
             if( action == 'edit'){
-                const deductionID = row['deduction_id'];
+                fetchAllLedgers();
+                const nssfID = row['nssf_id'];
                 let formData = {
                     company: companyID.value,
-                    deduction: deductionID
+                    nssf: nssfID
                 }
-                await store.dispatch('Deductions/fetchDeduction',formData)
+                await store.dispatch('Nssf/fetchNssf',formData)
                 propModalVisible.value = true;
-                flex_basis.value = '1/2';
-                flex_basis_percentage.value = '50';
+                flex_basis.value = '1/3';
+                flex_basis_percentage.value = '33.333';
 
             }else if(action == 'delete'){
-                const deductionID = [row[idField]];
+                const nssfID = [row[idField]];
                 let formData = {
                     company: companyID.value,
-                    deduction: deductionID
+                    nssf: nssfID
                 }
-                await store.dispatch('Deductions/deleteDeduction',formData).
+                await store.dispatch('Nssf/deleteNssf',formData).
                 then(()=>{
-                    searchDeductions();
+                    searchNssfs();
                 })
             }else if(action == 'view'){
                 console.log("VIEWING TAKING PLACE");
@@ -442,96 +448,18 @@ export default{
         const closeModal = () =>{
             propModalVisible.value = false;
         };
-        const printDeductionsList = () =>{
-            showLoader();
-            let formData = {
-                deduction_name: deduction_name_search.value,
-                deduction_type: deduction_type_search.value,
-                company_id: companyID.value,
-                page_size: selectedValue.value
-            } 
 
-            axios
-            .post("api/v1/export-deductions-pdf/", formData, { responseType: 'blob' })
-                .then((response)=>{
-                    if(response.status == 200){
-                        const blob1 = new Blob([response.data]);
-                        // Convert blob to URL
-                        const url = URL.createObjectURL(blob1);
-                        PrintJS({printable: url, type: 'pdf'});
-                    }
-                })
-            .catch((error)=>{
-                console.log(error.message);
-            })
-            .finally(()=>{
-                hideLoader();
-            })
-        };
-        const downloadDeductionsExcel = () =>{
-            showLoader();
-            let formData = {
-                deduction_name: deduction_name_search.value,
-                deduction_type: deduction_type_search.value,
-                company_id: companyID.value,
-                page_size: selectedValue.value
-            }
-            axios.post("api/v1/export-deductions-excel/", formData, { responseType: 'blob' })
-            .then((response)=>{
-                if(response.status == 200){
-                const url = window.URL.createObjectURL(new Blob([response.data]));
-                const link = document.createElement('a');
-                link.href = url;
-                link.setAttribute('download', 'Earning/Deductions.xlsx');
-                document.body.appendChild(link);
-                link.click();
-                }
-            })
-            .catch((error)=>{
-                console.log(error);
-            })
-            .finally(()=>{
-                hideLoader();
-            })
-        };
-        const downloadDeductionsCSV = () =>{
-            showLoader();
-            let formData = {
-                deduction_name: deduction_name_search.value,
-                deduction_type: deduction_type_search.value,
-                company_id: companyID.value,
-                page_size: selectedValue.value
-            }
-            axios.post("api/v1/export-deductions-csv/", formData, { responseType: 'blob' })
-            .then((response)=>{
-                if(response.status == 200){
-                const url = window.URL.createObjectURL(new Blob([response.data]));
-                const link = document.createElement('a');
-                link.href = url;
-                link.setAttribute('download', 'Deductions.csv');
-                document.body.appendChild(link);
-                link.click();
-                }
-            })
-            .catch((error)=>{
-                console.log(error);
-            })
-            .finally(()=>{
-                hideLoader();
-            })
-        };
         onBeforeMount(()=>{
-            searchDeductions();
+            searchNssfs();
             
         })
         return{
-            title, searchDeductions,resetFilters, addButtonLabel, searchFilters, tableColumns, deductionsList,
+            title, searchNssfs,resetFilters, addButtonLabel, searchFilters, tableColumns, nssfList,
             propResults, propArrLen, propCount, pageCount, showNextBtn, showPreviousBtn,
             loadPrev, loadNext, firstPage, lastPage, idField, actions, handleActionClick, propModalVisible, closeModal,
-            submitButtonLabel, showModal, addNewDeduction, showLoader, loader, hideLoader, modal_loader, modal_top, modal_left, modal_width,displayButtons,
-            showModalLoader, hideModalLoader, saveDeduction, formFields, handleSelectionChange, flex_basis,flex_basis_percentage,
-            removeDeduction, removeDeductions,addingRight,rightsModule,printDeductionsList,selectSearchQuantity,selectedValue,
-            downloadDeductionsCSV,downloadDeductionsExcel
+            submitButtonLabel, showModal, addNewNssf, showLoader, loader, hideLoader, modal_loader, modal_top, modal_left, modal_width,displayButtons,
+            showModalLoader, hideModalLoader, saveNssf, formFields, handleSelectionChange, flex_basis,flex_basis_percentage,
+            removeNssf, removeNssfs,addingRight,rightsModule,selectSearchQuantity,selectedValue,
         }
     }
 };

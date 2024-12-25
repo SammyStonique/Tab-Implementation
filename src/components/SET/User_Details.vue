@@ -181,41 +181,44 @@ export default defineComponent({
                     }
 
                     const response2 = await axios.post("api/v1/users/", formData);
-                    userDetails.value = response2.data;
+                    if (response2.status == 200){
+                        userDetails.value = response2.data;
 
-                    let formData1 ={
-                        temporary_password: temporary_password.value,
-                        company: companyID.value
+                        let formData1 ={
+                            temporary_password: temporary_password.value,
+                            company: companyID.value
+                        }
+
+                        const response3 = await axios.post(`api/v1/user-credentials/${userDetails.value.user_id}/`, formData1);
+            
+                        let formData2 ={
+                            user: userDetails.value.user_id,
+                            company: companyID.value
+                        }
+
+                        const response4 = await axios.post("api/v1/create-user-company/", formData2);
+                        console.log("The response 4 data is ",response4.data);
+
+                        let formData3 = {
+                            phone_number: userDetails.value.phone_number,
+                            birth_date: userDetails.value.birth_date,
+                            user_department: userDetails.value.user_department,
+                        }
+
+                        const response5 = await axios.put("api/v1/users/"+userDetails.value.user_id+"/", formData3);
+                        // const response = await store.dispatch('userData/createUser', formData);
+                        if (response5) {
+                            hideLoader();
+                            toast.success('User created successfully!');
+                            handleReset();
+                            mainComponentKey.value += 1;
+                            depComponentKey.value += 1;
+                        } else {
+                            toast.error('An error occurred while creating the User.');
+                            hideLoader();
+                        }
                     }
-
-                    const response3 = await axios.post(`api/v1/user-credentials/${userDetails.value.user_id}/`, formData1);
-        
-                    let formData2 ={
-                        user: userDetails.value.user_id,
-                        company: companyID.value
-                    }
-
-                    const response4 = await axios.post("api/v1/create-user-company/", formData2);
-                    console.log("The response 4 data is ",response4.data);
-
-                    let formData3 = {
-                        phone_number: userDetails.value.phone_number,
-                        birth_date: userDetails.value.birth_date,
-                        user_department: userDetails.value.user_department,
-                    }
-
-                    const response5 = await axios.put("api/v1/users/"+userDetails.value.user_id+"/", formData3);
-                    // const response = await store.dispatch('userData/createUser', formData);
-                    if (response5) {
-                        hideLoader();
-                        toast.success('User created successfully!');
-                        handleReset();
-                        mainComponentKey.value += 1;
-                        depComponentKey.value += 1;
-                    } else {
-                        toast.error('An error occurred while creating the User.');
-                        hideLoader();
-                    }
+                    
                 } catch (error) {
                     console.error(error.message);
                     toast.error('Failed to create User: ' + error.message);

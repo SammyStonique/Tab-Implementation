@@ -89,6 +89,7 @@ export default{
             {label: "Email", key:"email"},
             {label: "Phone No", key:"phone_number"},
             {label: "Reg No", key:"registration_number"},
+            {label: "Regime", key:"regime"},
             {label: "Status", key: "status"},
         ])
         const actions = ref([

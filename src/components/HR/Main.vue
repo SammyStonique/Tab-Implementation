@@ -37,6 +37,7 @@ import Holidays from '@/components/HR/Holidays.vue'
 import Paye from '@/components/HR/Paye.vue'
 import Nssf from '@/components/HR/Nssf.vue'
 import Shif from '@/components/HR/Shif.vue'
+import Housing_Levy from '@/components/HR/Housing_Levy.vue'
 
 import Default_Settings from '@/components/SET/Default_Settings.vue';
 
@@ -46,7 +47,7 @@ export default{
         NavBarHR,
         PagesTab,
         Dashboard,
-        Pay_Cycles,Pay_Groups,Deductions,Leave_Types,Holidays,Paye,Nssf,Shif,
+        Pay_Cycles,Pay_Groups,Deductions,Leave_Types,Holidays,Paye,Nssf,Shif,Housing_Levy,
 
         Default_Settings
     },

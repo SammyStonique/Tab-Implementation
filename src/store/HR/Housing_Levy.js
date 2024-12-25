@@ -2,38 +2,38 @@ import axios from "axios";
 import Swal from 'sweetalert2';
 
 const state = {
-  shifsList: [], 
-  shifArr: [],
-  shifArray: [],
-  shifID: '',
-  shifRegime: '',
-  shif_regime_search: '',
-  selectedShif: null,
+  levyList: [], 
+  levyArr: [],
+  levyArray: [],
+  levyID: '',
+  levyRegime: '',
+  levy_regime_search: '',
+  selectedLevy: null,
   selectedLedger: null,
   isEditing: false
 };
   
 const mutations = {
   initializeStore(state){
-    state.shifsList = [];
-    state.shifArr = [];
-    state.shifArray = [];
-    state.shifID = "";
-    state.shifRegime = "";
-    state.shif_regime_search = '';
-    state.selectedShif = null;
+    state.levyList = [];
+    state.levyArr = [];
+    state.levyArray = [];
+    state.levyID = "";
+    state.levyRegime = "";
+    state.levy_regime_search = '';
+    state.selectedLevy = null;
     state.selectedLedger = null;
     state.isEditing = false;
   },
-  SET_SELECTED_SHIF(state, shif) {
-    state.selectedShif = shif;
+  SET_SELECTED_LEVY(state, levy) {
+    state.selectedLevy = levy;
     state.isEditing = true;
   },
-  LIST_SHIFS(state, shifs) {
-    state.shifsList = shifs;
+  LIST_LEVIES(state, levies) {
+    state.levyList = levies;
   },
-  SHIFS_ARRAY(state, shifs){
-    state.shifArray = shifs;
+  LEVIES_ARRAY(state, levies){
+    state.levyArray = levies;
   },
   SET_SELECTED_LEDGER(state, ledger) {
     state.selectedLedger = ledger;
@@ -51,7 +51,7 @@ const mutations = {
     }
   },
   RESET_SEARCH_FILTERS(state){
-    state.shif_regime_search = '';
+    state.levy_regime_search = '';
   }
 };
   
@@ -60,8 +60,8 @@ const actions = {
     commit('SET_STATE', newState);
   },
   
-  async createShif({ commit,state }, formData) {
-    return axios.post('api/v1/create-shif/', formData)
+  async createHousingLevy({ commit,state }, formData) {
+    return axios.post('api/v1/create-housing-levy/', formData)
     .then((response)=>{
       return response;
     })
@@ -71,26 +71,26 @@ const actions = {
     })
   },
 
-  fetchShifs({ commit,state }, formData) {
-    state.shifArr = [];
-    axios.post(`api/v1/get-shifs/`,formData)
+  fetchHousingLevies({ commit,state }, formData) {
+    state.levyArr = [];
+    axios.post(`api/v1/get-housing-levies/`,formData)
     .then((response)=>{
       for(let i=0; i< response.data.length; i++){
-        state.shifArr.push((response.data[i].regime + " - " + response.data[i].date));
+        state.levyArr.push((response.data[i].regime + " - " + response.data[i].date));
       }
-      commit('LIST_SHIFS', response.data);
+      commit('LIST_LEVIES', response.data);
     })
     .catch((error)=>{
       console.log(error.message);
     })
     
   },
-  fetchShif({ commit,state }, formData) {
-    axios.post(`api/v1/get-shifs/`,formData)
+  fetchHousingLevy({ commit,state }, formData) {
+    axios.post(`api/v1/get-housing-levies/`,formData)
     .then((response)=>{
-      state.selectedShif = response.data;
+      state.selectedLevy = response.data;
       const selectedLedger = response.data.posting_account.ledger_code + " - " + response.data.posting_account.ledger_name;
-      commit('SET_SELECTED_SHIF',response.data);
+      commit('SET_SELECTED_LEVY',response.data);
       commit('SET_SELECTED_LEDGER', selectedLedger);
     })
     .catch((error)=>{
@@ -98,20 +98,20 @@ const actions = {
     })
     
   },
-  handleSelectedShif({ commit, state }, option){
-    state.shifArray = [];
-    const selectedShif = state.shifsList.find(shif => (shif.regime + " - " + shif.date) === option);
-    if (selectedShif) {
-        state.shifID = selectedShif.shif_id;
-        state.shifRegime = selectedShif.regime;
-        state.shifArray = [...state.shifArray, selectedShif];
+  handleSelectedLevy({ commit, state }, option){
+    state.levyArray = [];
+    const selectedLevy = state.levyList.find(levy => (levy.regime + " - " + levy.date) === option);
+    if (selectedLevy) {
+        state.levyID = selectedLevy.housing_levy_id;
+        state.levyRegime = selectedLevy.regime;
+        state.levyArray = [...state.levyArray, selectedLevy];
     }
-    commit('SHIFS_ARRAY', state.shifArray);
+    commit('LEVIES_ARRAY', state.levyArray);
       
   },
 
-  async updateShif({ commit,state }, formData) {
-    return axios.put(`api/v1/update-shif/`,formData)
+  async updateHousingLevy({ commit,state }, formData) {
+    return axios.put(`api/v1/update-housing-levy/`,formData)
     .then((response)=>{
       return response;
     })
@@ -121,14 +121,14 @@ const actions = {
     })  
   },
 
-  deleteShif({ commit,state }, formData) {
+  deleteHousingLevy({ commit,state }, formData) {
     Swal.fire({
       title: "Are you sure?",
-      text: `Do you wish to delete Shif?`,
+      text: `Do you wish to delete Housing Levy?`,
       type: 'warning',
       showCloseButton: true,
       showCancelButton: true,
-      confirmButtonText: 'Yes Delete Shif!',
+      confirmButtonText: 'Yes Delete Housing Levy!',
       cancelButtonText: 'Cancel!',
       customClass: {
           confirmButton: 'swal2-confirm-custom',
@@ -137,15 +137,15 @@ const actions = {
       showLoaderOnConfirm: true,
     }).then((result) => {
       if (result.value) {
-        axios.post(`api/v1/delete-shif/`,formData)
+        axios.post(`api/v1/delete-housing-levy/`,formData)
         .then((response)=>{
           if(response.status == 200){
-              Swal.fire("Poof! Shif removed succesfully!", {
+              Swal.fire("Poof! Housing Levy removed succesfully!", {
                 icon: "success",
               }); 
           }else{
             Swal.fire({
-              title: "Error Deleting Shif",
+              title: "Error Deleting Housing Levy",
               icon: "warning",
             });
           }                   
@@ -158,7 +158,7 @@ const actions = {
           });
         })
       }else{
-        Swal.fire(`Shif has not been deleted!`);
+        Swal.fire(`Housing Levy has not been deleted!`);
       }
     })
   },

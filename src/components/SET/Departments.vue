@@ -175,6 +175,7 @@ export default{
                         hideModalLoader();
                         toast.success('Department created successfully!');
                         handleReset();
+                        searchDepartments();
                     }else {
                         toast.error('An error occurred while creating the department.');
                     }
@@ -210,6 +211,7 @@ export default{
                         hideModalLoader();
                         toast.success("Department updated successfully!");
                         handleReset();
+                        searchDepartments();
                     } else {
                         toast.error('An error occurred while updating the department.');
                     }
