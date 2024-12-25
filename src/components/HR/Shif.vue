@@ -257,11 +257,11 @@ export default{
                     }
                 } catch (error) {
                     console.error(error.message);
-                    toast.error('Failed to update Earning/Deduction: ' + error.message);
+                    toast.error('Failed to update unit: ' + error.message);
                 } finally {
                     hideModalLoader();
                     propModalVisible.value = false;
-                    store.dispatch("Deductions/updateState",{selectedDeduction:null})
+                    store.dispatch("Deductions/updateState",{selectedGroup:null})
                     searchDeductions();
                 }             
             }
