@@ -62,11 +62,13 @@ import Paye from './HR/Paye';
 import Nssf from './HR/Nssf';
 import Shif from './HR/Shif';
 import Housing_Levy from './HR/Housing_Levy';
+import Employees from './HR/Employees';
 
 
 import Default_Settings from './SET/Default_Settings';
 import Companies from './SET/Companies';
 import Branches from './SET/Branches';
+import Banks from './SET/Banks';
 import User_Rights from './SET/User_Rights';
 import SMS_Integrations from './SET/SMS_Integrations';
 import Email_Integrations from './SET/Email_Integrations';
@@ -92,8 +94,8 @@ export default createStore({
     
     Ledgers, Currencies, Taxes, Journals, Customers, Vendors,Fiscal_Periods,
 
-    Pay_Cycles,Pay_Groups,Deductions,Leave_Types,Holidays,Paye,Nssf,Shif,Housing_Levy,
+    Pay_Cycles,Pay_Groups,Deductions,Leave_Types,Holidays,Paye,Nssf,Shif,Housing_Levy,Employees,
 
-    Default_Settings,Companies,Branches,User_Rights,SMS_Integrations,Email_Integrations,Mpesa_Integrations,Mpesa_Transactions
+    Default_Settings,Companies,Branches,User_Rights,SMS_Integrations,Email_Integrations,Mpesa_Integrations,Mpesa_Transactions,Banks
   },
 });

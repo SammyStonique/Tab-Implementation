@@ -281,7 +281,7 @@ export default{
                     const response = await store.dispatch('Active_Tenants/deleteTenant',formData)
                     if(response && response.status == 200){
                         toast.success("Tenant(s) Removed Succesfully");
-                        searchPropertys();
+                        searchTenants();
                     }
                 }
                 catch(error){

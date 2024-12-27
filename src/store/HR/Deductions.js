@@ -106,7 +106,6 @@ const actions = {
     
   },
   handleSelectedDeduction({ commit, state }, option){
-    state.deductionArray = [];
     const selectedDeduction = state.deductionsList.find(deduction => (deduction.deduction_name) === option);
     if (selectedDeduction) {
         state.deductionID = selectedDeduction.deduction_id;
@@ -168,6 +167,10 @@ const actions = {
         Swal.fire(`Earning/Deduction has not been deleted!`);
       }
     })
+  },
+  removeDeduction({commit, state}, index){
+    state.deductionArray.splice(index, 1); 
+    commit('DEDUCTIONS_ARRAY', state.deductionArray);
   },
 };
   

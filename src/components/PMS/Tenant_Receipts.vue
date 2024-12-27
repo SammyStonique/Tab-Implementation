@@ -259,18 +259,23 @@ export default{
                     if (result.value) {
                         axios.post(`api/v1/delete-journal/`,formData)
                         .then((response)=>{
-                        if(response.data.msg == "Success"){
-                            Swal.fire("Poof! Receipt(s) removed succesfully!", {
-                                icon: "success",
-                            }); 
-                            toast.success("Receipt(s) removed succesfully");
-                            searchReceipts();
-                        }else if(response.data.msg == "Reversed"){
-                            Swal.fire({
-                                title: "Cannot Delete Reversed Receipt",
-                                icon: "warning",
-                            });
-                        }                  
+                            if(response.data.msg == "Success"){
+                                Swal.fire("Poof! Receipt(s) removed succesfully!", {
+                                    icon: "success",
+                                }); 
+                                toast.success("Receipt(s) removed succesfully");
+                                searchReceipts();
+                            }else if(response.data.msg == "Reversed"){
+                                Swal.fire({
+                                    title: "Cannot Delete Reversed Receipt",
+                                    icon: "warning",
+                                });
+                            }else if(response.data.msg == "Refunded"){
+                                Swal.fire({
+                                    title: "Refund Has Already Been Processed",
+                                    icon: "warning",
+                                });
+                            }                 
                         })
                         .catch((error)=>{
                             console.log(error.message);
@@ -317,18 +322,23 @@ export default{
                     if (result.value) {
                         axios.post(`api/v1/delete-journal/`,formData)
                         .then((response)=>{
-                        if(response.data.msg == "Success"){
-                            Swal.fire("Poof! Receipt(s) removed succesfully!", {
-                                icon: "success",
-                            }); 
-                            toast.success("Receipt(s) removed succesfully");
-                            searchReceipts();
-                        }else if(response.data.msg == "Reversed"){
-                            Swal.fire({
-                                title: "Cannot Delete Reversed Receipt",
-                                icon: "warning",
-                            });
-                        }                  
+                            if(response.data.msg == "Success"){
+                                Swal.fire("Poof! Receipt(s) removed succesfully!", {
+                                    icon: "success",
+                                }); 
+                                toast.success("Receipt(s) removed succesfully");
+                                searchReceipts();
+                            }else if(response.data.msg == "Reversed"){
+                                Swal.fire({
+                                    title: "Cannot Delete Reversed Receipt",
+                                    icon: "warning",
+                                });
+                            }else if(response.data.msg == "Refunded"){
+                                Swal.fire({
+                                    title: "Refund Has Already Been Processed",
+                                    icon: "warning",
+                                });
+                            }                   
                         })
                         .catch((error)=>{
                             console.log(error.message);
@@ -517,7 +527,12 @@ export default{
                                 title: "Cannot Delete Reversed Receipt",
                                 icon: "warning",
                             });
-                        }                  
+                        }else if(response.data.msg == "Refunded"){
+                            Swal.fire({
+                                title: "Refund Has Already Been Processed",
+                                icon: "warning",
+                            });
+                        }                
                         })
                         .catch((error)=>{
                             console.log(error.message);

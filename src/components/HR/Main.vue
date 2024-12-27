@@ -38,6 +38,10 @@ import Paye from '@/components/HR/Paye.vue'
 import Nssf from '@/components/HR/Nssf.vue'
 import Shif from '@/components/HR/Shif.vue'
 import Housing_Levy from '@/components/HR/Housing_Levy.vue'
+import Employees from '@/components/HR/Employees.vue'
+import Employee_Biodata from '@/components/HR/Employee_Biodata.vue'
+import Deduction_Details from '@/components/HR/Deduction_Details.vue'
+import Employee_Details from '@/components/HR/Employee_Details.vue'
 
 import Default_Settings from '@/components/SET/Default_Settings.vue';
 
@@ -48,6 +52,7 @@ export default{
         PagesTab,
         Dashboard,
         Pay_Cycles,Pay_Groups,Deductions,Leave_Types,Holidays,Paye,Nssf,Shif,Housing_Levy,
+        Employees,Employee_Biodata,Deduction_Details,Employee_Details,
 
         Default_Settings
     },
