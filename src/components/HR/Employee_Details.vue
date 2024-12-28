@@ -57,7 +57,7 @@ export default defineComponent({
         const mainComponentKey = ref(0);
         const currentTab = computed(()=> store.state.Employees.currentTab);
         const isEditing = computed(()=> store.state.Employees.isEditing);
-        const selectedEmployee = computed(()=> store.state.Employees.selectedEmployee);
+        const employeeID = computed(()=> store.state.Employees.selectedEmployeeID);
         const companyID = computed(()=> store.state.userData.company_id);
 
         const employeeFormFields = ref([]);
@@ -72,44 +72,7 @@ export default defineComponent({
             employeeAdditionalFields.value = additionalFields;
         };
 
-        watch([selectedEmployee], () => {
-            if(selectedEmployee.value){
-                employeeFormFields.value[0].value = selectedEmployee.value.staff_number;
-                employeeFormFields.value[1].value = selectedEmployee.value.employee_name;
-                employeeFormFields.value[2].value = selectedEmployee.value.phone_number;
-                employeeFormFields.value[3].value = selectedEmployee.value.id_number;
-                employeeFormFields.value[4].value = selectedEmployee.value.dob;
-                employeeFormFields.value[5].value = selectedEmployee.value.gender;
-                employeeFormFields.value[6].value = selectedEmployee.value.email;
-                employeeFormFields.value[7].value = selectedEmployee.value.kra_pin;
-                employeeFormFields.value[8].value = selectedEmployee.value.marital_status;
-                employeeFormFields.value[9].value = selectedEmployee.value.country;
-                employeeFormFields.value[10].value = selectedEmployee.value.address;
-                employeeFormFields.value[11].value = selectedEmployee.value.job_title;
-                employeeAdditionalFields.value[0].value = selectedEmployee.value.contact_names;
-                employeeAdditionalFields.value[1].value = selectedEmployee.value.contact_phone_number;
-                employeeAdditionalFields.value[2].value = selectedEmployee.value.contact_email;
-                employeeAdditionalFields.value[3].value = selectedEmployee.value.contact_relationship;
-                // updateEmployeeFormFields();
-                deductionFormFields.value[0].value = selectedEmployee.value.employment_start_date;
-                deductionFormFields.value[1].value = selectedEmployee.value.employment_end_date;
-                deductionFormFields.value[2].value = selectedEmployee.value.basic_pay;
-                deductionFormFields.value[3].value = selectedEmployee.value.employment_status;
-                deductionFormFields.value[4].value = selectedEmployee.value.payment_method;
-                // deductionFormFields.value[5].value = selectedEmployeeLease.value.email;
-                // deductionFormFields.value[6].value = selectedEmployeeLease.value.kra_pin;
-                // deductionFormFields.value[7].value = selectedEmployeeLease.value.lease_start_date;
-                deductionFormFields.value[8].value = selectedEmployee.value.insurance_premium;
-                deductionFormFields.value[9].value = selectedEmployee.value.insurance_relief;
-                employmentAdditionalFields.value[0].value = selectedEmployee.value.deduct_shif;
-                employmentAdditionalFields.value[1].value = selectedEmployee.value.shif_number;
-                employmentAdditionalFields.value[2].value = selectedEmployee.value.deduct_nssf;
-                employmentAdditionalFields.value[3].value = selectedEmployee.value.nssf_number;
-            }
-            
-        }, { immediate: true });
-
-        const updateDeductionFormFields = (fields,additionalFields,deductionRows) => {
+   const updateDeductionFormFields = (fields,additionalFields,deductionRows) => {
             deductionFormFields.value = fields;
             employmentAdditionalFields.value = additionalFields;
             employeeDeductions.value = deductionRows;
@@ -140,7 +103,6 @@ export default defineComponent({
             }else{
                 store.dispatch('Employees/updateState', {currentTab: "Deduction_Details"})
             }
-            // store.dispatch('Employees/updateState', {currentTab: "Lease_Details"})
         };
 
         const openEmployeeDetails = () =>{
@@ -148,7 +110,7 @@ export default defineComponent({
         }
 
         const submitAll = async() => {
-            // showLoader();
+            showLoader();
             if(!isEditing.value){
                 const allFormData = {
                     employee_biodata: employeeFormFields.value,
@@ -159,30 +121,55 @@ export default defineComponent({
                     company: companyID.value
                 };        
                 console.log('Submitting all form data:', allFormData);
-                // await axios.post('api/v1/create-employee/',allFormData)
-                // .then((response)=>{
-                //     if(response.status == 200){
-                //         toast.success("Employee Created Succesfully")
-                //         handleReset();
-                //     }else{
-                //         toast.error("Error Creating Employee")
-                //     }
+                await axios.post('api/v1/create-employee/',allFormData)
+                .then((response)=>{
+                    if(response.data.msg == "Success"){
+                        toast.success("Employee Created Succesfully")
+                        handleReset();
+                    }else{
+                        toast.error("Error Creating Employee")
+                    }
                     
-                // })
-                // .catch((errors)=>{
-                //     toast.error(errors.message)
-                // })
-                // .finally(()=>{
-                //     hideLoader();
-                // })
+                })
+                .catch((errors)=>{
+                    toast.error(errors.message)
+                })
+                .finally(()=>{
+                    hideLoader();
+                })
             }else{
-                toast.error("Editing Details Not Allowed");
-                hideLoader();
+                const allFormData = {
+                    employee: employeeID.value,
+                    employee_biodata: employeeFormFields.value,
+                    emergency_contact: employeeAdditionalFields.value,
+                    employment_details: deductionFormFields.value,
+                    statutory_deductions: employmentAdditionalFields.value,
+                    deductions: employeeDeductions.value,
+                    company: companyID.value
+                };        
+                console.log('Submitting all form data:', allFormData);
+                await axios.put('api/v1/update-employee/',allFormData)
+                .then((response)=>{
+                    if(response.data.msg == "Success"){
+                        toast.success("Employee Updated Succesfully")
+                        handleReset();
+                    }else{
+                        toast.error("Error Updating Employee")
+                    }
+                    
+                })
+                .catch((errors)=>{
+                    toast.error(errors.message)
+                })
+                .finally(()=>{
+                    hideLoader();
+                })
             }
         };
 
         const handleReset = async() =>{
             await store.dispatch('Deductions/updateState', {deductionArray: []})
+            await store.dispatch('Employees/updateState', {currentTab: 'Employee_Biodata',selectedEmployee: null,selectedEmployeeID: null,selectedSupervisor: null,selectedCurrency: null,selectedDepartment:null,selectedPayGroup: null,selectedBank: null,employeeDeductions: [],isEditing: false})
             for(let i=0; i < employeeFormFields.value.length; i++){
                 if(employeeFormFields.value[i].label != 'Country'){
                     employeeFormFields.value[i].value = '';

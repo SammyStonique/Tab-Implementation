@@ -6,8 +6,7 @@ const state = {
   employeeArr: [],
   employeeArray: [],
   employeeID: null,
-  employeeBankID: null,
-  employeeCompanyID: null,
+  selectedEmployeeID: null,
   employeeName: '',
   employeeNumber: '',
   name_search: '',
@@ -17,12 +16,12 @@ const state = {
   selectedEmployee: null,
   selectedSupervisor: null,
   selectedDepartment: null,
-  employeeDepartment: null,
   selectedEmployeeSupervisor: null,
   selectedEmployeeDepartment: null,
   selectedEmployeeCurrency: null,
-  employeeCurrency: null,
-  employeeBank: null,
+  selectedCurrency: null,
+  selectedBank: null,
+  selectedPayGroup: null,
   isEditing: false,
   employeeDeductions: [],
   employeeDetails: [],
@@ -35,23 +34,20 @@ const mutations = {
     state.employeeArr = [];
     state.employeeArray = [];
     state.employeeID = "";
+    state.selectedEmployeeID = null;
     state.employeeNumber = "";
     state.name_search = '';
     state.staff_number_search = '';
     state.phone_number_search = '';
     state.gender_search = '';
     state.selectedEmployee = null;
-    state.employeeBankID = null;
-    state.employeeCompanyID = null;
-    state.selectedTenantLease = null;
     state.selectedEmployeeCurrency = null;
     state.selectedEmployeeSupervisor = null;
-    state.employeeCurrency = null;
-    state.tenantProperty = null;
+    state.selectedCurrency = null;
     state.selectedSupervisor = null;
     state.selectedDepartment = null;
-    state.employeeDepartment = null;
-    state.employeeBank = null;
+    state.selectedPayGroup = null;
+    state.selectedBank = null;
     state.isEditing = false;
     state.employeeDeductions = [];
     state.employeeDetails = [];
@@ -63,15 +59,17 @@ const mutations = {
   SET_SELECTED_DEPARTMENT(state, department) {
     state.selectedDepartment = department;
   },
-  SET_EMPLOYEE_DEPARTMENT(state, department) {
-    state.employeeDepartment = department;
-  },
   SET_SELECTED_SUPERVISOR(state, supervisor) {
     state.selectedSupervisor = supervisor;
   },
-  
   SET_SELECTED_CURRENCY(state, currency) {
-    state.selectedEmployeeCurrency = currency;
+    state.selectedCurrency = currency;
+  },
+  SET_SELECTED_BANK(state, bank) {
+    state.selectedBank = bank;
+  },
+  SET_SELECTED_PAY_GROUP(state, paygroup) {
+    state.selectedPayGroup = paygroup;
   },
   SET_EMPLOYEE_DETAILS(state, details){
     state.employeeDetails = details;
@@ -191,10 +189,14 @@ const actions = {
     axios.post(`api/v1/get-employees/`,formData)
     .then((response)=>{
         state.selectedEmployee = response.data;
+        state.selectedEmployeeID = response.data.employee_id;
         commit('SET_SELECTED_EMPLOYEE',response.data);
-        commit('SET_SELECTED_DEPARTMENT',(response.data.employee_department != null) ? response.data.employee_department.name : "");
-        commit('SET_SELECTED_SUPERVISOR',(response.data.supervisor != null) ? (response.data.supervisor.first_name + " "+ response.data.supervisor.first_name + " - " + response.data.supervisor.email) : "");
-        commit('SET_SELECTED_CURRENCY',response.data.employee_currency.name);
+        commit('SET_SELECTED_DEPARTMENT',(response.data.employee_department != null) ? (response.data.employee_department.code + " - " +response.data.employee_department.name) : "");
+        commit('SET_SELECTED_SUPERVISOR',(response.data.supervisor != null) ? (response.data.supervisor.first_name + " "+ response.data.supervisor.last_name + " - " + response.data.supervisor.email) : "");
+        commit('SET_SELECTED_CURRENCY',response.data.employee_currency.code + " - " + response.data.employee_currency.name);
+        commit('SET_SELECTED_BANK',(response.data.employee_bank != null) ? (response.data.employee_bank[0].bank_name) : "");
+        commit('SET_SELECTED_PAY_GROUP',(response.data.employee_pay_group != null) ? (response.data.employee_pay_group[0].pay_group_name) : "");
+        commit('SET_EMPLOYEE_DEDUCTIONS',(response.data.employee_deductions != null) ? (response.data.employee_deductions) : []);
     })   
     .catch((error)=>{
       console.log(error.message);

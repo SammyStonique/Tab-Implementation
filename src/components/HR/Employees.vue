@@ -106,7 +106,7 @@ export default{
             {label: "Employee Name", key:"employee_name"},
             {label: "Phone No", key: "phone_number"},
             {label: "Email", key:"email"},
-            {label: "Pay Group", key:"unit_number"},
+            {label: "Pay Group", key:"pay_group"},
             {label: "Gender", key:"gender"},
             {label: "Title", key:"job_title"},
         ])
@@ -351,13 +351,13 @@ export default{
         }
         const addNewEmployee = async() =>{
             store.commit('Employees/initializeStore');
-            await store.dispatch('Employees/updateState', {currentTab: 'Employee_Biodata',selectedEmployee: null,selectedEmployeeSupervisor: null,selectedEmployeeCurrency: null,selectedDepartment:null,isEditing: false});
+            await store.dispatch('Employees/updateState', {currentTab: 'Employee_Biodata',selectedEmployee: null,selectedEmployeeID: null,selectedSupervisor: null,selectedCurrency: null,selectedDepartment:null,selectedPayGroup: null,selectedBank: null,employeeDeductions: [],isEditing: false});
             store.commit('pageTab/ADD_PAGE', {'HR':'Employee_Details'});
             store.state.pageTab.hrActiveTab = 'Employee_Details';          
         }
         const handleActionClick = async(rowIndex, action, row) =>{
             if( action == 'edit'){
-                await store.dispatch('Employees/updateState', {currentTab: 'Employee_Biodata',selectedEmployee: null,selectedEmployeeSupervisor: null,selectedEmployeeCurrency: null,selectedDepartment:null, isEditing: false});
+                await store.dispatch('Employees/updateState', {currentTab: 'Employee_Biodata',selectedEmployee: null,selectedEmployeeID: null,selectedSupervisor: null,selectedCurrency: null,selectedDepartment:null,selectedPayGroup: null,selectedBank: null,employeeDeductions: [],isEditing: false});
                 store.dispatch('Employees/updateState', {tenantCompanyID: companyID.value})
                 const employeeID = row[idField];
                 let formData = {
@@ -380,7 +380,7 @@ export default{
                     searchEmployees();
                 })
             }else if(action == 'view'){
-                await store.dispatch('Employees/updateState', {currentTab: 'Employee_Biodata',selectedEmployee: null,selectedEmployeeSupervisor: null,selectedEmployeeCurrency: null,selectedDepartment:null, isEditing: false});
+                await store.dispatch('Employees/updateState', {currentTab: 'Employee_Biodata',selectedEmployee: null,selectedEmployeeID: null,selectedSupervisor: null,selectedCurrency: null,selectedDepartment:null,selectedPayGroup: null,selectedBank: null,employeeDeductions: [],isEditing: false});
                 const employeeID = row[idField];
                 let formData = {
                     company: companyID.value,

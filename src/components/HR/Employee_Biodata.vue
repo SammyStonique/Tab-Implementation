@@ -41,8 +41,8 @@ export default defineComponent({
         const errors = ref([]);
         const companyID = computed(()=> store.state.userData.company_id);
         const selectedEmployee = computed(()=> store.state.Employees.selectedEmployee);
-        const selectedEmployeeDepartment = computed(()=> store.state.Employees.selectedEmployeeDepartment);
-        const selectedEmployeeSupervisor = computed(()=> store.state.Employees.selectedEmployeeSupervisor);
+        const selectedDepartment = computed(()=> store.state.Employees.selectedDepartment);
+        const selectedSupervisor = computed(()=> store.state.Employees.selectedSupervisor);
         const flex_basis = ref('');
         const flex_basis_percentage = ref('');
         const additional_flex_basis = ref('');
@@ -58,9 +58,7 @@ export default defineComponent({
         const handleSelectedDepartment = async(option) =>{
             await store.dispatch('Departments/handleSelectedDepartment', option)
             departmentID.value = store.state.Departments.depID;
-            if(selectedEmployee.value){
-                selectedEmployee.value.employee_department.department_id = departmentID.value;
-            }
+
         };
         const clearSelectedDepartment = async() =>{
             await store.dispatch('Departments/updateState', {depID: ''});
@@ -72,9 +70,7 @@ export default defineComponent({
         const handleSelectedSupervisor = async(option) =>{
             await store.dispatch('userData/handleSelectedUser', option)
             supervisorID.value = store.state.userData.userID;
-            if(selectedEmployee.value){
-                selectedEmployee.value.supervisor.user_id = supervisorID.value;
-            }
+
         };
         const clearSelectedSupervisor = async() =>{
             await store.dispatch('userData/updateState', {supervisorID: ''});
@@ -89,32 +85,47 @@ export default defineComponent({
         });
         const updateFormFields = () => {
             formFields.value = [
-                { type: 'text', name: 'staff_number',label: "Staff Number", value: '', required: false },
-                { type: 'text', name: 'tenant_name',label: "Employee Name", value: '', required: true },
-                { type: 'text', name: 'phone_number',label: "Phone Number", value: '', required: true, placeholder: '' },
-                { type: 'text', name: 'id_number',label: "ID Number", value: '', required: true, placeholder: '' },
-                { type: 'date', name: 'dob',label: "D.O.B", value: '', required: true, placeholder: '' },
-                { type: 'dropdown', name: 'gender',label: "Gender", value: '', placeholder: "", required: true, options: [{ text: 'Male', value: 'Male' }, { text: 'Female', value: 'Female' }, { text: 'Others', value: 'Others' }] },
-                { type: 'text', name: 'email',label: "Email", value: '', required: false },
-                { type: 'text', name: 'kra_pin',label: "Tax Pin", value: '', required: false },
-                { type: 'dropdown', name: 'marital_status',label: "Marital Status", value: '', placeholder: "", required: true, options: [{ text: 'Single', value: 'Single' }, { text: 'Married', value: 'Married' },{ text: 'Separated', value: 'Separated' }, { text: 'Divorced', value: 'Divorced' },{ text: 'Widowed', value: 'Widowed' }] },
-                { type: 'text', name: 'country',label: "Country", value: 'Kenya', required: true },
-                { type: 'text', name: 'address',label: "Address", value: '', required: false },
-                { type: 'text', name: 'job_title',label: "Job Title", value: '', required: true },
+                { type: 'text', name: 'staff_number',label: "Staff Number", value: selectedEmployee.value?.staff_number || '', required: false },
+                { type: 'text', name: 'employee_name',label: "Employee Name", value: selectedEmployee.value?.employee_name || '', required: true },
+                { type: 'text', name: 'phone_number',label: "Phone Number", value: selectedEmployee.value?.phone_number || '', required: true, placeholder: '' },
+                { type: 'text', name: 'id_number',label: "ID Number", value: selectedEmployee.value?.id_number || '', required: true, placeholder: '' },
+                { type: 'date', name: 'dob',label: "D.O.B", value: selectedEmployee.value?.dob || '', required: true, placeholder: '' },
+                { type: 'dropdown', name: 'gender',label: "Gender", value: selectedEmployee.value?.gender || '', placeholder: "", required: true, options: [{ text: 'Male', value: 'Male' }, { text: 'Female', value: 'Female' }, { text: 'Others', value: 'Others' }] },
+                { type: 'text', name: 'email',label: "Email", value: selectedEmployee.value?.email || '', required: false },
+                { type: 'text', name: 'kra_pin',label: "Tax Pin", value: selectedEmployee.value?.kra_pin || '', required: false },
+                { type: 'dropdown', name: 'marital_status',label: "Marital Status", value: selectedEmployee.value?.marital_status || '', placeholder: "", required: true, options: [{ text: 'Single', value: 'Single' }, { text: 'Married', value: 'Married' },{ text: 'Separated', value: 'Separated' }, { text: 'Divorced', value: 'Divorced' },{ text: 'Widowed', value: 'Widowed' }] },
+                { type: 'text', name: 'country',label: "Country", value: selectedEmployee.value?.country || 'Kenya', required: true },
+                { type: 'text', name: 'address',label: "Address", value: selectedEmployee.value?.address || '', required: false },
+                { type: 'text', name: 'job_title',label: "Job Title", value: selectedEmployee.value?.job_title || '', required: true },
                 {  
                     type:'search-dropdown', label:"Department", value: departmentValue.value, componentKey: depComponentKey,
                     selectOptions: depArray, optionSelected: handleSelectedDepartment, required: false,
-                    searchPlaceholder: 'Select Department...', dropdownWidth: '500px', updateValue: selectedEmployeeDepartment.value,
+                    searchPlaceholder: 'Select Department...', dropdownWidth: '500px', updateValue: selectedDepartment.value,
                     fetchData: fetchDepartments(), clearSearch: clearSelectedDepartment
                 },
                 {  
                     type:'search-dropdown', label:"Supervisor", value: supervisorValue.value, componentKey: userComponentKey,
                     selectOptions: usersArray, optionSelected: handleSelectedSupervisor, required: false,
-                    searchPlaceholder: 'Select Supervisor...', dropdownWidth: '500px', updateValue: selectedEmployeeSupervisor.value,
+                    searchPlaceholder: 'Select Supervisor...', dropdownWidth: '500px', updateValue: selectedSupervisor.value,
                     fetchData: fetchUsers(), clearSearch: clearSelectedSupervisor
                 },
                 {required:false}
             ];
+            emitUpdatedFields();
+        };
+
+        const additionalFields = ref(props.additionalFields);
+        const updateAdditionalFormFields = () => {
+            additionalFields.value = [
+                { type: 'text', name: 'contact_names',label: "Name", value: selectedEmployee.value?.contact_names ||'', required: false },
+                { type: 'text', name: 'contact_phone_number',label: "Phone Number", value: selectedEmployee.value?.contact_phone_number ||'', required: false },
+                { type: 'text', name: 'contact_email',label: "Email", value: selectedEmployee.value?.contact_email ||'', required: false },
+                { type: 'text', name: 'contact_relationship',label: "Relationship", value: selectedEmployee.value?.contact_relationship ||'', required: false },
+            ];
+            emitUpdatedFields();
+        };
+        const emitUpdatedFields = () => {
+            emit('update-form', formFields.value, additionalFields.value);
         };
 
         watch([departmentID, supervisorID], () => {
@@ -123,6 +134,28 @@ export default defineComponent({
             }
             if(supervisorID.value != ""){
                 formFields.value[13].value = supervisorID.value;
+            }
+        }, { immediate: true });
+
+        watch([selectedEmployee, selectedDepartment, selectedSupervisor], () => {
+            if (selectedEmployee.value && selectedDepartment.value && selectedSupervisor.value) {
+                depComponentKey.value += 1;
+                userComponentKey.value += 1;
+                updateFormFields();
+                updateAdditionalFormFields();
+
+            }else if(selectedEmployee.value && selectedDepartment.value){
+                depComponentKey.value += 1;
+                updateFormFields();
+                updateAdditionalFormFields();
+                
+            }else if(selectedEmployee.value && selectedSupervisor.value){
+                userComponentKey.value += 1;
+                updateFormFields();
+                updateAdditionalFormFields();
+            }else if(selectedEmployee.value){
+                updateFormFields();
+                updateAdditionalFormFields();
             }
         }, { immediate: true });
 
@@ -137,20 +170,6 @@ export default defineComponent({
             }
             emit('reset-employee-details')
         }
-
-
-        const additionalFields = ref(props.additionalFields);
-        const updateAdditionalFormFields = () => {
-            additionalFields.value = [
-                { type: 'text', name: 'contact_names',label: "Name", value: '', required: false },
-                { type: 'text', name: 'contact_phone_number',label: "Phone Number", value: '', required: false },
-                { type: 'text', name: 'contact_email',label: "Email", value: '', required: false },
-                { type: 'text', name: 'contact_relationship',label: "Relationship", value: '', required: false },
-            ];
-        };
-        const emitUpdatedFields = () => {
-            emit('update-form', formFields.value, additionalFields.value);
-        };
          
         const showLoader = () =>{
             loader.value = "block";

@@ -82,7 +82,10 @@ export default defineComponent({
         const additional_flex_basis = ref('');
         const additional_flex_basis_percentage = ref('');
         const selectedEmployee = computed(()=> store.state.Employees.selectedEmployee);
-        const selectedEmployeeCurrency = computed(()=> store.state.Employees.selectedEmployeeCurrency);
+        const selectedCurrency = computed(()=> store.state.Employees.selectedCurrency);
+        const selectedBank = computed(()=> store.state.Employees.selectedBank);
+        const selectedPayGroup = computed(()=> store.state.Employees.selectedPayGroup);
+        const employeeDeductions = computed(()=> store.state.Employees.employeeDeductions);
         const currencyArray = computed(() => store.state.Currencies.currencyArr);
         const bankArray = computed(() => store.state.Banks.bankArr);
         const payGroupArray = computed(() => store.state.Pay_Groups.groupArr);
@@ -126,13 +129,19 @@ export default defineComponent({
         }, { immediate: true });
         const formFields = ref(props.formFields);
         const currencyValue = computed(() => {
-           return (selectedEmployee.value && selectedEmployee.value.currency && !currencyID.value) ? selectedEmployee.value.currency.currency_id : currencyID.value;
+           return (selectedEmployee.value && selectedEmployee.value.employee_currency && !currencyID.value) ? selectedEmployee.value.employee_currency.currency_id : currencyID.value;
         });
         const bankValue = computed(() => {
-           return bankID.value;
+            return (selectedEmployee.value && selectedEmployee.value.employee_bank && !bankID.value) ? selectedEmployee.value.employee_bank[0].bank_id : bankID.value;
         });
         const payValue = computed(() => {
-           return payGroupID.value;
+            return (selectedEmployee.value && selectedEmployee.value.employee_pay_group && !payGroupID.value) ? selectedEmployee.value.employee_pay_group[0].pay_group_id : payGroupID.value;
+        });
+        const accName = computed(() => {
+            return (selectedEmployee.value && selectedEmployee.value.employee_bank) ? selectedEmployee.value.employee_bank[0].account_name : "-";
+        });
+        const accNumber = computed(() => {
+            return (selectedEmployee.value && selectedEmployee.value.employee_bank) ? selectedEmployee.value.employee_bank[0].account_number : "0";
         });
         const updateFormFields = () => {
             formFields.value = [
@@ -144,26 +153,42 @@ export default defineComponent({
                 {  
                     type:'search-dropdown', label:"Bank", value: bankValue.value, componentKey: bankComponentKey,
                     selectOptions: bankArray, optionSelected: handleSelectedBank, required: false,
-                    searchPlaceholder: 'Select Bank...', dropdownWidth: '500px', updateValue: selectedEmployeeCurrency.value,
+                    searchPlaceholder: 'Select Bank...', dropdownWidth: '500px', updateValue: selectedBank.value,
                     fetchData: fetchBanks(), clearSearch: clearSelectedBank
                 },
-                { type: 'text', name: 'account_name',label: "Account Name", value: '-', required: false },
-                { type: 'text', name: 'account_number',label: "Account No", value: '0', required: false },
+                { type: 'text', name: 'account_name',label: "Account Name", value: accName.value, required: false },
+                { type: 'text', name: 'account_number',label: "Account No", value: accNumber.value, required: false },
                 { type: 'text', name: 'insurance_premium',label: "Insurance Premium", value: selectedEmployee.value?.insurance_premium || '0', required: false },
                 { type: 'text', name: 'insurance_relief',label: "Insurance Relief", value: selectedEmployee.value?.insurance_relief || '0', required: false },
                 {  
                     type:'search-dropdown', label:"Currency", value: currencyValue.value, componentKey: currencyComponentKey,
                     selectOptions: currencyArray, optionSelected: handleSelectedCurrency, required: true,
-                    searchPlaceholder: 'Select Currency...', dropdownWidth: '500px', updateValue: selectedEmployeeCurrency.value,
+                    searchPlaceholder: 'Select Currency...', dropdownWidth: '500px', updateValue: selectedCurrency.value,
                     fetchData: fetchCurrencies(), clearSearch: clearSelectedCurrency
                 },
                 {  
                     type:'search-dropdown', label:"Pay Group", value: payValue.value, componentKey: payComponentKey,
                     selectOptions: payGroupArray, optionSelected: handleSelectedPayGroup, required: false,
-                    searchPlaceholder: 'Select Pay Group...', dropdownWidth: '500px', updateValue: selectedEmployeeCurrency.value,
+                    searchPlaceholder: 'Select Pay Group...', dropdownWidth: '500px', updateValue: selectedPayGroup.value,
                     fetchData: fetchPayGroups(), clearSearch: clearSelectedPayGroup
                 },
                ];
+               emitUpdatedFields();
+        };
+        const additionalFields = ref(props.additionalFields);
+        const updateAdditionalFormFields = () => {
+            additionalFields.value = [
+                { type: 'dropdown', name: 'deduct_shif',label: "Deduct SHIF", value: selectedEmployee.value?.deduct_shif || 'No', placeholder: "", required: true, options: [{ text: 'Yes', value: 'Yes' }, { text: 'No', value: 'No' }] },
+                { type: 'text', name: 'shif_number',label: "SHIF No", value: selectedEmployee.value?.shif_number || '-', required: false },
+                {required:false},
+                { type: 'dropdown', name: 'deduct_nssf',label: "Deduct NSSF", value: selectedEmployee.value?.deduct_nssf || 'No', placeholder: "", required: true, options: [{ text: 'Yes', value: 'Yes' }, { text: 'No', value: 'No' }] },
+                { type: 'text', name: 'nssf_number',label: "NSSF No", value: selectedEmployee.value?.nssf_number || '-', required: false },
+                {required:false}
+            ];
+            emitUpdatedFields();
+        };
+        const emitUpdatedFields = () => {
+            emit('update-form', formFields.value, additionalFields.value, localDeductionRows.value);
         };
         watch([bankID, payGroupID], () => {
             if (bankID.value != "") {
@@ -189,11 +214,7 @@ export default defineComponent({
         }
 
         watch([selectedEmployee], () => {
-            if (selectedEmployee.value) {
-                bankComponentKey.value += 1;
-                deducComponentKey.value += 1;
-                // updateFormFields();
-            }
+            
         }, { immediate: true });
         const handleSelectedBank = async(option) =>{
             await store.dispatch('Banks/handleSelectedBank', option)
@@ -236,35 +257,60 @@ export default defineComponent({
         const fetchPayGroups = async() =>{
             await store.dispatch('Pay_Groups/fetchPayGroups', {company:companyID.value})
         };
-        const additionalFields = ref(props.additionalFields);
-        const updateAdditionalFormFields = () => {
-            additionalFields.value = [
-                { type: 'dropdown', name: 'deduct_shif',label: "Deduct SHIF", value: selectedEmployee.value?.deduct_shif || 'No', placeholder: "", required: true, options: [{ text: 'Yes', value: 'Yes' }, { text: 'No', value: 'No' }] },
-                { type: 'text', name: 'shif_number',label: "SHIF No", value: selectedEmployee.value?.shif_number || '-', required: false },
-                {required:false},
-                { type: 'dropdown', name: 'deduct_nssf',label: "Deduct NSSF", value: selectedEmployee.value?.deduct_nssf || 'No', placeholder: "", required: true, options: [{ text: 'Yes', value: 'Yes' }, { text: 'No', value: 'No' }] },
-                { type: 'text', name: 'nssf_number',label: "NSSF No", value: selectedEmployee.value?.nssf_number || '-', required: false },
-                {required:false}
-            ];
-        };
-        watch([selectedEmployee, selectedEmployeeCurrency], () => {
-            if(selectedEmployee.value  && selectedEmployeeCurrency.value){
+        
+        watch([selectedEmployee, selectedCurrency, selectedBank, selectedPayGroup, employeeDeductions], () => {
+            if(employeeDeductions.value){
+                deducComponentKey.value += 1;
+                store.dispatch('Deductions/updateState',{deductionArray: employeeDeductions.value})
+                tableKey.value += 1;
+            }
+            if (selectedEmployee.value && selectedCurrency.value  && selectedPayGroup.value && selectedBank.value) {
+                bankComponentKey.value += 1;
                 currencyComponentKey.value += 1;
                 payComponentKey.value += 1;
+                formFields.value[6].value = selectedEmployee.value.employee_bank[0].account_name;
+                formFields.value[7].value = selectedEmployee.value.employee_bank[0].account_number;
+                updateFormFields();
+                updateAdditionalFormFields();
+            }else if (selectedEmployee.value && selectedCurrency.value  && selectedPayGroup.value && selectedBank.value) {
+                bankComponentKey.value += 1;
+                currencyComponentKey.value += 1;
+                payComponentKey.value += 1;
+                deducComponentKey.value += 1;
+                formFields.value[6].value = selectedEmployee.value.employee_bank[0].account_name;
+                formFields.value[7].value = selectedEmployee.value.employee_bank[0].account_number;
+                updateFormFields();
+                updateAdditionalFormFields();
+            }
+            else if(selectedEmployee.value  && selectedCurrency.value && selectedPayGroup.value){
+                currencyComponentKey.value += 1;
+                payComponentKey.value += 1;
+                updateFormFields();
+                updateAdditionalFormFields();
+            }
+            else if(selectedEmployee.value  && selectedCurrency.value  && selectedBank.value){
+                currencyComponentKey.value += 1;
+                bankComponentKey.value += 1;
+                formFields.value[6].value = selectedEmployee.value.employee_bank[0].account_name;
+                formFields.value[7].value = selectedEmployee.value.employee_bank[0].account_number;
+                updateFormFields();
+                updateAdditionalFormFields();
+            }
+            else if(selectedEmployee.value  && selectedCurrency.value){
+                currencyComponentKey.value += 1;
+                updateFormFields();
                 updateAdditionalFormFields();
             }
         }, { immediate: true });
 
-        const emitUpdatedFields = () => {
-            emit('update-form', formFields.value, additionalFields.value, localDeductionRows.value);
-        };
+        
         watch(() => store.state.Deductions.deductionArray, (newVal) => {
             if (newVal) {
                 localDeductionRows.value = [...newVal];
                 tableKey.value += 1;
                 emitUpdatedFields();
             }else{
-                emitUpdatedFields();
+                // emitUpdatedFields();
             }
         },{ immediate: true });
          
