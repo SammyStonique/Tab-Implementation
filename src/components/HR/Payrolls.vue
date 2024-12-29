@@ -3,19 +3,19 @@
         <PageComponent 
             :loader="loader" @showLoader="showLoader" @hideLoader="hideLoader"
             :addButtonLabel="addButtonLabel"
-            @handleAddNew="bookInvoice"
+            @handleAddNew="runPayroll"
             :searchFilters="searchFilters"
             :dropdownOptions="dropdownOptions"
             @handleDynamicOption="handleDynamicOption"
-            @searchPage="searchInvoices"
+            @searchPage="searchPayrolls"
             @resetFilters="resetFilters"
-            @removeItem="removeInvoice"
-            @removeSelectedItems="removeInvoices"
-            @printList="printInvoiceList"
+            @removeItem="removePayroll"
+            @removeSelectedItems="removePayrolls"
+            @printList="printPayrollList"
             :addingRight="addingRight"
             :rightsModule="rightsModule"
             :columns="tableColumns"
-            :rows="invoicesList"
+            :rows="payrollList"
             :actions="actions"
             :showTotals="showTotals"
             :idField="idField"
@@ -68,7 +68,7 @@
         >
             <DynamicForm 
                 :fields="formFields" :flex_basis="flex_basis" :flex_basis_percentage="flex_basis_percentage" 
-                :displayButtons="displayButtons" @handleSubmit="bookRentalInvoice" @handleReset="handleReset"
+                :displayButtons="displayButtons" @handleSubmit="payrollProcessing" @handleReset="handleReset"
             />
         </MovableModal>
     </div>
@@ -89,7 +89,7 @@ import InvoicePayments from "@/components/InvoicePayments.vue";
 import PrintJS from 'print-js';
 
 export default{
-    name: 'Tenant_Invoices',
+    name: 'Payrolls',
     components:{
         PageComponent, MovableModal,DynamicForm,JournalEntries,InvoiceLines,InvoicePayments
     },
@@ -101,24 +101,24 @@ export default{
         const current_date = new Date();
         const loader = ref('none');
         const modal_loader = ref('none');
-        const idField = 'journal_id';
-        const addButtonLabel = ref('New Booking');
-        const addingRight = ref('Book Rental Invoice');
-        const rightsModule = ref('PMS');
+        const idField = 'payroll_id';
+        const addButtonLabel = ref('Run Payroll');
+        const addingRight = ref('Running Payroll');
+        const rightsModule = ref('HR');
         const submitButtonLabel = ref('Add');
-        const title = ref('Invoice Booking');
-        const detailsTitle = ref('Item Details');
+        const title = ref('Run Payroll');
+        const detailsTitle = ref('Payroll Details');
         const tabs = ref(['Journal Entries','Invoice Lines','Invoice Payments']);
         const activeTab = ref(0);
         const invoiceID = ref(null);
         const propComponentKey = ref(0);
-        const tntComponentKey = ref(0);
+        const paySearchComponentKey = ref(0);
         const invModalVisible = ref(false);
-        const modal_top = ref('150px');
-        const modal_left = ref('400px');
-        const modal_width = ref('32vw');
+        const modal_top = ref('200px');
+        const modal_left = ref('500px');
+        const modal_width = ref('30vw');
         const selectedIds = ref([]);
-        const invoicesList = ref([]);
+        const payrollList = ref([]);
         const propResults = ref([]);
         const propArrLen = ref(0);
         const propCount = ref(0);
@@ -136,128 +136,100 @@ export default{
         const flex_basis_percentage = ref('');
         const displayButtons = ref(true);
         const errors = ref([]);
-        const ledgerID = ref('');
-        const tenantID = ref(null);
-        const propertyID = ref(null);
-        const propertySearchID = ref('');
-        const propertyArray = computed(() => store.state.Properties_List.propertyArr);
-        const tenantArray = computed(() => store.state.Active_Tenants.tenantUnitsArr);
+        const payGroupID = ref(null);
+        const groupSearchID = ref('');
+        const payGroupArray = computed(() => store.state.Pay_Groups.groupArr);
         const showModal = ref(false);
         const tableColumns = ref([
             {type: "checkbox"},
-            {label: "Invoice#", key:"journal_no"},
             {label: "Date", key: "date"},
-            {label: "Tenant Name", key:"tenant_name"},
-            {label: "Property Name", key:"property_name"},
-            {label: "Unit", key:"unit_number"},
-            {label: "Description", key:"description"},
-            {label: "Amount", key:"total_amount", type: "number"},
-            {label: "Paid", key:"total_paid", type: "number"},
-            {label: "Balance", key:"due_amount", type: "number"},
+            {label: "Month", key:"month"},
+            {label: "Year", key:"year"},
+            {label: "Basic Pay", key:"base_salary", type: "number"},
+            {label: "Allowances", key:"allowances", type: "number"},
+            {label: "Deductions", key:"deductions", type: "number"},
+            {label: "Paye", key:"tax", type: "number"},
+            {label: "Net Pay", key:"net_pay", type: "number"},
             {label: "Status", key:"status"},
         ])
         const showTotals = ref(true);
         const actions = ref([
-            {name: 'print', icon: 'fa fa-print', title: 'Print Invoice', rightName: 'Print Tenant Invoice'},
-            {name: 'download', icon: 'fa fa-download', title: 'Download Invoice', rightName: 'Print Tenant Invoice'},
-            {name: 'delete', icon: 'fa fa-trash', title: 'Delete Invoice', rightName: 'Deleting Tenant Invoice'},
+            {name: 'print', icon: 'fa fa-print', title: 'Print Payroll', rightName: 'Print Payroll'},
+            {name: 'download', icon: 'fa fa-download', title: 'Download Payroll', rightName: 'Print Payroll'},
+            {name: 'delete', icon: 'fa fa-trash', title: 'Delete Payroll', rightName: 'Deleting Payroll'},
         ])
         const companyID = computed(()=> store.state.userData.company_id);
-        const fetchProperties = async() =>{
-            await store.dispatch('Properties_List/fetchProperties', {company:companyID.value})
+        const fetchPayGroups = async() =>{
+            await store.dispatch('Pay_Groups/fetchPayGroups', {company:companyID.value})
         };
-        const handleSearchProperty = async(option) =>{
-            await store.dispatch('Properties_List/handleSelectedProperty', option)
-            propertySearchID.value = store.state.Properties_List.propertyID;
+        const handleSearchPayGroup = async(option) =>{
+            await store.dispatch('Pay_Groups/handleSelectedPayGroup', option)
+            groupSearchID.value = store.state.Pay_Groups.groupID;
         };
-        const clearSearchProperty = async() =>{
-            await store.dispatch('Properties_List/updateState', {propertyID: ''});
-            propertySearchID.value = ""
+        const clearSearchPayGroup = async() =>{
+            await store.dispatch('Pay_Groups/updateState', {groupID: ''});
+            groupSearchID.value = ""
         };
-        const journal_no_search = ref("");
-        const tenant_name_search = ref("");
-        const tenant_code_search = ref("");
+        const month_search = ref("");
+        const year_search = ref("");
+        const status_search = ref("");
         const from_date_search = ref("");
         const to_date_search = ref("");
-        const status_search = ref("");
         const searchFilters = ref([
-            {type:'text', placeholder:"Invoice#...", value: journal_no_search, width:36},
-            {type:'text', placeholder:"Tenant Code...", value: tenant_code_search, width:36},
-            {type:'text', placeholder:"Tenant Name...", value: tenant_name_search, width:64},
             {
-                type:'dropdown', placeholder:"Status..", value: status_search, width:32,
-                options: [{text:'Open',value:'Open'},{text:'Closed',value:'Closed'}]
+                type:'dropdown', placeholder:"Month..", value: month_search, width:32,
+                options: [{text:'January',value:'January'},{text:'February',value:'February'},{text:'March',value:'March'},{text:'April',value:'April'},{text:'May',value:'May'},{text:'June',value:'June'},
+                        {text:'July',value:'July'},{text:'August',value:'August'},{text:'September',value:'September'},{text:'October',value:'October'},{text:'November',value:'November'},{text:'December',value:'December'}]
             },
+            {type:'text', placeholder:"Year...", value: year_search, width:36},
             {type:'date', placeholder:"From Date...", value: from_date_search, width:36, title: "Date From Search"},
             {type:'date', placeholder:"To Date...", value: to_date_search, width:36, title: "Date To Search"},
             {
-                type:'search-dropdown', value: propertySearchID.value, width:64, componentKey: propComponentKey,
-                selectOptions: propertyArray, optionSelected: handleSearchProperty,
-                searchPlaceholder: 'Property Search...', dropdownWidth: '300px',
-                fetchData: fetchProperties(), clearSearch: clearSearchProperty           
+                type:'dropdown', placeholder:"Status..", value: status_search, width:32,
+                options: [{text:'Pending',value:'Pending'},{text:'Processed',value:'Processed'},{text:'Approved',value:'Approved'}]
             },
+            {
+                type:'search-dropdown', value: payGroupArray, width:48,
+                selectOptions: payGroupArray, optionSelected: handleSearchPayGroup,
+                searchPlaceholder: 'Pay Group...', dropdownWidth: '300px',
+                fetchData: store.dispatch('Pay_Groups/fetchPayGroups', {company:companyID.value}),
+                clearSearch: clearSearchPayGroup, componentKey: paySearchComponentKey
+            },
+            
         ]);
         const handleSelectionChange = (ids) => {
             selectedIds.value = ids;
         };
         
-        const handleSelectedProperty = async(option) =>{
-            await store.dispatch('Properties_List/handleSelectedProperty', option)
-            propertyID.value = store.state.Properties_List.propertyID;
+        const handleSelectedPayGroup = async(option) =>{
+            await store.dispatch('Pay_Groups/handleSelectedPayGroup', option)
+            payGroupID.value = store.state.Pay_Groups.groupID;
         };
-        const clearSelectedProperty = async() =>{
-            await store.dispatch('Properties_List/updateState', {propertyID: ''});
-            propertyID.value = ""
-        }
-        const fetchTenants = async() =>{
-            if(propertyID.value){
-                await store.dispatch('Active_Tenants/fetchTenantUnits', {company:companyID.value, property: propertyID.value})
-            }       
-        };
-        const handleSelectedTenant = async(option) =>{
-            await store.dispatch('Active_Tenants/handleSelectedTenantUnit', option)
-            tenantID.value = store.state.Active_Tenants.tenantUnitID;
-        };
-        const clearSelectedTenant = async() =>{
-            await store.dispatch('Active_Tenants/updateState', {tenantUnitID: ''});
-            tenantID.value = ""
+        const clearSelectedPayGroup = async() =>{
+            await store.dispatch('Pay_Groups/updateState', {groupID: ''});
+            payGroupID.value = ""
         }
         const formFields = ref([]);
         const updateFormFields = () =>{
             formFields.value = [
                 {
-                    type:'search-dropdown', label:"Property", value: propertyID.value, componentKey: propComponentKey,
-                    selectOptions: propertyArray, optionSelected: handleSelectedProperty, required: false,
-                    searchPlaceholder: 'Select Property...', dropdownWidth: '500px', updateValue: "",
-                    fetchData: fetchProperties(), clearSearch: clearSelectedProperty            
+                    type:'search-dropdown', label:"Pay Group", value: payGroupID.value, componentKey: propComponentKey,
+                    selectOptions: payGroupArray, optionSelected: handleSelectedPayGroup, required: true,
+                    searchPlaceholder: 'Select Pay Group...', dropdownWidth: '500px', updateValue: "",
+                    fetchData: fetchPayGroups(), clearSearch: clearSelectedPayGroup            
                 },
-                {
-                    type:'search-dropdown', label:"Tenant", value: tenantID.value, componentKey: tntComponentKey,
-                    selectOptions: tenantArray, optionSelected: handleSelectedTenant, required: false,
-                    searchPlaceholder: 'Select Tenant...', dropdownWidth: '500px', updateValue: "",
-                    fetchData: fetchTenants(), clearSearch: clearSelectedTenant         
-                },
-                { type: 'dropdown', name: 'period_month',label: "Month", value: '', placeholder: "", required: true, options: [{ text: 'January', value: 'January' }, { text: 'February', value: 'February' },{ text: 'March', value: 'March' }, { text: 'April', value: 'April' },{ text: 'May', value: 'May' }, { text: 'June', value: 'June' },{ text: 'July', value: 'July' }, { text: 'August', value: 'August' },{ text: 'September', value: 'September' }, { text: 'October', value: 'October' },{ text: 'November', value: 'November' }, { text: 'December', value: 'December' }] },
+                { type: 'dropdown', name: 'month',label: "Month", value: '', placeholder: "", required: true, options: [{ text: 'January', value: 'January' }, { text: 'February', value: 'February' },{ text: 'March', value: 'March' }, { text: 'April', value: 'April' },{ text: 'May', value: 'May' }, { text: 'June', value: 'June' },{ text: 'July', value: 'July' }, { text: 'August', value: 'August' },{ text: 'September', value: 'September' }, { text: 'October', value: 'October' },{ text: 'November', value: 'November' }, { text: 'December', value: 'December' }] },
                 { type: 'text', name: 'period_year',label: "Year", value: "", required: true },
-                
+                { type: 'date', name: 'date',label: "Running Date", value: "", required: true },
             ]
         };
-
-        watch([propertyID], () => {
-            if (propertyID.value) {
-                tntComponentKey.value += 1;
-                fetchTenants();
-            }      
-        }, { immediate: true });
 
         const handleReset = async() =>{
             for(let i=0; i < formFields.value.length; i++){
                 formFields.value[i].value = '';
             }
             propComponentKey.value += 1;
-            propertyID.value = '';
-            tntComponentKey.value += 1;
-            tenantID.value = '';
+            payGroupID.value = '';
         }
         
         const showModalLoader = () =>{
@@ -266,13 +238,13 @@ export default{
         const hideModalLoader = () =>{
             modal_loader.value = "none";
         }
-        const bookRentalInvoice = async() =>{
+        const payrollProcessing = async() =>{
             showModalLoader();
             let formData = {
-                property: propertyID.value,
-                tenant: tenantID.value,
-                period_month: formFields.value[2].value,
-                period_year: formFields.value[3].value,
+                pay_group: payGroupID.value,
+                date: formFields.value[3].value,
+                period_month: formFields.value[1].value,
+                period_year: formFields.value[2].value,
                 company: companyID.value
             }
 
@@ -288,78 +260,76 @@ export default{
                 hideModalLoader();
             }else{
                 try {
-                    const response = await store.dispatch('Journals/bookTenantInvoices', formData);
+                    const response = await store.dispatch('Payrolls/createPayroll', formData);
                     if (response && response.status === 200) {
                         hideModalLoader();
-                        toast.success('Invoice(s) Booked Successfully!');
+                        toast.success('Payroll Run Successfully!');
                         handleReset();
                         propComponentKey.value += 1;
                     } else {
-                        toast.error('An error occurred while booking the invoice(s).');
+                        toast.error('An error occurred while Running the Payroll.');
                     }
                 } catch (error) {
                     console.error(error.message);
-                    toast.error('Failed to book invoice(s): ' + error.message);
+                    toast.error('Failed to Run Payroll: ' + error.message);
                 } finally {
                     hideModalLoader();
-                    searchInvoices();
+                    searchPayrolls();
                 }
             }
         }
 
-        const removeInvoice = async() =>{
+        const removePayroll = async() =>{
             if(selectedIds.value.length == 1){
                 let formData = {
                     company: companyID.value,
-                    journal: selectedIds.value,
-                    txn_type: "INV"
+                    payroll: selectedIds.value,
                 }
                 try{
-                    const response = await store.dispatch('Journals/deleteInvoice',formData)
+                    const response = await store.dispatch('Payrolls/deletePayroll',formData)
                     if(response && response.status == 200){
-                        toast.success("Invoice Removed Succesfully");
-                        searchInvoices();
+                        toast.success("Payroll Removed Succesfully");
+                        searchPayrolls();
                     }
                 }
                 catch(error){
                     console.error(error.message);
-                    toast.error('Failed to remove invoice: ' + error.message);
+                    toast.error('Failed to remove Payroll: ' + error.message);
                 }
                 finally{
                     selectedIds.value = [];
-                    searchInvoices();
+                    searchPayrolls();
                 }
             }else if(selectedIds.value.length > 1){
-                toast.error("You have selected more than 1 Invoice") 
+                toast.error("You have selected more than 1 Payroll") 
             }else{
-                toast.error("Please Select An Invoice To Remove")
+                toast.error("Please Select A Payroll To Remove")
             }
         }
-        const removeInvoices = async() =>{
+        const removePayrolls = async() =>{
             if(selectedIds.value.length){
                 let formData = {
                     company: companyID.value,
-                    journal: selectedIds.value,
-                    txn_type: "INV"
+                    payroll: selectedIds.value,
                 }
 
                 try{
-                    const response = await store.dispatch('Journals/deleteInvoice',formData)
+                    const response = await store.dispatch('Payrolls/deletePayroll',formData)
                     if(response && response.msg == "Success"){
-                        toast.success("Invoice(s) Removed Succesfully");
-                        searchInvoices();
+                        toast.success("Payroll(s) Removed Succesfully");
+                        searchPayrolls();
                     }
                 }
                 catch(error){
                     console.error(error.message);
-                    toast.error('Failed to remove invoices: ' + error.message);
+                    toast.error('Failed to remove Payrolls: ' + error.message);
                 }
                 finally{
                     selectedIds.value = [];
-                    searchInvoices();
+                    searchPayrolls();
                 }
             }else{
-                toast.error("Please Select An Invoice To Remove")
+                toast.error("Please Select A Payroll To Remove")
             }
         }
         const showLoader = () =>{
@@ -368,32 +338,28 @@ export default{
         const hideLoader = () =>{
             loader.value = "none";
         }
-        const searchInvoices = () =>{
+        const searchPayrolls = () =>{
             showLoader();
             showNextBtn.value = false;
             showPreviousBtn.value = false;
             let formData = {
-                client_category: "Tenants",
-                txn_type: "INV",
-                client_name: tenant_name_search.value,
-                client_code: tenant_code_search.value,
                 from_date: from_date_search.value,
                 to_date: to_date_search.value,
-                journal_no: journal_no_search.value,
+                month: month_search.value,
+                year: year_search.value,
                 status: status_search.value,
-                reversed: "No",
-                property: propertySearchID.value,
+                pay_group: groupSearchID.value,
                 company: companyID.value,
                 page_size: selectedValue.value
             } 
    
             axios
-            .post(`api/v1/clients-journals-search/?page=${currentPage.value}`,formData)
+            .post(`api/v1/payrolls-search/?page=${currentPage.value}`,formData)
             .then((response)=>{
-                invoicesList.value = response.data.results;
-                store.commit('Journals/LIST_TENANTS_INVOICES', invoicesList.value)
+                payrollList.value = response.data.results;
+                store.commit('Payrolls/LIST_PAYROLLS', payrollList.value)
                 propResults.value = response.data;
-                propArrLen.value = invoicesList.value.length;
+                propArrLen.value = payrollList.value.length;
                 propCount.value = propResults.value.count;
                 pageCount.value = Math.ceil(propCount.value / selectedValue.value);
                 if(response.data.next){
@@ -412,19 +378,18 @@ export default{
         };
         const selectSearchQuantity = (newValue) =>{
             selectedValue.value = newValue;
-            searchInvoices(selectedValue.value);
+            searchPayrolls(selectedValue.value);
         };
         const resetFilters = () =>{
             selectedValue.value = 50;
-            tenant_name_search.value = "";
-            tenant_code_search.value = "";
+            month_search.value = "";
+            year_search.value = "";
             from_date_search.value= "";
             to_date_search.value = "";
-            journal_no_search.value= "";
             status_search.value = "";
-            propComponentKey.value += 1;
-            propertySearchID.value = "";
-            searchInvoices();
+            paySearchComponentKey.value += 1;
+            groupSearchID.value = "";
+            searchPayrolls();
         }
         const loadPrev = () =>{
             if (currentPage.value <= 1){
@@ -433,7 +398,7 @@ export default{
                 currentPage.value -= 1;
             }
             
-            searchInvoices();
+            searchPayrolls();
             // scrollToTop();
         }
         const loadNext = () =>{
@@ -443,63 +408,60 @@ export default{
                 currentPage.value += 1;
             }
             
-            searchInvoices();
+            searchPayrolls();
             // scrollToTop(); 
         }
         const firstPage = ()=>{
             currentPage.value = 1;
-            searchInvoices();
+            searchPayrolls();
             // scrollToTop();
         }
         const lastPage = () =>{
             currentPage.value = pageCount.value;
-            searchInvoices();
+            searchPayrolls();
             // scrollToTop();
         }
-        const bookInvoice = () =>{
+        const runPayroll = () =>{
             invModalVisible.value = true;
             updateFormFields();
-            formFields.value[2].value = getMonth(current_date);
-            formFields.value[3].value = getYear(current_date);
-            propertyID.value = "";
-            tenantID.value = "";
+            formFields.value[1].value = getMonth(current_date);
+            formFields.value[2].value = getYear(current_date);
+            payGroupID.value = "";
             propComponentKey.value += 1;
-            tntComponentKey.value += 1;
             propModalVisible.value = true;
-            flex_basis.value = '1/4';
-            flex_basis_percentage.value = '25';
+            flex_basis.value = '1/2';
+            flex_basis_percentage.value = '50';
         }
         const handleActionClick = async(rowIndex, action, row) =>{
             if(action == 'delete'){
-                const journalID = [row['journal_id']];
+                const payrollID = [row['payroll_id']];
                 let formData = {
                     company: companyID.value,
-                    journal: journalID,
-                    txn_type: "INV"
+                    payroll: payrollID,
                 }
-                await store.dispatch('Journals/deleteInvoice',formData).
+                await store.dispatch('Payrolls/deletePayroll',formData).
                 then(()=>{
-                    searchInvoices();
+                    searchPayrolls();
                 })
             }else if(action == 'print'){
                 showLoader();
-                const journalID = row['journal_id'];
+                const payrollID = row['payroll_id'];
                 let formData = {
-                    invoice: journalID,
+                    payroll: payrollID,
                     company: companyID.value
                 }
-                await store.dispatch('Journals/previewTenantInvoice',formData).
+                await store.dispatch('Payrolls/previewPayroll',formData).
                 then(()=>{
                     hideLoader();
                 })
             }else if(action == 'download'){
                 showLoader();
-                const journalID = row['journal_id'];
+                const payrollID = row['payroll_id'];
                 let formData = {
-                    invoice: journalID,
+                    payroll: payrollID,
                     company: companyID.value
                 }
-                await store.dispatch('Journals/downloadTenantInvoice',formData).
+                await store.dispatch('Payrolls/downloadPayroll',formData).
                 then(()=>{
                     hideLoader();
                 })
@@ -511,7 +473,7 @@ export default{
             detailsTitle.value = row['journal_no'] + ' Details';
             showDetails.value = true;
             let formData = {
-                journal: row['journal_id'],
+                journal: row['payroll_id'],
                 company: companyID.value
             }
             axios.post('api/v1/journal-entries-search/',formData)
@@ -523,33 +485,8 @@ export default{
             })
         };
         const selectTab = async(index) => {
-            let formData = {
-                company: companyID.value,
-                journal: invoiceID.value,
-            }
-            if(index == 1){
-                activeTab.value = index;
-                await axios.post('api/v1/invoice-lines-search/',formData)
-                .then((response)=>{
-                    invoiceLines.value = response.data.invoice_lines;
-                })
-                .catch((error)=>{
-                    console.log(error.message)
-                })
-            }else if( index == 2){
-                activeTab.value = index;
-                await axios.post('api/v1/invoice-payments-search/',formData)
-                .then((response)=>{
-                    invoicePayments.value = response.data.invoice_payments;
-                })
-                .catch((error)=>{
-                    console.log(error.message)
-                })
-                
-            }else{
-                activeTab.value = index;
-                hideLoader();
-            }
+            activeTab.value = index;
+            hideLoader();
 
         };
         const hideDetails = async() =>{
@@ -558,9 +495,7 @@ export default{
         const closeModal = async() =>{
             invModalVisible.value = false;
             propComponentKey.value += 1;
-            propertyID.value = "";
-            tntComponentKey.value += 1;
-            tenantID.value = "";
+            payGroupID.value = "";
             handleReset();
         }
 
@@ -568,27 +503,23 @@ export default{
             {label: 'Withholding Tax', action: 'withholding-tax'},
         ]);
         const handleDynamicOption = (option) =>{
-            if(option == 'batch-meter-reading'){
-                store.commit('pageTab/ADD_PAGE', {'PMS':'Batch_Readings'})
-                store.state.pageTab.pmsActiveTab = 'Batch_Readings';
-            }
+
         };
-        const printInvoiceList = () =>{
+        const printPayrollList = () =>{
             showLoader();
 
             let formData = {
-                journal_no: "",
-                client_category: "Tenants",
-                txn_type: "INV",
-                client: tenant_name_search.value,
-                date_from: from_date_search.value,
-                date_to: to_date_search.value,
-                status: "",
-                company_id: companyID.value
+                from_date: from_date_search.value,
+                to_date: to_date_search.value,
+                month: month_search.value,
+                year: year_search.value,
+                status: status_search.value,
+                pay_group: groupSearchID.value,
+                company: companyID.value,
             } 
    
             axios
-            .post("api/v1/export-rental-invoices-pdf/", formData, { responseType: 'blob' })
+            .post("api/v1/export-payrolls-pdf/", formData, { responseType: 'blob' })
                 .then((response)=>{
                     if(response.status == 200){
                         const blob1 = new Blob([response.data]);
@@ -605,16 +536,16 @@ export default{
             })
         }
         onBeforeMount(()=>{
-            searchInvoices();
+            searchPayrolls();
             
         })
         return{
-            showTotals,title, searchInvoices,resetFilters, addButtonLabel, searchFilters, tableColumns, invoicesList,
+            showTotals,title, searchPayrolls,resetFilters, addButtonLabel, searchFilters, tableColumns, payrollList,
             propResults, propArrLen, propCount, pageCount, showNextBtn, showPreviousBtn,invModalVisible,
             loadPrev, loadNext, firstPage, lastPage, idField, actions, handleActionClick, propModalVisible, closeModal,
-            submitButtonLabel, showModal, bookInvoice, showLoader, loader, hideLoader, modal_loader, modal_top, modal_left, modal_width,displayButtons,
+            submitButtonLabel, showModal, runPayroll, showLoader, loader, hideLoader, modal_loader, modal_top, modal_left, modal_width,displayButtons,
             showModalLoader, hideModalLoader, formFields, handleSelectionChange, flex_basis,flex_basis_percentage,
-            removeInvoice, removeInvoices, dropdownOptions, handleDynamicOption, bookRentalInvoice,addingRight,rightsModule,printInvoiceList,
+            removePayroll, removePayrolls, dropdownOptions, handleDynamicOption, payrollProcessing,addingRight,rightsModule,printPayrollList,
             selectSearchQuantity,selectedValue,showDetails,detailsTitle,hideDetails,handleShowDetails,journalEntries,
             invoiceLines,invoicePayments,tabs,selectTab,activeTab
         }

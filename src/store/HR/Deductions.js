@@ -110,6 +110,7 @@ const actions = {
     if (selectedDeduction) {
         state.deductionID = selectedDeduction.deduction_id;
         state.deductionName = selectedDeduction.deduction_name;
+        selectedDeduction.employee_deduction_id = null;
         state.deductionArray = [...state.deductionArray, selectedDeduction];
     }
     commit('DEDUCTIONS_ARRAY', state.deductionArray);

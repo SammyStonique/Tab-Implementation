@@ -25,23 +25,26 @@
 <script>
 import { useStore } from 'vuex';
 import { ref, computed, watch } from 'vue';
-import NavBar from '@/components/NavBar.vue'
-import NavBarHR from '@/components/HR/NavBarHR.vue'
-import PagesTab from '@/components/HR/PagesTab.vue'
-import Dashboard from '@/components/HR/Dashboard.vue'
-import Pay_Cycles from '@/components/HR/Pay_Cycles.vue'
-import Pay_Groups from '@/components/HR/Pay_Groups.vue'
-import Deductions from '@/components/HR/Deductions.vue'
-import Leave_Types from '@/components/HR/Leave_Types.vue'
-import Holidays from '@/components/HR/Holidays.vue'
-import Paye from '@/components/HR/Paye.vue'
-import Nssf from '@/components/HR/Nssf.vue'
-import Shif from '@/components/HR/Shif.vue'
-import Housing_Levy from '@/components/HR/Housing_Levy.vue'
-import Employees from '@/components/HR/Employees.vue'
-import Employee_Biodata from '@/components/HR/Employee_Biodata.vue'
-import Deduction_Details from '@/components/HR/Deduction_Details.vue'
-import Employee_Details from '@/components/HR/Employee_Details.vue'
+import NavBar from '@/components/NavBar.vue';
+import NavBarHR from '@/components/HR/NavBarHR.vue';
+import PagesTab from '@/components/HR/PagesTab.vue';
+import Dashboard from '@/components/HR/Dashboard.vue';
+import Pay_Cycles from '@/components/HR/Pay_Cycles.vue';
+import Pay_Groups from '@/components/HR/Pay_Groups.vue';
+import Deductions from '@/components/HR/Deductions.vue';
+import Leave_Types from '@/components/HR/Leave_Types.vue';
+import Holidays from '@/components/HR/Holidays.vue';
+import Paye from '@/components/HR/Paye.vue';
+import Nssf from '@/components/HR/Nssf.vue';
+import Shif from '@/components/HR/Shif.vue';
+import Housing_Levy from '@/components/HR/Housing_Levy.vue';
+import Employees from '@/components/HR/Employees.vue';
+import Employee_Biodata from '@/components/HR/Employee_Biodata.vue';
+import Deduction_Details from '@/components/HR/Deduction_Details.vue';
+import Employee_Details from '@/components/HR/Employee_Details.vue';
+import Import_Employees from '@/components/HR/Import_Employees.vue';
+import Payrolls from '@/components/HR/Payrolls.vue';
+
 
 import Default_Settings from '@/components/SET/Default_Settings.vue';
 
@@ -52,7 +55,7 @@ export default{
         PagesTab,
         Dashboard,
         Pay_Cycles,Pay_Groups,Deductions,Leave_Types,Holidays,Paye,Nssf,Shif,Housing_Levy,
-        Employees,Employee_Biodata,Deduction_Details,Employee_Details,
+        Employees,Employee_Biodata,Deduction_Details,Employee_Details,Import_Employees,Payrolls,
 
         Default_Settings
     },
