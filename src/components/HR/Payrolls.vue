@@ -154,8 +154,7 @@ export default{
         ])
         const showTotals = ref(true);
         const actions = ref([
-            {name: 'print', icon: 'fa fa-print', title: 'Print Payroll', rightName: 'Print Payroll'},
-            {name: 'download', icon: 'fa fa-download', title: 'Download Payroll', rightName: 'Print Payroll'},
+            {name: 'view', icon: 'fa fa-file-pdf-o', title: 'View Payroll', rightName: 'View Payroll Details'},
             {name: 'delete', icon: 'fa fa-trash', title: 'Delete Payroll', rightName: 'Deleting Payroll'},
         ])
         const companyID = computed(()=> store.state.userData.company_id);
@@ -443,28 +442,12 @@ export default{
                 then(()=>{
                     searchPayrolls();
                 })
-            }else if(action == 'print'){
+            }else if(action == 'view'){
                 showLoader();
                 const payrollID = row['payroll_id'];
-                let formData = {
-                    payroll: payrollID,
-                    company: companyID.value
-                }
-                await store.dispatch('Payrolls/previewPayroll',formData).
-                then(()=>{
-                    hideLoader();
-                })
-            }else if(action == 'download'){
-                showLoader();
-                const payrollID = row['payroll_id'];
-                let formData = {
-                    payroll: payrollID,
-                    company: companyID.value
-                }
-                await store.dispatch('Payrolls/downloadPayroll',formData).
-                then(()=>{
-                    hideLoader();
-                })
+                await store.dispatch('Payrolls/updateState',{payrollID: payrollID})
+                store.commit('pageTab/ADD_PAGE', {'HR':'Payroll_Employees'})
+                store.state.pageTab.hrActiveTab = 'Payroll_Employees';
             }
         }
         const handleShowDetails = async(row) =>{

@@ -44,7 +44,7 @@ import Deduction_Details from '@/components/HR/Deduction_Details.vue';
 import Employee_Details from '@/components/HR/Employee_Details.vue';
 import Import_Employees from '@/components/HR/Import_Employees.vue';
 import Payrolls from '@/components/HR/Payrolls.vue';
-
+import Payroll_Employees from '@/components/HR/Payroll_Employees.vue';
 
 import Default_Settings from '@/components/SET/Default_Settings.vue';
 
@@ -55,7 +55,7 @@ export default{
         PagesTab,
         Dashboard,
         Pay_Cycles,Pay_Groups,Deductions,Leave_Types,Holidays,Paye,Nssf,Shif,Housing_Levy,
-        Employees,Employee_Biodata,Deduction_Details,Employee_Details,Import_Employees,Payrolls,
+        Employees,Employee_Biodata,Deduction_Details,Employee_Details,Import_Employees,Payrolls,Payroll_Employees,
 
         Default_Settings
     },
