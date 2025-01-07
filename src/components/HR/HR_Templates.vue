@@ -41,7 +41,7 @@ import { useStore } from "vuex";
 import { useToast } from "vue-toastification";
 
 export default{
-    name: 'Templates',
+    name: 'HR_Templates',
     components:{
         PageComponent,
     },
@@ -52,8 +52,8 @@ export default{
         const modal_loader = ref('none');
         const idField = 'property_template_id';
         const addButtonLabel = ref('New Template');
-        const addingRight = ref('Creating Template');
-        const rightsModule = ref('PMS');
+        const addingRight = ref('Creating HR Template');
+        const rightsModule = ref('HR');
         const submitButtonLabel = ref('Add');
         const editorComponentKey = ref(0);
         const selectedIds = ref([]);
@@ -76,8 +76,8 @@ export default{
             {label: "Type", key:"template_type"},
         ])
         const actions = ref([
-            {name: 'edit', icon: 'fa fa-edit', title: 'Edit Template', rightName: 'Editing Template'},
-            {name: 'delete', icon: 'fa fa-trash', title: 'Delete Template', rightName: 'Deleting Template'},
+            {name: 'edit', icon: 'fa fa-edit', title: 'Edit Template', rightName: 'Editing HR Template'},
+            {name: 'delete', icon: 'fa fa-trash', title: 'Delete Template', rightName: 'Deleting HR Template'},
         ])
         const companyID = computed(()=> store.state.userData.company_id);
         const name_search = computed({
@@ -239,8 +239,8 @@ export default{
         }
         const addNewTemplate = async() =>{
             await store.dispatch("Templates/updateState",{selectedTemplate:null, isEditing:false})
-            store.commit('pageTab/ADD_PAGE', {'PMS':'Design_Template'});
-            store.state.pageTab.pmsActiveTab = 'Design_Template';    
+            store.commit('pageTab/ADD_PAGE', {'HR':'Design_HR_Template'});
+            store.state.pageTab.hrActiveTab = 'Design_HR_Template';    
             
         }
         const handleActionClick = async(rowIndex, action, row) =>{
@@ -253,8 +253,8 @@ export default{
 
                 await store.dispatch('Templates/fetchTemplate',formData)
                 .then(()=>{
-                    store.commit('pageTab/ADD_PAGE', {'PMS':'Design_Template'});
-                    store.state.pageTab.pmsActiveTab = 'Design_Template'; 
+                    store.commit('pageTab/ADD_PAGE', {'HR':'Design_HR_Template'});
+                    store.state.pageTab.hrActiveTab = 'Design_HR_Template'; 
                 })
 
             }else if(action == 'delete'){

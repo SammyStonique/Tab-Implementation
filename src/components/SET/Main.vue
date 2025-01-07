@@ -47,6 +47,7 @@ import Mpesa_Authentication from '@/components/SET/Mpesa_Authentication.vue';
 import Mpesa_Endpoints from '@/components/SET/Mpesa_Endpoints.vue';
 import Mpesa_Setup_Details from '@/components/SET/Mpesa_Setup_Details.vue';
 import Mpesa_Transactions from '@/components/SET/Mpesa_Transactions.vue';
+import Banks from '@/components/SET/Banks.vue';
 
 export default{
     components:{
@@ -55,7 +56,7 @@ export default{
         PagesTab,
         Dashboard,Companies,Company_Details,Default_Settings,Company_Info,Departments,Branches,Users,System_Users,
         User_Details,User_Rights,SMS_Integrations,Email_Integrations,Mpesa_Authentication,Mpesa_Endpoints,Mpesa_Setup_Details,Mpesa_Transactions,
-        Import_Departments
+        Import_Departments,Banks
     },
     props: {
         title: {

@@ -45,6 +45,8 @@ import Employee_Details from '@/components/HR/Employee_Details.vue';
 import Import_Employees from '@/components/HR/Import_Employees.vue';
 import Payrolls from '@/components/HR/Payrolls.vue';
 import Payroll_Employees from '@/components/HR/Payroll_Employees.vue';
+import HR_Templates from '@/components/HR/HR_Templates.vue';
+import Design_HR_Template from '@/components/HR/Design_HR_Template.vue';
 
 import Default_Settings from '@/components/SET/Default_Settings.vue';
 
@@ -56,6 +58,7 @@ export default{
         Dashboard,
         Pay_Cycles,Pay_Groups,Deductions,Leave_Types,Holidays,Paye,Nssf,Shif,Housing_Levy,
         Employees,Employee_Biodata,Deduction_Details,Employee_Details,Import_Employees,Payrolls,Payroll_Employees,
+        HR_Templates,Design_HR_Template,
 
         Default_Settings
     },

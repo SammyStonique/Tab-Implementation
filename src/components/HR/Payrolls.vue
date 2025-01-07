@@ -71,6 +71,14 @@
                 :displayButtons="displayButtons" @handleSubmit="payrollProcessing" @handleReset="handleReset"
             />
         </MovableModal>
+        <MovableModal v-model:visible="appModalVisible" :title="appTitle" :modal_top="modal_top" :modal_left="modal_left" :modal_width="modal_width"
+            :loader="app_modal_loader" @showLoader="showAppModalLoader" @hideLoader="hideAppModalLoader" @closeModal="closeAppModal"
+        >
+            <DynamicForm 
+                :fields="formFields1" :flex_basis="flex_basis" :flex_basis_percentage="flex_basis_percentage" 
+                :displayButtons="displayButtons" @handleSubmit="approvePayroll" @handleReset="handleAppReset"
+            />
+        </MovableModal>
     </div>
 </template>
 
@@ -101,6 +109,7 @@ export default{
         const current_date = new Date();
         const loader = ref('none');
         const modal_loader = ref('none');
+        const app_modal_loader = ref('none');
         const idField = 'payroll_id';
         const addButtonLabel = ref('Run Payroll');
         const addingRight = ref('Running Payroll');
@@ -108,12 +117,14 @@ export default{
         const submitButtonLabel = ref('Add');
         const title = ref('Run Payroll');
         const detailsTitle = ref('Payroll Details');
+        const appTitle = ref('Approve Payroll');
         const tabs = ref(['Journal Entries','Invoice Lines','Invoice Payments']);
         const activeTab = ref(0);
         const invoiceID = ref(null);
         const propComponentKey = ref(0);
         const paySearchComponentKey = ref(0);
         const invModalVisible = ref(false);
+        const appModalVisible = ref(false);
         const modal_top = ref('200px');
         const modal_left = ref('500px');
         const modal_width = ref('30vw');
@@ -137,6 +148,7 @@ export default{
         const displayButtons = ref(true);
         const errors = ref([]);
         const payGroupID = ref(null);
+        const payrollID = ref(null);
         const groupSearchID = ref('');
         const payGroupArray = computed(() => store.state.Pay_Groups.groupArr);
         const showModal = ref(false);
@@ -151,10 +163,12 @@ export default{
             {label: "Paye", key:"tax", type: "number"},
             {label: "Net Pay", key:"net_pay", type: "number"},
             {label: "Status", key:"status"},
+            {label: "Appr. Date", key:"processed_at"},
         ])
         const showTotals = ref(true);
         const actions = ref([
             {name: 'view', icon: 'fa fa-file-pdf-o', title: 'View Payroll', rightName: 'View Payroll Details'},
+            {name: 'approve', icon: 'fa fa-check-circle', title: 'Approve Payroll', rightName: 'Approve Payroll'},
             {name: 'delete', icon: 'fa fa-trash', title: 'Delete Payroll', rightName: 'Deleting Payroll'},
         ])
         const companyID = computed(()=> store.state.userData.company_id);
@@ -276,6 +290,67 @@ export default{
                     searchPayrolls();
                 }
             }
+        }
+
+        const formFields1 = ref([]);
+        const updateFormFields1 = () =>{
+            formFields1.value = [
+                { type: 'date', name: 'date',label: "Approval Date", value: "", required: true },
+            ]
+        };
+
+        const handleAppReset = async() =>{
+            for(let i=0; i < formFields1.value.length; i++){
+                formFields1.value[i].value = '';
+            }
+        }
+        
+        const showAppModalLoader = () =>{
+            app_modal_loader.value = "block";
+        }
+        const hideAppModalLoader = () =>{
+            app_modal_loader.value = "none";
+        }
+        const approvePayroll = async() =>{
+            showAppModalLoader();
+            let formData = {
+                payroll: payrollID.value,
+                date: formFields1.value[0].value,
+                company: companyID.value
+            }
+
+            errors.value = [];
+            for(let i=0; i < (formFields1.value.length); i++){
+                if(formFields1.value[i].value =='' && formFields1.value[i].required == true){
+                    errors.value.push(formFields1.value[i].label);
+                }
+            }
+
+            if(errors.value.length){
+                toast.error('Fill In Required Fields');
+                hideAppModalLoader();
+            }else{
+                try {
+                    const response = await store.dispatch('Payrolls/approvePayroll', formData);
+                    if (response && response.status === 200) {
+                        hideAppModalLoader();
+                        toast.success('Payroll Approved Successfully!');
+                        handleAppReset();
+                    } else {
+                        toast.error('An error occurred while Approving the Payroll.');
+                    }
+                } catch (error) {
+                    console.error(error.message);
+                    toast.error('Failed to Approve Payroll: ' + error.message);
+                } finally {
+                    hideAppModalLoader();
+                    searchPayrolls();
+                }
+            }
+        };
+        const closeAppModal = async() =>{
+            appModalVisible.value = false;
+            handleAppReset();
         }
 
         const removePayroll = async() =>{
@@ -443,11 +518,20 @@ export default{
                     searchPayrolls();
                 })
             }else if(action == 'view'){
-                showLoader();
                 const payrollID = row['payroll_id'];
                 await store.dispatch('Payrolls/updateState',{payrollID: payrollID})
                 store.commit('pageTab/ADD_PAGE', {'HR':'Payroll_Employees'})
                 store.state.pageTab.hrActiveTab = 'Payroll_Employees';
+            }else if(action == 'approve'){
+                const approvalStatus = row['status'];
+                if (approvalStatus == "Approved"){
+                    toast.error("Payroll Already Approved!")
+                }else{
+                    payrollID.value = row['payroll_id'];
+                    appModalVisible.value = true;
+                    updateFormFields1();
+                }
+                
             }
         }
         const handleShowDetails = async(row) =>{
@@ -530,7 +614,8 @@ export default{
             showModalLoader, hideModalLoader, formFields, handleSelectionChange, flex_basis,flex_basis_percentage,
             removePayroll, removePayrolls, dropdownOptions, handleDynamicOption, payrollProcessing,addingRight,rightsModule,printPayrollList,
             selectSearchQuantity,selectedValue,showDetails,detailsTitle,hideDetails,handleShowDetails,journalEntries,
-            invoiceLines,invoicePayments,tabs,selectTab,activeTab
+            invoiceLines,invoicePayments,tabs,selectTab,activeTab,app_modal_loader,appTitle,appModalVisible,approvePayroll,showAppModalLoader,hideAppModalLoader,
+            formFields1,closeAppModal
         }
     }
 };

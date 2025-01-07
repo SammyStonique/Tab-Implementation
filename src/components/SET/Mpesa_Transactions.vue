@@ -48,7 +48,7 @@ import { useToast } from "vue-toastification";
 import PrintJS from 'print-js';
 
 export default{
-    name: 'Sale_Items',
+    name: 'Mpesa_Transactions',
     props: ['scrollToTop','loader','showLoader','hideLoader',],
     components:{
         PageComponent,MovableModal,DynamicForm
@@ -63,7 +63,7 @@ export default{
         const title = ref('Mpesa Transactions');
         const companyID = computed(()=> store.state.userData.company_id);
         const txnID = ref(null);
-        const idField = 'sale_item_id';
+        const idField = 'mpesa_transaction_id';
         const selectedIds = ref([]);
         const appModalVisible = ref(false);
         const txnList = ref([]);

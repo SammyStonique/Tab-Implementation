@@ -104,8 +104,8 @@ const actions = {
       
   },
 
-  async updatePayroll({ commit,state }, formData) {
-    return axios.put(`api/v1/update-payroll/`,formData)
+  async approvePayroll({ commit,state }, formData) {
+    return axios.put(`api/v1/approve-payroll/`,formData)
     .then((response)=>{
       return response;
     })
