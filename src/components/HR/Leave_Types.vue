@@ -109,7 +109,7 @@ export default{
         const dropdownWidth = ref("320px")
         const modal_top = ref('250px');
         const modal_left = ref('500px');
-        const modal_width = ref('30vw');
+        const modal_width = ref('40vw');
         const hol_modal_width = ref('35vw');
         const isEditing = computed(()=> store.state.Leave_Types.isEditing);
         const selectedLeave = computed(()=> store.state.Leave_Types.selectedLeave);
@@ -118,6 +118,7 @@ export default{
             {type: "checkbox"},
             {label: "Name", key:"leave_name"},
             {label: "Paid Leave", key: "paid_leave"},
+            {label: "Max Days", key: "max_days_per_year"},
             {label: "Carry Over", key:"carry_over"},
             {label: "Calculation Mode", key:"calculation_mode"},
             {label: "Max Accrual", key:"max_accrual"},
@@ -267,11 +268,12 @@ export default{
             formFields.value = [
                 { type: 'text', name: 'leave_name',label: "Name", value: selectedLeave.value?.leave_name || '', required: true },
                 { type: 'dropdown', name: 'calculation_mode',label: "Calculation Mode", value: selectedLeave.value?.calculation_mode || 'Provided Days', placeholder: "", required: true, options: [{ text: 'Accrual', value: 'Accrual' }, { text: 'Provided Days', value: 'Provided Days' }] },
+                { type: 'number', name: 'max_days_per_year',label: "Max Days Per Year", value: selectedLeave.value?.max_days_per_year || 0, required: false },
                 { type: 'dropdown', name: 'paid_leave',label: "Paid Leave", value: selectedLeave.value?.paid_leave || 'Yes', placeholder: "", required: true, options: [{ text: 'Yes', value: 'Yes' }, { text: 'No', value: 'No' }] },
                 { type: 'dropdown', name: 'carry_over',label: "Carry Over", value: selectedLeave.value?.carry_over || 'No', placeholder: "", required: true, options: [{ text: 'Yes', value: 'Yes' }, { text: 'No', value: 'No' }] },
                 { type: 'number', name: 'max_accrual',label: "Days Carried Over", value: selectedLeave.value?.max_accrual || 0, required: false },
                 { type: 'dropdown', name: 'print_on_payslip',label: "Display on Pay Slip", value: selectedLeave.value?.print_on_payslip || 'No', placeholder: "", required: true, options: [{ text: 'Yes', value: 'Yes' }, { text: 'No', value: 'No' }] },
-
+                {required: false}
             ];  
         };
         const handleReset = () =>{
@@ -299,11 +301,12 @@ export default{
             showModalLoader();
             let formData = {
                 leave_name: formFields.value[0].value,
-                carry_over: formFields.value[3].value,
-                paid_leave: formFields.value[2].value,
+                carry_over: formFields.value[4].value,
+                paid_leave: formFields.value[3].value,
                 calculation_mode: formFields.value[1].value,
-                print_on_payslip: formFields.value[5].value,
-                max_accrual: formFields.value[4].value || 0,
+                print_on_payslip: formFields.value[6].value,
+                max_days_per_year: formFields.value[2].value || 0,
+                max_accrual: formFields.value[5].value || 0,
                 company: companyID.value
             }
 
@@ -341,11 +344,12 @@ export default{
             let formData = {
                 leave_type: selectedLeave.value.leave_type_id,
                 leave_name: formFields.value[0].value,
-                carry_over: formFields.value[3].value,
-                paid_leave: formFields.value[2].value,
+                carry_over: formFields.value[4].value,
+                paid_leave: formFields.value[3].value,
                 calculation_mode: formFields.value[1].value,
-                print_on_payslip: formFields.value[5].value || 0,
-                max_accrual: formFields.value[4].value,
+                print_on_payslip: formFields.value[6].value,
+                max_days_per_year: formFields.value[2].value || 0,
+                max_accrual: formFields.value[5].value || 0,
                 company: companyID.value
             }
 
@@ -515,8 +519,8 @@ export default{
             store.dispatch("Leave_Types/updateState",{selectedLeave:null,isEditing:false})
             propModalVisible.value = true;
             handleReset();
-            flex_basis.value = '1/2';
-            flex_basis_percentage.value = '50';
+            flex_basis.value = '1/3';
+            flex_basis_percentage.value = '33.333';
         }
         const handleActionClick = async(rowIndex, action, row) =>{
             if( action == 'edit'){
@@ -527,8 +531,8 @@ export default{
                 }
                 await store.dispatch('Leave_Types/fetchLeaveType',formData)
                 propModalVisible.value = true;
-                flex_basis.value = '1/2';
-                flex_basis_percentage.value = '50';
+                flex_basis.value = '1/3';
+                flex_basis_percentage.value = '33.333';
 
             }else if(action == 'delete'){
                 const leaveID = [row[idField]];

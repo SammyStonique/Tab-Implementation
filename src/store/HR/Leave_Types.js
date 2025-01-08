@@ -7,6 +7,7 @@ const state = {
   leaveArray: [],
   leaveID: '',
   leaveName: '',
+  leaveMaxDays: 0,
   name_search: '',
   selectedLeave: null,
   isEditing: false
@@ -19,6 +20,7 @@ const mutations = {
     state.leaveArray = [];
     state.name_search = '';
     state.isEditing = false;
+    state.leaveMaxDays = 0;
     state.selectedLeave = null;
   },
   SET_SELECTED_LEAVE(state, leave) {
@@ -97,6 +99,7 @@ const actions = {
     if (selectedLeave) {
         state.leaveID = selectedLeave.leave_type_id;
         state.leaveName = selectedLeave.leave_name;
+        state.leaveMaxDays = selectedLeave.max_days_per_year;
         state.leaveArray = [...state.leaveArray, selectedLeave];
     }
     commit('LEAVES_ARRAY', state.leaveArray);

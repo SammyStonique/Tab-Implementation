@@ -60,7 +60,12 @@
                             <i class="fa fa-cubes pt-2 mr-2" aria-hidden="true"></i>
                             <p class="">Leave Applications</p>
                         </button>
-    
+                    </div>
+                    <div class="py-2 px-3 pl-4 w-full hover:bg-slate-500 hover:w-full">
+                        <button class="flex text-sm w-full" @click="openPage({'HR':'Leave_Allocations'})">
+                            <i class="fa fa-cubes pt-2 mr-2" aria-hidden="true"></i>
+                            <p class="">Leave Allocations</p>
+                        </button>
                     </div>
                 </div>
             </div>

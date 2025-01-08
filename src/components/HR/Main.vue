@@ -33,6 +33,8 @@ import Pay_Cycles from '@/components/HR/Pay_Cycles.vue';
 import Pay_Groups from '@/components/HR/Pay_Groups.vue';
 import Deductions from '@/components/HR/Deductions.vue';
 import Leave_Types from '@/components/HR/Leave_Types.vue';
+import Leave_Applications from '@/components/HR/Leave_Applications.vue';
+import Leave_Allocations from '@/components/HR/Leave_Allocations.vue';
 import Holidays from '@/components/HR/Holidays.vue';
 import Paye from '@/components/HR/Paye.vue';
 import Nssf from '@/components/HR/Nssf.vue';
@@ -58,7 +60,7 @@ export default{
         Dashboard,
         Pay_Cycles,Pay_Groups,Deductions,Leave_Types,Holidays,Paye,Nssf,Shif,Housing_Levy,
         Employees,Employee_Biodata,Deduction_Details,Employee_Details,Import_Employees,Payrolls,Payroll_Employees,
-        HR_Templates,Design_HR_Template,
+        HR_Templates,Design_HR_Template,Leave_Applications,Leave_Allocations,
 
         Default_Settings
     },

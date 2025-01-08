@@ -274,12 +274,19 @@ export default{
             }else{
                 try {
                     const response = await store.dispatch('Payrolls/createPayroll', formData);
-                    if (response && response.status === 200) {
+                    if (response && response.data.msg === "Success") {
                         hideModalLoader();
                         toast.success('Payroll Run Successfully!');
                         handleReset();
                         propComponentKey.value += 1;
-                    } else {
+                    }else if(response && response.data.msg === "Failed"){
+                        hideModalLoader();
+                        toast.error('Payroll Already Run!');
+                    }else if(response && response.data.msg === "Empty"){
+                        hideModalLoader();
+                        toast.error('Pay Group Has No Active Employees!');
+                    }
+                    else {
                         toast.error('An error occurred while Running the Payroll.');
                     }
                 } catch (error) {
