@@ -272,6 +272,8 @@ export default{
                 { type: 'dropdown', name: 'paid_leave',label: "Paid Leave", value: selectedLeave.value?.paid_leave || 'Yes', placeholder: "", required: true, options: [{ text: 'Yes', value: 'Yes' }, { text: 'No', value: 'No' }] },
                 { type: 'dropdown', name: 'carry_over',label: "Carry Over", value: selectedLeave.value?.carry_over || 'No', placeholder: "", required: true, options: [{ text: 'Yes', value: 'Yes' }, { text: 'No', value: 'No' }] },
                 { type: 'number', name: 'max_accrual',label: "Days Carried Over", value: selectedLeave.value?.max_accrual || 0, required: false },
+                { type: 'dropdown', name: 'exclude_saturday',label: "Exclude Saturday", value: selectedLeave.value?.exclude_saturday || 'Yes', placeholder: "", required: true, options: [{ text: 'Yes', value: 'Yes' }, { text: 'No', value: 'No' }] },
+                { type: 'dropdown', name: 'exclude_sunday',label: "Exclude Sunday", value: selectedLeave.value?.exclude_sunday || 'Yes', placeholder: "", required: true, options: [{ text: 'Yes', value: 'Yes' }, { text: 'No', value: 'No' }] },
                 { type: 'dropdown', name: 'print_on_payslip',label: "Display on Pay Slip", value: selectedLeave.value?.print_on_payslip || 'No', placeholder: "", required: true, options: [{ text: 'Yes', value: 'Yes' }, { text: 'No', value: 'No' }] },
                 {required: false}
             ];  
@@ -304,7 +306,9 @@ export default{
                 carry_over: formFields.value[4].value,
                 paid_leave: formFields.value[3].value,
                 calculation_mode: formFields.value[1].value,
-                print_on_payslip: formFields.value[6].value,
+                exclude_saturday: formFields.value[6].value,
+                exclude_sunday: formFields.value[7].value,
+                print_on_payslip: formFields.value[8].value,
                 max_days_per_year: formFields.value[2].value || 0,
                 max_accrual: formFields.value[5].value || 0,
                 company: companyID.value
@@ -347,7 +351,9 @@ export default{
                 carry_over: formFields.value[4].value,
                 paid_leave: formFields.value[3].value,
                 calculation_mode: formFields.value[1].value,
-                print_on_payslip: formFields.value[6].value,
+                exclude_saturday: formFields.value[6].value,
+                exclude_sunday: formFields.value[7].value,
+                print_on_payslip: formFields.value[8].value,
                 max_days_per_year: formFields.value[2].value || 0,
                 max_accrual: formFields.value[5].value || 0,
                 company: companyID.value
@@ -518,7 +524,6 @@ export default{
         const addNewLeave = () =>{
             store.dispatch("Leave_Types/updateState",{selectedLeave:null,isEditing:false})
             propModalVisible.value = true;
-            handleReset();
             flex_basis.value = '1/3';
             flex_basis_percentage.value = '33.333';
         }
@@ -553,6 +558,7 @@ export default{
         }
         const closeModal = () =>{
             propModalVisible.value = false;
+            handleReset();
         }
         onBeforeMount(()=>{
             searchLeaves();

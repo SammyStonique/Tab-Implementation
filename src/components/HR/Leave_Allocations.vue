@@ -228,13 +228,16 @@ export default{
             }else{
                 try {
                     const response = await store.dispatch('Leave_Allocations/createLeaveAllocation', formData);
-                    if (response && response.status === 200) {
+                    if (response && response.status === 200 && response.data.msg != 'Exists') {
                         hideModalLoader();
                         toast.success('Leave Allocation created successfully!');
                         handleReset();
                         emplComponentKey.value += 1;
                         levComponentKey.value += 1;
-                    } else {
+                    }else if(response && response.data.msg == 'Exists'){
+                        toast.error('Employee Already Has Leave Allocation.');
+                    }
+                    else {
                         toast.error('An error occurred while creating the Leave Allocation.');
                     }
                 } catch (error) {

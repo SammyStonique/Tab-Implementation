@@ -39,6 +39,14 @@
                 :displayButtons="displayButtons" @handleSubmit="saveApplication" @handleReset="handleReset"
             />
         </MovableModal>
+        <MovableModal v-model:visible="appModalVisible" :title="appTitle" :modal_top="modal_top" :modal_left="modal_left" :modal_width="modal_width"
+            :loader="app_modal_loader" @showLoader="showAppModalLoader" @hideLoader="hideAppModalLoader" @closeModal="closeAppModal"
+        >
+            <DynamicForm 
+                :fields="formFields1" :flex_basis="flex_basis" :flex_basis_percentage="flex_basis_percentage" 
+                :displayButtons="displayButtons" @handleSubmit="approveLeaveApplication" @handleReset="handleAppReset"
+            />
+        </MovableModal>
     </div>
 </template>
 
@@ -62,6 +70,7 @@ export default{
         const toast = useToast();
         const loader = ref('none');
         const modal_loader = ref('none');
+        const app_modal_loader = ref('none');
         const emplComponentKey = ref(0);
         const levComponentKey = ref(0);
         const idField = 'leave_application_id';
@@ -69,6 +78,7 @@ export default{
         const addingRight = ref('Adding Leave Applications');
         const rightsModule = ref('HR');
         const title = ref('Leave Application Details');
+        const appTitle = ref('Approve Leave Application');
         const submitButtonLabel = ref('Add');
         const selectedIds = ref([]);
         const applicationsList = ref([]);
@@ -81,6 +91,7 @@ export default{
         const showNextBtn = ref(false);
         const showPreviousBtn = ref(false);
         const propModalVisible = ref(false);
+        const appModalVisible = ref(false);
         const flex_basis = ref('');
         const flex_basis_percentage = ref('');
         const displayButtons = ref(true);
@@ -90,14 +101,19 @@ export default{
         const modal_width = ref('30vw');
         const employeeID = ref('');
         const leaveID = ref('');
+        const applicationID = ref('');
         const requestedDays = ref(0);
         const computedRequestedDays = computed(()=> requestedDays);
+        const leaveBalance = ref(0);
+        const computedLeaveBalance = computed(()=> leaveBalance);
         const isEditing = computed(()=> store.state.Leave_Applications.isEditing);
         const selectedApplication = computed(()=> store.state.Leave_Applications.selectedApplication);
         const selectedEmployee = computed(()=> store.state.Leave_Applications.selectedEmployee);
         const selectedLeave = computed(()=> store.state.Leave_Applications.selectedLeave);
         const leaveArray = computed(() => store.state.Leave_Types.leaveArr);
         const employeeArray = computed(() => store.state.Employees.employeeArr);
+        const excSaturday = computed(()=> store.state.Leave_Types.excSaturday);
+        const excSunday = computed(()=> store.state.Leave_Types.excSunday);
         const showModal = ref(false);
         const tableColumns = ref([
             {type: "checkbox"},
@@ -111,8 +127,9 @@ export default{
             {label: "Status", key:"status"},
         ])
         const actions = ref([
-            {name: 'edit', icon: 'fa fa-edit', title: 'Edit Leave Applications', rightName: 'Editing Leave Applications'},
-            {name: 'delete', icon: 'fa fa-trash', title: 'Delete Leave Applications', rightName: 'Deleting Leave Applications'},
+            {name: 'edit', icon: 'fa fa-edit', title: 'Edit Application', rightName: 'Editing Leave Applications'},
+            {name: 'approve', icon: 'fa fa-check-circle', title: 'Approve Application', rightName: 'Approve Leave Applications'},
+            {name: 'delete', icon: 'fa fa-trash', title: 'Delete Application', rightName: 'Deleting Leave Applications'},
         ])
         const companyID = computed(()=> store.state.userData.company_id);
         const employee_name_search = ref('');
@@ -140,6 +157,10 @@ export default{
         const handleSelectedLeave = async(option) =>{
             await store.dispatch('Leave_Types/handleSelectedLeaveType', option)
             leaveID.value = store.state.Leave_Types.leaveID;
+            if(leaveID.value && employeeID.value){
+                getLeaveBalance();
+            }
+            
         };
         const clearSelectedLeave = async() =>{
             await store.dispatch('Leave_Types/updateState', {leaveID: ''});
@@ -152,8 +173,41 @@ export default{
             // Calculate the difference in days
             const differenceInTime = end.getTime() - start.getTime();
             const differenceInDays = differenceInTime / (1000 * 3600 * 24); // Convert from milliseconds to days
-            
-            requestedDays.value = differenceInDays + 1;
+
+            let saturdays = 0
+            let sundays = 0
+            for (let currentDate = new Date(start); currentDate <= end; currentDate.setDate(currentDate.getDate() + 1)) {
+                const dayOfWeek = currentDate.getDay();
+                if (dayOfWeek == 6){
+                    saturdays += 1;
+                }else if(dayOfWeek == 0){
+                    sundays += 1;
+                }
+                
+            }
+
+            requestedDays.value = differenceInDays + 1
+
+            if (excSaturday.value == "Yes"){
+                requestedDays.value -= saturdays;
+            }
+            if (excSunday.value == "Yes"){
+                requestedDays.value -= sundays;
+            }
+        }
+        const getLeaveBalance = () => {
+            let formData = {
+                employee: employeeID.value,
+                leave: leaveID.value,
+                company: companyID.value
+            }
+            axios.post('api/v1/get-leave-allocations/', formData)
+            .then((response)=>{
+                leaveBalance.value = response.data.remaining_leave_days;
+            })
+            .catch((error)=>{
+                toast.error(error.message)
+            })
         }
         const formFields = ref([]);
         const employeeValue = computed(() => {
@@ -182,11 +236,11 @@ export default{
                 },
                 { type: 'date', name: 'start_date',label: "Start Date", value: selectedApplication.value?.start_date || '', required: true },
                 { type: 'dropdown', name: 'start_date_type',label: "Type", value: selectedApplication.value?.start_date_type || 'Full Day', placeholder: "", required: true, options: [{ text: 'Full Day', value: 'Full Day' }, { text: 'Half Day', value: 'Half Day' }] },
-                { type: 'date', name: 'end_date',label: "End Date", value: selectedApplication.value?.end_date || '', required: true },
-                { type: 'dropdown', name: 'end_date_type',label: "Type", value: selectedApplication.value?.end_date_type || '', method: calculateDaysRequested, placeholder: "", required: true, options: [{ text: 'Full Day', value: 'Full Day' }, { text: 'Half Day', value: 'Half Day' }] },
+                { type: 'date', name: 'end_date',label: "End Date", value: selectedApplication.value?.end_date || '', required: true, method: calculateDaysRequested },
+                { type: 'dropdown', name: 'end_date_type',label: "Type", value: selectedApplication.value?.end_date_type || 'Full Day', placeholder: "", required: true, options: [{ text: 'Full Day', value: 'Full Day' }, { text: 'Half Day', value: 'Half Day' }] },
                 {type:'text-area', label:"Reason", value: selectedApplication.value?.reason || '', textarea_rows: '2', textarea_cols: '56', required: true},
                 { type: 'text', name: 'days_requested',label: "Days Requested", value: selectedApplication.value?.days_requested || computedRequestedDays.value, required: false, disabled:true },
-                { type: 'text', name: 'leave_balance',label: "Balance", value: selectedApplication.value?.leave_balance || '0', required: false, disabled:true },
+                { type: 'text', name: 'leave_balance',label: "Balance", value: selectedApplication.value?.leave_balance || computedLeaveBalance.value, required: false, disabled:true },
             ];
         };
         const handleReset = () =>{
@@ -223,6 +277,7 @@ export default{
                 end_date: formFields.value[4].value,
                 end_date_type: formFields.value[5].value,
                 reason: formFields.value[6].value,
+                days_requested: formFields.value[7].value,
                 employee: employeeID.value,
                 employee_id: employeeID.value,
                 leave_type: leaveID.value,
@@ -242,6 +297,9 @@ export default{
 
             if(errors.value.length){
                 toast.error('Fill In Required Fields');
+                hideModalLoader();
+            }else if(requestedDays.value > leaveBalance.value){
+                toast.error('Invalid Requested Days');
                 hideModalLoader();
             }else{
                 try {
@@ -274,6 +332,7 @@ export default{
                 end_date: formFields.value[4].value,
                 end_date_type: formFields.value[5].value,
                 reason: formFields.value[6].value,
+                days_requested: formFields.value[7].value,
                 employee: employeeValue.value,
                 employee_id: employeeValue.value,
                 leave_type: leaveValue.value,
@@ -321,6 +380,71 @@ export default{
             }else{
                 createApplication();
             }
+        };
+        const formFields1 = ref([]);
+        const updateFormFields1 = () =>{
+            formFields1.value = [
+                { type: 'date', name: 'date',label: "Date", value: "", required: true },
+                { type: 'dropdown', name: 'status',label: "Status", value: '', placeholder: "", required: true, options: [{ text: 'Approve', value: 'Approved' }, { text: 'Reject', value: 'Rejected' }] },
+                {type:'text-area', label:"Reason", value: '', textarea_rows: '2', textarea_cols: '56', required: true},
+
+            ]
+        };
+
+        const handleAppReset = async() =>{
+            for(let i=0; i < formFields1.value.length; i++){
+                formFields1.value[i].value = '';
+            }
+        }
+        
+        const showAppModalLoader = () =>{
+            app_modal_loader.value = "block";
+        }
+        const hideAppModalLoader = () =>{
+            app_modal_loader.value = "none";
+        }
+        const approveLeaveApplication = async() =>{
+            showAppModalLoader();
+            let formData = {
+                leave_application: applicationID.value,
+                date: formFields1.value[0].value,
+                status: formFields1.value[1].value,
+                reason: formFields1.value[2].value,
+                company: companyID.value
+            }
+
+            errors.value = [];
+            for(let i=0; i < (formFields1.value.length); i++){
+                if(formFields1.value[i].value =='' && formFields1.value[i].required == true){
+                    errors.value.push(formFields1.value[i].label);
+                }
+            }
+
+            if(errors.value.length){
+                toast.error('Fill In Required Fields');
+                hideAppModalLoader();
+            }else{
+                try {
+                    const response = await store.dispatch('Leave_Applications/approveLeaveApplication', formData);
+                    if (response && response.status === 200) {
+                        hideAppModalLoader();
+                        toast.success('Success!');
+                        handleAppReset();
+                    } else {
+                        toast.error('An error occurred while Approving the Leave Application.');
+                    }
+                } catch (error) {
+                    console.error(error.message);
+                    toast.error('Failed to Approve Leave Application: ' + error.message);
+                } finally {
+                    hideAppModalLoader();
+                    searchApplications();
+                }
+            }
+        };
+        const closeAppModal = async() =>{
+            appModalVisible.value = false;
+            handleAppReset();
         }
         const removeApplication = async() =>{
             if(selectedIds.value.length == 1){
@@ -487,8 +611,17 @@ export default{
                 then(()=>{
                     searchApplications();
                 })
-            }else if(action == 'view'){
-                console.log("VIEWING TAKING PLACE");
+            }else if(action == 'approve'){
+                const approvalStatus = row['status'];
+                if (approvalStatus == "Approved"){
+                    toast.error("Application Already Approved!")
+                }else{
+                    applicationID.value = row['leave_application_id'];
+                    appModalVisible.value = true;
+                    flex_basis.value = '1/2';
+                    flex_basis_percentage.value = '50';
+                    updateFormFields1();
+                }
             }
         }
         const closeModal = () =>{
@@ -583,7 +716,8 @@ export default{
             submitButtonLabel, showModal, addNewApplication, showLoader, loader, hideLoader, modal_loader, modal_top, modal_left, modal_width,displayButtons,
             showModalLoader, hideModalLoader, saveApplication, formFields, handleSelectionChange, flex_basis,flex_basis_percentage,
             removeApplication, removeApplications,addingRight,rightsModule,printApplicationsList,selectSearchQuantity,selectedValue,
-            downloadApplicationsCSV,downloadApplicationsExcel
+            downloadApplicationsCSV,downloadApplicationsExcel,app_modal_loader,appTitle,appModalVisible,approveLeaveApplication,showAppModalLoader,hideAppModalLoader,
+            formFields1,closeAppModal,handleAppReset
         }
     }
 };

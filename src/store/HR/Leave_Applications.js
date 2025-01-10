@@ -113,6 +113,16 @@ const actions = {
     commit('APPLICATIONS_ARRAY', state.applicationArray);
       
   },
+  async approveLeaveApplication({ commit,state }, formData) {
+    return axios.put(`api/v1/approve-leave-application/`,formData)
+    .then((response)=>{
+      return response;
+    })
+    .catch((error)=>{
+      console.log(error.message);
+      throw error;
+    })  
+  },
 
   async updateLeaveApplication({ commit,state }, formData) {
     return axios.put(`api/v1/update-leave-application/`,formData)
