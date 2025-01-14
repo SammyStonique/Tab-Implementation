@@ -4,7 +4,7 @@
         <div class="w-3/4 mr-3">
           <div class="flex mb-3">
             <div class="w-1/2 h-[300px] rounded-lg py-5 px-2 bg-white mr-2">
-              <h1 class="font-bold mb-10">Employees Overview</h1>
+              <h1 class="font-bold mb-10">Membership Overview</h1>
               <div class="flex w-full mb-3">
                 <div class="w-1/2 rounded-lg h-16 border-2 p-2 mr-4">
                   <div class="w-full flex">
@@ -13,7 +13,7 @@
                     </div>
                     <div class="w-3/4 px-2">
                       <p class="font-bold">{{itemsCount}}</p>
-                      <p class="font-light text-sm">Employees</p>
+                      <p class="font-light text-sm">Members</p>
                     </div>
                   </div>
                 </div>
@@ -24,7 +24,7 @@
                     </div>
                     <div class="w-3/4 px-2">
                       <p class="font-bold">{{outletsCount}}</p>
-                      <p class="font-light text-sm">Leave Applications</p>
+                      <p class="font-light text-sm">Sponsors</p>
                     </div>
                   </div>
                 </div>
@@ -37,7 +37,7 @@
                     </div>
                     <div class="w-3/4 px-2">
                       <p class="font-bold">{{salesCount}}</p>
-                      <p class="font-light text-sm">Payrolls</p>
+                      <p class="font-light text-sm">Savings</p>
                     </div>
                   </div>
                 </div>
@@ -48,7 +48,7 @@
                     </div>
                     <div class="w-3/4 px-2">
                       <p class="font-bold">{{ purchasesCount }}</p>
-                      <p class="font-light text-sm">Pay Groups</p>
+                      <p class="font-light text-sm">Loans</p>
                     </div>
                   </div>
                 </div>
@@ -65,7 +65,7 @@
           </div>
   
           <div class="w-full rounded-lg py-3 px-8 bg-white appointments-table">
-              <h1 class="font-bold mb-3">Direct Sales vs Purchases</h1>
+              <h1 class="font-bold mb-3">Savings vs Loans</h1>
               <BarChart :data="barChartData" :options="barChartOptions" />
           </div>
         </div>

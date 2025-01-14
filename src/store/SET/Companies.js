@@ -115,6 +115,8 @@ const actions = {
             "Inventory": response.data.inventory_module,
             "HR": response.data.hr_module,
             "Settings": response.data.settings_module,
+            "HHS": response.data.hhs_module,
+            "MMS": response.data.mms_module,
           }
           state.companyModulesArray = obj;
       })

@@ -86,6 +86,9 @@ export default defineComponent({
                 { type: 'dropdown', name: 'hms_module',label: "Hospital Management", value: selectedCompany.value?.hms_module || '', placeholder: "", required: true, options: [{ text: 'Enabled', value: 'Enabled' }, { text: 'Disabled', value: 'Disabled' }] },
                 { type: 'dropdown', name: 'hr_module',label: "Human Resource", value: selectedCompany.value?.hr_module || '', placeholder: "", required: true, options: [{ text: 'Enabled', value: 'Enabled' }, { text: 'Disabled', value: 'Disabled' }] },
                 { type: 'dropdown', name: 'settings_module',label: "Settings", value: selectedCompany.value?.settings_module || '', placeholder: "", required: true, options: [{ text: 'Enabled', value: 'Enabled' }, { text: 'Disabled', value: 'Disabled' }] },
+                { type: 'dropdown', name: 'hhs_module',label: "Hotel Management", value: selectedCompany.value?.hhs_module || 'Disabled', placeholder: "", required: true, options: [{ text: 'Enabled', value: 'Enabled' }, { text: 'Disabled', value: 'Disabled' }] },
+                { type: 'dropdown', name: 'mms_module',label: "Membership Management", value: selectedCompany.value?.mms_module || 'Disabled', placeholder: "", required: true, options: [{ text: 'Enabled', value: 'Enabled' }, { text: 'Disabled', value: 'Disabled' }] },
+                {required: false}
             ];
         };
         watch([selectedCompany], () => {
@@ -137,6 +140,8 @@ export default defineComponent({
                     inventory_module: additionalFields.value[2].value,
                     hms_module: additionalFields.value[3].value,
                     settings_module: additionalFields.value[5].value,
+                    hhs_module: additionalFields.value[6].value,
+                    mms_module: additionalFields.value[7].value,
                 };
 
                 try {

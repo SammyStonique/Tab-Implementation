@@ -111,12 +111,15 @@ export default defineComponent({
         const additionalFields = ref([]);
         const updateAdditionalFormFields = () => {
             additionalFields.value = [
-            { type: 'dropdown', name: 'pms_module',label: "Property Management", value: selectedUser.value?.pms_module || 'Disabled', placeholder: "", required: true, options: [{ text: 'Enabled', value: 'Enabled' }, { text: 'Disabled', value: 'Disabled' }] },
+                { type: 'dropdown', name: 'pms_module',label: "Property Management", value: selectedUser.value?.pms_module || 'Disabled', placeholder: "", required: true, options: [{ text: 'Enabled', value: 'Enabled' }, { text: 'Disabled', value: 'Disabled' }] },
                 { type: 'dropdown', name: 'accounts_module',label: "Financial Accounts", value: selectedUser.value?.accounts_module || 'Disabled', placeholder: "", required: true, options: [{ text: 'Enabled', value: 'Enabled' }, { text: 'Disabled', value: 'Disabled' }] },
                 { type: 'dropdown', name: 'inventory_module',label: "Inventory Management", value: selectedUser.value?.inventory_module || 'Disabled', placeholder: "", required: true, options: [{ text: 'Enabled', value: 'Enabled' }, { text: 'Disabled', value: 'Disabled' }] },
                 { type: 'dropdown', name: 'hms_module',label: "Hospital Management", value: selectedUser.value?.hms_module || 'Disabled', placeholder: "", required: true, options: [{ text: 'Enabled', value: 'Enabled' }, { text: 'Disabled', value: 'Disabled' }] },
                 { type: 'dropdown', name: 'hr_module',label: "Human Resource", value: selectedUser.value?.hr_module || 'Disabled', placeholder: "", required: true, options: [{ text: 'Enabled', value: 'Enabled' }, { text: 'Disabled', value: 'Disabled' }] },
                 { type: 'dropdown', name: 'settings_module',label: "Settings", value: selectedUser.value?.settings_module || 'Disabled', placeholder: "", required: true, options: [{ text: 'Enabled', value: 'Enabled' }, { text: 'Disabled', value: 'Disabled' }] },
+                { type: 'dropdown', name: 'hhs_module',label: "Hotel Management", value: selectedUser.value?.hhs_module || 'Disabled', placeholder: "", required: true, options: [{ text: 'Enabled', value: 'Enabled' }, { text: 'Disabled', value: 'Disabled' }] },
+                { type: 'dropdown', name: 'mms_module',label: "Membership Management", value: selectedUser.value?.mms_module || 'Disabled', placeholder: "", required: true, options: [{ text: 'Enabled', value: 'Enabled' }, { text: 'Disabled', value: 'Disabled' }] },
+                {required: false}
             ];
         };
         watch([selectedUser, selectedDepartment], () => {
@@ -176,6 +179,8 @@ export default defineComponent({
                         hr_module: additionalFields.value[4].value,
                         inventory_module: additionalFields.value[2].value,
                         settings_module: additionalFields.value[5].value,
+                        hhs_module: additionalFields.value[6].value,
+                        mms_module: additionalFields.value[7].value,
                         user_department: depValue.value,
                         password: temporary_password.value
                     }
@@ -267,6 +272,8 @@ export default defineComponent({
                     hr_module: additionalFields.value[4].value,
                     inventory_module: additionalFields.value[2].value,
                     settings_module: additionalFields.value[5].value,
+                    hhs_module: additionalFields.value[6].value,
+                    mms_module: additionalFields.value[7].value,
                     user_department: depValue.value,
                 };
 
@@ -308,7 +315,7 @@ export default defineComponent({
             flex_basis.value = '1/4';
             flex_basis_percentage.value = '25';
             additional_flex_basis.value = '1/4';
-            additional_flex_basis_percentage.value = '25';
+            additional_flex_basis_percentage.value = '20';
             fetchDepartments();
         })
         onMounted(()=>{

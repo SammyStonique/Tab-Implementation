@@ -68,6 +68,11 @@ import Leave_Applications from './HR/Leave_Applications';
 import Leave_Allocations from './HR/Leave_Allocations';
 
 
+import Member_Categories from './MMS/Member_Categories';
+import Member_Sponsors from './MMS/Member_Sponsors';
+import Members from './MMS/Members';
+
+
 import Default_Settings from './SET/Default_Settings';
 import Companies from './SET/Companies';
 import Branches from './SET/Branches';
@@ -98,6 +103,8 @@ export default createStore({
     Ledgers, Currencies, Taxes, Journals, Customers, Vendors,Fiscal_Periods,
 
     Pay_Cycles,Pay_Groups,Deductions,Leave_Types,Holidays,Paye,Nssf,Shif,Housing_Levy,Employees,Payrolls,Leave_Applications,Leave_Allocations,
+
+    Member_Categories,Member_Sponsors,Members,
 
     Default_Settings,Companies,Branches,User_Rights,SMS_Integrations,Email_Integrations,Mpesa_Integrations,Mpesa_Transactions,Banks
   },

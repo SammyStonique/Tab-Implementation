@@ -6,12 +6,16 @@ const state = {
     faArray: new Set(["Dashboard"]),
     hrArray: new Set(["Dashboard"]),
     invArray: new Set(["Dashboard"]),
+    mmsArray: new Set(["Dashboard"]),
+    hhsArray: new Set(["Dashboard"]),
     setArray: new Set(["Dashboard"]),
     hmsActiveTab: 'Dashboard',
     pmsActiveTab: 'Dashboard',
     hrActiveTab: 'Dashboard',
     faActiveTab: 'Dashboard',
     invActiveTab: 'Dashboard',
+    mmsActiveTab: 'Dashboard',
+    hhsActiveTab: 'Dashboard',
     setActiveTab: 'Dashboard',
   };
   
@@ -33,6 +37,12 @@ const state = {
         }else if(key == 'HR'){
           state.hrArray.add(value);
           state.hrActiveTab = value;
+        }else if(key == 'HHS'){
+          state.hhsArray.add(value);
+          state.hhsActiveTab = value;
+        }else if(key == 'MMS'){
+          state.mmsArray.add(value);
+          state.mmsActiveTab = value;
         }else if(key == 'SET'){
           state.setArray.add(value);
           state.setActiveTab = value;
@@ -71,6 +81,16 @@ const state = {
           let myArray = Array.from(state.hrArray);
           state.hrActiveTab = myArray[myArray.length - 1];
         }
+        else if(key == 'HHS'){
+          state.hhsArray.delete(value);
+          let myArray = Array.from(state.hhsArray);
+          state.hhsActiveTab = myArray[myArray.length - 1];
+        }
+        else if(key == 'MMS'){
+          state.mmsArray.delete(value);
+          let myArray = Array.from(state.mmsArray);
+          state.mmsActiveTab = myArray[myArray.length - 1];
+        }
         else if(key == 'SET'){
           state.setArray.delete(value);
           let myArray = Array.from(state.setArray);
@@ -94,6 +114,12 @@ const state = {
       }else if(module == 'Human Resource'){
         state.hrArray = new Set(["Dashboard"]);
         state.hrActiveTab = "Dashboard"; 
+      }else if(module == 'Hotel Management'){
+        state.hhsArray = new Set(["Dashboard"]);
+        state.hhsActiveTab = "Dashboard"; 
+      }else if(module == 'Membership Management'){
+        state.mmsArray = new Set(["Dashboard"]);
+        state.mmsActiveTab = "Dashboard"; 
       }else if(module == 'Settings'){
         state.setArray = new Set(["Dashboard"]);
         state.setActiveTab = "Dashboard"; 

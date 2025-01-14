@@ -2,14 +2,16 @@
     <PageComponent 
         :loader="loader" @showLoader="showLoader" @hideLoader="hideLoader"
         :addButtonLabel="addButtonLabel"
-        @handleAddNew="addNewRight"
+        @handleAddNew="addNewCategory"
         :searchFilters="searchFilters"
-        @searchPage="searchRights"
+        @searchPage="searchCategories"
         @resetFilters="resetFilters"
+        @removeItem="removeCategory"
+        @removeSelectedItems="removeCategories"
         :addingRight="addingRight"
         :rightsModule="rightsModule"
         :columns="tableColumns"
-        :rows="rightsList"
+        :rows="categoryList"
         :actions="actions"
         :idField="idField"
         @handleActionClick="handleActionClick"
@@ -24,10 +26,10 @@
         :showPreviousBtn="showPreviousBtn"
     />
     <MovableModal v-model:visible="depModalVisible" :title="title" :modal_top="modal_top" :modal_left="modal_left" :modal_width="modal_width"
-        :loader="modal_loader" @showLoader="showModalLoader" @hideLoader="hideModalLoader" >
+        :loader="modal_loader" @showLoader="showModalLoader" @hideLoader="hideModalLoader"  @closeModal="closeModal">
         <DynamicForm 
             :fields="formFields" :flex_basis="flex_basis" :flex_basis_percentage="flex_basis_percentage" 
-            :displayButtons="displayButtons" @handleSubmit="saveRight" @handleReset="handleReset"
+            :displayButtons="displayButtons" @handleSubmit="saveCategory" @handleReset="handleReset"
         />
     </MovableModal>
 </template>
@@ -42,7 +44,7 @@ import { useStore } from "vuex";
 import { useToast } from "vue-toastification";
 
 export default{
-    name: 'User_Rights',
+    name: 'Member_Categories',
     components:{
         PageComponent,MovableModal,DynamicForm
     },
@@ -51,13 +53,13 @@ export default{
         const toast = useToast();
         const loader = ref('');
         const modal_loader = ref('none');
-        const title = ref('Right Details');
-        const addButtonLabel = ref('New Right');
-        const addingRight = ref('Adding User Rights');
-        const rightsModule = ref('Settings');
-        const idField = 'permission_id';
+        const title = ref('Category Details');
+        const addButtonLabel = ref('New Category');
+        const addingRight = ref('Adding Member Categories');
+        const rightsModule = ref('MMS');
+        const idField = 'member_category_id';
         const depModalVisible = ref(false);
-        const rightsList = ref([]);
+        const categoryList = ref([]);
         const depResults = ref([]);
         const depArrLen = ref(0);
         const depCount = ref(0);
@@ -71,63 +73,47 @@ export default{
         const errors = ref([]);
         const modal_top = ref('200px');
         const modal_left = ref('400px');
-        const modal_width = ref('30vw');
-        const isEditing = computed(()=> store.state.User_Rights.isEditing);
-        const selectedRight = computed(()=> store.state.User_Rights.selectedRight);
+        const modal_width = ref('45vw');
+        const isEditing = computed(()=> store.state.Member_Categories.isEditing)
+        const selectedCategory = computed(()=> store.state.Member_Categories.selectedCategory);
         const tableColumns = ref([
             {type: "checkbox"},
-            {label: "Name", key:"permission_name",type: "text", editable: false},
-            {label: "Module", key: "module", type: "text", editable: false}
+            {label: "Name", key: "category_name", type: "text", editable: false},
+            {label: "Count", key: "member_count", type: "text", editable: false},
         ])
         const actions = ref([
-            {name: 'edit', icon: 'fa fa-edit', title: 'Edit Right', rightName: 'Editing User Rights'},
-            {name: 'delete', icon: 'fa fa-trash', title: 'Delete Right', rightName: 'Deleting User Rights'},
+            {name: 'edit', icon: 'fa fa-edit', title: 'Edit Category', rightName: 'Editing Member Categories'},
+            {name: 'delete', icon: 'fa fa-trash', title: 'Delete Category', rightName: 'Deleting Member Categories'},
         ])
         const companyID = computed(()=> store.state.userData.company_id);
-        const module_search = computed({
-            get: () => store.state.User_Rights.module_search,
-            set: (value) => store.commit('User_Rights/SET_SEARCH_FILTERS', {"module_search":value}),
-        });
-        const name_search = computed({
-            get: () => store.state.User_Rights.name_search,
-            set: (value) => store.commit('User_Rights/SET_SEARCH_FILTERS', {"name_search":value}),
-        });
+        const name_search = ref('');
         const searchFilters = ref([
-            {
-                type:'dropdown', placeholder:"Module", value: module_search, width:48,
-                options: [{ text: 'HMS', value: 'HMS' }, { text: 'PMS', value: 'PMS' },{ text: 'Accounts', value: 'Accounts' }, { text: 'Inventory', value: 'Inventory' },{ text: 'HR', value: 'HR' }, { text: 'Settings', value: 'Settings' },{ text: 'HHS', value: 'HHS' }, { text: 'MMS', value: 'MMS' }]
-            },
             {type:'text', placeholder:"Search Name...", value: name_search}
         ]);
         const formFields = ref([]);
-        const updateFormFields = (right) => {
+        const updateFormFields = (category) => {
             formFields.value = [
-            { type: 'dropdown', name: 'module',label: "Module", value: right?.module || '', placeholder: "", required: true, options: [{ text: 'HMS', value: 'HMS' }, { text: 'PMS', value: 'PMS' },{ text: 'Accounts', value: 'Accounts' }, { text: 'Inventory', value: 'Inventory' },{ text: 'HR', value: 'HR' }, { text: 'Settings', value: 'Settings' },{ text: 'HHS', value: 'HHS' }, { text: 'MMS', value: 'MMS' }] },
-                { type: 'text', name: 'permission_name',label: "Name", value: right?.permission_name || '', required: true },
+                { type: 'text', name: 'name',label: "Name", value: category?.category_name || '', required: true },
             ];
         };
-        watch(selectedRight, (newRight) => {
-            updateFormFields(newRight);
+        watch(selectedCategory, (newCategory) => {
+            updateFormFields(newCategory);
         }, { immediate: true });
-        const addNewRight = () =>{
+        const addNewCategory = () =>{
             depModalVisible.value = true;
             handleReset();
-            store.dispatch("User_Rights/updateState",{isEditing:false})
+            store.dispatch("Member_Categories/updateState",{isEditing:false})
             flex_basis.value = '1/2';
             flex_basis_percentage.value = '50';
-        };
-        
+        }
         const handleActionClick = async(rowIndex, action, row) =>{
             if( action == 'edit'){
-                const rightID = row['permission_id'];
-                const permName = row['permission_name'];
-                const mod = row['module'];
-                await store.dispatch('User_Rights/updateState',{rightID: rightID})
+                const categoryID = row[idField];
                 let formData = {
-                    module: mod,
-                    permission_name: permName
+                    company: companyID.value,
+                    member_category: categoryID
                 }
-                await store.dispatch('User_Rights/fetchRight',formData).
+                await store.dispatch('Member_Categories/fetchMemberCategory',formData).
                 then(()=>{
                     depModalVisible.value = true;
                     flex_basis.value = '1/2';
@@ -135,17 +121,14 @@ export default{
                 })
                 
             }else if(action == 'delete'){
-                const rightID = row['permission_id'];
-                const permName = row['permission_name'];
-                const mod = row['module'];
-                await store.dispatch('User_Rights/updateState',{rightID: rightID})
+                const categoryID = [row[idField]];
                 let formData = {
-                    module: mod,
-                    permission_name: permName
+                    company: companyID.value,
+                    member_category: categoryID
                 }
-                await store.dispatch('User_Rights/deleteRight',formData).
+                await store.dispatch('Member_Categories/deleteMemberCategory',formData).
                 then(()=>{
-                    searchRights();
+                    searchCategories();
                 })
             }
         } 
@@ -160,11 +143,11 @@ export default{
         const hideModalLoader = () =>{
             modal_loader.value = "none";
         }
-        const createRight = async() =>{
+        const createCategory = async() =>{
             showModalLoader();
             let formData = {
-                module: formFields.value[0].value,
-                permission_name: formFields.value[1].value,
+                category_name: formFields.value[0].value,
+                company: companyID.value
             }
             errors.value = [];
             for(let i=0; i < formFields.value.length; i++){
@@ -177,29 +160,31 @@ export default{
                 hideModalLoader();
             }else{
                 try {
-                    const response = await store.dispatch('User_Rights/createRight', formData);
-                    if(response) {
+                    const response = await store.dispatch('Member_Categories/createMemberCategory', formData);
+                    if(response && response.status === 200) {
                         hideModalLoader();
-                        toast.success('Right created successfully!');
+                        toast.success('Category created successfully!');
                         handleReset();
                     }else {
-                        toast.error('An error occurred while creating the Right.');
+                        toast.error('An error occurred while creating the category.');
                     }
                 } catch (error) {
                     console.error(error.message);
-                    toast.error('Failed to create Right: ' + error.message);
+                    toast.error('Failed to create category: ' + error.message);
                 } finally {
                     hideModalLoader();
+                    searchCategories();
                 }
             }
 
         }
-        const updateRight = async() =>{
+        const updateCategory = async() =>{
             showModalLoader();
             errors.value = [];
             let formData = {
-                module: formFields.value[0].value,
-                permission_name: formFields.value[1].value,
+                category_name: formFields.value[0].value,
+                company: companyID.value,
+                member_category: selectedCategory.value.member_category_id
             }
             for(let i=0; i < formFields.value.length; i++){
                 if(formFields.value[i].value =='' && formFields.value[i].required == true){
@@ -210,28 +195,78 @@ export default{
                     toast.error('Fill In Required Fields');
             }else{
                 try {
-                    const response = await store.dispatch('User_Rights/updateRight', formData);
-                    if (response) {
+                    const response = await store.dispatch('Member_Categories/updateMemberCategory', formData);
+                    if (response && response.status === 200) {
                         hideModalLoader();
-                        toast.success("Right updated successfully!");
+                        toast.success("Category updated successfully!");
                         handleReset();
                     } else {
-                        toast.error('An error occurred while updating the Right.');
+                        toast.error('An error occurred while updating the Category.');
                     }
                 } catch (error) {
                     console.error(error.message);
-                    toast.error('Failed to update Right: ' + error.message);
+                    toast.error('Failed to update Category: ' + error.message);
                 } finally {
                     hideModalLoader();
-                    await store.dispatch('User_Rights/updateState',{rightID: ""})
+                    searchCategories();
                 }
             }
         }
-        const saveRight = () =>{
+        const saveCategory = () =>{
             if(isEditing.value == true){
-                updateRight();
+                updateCategory();
             }else{
-                createRight();
+                createCategory();
+            }
+        }
+        const removeCategory = async() =>{
+            if(selectedIds.value.length == 1){
+                let formData = {
+                    company: companyID.value,
+                    member_category: selectedIds.value,
+                }
+                try{
+                    const response = await store.dispatch('Member_Categories/deleteMemberCategory',formData)
+                    if(response && response.status == 200){
+                        toast.success("Category Removed Succesfully");
+                        searchCategories();
+                    }
+                }
+                catch(error){
+                    console.error(error.message);
+                    toast.error('Failed to remove Category: ' + error.message);
+                }
+                finally{
+                    selectedIds.value = [];
+                }
+            }else if(selectedIds.value.length > 1){
+                toast.error("You have selected more than 1 Category") 
+            }else{
+                toast.error("Please Select A Category To Remove")
+            }
+        }
+        const removeCategories = async() =>{
+            if(selectedIds.value.length){
+                let formData = {
+                    company: companyID.value,
+                    member_category: selectedIds.value,
+                }
+                try{
+                    const response = await store.dispatch('Member_Categories/deleteMemberCategory',formData)
+                    if(response && response.status == 200){
+                        toast.success("Category(s) Removed Succesfully");
+                        searchCategories();
+                    }
+                }
+                catch(error){
+                    console.error(error.message);
+                    toast.error('Failed to remove Category(s): ' + error.message);
+                }
+                finally{
+                    selectedIds.value = [];
+                }
+            }else{
+                toast.error("Please Select A Category To Remove")
             }
         }
         const showLoader = () =>{
@@ -240,23 +275,23 @@ export default{
         const hideLoader = () =>{
             loader.value = "none";
         }
-        const searchRights = () =>{
+        const searchCategories = () =>{
             showLoader();
             showNextBtn.value = false;
             showPreviousBtn.value = false;
             let formData = {
-                module: module_search.value,
-                permission_name: name_search.value,
+                category_name: name_search.value,
+                company_id: companyID.value
             }
             axios
-            .post(`api/v1/permissions-search/?page=${currentPage.value}`,formData)
+            .post(`api/v1/member-categories-search/?page=${currentPage.value}`,formData)
             .then((response)=>{
-                rightsList.value = response.data.results;
-                store.commit('User_Rights/LIST_RIGHTS', rightsList.value)
+                categoryList.value = response.data.results;
+                store.commit('Member_Categories/LIST_MEMBER_CATEGORIES', categoryList.value)
                 depResults.value = response.data;
-                depArrLen.value = rightsList.value.length;
+                depArrLen.value = categoryList.value.length;
                 depCount.value = depResults.value.count;
-                pageCount.value = Math.ceil(depCount.value / 1000);
+                pageCount.value = Math.ceil(depCount.value / 50);
                 
                 if(response.data.next){
                     showNextBtn.value = true;
@@ -279,7 +314,7 @@ export default{
                 currentPage.value -= 1;
             }
             
-            searchRights();
+            searchCategories();
         }
         const loadNext = () =>{
             if(currentPage.value >= pageCount.value){
@@ -288,29 +323,34 @@ export default{
                 currentPage.value += 1;
             }
             
-            searchRights();
+            searchCategories();
         }
         const firstPage = ()=>{
             currentPage.value = 1;
-            searchRights();
+            searchCategories();
         }
         const lastPage = () =>{
             currentPage.value = pageCount.value;
-            searchRights();
+            searchCategories();
         }
         const resetFilters = () =>{
-            store.commit('User_Rights/RESET_SEARCH_FILTERS')
-            searchRights();
+            name_search.value = "";
+            searchCategories();
+        };
+        const closeModal = async() =>{
+            depModalVisible.value = false;
+            handleReset();
         }
         onMounted(()=>{
-            searchRights();
+            searchCategories();
         })
         return{
-            title,idField, searchRights, addButtonLabel, searchFilters, resetFilters, tableColumns, rightsList,
+            title,idField, searchCategories, addButtonLabel, searchFilters, resetFilters, tableColumns, categoryList,
             depResults, depArrLen, depCount, pageCount, showNextBtn, showPreviousBtn,modal_top, modal_left, modal_width,
-            loadPrev, loadNext, firstPage, lastPage, actions, formFields, depModalVisible, addNewRight,
-            displayButtons,flex_basis,flex_basis_percentage, handleActionClick, handleReset, saveRight,
-            showLoader, loader, hideLoader, modal_loader, showModalLoader, hideModalLoader,addingRight,rightsModule
+            loadPrev, loadNext, firstPage, lastPage, actions, formFields, depModalVisible, addNewCategory,
+            displayButtons,flex_basis,flex_basis_percentage, handleActionClick, handleReset, saveCategory,
+            showLoader, loader, hideLoader, modal_loader, showModalLoader, hideModalLoader, removeCategory, removeCategories,
+            addingRight,rightsModule, closeModal
         }
     }
 }
