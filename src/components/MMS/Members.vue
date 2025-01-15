@@ -39,12 +39,20 @@
     </div>
     <MovableModal v-model:visible="transModalVisible" :title="transTitle" :modal_top="modal_top" :modal_left="modal_left" :modal_width="modal_width"
         :loader="trans_modal_loader" @showLoader="showTransModalLoader" @hideLoader="hideTransModalLoader" @closeModal="closeTransModal">
-        <div class="mt-4 mb-8">
+        <div class="mt-4 mb-8 w-full">       
+            <label for="">Date:</label><br />
+            <input v-model="exit_date"  type="date" class="`bg-slate-50 rounded pl-3 border border-gray-400 text-base w-full`"/>
+        </div>
+        <div class="mb-8 w-full">         
             <label for="">Select Member Status:</label><br />
-            
+            <select v-model="member_status" class="bg-slate-50 rounded border border-gray-400 text-sm pl-2 pt-2 w-full">
+                <option value="" selected disabled>Select Status</option>
+                <option value="Active">Active</option>
+                <option value="Inactive">Inactive</option>
+          </select>
         </div>
         <div class="flex-1 basis-full px-2">
-            <button @click="changeMemberStatus" class="rounded bg-green-400 text-sm mr-2  text-white px-2 py-1.5"><i class="fa fa-check-circle text-xs mr-1.5" aria-hidden="true"></i>Transfer</button>
+            <button @click="changeMemberStatus" class="rounded bg-green-400 text-sm mr-2  text-white px-2 py-1.5"><i class="fa fa-check-circle text-xs mr-1.5" aria-hidden="true"></i>Change Status</button>
         </div>
     </MovableModal>
 
@@ -74,6 +82,8 @@ export default{
         const displayButtons = ref(true);
         const unitComponentKey = ref(0);
         const trans_modal_loader = ref('none');
+        const member_status = ref('');
+        const exit_date = ref('');
         const idField = 'member_id';
         const addButtonLabel = ref('New Member');
         const addingRight = ref('Adding Members');
@@ -91,12 +101,12 @@ export default{
         const showNextBtn = ref(false);
         const showPreviousBtn = ref(false);
         const detailsTitle = ref('Member Documents');
-        const transTitle = ref('Changing Mmeber Status');
+        const transTitle = ref('Changing Member Status');
         const transModalVisible = ref(false);
         const dropdownWidth = ref("500px")
         const modal_top = ref('200px');
         const modal_left = ref('400px');
-        const modal_width = ref('30vw');
+        const modal_width = ref('45vw');
         const flex_basis = ref('');
         const flex_basis_percentage = ref('');
         const showModal = ref(false);
@@ -113,7 +123,7 @@ export default{
         const actions = ref([
             {name: 'edit', icon: 'fa fa-edit', title: 'Edit Member', rightName: 'Editing Members'},
             {name: 'view', icon: 'fa fa-file-pdf-o', title: 'View Profile', rightName: 'Viewing Member Profile'},
-            {name: 'transfer', icon: 'fa fa-exchange', title: 'Change Member Status', rightName: 'Editing Members'},
+            {name: 'transfer', icon: 'fa fa-exchange', title: 'Change Member Status', rightName: 'Changing Member Status'},
             {name: 'delete', icon: 'fa fa-trash', title: 'Delete Member', rightName: 'Deleting Members'},
         ])
         const companyID = computed(()=> store.state.userData.company_id);
@@ -349,13 +359,14 @@ export default{
         }
         const addNewMember = async() =>{
             store.commit('Members/initializeStore');
-            await store.dispatch('Members/updateState', {currentTab: 'Member_Biodata',selectedEmployee: null,selectedCategory: null,selectedSponsor: null,selectedCurrency: null,isEditing: false});
+            await store.dispatch('Members/updateState', {selectedEmployee: null,selectedCategory: null,selectedSponsor: null,selectedCurrency: null,isEditing: false});
+            await store.dispatch('Membership_Fees/updateState', {feeArray: []})
             store.commit('pageTab/ADD_PAGE', {'MMS':'Member_Details'});
             store.state.pageTab.mmsActiveTab = 'Member_Details';          
         }
         const handleActionClick = async(rowIndex, action, row) =>{
             if( action == 'edit'){
-                await store.dispatch('Members/updateState', {currentTab: 'Member_Biodata',selectedMember: null,selectedCategory: null,selectedSponsor: null,selectedCurrency: null,isEditing: false});
+                await store.dispatch('Members/updateState', {selectedMember: null,selectedCategory: null,selectedSponsor: null,selectedCurrency: null,isEditing: false});
                 const memberID = row[idField];
                 let formData = {
                     company: companyID.value,
@@ -439,7 +450,7 @@ export default{
             submitButtonLabel, showModal, addNewMember, showLoader, loader, hideLoader, importMembers, removeMember, removeMembers,
             handleSelectionChange,addingRight,rightsModule,printMembersList,selectSearchQuantity,selectedValue,
             modal_left,modal_top,modal_width,trans_modal_loader,transModalVisible,transTitle,showTransModalLoader,hideTransModalLoader,changeMemberStatus,closeTransModal,
-            dropdownOptions,handleDynamicOption,
+            dropdownOptions,handleDynamicOption,member_status,exit_date
         }
     }
 };

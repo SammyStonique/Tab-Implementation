@@ -535,7 +535,7 @@ export default{
             }else{
                 try {
                     const response = await store.dispatch('Ledgers/createLedger', formData);
-                    if(response && response.status === 200) {
+                    if(response && response.status === 201) {
                         hideModalLoader();
                         toast.success('Ledger created successfully!');
                         handleReset();

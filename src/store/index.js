@@ -71,6 +71,7 @@ import Leave_Allocations from './HR/Leave_Allocations';
 import Member_Categories from './MMS/Member_Categories';
 import Member_Sponsors from './MMS/Member_Sponsors';
 import Members from './MMS/Members';
+import Membership_Fees from './MMS/Membership_Fees';
 
 
 import Default_Settings from './SET/Default_Settings';
@@ -104,7 +105,7 @@ export default createStore({
 
     Pay_Cycles,Pay_Groups,Deductions,Leave_Types,Holidays,Paye,Nssf,Shif,Housing_Levy,Employees,Payrolls,Leave_Applications,Leave_Allocations,
 
-    Member_Categories,Member_Sponsors,Members,
+    Member_Categories,Member_Sponsors,Members,Membership_Fees,
 
     Default_Settings,Companies,Branches,User_Rights,SMS_Integrations,Email_Integrations,Mpesa_Integrations,Mpesa_Transactions,Banks
   },

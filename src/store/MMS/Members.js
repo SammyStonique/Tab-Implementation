@@ -19,7 +19,6 @@ const state = {
     selectedCurrency: null,
     isEditing: false,
     memberDetails: [],
-    currentTab: "Member_Biodata",
 };
   
 const mutations = {
@@ -98,7 +97,7 @@ const actions = {
   },
   
   async createMember({ commit,state }, formData) {
-    return axios.post('api/v1/create-Member/', formData)
+    return axios.post('api/v1/create-member/', formData)
     .then((response)=>{
       return response;
     })
@@ -109,7 +108,7 @@ const actions = {
   },
 
   async updateMember({ commit,state }, formData) {
-    return axios.post('api/v1/update-Member/', formData)
+    return axios.post('api/v1/update-member/', formData)
     .then((response)=>{
       return response;
     })

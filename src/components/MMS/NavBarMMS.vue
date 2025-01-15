@@ -100,28 +100,28 @@
                     </div>
                 </div>
             </div>
-            <div class="web-links dropdown w-48">
+            <div class="web-links dropdown w-36">
                 <div class="py-1.5 px-2.5 h-full hover:bg-slate-500 hover:rounded">
-                    <button class="flex" @click="showAssetsDropdown">
-                        <i class="fa fa-warehouse pt-2 mr-2" aria-hidden="true"></i>
-                        <p class="pt-1.5">Asset Management</p>
+                    <button class="flex w-full" @click="showFinancesDropdown">
+                        <i class="fa fa-money pt-2 mr-2" aria-hidden="true"></i>
+                        <p class="pt-1.5">Finances</p>
                     </button>
                 </div>
-                <div class="dropdown-content w-56 absolute rounded border border-gray-200 bg-white shadow-slate-400 shadow-sm" v-if="assets_dropdown">
+                <div class="dropdown-content w-48 absolute rounded border border-gray-200 bg-white shadow-slate-400 shadow-sm" v-if="finances_dropdown">
                     <div class="py-2 px-3 pl-4 w-full hover:bg-slate-500 hover:w-full">
-                        <button class="flex text-sm" @click="openPage({'HR':'Assets_List'})">
-                            <i class="fa fa-warehouse pt-2 mr-2" aria-hidden="true"></i>
-                            <p class="">Assets List</p>
+                        <button class="flex text-sm w-full" @click="openPage({'MMS':'Member_Invoices'})">
+                            <i class="fa fa-file-invoice pt-2 mr-2" aria-hidden="true"></i>
+                            <p class="">Invoices</p>
                         </button>
                     </div>
                     <div class="py-2 px-3 pl-4 w-full hover:bg-slate-500 hover:w-full">
-                        <button class="flex text-sm" @click="openPage({'HR':'Assigned_Assets'})">
-                        <i class="fa fa-money-bill pt-2 mr-2" aria-hidden="true"></i>
-                        <p class="">Assigned Assets</p>
+                        <button class="flex text-sm w-full" @click="openPage({'MMS':'Member_Receipts'})">
+                        <i class="fa fa-receipt pt-2 mr-2" aria-hidden="true"></i>
+                        <p class="">Receipts</p>
                         </button>
                     </div>
                 </div>
-            </div>  
+            </div> 
             <div class="web-links dropdown w-36">
                 <div class="py-1.5 px-2.5 h-full hover:bg-slate-500 hover:rounded">
                     <button class="flex" @click="showSettingsDropdown">
@@ -131,9 +131,9 @@
                 </div>
                 <div class="dropdown-content w-56 absolute rounded border border-gray-200 bg-white shadow-slate-400 shadow-sm" v-if="settings_dropdown">
                     <div class="py-2 px-3 pl-4 w-full hover:bg-slate-500 hover:w-full">
-                        <button class="flex text-sm" @click="openPage({'HR':'Pay_Cycles'})">
-                            <i class="fa fa-sync pt-2 mr-2" aria-hidden="true"></i>
-                            <p class="">Pay Cycles</p>
+                        <button class="flex text-sm" @click="openPage({'MMS':'Membership_Fees'})">
+                            <i class="fa fa-money-bill-wave pt-2 mr-2" aria-hidden="true"></i>
+                            <p class="">Membership Fees</p>
                         </button>
                     </div>
                     <div class="py-2 px-3 pl-4 w-full hover:bg-slate-500 hover:w-full">
@@ -215,7 +215,7 @@ export default defineComponent({
         const leave_dropdown = ref(false);
         const members_dropdown = ref(false);
         const attendance_dropdown = ref(false);
-        const assets_dropdown = ref(false);
+        const finances_dropdown = ref(false);
         const userDetails = ref([]);
         const dropdown = ref(false);
 
@@ -225,7 +225,7 @@ export default defineComponent({
             members_dropdown.value  = false;
             attendance_dropdown.value = false;
             dropdown.value = true;
-            assets_dropdown.value  = false;
+            finances_dropdown.value  = false;
             payroll_dropdown.value  = !payroll_dropdown.value ;
         }
         const showMembersDropdown = () =>{
@@ -233,7 +233,7 @@ export default defineComponent({
             settings_dropdown.value = false;
             payroll_dropdown.value  = false;
             attendance_dropdown.value = false;
-            assets_dropdown.value  = false;
+            finances_dropdown.value  = false;
             dropdown.value = true;
             members_dropdown.value  = !members_dropdown.value ;
         }
@@ -242,7 +242,7 @@ export default defineComponent({
             payroll_dropdown.value  = false;
             members_dropdown.value = false;
             attendance_dropdown.value = false;
-            assets_dropdown.value  = false;
+            finances_dropdown.value  = false;
             dropdown.value = true;
             leave_dropdown.value  = !leave_dropdown.value ;
         }
@@ -251,7 +251,7 @@ export default defineComponent({
             payroll_dropdown.value  = false;
             members_dropdown.value  = false;
             attendance_dropdown.value = false;
-            assets_dropdown.value  = false;
+            finances_dropdown.value  = false;
             dropdown.value = true;
             settings_dropdown.value  = !settings_dropdown.value ;
         }
@@ -260,18 +260,18 @@ export default defineComponent({
             payroll_dropdown.value  = false;
             members_dropdown.value  = false;
             settings_dropdown.value = false;
-            assets_dropdown.value  = false;
+            finances_dropdown.value  = false;
             dropdown.value = true;
             attendance_dropdown.value  = !attendance_dropdown.value ;
         }
-        const showAssetsDropdown = () =>{
+        const showFinancesDropdown = () =>{
             leave_dropdown.value = false;
             payroll_dropdown.value  = false;
             members_dropdown.value  = false;
             settings_dropdown.value = false;
             attendance_dropdown.value = false;
             dropdown.value = true;
-            assets_dropdown.value  = !assets_dropdown.value ;
+            finances_dropdown.value  = !finances_dropdown.value ;
         }
         const closeDropdown = () =>{
             leave_dropdown.value = false;
@@ -279,7 +279,7 @@ export default defineComponent({
             members_dropdown.value  = false;
             settings_dropdown.value = false;
             attendance_dropdown.value = false;
-            assets_dropdown.value  = false;
+            finances_dropdown.value  = false;
             dropdown.value = false;
         }
         const openPage = (pageName) =>{
@@ -291,9 +291,9 @@ export default defineComponent({
             store.commit('modulesTab/MINIMIZE_TAB')
         };
         return{
-            dropdown, settings_dropdown, leave_dropdown, payroll_dropdown, attendance_dropdown,members_dropdown, assets_dropdown,
+            dropdown, settings_dropdown, leave_dropdown, payroll_dropdown, attendance_dropdown,members_dropdown, finances_dropdown,
             user_profile,userDetails, closeDropdown,showPayrollDropdown, showLeaveDropdown,showMembersDropdown, showAttendanceDropdown,
-            showSettingsDropdown, showAssetsDropdown,openPage,showHomePage
+            showSettingsDropdown, showFinancesDropdown,openPage,showHomePage
         }
     },
 

@@ -31,6 +31,11 @@ import PagesTab from '@/components/MMS/PagesTab.vue';
 import Dashboard from '@/components/MMS/Dashboard.vue';
 import Member_Categories from '@/components/MMS/Member_Categories.vue';
 import Member_Sponsors from '@/components/MMS/Member_Sponsors.vue';
+import Members from '@/components/MMS/Members.vue';
+import Member_Details from '@/components/MMS/Member_Details.vue';
+import Membership_Fees from '@/components/MMS/Membership_Fees.vue';
+import Member_Invoices from '@/components/MMS/Member_Invoices.vue';
+import Member_Receipts from '@/components/MMS/Member_Receipts.vue';
 
 import Default_Settings from '@/components/SET/Default_Settings.vue';
 
@@ -40,7 +45,8 @@ export default{
         NavBarMMS,
         PagesTab,
         Dashboard,
-        Member_Categories,Member_Sponsors,
+        Member_Categories,Member_Sponsors,Members,Member_Details,Membership_Fees,
+        Member_Invoices,Member_Receipts,
 
         Default_Settings
     },
