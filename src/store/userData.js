@@ -9,6 +9,7 @@ const state = {
     userID: '',
     departmentID: '',
     company_id: '',
+    device_id: '',
     company_name: '',
     system_timeout: 0,
     user_names: '',
@@ -305,8 +306,8 @@ const actions = {
         dispatch('deleteCookie', 'csrftoken');
         dispatch('deleteCookie', 'sessionid');
     },
-    logout({ commit,state,dispatch }){
-        axios.post('api/v1/auth-token/logout/',{headers: {'Content-Type': 'application/json','Authorization': `Token ${state.token}`}})
+    logout({ commit,dispatch }, formData){
+        axios.post('api/v1/custom-logout/',formData)
         .then((response)=>{
             
         })

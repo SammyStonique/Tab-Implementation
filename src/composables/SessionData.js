@@ -11,7 +11,7 @@ export function useFetchSessionData() {
     await axios.get('api/v1/get-session-data')
     .then((response)=>{
         if(response.data.msg == "Unauthorized"){
-          toast.error("Session Expired")
+          // toast.error("Session Expired")
           const newState ={
             activeComponent:"Login",
             isAuthenticated: false,

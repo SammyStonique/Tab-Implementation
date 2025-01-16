@@ -78,6 +78,8 @@ export default defineComponent({
     const isAuthenticated = computed(() => store.state.userData.isAuthenticated);
     const company_name = computed(() => store.state.userData.company_name);
     const user_names = computed(() => store.state.userData.user_names);
+    const userID = computed(() => store.state.userData.user_id);
+    const deviceID = computed(() => store.state.userData.device_id);
     const user_profile = computed(() => store.state.userData.user_profile);
 
     const showDropdown = () => {
@@ -85,8 +87,12 @@ export default defineComponent({
     };
 
     const logout = async () => {
-      await store.dispatch("userData/logout");
-    };
+            let formData = {
+                user_id: userID.value,
+                device_id: deviceID.value,
+            }
+            await store.dispatch("userData/logout", formData);
+        };
 
     const minimize = () => {
       emit('minimize');

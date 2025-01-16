@@ -74,7 +74,8 @@
           showLoader();
         let formData = {
           email: email.value,
-          password: password.value
+          password: password.value,
+          device: 'Web'
         };
   
         axios.post('api/v1/auth-token/login/', formData)
@@ -84,6 +85,7 @@
               const userData = {
                 user_id: response.data.user_id,
                 company_id: response.data.company_id,
+                device_id: response.data.device_id,
                 user_names: response.data.user_names,
                 user_profile: response.data.user_profile,
                 company_name: response.data.company_name,

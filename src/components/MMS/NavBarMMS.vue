@@ -47,55 +47,73 @@
             </div>
             <div class="web-links dropdown w-36">
                 <div class="py-1.5 px-2.5 h-full hover:bg-slate-500 hover:rounded">
-                <button class="flex w-full" @click="showPayrollDropdown">
+                <button class="flex w-full" @click="showSavingsDropdown">
                     <i class="fa fa-spinner pt-2 mr-2" aria-hidden="true"></i>
-                    <p class="pt-1.5">Payroll</p>
+                    <p class="pt-1.5">Savings</p>
                 </button>
                 </div>
-                <div class="dropdown-content w-52 absolute rounded border border-gray-200 bg-white shadow-slate-400 shadow-sm pt-2" v-if="payroll_dropdown">
+                <div class="dropdown-content w-52 absolute rounded border border-gray-200 bg-white shadow-slate-400 shadow-sm pt-2" v-if="savings_dropdown">
                     <div class="py-2 px-3 pl-4 w-full hover:bg-slate-500 hover:w-full">
-                        <button class="flex text-sm w-full" @click="openPage({'HR':'Payrolls'})">
+                        <button class="flex text-sm w-full" @click="openPage({'MMS':'Savings_Products'})">
                             <i class="fa fa-spinner pt-2 mr-2" aria-hidden="true"></i>
-                            <p class="">Payroll Processing</p>
+                            <p class="">Savings Products</p>
+                        </button>
+                    </div>
+                    <div class="py-2 px-3 pl-4 w-full hover:bg-slate-500 hover:w-full">
+                        <button class="flex text-sm w-full" @click="openPage({'MMS':'Savings_Accounts'})">
+                            <i class="fa fa-spinner pt-2 mr-2" aria-hidden="true"></i>
+                            <p class="">Savings Accounts</p>
+                        </button>
+                    </div>
+                    <div class="py-2 px-3 pl-4 w-full hover:bg-slate-500 hover:w-full">
+                        <button class="flex text-sm w-full" @click="openPage({'MMS':'Savings_Deposits'})">
+                            <i class="fa fa-spinner pt-2 mr-2" aria-hidden="true"></i>
+                            <p class="">Savings Deposits</p>
                         </button>
                     </div>
                 </div>
             </div>
-            <div class="web-links dropdown w-48">
+            <div class="web-links dropdown w-36">
                 <div class="py-1.5 px-2.5 h-full hover:bg-slate-500 hover:rounded">
-                <button class="flex w-full" @click="showLeaveDropdown">
+                <button class="flex w-full" @click="showSharesDropdown">
                     <i class="fa fa-calendar-alt pt-2 mr-2" aria-hidden="true"></i>
-                    <p class="pt-1.5">Leave Management</p>
+                    <p class="pt-1.5">Shares</p>
                 </button>
                 </div>
-                <div class="dropdown-content w-52 absolute rounded border border-gray-200 bg-white shadow-slate-400 shadow-sm pt-2" v-if="leave_dropdown">
+                <div class="dropdown-content w-52 absolute rounded border border-gray-200 bg-white shadow-slate-400 shadow-sm pt-2" v-if="shares_dropdown">
                     <div class="py-2 px-3 pl-4 w-full hover:bg-slate-500 hover:w-full">
-                        <button class="flex text-sm w-full" @click="openPage({'HR':'Leave_Applications'})">
+                        <button class="flex text-sm w-full" @click="openPage({'MMS':'Shares_Products'})">
                             <i class="fa fa-cubes pt-2 mr-2" aria-hidden="true"></i>
-                            <p class="">Leave Applications</p>
+                            <p class="">Shares Products</p>
                         </button>
                     </div>
                     <div class="py-2 px-3 pl-4 w-full hover:bg-slate-500 hover:w-full">
-                        <button class="flex text-sm w-full" @click="openPage({'HR':'Leave_Allocations'})">
+                        <button class="flex text-sm w-full" @click="openPage({'MMS':'Shares_Accounts'})">
                             <i class="fa fa-cubes pt-2 mr-2" aria-hidden="true"></i>
-                            <p class="">Leave Allocations</p>
+                            <p class="">Shares Accounts</p>
+                        </button>
+                    </div>
+                    <div class="py-2 px-3 pl-4 w-full hover:bg-slate-500 hover:w-full">
+                        <button class="flex text-sm w-full" @click="openPage({'MMS':'Shares_Deposits'})">
+                            <i class="fa fa-cubes pt-2 mr-2" aria-hidden="true"></i>
+                            <p class="">Shares Deposits</p>
                         </button>
                     </div>
                 </div>
             </div>
 
-            <div class="web-links dropdown w-48">
+            <div class="web-links dropdown w-36">
                 <div class="py-1.5 px-2.5 h-full hover:bg-slate-500 hover:rounded">
-                    <button class="flex w-full" @click="showAttendanceDropdown">
+                    <button class="flex w-full" @click="showLoansDropdown">
                         <i class="fa fa-clock pt-2 mr-2" aria-hidden="true"></i>
-                        <p class="pt-1.5">Employee Attendance</p>
+                        <p class="pt-1.5">Loans</p>
                     </button>
                 </div>
-                <div class="dropdown-content w-48 absolute rounded border border-gray-200 bg-white shadow-slate-400 shadow-sm" v-if="attendance_dropdown">
+                <div class="dropdown-content w-48 absolute rounded border border-gray-200 bg-white shadow-slate-400 shadow-sm" v-if="loans_dropdowns">
                     <div class="py-2 px-3 pl-4 w-full hover:bg-slate-500 hover:w-full">
-                        <button class="flex text-sm w-full" @click="openPage({'HR':'Timesheet'})">
+                        <button class="flex text-sm w-full" @click="openPage({'MMS':'Loan_Products'})">
                             <i class="fa fa-clock pt-2 mr-2" aria-hidden="true"></i>
-                            <p class="">Timesheet</p>
+                            <p class="">Loan Products</p>
                         </button>
                     </div>
                 </div>
@@ -211,74 +229,74 @@ export default defineComponent({
         const store = useStore();
         const user_profile = computed(()=> store.state.userData.user_profile);
         const settings_dropdown = ref(false);
-        const payroll_dropdown = ref(false);
-        const leave_dropdown = ref(false);
+        const savings_dropdown = ref(false);
+        const shares_dropdown = ref(false);
         const members_dropdown = ref(false);
-        const attendance_dropdown = ref(false);
+        const loans_dropdowns = ref(false);
         const finances_dropdown = ref(false);
         const userDetails = ref([]);
         const dropdown = ref(false);
 
-        const showPayrollDropdown = () =>{
-            leave_dropdown.value = false;
+        const showSavingsDropdown = () =>{
+            shares_dropdown.value = false;
             settings_dropdown.value = false;
             members_dropdown.value  = false;
-            attendance_dropdown.value = false;
+            loans_dropdowns.value = false;
             dropdown.value = true;
             finances_dropdown.value  = false;
-            payroll_dropdown.value  = !payroll_dropdown.value ;
+            savings_dropdown.value  = !savings_dropdown.value ;
         }
         const showMembersDropdown = () =>{
-            leave_dropdown.value = false;
+            shares_dropdown.value = false;
             settings_dropdown.value = false;
-            payroll_dropdown.value  = false;
-            attendance_dropdown.value = false;
+            savings_dropdown.value  = false;
+            loans_dropdowns.value = false;
             finances_dropdown.value  = false;
             dropdown.value = true;
             members_dropdown.value  = !members_dropdown.value ;
         }
-        const showLeaveDropdown = () =>{
+        const showSharesDropdown = () =>{
             settings_dropdown.value = false;
-            payroll_dropdown.value  = false;
+            savings_dropdown.value  = false;
             members_dropdown.value = false;
-            attendance_dropdown.value = false;
+            loans_dropdowns.value = false;
             finances_dropdown.value  = false;
             dropdown.value = true;
-            leave_dropdown.value  = !leave_dropdown.value ;
+            shares_dropdown.value  = !shares_dropdown.value ;
         }
         const showSettingsDropdown = () =>{
-            leave_dropdown.value = false;
-            payroll_dropdown.value  = false;
+            shares_dropdown.value = false;
+            savings_dropdown.value  = false;
             members_dropdown.value  = false;
-            attendance_dropdown.value = false;
+            loans_dropdowns.value = false;
             finances_dropdown.value  = false;
             dropdown.value = true;
             settings_dropdown.value  = !settings_dropdown.value ;
         }
-        const showAttendanceDropdown = () =>{
-            leave_dropdown.value = false;
-            payroll_dropdown.value  = false;
+        const showLoansDropdown = () =>{
+            shares_dropdown.value = false;
+            savings_dropdown.value  = false;
             members_dropdown.value  = false;
             settings_dropdown.value = false;
             finances_dropdown.value  = false;
             dropdown.value = true;
-            attendance_dropdown.value  = !attendance_dropdown.value ;
+            loans_dropdowns.value  = !loans_dropdowns.value ;
         }
         const showFinancesDropdown = () =>{
-            leave_dropdown.value = false;
-            payroll_dropdown.value  = false;
+            shares_dropdown.value = false;
+            savings_dropdown.value  = false;
             members_dropdown.value  = false;
             settings_dropdown.value = false;
-            attendance_dropdown.value = false;
+            loans_dropdowns.value = false;
             dropdown.value = true;
             finances_dropdown.value  = !finances_dropdown.value ;
         }
         const closeDropdown = () =>{
-            leave_dropdown.value = false;
-            payroll_dropdown.value  = false;
+            shares_dropdown.value = false;
+            savings_dropdown.value  = false;
             members_dropdown.value  = false;
             settings_dropdown.value = false;
-            attendance_dropdown.value = false;
+            loans_dropdowns.value = false;
             finances_dropdown.value  = false;
             dropdown.value = false;
         }
@@ -291,8 +309,8 @@ export default defineComponent({
             store.commit('modulesTab/MINIMIZE_TAB')
         };
         return{
-            dropdown, settings_dropdown, leave_dropdown, payroll_dropdown, attendance_dropdown,members_dropdown, finances_dropdown,
-            user_profile,userDetails, closeDropdown,showPayrollDropdown, showLeaveDropdown,showMembersDropdown, showAttendanceDropdown,
+            dropdown, settings_dropdown, shares_dropdown, savings_dropdown, loans_dropdowns,members_dropdown, finances_dropdown,
+            user_profile,userDetails, closeDropdown,showSavingsDropdown, showSharesDropdown,showMembersDropdown, showLoansDropdown,
             showSettingsDropdown, showFinancesDropdown,openPage,showHomePage
         }
     },

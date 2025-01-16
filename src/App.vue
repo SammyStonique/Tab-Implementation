@@ -19,6 +19,8 @@ export default{
   setup(){
     const store = useStore();
     const activeComponent = computed(() => store.state.userData.activeComponent);
+    const deviceID = computed(() => store.state.userData.device_id);
+    const userID = computed(() => store.state.userData.user_id);
 
     const isIdle = computed(() => {
         // Check if the user is idle
@@ -27,7 +29,11 @@ export default{
 
         // Commit mutation if the user is idle
         if (idleStatus == true && companyID != "" && activeComponent != 'Login') {
-            store.dispatch('userData/logout');
+          let formData = {
+                user_id: userID.value,
+                device_id: deviceID.value,
+            }
+            store.dispatch("userData/logout", formData);
         }
 
         return idleStatus;
@@ -41,6 +47,7 @@ export default{
         if(response.status == 200){
           const userData = {
               user_id: response.data.user_id,
+              device_id: response.data.device_id,
               company_id: response.data.company_id,
               user_names: response.data.user_names,
               user_profile: response.data.user_profile,

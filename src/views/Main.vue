@@ -94,6 +94,8 @@ export default {
         const loader = ref('none');
         const username = computed(() => store.state.userData.user_names);
         const companyID = computed(() => store.state.userData.company_id);
+        const deviceID = computed(() => store.state.userData.device_id);
+        const userID = computed(() => store.state.userData.user_id);
         const company_name = computed(() => store.state.userData.company_name);
         const companyList = computed(() => store.state.userData.user_companies);
         const hmsOpen = computed(() => store.state.modulesTab.modulePage);
@@ -149,7 +151,11 @@ export default {
         };
 
         const logout = async () => {
-            await store.dispatch("userData/logout");
+            let formData = {
+                user_id: userID.value,
+                device_id: deviceID.value,
+            }
+            await store.dispatch("userData/logout", formData);
         };
 
         onBeforeMount(() => {
