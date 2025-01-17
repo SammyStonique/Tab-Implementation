@@ -31,14 +31,14 @@
                     </div>
                     <div class="py-2 px-3 pl-4 w-full hover:bg-slate-500 hover:w-full">
                         <button class="flex text-sm w-full" @click="openPage({'MMS':'Member_Categories'})">
-                            <i class="fa fa-universal-access pt-2 mr-2" aria-hidden="true"></i>
+                            <i class="fa fa-bars pt-2 mr-2" aria-hidden="true"></i>
                             <p class="">Member Categories</p>
                         </button>
     
                     </div>
                     <div class="py-2 px-3 pl-4 w-full hover:bg-slate-500 hover:w-full">
                         <button class="flex text-sm w-full" @click="openPage({'MMS':'Member_Sponsors'})">
-                            <i class="fa fa-universal-access pt-2 mr-2" aria-hidden="true"></i>
+                            <i class="fa fa-hands-helping pt-2 mr-2" aria-hidden="true"></i>
                             <p class="">Member Sponsors</p>
                         </button>
     
@@ -48,26 +48,26 @@
             <div class="web-links dropdown w-36">
                 <div class="py-1.5 px-2.5 h-full hover:bg-slate-500 hover:rounded">
                 <button class="flex w-full" @click="showSavingsDropdown">
-                    <i class="fa fa-spinner pt-2 mr-2" aria-hidden="true"></i>
+                    <i class="fa fa-piggy-bank pt-2 mr-2" aria-hidden="true"></i>
                     <p class="pt-1.5">Savings</p>
                 </button>
                 </div>
                 <div class="dropdown-content w-52 absolute rounded border border-gray-200 bg-white shadow-slate-400 shadow-sm pt-2" v-if="savings_dropdown">
                     <div class="py-2 px-3 pl-4 w-full hover:bg-slate-500 hover:w-full">
                         <button class="flex text-sm w-full" @click="openPage({'MMS':'Savings_Products'})">
-                            <i class="fa fa-spinner pt-2 mr-2" aria-hidden="true"></i>
+                            <i class="fa fa-piggy-bank pt-2 mr-2" aria-hidden="true"></i>
                             <p class="">Savings Products</p>
                         </button>
                     </div>
                     <div class="py-2 px-3 pl-4 w-full hover:bg-slate-500 hover:w-full">
                         <button class="flex text-sm w-full" @click="openPage({'MMS':'Saving_Accounts'})">
-                            <i class="fa fa-spinner pt-2 mr-2" aria-hidden="true"></i>
+                            <i class="fa fa-coins pt-2 mr-2" aria-hidden="true"></i>
                             <p class="">Savings Accounts</p>
                         </button>
                     </div>
                     <div class="py-2 px-3 pl-4 w-full hover:bg-slate-500 hover:w-full">
-                        <button class="flex text-sm w-full" @click="openPage({'MMS':'Savings_Deposits'})">
-                            <i class="fa fa-spinner pt-2 mr-2" aria-hidden="true"></i>
+                        <button class="flex text-sm w-full" @click="openPage({'MMS':'Saving_Deposits'})">
+                            <i class="fa fa-arrow-circle-down pt-2 mr-2" aria-hidden="true"></i>
                             <p class="">Savings Deposits</p>
                         </button>
                     </div>
@@ -76,26 +76,26 @@
             <div class="web-links dropdown w-36">
                 <div class="py-1.5 px-2.5 h-full hover:bg-slate-500 hover:rounded">
                 <button class="flex w-full" @click="showSharesDropdown">
-                    <i class="fa fa-calendar-alt pt-2 mr-2" aria-hidden="true"></i>
+                    <i class="fa fa-chart-line pt-2 mr-2" aria-hidden="true"></i>
                     <p class="pt-1.5">Shares</p>
                 </button>
                 </div>
                 <div class="dropdown-content w-52 absolute rounded border border-gray-200 bg-white shadow-slate-400 shadow-sm pt-2" v-if="shares_dropdown">
                     <div class="py-2 px-3 pl-4 w-full hover:bg-slate-500 hover:w-full">
                         <button class="flex text-sm w-full" @click="openPage({'MMS':'Shares_Products'})">
-                            <i class="fa fa-cubes pt-2 mr-2" aria-hidden="true"></i>
+                            <i class="fa fa-chart-line pt-2 mr-2" aria-hidden="true"></i>
                             <p class="">Shares Products</p>
                         </button>
                     </div>
                     <div class="py-2 px-3 pl-4 w-full hover:bg-slate-500 hover:w-full">
                         <button class="flex text-sm w-full" @click="openPage({'MMS':'Share_Accounts'})">
-                            <i class="fa fa-cubes pt-2 mr-2" aria-hidden="true"></i>
+                            <i class="fa fa-coins pt-2 mr-2" aria-hidden="true"></i>
                             <p class="">Shares Accounts</p>
                         </button>
                     </div>
                     <div class="py-2 px-3 pl-4 w-full hover:bg-slate-500 hover:w-full">
-                        <button class="flex text-sm w-full" @click="openPage({'MMS':'Shares_Deposits'})">
-                            <i class="fa fa-cubes pt-2 mr-2" aria-hidden="true"></i>
+                        <button class="flex text-sm w-full" @click="openPage({'MMS':'Share_Deposits'})">
+                            <i class="fa fa-arrow-circle-down pt-2 mr-2" aria-hidden="true"></i>
                             <p class="">Shares Deposits</p>
                         </button>
                     </div>
@@ -105,14 +105,14 @@
             <div class="web-links dropdown w-36">
                 <div class="py-1.5 px-2.5 h-full hover:bg-slate-500 hover:rounded">
                     <button class="flex w-full" @click="showLoansDropdown">
-                        <i class="fa fa-clock pt-2 mr-2" aria-hidden="true"></i>
+                        <i class="fa fa-file-contract pt-2 mr-2" aria-hidden="true"></i>
                         <p class="pt-1.5">Loans</p>
                     </button>
                 </div>
                 <div class="dropdown-content w-48 absolute rounded border border-gray-200 bg-white shadow-slate-400 shadow-sm" v-if="loans_dropdowns">
                     <div class="py-2 px-3 pl-4 w-full hover:bg-slate-500 hover:w-full">
                         <button class="flex text-sm w-full" @click="openPage({'MMS':'Loan_Products'})">
-                            <i class="fa fa-clock pt-2 mr-2" aria-hidden="true"></i>
+                            <i class="fa fa-file-contract pt-2 mr-2" aria-hidden="true"></i>
                             <p class="">Loan Products</p>
                         </button>
                     </div>

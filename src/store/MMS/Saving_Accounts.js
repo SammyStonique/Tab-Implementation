@@ -80,7 +80,7 @@ const actions = {
     axios.post(`api/v1/get-saving-accounts/`,formData)
     .then((response)=>{
       for(let i=0; i< response.data.length; i++){
-        state.accountArr.push((response.data[i].account_number + " - " + response.data[i].member.member_name));
+        state.accountArr.push((response.data[i].account_number + " - " + response.data[i].member.member_name + " - " + response.data[i].saving_product.product_name));
       }
       commit('LIST_ACCOUNTS', response.data);
     })
@@ -105,7 +105,7 @@ const actions = {
     
   },
   handleSelectedAccount({ commit, state }, option){
-    const selectedAccount = state.accountsList.find(account => (account.account_code + " - " +account.member.member_name) === option);
+    const selectedAccount = state.accountsList.find(account => (account.account_number + " - " + account.member.member_name  + " - " + account.saving_product.product_name) === option);
     if (selectedAccount) {
         state.accountID = selectedAccount.saving_account_id;
         state.accountNumber = selectedAccount.account_number;
