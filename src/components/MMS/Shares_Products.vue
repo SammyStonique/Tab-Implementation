@@ -3,20 +3,19 @@
         <PageComponent 
             :loader="loader" @showLoader="showLoader" @hideLoader="hideLoader"
             :addButtonLabel="addButtonLabel"
-            @handleAddNew="addNewMember"
+            @handleAddNew="addNewProduct"
             :searchFilters="searchFilters"
             :dropdownOptions="dropdownOptions"
             @handleDynamicOption="handleDynamicOption"
-            @searchPage="searchMembers"
+            @searchPage="searchProducts"
             @resetFilters="resetFilters"
-            @importData="importMembers"
-            @removeItem="removeMember"
-            @removeSelectedItems="removeMembers"
-            @printList="printMembersList"
+            @removeItem="removeProduct"
+            @removeSelectedItems="removeProducts"
+            @printList="printproductsList"
             :addingRight="addingRight"
             :rightsModule="rightsModule"
             :columns="tableColumns"
-            :rows="membersList"
+            :rows="productsList"
             :actions="actions"
             :idField="idField"
             @handleSelectionChange="handleSelectionChange"
@@ -44,15 +43,15 @@
             <input v-model="exit_date"  type="date" class="`bg-slate-50 rounded pl-3 border border-gray-400 text-base w-full`"/>
         </div>
         <div class="mb-8 w-full">         
-            <label for="">Select Member Status:</label><br />
-            <select v-model="member_status" class="bg-slate-50 rounded border border-gray-400 text-sm pl-2 pt-2 w-full">
+            <label for="">Select Product Status:</label><br />
+            <select v-model="product_status" class="bg-slate-50 rounded border border-gray-400 text-sm pl-2 pt-2 w-full">
                 <option value="" selected disabled>Select Status</option>
                 <option value="Active">Active</option>
                 <option value="Inactive">Inactive</option>
           </select>
         </div>
         <div class="flex-1 basis-full px-2">
-            <button @click="changeMemberStatus" class="rounded bg-green-400 text-sm mr-2  text-white px-2 py-1.5"><i class="fa fa-check-circle text-xs mr-1.5" aria-hidden="true"></i>Change Status</button>
+            <button @click="changeProductStatus" class="rounded bg-green-400 text-sm mr-2  text-white px-2 py-1.5"><i class="fa fa-check-circle text-xs mr-1.5" aria-hidden="true"></i>Change Status</button>
         </div>
     </MovableModal>
 
@@ -71,7 +70,7 @@ import SearchableDropdown from '@/components/SearchableDropdown.vue';
 import Swal from 'sweetalert2';
 
 export default{
-    name: 'Members',
+    name: 'Shares_Products',
     components:{
         PageComponent,MovableModal,SearchableDropdown,DynamicForm
     },
@@ -82,15 +81,15 @@ export default{
         const displayButtons = ref(true);
         const unitComponentKey = ref(0);
         const trans_modal_loader = ref('none');
-        const member_status = ref('');
+        const product_status = ref('');
         const exit_date = ref('');
-        const idField = 'member_id';
-        const addButtonLabel = ref('New Member');
-        const addingRight = ref('Adding Members');
+        const idField = 'shares_product_id';
+        const addButtonLabel = ref('New Shares Product');
+        const addingRight = ref('Adding Shares Products');
         const rightsModule = ref('MMS');
         const submitButtonLabel = ref('Add');
         const selectedIds = ref([]);
-        const membersList = ref([]);
+        const productsList = ref([]);
         const propResults = ref([]);
         const propArrLen = ref(0);
         const propCount = ref(0);
@@ -100,8 +99,8 @@ export default{
         const currentPage = ref(1);
         const showNextBtn = ref(false);
         const showPreviousBtn = ref(false);
-        const detailsTitle = ref('Member Documents');
-        const transTitle = ref('Changing Member Status');
+        const detailsTitle = ref('Approval');
+        const transTitle = ref('Changing Product Status');
         const transModalVisible = ref(false);
         const dropdownWidth = ref("500px")
         const modal_top = ref('200px');
@@ -112,40 +111,32 @@ export default{
         const showModal = ref(false);
         const tableColumns = ref([
             {type: "checkbox"},
-            {label: "Member No", key:"member_number"},
-            {label: "Member Name", key:"member_name"},
-            {label: "Phone No", key: "phone_number"},
-            {label: "Email", key:"email"},
+            {label: "Date", key:"date"},
+            {label: "Code", key:"product_code"},
+            {label: "Product Name", key:"product_name"},
+            {label: "Amount", key: "amount"},
+            {label: "Type", key: "share_type"},
             {label: "Category", key:"member_category"},
-            {label: "Sponsor", key:"member_sponsor"},
-            {label: "Gender", key:"gender"},
+            {label: "Mandatory", key:"mandatory"},
         ])
         const actions = ref([
-            {name: 'edit', icon: 'fa fa-edit', title: 'Edit Member', rightName: 'Editing Members'},
-            {name: 'view', icon: 'fa fa-file-pdf-o', title: 'View Profile', rightName: 'Viewing Member Profile'},
-            {name: 'transfer', icon: 'fa fa-exchange', title: 'Change Member Status', rightName: 'Changing Member Status'},
-            {name: 'delete', icon: 'fa fa-trash', title: 'Delete Member', rightName: 'Deleting Members'},
+            {name: 'edit', icon: 'fa fa-edit', title: 'Edit Product', rightName: 'Editing Shares Products'},
+            {name: 'transfer', icon: 'fa fa-exchange', title: 'Change Product Status', rightName: 'Changing Product Status'},
+            {name: 'delete', icon: 'fa fa-trash', title: 'Delete Product', rightName: 'Deleting Shares Products'},
         ])
         const companyID = computed(()=> store.state.userData.company_id);
-        const memberID = ref("");
+        const productID = ref("");
         const dropdownOptions = ref([
             
         ]);
         
         const name_search = ref('');
-        const member_number_search = ref("");
+        const product_code_search = ref("");
         const active_status_search = ref("");
-        const phone_number_search = ref("");
-        const gender_search = ref("");
  
         const searchFilters = ref([
             {type:'text', placeholder:"Name...", value: name_search, width:48,},
-            {type:'text', placeholder:"Member No...", value: member_number_search, width:48,},
-            {type:'text', placeholder:"Phone No...", value: phone_number_search, width:48,},
-            {
-                type:'dropdown', placeholder:"Gender..", value: gender_search, width:40,
-                options: [{text:'Male',value:'Male'},{text:'Female',value:'Female'},{text:'Others',value:'Others'}]
-            },
+            {type:'text', placeholder:"Code...", value: product_code_search, width:48,},
             {
                 type:'dropdown', placeholder:"Status..", value: active_status_search, width:40,
                 options: [{text:'Active',value:'Active'},{text:'Inactive',value:'Inactive'}]
@@ -154,59 +145,55 @@ export default{
         const handleSelectionChange = (ids) => {
             selectedIds.value = ids;
         };
-        const importMembers = () =>{
-            store.commit('pageTab/ADD_PAGE', {'MMS':'Import_Members'})
-            store.state.pageTab.mmsActiveTab = 'Import_Members';
-        }
-        const removeMember = async() =>{
+        const removeProduct = async() =>{
             if(selectedIds.value.length == 1){
                 let formData = {
                     company: companyID.value,
-                    member: selectedIds.value
+                    savings_product: selectedIds.value
                 }
                 try{
-                    const response = await store.dispatch('Members/deleteMember',formData)
+                    const response = await store.dispatch('Shares_Products/deleteSharesProduct',formData)
                     if(response && response.status == 200){
-                        toast.success("Member Removed Succesfully");
-                        searchMembers();
+                        toast.success("Product Removed Succesfully");
+                        searchProducts();
                     }
                 }
                 catch(error){
                     console.error(error.message);
-                    toast.error('Failed to remove Member: ' + error.message);
+                    toast.error('Failed to remove Product: ' + error.message);
                 }
                 finally{
                     selectedIds.value = [];
                 }
             }else if(selectedIds.value.length > 1){
-                toast.error("You have selected more than 1 Member") 
+                toast.error("You have selected more than 1 Product") 
             }else{
-                toast.error("Please Select A Member To Remove")
+                toast.error("Please Select A Product To Remove")
             }
         }
-        const removeMembers = async() =>{
+        const removeProducts = async() =>{
             if(selectedIds.value.length){
                 let formData = {
                     company: companyID.value,
-                    member: selectedIds.value
+                    savings_product: selectedIds.value
                 }
                 try{
-                    const response = await store.dispatch('Members/deleteMember',formData)
+                    const response = await store.dispatch('Shares_Products/deleteSharesProduct',formData)
                     if(response && response.status == 200){
-                        toast.success("Member(s) Removed Succesfully");
+                        toast.success("Product(s) Removed Succesfully");
                         searchPropertys();
                     }
                 }
                 catch(error){
                     console.error(error.message);
-                    toast.error('Failed to remove Member: ' + error.message);
+                    toast.error('Failed to remove Product: ' + error.message);
                 }
                 finally{
                     selectedIds.value = [];
 
                 }
             }else{
-                toast.error("Please Select A Member To Remove")
+                toast.error("Please Select A Product To Remove")
             }
         };
         const showTransModalLoader = () =>{
@@ -215,10 +202,10 @@ export default{
         const hideTransModalLoader = () =>{
             trans_modal_loader.value = "none";
         }
-        const changeMemberStatus = async() =>{
+        const changeProductStatus = async() =>{
             showTransModalLoader();
             let formData = {
-                member: memberID.value,
+                savings_product: productID.value,
                 company: companyID.value
             }
             Swal.fire({
@@ -236,7 +223,7 @@ export default{
             showLoaderOnConfirm: true,
             }).then((result) => {
             if (result.value) {
-                axios.post(`api/v1/change-member-status/`,formData)
+                axios.post(`api/v1/change-shares-product-status/`,formData)
                 .then((response)=>{
                 if(response.data.msg == "Success"){
                     Swal.fire("Status changed succesfully!", {
@@ -244,10 +231,10 @@ export default{
                     }); 
                     unitComponentKey.value += 1;
                     closeTransModal();
-                    searchMembers();
+                    searchProducts();
                 }else{
                     Swal.fire({
-                    title: "Error Changing Member Status",
+                    title: "Error Changing Product Status",
                     icon: "warning",
                     });
                 }                   
@@ -261,14 +248,14 @@ export default{
                     hideTransModalLoader();
                 })
             }else{
-                Swal.fire(`Member Status has not been changed!`);
+                Swal.fire(`Product Status has not been changed!`);
                 hideTransModalLoader();
             }
             })     
         };
         const closeTransModal = () =>{
             transModalVisible.value = false;
-            memberID.value = null;
+            productID.value = null;
             hideTransModalLoader();
         };
         const showLoader = () =>{
@@ -278,26 +265,24 @@ export default{
             loader.value = "none";
         }
        
-        const searchMembers = () =>{
+        const searchProducts = () =>{
             showLoader();
             showNextBtn.value = false;
             showPreviousBtn.value = false;
             let formData = {
-                member_name: name_search.value,
-                member_number: member_number_search.value,
+                product_name: name_search.value,
+                product_code: product_code_search.value,
                 active_status: active_status_search.value,
-                gender: gender_search.value,
-                phone_number: phone_number_search.value,
                 company_id: companyID.value,
                 page_size: selectedValue.value
             } 
             axios
-            .post(`api/v1/members-search/?page=${currentPage.value}`,formData)
+            .post(`api/v1/share-products-search/?page=${currentPage.value}`,formData)
             .then((response)=>{
-                membersList.value = response.data.results;
-                store.commit('Members/LIST_MEMBERS', membersList.value)
+                productsList.value = response.data.results;
+                store.commit('Shares_Products/LIST_PRODUCTS', productsList.value)
                 propResults.value = response.data;
-                propArrLen.value = membersList.value.length;
+                propArrLen.value = productsList.value.length;
                 propCount.value = propResults.value.count;
                 pageCount.value = Math.ceil(propCount.value / selectedValue.value);
                 if(response.data.next){
@@ -316,16 +301,14 @@ export default{
         };
         const selectSearchQuantity = (newValue) =>{
             selectedValue.value = newValue;
-            searchMembers(selectedValue.value);
+            searchProducts(selectedValue.value);
         };
         const resetFilters = () =>{
             selectedValue.value = 50;
             name_search.value = "";
-            gender_search.value = "";
-            phone_number_search.value = "";
             active_status_search.value = "";
-            member_number_search.value = "";
-            searchMembers();
+            product_code_search.value = "";
+            searchProducts();
         }
         const loadPrev = () =>{
             if (currentPage.value <= 1){
@@ -334,7 +317,7 @@ export default{
                 currentPage.value -= 1;
             }
             
-            searchMembers();
+            searchProducts();
             // scrollToTop();
         }
         const loadNext = () =>{
@@ -344,62 +327,51 @@ export default{
                 currentPage.value += 1;
             }
             
-            searchMembers();
+            searchProducts();
             // scrollToTop(); 
         }
         const firstPage = ()=>{
             currentPage.value = 1;
-            searchMembers();
+            searchProducts();
             // scrollToTop();
         }
         const lastPage = () =>{
             currentPage.value = pageCount.value;
-            searchMembers();
+            searchProducts();
             // scrollToTop();
         }
-        const addNewMember = async() =>{
-            store.commit('Members/initializeStore');
-            await store.dispatch('Members/updateState', {selectedEmployee: null,selectedCategory: null,selectedSponsor: null,selectedCurrency: null,isEditing: false});
-            await store.dispatch('Membership_Fees/updateState', {feeArray: []})
-            store.commit('pageTab/ADD_PAGE', {'MMS':'Member_Details'});
-            store.state.pageTab.mmsActiveTab = 'Member_Details';          
+        const addNewProduct = async() =>{
+            store.commit('Shares_Products/initializeStore');
+            await store.dispatch('Shares_Products/updateState', {selectedProduct: null,selectedCategory: null,selectedDeclarationLedger: null,selectedWithholdingLedger: null,isEditing: false});
+            store.commit('pageTab/ADD_PAGE', {'MMS':'Share_Product_Details'});
+            store.state.pageTab.mmsActiveTab = 'Share_Product_Details';          
         }
         const handleActionClick = async(rowIndex, action, row) =>{
             if( action == 'edit'){
-                await store.dispatch('Members/updateState', {selectedMember: null,selectedCategory: null,selectedSponsor: null,selectedCurrency: null,isEditing: false});
-                const memberID = row[idField];
+                await store.dispatch('Shares_Products/updateState', {selectedProduct: null,selectedCategory: null,selectedDeclarationLedger: null,selectedWithholdingLedger: null,isEditing: false});
+                const productID = row[idField];
                 let formData = {
                     company: companyID.value,
-                    member: memberID
+                    shares_product: productID
                 }
-                await store.dispatch('Members/fetchMember',formData).
+                await store.dispatch('Shares_Products/fetchSharesProduct',formData).
                 then(()=>{
-                    store.commit('pageTab/ADD_PAGE', {'MMS':'Member_Details'})
-                    store.state.pageTab.mmsActiveTab = 'Member_Details';
+                    store.commit('pageTab/ADD_PAGE', {'MMS':'Share_Product_Details'})
+                    store.state.pageTab.mmsActiveTab = 'Share_Product_Details';
                 })
             }else if(action == 'delete'){
-                const memberID = [row[idField]];
+                const productID = [row[idField]];
                 let formData = {
                     company: companyID.value,
-                    member: memberID
+                    shares_product: productID
                 }
-                await store.dispatch('Members/deleteMember',formData).
+                await store.dispatch('Shares_Products/deleteSharesProduct',formData).
                 then(()=>{
-                    searchMembers();
+                    searchProducts();
                 })
-            }else if(action == 'view'){
-                await store.dispatch('Members/updateState', {currentTab: 'Members_Biodata',selectedMember: null,selectedCategory: null,selectedSponsor: null,selectedCurrency: null,isEditing: false});
-                const memberID = row[idField];
-                let formData = {
-                    company: companyID.value,
-                    member: memberID
-                }
-                await store.dispatch('Members/fetchMember',formData)
-                store.commit('pageTab/ADD_PAGE', {'MMS':'Member_Profile'})
-                store.state.pageTab.mmsActiveTab = 'Member_Profile';
             }else if(action == 'transfer'){
                 hideTransModalLoader();
-                memberID.value = row['member_id'];
+                productID.value = row['shares_product_id'];
                 transModalVisible.value = true;
             }
         };
@@ -408,19 +380,17 @@ export default{
             
         };
         
-        const printMembersList = () =>{
+        const printproductsList = () =>{
             showLoader();
             let formData = {
-                member_name: name_search.value,
-                staff_number: member_number_search.value,
+                product_name: name_search.value,
+                product_code: product_code_search.value,
                 active_status: active_status_search.value,
-                gender: gender_search.value,
-                phone_number: phone_number_search.value,
                 company_id: companyID.value,
             } 
 
             axios
-            .post("api/v1/export-members-pdf/", formData, { responseType: 'blob' })
+            .post("api/v1/export-share-products-pdf/", formData, { responseType: 'blob' })
                 .then((response)=>{
                     if(response.status == 200){
                         const blob1 = new Blob([response.data]);
@@ -440,17 +410,17 @@ export default{
             showDetails.value = false;
         };
         onBeforeMount(()=>{
-            searchMembers();
+            searchProducts();
             
         })
         return{
-            searchMembers,resetFilters, addButtonLabel, searchFilters, tableColumns, membersList,dropdownWidth,displayButtons,
+            searchProducts,resetFilters, addButtonLabel, searchFilters, tableColumns, productsList,dropdownWidth,displayButtons,
             propResults, propArrLen, propCount, pageCount, showNextBtn, showPreviousBtn,flex_basis,flex_basis_percentage,
             loadPrev, loadNext, firstPage, lastPage, idField, actions, handleActionClick,showDetails,detailsTitle,hideDetails,
-            submitButtonLabel, showModal, addNewMember, showLoader, loader, hideLoader, importMembers, removeMember, removeMembers,
-            handleSelectionChange,addingRight,rightsModule,printMembersList,selectSearchQuantity,selectedValue,
-            modal_left,modal_top,modal_width,trans_modal_loader,transModalVisible,transTitle,showTransModalLoader,hideTransModalLoader,changeMemberStatus,closeTransModal,
-            dropdownOptions,handleDynamicOption,member_status,exit_date
+            submitButtonLabel, showModal, addNewProduct, showLoader, loader, hideLoader, removeProduct, removeProducts,
+            handleSelectionChange,addingRight,rightsModule,printproductsList,selectSearchQuantity,selectedValue,
+            modal_left,modal_top,modal_width,trans_modal_loader,transModalVisible,transTitle,showTransModalLoader,hideTransModalLoader,changeProductStatus,closeTransModal,
+            dropdownOptions,handleDynamicOption,product_status,exit_date
         }
     }
 };

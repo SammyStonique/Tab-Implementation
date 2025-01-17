@@ -7,6 +7,7 @@ const state = {
   productArray: [],
   productID: '',
   productName: '',
+  productAmount: 0,
   selectedProduct: null,
   selectedDeclarationLedger: null,
   selectedWithholdingLedger: null,
@@ -21,6 +22,7 @@ const mutations = {
     state.productArray = [];
     state.productID = "";
     state.productName = "";
+    state.productAmount = 0;
     state.selectedProduct = null;
     state.selectedDeclarationLedger = null;
     state.selectedWithholdingLedger = null;
@@ -99,7 +101,7 @@ const actions = {
       state.selectedProduct = response.data;
       const selectedDeclarationLedger = response.data.declaration_posting_account.ledger_code + " - " + response.data.declaration_posting_account.ledger_name;
       const selectedWithholdingLedger = response.data.withholding_posting_account.ledger_code + " - " + response.data.withholding_posting_account.ledger_name;
-      const selectedCategory = response.data.member_category.category_name;
+      const selectedCategory = (response.data.member_category != null) ? (response.data.member_category.category_name) : "";
       commit('SET_SELECTED_PRODUCT',response.data);
       commit('SET_SELECTED_CATEGORY',selectedCategory);
       commit('SET_SELECTED_DECLARATION_LEDGER', selectedDeclarationLedger);
@@ -115,6 +117,7 @@ const actions = {
     if (selectedProduct) {
         state.productID = selectedProduct.shares_product_id;
         state.productName = selectedProduct.product_name;
+        state.productAmount = selectedProduct.amount;
         state.productArray = [...state.productArray, selectedProduct];
     }
     commit('PRODUCTS_ARRAY', state.productArray);

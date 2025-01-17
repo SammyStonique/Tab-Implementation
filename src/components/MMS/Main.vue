@@ -38,6 +38,10 @@ import Member_Invoices from '@/components/MMS/Member_Invoices.vue';
 import Member_Receipts from '@/components/MMS/Member_Receipts.vue';
 import Savings_Products from '@/components/MMS/Savings_Products.vue';
 import Saving_Product_Details from '@/components/MMS/Saving_Product_Details.vue';
+import Shares_Products from '@/components/MMS/Shares_Products.vue';
+import Share_Product_Details from '@/components/MMS/Share_Product_Details.vue';
+import Saving_Accounts from '@/components/MMS/Saving_Accounts.vue';
+import Share_Accounts from '@/components/MMS/Share_Accounts.vue';
 
 import Default_Settings from '@/components/SET/Default_Settings.vue';
 
@@ -48,7 +52,7 @@ export default{
         PagesTab,
         Dashboard,
         Member_Categories,Member_Sponsors,Members,Member_Details,Membership_Fees,
-        Member_Invoices,Member_Receipts,Savings_Products,Saving_Product_Details,
+        Member_Invoices,Member_Receipts,Savings_Products,Saving_Product_Details,Shares_Products,Share_Product_Details,Saving_Accounts,Share_Accounts,
 
         Default_Settings
     },

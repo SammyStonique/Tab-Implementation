@@ -2,7 +2,7 @@
     <PageStyleComponent :key="mainComponentKey" :loader="loader" @showLoader="showLoader" @hideLoader="hideLoader">
         <template v-slot:body>
             <div class="mt-6">
-                <DynamicForm  :fields="formFields" :flex_basis="flex_basis" :flex_basis_percentage="flex_basis_percentage" :displayButtons="displayButtons" @handleSubmit="saveSavingsProduct" @handleReset="handleReset"> 
+                <DynamicForm  :fields="formFields" :flex_basis="flex_basis" :flex_basis_percentage="flex_basis_percentage" :displayButtons="displayButtons" @handleSubmit="saveSharesProduct" @handleReset="handleReset"> 
                 </DynamicForm>
             </div>
             
@@ -19,7 +19,7 @@ import { useDateFormatter } from '@/composables/DateFormatter';
 import { useToast } from "vue-toastification";
 
 export default defineComponent({
-    name: 'Saving_Product_Details',
+    name: 'Share_Product_Details',
     components:{
         PageStyleComponent, DynamicForm,
     },
@@ -35,13 +35,13 @@ export default defineComponent({
         const errors = ref([]);
         const companyID = computed(()=> store.state.userData.company_id);
         const displayButtons = ref(true);
-        const isEditing = computed(()=> store.state.Savings_Products.isEditing);
+        const isEditing = computed(()=> store.state.Shares_Products.isEditing);
         const flex_basis = ref('');
         const flex_basis_percentage = ref('');
-        const selectedProduct = computed(()=> store.state.Savings_Products.selectedProduct);
-        const selectedWithdrawalLedger = computed(()=> store.state.Savings_Products.selectedWithdrawalLedger);
-        const selectedInterestLedger = computed(()=> store.state.Savings_Products.selectedInterestLedger);
-        const selectedCategory = computed(()=> store.state.Savings_Products.selectedCategory);
+        const selectedProduct = computed(()=> store.state.Shares_Products.selectedProduct);
+        const selectedWithholdingLedger = computed(()=> store.state.Shares_Products.selectedWithholdingLedger);
+        const selectedDeclarationLedger = computed(()=> store.state.Shares_Products.selectedDeclarationLedger);
+        const selectedCategory = computed(()=> store.state.Shares_Products.selectedCategory);
         const categoryArray = computed(() => store.state.Member_Categories.categoryArr);
         const categoryID = ref('');
         const ledgerArray = computed(() => store.state.Ledgers.ledgerArr);
@@ -63,27 +63,27 @@ export default defineComponent({
         const fetchAllLedgers = async() =>{
             await store.dispatch('Ledgers/fetchLedgers', {company:companyID.value})
         };
-        const handleSelectedInterestLedger = async(option) =>{
+        const handleSelectedDeclarationLedger = async(option) =>{
             await store.dispatch('Ledgers/handleSelectedLedger', option)
             intLedgerID.value = store.state.Ledgers.ledgerID;
             if(selectedProduct.value){
-                selectedProduct.value.interest_posting_account.ledger_id = intLedgerID.value;
+                selectedProduct.value.declaration_posting_account.ledger_id = intLedgerID.value;
                 intLedgerValue.value = intLedgerID.value
             }
         };
-        const clearSelectedInterestLedger = async() =>{
+        const clearSelectedDeclarationLedger = async() =>{
             await store.dispatch('Ledgers/updateState', {ledgerID: ''});
             intLedgerID.value = store.state.Ledgers.ledgerID;
         };
-        const handleSelectedWithdrawalLedger = async(option) =>{
+        const handleSelectedWithholdingLedger = async(option) =>{
             await store.dispatch('Ledgers/handleSelectedLedger', option)
             whlLedgerID.value = store.state.Ledgers.ledgerID;
             if(selectedProduct.value){
-                selectedProduct.value.withdrawal_posting_account.ledger_id = whlLedgerID.value;
+                selectedProduct.value.withholding_posting_account.ledger_id = whlLedgerID.value;
                 whlLedgerValue.value = whlLedgerID.value
             }
         };
-        const clearSelectedWithdrawalLedger = async() =>{
+        const clearSelectedWithholdingLedger = async() =>{
             await store.dispatch('Ledgers/updateState', {ledgerID: ''});
             whlLedgerID.value = store.state.Ledgers.ledgerID;
         };
@@ -93,10 +93,10 @@ export default defineComponent({
 
         });
         const intLedgerValue = computed(() => {
-            return (selectedProduct.value && selectedProduct.value.interest_posting_account && !intLedgerID.value) ? selectedProduct.value.interest_posting_account.ledger_id : intLedgerID.value;
+            return (selectedProduct.value && selectedProduct.value.declaration_posting_account && !intLedgerID.value) ? selectedProduct.value.declaration_posting_account.ledger_id : intLedgerID.value;
         });
         const whlLedgerValue = computed(() => {
-            return (selectedProduct.value && selectedProduct.value.withdrawal_posting_account && !whlLedgerID.value) ? selectedProduct.value.withdrawal_posting_account.ledger_id : whlLedgerID.value;
+            return (selectedProduct.value && selectedProduct.value.withholding_posting_account && !whlLedgerID.value) ? selectedProduct.value.withholding_posting_account.ledger_id : whlLedgerID.value;
         });
         const updateFormFields = () => {
             formFields.value = [
@@ -109,28 +109,28 @@ export default defineComponent({
                 { type: 'text', name: 'product_code',label: "Code", value: selectedProduct.value?.product_code || '', required: false },
                 { type: 'text', name: 'product_name',label: "Name", value: selectedProduct.value?.product_name || '', required: true },
                 { type: 'date', name: 'date',label: "Effective Date", value: selectedProduct.value?.date || '', required: true, placeholder: '' },
-                { type: 'dropdown', name: 'charge_mode',label: "Contribution Frequency", value: selectedProduct.value?.charge_mode || '', placeholder: "", required: true, options: [{ text: 'One-Off', value: 'One-Off' }, { text: 'Weekly', value: 'Weekly' },{ text: 'Monthly', value: 'Monthly' }, { text: 'Annually', value: 'Annually' }, { text: 'Any Amount', value: 'Any Amount' }] },
-                { type: 'text', name: 'min_amount',label: "Min Amount", value: selectedProduct.value?.min_amount || '', required: true },
-                { type: 'text', name: 'max_amount',label: "Max Amount", value: selectedProduct.value?.max_amount || '0', required: false },
-                { type: 'text', name: 'interest_rate',label: "Interest Rate", value: selectedProduct.value?.interest_rate || '0', required: false },
-                { type: 'dropdown', name: 'interest_calculation',label: "Interest Calculation", value: selectedProduct.value?.interest_calculation || 'Closing Balance', placeholder: "", required: true, options: [{ text: 'Closing Balance', value: 'Closing Balance' }, { text: 'Pro-Rata Basis', value: 'Pro-Rata Basis' }] },
+                { type: 'dropdown', name: 'share_type',label: "Share Type", value: selectedProduct.value?.share_type || '', placeholder: "", required: true, options: [{ text: 'Capital', value: 'Capital' }, { text: 'Ordinary', value: 'Ordinary' },{ text: 'Preferential', value: 'Preferential' }, { text: 'Reserved', value: 'Reserved' }] },
+                { type: 'text', name: 'amount',label: "Amount", value: selectedProduct.value?.amount || '', required: true },
+                { type: 'text', name: 'dividend_rate',label: "Dividend Rate", value: selectedProduct.value?.dividend_rate || '0', required: false },
+                { type: 'dropdown', name: 'dividend_calculation',label: "Dividend Calculation", value: selectedProduct.value?.dividend_calculation || 'Declared Rate', placeholder: "", required: true, options: [{ text: 'Declared Rate', value: 'Declared Rate' }, { text: 'Amount', value: 'Amount' }] },
                 { type: 'dropdown', name: 'mandatory',label: "Mandatory", value: selectedProduct.value?.mandatory || 'Yes', placeholder: "", required: true, options: [{ text: 'Yes', value: 'Yes' }, { text: 'No', value: 'No' }] },
-                { type: 'dropdown', name: 'withdrawable',label: "Withdrawable", value: selectedProduct.value?.withdrawable || 'Yes', placeholder: "", required: true, options: [{ text: 'Yes', value: 'Yes' }, { text: 'No', value: 'No' }] },
+                { type: 'dropdown', name: 'withdrawable',label: "Withdrawable", value: selectedProduct.value?.withdrawable || 'No', placeholder: "", required: true, options: [{ text: 'Yes', value: 'Yes' }, { text: 'No', value: 'No' }] },
                 { type: 'dropdown', name: 'transferable',label: "Transferable", value: selectedProduct.value?.transferable || 'Yes', placeholder: "", required: true, options: [{ text: 'Yes', value: 'Yes' }, { text: 'No', value: 'No' }] },
-                { type: 'dropdown', name: 'guaranteeable',label: "Loan Guarantee", value: selectedProduct.value?.guaranteeable || 'Yes', placeholder: "", required: true, options: [{ text: 'Yes', value: 'Yes' }, { text: 'No', value: 'No' }] },
+                { type: 'dropdown', name: 'guaranteeable',label: "Loan Guarantee", value: selectedProduct.value?.guaranteeable || 'No', placeholder: "", required: true, options: [{ text: 'Yes', value: 'Yes' }, { text: 'No', value: 'No' }] },
 
                 {  
-                    type:'search-dropdown', label:"Interest Posting Account", value: intLedgerValue.value, componentKey: intComponentKey,
-                    selectOptions: ledgerArray, optionSelected: handleSelectedInterestLedger, required: true,
-                    searchPlaceholder: 'Select Posting Acc...', dropdownWidth: '400px', updateValue: selectedInterestLedger.value,
-                    fetchData: store.dispatch('Ledgers/fetchLedger', {company:companyID.value}), clearSearch: clearSelectedInterestLedger
+                    type:'search-dropdown', label:"Declared Dividend Posting Account", value: intLedgerValue.value, componentKey: intComponentKey,
+                    selectOptions: ledgerArray, optionSelected: handleSelectedDeclarationLedger, required: true,
+                    searchPlaceholder: 'Select Posting Acc...', dropdownWidth: '400px', updateValue: selectedDeclarationLedger.value,
+                    fetchData: store.dispatch('Ledgers/fetchLedger', {company:companyID.value}), clearSearch: clearSelectedDeclarationLedger
                 },
                 {  
-                    type:'search-dropdown', label:"Saving Withdrawal Posting Account", value: whlLedgerValue.value, componentKey: whlComponentKey,
-                    selectOptions: ledgerArray, optionSelected: handleSelectedWithdrawalLedger, required: true,
-                    searchPlaceholder: 'Select Posting Acc...', dropdownWidth: '400px', updateValue: selectedWithdrawalLedger.value,
-                    fetchData: store.dispatch('Ledgers/fetchLedger', {company:companyID.value}), clearSearch: clearSelectedWithdrawalLedger
-                }
+                    type:'search-dropdown', label:"Dividend Withholding Posting Account", value: whlLedgerValue.value, componentKey: whlComponentKey,
+                    selectOptions: ledgerArray, optionSelected: handleSelectedWithholdingLedger, required: true,
+                    searchPlaceholder: 'Select Posting Acc...', dropdownWidth: '400px', updateValue: selectedWithholdingLedger.value,
+                    fetchData: store.dispatch('Ledgers/fetchLedger', {company:companyID.value}), clearSearch: clearSelectedWithholdingLedger
+                },
+                {required: false}
             ];
         };
         const handleReset = () =>{
@@ -147,15 +147,15 @@ export default defineComponent({
 
         }
 
-        watch([selectedProduct, selectedCategory, selectedInterestLedger, selectedWithdrawalLedger], () => {
-            if (selectedProduct.value && selectedCategory.value && selectedInterestLedger.value && selectedWithdrawalLedger.value) {
+        watch([selectedProduct, selectedCategory, selectedDeclarationLedger, selectedWithholdingLedger], () => {
+            if (selectedProduct.value && selectedCategory.value && selectedDeclarationLedger.value && selectedWithholdingLedger.value) {
                 intComponentKey.value += 1;
                 whlComponentKey.value += 1;
                 catComponentKey.value += 1;
                 mainComponentKey.value += 1;
                 updateFormFields();
             }
-            else if(selectedProduct.value && selectedInterestLedger.value && selectedWithdrawalLedger.value){
+            else if(selectedProduct.value && selectedDeclarationLedger.value && selectedWithholdingLedger.value){
                 intComponentKey.value += 1;
                 whlComponentKey.value += 1;
                 mainComponentKey.value += 1;
@@ -172,7 +172,7 @@ export default defineComponent({
         const hideLoader = () =>{
             loader.value = "none";
         } 
-        const createSavingsProduct = async() =>{
+        const createSharesProduct = async() =>{
             showLoader();
             let formData = {
                 company: companyID.value,
@@ -181,20 +181,19 @@ export default defineComponent({
                 status: "Active",
                 date: formFields.value[3].value,
                 charge_mode: formFields.value[4].value,
-                min_amount: formFields.value[5].value,
-                max_amount: formFields.value[6].value,
-                interest_rate: formFields.value[7].value,
-                interest_calculation: formFields.value[8].value,
-                mandatory: formFields.value[9].value,
-                withdrawable: formFields.value[10].value,
-                transferable: formFields.value[11].value,
-                guaranteeable: formFields.value[12].value,
-                interest_posting_account: intLedgerID.value,
-                interest_posting_account_id: intLedgerID.value,
+                amount: formFields.value[5].value,
+                dividend_rate: formFields.value[6].value,
+                dividend_calculation: formFields.value[7].value,
+                mandatory: formFields.value[8].value,
+                withdrawable: formFields.value[9].value,
+                transferable: formFields.value[10].value,
+                guaranteeable: formFields.value[11].value,
+                declaration_posting_account: intLedgerID.value,
+                declaration_posting_account_id: intLedgerID.value,
                 member_category: categoryID.value,
                 member_category_id: categoryID.value,
-                withdrawal_posting_account: whlLedgerID.value,
-                withdrawal_posting_account_id: whlLedgerID.value,
+                withholding_posting_account: whlLedgerID.value,
+                withholding_posting_account_id: whlLedgerID.value,
             }
 
             errors.value = [];
@@ -211,7 +210,7 @@ export default defineComponent({
                 hideLoader();                 
             }else{            
                 try {
-                    const response = await store.dispatch('Savings_Products/createSavingsProduct', formData);
+                    const response = await store.dispatch('Shares_Products/createSharesProduct', formData);
                     if (response && response.status === 201) {
                         hideLoader();
                         toast.success('Product created successfully!');
@@ -233,7 +232,7 @@ export default defineComponent({
             }
         }
 
-        const updateSavingsProduct = async() => {
+        const updateSharesProduct = async() => {
             showLoader();
             errors.value = [];
             for(let i=2; i < (formFields.value.length -1); i++){
@@ -248,39 +247,38 @@ export default defineComponent({
                     toast.error('Fill In Required Fields');
                     hideLoader();
             }else{
-                const updatedSavingsProduct = {
-                    savings_product: selectedProduct.value.savings_product_id,
+                const updatedSharesProduct = {
+                    shares_product: selectedProduct.value.shares_product_id,
                     company: companyID.value,
-                    product_code: formFields.value[1].value,
+                    product_code: formFields.value[1].value || '-',
                     product_name: formFields.value[2].value,
                     status: selectedProduct.value.status,
                     date: formFields.value[3].value,
                     charge_mode: formFields.value[4].value,
-                    min_amount: formFields.value[5].value,
-                    max_amount: formFields.value[6].value,
-                    interest_rate: formFields.value[7].value,
-                    interest_calculation: formFields.value[8].value,
-                    mandatory: formFields.value[9].value,
-                    withdrawable: formFields.value[10].value,
-                    transferable: formFields.value[11].value,
-                    guaranteeable: formFields.value[12].value,
-                    interest_posting_account: intLedgerValue.value,
-                    interest_posting_account_id: intLedgerValue.value,
+                    amount: formFields.value[5].value,
+                    dividend_rate: formFields.value[6].value,
+                    dividend_calculation: formFields.value[7].value,
+                    mandatory: formFields.value[8].value,
+                    withdrawable: formFields.value[9].value,
+                    transferable: formFields.value[10].value,
+                    guaranteeable: formFields.value[11].value,
+                    declaration_posting_account: intLedgerValue.value,
+                    declaration_posting_account_id: intLedgerValue.value,
                     member_category: categoryID.value,
                     member_category_id: categoryID.value,
-                    withdrawal_posting_account: whlLedgerValue.value,
-                    withdrawal_posting_account_id: whlLedgerValue.value,
+                    withholding_posting_account: whlLedgerValue.value,
+                    withholding_posting_account_id: whlLedgerValue.value,
                 };
        
                 try {
-                        const response = await store.dispatch('Savings_Products/updateSavingsProduct', updatedSavingsProduct);
+                        const response = await store.dispatch('Shares_Products/updateSharesProduct', updatedSharesProduct);
                         if (response && response.status === 200) {
                             hideLoader();
                             toast.success('Product updated successfully!');
                             handleReset();
                             await store.dispatch('Member_Categories/updateState',{categoryID:''})
                             await store.dispatch('Ledgers/updateState',{ledgerID:''})
-                            await store.dispatch("Savings_Products/updateState",{selectedProduct:null,selectedCategory:null,selectedInterestLedger:null,selectedWithdrawalLedger:null})
+                            await store.dispatch("Shares_Products/updateState",{selectedProduct:null,selectedCategory:null,selectedDeclarationLedger:null,selectedWithholdingLedger:null})
                             catComponentKey.value += 1;
                             intComponentKey.value += 1;
                             whlComponentKey.value += 1;
@@ -298,11 +296,11 @@ export default defineComponent({
             }                    
         };
 
-        const saveSavingsProduct = () =>{
+        const saveSharesProduct = () =>{
             if(isEditing.value == true){
-                updateSavingsProduct();
+                updateSharesProduct();
             }else{
-                createSavingsProduct();
+                createSharesProduct();
             }
         }
         
@@ -320,7 +318,7 @@ export default defineComponent({
 
         return{
             componentKey, formFields, flex_basis, flex_basis_percentage,
-            displayButtons, saveSavingsProduct, mainComponentKey,
+            displayButtons, saveSharesProduct, mainComponentKey,
             handleReset, isEditing, loader, showLoader, hideLoader,
         }
     }

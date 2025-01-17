@@ -7,6 +7,7 @@ const state = {
   productArray: [],
   productID: '',
   productName: '',
+  productMinAmount: 0,
   selectedProduct: null,
   selectedInterestLedger: null,
   selectedWithdrawalLedger: null,
@@ -21,6 +22,7 @@ const mutations = {
     state.productArray = [];
     state.productID = "";
     state.productName = "";
+    state.productMinAmount = 0;
     state.selectedProduct = null;
     state.selectedInterestLedger = null;
     state.selectedWithdrawalLedger = null;
@@ -115,6 +117,7 @@ const actions = {
     if (selectedProduct) {
         state.productID = selectedProduct.savings_product_id;
         state.productName = selectedProduct.product_name;
+        state.productMinAmount = selectedProduct.min_amount;
         state.productArray = [...state.productArray, selectedProduct];
     }
     commit('PRODUCTS_ARRAY', state.productArray);
