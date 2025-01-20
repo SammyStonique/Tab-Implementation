@@ -21,6 +21,7 @@
             :idField="idField"
             @handleSelectionChange="handleSelectionChange"
             @handleActionClick="handleActionClick"
+            @handleShowDetails="handleShowDetails"
             :count="propCount"
             :currentPage="currentPage"
             :result="propArrLen"
@@ -32,7 +33,26 @@
             :showPreviousBtn="showPreviousBtn"
             :selectedValue="selectedValue"
             @selectSearchQuantity="selectSearchQuantity"
-        />
+            :showDetails="showDetails"
+            :detailsTitle="detailsTitle"
+            @hideDetails="hideDetails"
+            >
+            <div>
+                <div class="tabs pt-2">
+                    <button v-for="(tab, index) in tabs" :key="tab" :class="['tab', { active: activeTab === index }]"@click="selectTab(index)">
+                        {{ tab }}
+                    </button>
+                </div>
+                <div class="tab-content mt-3">
+                    <div v-if="activeTab == 0">
+                        <JournalEntries 
+                            :detailRows="journalEntries"
+                        />
+                    </div>
+                </div>
+                
+            </div>
+        </PageComponent>
         <MovableModal v-model:visible="invModalVisible" :title="title" :modal_top="modal_top" :modal_left="modal_left" :modal_width="modal_width"
             :loader="modal_loader" @showLoader="showModalLoader" @hideLoader="hideModalLoader" @closeModal="closeModal"
         >
@@ -49,6 +69,7 @@ import axios from "axios";
 import { ref, computed, onMounted, onBeforeMount, watch} from 'vue';
 import PageComponent from '@/components/PageComponent.vue';
 import MovableModal from '@/components/MovableModal.vue';
+import JournalEntries from "@/components/JournalEntries.vue";
 import DynamicForm from '../NewDynamicForm.vue';
 import { useStore } from "vuex";
 import { useToast } from "vue-toastification";
@@ -58,7 +79,7 @@ import PrintJS from 'print-js';
 export default{
     name: 'Journals',
     components:{
-        PageComponent, MovableModal,DynamicForm
+        PageComponent, MovableModal,DynamicForm,JournalEntries
     },
     setup(){
         const store = useStore();     
@@ -73,6 +94,10 @@ export default{
         const addButtonLabel = ref('New Journal');
         const submitButtonLabel = ref('Add');
         const title = ref('Invoice Booking');
+        const detailsTitle = ref('Item Details');
+        const tabs = ref(['Journal Entries']);
+        const activeTab = ref(0);
+        const invoiceID = ref(null);
         const invModalVisible = ref(false);
         const modal_top = ref('150px');
         const modal_left = ref('400px');
@@ -84,6 +109,8 @@ export default{
         const propCount = ref(0);
         const pageCount = ref(0);
         const selectedValue = ref(50);
+        const showDetails = ref(false);
+        const journalEntries = ref([]);
         const currentPage = ref(1);
         const showNextBtn = ref(false);
         const showPreviousBtn = ref(false);
@@ -322,7 +349,35 @@ export default{
                 await store.dispatch('Journals/deleteJournal',formData)
                 searchJournals();
             }
-        }
+        };
+        const handleShowDetails = async(row) =>{
+            activeTab.value = 0;
+            invoiceID.value = row['journal_id'];
+            detailsTitle.value = row['journal_no'] + ' Details';
+            showDetails.value = true;
+            let formData = {
+                journal: row['journal_id'],
+                company: companyID.value
+            }
+            axios.post('api/v1/journal-entries-search/',formData)
+            .then((response)=>{
+                journalEntries.value = response.data.journal_entries;
+            })
+            .catch((error)=>{
+                console.log(error.message)
+            })
+        };
+        const selectTab = async(index) => {
+            let formData = {
+                company: companyID.value,
+                journal: invoiceID.value,
+            }
+                activeTab.value = index;
+                hideLoader();
+        };
+        const hideDetails = async() =>{
+            showDetails.value = false;
+        };
         const closeModal = async() =>{
             invModalVisible.value = false;
             handleReset();
@@ -383,8 +438,27 @@ export default{
             submitButtonLabel, showModal, showLoader, loader, hideLoader, modal_loader, modal_top, modal_left, modal_width,displayButtons,
             showModalLoader, hideModalLoader, formFields, handleSelectionChange, flex_basis,flex_basis_percentage,
             removeJournal, removeJournals, dropdownOptions, handleDynamicOption, addNewJournal, printJournalsList,addingRight,rightsModule,
-            selectSearchQuantity,selectedValue
+            selectSearchQuantity,selectedValue,showDetails,detailsTitle,hideDetails,handleShowDetails,journalEntries,tabs,selectTab,activeTab
         }
     }
 };
 </script>
+
+
+<style scoped>
+.tabs {
+    display: flex;
+    border-bottom: 1px solid #ccc;
+}
+.tab {
+    padding: 2px 20px 2px 20px;
+    cursor: pointer;
+}
+
+.tab.active {
+    border-bottom: 2px solid #000;
+}
+
+.tab-content {
+    padding: 1px;
+}</style>

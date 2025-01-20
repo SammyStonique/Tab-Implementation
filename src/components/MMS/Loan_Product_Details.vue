@@ -1,0 +1,423 @@
+<template>
+    <PageStyleComponent :key="mainComponentKey" :loader="loader" @showLoader="showLoader" @hideLoader="hideLoader">
+        <template v-slot:body>
+            <div class="mt-6">
+                <h2><strong>Product Details</strong></h2>
+                <DynamicForm  :fields="formFields" :flex_basis="flex_basis" :flex_basis_percentage="flex_basis_percentage" :displayButtons="displayButtons" @handleSubmit="saveLoanProduct" @handleReset="handleReset"> 
+                    <template v-slot:additional-content>
+                        <div class="border border-slate-200 rounded relative py-1.5 mt-3 px-2 min-h-[180px]">
+                            <h1 class="font-bold absolute top-[-13px] left-5 bg-white">Charge Details</h1>
+                            <div class="tabs pt-2">
+                                <button v-for="(tab, index) in tabs" :key="tab" :class="['tab', { active: activeTab === index }]"@click="selectTab(index)">
+                                    {{ tab }}
+                                </button>
+                            </div>
+                            <div class="tab-content">
+                                <div v-show="activeTab == 0">
+                                    <div class="text-left p-2">
+                                        <SearchableDropdown 
+                                            :key="chargeComponentKey"
+                                            :options="chargeArr"
+                                            :dropdownWidth="chargesDropdownWidth"
+                                            :searchPlaceholder="chargesSearchPlaceholder"
+                                            @option-selected="handleSelectedCharge"
+                                            @fetchData="fetchData"
+                                        />
+                                    </div>                      
+                                    <DynamicTable :key="tableKey" :columns="chargeColumns" :rows="chargeRows" :idField="idFieldCharge" :actions="actionCharges" @action-click="deleteCharge" :rightsModule="rightsModule" />
+                                </div>
+                                <div v-show="activeTab == 2">
+                                    <div class="text-left p-2">
+                        
+                                    </div>                      
+                                </div>
+                            </div>
+                        </div>
+                    </template>
+                </DynamicForm>
+            </div>
+        </template>
+    </PageStyleComponent>
+</template>
+
+<script>
+import { defineComponent, ref, onBeforeMount, onMounted, computed, watch } from 'vue';
+import DynamicForm from '@/components/NewDynamicForm.vue';
+import SearchableDropdown from '@/components/SearchableDropdown.vue';
+import DynamicTable from '@/components/DynamicTable.vue';
+import PageStyleComponent from '@/components/PageStyleComponent.vue';
+import { useStore } from "vuex";
+import { useToast } from "vue-toastification";
+
+export default defineComponent({
+    name: 'Loan_Product_Details',
+    components:{
+         DynamicForm,PageStyleComponent,SearchableDropdown,DynamicTable
+    },
+    setup(){
+        const store = useStore();
+        const toast = useToast();
+        const loader = ref('none');
+        const tabs = ref(['Loan Charges']);
+        const mainComponentKey = ref(0);
+        const intComponentKey = ref(0);
+        const catComponentKey = ref(0);
+        const chargeComponentKey = ref(0);
+        const activeTab = ref(0);
+        const rightsModule = ref('MMS');
+        const displayButtons = ref(true);
+        const componentKey = ref(0);
+        const tableKey = ref(0);
+        const errors = ref([]);
+        const companyID = computed(()=> store.state.userData.company_id);
+        const flex_basis = ref('');
+        const flex_basis_percentage = ref('');
+        const additional_flex_basis = ref('');
+        const additional_flex_basis_percentage = ref('');
+        const isEditing = computed(()=> store.state.Loan_Products.isEditing);
+        const selectedProduct = computed(()=> store.state.Loan_Products.selectedProduct);
+        const selectedInterestLedger = computed(()=> store.state.Loan_Products.selectedInterestLedger);
+        const selectedCategory = computed(()=> store.state.Loan_Products.selectedCategory);
+        const loanCharges = computed(()=> store.state.Loan_Products.loanCharges);
+        const categoryArray = computed(() => store.state.Member_Categories.categoryArr);
+        const ledgerArray = computed(() => store.state.Ledgers.ledgerArr);
+        const intLedgerID = ref('');
+        const chargeArr = computed(() => store.state.Loan_Fees.feeArr);
+        const chargesDropdownWidth = ref('400px');
+        const chargesSearchPlaceholder = ref('Select Charge...');
+        const categoryID = ref('');
+        const chargeColumns = ref([
+            {label: "Name", key:"fee_name", type: "text", editable: false},
+            {label: "Charge Time", key:"charge_time", type: "text", editable: false},
+            {label: "Charge Mode", key:"charge_mode", type: "text", editable: false},
+            {label: "Charge Type", key:"charge_type", type: "text", editable: false},
+            {label: "Value", key: "default_amount", type: "number", editable: true},
+        ]);
+        const chargeRows = computed(() => {
+            return store.state.Loan_Fees.feeArray;
+        });
+        const idFieldCharge = 'loan_fee_id';
+        const actionCharges = ref([
+            {name: 'delete', icon: 'fa fa-minus-circle', title: 'Remove Charge', rightName: 'Adding Loan Products'},
+        ])
+
+        const handleSelectedCategory = async(option) =>{
+            await store.dispatch('Member_Categories/handleSelectedCategory', option)
+            categoryID.value = store.state.Member_Categories.categoryID;
+            if(selectedProduct.value){
+                selectedProduct.value.member_category.member_category_id = categoryID.value;
+                categoryValue.value = categoryID.value
+            }
+        };
+        const clearSelectedCategory = async() =>{
+            await store.dispatch('Member_Categories/updateState', {categoryID: ''});
+            categoryID.value = store.state.Member_Categories.categoryID;
+        };
+        const fetchAllLedgers = async() =>{
+            await store.dispatch('Ledgers/fetchLedgers', {company:companyID.value})
+        };
+        const handleSelectedInterestLedger = async(option) =>{
+            await store.dispatch('Ledgers/handleSelectedLedger', option)
+            intLedgerID.value = store.state.Ledgers.ledgerID;
+            if(selectedProduct.value){
+                selectedProduct.value.interest_posting_account.ledger_id = intLedgerID.value;
+                intLedgerValue.value = intLedgerID.value
+            }
+        };
+        const clearSelectedInterestLedger = async() =>{
+            await store.dispatch('Ledgers/updateState', {ledgerID: ''});
+            intLedgerID.value = store.state.Ledgers.ledgerID;
+        };
+        const fetchCharges = async() =>{
+            await store.dispatch('Loan_Fees/fetchLoanFees', {company:companyID.value})
+        };
+        const formFields = ref();
+        const categoryValue = computed(() => {
+           return (selectedProduct.value && selectedProduct.value.member_category && !categoryID.value) ? selectedProduct.value.member_category.member_category_id : categoryID.value;
+
+        });
+        const intLedgerValue = computed(() => {
+            return (selectedProduct.value && selectedProduct.value.interest_posting_account && !intLedgerID.value) ? selectedProduct.value.interest_posting_account.ledger_id : intLedgerID.value;
+        });
+        const updateFormFields = () => {
+            formFields.value = [
+                {  
+                    type:'search-dropdown', label:"Member Category", value: categoryValue.value, componentKey: catComponentKey,
+                    selectOptions: categoryArray, optionSelected: handleSelectedCategory, required: false,
+                    searchPlaceholder: 'Select Category...', dropdownWidth: '400px', updateValue: selectedCategory.value,
+                    fetchData: store.dispatch('Member_Categories/fetchMemberCategories', {company:companyID.value}), clearSearch: clearSelectedCategory
+                },
+                { type: 'text', name: 'product_code',label: "Code", value: selectedProduct.value?.product_code || '', required: false },
+                { type: 'text', name: 'product_name',label: "Name", value: selectedProduct.value?.product_name || '', required: true },
+                { type: 'date', name: 'date',label: "Effective Date", value: selectedProduct.value?.date || '', required: true, placeholder: '' },
+                { type: 'dropdown', name: 'repayment_frequency',label: "Repayment Frequency", value: selectedProduct.value?.repayment_frequency || 'Monthly', placeholder: "", required: true, options: [{ text: 'Daily', value: 'Daily' }, { text: 'Weekly', value: 'Weekly' },{ text: 'Monthly', value: 'Monthly' }, { text: 'Annually', value: 'Annually' }] },
+                { type: 'text', name: 'min_amount',label: "Min Amount", value: selectedProduct.value?.min_amount || '', required: true },
+                { type: 'text', name: 'max_amount',label: "Max Amount", value: selectedProduct.value?.max_amount || '0', required: false },
+                { type: 'text', name: 'interest_rate',label: "Interest Rate", value: selectedProduct.value?.interest_rate || '0', required: false },
+                { type: 'dropdown', name: 'interest_calculation',label: "Interest Method", value: selectedProduct.value?.interest_calculation || 'Simple Interest', placeholder: "", required: true, options: [{ text: 'Reducing Interest EMI', value: 'Reducing Interest EMI' }, { text: 'Reducing Interest Principal Payments', value: 'Reducing Interest Principal Payments' },{ text: 'Flat Interest EMI', value: 'Flat Interest EMI' }, { text: 'Flat Interest Principal Payments', value: 'Flat Interest Principal Payments' },{ text: 'Simple Interest', value: 'Simple Interest' }] },
+                { type: 'dropdown', name: 'loan_period',label: "Loan Period", value: selectedProduct.value?.loan_period || 'Months', placeholder: "", required: true, options: [{ text: 'Days', value: 'Days' }, { text: 'Weeks', value: 'Weeks' },{ text: 'Months', value: 'Months' }, { text: 'Years', value: 'Years' }] },
+                { type: 'text', name: 'max_repayment',label: "Max Repay. Period", value: selectedProduct.value?.max_repayment || '0', required: false },
+                { type: 'dropdown', name: 'mandatory_savings',label: "Use Savings", value: selectedProduct.value?.mandatory_savings || 'Yes', placeholder: "", required: true, options: [{ text: 'Yes', value: 'Yes' }, { text: 'No', value: 'No' }] },
+                { type: 'text', name: 'savings_percentage',label: "Savings Percentage(%)", value: selectedProduct.value?.savings_percentage || '0', required: false },
+                { type: 'dropdown', name: 'penalize',label: "Penalize", value: selectedProduct.value?.penalize || 'No', placeholder: "", required: false, options: [{ text: 'Yes', value: 'Yes' }, { text: 'No', value: 'No' }] },
+                { type: 'dropdown', name: 'penalty_mode',label: "Penalty Mode", value: selectedProduct.value?.penalty_mode || 'Flat Amount', placeholder: "", required: false, options: [{ text: 'Flat Amount', value: 'Flat Amount' }, { text: '% of Installment Principal', value: 'Installment Principal' },{ text: '% of Installment Interest', value: 'Installment Interest' }, { text: '% of Installment Principal + Interest', value: 'Installment Principal + Interest' },{ text: '% of Principal Balance', value: 'Principal Balance' }, { text: '% of Loan Balance', value: 'Loan Balance' }] },
+                { type: 'text', name: 'penalty_value',label: "Penalty Value", value: selectedProduct.value?.penalty_value || '0', required: false },
+                { type: 'dropdown', name: 'use_guarantors',label: "Use Guarantors", value: selectedProduct.value?.use_guarantors || 'Yes', placeholder: "", required: true, options: [{ text: 'Yes', value: 'Yes' }, { text: 'No', value: 'No' }] },
+                { type: 'text', name: 'min_guarantors',label: "Minimum Guarantors", value: selectedProduct.value?.min_guarantors || '0', required: false },
+                { type: 'text', name: 'guarantors_percentage',label: "Guarantors Percentage(%)", value: selectedProduct.value?.guarantors_percentage || '0', required: false },
+                {  
+                    type:'search-dropdown', label:"Interest Posting Account", value: intLedgerValue.value, componentKey: intComponentKey,
+                    selectOptions: ledgerArray, optionSelected: handleSelectedInterestLedger, required: true,
+                    searchPlaceholder: 'Select Posting Acc...', dropdownWidth: '400px', updateValue: selectedInterestLedger.value,
+                    fetchData: store.dispatch('Ledgers/fetchLedger', {company:companyID.value}), clearSearch: clearSelectedInterestLedger
+                },
+                {required: false}
+
+            ];
+        };
+
+        const additionalFields = ref();
+        const updateAdditionalFormFields = () => {
+            additionalFields.value = [
+                ];
+        };
+
+        watch([categoryID, intLedgerID], () => {
+            if (categoryID.value != "") {
+                formFields.value[0].value = categoryID.value;
+            }
+            if(intLedgerID.value != ""){
+                formFields.value[19].value = intLedgerID.value;
+            }
+        }, { immediate: true });
+
+        watch([selectedProduct, selectedInterestLedger, selectedCategory, loanCharges], () => {
+            if(loanCharges.value){
+                store.dispatch('Loan_Fees/updateState',{feeArray: loanCharges.value})
+                tableKey.value += 1;
+            }
+            if (selectedProduct.value && selectedInterestLedger.value && selectedCategory.value) {
+                catComponentKey.value += 1;
+                intComponentKey.value += 1;
+                updateFormFields();
+                updateAdditionalFormFields();
+
+            }
+            else if(selectedProduct.value && selectedInterestLedger.value){
+                intComponentKey.value += 1;
+                updateFormFields();
+                updateAdditionalFormFields();
+                    
+            }else if(selectedProduct.value){
+                updateFormFields();
+                updateAdditionalFormFields();
+            }
+        }, { immediate: true });
+
+        const handleReset = async() =>{
+            for(let i=0; i < formFields.value.length; i++){
+                if(formFields.value[i].label != 'Country'){
+                    formFields.value[i].value = '';
+                }
+            }
+            for(let i=0; i < additionalFields.value.length; i++){
+                additionalFields.value[i].value = '';
+            }
+            await store.dispatch('Loan_Fees/updateState', {feeArray: []});
+            await store.dispatch('Loan_Products/updateState', {selectedProduct: null, loanCharges: [], selectedInterestLedger: null, selectedCategory: null, isEditing:false});
+            mainComponentKey.value += 1;
+            intComponentKey.value += 1;
+            catComponentKey.value += 1;
+            intLedgerID.value = "";
+            categoryID.value = "";
+        }
+         
+        const showLoader = () =>{
+            loader.value = "block";
+        }
+        const hideLoader = () =>{
+            loader.value = "none";
+        } 
+        const createLoanProduct = async() =>{
+            showLoader();
+            let formData = {
+                product_code: formFields.value[1].value || '-',
+                product_name: formFields.value[2].value,
+                date: formFields.value[3].value,
+                repayment_frequency: formFields.value[4].value,
+                min_amount: formFields.value[5].value,
+                max_amount: formFields.value[6].value,
+                interest_rate: formFields.value[7].value,
+                interest_calculation: formFields.value[8].value,
+                loan_period: formFields.value[9].value,
+                max_repayment: formFields.value[10].value,
+                mandatory_savings: formFields.value[11].value,
+                savings_percentage: formFields.value[12].value,
+                penalize: formFields.value[13].value,
+                penalty_value: formFields.value[15].value,
+                status: 'Active',
+                penalty_mode: formFields.value[14].value,
+                use_guarantors: formFields.value[16].value,
+                min_guarantors: formFields.value[17].value,
+                guarantors_percentage: formFields.value[18].value,
+                interest_posting_account: intLedgerID.value,
+                interest_posting_account_id: intLedgerID.value,
+                member_category: categoryID.value,
+                member_category_id: categoryID.value,
+                charges: chargeRows.value,
+                company: companyID.value
+            }
+            errors.value = [];
+            for(let i=0; i < formFields.value.length; i++){
+                if(formFields.value[i].value =='' && formFields.value[i].required == true && formFields.value[i].type != 'search-dropdown'){
+                    errors.value.push('Error');
+                }
+            }
+            if(intLedgerValue.value == ''){
+                errors.value.push('Error');
+            }
+            if(errors.value.length){
+                toast.error('Fill In Required Fields');
+                hideLoader();
+            }else{
+                try {
+                    const response = await store.dispatch('Loan_Products/createLoanProduct', formData);
+                    if(response && response.status === 201) {
+                        hideLoader();
+                        toast.success('Product created successfully!');
+                        handleReset();
+                    }else {
+                        toast.error('An error occurred while creating the Product.');
+                    }
+                } catch (error) {
+                    console.error(error.message);
+                    toast.error('Failed to create Product: ' + error.message);
+                } finally {
+                    hideLoader();
+                }
+            }
+
+        }
+        const updateLoanProduct = async() =>{
+            showLoader();
+            errors.value = [];
+            let formData = {
+                loan_product: selectedProduct.value.loan_product_id,
+                product_code: formFields.value[1].value || '-',
+                product_name: formFields.value[2].value,
+                date: formFields.value[3].value,
+                repayment_frequency: formFields.value[4].value,
+                min_amount: formFields.value[5].value,
+                max_amount: formFields.value[6].value,
+                interest_rate: formFields.value[7].value,
+                interest_calculation: formFields.value[8].value,
+                loan_period: formFields.value[9].value,
+                max_repayment: formFields.value[10].value,
+                mandatory_savings: formFields.value[11].value,
+                savings_percentage: formFields.value[12].value,
+                penalize: formFields.value[13].value,
+                penalty_value: formFields.value[15].value,
+                status: selectedProduct.value.status,
+                penalty_mode: formFields.value[14].value,
+                use_guarantors: formFields.value[16].value,
+                min_guarantors: formFields.value[17].value,
+                guarantors_percentage: formFields.value[18].value,
+                interest_posting_account: intLedgerValue.value,
+                interest_posting_account_id: intLedgerValue.value,
+                member_category: categoryValue.value,
+                member_category_id: categoryValue.value,
+                company: companyID.value,
+                charges: chargeRows.value,
+            }
+            errors.value = [];
+            for(let i=0; i < formFields.value.length; i++){
+                if(formFields.value[i].value =='' && formFields.value[i].required == true && formFields.value[i].type != 'search-dropdown'){
+                    errors.value.push('Error');
+                }
+            }
+            if(intLedgerValue.value == ''){
+                errors.value.push('Error');
+            }
+            if(errors.value.length){
+                    toast.error('Fill In Required Fields');
+            }else{
+                try {
+                    const response = await store.dispatch('Loan_Products/updateLoanProduct', formData);
+                    if (response && response.status === 200) {
+                        hideLoader();
+                        toast.success("Product updated successfully!");
+                        handleReset();
+                    } else {
+                        toast.error('An error occurred while updating the Product.');
+                    }
+                } catch (error) {
+                    console.error(error.message);
+                    toast.error('Failed to update Product: ' + error.message);
+                } finally {
+                    hideLoader();
+                }
+            }
+        }
+        const saveLoanProduct = () =>{
+            if(isEditing.value == true){
+                updateLoanProduct();
+            }else{
+                createLoanProduct();
+            }
+        };
+
+        const selectTab = (index) => {
+            activeTab.value = index;
+        };
+        
+        const handleSelectedCharge = async(option) =>{
+            await store.dispatch('Loan_Fees/handleSelectedFee', option);
+            chargeComponentKey.value += 1;
+        }
+        const deleteCharge = (rowIndex, action, row) =>{
+            store.dispatch('Loan_Fees/removeLoanFee', rowIndex);
+            tableKey.value += 1;
+        }
+        
+        onBeforeMount(()=>{ 
+            fetchCharges();
+            updateFormFields();
+            updateAdditionalFormFields();
+            flex_basis.value = '1/4';
+            flex_basis_percentage.value = '20';
+            additional_flex_basis.value = '1/3';
+            additional_flex_basis_percentage.value = '33.333';
+        })
+        onMounted(()=>{
+            
+        })
+
+        return{
+            tabs,componentKey, formFields, additionalFields, flex_basis, flex_basis_percentage, additional_flex_basis,
+            additional_flex_basis_percentage, mainComponentKey,handleReset, loader, showLoader, hideLoader,
+            displayButtons,saveLoanProduct,chargeArr,chargesDropdownWidth,chargesSearchPlaceholder,selectTab,handleSelectedCharge,
+            deleteCharge,activeTab,rightsModule,idFieldCharge,chargeRows,chargeColumns,actionCharges,chargeComponentKey
+        }
+    }
+})
+</script>
+
+<style scoped>
+.tabs {
+    display: flex;
+    border-bottom: 1px solid #ccc;
+}
+.tab {
+    padding: 2px 20px 2px 20px;
+    cursor: pointer;
+}
+
+.tab.active {
+    border-bottom: 2px solid #000;
+}
+
+.tab-content {
+    padding: 3px;
+    margin-top: 10px !important;
+}
+</style>

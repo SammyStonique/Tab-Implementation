@@ -91,6 +91,7 @@ export default{
             {label: "Ref. No.", key: "reference_no", type: "text", editable: false},
             {label: "Open. Bal.", key: "opening_balance", type: "text", editable: false},
             {label: "Posting Account", key: "posting_account", type: "text", editable: false},
+            {label: "Txn. No.", key: "txn_no", type: "text", editable: false},
         ])
         const actions = ref([
             {name: 'delete', icon: 'fa fa-trash', title: 'Delete Deposit', rightName: 'Deleting Share Deposits'},

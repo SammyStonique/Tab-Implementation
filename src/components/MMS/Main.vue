@@ -44,6 +44,9 @@ import Saving_Accounts from '@/components/MMS/Saving_Accounts.vue';
 import Share_Accounts from '@/components/MMS/Share_Accounts.vue';
 import Saving_Deposits from '@/components/MMS/Saving_Deposits.vue';
 import Share_Deposits from '@/components/MMS/Share_Deposits.vue';
+import Loan_Products from '@/components/MMS/Loan_Products.vue';
+import Loan_Product_Details from '@/components/MMS/Loan_Product_Details.vue';
+import Loan_Fees from '@/components/MMS/Loan_Fees.vue';
 
 import Default_Settings from '@/components/SET/Default_Settings.vue';
 
@@ -55,7 +58,7 @@ export default{
         Dashboard,
         Member_Categories,Member_Sponsors,Members,Member_Details,Membership_Fees,
         Member_Invoices,Member_Receipts,Savings_Products,Saving_Product_Details,Shares_Products,Share_Product_Details,Saving_Accounts,Share_Accounts,
-        Saving_Deposits,Share_Deposits,
+        Saving_Deposits,Share_Deposits,Loan_Products,Loan_Product_Details,Loan_Fees,
 
         Default_Settings
     },
