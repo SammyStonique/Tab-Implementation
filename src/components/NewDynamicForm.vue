@@ -94,8 +94,8 @@
       </div>
   </div>
   <div class="flex-1 basis-full px-2" v-if="displayButtons">
-    <button @click="handleSubmit" class="rounded bg-green-400 text-sm mr-2  text-white px-2 py-1.5"><i class="fa fa-check-circle text-xs mr-1.5" aria-hidden="true"></i>{{saveButtonLabel}}</button>
-    <button @click="handleReset" class="rounded bg-green-400 text-sm mr-2  text-white px-2 py-1.5"><i class="fa fa-refresh text-xs mr-1.5" aria-hidden="true"></i>Reset</button>
+    <button @click="handleSubmit" class="rounded bg-green-400 cursor-pointer text-sm mr-2  text-white px-2 py-1.5"><i class="fa fa-check-circle text-xs mr-1.5" aria-hidden="true"></i>{{saveButtonLabel}}</button>
+    <button @click="handleReset" class="rounded bg-green-400 cursor-pointer text-sm mr-2  text-white px-2 py-1.5"><i class="fa fa-refresh text-xs mr-1.5" aria-hidden="true"></i>Reset</button>
   </div>
 </template>
 

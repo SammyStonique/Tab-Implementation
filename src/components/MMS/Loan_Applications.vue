@@ -3,19 +3,19 @@
         <PageComponent 
             :loader="loader" @showLoader="showLoader" @hideLoader="hideLoader"
             :addButtonLabel="addButtonLabel"
-            @handleAddNew="addNewProduct"
+            @handleAddNew="addNewApplication"
             :searchFilters="searchFilters"
             :dropdownOptions="dropdownOptions"
             @handleDynamicOption="handleDynamicOption"
-            @searchPage="searchProducts"
+            @searchPage="searchApplications"
             @resetFilters="resetFilters"
-            @removeItem="removeProduct"
-            @removeSelectedItems="removeProducts"
-            @printList="printProductsList"
+            @removeItem="removeApplication"
+            @removeSelectedItems="removeApplications"
+            @printList="printApplicationList"
             :addingRight="addingRight"
             :rightsModule="rightsModule"
             :columns="tableColumns"
-            :rows="productsList"
+            :rows="applicationList"
             :actions="actions"
             :idField="idField"
             @handleSelectionChange="handleSelectionChange"
@@ -40,18 +40,18 @@
         :loader="trans_modal_loader" @showLoader="showTransModalLoader" @hideLoader="hideTransModalLoader" @closeModal="closeTransModal">
         <div class="mt-4 mb-8 w-full">       
             <label for="">Date:</label><br />
-            <input v-model="exit_date"  type="date" class="`bg-slate-50 rounded pl-3 border border-gray-400 text-base w-full`"/>
+            <input v-model="approval_date"  type="date" class="`bg-slate-50 rounded pl-3 border border-gray-400 text-base w-full`"/>
         </div>
         <div class="mb-8 w-full">         
-            <label for="">Select Product Status:</label><br />
-            <select v-model="product_status" class="bg-slate-50 rounded border border-gray-400 text-sm pl-2 pt-2 w-full">
+            <label for="">Select Approval Status:</label><br />
+            <select v-model="approval_status" class="bg-slate-50 rounded border border-gray-400 text-sm pl-2 pt-2 w-full">
                 <option value="" selected disabled>Select Status</option>
-                <option value="Active">Active</option>
-                <option value="Inactive">Inactive</option>
+                <option value="Approved">Approve</option>
+                <option value="Rejected">Reject</option>
           </select>
         </div>
         <div class="flex-1 basis-full px-2">
-            <button @click="changeProductStatus" class="rounded bg-green-400 text-sm mr-2  text-white px-2 py-1.5"><i class="fa fa-check-circle text-xs mr-1.5" aria-hidden="true"></i>Change Status</button>
+            <button @click="approveLoan" class="rounded bg-green-400 text-sm mr-2  text-white px-2 py-1.5"><i class="fa fa-check-circle text-xs mr-1.5" aria-hidden="true"></i>Save</button>
         </div>
     </MovableModal>
 
@@ -70,7 +70,7 @@ import SearchableDropdown from '@/components/SearchableDropdown.vue';
 import Swal from 'sweetalert2';
 
 export default{
-    name: 'Loan_Products',
+    name: 'Loan_Applications',
     components:{
         PageComponent,MovableModal,SearchableDropdown,DynamicForm
     },
@@ -81,15 +81,15 @@ export default{
         const displayButtons = ref(true);
         const unitComponentKey = ref(0);
         const trans_modal_loader = ref('none');
-        const product_status = ref('');
-        const exit_date = ref('');
-        const idField = 'loan_product_id';
-        const addButtonLabel = ref('New Product');
-        const addingRight = ref('Adding Loan Products');
+        const approval_status = ref('');
+        const approval_date = ref('');
+        const idField = 'loan_application_id';
+        const addButtonLabel = ref('New Application');
+        const addingRight = ref('Adding Loan Applications');
         const rightsModule = ref('MMS');
         const submitButtonLabel = ref('Add');
         const selectedIds = ref([]);
-        const productsList = ref([]);
+        const applicationList = ref([]);
         const propResults = ref([]);
         const propArrLen = ref(0);
         const propCount = ref(0);
@@ -99,8 +99,8 @@ export default{
         const currentPage = ref(1);
         const showNextBtn = ref(false);
         const showPreviousBtn = ref(false);
-        const detailsTitle = ref('Product Documents');
-        const transTitle = ref('Changing Product Status');
+        const detailsTitle = ref('Application Documents');
+        const transTitle = ref('Changing Application Status');
         const transModalVisible = ref(false);
         const dropdownWidth = ref("500px")
         const modal_top = ref('200px');
@@ -111,90 +111,87 @@ export default{
         const showModal = ref(false);
         const tableColumns = ref([
             {type: "checkbox"},
-            {label: "Date", key:"date"},
-            {label: "Code", key:"product_code"},
-            {label: "Product Name", key:"product_name"},
-            {label: "Min Amnt", key: "min_amount"},
-            {label: "Max Amnt", key: "max_amount"},
-            {label: "Category", key:"member_category"},
-            {label: "Interest", key:"interest_calculation"},
-            {label: "Rate(%)", key:"interest_rate"},
+            {label: "Date", key:"application_date"},
+            {label: "Loan No", key:"loan_number"},
+            {label: "Member Name", key:"member"},
+            {label: "Product Name", key:"loan_product"},
+            {label: "Applied Amnt", key: "applied_amount"},
+            {label: "Approved Amnt", key: "approved_amount"},
+            {label: "Status", key:"approval_status"},
+            {label: "Loan Remarks", key:"loan_remarks"},
         ])
         const actions = ref([
-            {name: 'edit', icon: 'fa fa-edit', title: 'Edit Product', rightName: 'Editing Loan Products'},
-            {name: 'transfer', icon: 'fa fa-exchange', title: 'Change Product Status', rightName: 'Editing Loan Products'},
-            {name: 'delete', icon: 'fa fa-trash', title: 'Delete Product', rightName: 'Deleting Loan Products'},
+            {name: 'edit', icon: 'fa fa-edit', title: 'Edit Application', rightName: 'Editing Loan Applications'},
+            {name: 'transfer', icon: 'fa fa-exchange', title: 'Change Application Status', rightName: 'Approving Loan Applications'},
+            {name: 'delete', icon: 'fa fa-trash', title: 'Delete Application', rightName: 'Deleting Loan Applications'},
         ])
         const companyID = computed(()=> store.state.userData.company_id);
-        const productID = ref("");
+        const applicationID = ref("");
         const dropdownOptions = ref([
             
         ]);
         
         const name_search = ref('');
-        const product_code_search = ref("");
-        const active_status_search = ref("");
+        const loan_number_search = ref("");
+        const member_number_search = ref("");
  
         const searchFilters = ref([
-            {type:'text', placeholder:"Name...", value: name_search, width:48,},
-            {type:'text', placeholder:"Code...", value: product_code_search, width:48,},
-            {
-                type:'dropdown', placeholder:"Status..", value: active_status_search, width:40,
-                options: [{text:'Active',value:'Active'},{text:'Inactive',value:'Inactive'}]
-            },
+            {type:'text', placeholder:"Loan No...", value: loan_number_search, width:48,},
+            {type:'text', placeholder:"Member Name...", value: name_search, width:48,},
+            {type:'text', placeholder:"Member No...", value: member_number_search, width:48,},
         ]);
         const handleSelectionChange = (ids) => {
             selectedIds.value = ids;
         };
-        const removeProduct = async() =>{
+        const removeApplication = async() =>{
             if(selectedIds.value.length == 1){
                 let formData = {
                     company: companyID.value,
-                    loan_product: selectedIds.value
+                    loan_application: selectedIds.value
                 }
                 try{
-                    const response = await store.dispatch('Loan_Products/deleteLoanProduct',formData)
+                    const response = await store.dispatch('Loan_Applications/deleteLoanApplication',formData)
                     if(response && response.status == 200){
-                        toast.success("Product Removed Succesfully");
-                        searchProducts();
+                        toast.success("Application Removed Succesfully");
+                        searchApplications();
                     }
                 }
                 catch(error){
                     console.error(error.message);
-                    toast.error('Failed to remove Product: ' + error.message);
+                    toast.error('Failed to remove Application: ' + error.message);
                 }
                 finally{
                     selectedIds.value = [];
                 }
             }else if(selectedIds.value.length > 1){
-                toast.error("You have selected more than 1 Product") 
+                toast.error("You have selected more than 1 Application") 
             }else{
-                toast.error("Please Select A Product To Remove")
+                toast.error("Please Select An Application To Remove")
             }
         }
-        const removeProducts = async() =>{
+        const removeApplications = async() =>{
             if(selectedIds.value.length){
                 let formData = {
                     company: companyID.value,
-                    loan_product: selectedIds.value
+                    loan_application: selectedIds.value
                 }
                 try{
-                    const response = await store.dispatch('Loan_Products/deleteLoanProduct',formData)
+                    const response = await store.dispatch('Loan_Applications/deleteLoanApplication',formData)
                     if(response && response.status == 200){
-                        toast.success("Product(s) Removed Succesfully");
+                        toast.success("Application(s) Removed Succesfully");
                         searchPropertys();
                     }
                 }
                 catch(error){
                     console.error(error.message);
-                    toast.error('Failed to remove Product: ' + error.message);
+                    toast.error('Failed to remove Application: ' + error.message);
                 }
                 finally{
                     selectedIds.value = [];
 
                 }
             }else{
-                toast.error("Please Select A Product To Remove")
+                toast.error("Please Select An Application To Remove")
             }
         };
         const showTransModalLoader = () =>{
@@ -203,19 +200,19 @@ export default{
         const hideTransModalLoader = () =>{
             trans_modal_loader.value = "none";
         }
-        const changeProductStatus = async() =>{
+        const approveLoan = async() =>{
             showTransModalLoader();
             let formData = {
-                loan_product: productID.value,
+                loan_application: applicationID.value,
                 company: companyID.value
             }
             Swal.fire({
             title: "Are you sure?",
-            text: `Do you wish to Change Status?`,
+            text: `Do you wish to Approve/Reject Loan?`,
             type: 'warning',
             showCloseButton: true,
             showCancelButton: true,
-            confirmButtonText: 'Yes, Change Status!',
+            confirmButtonText: 'Yes, Approve/Reject Loan!',
             cancelButtonText: 'Cancel!',
             customClass: {
                 confirmButton: 'swal2-confirm-custom',
@@ -224,18 +221,18 @@ export default{
             showLoaderOnConfirm: true,
             }).then((result) => {
             if (result.value) {
-                axios.post(`api/v1/change-loan-product-status/`,formData)
+                axios.post(`api/v1/approve-member-loan/`,formData)
                 .then((response)=>{
                 if(response.data.msg == "Success"){
-                    Swal.fire("Status changed succesfully!", {
+                    Swal.fire("Success!", {
                         icon: "success",
                     }); 
                     unitComponentKey.value += 1;
                     closeTransModal();
-                    searchProducts();
+                    searchApplications();
                 }else{
                     Swal.fire({
-                    title: "Error Changing Product Status",
+                    title: "Error Approving/Rejecting Loan",
                     icon: "warning",
                     });
                 }                   
@@ -249,14 +246,14 @@ export default{
                     hideTransModalLoader();
                 })
             }else{
-                Swal.fire(`Product Status has not been changed!`);
+                Swal.fire(`Application has not been Approved/Rejected!`);
                 hideTransModalLoader();
             }
             })     
         };
         const closeTransModal = () =>{
             transModalVisible.value = false;
-            productID.value = null;
+            applicationID.value = null;
             hideTransModalLoader();
         };
         const showLoader = () =>{
@@ -266,24 +263,24 @@ export default{
             loader.value = "none";
         }
        
-        const searchProducts = () =>{
+        const searchApplications = () =>{
             showLoader();
             showNextBtn.value = false;
             showPreviousBtn.value = false;
             let formData = {
-                product_name: name_search.value,
-                product_code: product_code_search.value,
-                active_status: active_status_search.value,
+                member_name: name_search.value,
+                loan_number: loan_number_search.value,
+                member_number: member_number_search.value,
                 company_id: companyID.value,
                 page_size: selectedValue.value
             } 
             axios
-            .post(`api/v1/loan-products-search/?page=${currentPage.value}`,formData)
+            .post(`api/v1/loan-applications-search/?page=${currentPage.value}`,formData)
             .then((response)=>{
-                productsList.value = response.data.results;
-                store.commit('Loan_Products/LIST_PRODUCTS', productsList.value)
+                applicationList.value = response.data.results;
+                store.commit('Loan_Applications/LIST_APPLICATIONS', applicationList.value)
                 propResults.value = response.data;
-                propArrLen.value = productsList.value.length;
+                propArrLen.value = applicationList.value.length;
                 propCount.value = propResults.value.count;
                 pageCount.value = Math.ceil(propCount.value / selectedValue.value);
                 if(response.data.next){
@@ -302,14 +299,14 @@ export default{
         };
         const selectSearchQuantity = (newValue) =>{
             selectedValue.value = newValue;
-            searchProducts(selectedValue.value);
+            searchApplications(selectedValue.value);
         };
         const resetFilters = () =>{
             selectedValue.value = 50;
             name_search.value = "";
-            active_status_search.value = "";
-            product_code_search.value = "";
-            searchProducts();
+            member_number_search.value = "";
+            loan_number_search.value = "";
+            searchApplications();
         }
         const loadPrev = () =>{
             if (currentPage.value <= 1){
@@ -318,7 +315,7 @@ export default{
                 currentPage.value -= 1;
             }
             
-            searchProducts();
+            searchApplications();
             // scrollToTop();
         }
         const loadNext = () =>{
@@ -328,52 +325,54 @@ export default{
                 currentPage.value += 1;
             }
             
-            searchProducts();
+            searchApplications();
             // scrollToTop(); 
         }
         const firstPage = ()=>{
             currentPage.value = 1;
-            searchProducts();
+            searchApplications();
             // scrollToTop();
         }
         const lastPage = () =>{
             currentPage.value = pageCount.value;
-            searchProducts();
+            searchApplications();
             // scrollToTop();
         }
-        const addNewProduct = async() =>{
-            store.commit('Loan_Products/initializeStore');
-            await store.dispatch('Loan_Products/updateState', {selectedProduct: null,selectedCategory: null,selectedInterestLedger: null,isEditing: false});
-            await store.dispatch('Loan_Fees/updateState', {feeArray: []})
-            store.commit('pageTab/ADD_PAGE', {'MMS':'Loan_Product_Details'});
-            store.state.pageTab.mmsActiveTab = 'Loan_Product_Details';          
+        const addNewApplication = async() =>{
+            await store.dispatch('Loan_Products/updateState', {loanCharges: [], productMaxAmount: 0, installments:0});
+            await store.dispatch('Loan_Guarantors/updateState', {memberArray: []});
+            store.commit('Loan_Applications/initializeStore');
+            await store.dispatch('Loan_Applications/updateState', {selectedApplication: null,selectedMember: null,selectedProduct: null,loanCharges: [],loanGuarantors: [],loanSchedules: [],isEditing: false});
+            store.commit('pageTab/ADD_PAGE', {'MMS':'Loan_Application_Details'});
+            store.state.pageTab.mmsActiveTab = 'Loan_Application_Details';          
         }
         const handleActionClick = async(rowIndex, action, row) =>{
             if( action == 'edit'){
-                await store.dispatch('Loan_Products/updateState', {selectedProduct: null,selectedCategory: null,selectedInterestLedger: null,isEditing: false});
-                const productID = row[idField];
+                await store.dispatch('Loan_Applications/updateState', {selectedApplication: null,selectedMember: null,selectedProduct: null,loanCharges: [],loanGuarantors: [],loanSchedules: [],isEditing: false});
+                const applicationID = row[idField];
+
                 let formData = {
                     company: companyID.value,
-                    loan_product: productID
+                    loan_application: applicationID
                 }
-                await store.dispatch('Loan_Products/fetchLoanProduct',formData).
+                await store.dispatch('Loan_Applications/fetchLoanApplication',formData).
                 then(()=>{
-                    store.commit('pageTab/ADD_PAGE', {'MMS':'Loan_Product_Details'})
-                    store.state.pageTab.mmsActiveTab = 'Loan_Product_Details';
+                    store.commit('pageTab/ADD_PAGE', {'MMS':'Loan_Application_Details'})
+                    store.state.pageTab.mmsActiveTab = 'Loan_Application_Details';
                 })
             }else if(action == 'delete'){
-                const productID = [row[idField]];
+                const applicationID = [row[idField]];
                 let formData = {
                     company: companyID.value,
-                    loan_product: productID
+                    loan_application: applicationID
                 }
-                await store.dispatch('Loan_Products/deleteLoanProduct',formData).
+                await store.dispatch('Loan_Applications/deleteLoanApplication',formData).
                 then(()=>{
-                    searchProducts();
+                    searchApplications();
                 })
             }else if(action == 'transfer'){
                 hideTransModalLoader();
-                productID.value = row['loan_product_id'];
+                applicationID.value = row['loan_application_id'];
                 transModalVisible.value = true;
             }
         };
@@ -382,17 +381,17 @@ export default{
             
         };
         
-        const printProductsList = () =>{
+        const printApplicationList = () =>{
             showLoader();
             let formData = {
                 product_name: name_search.value,
-                product_code: product_code_search.value,
-                active_status: active_status_search.value,
+                product_code: loan_number_search.value,
+                active_status: member_number_search.value,
                 company_id: companyID.value,
             } 
 
             axios
-            .post("api/v1/export-loan-products-pdf/", formData, { responseType: 'blob' })
+            .post("api/v1/export-loan-applications-pdf/", formData, { responseType: 'blob' })
                 .then((response)=>{
                     if(response.status == 200){
                         const blob1 = new Blob([response.data]);
@@ -412,17 +411,17 @@ export default{
             showDetails.value = false;
         };
         onBeforeMount(()=>{
-            searchProducts();
+            searchApplications();
             
         })
         return{
-            searchProducts,resetFilters, addButtonLabel, searchFilters, tableColumns, productsList,dropdownWidth,displayButtons,
+            searchApplications,resetFilters, addButtonLabel, searchFilters, tableColumns, applicationList,dropdownWidth,displayButtons,
             propResults, propArrLen, propCount, pageCount, showNextBtn, showPreviousBtn,flex_basis,flex_basis_percentage,
             loadPrev, loadNext, firstPage, lastPage, idField, actions, handleActionClick,showDetails,detailsTitle,hideDetails,
-            submitButtonLabel, showModal, addNewProduct, showLoader, loader, hideLoader, removeProduct, removeProducts,
-            handleSelectionChange,addingRight,rightsModule,printProductsList,selectSearchQuantity,selectedValue,
-            modal_left,modal_top,modal_width,trans_modal_loader,transModalVisible,transTitle,showTransModalLoader,hideTransModalLoader,changeProductStatus,closeTransModal,
-            dropdownOptions,handleDynamicOption,product_status,exit_date
+            submitButtonLabel, showModal, addNewApplication, showLoader, loader, hideLoader, removeApplication, removeApplications,
+            handleSelectionChange,addingRight,rightsModule,printApplicationList,selectSearchQuantity,selectedValue,
+            modal_left,modal_top,modal_width,trans_modal_loader,transModalVisible,transTitle,showTransModalLoader,hideTransModalLoader,approveLoan,closeTransModal,
+            dropdownOptions,handleDynamicOption,approval_status,approval_date
         }
     }
 };

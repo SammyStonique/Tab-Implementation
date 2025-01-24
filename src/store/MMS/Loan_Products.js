@@ -8,7 +8,12 @@ const state = {
   productID: '',
   productName: '',
   productMaxAmount: 0,
+  installments: 0,
   loanCharges: [],
+  chargesList: [], 
+  chargeArr: [],
+  chargeID: '',
+  chargeName: '',
   selectedProduct: null,
   selectedInterestLedger: null,
   selectedCategory: null,
@@ -23,11 +28,16 @@ const mutations = {
     state.productID = "";
     state.productName = "";
     state.productMaxAmount = 0;
+    state.installments = 0;
     state.selectedProduct = null;
     state.selectedInterestLedger = null;
     state.selectedCategory = null;
     state.loanCharges = [];
     state.isEditing = false;
+    state.chargeID = "";
+    state.chargesList = [];
+    state.chargeArr = [];
+    state.chargeName = "";
   },
   SET_SELECTED_PRODUCT(state, product) {
     state.selectedProduct = product;
@@ -35,6 +45,9 @@ const mutations = {
   },
   LIST_PRODUCTS(state, products) {
     state.productsList = products;
+  },
+  LIST_CHARGES(state, charges) {
+    state.chargesList = charges;
   },
   PRODUCTS_ARRAY(state, products){
     state.productArray = products;
@@ -111,15 +124,53 @@ const actions = {
     })
     
   },
+  fetchLoansCharges({ commit,state }, formData) {
+    state.chargeArr = [];
+    axios.post(`api/v1/get-loan-fees/`,formData)
+    .then((response)=>{
+      for(let i=0; i< response.data.length; i++){
+        state.chargeArr.push((response.data[i].fee_name));
+      }
+      commit('LIST_CHARGES', response.data);
+    })
+    .catch((error)=>{
+      console.log(error.message);
+    })
+    
+  },
+
+  fetchLoanProductCharges({ commit,state }, formData) {
+    axios.post(`api/v1/get-loan-products/`,formData)
+    .then((response)=>{
+        commit('SET_PRODUCT_CHARGES',(response.data.loan_charges != null) ? (response.data.loan_charges) : []);
+    })
+    .catch((error)=>{
+      console.log(error.message);
+    })
+    
+  },
   handleSelectedProduct({ commit, state }, option){
     const selectedProduct = state.productsList.find(product => (product.product_code + " - " +product.product_name) === option);
     if (selectedProduct) {
-        state.productID = selectedProduct.loans_product_id;
+        state.productID = selectedProduct.loan_product_id;
         state.productName = selectedProduct.product_name;
         state.productMaxAmount = selectedProduct.max_amount;
+        state.installments = selectedProduct.max_repayment;
         state.productArray = [...state.productArray, selectedProduct];
     }
     commit('PRODUCTS_ARRAY', state.productArray);
+      
+  },
+  
+  handleSelectedCharge({ commit, state }, option){
+    const selectedFee = state.chargesList.find(fee => (fee.fee_name) === option);
+    if (selectedFee) {
+        state.chargeID = selectedFee.loan_fee_id;
+        state.chargeName = selectedFee.fee_name;
+        selectedFee.member_loan_fee_id = null;
+        state.loanCharges = [...state.loanCharges, selectedFee];
+    }
+    commit('SET_PRODUCT_CHARGES', state.loanCharges);
       
   },
 
@@ -174,6 +225,10 @@ const actions = {
         Swal.fire(`Loans Product has not been deleted!`);
       }
     })
+  },
+  removeLoanCharge({commit, state}, index){
+    state.loanCharges.splice(index, 1); 
+    commit('SET_PRODUCT_CHARGES', state.loanCharges);
   },
 };
   
