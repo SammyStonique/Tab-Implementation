@@ -13,6 +13,8 @@ const state = {
     member_number_search: '',
     phone_number_search: '',
     gender_search: '',
+    memberSavings: 0,
+    memberShares: 0,
     selectedMember: null,
     selectedSponsor: null,
     selectedCategory: null,
@@ -37,6 +39,8 @@ const mutations = {
     state.selectedCurrency = null;
     state.selectedSponsor = null;
     state.selectedCategory = null;
+    state.memberSavings = 0;
+    state.memberShares = 0;
     state.isEditing = false;
     state.memberDetails = [];
   },
@@ -137,6 +141,8 @@ const actions = {
     .then((response)=>{
         state.selectedMember = response.data;
         state.selectedMemberID = response.data.member_id;
+        state.memberSavings = response.data.total_savings;
+        state.memberShares = response.data.total_shares;
         commit('SET_SELECTED_MEMBER',response.data);
         commit('SET_SELECTED_CATEGORY',(response.data.member_category != null) ? (response.data.member_category.category_name) : "");
         commit('SET_SELECTED_SPONSOR',(response.data.member_sponsor != null) ? (response.data.member_sponsor.sponsor_name) : "");
@@ -165,8 +171,10 @@ const actions = {
     if (selectedMember) {
         state.memberID = selectedMember.member_id;
         state.memberName = selectedMember.member_name;
+        
         state.memberArray = [...state.memberArray, selectedMember];
     }
+
     commit('MEMBERS_ARRAY', state.memberArray);
       
   },

@@ -14,6 +14,7 @@
         :rows="accountsList"
         :actions="actions"
         :idField="idField"
+        @handleSelectionChange="handleSelectionChange"
         @handleActionClick="handleActionClick"
         :count="depCount"
         :currentPage="currentPage"
@@ -61,6 +62,7 @@ export default{
         const rightsModule = ref('MMS');
         const idField = 'saving_account_id';
         const depModalVisible = ref(false);
+        const selectedIds = ref([]);
         const accountsList = ref([]);
         const depResults = ref([]);
         const depArrLen = ref(0);
@@ -107,6 +109,9 @@ export default{
             {type:'text', placeholder:"Member No...", value: member_number_search, width:36,},
             {type:'text', placeholder:"Search Name...", value: name_search, width:48,},
         ]);
+        const handleSelectionChange = (ids) => {
+            selectedIds.value = ids;
+        };
         const handleSelectedMember = async(option) =>{
             await store.dispatch('Members/handleSelectedMember', option)
             memberID.value = store.state.Members.memberID;
@@ -451,7 +456,7 @@ export default{
             loadPrev, loadNext, firstPage, lastPage, actions, formFields, depModalVisible, addNewAccount,
             displayButtons,flex_basis,flex_basis_percentage, handleActionClick, handleReset, saveAccount,
             showLoader, loader, hideLoader, modal_loader, showModalLoader, hideModalLoader, removeAccount, removeAccounts,
-            addingRight,rightsModule, closeModal
+            addingRight,rightsModule, closeModal,handleSelectionChange
         }
     }
 }

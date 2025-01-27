@@ -151,6 +151,7 @@ const actions = {
     if (selectedMember) {
         state.memberID = selectedMember.member_id;
         state.memberName = selectedMember.member_name;
+        selectedMember.loan_guarantor_id = null;
         state.memberArray = [...state.memberArray, selectedMember];
     }
     commit('MEMBERS_ARRAY', state.memberArray);

@@ -98,6 +98,8 @@ export default defineComponent({
         const loanCharges = computed(()=> store.state.Loan_Applications.loanCharges);
         const memberArray = computed(() => store.state.Members.memberArr);
         const productArray = computed(() => store.state.Loan_Products.productArr);
+        const productMaxAmount = computed(() => store.state.Loan_Products.productMaxAmount);
+        const computedMaxAmnt = computed(() => productMaxAmount);
         const chargeArr = computed(() => store.state.Loan_Products.chargeArr);
         const memberArr = computed(() => store.state.Loan_Guarantors.memberArr);
         const chargesDropdownWidth = ref('400px');
@@ -160,6 +162,7 @@ export default defineComponent({
         const handleSelectedProduct = async(option) =>{
             await store.dispatch('Loan_Products/handleSelectedProduct', option)
             productID.value = store.state.Loan_Products.productID;
+            
             let formData = {
                 company: companyID.value,
                 loan_product: productID.value
@@ -180,6 +183,19 @@ export default defineComponent({
         const fetchGuarantors = async() =>{
             await store.dispatch('Loan_Guarantors/fetchMembers', {company:companyID.value})
         };
+
+        const checkMemberEligiility = (value) =>{
+            if(productValue.value == '' || memberValue.value == ''){
+                toast.error("Please Select a Member or Loan Product")
+                formFields.value[2].value = 0;
+            }
+
+            if(parseFloat(value) > productMaxAmount.value){
+                toast.error(`The Max Amount for the Product is ${productMaxAmount.value}`) 
+                formFields.value[2].value = 0;
+            }
+        }
+
         const formFields = ref();
         const productValue = computed(() => {
            return (selectedApplication.value && selectedApplication.value.loan_product && !productID.value) ? selectedApplication.value.loan_product.loan_product_id : productID.value;
@@ -202,12 +218,12 @@ export default defineComponent({
                     searchPlaceholder: 'Select Loan Product...', dropdownWidth: '400px', updateValue: selectedProduct.value,
                     fetchData: store.dispatch('Loan_Products/fetchLoanProducts', {company:companyID.value}), clearSearch: clearSelectedProduct
                 },
-                { type: 'text', name: 'applied_amount',label: "Applied Amount", value: selectedApplication.value?.applied_amount || '0', required: true },
+                { type: 'text', name: 'applied_amount',label: "Applied Amount", value: selectedApplication.value?.applied_amount || '0', required: true , method: checkMemberEligiility},
                 { type: 'date', name: 'application_date',label: "Application Date", value: selectedApplication.value?.application_date || '', required: true, placeholder: '' },
                 { type: 'date', name: 'repayment_start_date',label: "Repayment Start Date", value: selectedApplication.value?.repayment_start_date || '', required: true, placeholder: '' },
                 { type: 'text', name: 'loan_due_date',label: "Due Day", value: selectedApplication.value?.loan_due_date || '1', required: true },
-                { type: 'text', name: 'installments',label: "Installments", value: computedInstlmnts.value, required: false },
-                { type: 'text-area', name: 'loan_remarks',label: "Remarks", value: selectedApplication.value?.loan_remarks || '0', required: false,textarea_rows: '2', textarea_cols: '56'},
+                { type: 'text', name: 'installments',label: "Installments", value: installments.value, required: false },
+                { type: 'text-area', name: 'loan_remarks',label: "Remarks", value: selectedApplication.value?.loan_remarks || '', required: false,textarea_rows: '2', textarea_cols: '56'},
                 {required: false}
             ];
         };
@@ -221,6 +237,7 @@ export default defineComponent({
         watch([productID, memberID], () => {
             if (productID.value != "") {
                 formFields.value[1].value = productID.value;
+                formFields.value[6].value = installments.value;
             }
             if(memberID.value != ""){
                 formFields.value[0].value = memberID.value;
@@ -384,6 +401,7 @@ export default defineComponent({
                 loan_product: productValue.value,
                 loan_product_id: productValue.value,
                 company: companyID.value,
+                guarantors: guarantorRows.value,
                 charges: chargeRows.value,
             }
             errors.value = [];

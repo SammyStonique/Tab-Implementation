@@ -122,6 +122,12 @@
                             <p class="">Loan Applications</p>
                         </button>
                     </div>
+                    <div class="py-2 px-3 pl-4 w-full hover:bg-slate-500 hover:w-full">
+                        <button class="flex text-sm w-full" @click="openPage({'MMS':'Loan_Guarantors'})">
+                            <i class="fa fa-users pt-2 mr-2" aria-hidden="true"></i>
+                            <p class="">Loan Guarantors</p>
+                        </button>
+                    </div>
                 </div>
             </div>
             <div class="web-links dropdown w-36">
@@ -163,7 +169,7 @@
                     <div class="py-2 px-3 pl-4 w-full hover:bg-slate-500 hover:w-full">
                         <button class="flex text-sm" @click="openPage({'MMS':'Loan_Fees'})">
                         <i class="fa fa-money-bill-wave pt-2 mr-2" aria-hidden="true"></i>
-                        <p class="">Loan Fees</p>
+                        <p class="">Loan Fees Setup</p>
                         </button>
                     </div>
                     <div class="py-2 px-3 pl-4 w-full hover:bg-slate-500 hover:w-full">

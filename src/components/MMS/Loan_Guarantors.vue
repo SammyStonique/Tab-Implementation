@@ -2,16 +2,16 @@
     <PageComponent 
         :loader="loader" @showLoader="showLoader" @hideLoader="hideLoader"
         :addButtonLabel="addButtonLabel"
-        @handleAddNew="addNewAccount"
+        @handleAddNew="addNewGuarantor"
         :searchFilters="searchFilters"
-        @searchPage="searchAccounts"
+        @searchPage="searchGuarantors"
         @resetFilters="resetFilters"
-        @removeItem="removeAccount"
-        @removeSelectedItems="removeAccounts"
+        @removeItem="removeGuarantor"
+        @removeSelectedItems="removeGuarantors"
         :addingRight="addingRight"
         :rightsModule="rightsModule"
         :columns="tableColumns"
-        :rows="accountsList"
+        :rows="guarantorsList"
         :actions="actions"
         :idField="idField"
         @handleSelectionChange="handleSelectionChange"
@@ -25,12 +25,14 @@
         @lastPage="lastPage"
         :showNextBtn="showNextBtn"
         :showPreviousBtn="showPreviousBtn"
+        :selectedValue="selectedValue"
+        @selectSearchQuantity="selectSearchQuantity"
     />
     <MovableModal v-model:visible="depModalVisible" :title="title" :modal_top="modal_top" :modal_left="modal_left" :modal_width="modal_width"
         :loader="modal_loader" @showLoader="showModalLoader" @hideLoader="hideModalLoader"  @closeModal="closeModal">
         <DynamicForm 
             :fields="formFields" :flex_basis="flex_basis" :flex_basis_percentage="flex_basis_percentage" 
-            :displayButtons="displayButtons" @handleSubmit="saveAccount" @handleReset="handleReset"
+            :displayButtons="displayButtons" @handleSubmit="createLoanGuarantor" @handleReset="handleReset"
         />
     </MovableModal>
 </template>
@@ -45,7 +47,7 @@ import { useStore } from "vuex";
 import { useToast } from "vue-toastification";
 
 export default{
-    name: 'Share_Accounts',
+    name: 'Loan_Guarantors',
     components:{
         PageComponent,MovableModal,DynamicForm
     },
@@ -56,18 +58,19 @@ export default{
         const modal_loader = ref('none');
         const memComponentKey = ref(0);
         const prodComponentKey = ref(0);
-        const title = ref('Share Account Details');
-        const addButtonLabel = ref('New Share Account');
-        const addingRight = ref('Adding Share Accounts');
+        const title = ref('Saving Account Details');
+        const addButtonLabel = ref('New Guarantor');
+        const addingRight = ref('Adding Loan Guarantors');
         const rightsModule = ref('MMS');
-        const idField = 'share_account_id';
+        const idField = 'loan_guarantor_id';
         const depModalVisible = ref(false);
+        const guarantorsList = ref([]);
         const selectedIds = ref([]);
-        const accountsList = ref([]);
         const depResults = ref([]);
         const depArrLen = ref(0);
         const depCount = ref(0);
         const pageCount = ref(0);
+        const selectedValue = ref(50);
         const currentPage = ref(1);
         const showNextBtn = ref(false);
         const showPreviousBtn = ref(false);
@@ -78,34 +81,34 @@ export default{
         const modal_top = ref('200px');
         const modal_left = ref('400px');
         const modal_width = ref('30vw');
-        const isEditing = computed(()=> store.state.Share_Accounts.isEditing)
-        const selectedAccount = computed(()=> store.state.Share_Accounts.selectedAccount);
-        const selectedMember = computed(()=> store.state.Share_Accounts.selectedMember);
-        const selectedProduct = computed(()=> store.state.Share_Accounts.selectedProduct);
+        const isEditing = computed(()=> store.state.Loan_Guarantors.isEditing)
+        const selectedGuarantor = computed(()=> store.state.Loan_Guarantors.selectedGuarantor);
+        const selectedMember = computed(()=> store.state.Loan_Guarantors.selectedMember);
+        const selectedApplication = computed(()=> store.state.Loan_Guarantors.selectedApplication);
         const memberArray = computed(() => store.state.Members.memberArr);
-        const productArray = computed(() => store.state.Shares_Products.productArr);
-        const productAmount = ref(0);
-        const computedProdAmnt = computed(() =>  productAmount);
+        const applicationArray = computed(() => store.state.Loan_Applications.applicationArr);
+        const productMinAmount = ref(0);
+        const computedProdMinAmnt = computed(() =>  productMinAmount);
         const tableColumns = ref([
             {type: "checkbox"},
-            {label: "Acc No", key: "account_number", type: "text", editable: false},
             {label: "Member No", key: "member_number", type: "text", editable: false},
             {label: "Member Name", key: "member_name", type: "text", editable: false},
-            {label: "Share Product", key: "share_product", type: "text", editable: false},
+            {label: "Phone No", key: "phone_number", type: "text", editable: false},
+            {label: "Loan No", key: "loan_number", type: "text", editable: false},
+            {label: "Guarantee", key: "guarantee", type: "text", editable: false},
             {label: "Amount", key: "amount", type: "text", editable: false},
         ])
         const actions = ref([
-            {name: 'edit', icon: 'fa fa-edit', title: 'Edit Account', rightName: 'Editing Share Accounts'},
-            {name: 'delete', icon: 'fa fa-trash', title: 'Delete Account', rightName: 'Deleting Share Accounts'},
+            {name: 'delete', icon: 'fa fa-trash', title: 'Delete Guarantor', rightName: 'Deleting Loan Guarantors'},
         ])
         const companyID = computed(()=> store.state.userData.company_id);
         const memberID = ref('');
-        const productID = ref('');
-        const account_number_search = ref('');
+        const applicationID = ref('');
+        const loan_number_search = ref('');
         const name_search = ref('');
         const member_number_search = ref("");
         const searchFilters = ref([
-            {type:'text', placeholder:"Account No...", value: account_number_search, width:40,},
+            {type:'text', placeholder:"Loan No...", value: loan_number_search, width:40,},
             {type:'text', placeholder:"Member No...", value: member_number_search, width:36,},
             {type:'text', placeholder:"Search Name...", value: name_search, width:48,},
         ]);
@@ -115,8 +118,8 @@ export default{
         const handleSelectedMember = async(option) =>{
             await store.dispatch('Members/handleSelectedMember', option)
             memberID.value = store.state.Members.memberID;
-            if(selectedAccount.value){
-                selectedAccount.value.member.member_id = memberID.value;
+            if(selectedGuarantor.value){
+                selectedGuarantor.value.member.member_id = memberID.value;
                 memberValue.value = memberID.value
             }
         };
@@ -124,25 +127,20 @@ export default{
             await store.dispatch('Members/updateState', {memberID: ''});
             memberID.value = store.state.Members.memberID;
         };
-        const handleSelectedProduct = async(option) =>{
-            await store.dispatch('Shares_Products/handleSelectedProduct', option)
-            productID.value = store.state.Shares_Products.productID;
-            productAmount.value = store.state.Shares_Products.productAmount;
-            if(selectedAccount.value){
-                selectedAccount.value.share_product.shares_product_id = productID.value;
-                productValue.value = productID.value
-            }
+        const handleSelectedApplication = async(option) =>{
+            await store.dispatch('Loan_Applications/handleSelectedApplication', option)
+            applicationID.value = store.state.Loan_Applications.applicationID;
         };
-        const clearSelectedProduct = async() =>{
-            await store.dispatch('Shares_Products/updateState', {productID: ''});
-            productID.value = store.state.Shares_Products.productID;
+        const clearSelectedApplication = async() =>{
+            await store.dispatch('Loan_Applications/updateState', {applicationID: ''});
+            applicationID.value = store.state.Loan_Applications.applicationID;
         };
         const formFields = ref([]);
         const memberValue = computed(() => {
-            return (selectedAccount.value && selectedAccount.value.member && !memberID.value) ? selectedAccount.value.member.member_id : memberID.value;
+            return (selectedGuarantor.value && selectedGuarantor.value.member && !memberID.value) ? selectedGuarantor.value.member.member_id : memberID.value;
         });
-        const productValue = computed(() => {
-            return (selectedAccount.value && selectedAccount.value.share_product && !productID.value) ? selectedAccount.value.share_product.shares_product_id : productID.value;
+        const applicationValue = computed(() => {
+            return (selectedGuarantor.value && selectedGuarantor.value.loan_application && !applicationID.value) ? selectedGuarantor.value.loan_application.savings_product_id : applicationID.value;
         });
         const updateFormFields = () => {
             formFields.value = [
@@ -153,18 +151,17 @@ export default{
                     fetchData: store.dispatch('Members/fetchMembers', {company:companyID.value}), clearSearch: clearSelectedMember
                 },
                 {  
-                    type:'search-dropdown', label:"Share Product", value: productValue.value, componentKey: prodComponentKey,
-                    selectOptions: productArray, optionSelected: handleSelectedProduct, required: true,
-                    searchPlaceholder: 'Select Share Product...', dropdownWidth: '400px', updateValue: selectedProduct.value,
-                    fetchData: store.dispatch('Shares_Products/fetchSharesProducts', {company:companyID.value}), clearSearch: clearSelectedProduct
+                    type:'search-dropdown', label:"Loan Application", value: applicationValue.value, componentKey: prodComponentKey,
+                    selectOptions: applicationArray, optionSelected: handleSelectedApplication, required: true,
+                    searchPlaceholder: 'Select Loan Application...', dropdownWidth: '400px', updateValue: selectedApplication.value,
+                    fetchData: store.dispatch('Loan_Applications/fetchLoanApplications', {company:companyID.value}), clearSearch: clearSelectedApplication
                 },
-                { type: 'text', name: 'account_number',label: "Account Number", value: selectedAccount.value?.account_number || '', required: true },
-                { type: 'date', name: 'date',label: "Date Opened", value: selectedAccount.value?.date || '', required: true },
-                { type: 'text', name: 'amount',label: "Amount", value: selectedAccount.value?.amount || computedProdAmnt.value, required: true },
+                { type: 'date', name: 'approval_date',label: "Date", value: selectedGuarantor.value?.approval_date || '', required: true },
+                { type: 'text', name: 'amount',label: "Amount", value: selectedGuarantor.value?.amount || '0', required: true },
             ];
         };
-        watch([selectedAccount, selectedMember, selectedProduct], () => {
-            if (selectedAccount.value && selectedMember.value && selectedProduct.value) {
+        watch([selectedGuarantor, selectedMember, selectedApplication], () => {
+            if (selectedGuarantor.value && selectedMember.value && selectedApplication.value) {
                 memComponentKey.value += 1;
                 prodComponentKey.value += 1;
                 updateFormFields();
@@ -173,10 +170,10 @@ export default{
                 updateFormFields();
             }
         }, { immediate: true });
-        const addNewAccount = () =>{
+        const addNewGuarantor = () =>{
             depModalVisible.value = true;
             handleReset();
-            store.dispatch("Share_Accounts/updateState",{selectedAccount:null, selectedMember:null, selectedProduct:null,isEditing:false})
+            store.dispatch("Loan_Guarantors/updateState",{selectedGuarantor:null, selectedMember:null, selectedApplication:null,isEditing:false})
             flex_basis.value = '1/2';
             flex_basis_percentage.value = '50';
         }
@@ -185,9 +182,9 @@ export default{
                 const accountID = row[idField];
                 let formData = {
                     company: companyID.value,
-                    share_account: accountID
+                    loan_guarantor: accountID
                 }
-                await store.dispatch('Share_Accounts/fetchShareAccount',formData).
+                await store.dispatch('Loan_Guarantors/fetchLoanGuarantor',formData).
                 then(()=>{
                     depModalVisible.value = true;
                     flex_basis.value = '1/2';
@@ -198,21 +195,21 @@ export default{
                 const accountID = [row[idField]];
                 let formData = {
                     company: companyID.value,
-                    share_account: accountID
+                    loan_guarantor: accountID
                 }
-                await store.dispatch('Share_Accounts/deleteShareAccount',formData).
+                await store.dispatch('Loan_Guarantors/deleteLoanGuarantor',formData).
                 then(()=>{
-                    searchAccounts();
+                    searchGuarantors();
                 })
             }
         } 
         const handleReset = () =>{
-            store.dispatch("Share_Accounts/updateState",{selectedAccount:null, selectedMember:null, selectedProduct:null,isEditing:false})
+            store.dispatch("Loan_Guarantors/updateState",{selectedGuarantor:null, selectedMember:null, selectedApplication:null,isEditing:false})
             for(let i=0; i < formFields.value.length; i++){
                 formFields.value[i].value = '';
             }
             memberID.value = "";
-            productID.value = "";
+            applicationID.value = "";
             prodComponentKey.value += 1;
             memComponentKey.value += 1;
 
@@ -223,16 +220,16 @@ export default{
         const hideModalLoader = () =>{
             modal_loader.value = "none";
         }
-        const createAccount = async() =>{
+        const createLoanGuarantor = async() =>{
             showModalLoader();
             let formData = {
-                account_number: formFields.value[2].value,
-                date: formFields.value[3].value,
-                amount: formFields.value[4].value,
+                date: formFields.value[2].value,
+                amount: formFields.value[3].value,
+                approved: 'Yes',
                 member: memberID.value,
                 member_id: memberID.value,
-                share_product: productID.value,
-                share_product_id: productID.value,
+                loan_application: applicationID.value,
+                loan_application_id: applicationID.value,
                 company: companyID.value
             }
             errors.value = [];
@@ -241,7 +238,7 @@ export default{
                     errors.value.push('Error');
                 }
             }
-            if(memberValue.value == '' || productValue.value == ''){
+            if(memberValue.value == '' || applicationValue.value == ''){
                 errors.value.push('Error');
             }
             if(errors.value.length){
@@ -249,126 +246,74 @@ export default{
                 hideModalLoader();
             }else{
                 try {
-                    const response = await store.dispatch('Share_Accounts/createShareAccount', formData);
+                    const response = await store.dispatch('Loan_Guarantors/createLoanGuarantor', formData);
                     if(response && response.status === 201) {
                         hideModalLoader();
-                        toast.success('Account created successfully!');
+                        toast.success('Guarantor created successfully!');
                         handleReset();
                         memComponentKey.value += 1;
                         prodComponentKey.value += 1;
                     }else {
-                        toast.error('An error occurred while creating the Account.');
+                        toast.error('An error occurred while creating the Guarantor.');
                     }
                 } catch (error) {
                     console.error(error.message);
-                    toast.error('Failed to create Account: ' + error.message);
+                    toast.error('Failed to create Guarantor: ' + error.message);
                 } finally {
                     hideModalLoader();
-                    searchAccounts();
+                    searchGuarantors();
                 }
             }
 
-        }
-        const updateAccount = async() =>{
-            showModalLoader();
-            errors.value = [];
-            let formData = {
-                account_number: formFields.value[2].value,
-                date: formFields.value[3].value,
-                amount: formFields.value[4].value,
-                member: memberValue.value,
-                member_id: memberValue.value,
-                share_product: productValue.value,
-                share_product_id: productValue.value,
-                company: companyID.value,
-                share_account: selectedAccount.value.share_account_id
-            }
-            for(let i=0; i < formFields.value.length; i++){
-                if(formFields.value[i].value =='' && formFields.value[i].required == true && formFields.value[i].type !='search-dropdown'){
-                    errors.value.push('Error');
-                }
-            }
-            if(memberValue.value == '' || productValue.value == ''){
-                errors.value.push('Error');
-            }
-            if(errors.value.length){
-                    toast.error('Fill In Required Fields');
-            }else{
-                try {
-                    const response = await store.dispatch('Share_Accounts/updateShareAccount', formData);
-                    if (response && response.status === 200) {
-                        hideModalLoader();
-                        toast.success("Account updated successfully!");
-                        handleReset();
-                        memComponentKey.value += 1;
-                        prodComponentKey.value += 1;
-                    } else {
-                        toast.error('An error occurred while updating the Account.');
-                    }
-                } catch (error) {
-                    console.error(error.message);
-                    toast.error('Failed to update Account: ' + error.message);
-                } finally {
-                    hideModalLoader();
-                    searchAccounts();
-                }
-            }
-        }
-        const saveAccount = () =>{
-            if(isEditing.value == true){
-                updateAccount();
-            }else{
-                createAccount();
-            }
-        }
-        const removeAccount = async() =>{
+        };
+        const removeGuarantor = async() =>{
             if(selectedIds.value.length == 1){
                 let formData = {
                     company: companyID.value,
-                    share_account: selectedIds.value,
+                    loan_guarantor: selectedIds.value,
                 }
                 try{
-                    const response = await store.dispatch('Share_Accounts/deleteShareAccount',formData)
+                    const response = await store.dispatch('Loan_Guarantors/deleteLoanGuarantor',formData)
                     if(response && response.status == 200){
-                        toast.success("Account Removed Succesfully");
-                        searchAccounts();
+                        toast.success("Guarantor Removed Succesfully");
+                        searchGuarantors();
                     }
                 }
                 catch(error){
                     console.error(error.message);
-                    toast.error('Failed to remove Account: ' + error.message);
+                    toast.error('Failed to remove Guarantor: ' + error.message);
                 }
                 finally{
                     selectedIds.value = [];
                 }
             }else if(selectedIds.value.length > 1){
-                toast.error("You have selected more than 1 Account") 
+                toast.error("You have selected more than 1 Guarantor") 
             }else{
-                toast.error("Please Select An Account To Remove")
+                toast.error("Please Select A Guarantor To Remove")
             }
         }
-        const removeAccounts = async() =>{
+        const removeGuarantors = async() =>{
             if(selectedIds.value.length){
                 let formData = {
                     company: companyID.value,
-                    share_account: selectedIds.value,
+                    loan_guarantor: selectedIds.value,
                 }
                 try{
-                    const response = await store.dispatch('Share_Accounts/deleteShareAccount',formData)
+                    const response = await store.dispatch('Loan_Guarantors/deleteLoanGuarantor',formData)
                     if(response && response.status == 200){
-                        toast.success("Account(s) Removed Succesfully");
-                        searchAccounts();
+                        toast.success("Guarantor(s) Removed Succesfully");
+                        searchGuarantors();
                     }
                 }
                 catch(error){
                     console.error(error.message);
-                    toast.error('Failed to remove Account(s): ' + error.message);
+                    toast.error('Failed to remove Guarantor(s): ' + error.message);
                 }
                 finally{
                     selectedIds.value = [];
                 }
             }else{
-                toast.error("Please Select An Account To Remove")
+                toast.error("Please Select A Guarantor To Remove")
             }
         }
         const showLoader = () =>{
@@ -377,25 +322,26 @@ export default{
         const hideLoader = () =>{
             loader.value = "none";
         }
-        const searchAccounts = () =>{
+        const searchGuarantors = () =>{
             showLoader();
             showNextBtn.value = false;
             showPreviousBtn.value = false;
             let formData = {
-                account_number: account_number_search.value,
+                loan_number: loan_number_search.value,
                 member_name: name_search.value,
                 member_number: member_number_search.value,
-                company_id: companyID.value
+                company_id: companyID.value,
+                page_size: selectedValue.value
             }
             axios
-            .post(`api/v1/share-accounts-search/?page=${currentPage.value}`,formData)
+            .post(`api/v1/loan-guarantors-search/?page=${currentPage.value}`,formData)
             .then((response)=>{
-                accountsList.value = response.data.results;
-                store.commit('Share_Accounts/LIST_ACCOUNTS', accountsList.value)
+                guarantorsList.value = response.data.results;
+                store.commit('Loan_Guarantors/LIST_GUARANTORS', guarantorsList.value)
                 depResults.value = response.data;
-                depArrLen.value = accountsList.value.length;
+                depArrLen.value = guarantorsList.value.length;
                 depCount.value = depResults.value.count;
-                pageCount.value = Math.ceil(depCount.value / 50);
+                pageCount.value = Math.ceil(depCount.value / selectedValue.value);
                 
                 if(response.data.next){
                     showNextBtn.value = true;
@@ -410,7 +356,11 @@ export default{
             .finally(()=>{
                 hideLoader();
             })
-        }
+        };
+        const selectSearchQuantity = (newValue) =>{
+            selectedValue.value = newValue;
+            searchGuarantors(selectedValue.value);
+        };
         const loadPrev = () =>{
             if (currentPage.value <= 1){
                 currentPage.value = 1;
@@ -418,7 +368,7 @@ export default{
                 currentPage.value -= 1;
             }
             
-            searchAccounts();
+            searchGuarantors();
         }
         const loadNext = () =>{
             if(currentPage.value >= pageCount.value){
@@ -427,36 +377,37 @@ export default{
                 currentPage.value += 1;
             }
             
-            searchAccounts();
+            searchGuarantors();
         }
         const firstPage = ()=>{
             currentPage.value = 1;
-            searchAccounts();
+            searchGuarantors();
         }
         const lastPage = () =>{
             currentPage.value = pageCount.value;
-            searchAccounts();
+            searchGuarantors();
         }
         const resetFilters = () =>{
+            selectedValue.value = 50;
             name_search.value = "";
-            account_number_search.value = "";
+            loan_number_search.value = "";
             member_number_search.value = "";
-            searchAccounts();
+            searchGuarantors();
         };
         const closeModal = async() =>{
             depModalVisible.value = false;
             handleReset();
         }
         onMounted(()=>{
-            searchAccounts();
+            searchGuarantors();
         })
         return{
-            title,idField, searchAccounts, addButtonLabel, searchFilters, resetFilters, tableColumns, accountsList,
+            title,idField, searchGuarantors, addButtonLabel, searchFilters, resetFilters, tableColumns, guarantorsList,
             depResults, depArrLen, depCount, pageCount, showNextBtn, showPreviousBtn,modal_top, modal_left, modal_width,
-            loadPrev, loadNext, firstPage, lastPage, actions, formFields, depModalVisible, addNewAccount,
-            displayButtons,flex_basis,flex_basis_percentage, handleActionClick, handleReset, saveAccount,
-            showLoader, loader, hideLoader, modal_loader, showModalLoader, hideModalLoader, removeAccount, removeAccounts,
-            addingRight,rightsModule, closeModal,handleSelectionChange
+            loadPrev, loadNext, firstPage, lastPage, actions, formFields, depModalVisible, addNewGuarantor,
+            displayButtons,flex_basis,flex_basis_percentage, handleActionClick, handleReset, createLoanGuarantor,
+            showLoader, loader, hideLoader, modal_loader, showModalLoader, hideModalLoader, removeGuarantor, removeGuarantors,
+            addingRight,rightsModule, closeModal,selectSearchQuantity,selectedValue,handleSelectionChange
         }
     }
 }

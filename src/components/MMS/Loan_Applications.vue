@@ -38,21 +38,10 @@
     </div>
     <MovableModal v-model:visible="transModalVisible" :title="transTitle" :modal_top="modal_top" :modal_left="modal_left" :modal_width="modal_width"
         :loader="trans_modal_loader" @showLoader="showTransModalLoader" @hideLoader="hideTransModalLoader" @closeModal="closeTransModal">
-        <div class="mt-4 mb-8 w-full">       
-            <label for="">Date:</label><br />
-            <input v-model="approval_date"  type="date" class="`bg-slate-50 rounded pl-3 border border-gray-400 text-base w-full`"/>
-        </div>
-        <div class="mb-8 w-full">         
-            <label for="">Select Approval Status:</label><br />
-            <select v-model="approval_status" class="bg-slate-50 rounded border border-gray-400 text-sm pl-2 pt-2 w-full">
-                <option value="" selected disabled>Select Status</option>
-                <option value="Approved">Approve</option>
-                <option value="Rejected">Reject</option>
-          </select>
-        </div>
-        <div class="flex-1 basis-full px-2">
-            <button @click="approveLoan" class="rounded bg-green-400 text-sm mr-2  text-white px-2 py-1.5"><i class="fa fa-check-circle text-xs mr-1.5" aria-hidden="true"></i>Save</button>
-        </div>
+        <DynamicForm 
+            :fields="formFields" :flex_basis="flex_basis" :flex_basis_percentage="flex_basis_percentage" 
+            :displayButtons="displayButtons" @handleSubmit="approveLoan" @handleReset="handleReset"
+        />
     </MovableModal>
 
 </template>
@@ -81,8 +70,6 @@ export default{
         const displayButtons = ref(true);
         const unitComponentKey = ref(0);
         const trans_modal_loader = ref('none');
-        const approval_status = ref('');
-        const approval_date = ref('');
         const idField = 'loan_application_id';
         const addButtonLabel = ref('New Application');
         const addingRight = ref('Adding Loan Applications');
@@ -100,12 +87,12 @@ export default{
         const showNextBtn = ref(false);
         const showPreviousBtn = ref(false);
         const detailsTitle = ref('Application Documents');
-        const transTitle = ref('Changing Application Status');
+        const transTitle = ref('Approve/Reject Loan');
         const transModalVisible = ref(false);
         const dropdownWidth = ref("500px")
         const modal_top = ref('200px');
         const modal_left = ref('400px');
-        const modal_width = ref('45vw');
+        const modal_width = ref('30vw');
         const flex_basis = ref('');
         const flex_basis_percentage = ref('');
         const showModal = ref(false);
@@ -115,18 +102,21 @@ export default{
             {label: "Loan No", key:"loan_number"},
             {label: "Member Name", key:"member"},
             {label: "Product Name", key:"loan_product"},
-            {label: "Applied Amnt", key: "applied_amount"},
-            {label: "Approved Amnt", key: "approved_amount"},
+            {label: "Applied", key: "formatted_applied_amount"},
+            {label: "Approved", key: "formatted_approved_amount"},
             {label: "Status", key:"approval_status"},
             {label: "Loan Remarks", key:"loan_remarks"},
+            {label: "Appr. By", key:"approved_by"},
         ])
         const actions = ref([
             {name: 'edit', icon: 'fa fa-edit', title: 'Edit Application', rightName: 'Editing Loan Applications'},
-            {name: 'transfer', icon: 'fa fa-exchange', title: 'Change Application Status', rightName: 'Approving Loan Applications'},
+            {name: 'approve/reject', icon: 'fa fa-exchange', title: 'Approve/Reject Loan', rightName: 'Approving Loan Applications'},
             {name: 'delete', icon: 'fa fa-trash', title: 'Delete Application', rightName: 'Deleting Loan Applications'},
         ])
         const companyID = computed(()=> store.state.userData.company_id);
+        const userID = computed(()=> store.state.userData.user_id);
         const applicationID = ref("");
+        const appliedAmount = ref(0);
         const dropdownOptions = ref([
             
         ]);
@@ -143,6 +133,20 @@ export default{
         const handleSelectionChange = (ids) => {
             selectedIds.value = ids;
         };
+        const formFields = ref([]);
+        const updateFormFields = () => {
+            formFields.value = [
+                { type: 'date', name: 'date',label: "Date", value: '', required: true },
+                { type: 'dropdown', name: 'approval_status',label: "Status", value: '', placeholder: "", required: true, options: [{ text: 'Approve', value: 'Approved' }, { text: 'Reject', value: 'Rejected' }] },
+                { type: 'text', name: 'approved_amount',label: "Approved Amount", value: appliedAmount || '0', required: false },
+                { type: 'text-area', name: 'approval_remarks',label: "Remarks", value: '', required: false,textarea_rows: '2', textarea_cols: '56'},
+            ]
+        };
+        const handleReset = () =>{
+            for(let i=0; i < formFields.value.length; i++){
+                formFields.value[i].value = '';
+            }
+        }
         const removeApplication = async() =>{
             if(selectedIds.value.length == 1){
                 let formData = {
@@ -204,52 +208,31 @@ export default{
             showTransModalLoader();
             let formData = {
                 loan_application: applicationID.value,
+                approved_by: userID.value,
+                approval_date: formFields.value[0].value,
+                approval_status: formFields.value[1].value,
+                approved_amount: formFields.value[2].value,
+                approval_remarks: formFields.value[3].value,
                 company: companyID.value
             }
-            Swal.fire({
-            title: "Are you sure?",
-            text: `Do you wish to Approve/Reject Loan?`,
-            type: 'warning',
-            showCloseButton: true,
-            showCancelButton: true,
-            confirmButtonText: 'Yes, Approve/Reject Loan!',
-            cancelButtonText: 'Cancel!',
-            customClass: {
-                confirmButton: 'swal2-confirm-custom',
-                cancelButton: 'swal2-cancel-custom',
-            },
-            showLoaderOnConfirm: true,
-            }).then((result) => {
-            if (result.value) {
-                axios.post(`api/v1/approve-member-loan/`,formData)
-                .then((response)=>{
-                if(response.data.msg == "Success"){
-                    Swal.fire("Success!", {
-                        icon: "success",
-                    }); 
-                    unitComponentKey.value += 1;
-                    closeTransModal();
-                    searchApplications();
-                }else{
-                    Swal.fire({
-                    title: "Error Approving/Rejecting Loan",
-                    icon: "warning",
-                    });
-                }                   
-                })
-                .catch((error)=>{
-                    console.log(error.message);
-                    Swal.fire({
-                        title: error.message,
-                        icon: "warning",
-                    });
-                    hideTransModalLoader();
-                })
-            }else{
-                Swal.fire(`Application has not been Approved/Rejected!`);
+
+            axios.post(`api/v1/approve-member-loan/`,formData)
+            .then((response)=>{
+            if(response.data.msg == "Success"){
                 hideTransModalLoader();
-            }
-            })     
+                closeTransModal();
+                toast.success("Success")
+                searchApplications();
+            }else{
+                toast.error("Error");
+                hideTransModalLoader();
+            }                   
+            })
+            .catch((error)=>{
+                console.log(error.message);
+                toast.error(error.message);
+                hideTransModalLoader();
+            })
         };
         const closeTransModal = () =>{
             transModalVisible.value = false;
@@ -350,16 +333,21 @@ export default{
             if( action == 'edit'){
                 await store.dispatch('Loan_Applications/updateState', {selectedApplication: null,selectedMember: null,selectedProduct: null,loanCharges: [],loanGuarantors: [],loanSchedules: [],isEditing: false});
                 const applicationID = row[idField];
-
-                let formData = {
-                    company: companyID.value,
-                    loan_application: applicationID
+                const applicationStatus = row['approval_status']
+                if(applicationStatus == 'Pending'){
+                    let formData = {
+                        company: companyID.value,
+                        loan_application: applicationID
+                    }
+                    await store.dispatch('Loan_Applications/fetchLoanApplication',formData).
+                    then(()=>{
+                        store.commit('pageTab/ADD_PAGE', {'MMS':'Loan_Application_Details'})
+                        store.state.pageTab.mmsActiveTab = 'Loan_Application_Details';
+                    })
+                }else{
+                    toast.error("Cannot Edit Approved/Rejected Loan")
                 }
-                await store.dispatch('Loan_Applications/fetchLoanApplication',formData).
-                then(()=>{
-                    store.commit('pageTab/ADD_PAGE', {'MMS':'Loan_Application_Details'})
-                    store.state.pageTab.mmsActiveTab = 'Loan_Application_Details';
-                })
+                
             }else if(action == 'delete'){
                 const applicationID = [row[idField]];
                 let formData = {
@@ -370,10 +358,13 @@ export default{
                 then(()=>{
                     searchApplications();
                 })
-            }else if(action == 'transfer'){
-                hideTransModalLoader();
+            }else if(action == 'approve/reject'){
+                updateFormFields();
                 applicationID.value = row['loan_application_id'];
+                appliedAmount.value = row['applied_amount'];
                 transModalVisible.value = true;
+                flex_basis.value = '1/2';
+                flex_basis_percentage.value = '50';
             }
         };
 
@@ -416,12 +407,12 @@ export default{
         })
         return{
             searchApplications,resetFilters, addButtonLabel, searchFilters, tableColumns, applicationList,dropdownWidth,displayButtons,
-            propResults, propArrLen, propCount, pageCount, showNextBtn, showPreviousBtn,flex_basis,flex_basis_percentage,
+            propResults, propArrLen, propCount, pageCount, showNextBtn, showPreviousBtn,flex_basis,flex_basis_percentage,formFields,handleReset,
             loadPrev, loadNext, firstPage, lastPage, idField, actions, handleActionClick,showDetails,detailsTitle,hideDetails,
             submitButtonLabel, showModal, addNewApplication, showLoader, loader, hideLoader, removeApplication, removeApplications,
             handleSelectionChange,addingRight,rightsModule,printApplicationList,selectSearchQuantity,selectedValue,
             modal_left,modal_top,modal_width,trans_modal_loader,transModalVisible,transTitle,showTransModalLoader,hideTransModalLoader,approveLoan,closeTransModal,
-            dropdownOptions,handleDynamicOption,approval_status,approval_date
+            dropdownOptions,handleDynamicOption
         }
     }
 };
