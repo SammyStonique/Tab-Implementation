@@ -14,7 +14,14 @@ const state = {
   selectedApplication: null,
   selectedProduct: null,
   selectedMember: null,
-  isEditing: false
+  isEditing: false,
+  loanDetails: [],
+  selectedSchedules: [],
+  selectedCharges: [],
+  selectedGuarantors: [],
+  selectedTransactions: [],
+  loanMember: [],
+  loanProduct: [],
 };
   
 const mutations = {
@@ -32,6 +39,13 @@ const mutations = {
     state.selectedProduct = null;
     state.selectedMember = null;
     state.isEditing = false;
+    state.loanDetails = [];
+    state.selectedSchedules = [];
+    state.selectedCharges = [];
+    state.selectedGuarantors = [];
+    state.selectedTransactions = [];
+    state.loanMember = [];
+    state.loanProduct = [];
   },
   SET_SELECTED_APPLICATION(state, application) {
     state.selectedApplication = application;
@@ -47,11 +61,26 @@ const mutations = {
   SET_APPLICATION_CHARGES(state, charges){
     state.loanCharges = charges
   },
-  SET_APPLICATION_GUARANTORS(state, guarrantors){
-    state.loanGuarantors = guarrantors
+  SET_APPLICATION_GUARANTORS(state, guarantors){
+    state.loanGuarantors = guarantors
   },
   SET_APPLICATION_SCHEDULES(state, schedules){
     state.loanSchedules = schedules
+  },
+  SET_LOAN_CHARGES(state, charges){
+    state.selectedCharges = charges
+  },
+  SET_LOAN_DETAILS(state, details){
+    state.loanDetails = details;
+  },
+  SET_LOAN_GUARANTORS(state, guarantors){
+    state.selectedGuarantors = guarantors;
+  },
+  SET_LOAN_SCHEDULES(state, schedules){
+    state.selectedSchedules = schedules;
+  },
+  SET_LOAN_TRANSACTIONS(state, transactions){
+    state.selectedTransactions = transactions;
   },
   SET_SELECTED_MEMBER(state, member) {
     state.selectedMember = member;
@@ -135,6 +164,51 @@ const actions = {
       console.log(error.message);
     })
     
+  },
+  fetchLoanDetails({ commit,state }, formData) {
+    axios.post(`api/v1/get-loan-applications/`,formData)
+    .then((response)=>{
+        state.loanDetails = response.data;
+        state.loanMember = response.data.member;
+        state.loanProduct = response.data.loan_product;
+        commit('SET_LOAN_DETAILS',response.data);
+        commit('SET_LOAN_CHARGES',(response.data.loan_charges != null) ? (response.data.loan_charges) : []);
+        commit('SET_LOAN_GUARANTORS',(response.data.loan_guarantors != null) ? (response.data.loan_guarantors) : []);
+        commit('SET_LOAN_SCHEDULES',(response.data.loan_schedules != null) ? (response.data.loan_schedules) : []);
+    })
+    .catch((error)=>{
+      console.log(error.message);
+    })
+    
+  },
+  fetchLoanTransactions({ commit,state }, formData){
+    let txns = [];
+    axios
+    .post("api/v1/loan-ledger-transactions-search/", formData)
+    .then((response)=>{
+        state.selectedTransactions = [];
+        let running_balance = 0;
+        txns = response.data.results;
+
+        for(let i=0; i<txns.length; i++){
+            if(txns[i].debit_amount != 0){
+                running_balance += txns[i].debit_amount;
+                txns[i]['running_balance'] = Number(running_balance).toLocaleString();
+                state.selectedTransactions.push(txns[i])
+            }
+            else if(txns[i].credit_amount != 0){
+                running_balance -= txns[i].credit_amount;
+                txns[i]['running_balance'] = Number(running_balance).toLocaleString();
+                state.selectedTransactions.push(txns[i])
+            }
+        }
+    })
+    .catch((error)=>{
+        console.log(error.message)
+    })
+    .finally(()=>{
+    
+    })
   },
   
   handleSelectedApplication({ commit, state }, option){

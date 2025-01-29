@@ -97,6 +97,7 @@ export default{
             {label: "Loan No", key: "loan_number", type: "text", editable: false},
             {label: "Guarantee", key: "guarantee", type: "text", editable: false},
             {label: "Amount", key: "amount", type: "text", editable: false},
+            {label: "Approved", key: "approval_status", type: "text", editable: false},
         ])
         const actions = ref([
             {name: 'delete', icon: 'fa fa-trash', title: 'Delete Guarantor', rightName: 'Deleting Loan Guarantors'},

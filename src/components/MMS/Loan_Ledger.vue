@@ -1,0 +1,447 @@
+<template>
+    <PageStyleComponent :key="mainComponentKey" :loader="loader" @showLoader="showLoader" @hideLoader="hideLoader">
+        <template v-slot:body>
+            <div class="border border-slate-200 rounded relative py-1.5 mt-3 px-2 min-h-[750px]">
+                <h1 class="font-bold absolute top-[-13px] left-5 bg-white">Loan Details</h1>
+                <div class="tabs pt-2">
+                    <button v-for="(tab, index) in tabs" :key="tab" :class="['tab', { active: activeTab === index }]"@click="selectTab(index)">
+                        {{ tab }}
+                    </button>
+                </div>
+                <div class="tab-content mt-3">
+                    <div v-if="activeTab == 0">
+                        <div class="flex">
+                            <div class="basis-1/2 border-left border-gray-400">
+                                <h1 class="font-bold mb-10">Loan Details</h1>
+                                <table class="w-full">
+                                    <tr class="text-left">
+                                        <td class="font-bold ">Loan Number:</td>
+                                        <td> {{ loanDetails.loan_number }}</td>
+                                        <td></td>
+                                        <td></td>
+                                        <td class="font-bold">Application Date:</td>
+                                        <td>{{ loanDetails.application_date }}</td>
+                                    </tr>
+                                    <tr class="text-left">
+                                        <td class="font-bold pt-3">Member Number:</td>
+                                        <td>{{ loanMember.member_number }}</td>
+                                        <td></td>
+                                        <td></td>
+                                        <td class="font-bold">Member Name:</td>
+                                        <td>{{ loanMember.member_name }}</td>
+                                        
+                                    </tr>
+                                    <tr class="text-left">
+                                        <td class="font-bold pt-3">Loan Product:</td>
+                                        <td>{{ loanProduct.product_name }}</td>
+                                        <td></td>
+                                        <td></td>
+                                        <td class="font-bold pt-3">Installments:</td>
+                                        <td>{{ loanDetails.installments }}</td>
+                                    </tr>
+                                    <tr class="text-left">
+                                        <td class="font-bold pt-3">Interest Rate(%):</td>
+                                        <td>{{ loanProduct.interest_rate }}</td>
+                                        <td></td>
+                                        <td></td>
+                                        <td class="font-bold pt-3">Interest Method:</td>
+                                        <td>{{ loanProduct.interest_calculation }}</td>
+                                    </tr>
+                                    
+                                    <tr class="text-left">
+                                        <td class="font-bold pt-3">Applied Amount:</td>
+                                        <td>{{ loanDetails.applied_amount }}</td>
+                                        <td></td>
+                                        <td></td>
+                                        <td class="font-bold pt-3">Approved Amount:</td>
+                                        <td>{{ loanDetails.approved_amount }}</td>
+                                    </tr>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                    <div v-if="activeTab == 2">
+                        <div class="relative w-[100%] bg-white z-50 px-6">
+                            <FilterBar 
+                                :showAddButton="showAddButton"
+                                :filters="searchFilters" 
+                                @search="searchLoanTransactions"
+                                @reset="resetFilters"
+                                @printList="printLoanLedger"
+                                @printExcel="printExcel"
+                                @printCSV="printCSV"
+                            />
+                        </div>
+                        <div class="table w-[100%] top-[17.1rem] z-30 px-6">
+                            <DynamicTable :key="statementTableKey" :rightsModule="rightsModule" :columns="statementColumns" :rows="statementRows" :idField="idFieldStatement" :showActions="showActions" :actions="actionsStatement"/>
+                        </div>
+                    </div>          
+                    <div v-if="activeTab == 1">                    
+                        <DynamicTable :key="tableKey" :rightsModule="rightsModule" :columns="scheduleColumns" :rows="computedScheduleRows" :idField="idFieldSchedule" :showTotals="showTotals" :actions="actionsSchedule" @action-click="scheduleActionClick" />
+                    </div>
+                    <div v-show="activeTab == 3">                  
+                        <DynamicTable :key="paymentTableKey" :rightsModule="rightsModule" :columns="paymentColumns" :rows="computedPaymentRows" :idField="idFieldPayment" :actions="actionsUtility" @action-click="paymentActionClick" />
+                    </div>   
+                </div>
+            </div>
+        </template>
+    </PageStyleComponent>
+</template>
+
+<script>
+import { defineComponent, ref, onBeforeMount, onMounted, computed, watch, reactive } from 'vue';
+import PageStyleComponent from '../PageStyleComponent.vue';
+import FilterBar from "@/components/FilterBar.vue";
+import DynamicTable from '@/components/DynamicTable.vue';
+import DynamicForm from '../NewDynamicForm.vue';
+import MovableModal from '@/components/MovableModal.vue';
+import { useStore } from "vuex";
+import { useToast } from "vue-toastification";
+import { useDateFormatter } from '@/composables/DateFormatter';
+import axios from 'axios';
+import PrintJS from 'print-js';
+
+export default defineComponent({
+    name: 'Loan_Ledger',
+    components:{
+        PageStyleComponent, DynamicTable, MovableModal, DynamicForm,FilterBar
+    },
+    setup(props,{emit}){
+        const store = useStore();
+        const toast = useToast();
+        const loader = ref('none');
+        const { formatDate } = useDateFormatter();
+        const current_date = new Date();
+        const showAddButton = ref(false);
+        const dep_modal_loader = ref('none');
+        const util_modal_loader = ref('none');
+        const tnt_modal_loader = ref('none');
+        const rightsModule = ref('MMS');
+        const allowedRights = ref([]);
+        const depModalVisible = ref(false);
+        const displayButtons = ref(true);
+        const flex_basis = ref('');
+        const flex_basis_percentage = ref('');
+        const modal_top = ref('150px');
+        const modal_left = ref('400px');
+        const modal_width = ref('30vw');
+        const companyID = computed(()=> store.state.userData.company_id);
+        const userID = computed(()=> store.state.userData.user_id);
+        const tabs = ref(['Loan Details','Armotization Schedule','Loan Ledger','Loan Repayment']);
+        const activeTab = ref(0);
+        const mainComponentKey = ref(0);
+        const tableKey = ref(0);
+        const paymentTableKey = ref(0);
+        const scheduleTableKey = ref(0);
+        const statementTableKey = ref(0);
+        const idFieldSchedule = ref('armotization_schedule_id');
+        const idFieldPayment = ref('utility_id');
+        const idFieldStatement = ref('');
+        const computedScheduleRows = computed(()=> store.state.Loan_Applications.selectedSchedules);
+        const computedPaymentRows = ref();
+        const statementRows = computed(()=> store.state.Loan_Applications.selectedTransactions);
+        const loanDetails = computed(()=> store.state.Loan_Applications.loanDetails);
+        const loanMember = computed(()=> store.state.Loan_Applications.loanMember);
+        const loanProduct = computed(()=> store.state.Loan_Applications.loanProduct);
+        const scheduleColumns = ref([
+            {type: "checkbox"},
+            {label: "#", key:"installment", type: "text", editable: false},
+            {label: "Due", key:"due_date", type: "text", editable: false},
+            {label: "Balance", key:"formatted_loan_balance", type: "text", editable: false},
+            {label: "Principal", key:"formatted_principal_amount", type: "number", editable: false},
+            {label: "Interest", key:"formatted_interest_amount", type: "number", editable: false},
+            {label: "Penalty", key:"penalty", type: "number", editable: false},
+            {label: "Schedule Total", key:"formatted_schedule_repayment", type: "number", editable: false},
+            {label: "Prepayment", key:"loan_prepayment", type: "number", editable: false},
+            {label: "Paid Principal", key:"repaid_principal_amount", type: "number", editable: false},
+            {label: "Paid Interest", key:"repaid_interest_amount", type: "number", editable: false},
+            {label: "Total Payment", key:"formatted_schedule_payment", type: "number", editable: false},
+            {label: "I.P", key:"interest_posted", type: "text", editable: false},
+            {label: "C.R.P", key:"credit_reduction_applied", type: "text", editable: false},
+        ]);
+        const showTotals = ref(true);
+        const actionsSchedule = ref([
+            {name: 'post-interest', icon: 'fa fa-spinner', title: 'Post Interest', rightName: 'Posting Loan Interest'},
+            {name: 'unbook-invoice', icon: 'fa fa-minus-circle', title: 'Cancel Booking', rightName: 'Posting Loan Interest'},
+        ]);
+
+        const paymentColumns = ref([
+            {type: "checkbox"},
+            {label: "Utility Name", key:"utility.name", type: "text", editable: false},
+            {label: "Charge Mode", key:"utility_charge_mode", type: "text", editable: false},
+            {label: "Def. Value", key: "utility_value", type: "text", editable: false},
+            {label: "Utility Vat", key: "deposit_value", type: "text", editable: false},
+            {label: "Amount", key: "utility_amount", type: "text", editable: false},
+            {label: "Status", key: "status", type: "text", editable: false},
+            {label: "From", key: "from_date", type: "text", editable: false},
+            {label: "To", key: "to_date", type: "text", editable: false},
+        ])
+
+        const actionsUtility = ref([
+
+        ]);
+        const showActions = ref(false);
+
+        const statementColumns = ref([
+            {type: "checkbox"},
+            {label: "Date", key:"date", type: "text", editable: false},
+            {label: "Ref No", key:"reference_no", type: "text", editable: false},
+            {label: "Txn No", key: "journal_no", type: "text", editable: false},
+            {label: "Narration", key: "description", type: "text", editable: false, maxWidth:"1200px"},
+            {label: "Charges", key: "debit_amount", type: "text", editable: false},
+            {label: "Payments", key: "credit_amount", type: "text", editable: false},
+            {label: "Balance", key: "running_balance", type: "text", editable: false},
+        ]);
+
+        const actionsStatement = ref([
+            {name: 'delete', icon: 'fa fa-trash', title: 'Delete Transaction'},
+        ]);
+
+        const from_date_search = ref("");
+        const to_date_search = ref("");
+        const searchFilters = ref([
+            {type:'date', placeholder:"From Date...", value: from_date_search, width:36, title: "Date From Search"},
+            {type:'date', placeholder:"To Date...", value: to_date_search, width:36, title: "Date To Search"},
+            
+        ]);
+        const searchLoanTransactions = async() =>{
+            showLoader();
+            let formData = {
+                client: loanDetails.value.loan_ledger_id,
+                company: companyID.value,
+                date_from: from_date_search.value,
+                date_to: to_date_search.value,
+                page_size: 1000
+            }
+            try{
+                const response = await store.dispatch('Ledgers/fetchClientJournals', formData)
+            }
+            catch(error){
+
+            }finally{
+                hideLoader();
+            }  
+        }
+        const printLoanLedger = () =>{
+            showLoader();
+            let formData = {
+                client: loanDetails.value.loan_ledger_id,
+                company: companyID.value,
+                date_from: from_date_search.value,
+                date_to: to_date_search.value,
+            }
+            axios
+            .post("api/v1/tenant-statement-pdf/", formData, { responseType: 'blob' })
+            .then((response)=>{
+                if(response.status == 200){
+                    const blob1 = new Blob([response.data]);
+                    // Convert blob to URL
+                    const url = URL.createObjectURL(blob1);
+                    PrintJS({printable: url, type: 'pdf'});
+                }
+            })
+            .catch((error)=>{
+                console.log(error.message);
+            })
+            .finally(()=>{
+                hideLoader();
+            })
+        }
+        const loadPrev = () =>{
+            if (currentPage.value <= 1){
+                currentPage.value = 1;
+            }else{
+                currentPage.value -= 1;
+            }
+            
+            searchLoanTransactions();
+        }
+        const loadNext = () =>{
+            if(currentPage.value >= pageCount.value){
+                currentPage.value = pageCount.value;
+            }else if(currentPage.value < pageCount.value){
+                currentPage.value += 1;
+            }
+            
+            searchLoanTransactions();
+        }
+        const firstPage = ()=>{
+            currentPage.value = 1;
+            searchLoanTransactions();
+        }
+        const lastPage = () =>{
+            currentPage.value = pageCount.value;
+            searchLoanTransactions();
+        }
+        const resetFilters = () =>{
+            from_date_search.value = "";
+            to_date_search.value = "";
+            searchLoanTransactions();
+        }
+
+        const selectTab = async(index) => {
+            showLoader();
+            let formData = {
+                company: companyID.value,
+                tenant: loanDetails.value.tenant_id
+            }
+            let formData1 = {
+                company: companyID.value,
+                client: loanDetails.value.loan_ledger_id,
+                application: loanDetails.value.loan_application_id,
+                page_size: "1000"
+            }
+            if(index == 2){
+                activeTab.value = index;
+                await store.dispatch('Loan_Applications/fetchLoanTransactions',formData1)
+                .then(()=>{
+                    hideLoader();
+                })
+            }else if( index == 1){
+                activeTab.value = index;
+                await store.dispatch('Security_Deposits/fetchTenantDeposits',formData)
+                .then(()=>{
+                    hideLoader();
+                })
+            }
+            else if( index == 3){
+                activeTab.value = index;
+                await store.dispatch('Utilities/fetchTenantUtilities',formData)
+                .then(()=>{
+                    hideLoader();
+                })
+            }else{
+                activeTab.value = index;
+                hideLoader();
+            }
+
+        };
+
+        const showLoader = () =>{
+            loader.value = "block";
+        };
+        const hideLoader = () =>{
+            loader.value = "none";
+        };
+
+        const scheduleActionClick = async(rowIndex, action, row) =>{
+            if( action == 'book-invoice'){
+            
+            }else if( action == 'unbook-invoice'){
+            
+            }
+            else if(action == 'delete'){
+ 
+            }
+        }
+
+        const paymentActionClick = async(rowIndex, action, row) =>{
+            if( action == 'void-utility'){
+                
+            }else if( action == 'reactivate-utility'){
+
+            }
+            else if(action == 'delete'){
+            }
+        }
+        const handleSelectedDeposit = async(option) =>{
+            await store.dispatch('Security_Deposits/handleSelectedDeposit', option)
+            depositID.value = store.state.Security_Deposits.depositID;
+        }
+        const fetchDeposits = async() =>{
+            await store.dispatch('Security_Deposits/fetchDeposits', {company:companyID.value})
+        }
+        const formFields = ref([
+            { type: 'date', name: 'date',label: "Date", value: '', required: true },
+            { type: 'dropdown', name: 'default_mode',label: "Charge Mode", value: '', placeholder: "", required: true, options: [{ text: 'Fixed Amount', value: 'Fixed Amount' }, { text: 'Rent Percentage', value: 'Rent Percentage' }] },
+            { type: 'number', name: 'default_value',label: "Default Value", value: 0, required: true },
+        ]);
+
+        const handleDepReset = () =>{
+            for(let i=0; i < formFields.value.length; i++){
+                formFields.value[i].value = '';
+            }
+            depositID.value = '';
+        }
+        const showDepModalLoader = () =>{
+            dep_modal_loader.value = "block";
+        }
+        const hideDepModalLoader = () =>{
+            dep_modal_loader.value = "none";
+        }
+        const additionalFields = ref([
+            { type: 'dropdown', name: 'default_mode',label: "Charge Mode", value: '', placeholder: "", required: true, options: [{ text: 'Fixed Amount', value: 'Fixed Amount' }, { text: 'Rent Percentage', value: 'Rent Percentage' }, { text: 'Billed On Use', value: 'Billed On Use' }] },
+            { type: 'number', name: 'default_value',label: "Default Value", value: 0, required: true },
+            { type: 'date', name: 'from_date',label: "From Date", value: '', required: true },
+        ]);
+        
+        const fetchEnabledRights = () =>{
+            allowedRights.value = [];
+            let formData = {
+                user: userID.value,
+                company: companyID.value,
+                module: rightsModule.value
+            }
+            axios
+            .post("api/v1/user-permissions-search/",formData)
+            .then((response)=>{
+                allowedRights.value = response.data.results;
+            })
+            .catch((error)=>{
+                console.log(error.message);
+            })
+        };
+        const isDisabled =(permissionName) =>{
+            const permission = allowedRights.value.find(p => p.permission_name === permissionName);
+            return permission ? !permission.right_status : true;
+        };
+        onBeforeMount(()=>{
+            loanDetails.value = store.state.Loan_Applications.loanDetails;
+        });
+        onMounted(()=>{
+            fetchEnabledRights();
+        });
+
+        return{
+            tabs, activeTab, mainComponentKey, scheduleColumns, paymentColumns, selectTab, loader, showLoader, hideLoader, formFields, additionalFields,showTotals,
+            tableKey,paymentTableKey, idFieldSchedule, idFieldPayment, actionsSchedule, actionsUtility, computedScheduleRows, computedPaymentRows,
+            scheduleTableKey, idFieldSchedule, scheduleColumns, actionsSchedule, statementTableKey, idFieldStatement, statementRows,showActions,searchFilters,resetFilters,
+            statementColumns, actionsStatement, loanDetails,loanProduct,loanMember, scheduleActionClick,showAddButton,searchLoanTransactions,printLoanLedger,
+            scheduleActionClick,tnt_modal_loader, dep_modal_loader, util_modal_loader, depModalVisible, displayButtons,
+            modal_top, modal_left, modal_width, showDepModalLoader, hideDepModalLoader, handleDepReset,
+            flex_basis, flex_basis_percentage, paymentActionClick,rightsModule,isDisabled,
+        }
+    }
+})
+</script>
+
+<style scoped>
+.disabled {
+  opacity: 0.5;
+  pointer-events: none;
+}
+.tabs {
+    display: flex;
+    border-bottom: 1px solid #ccc;
+}
+.tab {
+    padding: 2px 20px 2px 20px;
+    cursor: pointer;
+}
+
+.tab.active {
+    border-bottom: 2px solid #000;
+}
+
+.tab-content {
+    padding: 1px;
+}
+
+.table{
+    min-height: 15vh;
+    max-height: 15vh;
+    overflow-y: scroll;
+    overflow-x: scroll;
+}
+
+</style>

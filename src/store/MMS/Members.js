@@ -21,6 +21,8 @@ const state = {
     selectedCurrency: null,
     isEditing: false,
     memberDetails: [],
+    outstandingBalance: 0,
+    receiptItems: [],
 };
   
 const mutations = {
@@ -43,6 +45,7 @@ const mutations = {
     state.memberShares = 0;
     state.isEditing = false;
     state.memberDetails = [];
+    state.receiptItems = [];
   },
   SET_SELECTED_MEMBER(state, member) {
     state.selectedMember = member;
@@ -66,6 +69,9 @@ const mutations = {
   },
   MEMBERS_ARRAY(state, members){
     state.memberArray = members;
+  },
+  LIST_RECEIPT_ITEMS(state, items) {
+    state.receiptItems = items;
   },
   SET_STATE(state, payload) {
     for (const key in payload) {
@@ -148,6 +154,29 @@ const actions = {
         commit('SET_SELECTED_SPONSOR',(response.data.member_sponsor != null) ? (response.data.member_sponsor.sponsor_name) : "");
         commit('SET_SELECTED_CURRENCY',response.data.member_currency.code + " - " + response.data.member_currency.name);
     })   
+    .catch((error)=>{
+      console.log(error.message);
+    })
+    
+  },
+
+  fetchMemberReceiptItems({ commit,state }, formData) {
+    state.outstandingBalance = 0;
+    axios.post(`api/v1/member-receipt-items-search/`,formData)
+    .then((response)=>{
+      const receiptItems = response.data.items;
+      for(let i=0; i<response.data.length; i++){
+        state.outstandingBalance += Number(response.data[i].due_amount);
+      }
+      const transformedInvoiceArray = receiptItems.map(receiptItem =>({
+          ...receiptItem,
+          payment_allocation: 0,
+          bal_after_alloc: "",
+          allocation_status: false
+      }));
+      commit('LIST_RECEIPT_ITEMS', transformedInvoiceArray);
+      commit('CLIENT_OUTSTANDING_AMOUNT', state.outstandingBalance);
+    })
     .catch((error)=>{
       console.log(error.message);
     })

@@ -43,6 +43,13 @@
             :displayButtons="displayButtons" @handleSubmit="approveLoan" @handleReset="handleReset"
         />
     </MovableModal>
+    <MovableModal v-model:visible="refModalVisible" :title="refTitle" :modal_top="modal_top" :modal_left="modal_left" :modal_width="modal_width"
+        :loader="ref_modal_loader" @showLoader="showRefModalLoader" @hideLoader="hideRefModalLoader" @closeModal="closeRefModal">
+        <DynamicForm 
+            :fields="refFormFields" :flex_basis="flex_basis" :flex_basis_percentage="flex_basis_percentage" 
+            :displayButtons="displayButtons" @handleSubmit="disburseMemberLoan" @handleReset="handleRefReset"
+        />
+    </MovableModal>
 
 </template>
 
@@ -52,6 +59,7 @@ import { ref, computed, onMounted, onBeforeMount} from 'vue';
 import PageComponent from '@/components/PageComponent.vue'
 import { useStore } from "vuex";
 import { useToast } from "vue-toastification";
+import { useDateFormatter } from '@/composables/DateFormatter';
 import PrintJS from 'print-js';
 import MovableModal from '@/components/MovableModal.vue';
 import DynamicForm from '@/components/NewDynamicForm.vue';
@@ -66,10 +74,13 @@ export default{
     setup(){
         const store = useStore();
         const toast = useToast();
+        const { formatDate } = useDateFormatter();
+        const current_date = new Date();
         const loader = ref('');
+        const ledComponentKey = ref(0);
         const displayButtons = ref(true);
-        const unitComponentKey = ref(0);
         const trans_modal_loader = ref('none');
+        const ref_modal_loader = ref('none');
         const idField = 'loan_application_id';
         const addButtonLabel = ref('New Application');
         const addingRight = ref('Adding Loan Applications');
@@ -88,7 +99,9 @@ export default{
         const showPreviousBtn = ref(false);
         const detailsTitle = ref('Application Documents');
         const transTitle = ref('Approve/Reject Loan');
+        const refTitle = ref('Disburse Loan');
         const transModalVisible = ref(false);
+        const refModalVisible = ref(false);
         const dropdownWidth = ref("500px")
         const modal_top = ref('200px');
         const modal_left = ref('400px');
@@ -104,19 +117,27 @@ export default{
             {label: "Product Name", key:"loan_product"},
             {label: "Applied", key: "formatted_applied_amount"},
             {label: "Approved", key: "formatted_approved_amount"},
+            {label: "Disbursed", key: "disbursed"},
             {label: "Status", key:"approval_status"},
             {label: "Loan Remarks", key:"loan_remarks"},
             {label: "Appr. By", key:"approved_by"},
         ])
         const actions = ref([
             {name: 'edit', icon: 'fa fa-edit', title: 'Edit Application', rightName: 'Editing Loan Applications'},
-            {name: 'approve/reject', icon: 'fa fa-exchange', title: 'Approve/Reject Loan', rightName: 'Approving Loan Applications'},
+            {name: 'view', icon: 'fa fa-file-pdf-o', title: 'View Loan', rightName: 'Viewing Loan Ledger'},
+            {name: 'approve/reject', icon: 'fa fa-check-circle', title: 'Approve/Reject Loan', rightName: 'Approving Loan Applications'},
+            {name: 'disburse', icon: 'fa fa-credit-card', title: 'Disburse Loan', rightName: 'Disbursing Member Loan'},
             {name: 'delete', icon: 'fa fa-trash', title: 'Delete Application', rightName: 'Deleting Loan Applications'},
         ])
         const companyID = computed(()=> store.state.userData.company_id);
         const userID = computed(()=> store.state.userData.user_id);
+        const cashbookArr = computed(() => store.state.Ledgers.cashbookLedgerArr);
         const applicationID = ref("");
+        const cashbookID = ref("");
         const appliedAmount = ref(0);
+        const approvedAmount = ref(0);
+        const loanApprvAmnt = ref(0);
+        const computedApprovedAmount = computed(() => {return approvedAmount});
         const dropdownOptions = ref([
             
         ]);
@@ -345,7 +366,7 @@ export default{
                         store.state.pageTab.mmsActiveTab = 'Loan_Application_Details';
                     })
                 }else{
-                    toast.error("Cannot Edit Approved/Rejected Loan")
+                    toast.error(`Cannot Edit ${applicationStatus} Loan`)
                 }
                 
             }else if(action == 'delete'){
@@ -359,12 +380,52 @@ export default{
                     searchApplications();
                 })
             }else if(action == 'approve/reject'){
-                updateFormFields();
-                applicationID.value = row['loan_application_id'];
-                appliedAmount.value = row['applied_amount'];
-                transModalVisible.value = true;
-                flex_basis.value = '1/2';
-                flex_basis_percentage.value = '50';
+                const applicationStatus = row['approval_status']
+                if(applicationStatus == 'Pending'){
+                    updateFormFields();
+                    applicationID.value = row['loan_application_id'];
+                    appliedAmount.value = row['applied_amount'];
+                    transModalVisible.value = true;
+                    flex_basis.value = '1/2';
+                    flex_basis_percentage.value = '50';
+                }else{
+                    toast.error(`Loan Already ${applicationStatus}`)
+                }
+            }else if(action == 'view'){
+                const applicationID = row[idField];
+                const applicationStatus = row['approval_status']
+                if(applicationStatus == 'Approved'){
+                    let formData = {
+                        company: companyID.value,
+                        loan_application: applicationID
+                    }
+                    await store.dispatch('Loan_Applications/fetchLoanDetails',formData).
+                    then(()=>{
+                        store.commit('pageTab/ADD_PAGE', {'MMS':'Loan_Ledger'});
+                        store.state.pageTab.mmsActiveTab = 'Loan_Ledger'; 
+                    })
+                }else{
+                    toast.error(`Cannot View ${applicationStatus} Loan`)
+                }
+            }else if(action == 'disburse'){
+                const applicationStatus = row['approval_status']
+                const disburseStatus = row['disbursed']
+                if(disburseStatus == 'Yes'){
+                    toast.error(`Loan Already Disbursed`)
+                }else{
+                    if(applicationStatus == 'Approved'){
+                        fetchAllLedgers();
+                        applicationID.value = row[idField];
+                        approvedAmount.value = row['approved_amount'];
+                        loanApprvAmnt.value = row['approved_amount'];
+                        refModalVisible.value = true;
+                        flex_basis.value = '1/2';
+                        flex_basis_percentage.value = '50';
+                    }else{
+                        toast.error(`Cannot Disburse ${applicationStatus} Loan`)
+                    }
+                }
+                
             }
         };
 
@@ -401,6 +462,91 @@ export default{
         const hideDetails = async() =>{
             showDetails.value = false;
         };
+        const fetchLedgers = async() =>{
+            await store.dispatch('Ledgers/fetchCashbookLedgers', {company:companyID.value, ledger_type: 'Cashbook'})
+        };
+        const fetchAllLedgers = async() =>{
+            await store.dispatch('Ledgers/fetchLedgers', {company:companyID.value})
+        };
+        const handleSelectedLedger = async(option) =>{
+            await store.dispatch('Ledgers/handleSelectedLedger', option)
+            cashbookID.value = store.state.Ledgers.ledgerID;
+        };
+        const clearSelectedLedger = async() =>{
+            await store.dispatch('Ledgers/updateState', {ledgerID: ''});
+            cashbookID.value = ""
+        };
+        const checkApprovedLimit = (value) =>{
+            if(parseFloat(loanApprvAmnt.value) < parseFloat(value)){
+                toast.error(`Approved Amount is ${loanApprvAmnt.value}`)
+                refFormFields.value[5].value = loanApprvAmnt.value;
+            }
+        }
+        const refFormFields = ref([
+            {  
+                type:'search-dropdown', label:"Cashbook", value: cashbookID.value, componentKey: ledComponentKey,
+                selectOptions: cashbookArr, optionSelected: handleSelectedLedger, required: true,
+                searchPlaceholder: 'Select Cashbook...', dropdownWidth: '550px', updateValue: "",
+                fetchData: fetchLedgers(), clearSearch: clearSelectedLedger
+            },
+            { type: 'date', name: 'issue_date',label: "Recording Date", value: formatDate(current_date), required: true, maxDate: formatDate(current_date) },
+            { type: 'date', name: 'banking_date',label: "Banking Date", value: formatDate(current_date), required: true, maxDate: formatDate(current_date) },
+            { type: 'dropdown', name: 'payment_method',label: "Payment Method", value: '', placeholder: "", required: true, options: [{ text: 'Cash', value: 'Cash' }, { text: 'Mpesa', value: 'Mpesa' },{ text: 'Bank Deposit', value: 'Bank Deposit' }, { text: 'Cheque', value: 'Cheque' },{ text: 'Check-off', value: 'Check-off' }, { text: 'RTGS', value: 'RTGS' },{ text: 'EFT', value: 'EFT' }, { text: 'Not Applicable', value: 'Not Applicable' }] },
+            { type: 'text', name: 'reference_no',label: "Reference No", value: '', required: true,},
+            { type: 'number', name: 'total_amount',label: "Amount", value: computedApprovedAmount.value, required: true , method: checkApprovedLimit},
+        ]);
+        const handleRefReset = () =>{
+            for(let i=0; i < refFormFields.value.length; i++){
+                refFormFields.value[i].value = '';
+            }
+            applicationID.value = null;
+            cashbookID.value = null;
+            ledComponentKey.value +=1;
+        }
+        const showRefModalLoader = () =>{
+            ref_modal_loader.value = "block";
+        }
+        const hideRefModalLoader = () =>{
+            ref_modal_loader.value = "none";
+        }
+        const disburseMemberLoan = async() =>{
+            showRefModalLoader();
+            let formData = {
+                cashbook: cashbookID.value,
+                issue_date: refFormFields.value[1].value,
+                loan_application: applicationID.value,
+                banking_date: refFormFields.value[2].value,
+                amount: refFormFields.value[5].value,
+                payment_method: refFormFields.value[3].value,
+                reference_no: refFormFields.value[4].value,
+                user: userID.value,
+                company: companyID.value
+            }
+            axios.post(`api/v1/disburse-member-loan/`,formData)
+            .then((response)=>{
+                if(response.data.msg == "Success"){
+                    toast.success("Success")
+                    closeRefModal();
+                    searchApplications();
+                }else{
+                    toast.error("Error Disbursing Loan")
+                }                   
+            })
+            .catch((error)=>{
+                console.log(error.message);
+                toast.error(error.message)
+                hideRefModalLoader();
+            })
+            .finally(()=>{
+                hideRefModalLoader();
+            })
+        
+        };
+        const closeRefModal = () =>{
+            refModalVisible.value = false;
+            handleRefReset();
+            hideRefModalLoader();
+        };
         onBeforeMount(()=>{
             searchApplications();
             
@@ -412,7 +558,8 @@ export default{
             submitButtonLabel, showModal, addNewApplication, showLoader, loader, hideLoader, removeApplication, removeApplications,
             handleSelectionChange,addingRight,rightsModule,printApplicationList,selectSearchQuantity,selectedValue,
             modal_left,modal_top,modal_width,trans_modal_loader,transModalVisible,transTitle,showTransModalLoader,hideTransModalLoader,approveLoan,closeTransModal,
-            dropdownOptions,handleDynamicOption
+            dropdownOptions,handleDynamicOption,refTitle,refFormFields,refModalVisible,ref_modal_loader,handleRefReset,showRefModalLoader,hideRefModalLoader,closeRefModal,
+            disburseMemberLoan
         }
     }
 };

@@ -50,6 +50,8 @@ import Loan_Fees from '@/components/MMS/Loan_Fees.vue';
 import Loan_Applications from '@/components/MMS/Loan_Applications.vue';
 import Loan_Application_Details from '@/components/MMS/Loan_Application_Details.vue';
 import Loan_Guarantors from '@/components/MMS/Loan_Guarantors.vue';
+import Loan_Ledger from '@/components/MMS/Loan_Ledger.vue';
+import Receipt_Details from '@/components/MMS/Receipt_Details.vue';
 
 import Default_Settings from '@/components/SET/Default_Settings.vue';
 
@@ -59,9 +61,9 @@ export default{
         NavBarMMS,
         PagesTab,
         Dashboard,
-        Member_Categories,Member_Sponsors,Members,Member_Details,Membership_Fees,
+        Member_Categories,Member_Sponsors,Members,Member_Details,Membership_Fees,Receipt_Details,
         Member_Invoices,Member_Receipts,Savings_Products,Saving_Product_Details,Shares_Products,Share_Product_Details,Saving_Accounts,Share_Accounts,
-        Saving_Deposits,Share_Deposits,Loan_Products,Loan_Product_Details,Loan_Fees,Loan_Applications,Loan_Application_Details,Loan_Guarantors,
+        Saving_Deposits,Share_Deposits,Loan_Products,Loan_Product_Details,Loan_Fees,Loan_Applications,Loan_Application_Details,Loan_Guarantors,Loan_Ledger,
 
         Default_Settings
     },

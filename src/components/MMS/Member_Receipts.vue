@@ -188,8 +188,8 @@ export default{
             modal_loader.value = "none";
         }
         const addNewReceipt = () =>{
-            store.commit('pageTab/ADD_PAGE', {'FA':'Receipt_Details'});
-            store.state.pageTab.faActiveTab = 'Receipt_Details'; 
+            store.commit('pageTab/ADD_PAGE', {'MMS':'Receipt_Details'});
+            store.state.pageTab.mmsActiveTab = 'Receipt_Details'; 
         }
         const removeReceipt = async() =>{
             if(selectedIds.value.length == 1){
