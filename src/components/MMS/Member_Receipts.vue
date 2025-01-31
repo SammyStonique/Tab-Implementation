@@ -92,8 +92,8 @@ export default{
         const toast = useToast();
         const { getYear } = useDateFormatter();
         const { getMonth } = useDateFormatter();
-        const addingRight = ref('Adding Receipt');
-        const rightsModule = ref('Accounts');
+        const addingRight = ref('Adding Member Receipt');
+        const rightsModule = ref('MMS');
         const loader = ref('none');
         const modal_loader = ref('none');
         const idField = 'journal_id';
@@ -135,7 +135,7 @@ export default{
             {label: "Receipt#", key:"journal_no"},
             {label: "Date", key: "date"},
             {label: "Bank. Date", key: "banking_date"},
-            {label: "Member Name", key:"customer_name"},
+            {label: "Member Name", key:"member_name"},
             {label: "Cashbook", key:"cashbook"},
             {label: "Pay. Method", key:"payment_method"},
             {label: "Ref No", key:"reference_no"},
@@ -144,9 +144,9 @@ export default{
         ])
         const showTotals = ref(true);
         const actions = ref([
-            {name: 'print', icon: 'fa fa-print', title: 'Print Receipt', rightName: 'Print Receipt'},
-            {name: 'download', icon: 'fa fa-download', title: 'Download Receipt', rightName: 'Print Receipt'},
-            {name: 'delete', icon: 'fa fa-trash', title: 'Delete Receipt', rightName: 'Deleting Receipt'},
+            {name: 'print', icon: 'fa fa-print', title: 'Print Receipt', rightName: 'Print Member Receipt'},
+            {name: 'download', icon: 'fa fa-download', title: 'Download Receipt', rightName: 'Print Member Receipt'},
+            {name: 'delete', icon: 'fa fa-trash', title: 'Delete Receipt', rightName: 'Deleting Member Receipt'},
         ])
         const companyID = computed(()=> store.state.userData.company_id);
         const fetchCustomers = async() =>{
@@ -188,6 +188,7 @@ export default{
             modal_loader.value = "none";
         }
         const addNewReceipt = () =>{
+            store.dispatch('Members/updateState', {receiptItems: [], outstandingBalance: 0})
             store.commit('pageTab/ADD_PAGE', {'MMS':'Receipt_Details'});
             store.state.pageTab.mmsActiveTab = 'Receipt_Details'; 
         }

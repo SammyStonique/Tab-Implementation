@@ -25,6 +25,8 @@
         @lastPage="lastPage"
         :showNextBtn="showNextBtn"
         :showPreviousBtn="showPreviousBtn"
+        :selectedValue="selectedValue"
+        @selectSearchQuantity="selectSearchQuantity"
     />
     <MovableModal v-model:visible="depModalVisible" :title="title" :modal_top="modal_top" :modal_left="modal_left" :modal_width="modal_width"
         :loader="modal_loader" @showLoader="showModalLoader" @hideLoader="hideModalLoader"  @closeModal="closeModal">
@@ -68,6 +70,7 @@ export default{
         const depArrLen = ref(0);
         const depCount = ref(0);
         const pageCount = ref(0);
+        const selectedValue = ref(50);
         const currentPage = ref(1);
         const showNextBtn = ref(false);
         const showPreviousBtn = ref(false);
@@ -385,7 +388,8 @@ export default{
                 account_number: account_number_search.value,
                 member_name: name_search.value,
                 member_number: member_number_search.value,
-                company_id: companyID.value
+                company_id: companyID.value,
+                page_size: selectedValue.value
             }
             axios
             .post(`api/v1/saving-accounts-search/?page=${currentPage.value}`,formData)
@@ -395,7 +399,7 @@ export default{
                 depResults.value = response.data;
                 depArrLen.value = accountsList.value.length;
                 depCount.value = depResults.value.count;
-                pageCount.value = Math.ceil(depCount.value / 50);
+                pageCount.value = Math.ceil(depCount.value / selectedValue.value);
                 
                 if(response.data.next){
                     showNextBtn.value = true;
@@ -410,7 +414,11 @@ export default{
             .finally(()=>{
                 hideLoader();
             })
-        }
+        };
+        const selectSearchQuantity = (newValue) =>{
+            selectedValue.value = newValue;
+            searchAccounts(selectedValue.value);
+        };
         const loadPrev = () =>{
             if (currentPage.value <= 1){
                 currentPage.value = 1;
@@ -438,6 +446,7 @@ export default{
             searchAccounts();
         }
         const resetFilters = () =>{
+            selectedValue.value = 50;
             name_search.value = "";
             account_number_search.value = "";
             member_number_search.value = "";
@@ -456,7 +465,7 @@ export default{
             loadPrev, loadNext, firstPage, lastPage, actions, formFields, depModalVisible, addNewAccount,
             displayButtons,flex_basis,flex_basis_percentage, handleActionClick, handleReset, saveAccount,
             showLoader, loader, hideLoader, modal_loader, showModalLoader, hideModalLoader, removeAccount, removeAccounts,
-            addingRight,rightsModule, closeModal,handleSelectionChange
+            addingRight,rightsModule, closeModal,handleSelectionChange,selectSearchQuantity,selectedValue,
         }
     }
 }

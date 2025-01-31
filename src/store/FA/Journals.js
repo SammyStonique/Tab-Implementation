@@ -243,6 +243,8 @@ const actions = {
       const transformedInvoiceArray = clientInvoices.map(clientInvoice =>({
           ...clientInvoice,
           payment_allocation: 0,
+          quantity: 1,
+          cost: clientInvoice.total_amount,
           bal_after_alloc: "",
           allocation_status: false
       }));

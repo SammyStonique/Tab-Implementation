@@ -82,6 +82,7 @@ import Loan_Products from './MMS/Loan_Products';
 import Loan_Fees from './MMS/Loan_Fees';
 import Loan_Applications from './MMS/Loan_Applications';
 import Loan_Guarantors from './MMS/Loan_Guarantors';
+import Loan_Disbursements from './MMS/Loan_Disbursements';
 
 
 import Default_Settings from './SET/Default_Settings';
@@ -116,7 +117,7 @@ export default createStore({
     Pay_Cycles,Pay_Groups,Deductions,Leave_Types,Holidays,Paye,Nssf,Shif,Housing_Levy,Employees,Payrolls,Leave_Applications,Leave_Allocations,
 
     Member_Categories,Member_Sponsors,Members,Membership_Fees,Savings_Products,Shares_Products,Saving_Accounts,Share_Accounts,Saving_Deposits,Share_Deposits,
-    Loan_Products,Loan_Fees,Loan_Applications,Loan_Guarantors,
+    Loan_Products,Loan_Fees,Loan_Applications,Loan_Guarantors,Loan_Disbursements,
 
     Default_Settings,Companies,Branches,User_Rights,SMS_Integrations,Email_Integrations,Mpesa_Integrations,Mpesa_Transactions,Banks
   },

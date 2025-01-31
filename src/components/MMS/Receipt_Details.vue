@@ -2,7 +2,7 @@
     <PageStyleComponent :key="mainComponentKey" :loader="loader" @showLoader="showLoader" @hideLoader="hideLoader">
         <template v-slot:body>
             <div class="mt-6">
-                <DynamicForm  :fields="formFields" :flex_basis="flex_basis" :flex_basis_percentage="flex_basis_percentage" :displayButtons="displayButtons" @handleSubmit="createTenantReceipt" @handleReset="handleReset"> 
+                <DynamicForm  :fields="formFields" :flex_basis="flex_basis" :flex_basis_percentage="flex_basis_percentage" :displayButtons="displayButtons" @handleSubmit="createMemberReceipt" @handleReset="handleReset"> 
                     <template v-slot:additional-content>
                         <div class="flex">
                             <div class="basis-1/3 text-left">
@@ -17,7 +17,8 @@
                         </div>
                         
                         <div class="px-3 min-h-[220px]">
-                            <DynamicTable :key="tableKey" :columns="receiptColumns" :rows="receiptRows" :showActions="showActions" :idField="idField" @update-receipt-amount="allocateInputAmount" @row-db-click="autoPopulatePaymentAlloc"/>
+                            <DynamicTable :key="tableKey" :columns="receiptColumns" :rows="receiptRows" :showActions="showActions" :idField="idField" @update-receipt-amount="allocateInputAmount" @row-db-click="autoPopulatePaymentAlloc" 
+                                            :actions="actionsRcptItems" @action-click="removeReceiptItem" :rightsModule="rightsModule"/>
                         </div>
                     </template>
                 </DynamicForm>
@@ -56,6 +57,7 @@ export default defineComponent({
         const current_date = new Date();
         const loader = ref('none');
         const modal_loader = ref('none');
+        const rightsModule = ref('MMS');
         const tableKey = ref(0);
         const mainComponentKey = ref(0);
         const memComponentKey = ref(0);
@@ -70,13 +72,13 @@ export default defineComponent({
         const modal_top = ref('150px');
         const modal_left = ref('400px');
         const modal_width = ref('32vw');
-        const outstanding_balance = computed(()=> store.state.Journals.outstandingBalance);
+        const outstanding_balance = computed(()=> store.state.Members.outstandingBalance);
         const allotable_prepayment = computed(()=> store.state.Active_Tenants.allotablePrepayment);
         const errors = ref([]);
         const companyID = computed(()=> store.state.userData.company_id);
         const userID = computed(()=> store.state.userData.user_id);
         const displayButtons = ref(true);
-        const showActions = ref(false);
+        const showActions = ref(true);
         const idField = ref('');
         const flex_basis = ref('');
         const flex_basis_percentage = ref('');
@@ -84,7 +86,6 @@ export default defineComponent({
         const flex_basis_percentage_additional = ref('');
         const ledgerID = ref('');
         const memberID = ref('');
-        const propertyID = ref('');
         const ledgerArray = computed(() => store.state.Ledgers.cashbookLedgerArr);
         const memberArray = computed(() => store.state.Members.memberArr);
         const receiptRows = computed(() => store.state.Members.receiptItems);
@@ -97,18 +98,26 @@ export default defineComponent({
             {label: "Payment", key: "payment_allocation", type: "number", editable: true},
             {label: "Balance", key: "bal_after_alloc", type: "text", editable: false},
         ])
+        const actionsRcptItems = ref([
+            {name: 'delete', icon: 'fa fa-minus-circle', title: 'Delete Receipt Item',rightName: 'Adding Member Receipt'},
+        ]);
+        const removeReceiptItem = (rowIndex, action, row) =>{
+            store.dispatch('Members/removeReceiptItem', rowIndex);
+            tableKey.value += 1;
+        }
 
         const fetchMembers = async() =>{
                 await store.dispatch('Members/fetchMembers', {company:companyID.value})    
         };
         const fetchReceiptItems = async() =>{
             if(memberID.value){
-                await store.dispatch('Members/fetchMemberReceiptItems', {company:companyID.value, member:memberID.value, date: formFields.value[2].value})
+                await store.dispatch('Members/fetchMemberReceiptItems', {company:companyID.value, member:memberID.value, date: formFields.value[1].value})
             }       
         };
         const handleSelectedMember = async(option) =>{
             await store.dispatch('Members/handleSelectedMember', option)
             memberID.value = store.state.Members.memberID;
+            outstanding_balance.value = store.state.Members.outstandingBalance;
         };
         const clearSelectedTenant = async() =>{
             await store.dispatch('Members/updateState', {memberID: ''});
@@ -138,8 +147,8 @@ export default defineComponent({
                 receiptRows.value[i].allocation_status = false;
             }
             if(memberID.value == "" || memberID.value == null){
-                toast.error("Select A Tenant To Receipt")
-                formFields.value[6].value = 0;
+                toast.error("Select A Member To Receipt")
+                formFields.value[5].value = 0;
                 hasPrepayment.value = false;
             }
             else if(receiptTotals.value > 0 && receiptTotals.value <= outstanding_balance.value){
@@ -178,7 +187,7 @@ export default defineComponent({
                 receipt_totals.value = 0;
                 prepaymentAmount.value = 0;
                 receipt_memo.value = "";
-                formFields.value[8].value = "";
+                formFields.value[7].value = "";
                 for(let i=0; i<receiptRows.value.length; i++){
                     receiptRows.value[i].payment_allocation = 0;
                     receiptRows.value[i].bal_after_alloc = "";
@@ -213,7 +222,7 @@ export default defineComponent({
         };
         watch([receipt_memo, receipt_totals], () => {
             if (receipt_memo.value.length) {
-                formFields.value[8].value = receipt_memo.value;
+                formFields.value[7].value = receipt_memo.value;
             }else if(receipt_totals.value == 0){
                 receipt_memo.value = "";
             }
@@ -229,7 +238,6 @@ export default defineComponent({
                 }
                 
             }
-            propertyID.value = '';
             memberID.value = '';
             ledgerID.value = '';
             memComponentKey.value += 1;
@@ -247,7 +255,7 @@ export default defineComponent({
         }, { immediate: true });
         watch([ledgerID], () => {
             if (ledgerID.value !="") {
-                formFields.value[7].value = ledgerID.value;
+                formFields.value[6].value = ledgerID.value;
             }   
         }, { immediate: true })
 
@@ -257,37 +265,37 @@ export default defineComponent({
         const hideLoader = () =>{
             loader.value = "none";
         } 
-        const createTenantReceipt = async() =>{
+        const createMemberReceipt = async() =>{
             showLoader();
-            if(formFields.value[8].value == ""){
+            if(formFields.value[7].value == ""){
                 let rcptMemo = ""
                 for(let i=0; i<receiptRows.value.length; i++){
                     if(receiptRows.value[i].payment_allocation > 0){
                         rcptMemo = rcptMemo + receiptRows.value[i].description + ', ';
                     }
                 }
-                formFields.value[8].value = rcptMemo;
+                formFields.value[7].value = rcptMemo;
             }
             let formData = {
                 company: companyID.value,
                 txn_type: "RCPT",
-                tenant: memberID.value,
+                member: memberID.value,
                 user: userID.value,
                 cashbook: ledgerID.value,
-                description: formFields.value[8].value,
-                issue_date: formFields.value[2].value,
-                due_date: formFields.value[2].value,
+                description: formFields.value[7].value,
+                issue_date: formFields.value[1].value,
+                due_date: formFields.value[1].value,
                 client_category: "Members",
-                total_amount: formFields.value[6].value,
+                total_amount: formFields.value[5].value,
                 tax_amount: 0,
-                payment_method: formFields.value[4].value,
-                reference_no: formFields.value[5].value,
-                banking_date: formFields.value[3].value,
+                payment_method: formFields.value[3].value,
+                reference_no: formFields.value[4].value,
+                banking_date: formFields.value[2].value,
                 receipt_items: receiptRows.value
             }
             
             errors.value = [];
-            for(let i=2; i < (formFields.value.length); i++){
+            for(let i=1; i < (formFields.value.length); i++){
                 if(formFields.value[i].value =='' && formFields.value[i].required == true){
                     errors.value.push(formFields.value[i].label);
                 }
@@ -300,7 +308,7 @@ export default defineComponent({
                 rcptTotal += Number(receiptRows.value[i].payment_allocation);
             }
 
-            if(formFields.value[6].value != Number(rcptTotal)){
+            if(formFields.value[5].value != Number(rcptTotal.toFixed(2))){
                 toast.error('Invalid Receipt Amount');
                 hideLoader();
             }
@@ -310,7 +318,7 @@ export default defineComponent({
                     hideLoader();                 
                 }else{            
                     try {
-                        const response = await store.dispatch('Journals/createTenantReceipt', formData);
+                        const response = await store.dispatch('Members/createMemberReceipt', formData);
                         if (response && response.data.msg === "Success") {
                             hideLoader();
                             toast.success('Receipt created successfully!');
@@ -358,7 +366,7 @@ export default defineComponent({
 
         watch([receipt_totals], () => {
             if (receipt_totals.value) {
-                formFields.value[6].value = receipt_totals.value;
+                formFields.value[5].value = receipt_totals.value;
                 prepaymentCheck();
             } 
         }, { immediate: true });
@@ -390,9 +398,9 @@ export default defineComponent({
                     payment_allocation : prepaymentAmount.value,
                     bal_after_alloc : 0,
                 }
-                await store.dispatch('Journals/handleClientPrepayment',formData);
+                await store.dispatch('Members/handleClientPrepayment',formData);
                 toast.success("Prepayment Added");
-                formFields.value[8].value += "Member Prepayment"
+                formFields.value[7].value += "Member Prepayment"
                 hideModalLoader();
                 prepModalVisible.value = false;
             }
@@ -435,11 +443,12 @@ export default defineComponent({
         })
 
         return{
-            formFields, flex_basis, flex_basis_percentage, displayButtons, createTenantReceipt, mainComponentKey,
+            formFields, flex_basis, flex_basis_percentage, displayButtons, createMemberReceipt, mainComponentKey,
             handleReset, loader, showLoader, hideLoader, tableKey, receiptColumns, receiptRows, showActions, idField,
             autoPopulatePaymentAlloc, outstanding_balance, hasPrepayment, addPrepayment, handlePrepayment, allocateInputAmount,
             title, modal_loader, modal_left, modal_top, modal_width, prepModalVisible, showModalLoader, hideModalLoader, closeModal,
-            additionalFields,flex_basis_additional, flex_basis_percentage_additional, handlePrepaymentReset,allotable_prepayment,allocatePrepayment
+            additionalFields,flex_basis_additional, flex_basis_percentage_additional, handlePrepaymentReset,allotable_prepayment,allocatePrepayment,
+            actionsRcptItems,removeReceiptItem,rightsModule
         }
     }
 })

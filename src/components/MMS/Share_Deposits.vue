@@ -14,6 +14,7 @@
         :rows="depositsList"
         :actions="actions"
         :idField="idField"
+        @handleSelectionChange="handleSelectionChange"
         @handleActionClick="handleActionClick"
         :count="depCount"
         :currentPage="currentPage"
@@ -68,6 +69,7 @@ export default{
         const depArrLen = ref(0);
         const depCount = ref(0);
         const pageCount = ref(0);
+        const selectedIds = ref([]);
         const selectedValue = ref(50);
         const currentPage = ref(1);
         const showNextBtn = ref(false);
@@ -107,6 +109,9 @@ export default{
             {type:'text', placeholder:"Member No...", value: member_number_search, width:36,},
             {type:'text', placeholder:"Search Name...", value: name_search, width:48,},
         ]);
+        const handleSelectionChange = (ids) => {
+            selectedIds.value = ids;
+        };
         const handleSelectedAccount = async(option) =>{
             await store.dispatch('Share_Accounts/handleSelectedAccount', option)
             accountID.value = store.state.Share_Accounts.accountID;
@@ -376,7 +381,7 @@ export default{
             loadPrev, loadNext, firstPage, lastPage, actions, formFields, depModalVisible, addNewDeposit,
             displayButtons,flex_basis,flex_basis_percentage, handleActionClick, handleReset, createDeposit,
             showLoader, loader, hideLoader, modal_loader, showModalLoader, hideModalLoader, removeDeposit, removeDeposits,
-            addingRight,rightsModule, closeModal,selectSearchQuantity,selectedValue,
+            addingRight,rightsModule, closeModal,selectSearchQuantity,selectedValue,handleSelectionChange
         }
     }
 }

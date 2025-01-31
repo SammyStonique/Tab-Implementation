@@ -145,11 +145,21 @@ export default{
         const name_search = ref('');
         const loan_number_search = ref("");
         const member_number_search = ref("");
+        const approval_status_search = ref("");
+        const disbursed_status_search = ref("");
  
         const searchFilters = ref([
             {type:'text', placeholder:"Loan No...", value: loan_number_search, width:48,},
             {type:'text', placeholder:"Member Name...", value: name_search, width:48,},
             {type:'text', placeholder:"Member No...", value: member_number_search, width:48,},
+            {
+                type:'dropdown', placeholder:"Status..", value: approval_status_search, width:40,
+                options: [{text:'Pending',value:'Pending'},{text:'Approved',value:'Approved'},{text:'Rejected',value:'Rejected'}]
+            },
+            {
+                type:'dropdown', placeholder:"Disbursal Status..", value: disbursed_status_search, width:40,
+                options: [{text:'Yes',value:'Yes'},{text:'No',value:'No'}]
+            },
         ]);
         const handleSelectionChange = (ids) => {
             selectedIds.value = ids;
@@ -275,6 +285,8 @@ export default{
                 member_name: name_search.value,
                 loan_number: loan_number_search.value,
                 member_number: member_number_search.value,
+                approval_status: approval_status_search.value,
+                disbursed: disbursed_status_search.value,
                 company_id: companyID.value,
                 page_size: selectedValue.value
             } 
@@ -310,6 +322,8 @@ export default{
             name_search.value = "";
             member_number_search.value = "";
             loan_number_search.value = "";
+            approval_status_search.value = "";
+            disbursed_status_search.value = "";
             searchApplications();
         }
         const loadPrev = () =>{
@@ -410,7 +424,8 @@ export default{
             }else if(action == 'disburse'){
                 const applicationStatus = row['approval_status']
                 const disburseStatus = row['disbursed']
-                if(disburseStatus == 'Yes'){
+                const partDisburse = row['partial_disbursement']
+                if(disburseStatus == 'Yes' && partDisburse == 'No'){
                     toast.error(`Loan Already Disbursed`)
                 }else{
                     if(applicationStatus == 'Approved'){
@@ -419,8 +434,8 @@ export default{
                         approvedAmount.value = row['approved_amount'];
                         loanApprvAmnt.value = row['approved_amount'];
                         refModalVisible.value = true;
-                        flex_basis.value = '1/2';
-                        flex_basis_percentage.value = '50';
+                        flex_basis.value = '1/3';
+                        flex_basis_percentage.value = '33.333';
                     }else{
                         toast.error(`Cannot Disburse ${applicationStatus} Loan`)
                     }
@@ -479,9 +494,9 @@ export default{
         const checkApprovedLimit = (value) =>{
             if(parseFloat(loanApprvAmnt.value) < parseFloat(value)){
                 toast.error(`Approved Amount is ${loanApprvAmnt.value}`)
-                refFormFields.value[5].value = loanApprvAmnt.value;
+                refFormFields.value[6].value = loanApprvAmnt.value;
             }
-        }
+        };
         const refFormFields = ref([
             {  
                 type:'search-dropdown', label:"Cashbook", value: cashbookID.value, componentKey: ledComponentKey,
@@ -493,6 +508,7 @@ export default{
             { type: 'date', name: 'banking_date',label: "Banking Date", value: formatDate(current_date), required: true, maxDate: formatDate(current_date) },
             { type: 'dropdown', name: 'payment_method',label: "Payment Method", value: '', placeholder: "", required: true, options: [{ text: 'Cash', value: 'Cash' }, { text: 'Mpesa', value: 'Mpesa' },{ text: 'Bank Deposit', value: 'Bank Deposit' }, { text: 'Cheque', value: 'Cheque' },{ text: 'Check-off', value: 'Check-off' }, { text: 'RTGS', value: 'RTGS' },{ text: 'EFT', value: 'EFT' }, { text: 'Not Applicable', value: 'Not Applicable' }] },
             { type: 'text', name: 'reference_no',label: "Reference No", value: '', required: true,},
+            { type: 'dropdown', name: 'partial_disbursement',label: "Partial Payment", value: 'No', placeholder: "", required: true, options: [{ text: 'Yes', value: 'Yes' },{ text: 'No', value: 'No' }]},
             { type: 'number', name: 'total_amount',label: "Amount", value: computedApprovedAmount.value, required: true , method: checkApprovedLimit},
         ]);
         const handleRefReset = () =>{
@@ -516,7 +532,8 @@ export default{
                 issue_date: refFormFields.value[1].value,
                 loan_application: applicationID.value,
                 banking_date: refFormFields.value[2].value,
-                amount: refFormFields.value[5].value,
+                partial_disbursement: refFormFields.value[5].value,
+                amount: refFormFields.value[6].value,
                 payment_method: refFormFields.value[3].value,
                 reference_no: refFormFields.value[4].value,
                 user: userID.value,
@@ -528,6 +545,8 @@ export default{
                     toast.success("Success")
                     closeRefModal();
                     searchApplications();
+                }else if(response.data.msg == "Excess"){
+                    toast.error("Maximum Disbursement Exceeded")
                 }else{
                     toast.error("Error Disbursing Loan")
                 }                   

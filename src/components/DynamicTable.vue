@@ -202,7 +202,7 @@ export default defineComponent({
       let totalAmount = parseFloat(row.total_amount) || 0;
       let taxAmount = parseFloat(row.vat_amount) || 0;
       let salesIncome = ((parseFloat(row.selling_price) - parseFloat(row.cost)) * parseFloat(row.quantity)) || 0;
-      if(taxIncl == "Inclusive"){
+      if(taxIncl == "Inclusive" && taxRate != 0){
         taxAmount = ((taxRate/100) * subTotal).toFixed(2);
         totalAmount = subTotal.toFixed(2);
         row.vat_amount = taxAmount;

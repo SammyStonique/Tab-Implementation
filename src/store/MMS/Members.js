@@ -116,6 +116,16 @@ const actions = {
       throw error;
     })
   },
+  async createMemberReceipt({ commit,state }, formData) {
+    return axios.post('api/v1/receipt-member-loan/', formData)
+    .then((response)=>{
+      return response;
+    })
+    .catch((error)=>{
+      console.log(error.message);
+      throw error;
+    })
+  },
 
   async updateMember({ commit,state }, formData) {
     return axios.post('api/v1/update-member/', formData)
@@ -165,17 +175,17 @@ const actions = {
     axios.post(`api/v1/member-receipt-items-search/`,formData)
     .then((response)=>{
       const receiptItems = response.data.items;
-      for(let i=0; i<response.data.length; i++){
-        state.outstandingBalance += Number(response.data[i].due_amount);
+      for(let i=0; i<response.data.items.length; i++){
+        state.outstandingBalance += Number(response.data.items[i].due_amount);
       }
       const transformedInvoiceArray = receiptItems.map(receiptItem =>({
           ...receiptItem,
           payment_allocation: 0,
           bal_after_alloc: "",
+          quantity: 1,
           allocation_status: false
       }));
       commit('LIST_RECEIPT_ITEMS', transformedInvoiceArray);
-      commit('CLIENT_OUTSTANDING_AMOUNT', state.outstandingBalance);
     })
     .catch((error)=>{
       console.log(error.message);
@@ -259,6 +269,10 @@ const actions = {
         Swal.fire(`Member has not been deleted!`);
       }
     })
+  },
+  removeReceiptItem({commit, state}, index){
+    state.receiptItems.splice(index, 1); 
+    commit('LIST_RECEIPT_ITEMS', state.receiptItems);
   },
 
 };
