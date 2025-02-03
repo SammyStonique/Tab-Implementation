@@ -22,6 +22,7 @@ const state = {
   selectedTransactions: [],
   loanMember: [],
   loanProduct: [],
+  selectedApplicationID: null,
 };
   
 const mutations = {
@@ -46,6 +47,7 @@ const mutations = {
     state.selectedTransactions = [];
     state.loanMember = [];
     state.loanProduct = [];
+    state.selectedApplicationID = null;
   },
   SET_SELECTED_APPLICATION(state, application) {
     state.selectedApplication = application;
@@ -171,6 +173,7 @@ const actions = {
         state.loanDetails = response.data;
         state.loanMember = response.data.member;
         state.loanProduct = response.data.loan_product;
+        state.selectedApplicationID = response.data.loan_application_id;
         commit('SET_LOAN_DETAILS',response.data);
         commit('SET_LOAN_CHARGES',(response.data.loan_charges != null) ? (response.data.loan_charges) : []);
         commit('SET_LOAN_GUARANTORS',(response.data.loan_guarantors != null) ? (response.data.loan_guarantors) : []);

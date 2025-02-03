@@ -18,7 +18,7 @@
                         
                         <div class="px-3 min-h-[220px]">
                             <DynamicTable :key="tableKey" :columns="receiptColumns" :rows="receiptRows" :showActions="showActions" :idField="idField" @update-receipt-amount="allocateInputAmount" @row-db-click="autoPopulatePaymentAlloc" 
-                                            :actions="actionsRcptItems" @action-click="removeReceiptItem" :rightsModule="rightsModule"/>
+                                            :showTotals="showTotals" :actions="actionsRcptItems" @action-click="removeReceiptItem" :rightsModule="rightsModule"/>
                         </div>
                     </template>
                 </DynamicForm>
@@ -79,6 +79,7 @@ export default defineComponent({
         const userID = computed(()=> store.state.userData.user_id);
         const displayButtons = ref(true);
         const showActions = ref(true);
+        const showTotals = ref(true);
         const idField = ref('');
         const flex_basis = ref('');
         const flex_basis_percentage = ref('');
@@ -92,9 +93,9 @@ export default defineComponent({
         const receiptColumns = ref([
             {type: "checkbox"},
             {label: "Description", key:"description", type: "text", editable: false},
-            {label: "Amount", key: "total_amount", type: "text", editable: false},
-            {label: "Paid", key: "total_paid", type: "text", editable: false},
-            {label: "Due Amnt", key: "due_amount", type: "text", editable: false},
+            {label: "Amount", key: "total_amount", type: "number", editable: false},
+            {label: "Paid", key: "total_paid", type: "number", editable: false},
+            {label: "Due Amnt", key: "due_amount", type: "number", editable: false},
             {label: "Payment", key: "payment_allocation", type: "number", editable: true},
             {label: "Balance", key: "bal_after_alloc", type: "text", editable: false},
         ])
@@ -209,7 +210,7 @@ export default defineComponent({
                 { type: 'date', name: 'banking_date',label: "Banking Date", value: '', required: true, maxDate: formatDate(current_date) },
                 { type: 'dropdown', name: 'payment_method',label: "Payment Method", value: '', placeholder: "", required: true, options: [{ text: 'Cash', value: 'Cash' }, { text: 'Mpesa', value: 'Mpesa' },{ text: 'Bank Deposit', value: 'Bank Deposit' }, { text: 'Cheque', value: 'Cheque' },{ text: 'Check-off', value: 'Check-off' }, { text: 'RTGS', value: 'RTGS' },{ text: 'EFT', value: 'EFT' }, { text: 'Not Applicable', value: 'Not Applicable' }] },
                 { type: 'text', name: 'reference_no',label: "Reference No", value: '', required: true,},
-                { type: 'number', name: 'total_amount',label: "Amount", value: receipt_totals.value || 0, required: true, method: allocateReceivedAmount },
+                { type: 'text', name: 'total_amount',label: "Amount", value: receipt_totals.value || 0, required: true, method: allocateReceivedAmount },
                 {
                     type:'search-dropdown', label:"Cashbook", value: ledgerID.value, componentKey: ledComponentKey,
                     selectOptions: ledgerArray, optionSelected: handleSelectedLedger, required: true,
@@ -444,7 +445,7 @@ export default defineComponent({
 
         return{
             formFields, flex_basis, flex_basis_percentage, displayButtons, createMemberReceipt, mainComponentKey,
-            handleReset, loader, showLoader, hideLoader, tableKey, receiptColumns, receiptRows, showActions, idField,
+            handleReset, loader, showLoader, hideLoader, tableKey, receiptColumns, receiptRows, showActions,showTotals, idField,
             autoPopulatePaymentAlloc, outstanding_balance, hasPrepayment, addPrepayment, handlePrepayment, allocateInputAmount,
             title, modal_loader, modal_left, modal_top, modal_width, prepModalVisible, showModalLoader, hideModalLoader, closeModal,
             additionalFields,flex_basis_additional, flex_basis_percentage_additional, handlePrepaymentReset,allotable_prepayment,allocatePrepayment,

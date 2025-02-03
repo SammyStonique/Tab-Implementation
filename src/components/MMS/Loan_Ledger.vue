@@ -100,6 +100,7 @@ import { useToast } from "vue-toastification";
 import { useDateFormatter } from '@/composables/DateFormatter';
 import axios from 'axios';
 import PrintJS from 'print-js';
+import Swal from 'sweetalert2';
 
 export default defineComponent({
     name: 'Loan_Ledger',
@@ -137,6 +138,7 @@ export default defineComponent({
         const idFieldSchedule = ref('armotization_schedule_id');
         const idFieldPayment = ref('utility_id');
         const idFieldStatement = ref('');
+        const applicationID = computed(()=> store.state.Loan_Applications.selectedApplicationID);
         const computedScheduleRows = computed(()=> store.state.Loan_Applications.selectedSchedules);
         const computedPaymentRows = ref();
         const statementRows = computed(()=> store.state.Loan_Applications.selectedTransactions);
@@ -151,10 +153,10 @@ export default defineComponent({
             {label: "Principal", key:"formatted_principal_amount", type: "number", editable: false},
             {label: "Interest", key:"formatted_interest_amount", type: "number", editable: false},
             {label: "Penalty", key:"penalty", type: "number", editable: false},
-            {label: "Schedule Total", key:"formatted_schedule_repayment", type: "number", editable: false},
-            {label: "Prepayment", key:"loan_prepayment", type: "number", editable: false},
-            {label: "Paid Principal", key:"repaid_principal_amount", type: "number", editable: false},
-            {label: "Paid Interest", key:"repaid_interest_amount", type: "number", editable: false},
+            {label: "Sch. Total", key:"formatted_schedule_repayment", type: "number", editable: false},
+            {label: "Prepayment", key:"formatted_loan_prepayment", type: "number", editable: false},
+            {label: "Paid Principal", key:"formatted_repaid_principal_amount", type: "number", editable: false},
+            {label: "Paid Interest", key:"formatted_repaid_interest_amount", type: "number", editable: false},
             {label: "Total Payment", key:"formatted_schedule_payment", type: "number", editable: false},
             {label: "I.P", key:"interest_posted", type: "text", editable: false},
             {label: "C.R.P", key:"credit_reduction_applied", type: "text", editable: false},
@@ -283,7 +285,7 @@ export default defineComponent({
             showLoader();
             let formData = {
                 company: companyID.value,
-                tenant: loanDetails.value.tenant_id
+                loan_application: applicationID.value
             }
             let formData1 = {
                 company: companyID.value,
@@ -299,14 +301,14 @@ export default defineComponent({
                 })
             }else if( index == 1){
                 activeTab.value = index;
-                await store.dispatch('Security_Deposits/fetchTenantDeposits',formData)
+                await store.dispatch('Loan_Applications/fetchLoanDetails',formData)
                 .then(()=>{
                     hideLoader();
                 })
             }
             else if( index == 3){
                 activeTab.value = index;
-                await store.dispatch('Utilities/fetchTenantUtilities',formData)
+                await store.dispatch('fetchLoanDetails/fetchTenantUtilities',formData)
                 .then(()=>{
                     hideLoader();
                 })
@@ -325,8 +327,62 @@ export default defineComponent({
         };
 
         const scheduleActionClick = async(rowIndex, action, row) =>{
-            if( action == 'book-invoice'){
-            
+            if( action == 'post-interest'){
+                const postedStatus = row['interest_posted']
+                const scheduleID = [row['armotization_schedule_id']]
+                if(postedStatus == 'No'){
+                    let formData = {
+                        armotization_schedule: scheduleID,
+                        company: companyID.value
+                    }
+                    Swal.fire({
+                        title: "Are you sure?",
+                        text: `Do you wish to Post Interest?`,
+                        type: 'warning',
+                        showCloseButton: true,
+                        showCancelButton: true,
+                        confirmButtonText: 'Yes, Post!',
+                        cancelButtonText: 'Cancel!',
+                        customClass: {
+                            confirmButton: 'swal2-confirm-custom',
+                            cancelButton: 'swal2-cancel-custom',
+                        },
+                        showLoaderOnConfirm: true,
+                        }).then((result) => {
+                        if (result.value) {
+                            axios.post(`api/v1/post-armotization-interest/`,formData)
+                            .then((response)=>{
+                            if(response.data.msg == 'Success'){
+                                Swal.fire("Interest Posted Succesfully!", {
+                                    icon: "success",
+                                }); 
+                            }else if(response.data.msg == 'Failed'){
+                                Swal.fire("Interest Already Posted!", {
+                                    icon: "warning",
+                                });
+                            }
+                            else{
+                                Swal.fire({
+                                    title: "Error Posting Interest",
+                                    icon: "warning",
+                                });
+                            }                   
+                            })
+                            .catch((error)=>{
+                                console.log(error.message);
+                                Swal.fire({
+                                    title: error.message,
+                                    icon: "warning",
+                                });
+                            })
+                        }else{
+                            Swal.fire(`Interest(s) has not been posted!`);
+                        }
+                    })
+                }else{
+                    toast.error("Interest Already Posted")
+                }
+                           
             }else if( action == 'unbook-invoice'){
             
             }

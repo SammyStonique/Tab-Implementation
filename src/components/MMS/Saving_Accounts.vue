@@ -39,7 +39,7 @@
 
 <script>
 import axios from "axios";
-import { ref, computed, watch, onMounted, onBeforeMount } from 'vue';
+import { ref, computed, watch, onMounted, onBeforeMount, effect } from 'vue';
 import PageComponent from '@/components/PageComponent.vue'
 import MovableModal from '@/components/MovableModal.vue'
 import DynamicForm from '../NewDynamicForm.vue';
@@ -164,6 +164,7 @@ export default{
                 { type: 'text', name: 'account_number',label: "Account Number", value: selectedAccount.value?.account_number || '', required: true },
                 { type: 'date', name: 'date',label: "Date Opened", value: selectedAccount.value?.date || '', required: true },
                 { type: 'text', name: 'amount',label: "Amount", value: selectedAccount.value?.amount || computedProdMinAmnt.value, required: true },
+                { type: 'date', name: 'date',label: "Effective Date", value: selectedAccount.value?.effective_date || '', required: false },
             ];
         };
         watch([selectedAccount, selectedMember, selectedProduct], () => {
@@ -232,6 +233,7 @@ export default{
                 account_number: formFields.value[2].value,
                 date: formFields.value[3].value,
                 amount: formFields.value[4].value,
+                effective_date: formFields.value[5].value,
                 member: memberID.value,
                 member_id: memberID.value,
                 saving_product: productID.value,
@@ -279,6 +281,7 @@ export default{
                 account_number: formFields.value[2].value,
                 date: formFields.value[3].value,
                 amount: formFields.value[4].value,
+                effective_date: formFields.value[5].value,
                 member: memberValue.value,
                 member_id: memberValue.value,
                 saving_product: productValue.value,
