@@ -80,7 +80,8 @@
                         <DynamicTable :key="tableKey" :rightsModule="rightsModule" :columns="scheduleColumns" :rows="computedScheduleRows" :idField="idFieldSchedule" :showTotals="showTotals" :actions="actionsSchedule" @action-click="scheduleActionClick" />
                     </div>
                     <div v-show="activeTab == 3">                  
-                        <DynamicTable :key="paymentTableKey" :rightsModule="rightsModule" :columns="paymentColumns" :rows="computedPaymentRows" :idField="idFieldPayment" :actions="actionsUtility" @action-click="paymentActionClick" />
+                        <DynamicTable :key="paymentTableKey" :rightsModule="rightsModule" :columns="paymentColumns" :rows="computedPaymentRows" :idField="idFieldPayment" :actions="actionsUtility" @action-click="paymentActionClick" 
+                                        :showActions="showActions" :showTotals="showTotals"/>
                     </div>   
                 </div>
             </div>
@@ -140,7 +141,7 @@ export default defineComponent({
         const idFieldStatement = ref('');
         const applicationID = computed(()=> store.state.Loan_Applications.selectedApplicationID);
         const computedScheduleRows = computed(()=> store.state.Loan_Applications.selectedSchedules);
-        const computedPaymentRows = ref();
+        const computedPaymentRows = computed(()=> store.state.Loan_Applications.selectedRepayments);
         const statementRows = computed(()=> store.state.Loan_Applications.selectedTransactions);
         const loanDetails = computed(()=> store.state.Loan_Applications.loanDetails);
         const loanMember = computed(()=> store.state.Loan_Applications.loanMember);
@@ -164,19 +165,15 @@ export default defineComponent({
         const showTotals = ref(true);
         const actionsSchedule = ref([
             {name: 'post-interest', icon: 'fa fa-spinner', title: 'Post Interest', rightName: 'Posting Loan Interest'},
-            {name: 'unbook-invoice', icon: 'fa fa-minus-circle', title: 'Cancel Booking', rightName: 'Posting Loan Interest'},
+            {name: 'unpost-interest', icon: 'fa fa-minus-circle', title: 'Unpost Interest', rightName: 'Posting Loan Interest'},
         ]);
 
         const paymentColumns = ref([
             {type: "checkbox"},
-            {label: "Utility Name", key:"utility.name", type: "text", editable: false},
-            {label: "Charge Mode", key:"utility_charge_mode", type: "text", editable: false},
-            {label: "Def. Value", key: "utility_value", type: "text", editable: false},
-            {label: "Utility Vat", key: "deposit_value", type: "text", editable: false},
-            {label: "Amount", key: "utility_amount", type: "text", editable: false},
-            {label: "Status", key: "status", type: "text", editable: false},
-            {label: "From", key: "from_date", type: "text", editable: false},
-            {label: "To", key: "to_date", type: "text", editable: false},
+            {label: "Date", key:"journal.issue_date", type: "text", editable: false},
+            {label: "Txn No", key:"journal.journal_no", type: "text", editable: false},
+            {label: "Description", key: "description", type: "text", editable: false},
+            {label: "Amount", key: "amount", type: "number", editable: false},
         ])
 
         const actionsUtility = ref([
@@ -308,7 +305,7 @@ export default defineComponent({
             }
             else if( index == 3){
                 activeTab.value = index;
-                await store.dispatch('fetchLoanDetails/fetchTenantUtilities',formData)
+                await store.dispatch('Loan_Applications/fetchLoanRepayments',formData)
                 .then(()=>{
                     hideLoader();
                 })
@@ -383,8 +380,62 @@ export default defineComponent({
                     toast.error("Interest Already Posted")
                 }
                            
-            }else if( action == 'unbook-invoice'){
-            
+            }else if( action == 'unpost-interest'){
+                const postedStatus = row['interest_posted']
+                const scheduleID = [row['armotization_schedule_id']]
+                if(postedStatus == 'Yes'){
+                    let formData = {
+                        armotization_schedule: scheduleID,
+                        company: companyID.value
+                    }
+                    Swal.fire({
+                        title: "Are you sure?",
+                        text: `Do you wish to Unpost Interest?`,
+                        type: 'warning',
+                        showCloseButton: true,
+                        showCancelButton: true,
+                        confirmButtonText: 'Yes, Unpost!',
+                        cancelButtonText: 'Cancel!',
+                        customClass: {
+                            confirmButton: 'swal2-confirm-custom',
+                            cancelButton: 'swal2-cancel-custom',
+                        },
+                        showLoaderOnConfirm: true,
+                        }).then((result) => {
+                        if (result.value) {
+                            axios.post(`api/v1/unpost-armotization-interest/`,formData)
+                            .then((response)=>{
+                            if(response.data.msg == 'Success'){
+                                Swal.fire("Interest Unposted Succesfully!", {
+                                    icon: "success",
+                                }); 
+                            }else if(response.data.msg == 'Failed'){
+                                Swal.fire("Interest Not Posted!", {
+                                    icon: "warning",
+                                });
+                            }
+                            else{
+                                Swal.fire({
+                                    title: "Error Unposting Interest",
+                                    icon: "warning",
+                                });
+                            }                   
+                            })
+                            .catch((error)=>{
+                                console.log(error.message);
+                                Swal.fire({
+                                    title: error.message,
+                                    icon: "warning",
+                                });
+                            })
+                        }else{
+                            Swal.fire(`Interest(s) has not been unposted!`);
+                        }
+                    })
+                }else{
+                    toast.error("Interest Not Posted")
+                }
+                           
             }
             else if(action == 'delete'){
  

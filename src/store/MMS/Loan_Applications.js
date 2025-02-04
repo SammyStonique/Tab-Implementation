@@ -14,6 +14,7 @@ const state = {
   selectedApplication: null,
   selectedProduct: null,
   selectedMember: null,
+  selectedRepayments: [],
   isEditing: false,
   loanDetails: [],
   selectedSchedules: [],
@@ -48,10 +49,14 @@ const mutations = {
     state.loanMember = [];
     state.loanProduct = [];
     state.selectedApplicationID = null;
+    state.selectedRepayments = [];
   },
   SET_SELECTED_APPLICATION(state, application) {
     state.selectedApplication = application;
     state.isEditing = true;
+  },
+  SET_SELECTED_REPAYMENTS(state, repayment) {
+    state.selectedRepayments = repayment;
   },
   LIST_APPLICATIONS(state, applications) {
     state.applicationsList = applications;
@@ -212,6 +217,17 @@ const actions = {
     .finally(()=>{
     
     })
+  },
+  fetchLoanRepayments({ commit,state }, formData) {
+    axios.post(`api/v1/get-loan-repayments/`,formData)
+    .then((response)=>{
+        state.selectedRepayments = response.data;
+        commit('SET_SELECTED_REPAYMENTS',response.data);
+    })
+    .catch((error)=>{
+      console.log(error.message);
+    })
+    
   },
   
   handleSelectedApplication({ commit, state }, option){

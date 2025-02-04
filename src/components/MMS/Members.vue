@@ -114,6 +114,7 @@ export default{
             {type: "checkbox"},
             {label: "Member No", key:"member_number"},
             {label: "Member Name", key:"member_name"},
+            {label: "Joining Date", key:"joining_date"},
             {label: "Phone No", key: "phone_number"},
             {label: "Email", key:"email"},
             {label: "Category", key:"member_category"},

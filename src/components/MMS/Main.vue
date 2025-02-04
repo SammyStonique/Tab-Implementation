@@ -32,6 +32,7 @@ import Dashboard from '@/components/MMS/Dashboard.vue';
 import Member_Categories from '@/components/MMS/Member_Categories.vue';
 import Member_Sponsors from '@/components/MMS/Member_Sponsors.vue';
 import Members from '@/components/MMS/Members.vue';
+import Import_Members from '@/components/MMS/Import_Members.vue';
 import Member_Details from '@/components/MMS/Member_Details.vue';
 import Membership_Fees from '@/components/MMS/Membership_Fees.vue';
 import Member_Invoices from '@/components/MMS/Member_Invoices.vue';
@@ -41,6 +42,7 @@ import Saving_Product_Details from '@/components/MMS/Saving_Product_Details.vue'
 import Shares_Products from '@/components/MMS/Shares_Products.vue';
 import Share_Product_Details from '@/components/MMS/Share_Product_Details.vue';
 import Saving_Accounts from '@/components/MMS/Saving_Accounts.vue';
+import Import_Saving_Accounts from '@/components/MMS/Import_Saving_Accounts.vue';
 import Share_Accounts from '@/components/MMS/Share_Accounts.vue';
 import Saving_Deposits from '@/components/MMS/Saving_Deposits.vue';
 import Share_Deposits from '@/components/MMS/Share_Deposits.vue';
@@ -62,10 +64,10 @@ export default{
         NavBarMMS,
         PagesTab,
         Dashboard,
-        Member_Categories,Member_Sponsors,Members,Member_Details,Membership_Fees,Receipt_Details,
+        Member_Categories,Member_Sponsors,Members,Import_Members,Member_Details,Membership_Fees,Receipt_Details,
         Member_Invoices,Member_Receipts,Savings_Products,Saving_Product_Details,Shares_Products,Share_Product_Details,Saving_Accounts,Share_Accounts,
         Saving_Deposits,Share_Deposits,Loan_Products,Loan_Product_Details,Loan_Fees,Loan_Applications,Loan_Application_Details,Loan_Guarantors,Loan_Ledger,
-        Loan_Disbursements,
+        Loan_Disbursements,Import_Saving_Accounts,
 
         Default_Settings
     },

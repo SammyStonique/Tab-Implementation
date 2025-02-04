@@ -8,6 +8,7 @@
         @resetFilters="resetFilters"
         @removeItem="removeAccount"
         @removeSelectedItems="removeAccounts"
+        @importData="importAccounts"
         :addingRight="addingRight"
         :rightsModule="rightsModule"
         :columns="tableColumns"
@@ -112,6 +113,10 @@ export default{
             {type:'text', placeholder:"Member No...", value: member_number_search, width:36,},
             {type:'text', placeholder:"Search Name...", value: name_search, width:48,},
         ]);
+        const importAccounts = () =>{
+            store.commit('pageTab/ADD_PAGE', {'MMS':'Import_Saving_Accounts'})
+            store.state.pageTab.mmsActiveTab = 'Import_Saving_Accounts';
+        }
         const handleSelectionChange = (ids) => {
             selectedIds.value = ids;
         };
@@ -468,7 +473,7 @@ export default{
             loadPrev, loadNext, firstPage, lastPage, actions, formFields, depModalVisible, addNewAccount,
             displayButtons,flex_basis,flex_basis_percentage, handleActionClick, handleReset, saveAccount,
             showLoader, loader, hideLoader, modal_loader, showModalLoader, hideModalLoader, removeAccount, removeAccounts,
-            addingRight,rightsModule, closeModal,handleSelectionChange,selectSearchQuantity,selectedValue,
+            addingRight,rightsModule, closeModal,handleSelectionChange,selectSearchQuantity,selectedValue,importAccounts
         }
     }
 }
