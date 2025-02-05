@@ -56,6 +56,7 @@ const mutations = {
   },
   LIST_LEDGERS(state, ledgers) {
     state.ledgersList = ledgers;
+  
   },
   LEDGERS_ARRAY(state, ledgers){
     state.ledgerArray = ledgers;

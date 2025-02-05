@@ -58,7 +58,7 @@
             <option v-for="(option, index) in field.options" :key="index" :value="option.value">{{ option.text }}</option>
           </select>
         </div>
-        <div v-else-if="field.type === 'search-dropdown'" class="mr-2 text-left" :disabled="field.disabled">
+        <div v-else-if="field.type === 'search-dropdown'" class="mr-2 text-left" :class="field.disabled">
           <div v-if="field.required">
             <label for="">{{ field.label }} : <em>*</em></label><br />
           </div>
@@ -181,6 +181,10 @@ flex-grow: 1;
 }
 em{
 color: red;
+}
+.disabled-div {
+    pointer-events: none;
+    opacity: 0.5;
 }
 
 </style>

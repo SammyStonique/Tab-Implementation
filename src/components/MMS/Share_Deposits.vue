@@ -8,11 +8,13 @@
         @resetFilters="resetFilters"
         @removeItem="removeDeposit"
         @removeSelectedItems="removeDeposits"
+        @importData="importDeposits"
         :addingRight="addingRight"
         :rightsModule="rightsModule"
         :columns="tableColumns"
         :rows="depositsList"
         :actions="actions"
+        :showTotals="showTotals"
         :idField="idField"
         @handleSelectionChange="handleSelectionChange"
         @handleActionClick="handleActionClick"
@@ -58,6 +60,7 @@ export default{
         const modal_loader = ref('none');
         const memComponentKey = ref(0);
         const prodComponentKey = ref(0);
+        const prodSearchComponentKey = ref(0);
         const title = ref('Share Deposit Details');
         const addButtonLabel = ref('New Share Deposit');
         const addingRight = ref('Adding Share Deposits');
@@ -85,6 +88,7 @@ export default{
         const ledgerArray = computed(() => store.state.Ledgers.ledgerArr);
         const tableColumns = ref([
             {type: "checkbox"},
+            {label: "Date", key: "date", type: "text", editable: false},
             {label: "Acc No", key: "account_number", type: "text", editable: false},
             {label: "Member No", key: "member_number", type: "text", editable: false},
             {label: "Member Name", key: "member_name", type: "text", editable: false},
@@ -94,21 +98,45 @@ export default{
             {label: "Open. Bal.", key: "opening_balance", type: "text", editable: false},
             {label: "Posting Account", key: "posting_account", type: "text", editable: false},
             {label: "Txn. No.", key: "txn_no", type: "text", editable: false},
-        ])
+        ]);
+        const showTotals = ref(true);
         const actions = ref([
             {name: 'delete', icon: 'fa fa-trash', title: 'Delete Deposit', rightName: 'Deleting Share Deposits'},
         ])
         const companyID = computed(()=> store.state.userData.company_id);
         const accountID = ref('');
         const ledgerID = ref('');
+        const productSearchID = ref('');
         const account_number_search = ref('');
         const name_search = ref('');
         const member_number_search = ref("");
+        const products_array = computed({
+            get: () => store.state.Shares_Products.productArr,
+        });
+        const handleSelectedSearchProduct = async(option) =>{
+            await store.dispatch('Shares_Products/handleSelectedProduct', option)
+            productSearchID.value = store.state.Shares_Products.productID;
+        };
+        const clearSelectedSearchProduct = async() =>{
+            await store.dispatch('Shares_Products/updateState', {productID: ''});
+            productSearchID.value = store.state.Shares_Products.productID;
+        };
         const searchFilters = ref([
             {type:'text', placeholder:"Account No...", value: account_number_search, width:40,},
             {type:'text', placeholder:"Member No...", value: member_number_search, width:36,},
             {type:'text', placeholder:"Search Name...", value: name_search, width:48,},
+            {
+                type:'search-dropdown', value: products_array, width:48, componentKey: prodSearchComponentKey,
+                selectOptions: products_array, optionSelected: handleSelectedSearchProduct,
+                searchPlaceholder: 'Share Product...', dropdownWidth: '300px',
+                fetchData: store.dispatch('Shares_Products/fetchSharesProducts', {company:companyID.value}),
+                clearSearch: clearSelectedSearchProduct
+            },
         ]);
+        const importDeposits = () =>{
+            store.commit('pageTab/ADD_PAGE', {'MMS':'Import_Share_Deposits'})
+            store.state.pageTab.mmsActiveTab = 'Import_Share_Deposits';
+        }
         const handleSelectionChange = (ids) => {
             selectedIds.value = ids;
         };
@@ -203,6 +231,8 @@ export default{
                 share_account_id: accountID.value,
                 posting_account: ledgerID.value,
                 posting_account_id: ledgerID.value,
+                journal: null,
+                journal_id: null,
                 company: companyID.value
             }
             errors.value = [];
@@ -304,6 +334,7 @@ export default{
                 account_number: account_number_search.value,
                 member_name: name_search.value,
                 member_number: member_number_search.value,
+                product: productSearchID.value,
                 company_id: companyID.value,
                 page_size: selectedValue.value
             }
@@ -366,6 +397,8 @@ export default{
             name_search.value = "";
             account_number_search.value = "";
             member_number_search.value = "";
+            prodSearchComponentKey.value += 1;
+            productSearchID.value = "";
             searchDeposits();
         };
         const closeModal = async() =>{
@@ -376,12 +409,12 @@ export default{
             searchDeposits();
         })
         return{
-            title,idField, searchDeposits, addButtonLabel, searchFilters, resetFilters, tableColumns, depositsList,
+            title,idField, searchDeposits, addButtonLabel, searchFilters, resetFilters, tableColumns, depositsList,showTotals,
             depResults, depArrLen, depCount, pageCount, showNextBtn, showPreviousBtn,modal_top, modal_left, modal_width,
             loadPrev, loadNext, firstPage, lastPage, actions, formFields, depModalVisible, addNewDeposit,
             displayButtons,flex_basis,flex_basis_percentage, handleActionClick, handleReset, createDeposit,
             showLoader, loader, hideLoader, modal_loader, showModalLoader, hideModalLoader, removeDeposit, removeDeposits,
-            addingRight,rightsModule, closeModal,selectSearchQuantity,selectedValue,handleSelectionChange
+            addingRight,rightsModule, closeModal,selectSearchQuantity,selectedValue,handleSelectionChange,importDeposits
         }
     }
 }

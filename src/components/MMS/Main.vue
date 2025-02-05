@@ -44,8 +44,11 @@ import Share_Product_Details from '@/components/MMS/Share_Product_Details.vue';
 import Saving_Accounts from '@/components/MMS/Saving_Accounts.vue';
 import Import_Saving_Accounts from '@/components/MMS/Import_Saving_Accounts.vue';
 import Share_Accounts from '@/components/MMS/Share_Accounts.vue';
+import Import_Share_Accounts from '@/components/MMS/Import_Share_Accounts.vue';
 import Saving_Deposits from '@/components/MMS/Saving_Deposits.vue';
+import Import_Saving_Deposits from '@/components/MMS/Import_Saving_Deposits.vue';
 import Share_Deposits from '@/components/MMS/Share_Deposits.vue';
+import Import_Share_Deposits from '@/components/MMS/Import_Share_Deposits.vue';
 import Loan_Products from '@/components/MMS/Loan_Products.vue';
 import Loan_Product_Details from '@/components/MMS/Loan_Product_Details.vue';
 import Loan_Fees from '@/components/MMS/Loan_Fees.vue';
@@ -67,7 +70,7 @@ export default{
         Member_Categories,Member_Sponsors,Members,Import_Members,Member_Details,Membership_Fees,Receipt_Details,
         Member_Invoices,Member_Receipts,Savings_Products,Saving_Product_Details,Shares_Products,Share_Product_Details,Saving_Accounts,Share_Accounts,
         Saving_Deposits,Share_Deposits,Loan_Products,Loan_Product_Details,Loan_Fees,Loan_Applications,Loan_Application_Details,Loan_Guarantors,Loan_Ledger,
-        Loan_Disbursements,Import_Saving_Accounts,
+        Loan_Disbursements,Import_Saving_Accounts,Import_Share_Accounts,Import_Saving_Deposits,Import_Share_Deposits,
 
         Default_Settings
     },

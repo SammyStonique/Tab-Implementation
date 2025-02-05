@@ -15,14 +15,27 @@
                             :headers="{'Cache-Control': '' ,'X-Requested-With': ''}"
                         />
                     </div>
-                    <div class="text-left">
-                        <button type="button" class="rounded bg-green-400 text-sm mr-2 w-30 text-white px-2 py-1.5" @click="downloadExcelTemplate"><i class="fa fa-download mr-1.5"></i>Download</button>
+                    <div class="text-left flex">
+                        <button type="button" class="rounded bg-green-400 text-sm mr-2 h-8 w-36 text-white px-2 py-1.5" @click="downloadExcelTemplate"><i class="fa fa-download mr-1.5"></i>Download</button>
                         <label for="" class="mb-2 mr-3">Select Excel To Import:<em>*</em></label>
                         <input type="text" name="" class="rounded border-2 border-gray-600 text-gray-500 text-sm pl-2 mr-2 mb-4 w-80 h-8" placeholder="" v-model="filePath" >
                         <input type="file" name="file-input" @change="onFileChange" id="file-input" accept=".csv, .xls, .xlsx, .xlsm, .xlsb, application/vnd.openxmlformats-officedocument.spreadsheetml.sheet, application/vnd.ms-excel">
                         <!-- <label class="rounded border bg-gray-200 px-2 py-1.5 w-30 cursor-pointer mr-6" for="file-input">Browse...</label> -->
-                        <button type="button" class="rounded bg-green-400 text-sm mr-2 w-24 text-white px-2 py-1.5" @click="displayExcelData">Import</button>
-                    </div>                   
+                        <button type="button" class="rounded bg-green-400 text-sm mr-3 h-8 w-24 text-white px-2 py-1.5" @click="displayExcelData">Import</button>
+                        <div class="h-8" v-if="showSearchableDropdown">
+                            <label for="" class="text-left mr-3">{{ searchableDropdownLabel }}:<em>*</em></label>
+                            <SearchableDropdown  
+                                :key="componentKey"         
+                                :options="selectOptions"
+                                :dropdownWidth="dropdownWidth"
+                                :searchPlaceholder="searchPlaceholder"
+                                @option-selected="optionSelected"
+                                @clearSearch="clearSearch"
+                                @fetchData="fetchData"
+                            />
+                        </div> 
+                    </div> 
+                                     
                 </div>
                 <div class="mt-2 min-h-[50vh]">
                     <DynamicTable :columns="columns" :rows="rows" :idField="idField" :showActions="showActions"/>
@@ -31,6 +44,7 @@
                     <button @click="handleSubmit" class="rounded bg-green-400 text-sm mr-2  text-white px-2 py-1.5"><i class="fa fa-check-circle text-xs mr-1.5" aria-hidden="true"></i>Save</button>
                     <button @click="handleReset" class="rounded bg-green-400 text-sm mr-2  text-white px-2 py-1.5"><i class="fa fa-refresh text-xs mr-1.5" aria-hidden="true"></i>Reset</button>
                 </div>
+                
             </div>
         </template>
     </PageStyleComponent>
@@ -42,11 +56,12 @@ import { defineComponent, ref } from 'vue';
 import PageStyleComponent from '@/components/PageStyleComponent.vue';
 import DynamicTable from '@/components/DynamicTable.vue';
 import DropZone from 'dropzone-vue';
+import SearchableDropdown from '@/components/SearchableDropdown.vue'
 
 export default defineComponent({
     name: 'ImportComponent',
     components: {
-        PageStyleComponent, DynamicTable, DropZone
+        PageStyleComponent, DynamicTable, DropZone,SearchableDropdown
     },
     props:{
         columns: {
@@ -72,7 +87,37 @@ export default defineComponent({
         filePath:{
             type: String,
             required: true
-        }
+        },
+        showSearchableDropdown:{
+            type: Boolean,
+            required: false,
+            default: false
+        },
+        searchableDropdownLabel:{
+            type: String,
+            required: false,
+            default: ''
+        },
+        componentKey:{
+            type: Number,
+            required: false,
+            default: 0
+        },
+        selectOptions:{
+            type: Array,
+            required: false,
+            default: []
+        },
+        dropdownWidth:{
+            type: String,
+            required: false,
+            default: '350px'
+        },
+        searchPlaceholder:{
+            type: String,
+            required: false,
+            default: ''
+        },
     },
     setup(props,{emit}){
         const localFile = ref(null);
@@ -98,6 +143,15 @@ export default defineComponent({
         }
         const handleReset = () =>{
             emit('handleReset');
+        }
+        const optionSelected = (option) =>{
+            emit('optionSelected', option);
+        }
+        const clearSearch = () =>{
+            emit('clearSearch');
+        }
+        const fetchData = () =>{
+            emit('fetchData');
         }
 
         const onFileChange = (e) => {
@@ -132,7 +186,7 @@ export default defineComponent({
 
         return{
             showLoader, hideLoader, onFileAdd, displayExcelData, onFileChange,showActions,handleSubmit,handleReset,
-            downloadExcelTemplate
+            downloadExcelTemplate,optionSelected,clearSearch,fetchData
         }
     }
 });

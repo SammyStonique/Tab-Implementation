@@ -192,6 +192,10 @@ const actions = {
     })
     
   },
+  handleMemberPrepayment({commit,state}, formData){
+    state.receiptItems.push(formData);
+    commit('LIST_RECEIPT_ITEMS', state.receiptItems);
+  },
 
   async changeMemberStatus({ commit,state }, formData) {
     return axios.post('api/v1/change-member-status/', formData)

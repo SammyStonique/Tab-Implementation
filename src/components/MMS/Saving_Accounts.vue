@@ -59,6 +59,7 @@ export default{
         const modal_loader = ref('none');
         const memComponentKey = ref(0);
         const prodComponentKey = ref(0);
+        const prodSearchComponentKey = ref(0);
         const title = ref('Saving Account Details');
         const addButtonLabel = ref('New Saving Account');
         const addingRight = ref('Adding Saving Accounts');
@@ -105,13 +106,31 @@ export default{
         const companyID = computed(()=> store.state.userData.company_id);
         const memberID = ref('');
         const productID = ref('');
+        const productSearchID = ref('');
         const account_number_search = ref('');
         const name_search = ref('');
         const member_number_search = ref("");
+        const products_array = computed({
+            get: () => store.state.Savings_Products.productArr,
+        });
+        const handleSelectedSearchProduct = async(option) =>{
+            await store.dispatch('Savings_Products/handleSelectedProduct', option)
+            productSearchID.value = store.state.Savings_Products.productID;
+        };
+        const clearSelectedSearchProduct = async() =>{
+            await store.dispatch('Savings_Products/updateState', {productID: ''});
+            productSearchID.value = store.state.Savings_Products.productID;
+        };
         const searchFilters = ref([
             {type:'text', placeholder:"Account No...", value: account_number_search, width:40,},
             {type:'text', placeholder:"Member No...", value: member_number_search, width:36,},
             {type:'text', placeholder:"Search Name...", value: name_search, width:48,},
+            {
+                type:'search-dropdown', value: products_array, width:48, componentKey: prodSearchComponentKey,
+                selectOptions: products_array, optionSelected: handleSelectedSearchProduct,
+                searchPlaceholder: 'Saving Product...', dropdownWidth: '300px',
+                clearSearch: clearSelectedSearchProduct
+            },
         ]);
         const importAccounts = () =>{
             store.commit('pageTab/ADD_PAGE', {'MMS':'Import_Saving_Accounts'})
@@ -396,6 +415,7 @@ export default{
                 account_number: account_number_search.value,
                 member_name: name_search.value,
                 member_number: member_number_search.value,
+                product: productSearchID.value,
                 company_id: companyID.value,
                 page_size: selectedValue.value
             }
@@ -458,6 +478,8 @@ export default{
             name_search.value = "";
             account_number_search.value = "";
             member_number_search.value = "";
+            prodSearchComponentKey.value += 1;
+            productSearchID.value = "";
             searchAccounts();
         };
         const closeModal = async() =>{
