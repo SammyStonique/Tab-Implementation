@@ -101,7 +101,7 @@ export default{
         ])
         const showTotals = ref(true);
         const actions = ref([
-            {name: 'delete', icon: 'fa fa-trash', title: 'Delete Deposit', rightName: 'Deleting Saving Deposits'},
+            {name: 'delete', icon: 'fa fa-trash', title: 'Delete Deposit', rightName: 'Deletingg Saving Deposits'},
         ])
         const companyID = computed(()=> store.state.userData.company_id);
         const accountID = ref('');

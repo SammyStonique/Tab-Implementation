@@ -69,7 +69,7 @@
                                 <table class="w-full">
                                     <tr class="text-left">
                                         <td class="font-bold">Property:</td>
-                                        <td>{{ tenantProperty.name }}</td>
+                                        <td>{{ tenantProperty }}</td>
                                         <td></td>
                                         <td></td>
                                         <td class="font-bold">Unit Number(s):</td>

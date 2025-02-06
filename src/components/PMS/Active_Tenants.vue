@@ -130,6 +130,7 @@ export default{
             {label: "Unit", key:"unit_number"},
             {label: "Rent Amnt", key:"current_rent"},
             {label: "Balance", key:"running_balance", type: "number", textColor: "black"},
+            {label: "Bill. Freq", key:"billing_frequency"},
         ])
         const actions = ref([
             {name: 'edit', icon: 'fa fa-edit', title: 'Edit Tenant', rightName: 'Editing Tenants'},

@@ -38,7 +38,7 @@
     >
         <DynamicForm 
             :fields="additionalFields1" :flex_basis="flex_basis_additional" :flex_basis_percentage="flex_basis_percentage_additional" 
-            :displayButtons="displayButtons" @handleSubmit="handlePrepayment" @handleReset="handlePrepaymentReset"
+            :displayButtons="displayButtons" @handleSubmit="handleReceiptItem" @handleReset="handleReceiptItemReset"
         />
     </MovableModal>
 </template>
@@ -84,7 +84,7 @@ export default defineComponent({
         const addTitle = ref('Other Receipt Items')
         const modal_top = ref('120px');
         const modal_left = ref('400px');
-        const modal_width = ref('32vw');
+        const modal_width = ref('45vw');
         const outstanding_balance = computed(()=> store.state.Members.outstandingBalance);
         const allotable_prepayment = computed(()=> store.state.Active_Tenants.allotablePrepayment);
         const savingsArray = computed(() => store.state.Saving_Accounts.accountArr);
@@ -169,7 +169,7 @@ export default defineComponent({
                 formFields.value[5].value = 0;
                 hasPrepayment.value = false;
             }
-            else if(receiptTotals.value > 0 && receiptTotals.value <= outstanding_balance.value){
+            else if((receiptTotals.value > 0) && (receiptTotals.value <= outstanding_balance.value)){
                 hasPrepayment.value = false;
                 for(let i=0; i<receiptRows.value.length; i++){
                     if(receiptRows.value[i].due_amount <= receiptTotals.value && receiptTotals.value != 0){
@@ -184,14 +184,14 @@ export default defineComponent({
                         break
                     }
                 }
-            }else if(receiptTotals.value > 0 && receiptTotals.value > outstanding_balance.value){
+            }else if((receiptTotals.value > 0) && (receiptTotals.value > outstanding_balance.value)){
                 hasPrepayment.value = true;
                 prepaymentAmount.value = (receiptTotals.value  - outstanding_balance.value).toFixed(2);
                 for(let i=0; i<receiptRows.value.length; i++){
-                    if(receiptRows.value[i].due_amount <= receiptTotals.value && receiptTotals.value != 0){
+                    if((receiptRows.value[i].due_amount <= receiptTotals.value) && (receiptTotals.value != 0)){
                         receiptRows.value[i].payment_allocation = receiptRows.value[i].due_amount;
                         receiptRows.value[i].bal_after_alloc = receiptRows.value[i].due_amount - receiptRows.value[i].payment_allocation;
-                        receiptTotals.value = (receiptTotals.value - receiptRows.value[i].payment_allocation).toFixed(2);
+                        // receiptTotals.value = (receiptTotals.value - receiptRows.value[i].payment_allocation).toFixed(2);
                         receipt_memo.value += receiptRows.value[i].description + ','
                     }else{
                         receiptRows.value[i].payment_allocation = receiptTotals.value;
@@ -434,6 +434,7 @@ export default defineComponent({
                 due_amount : 0,
                 payment_allocation : additionalFields.value[2].value,
                 bal_after_alloc : 0,
+                cost: additionalFields.value[2].value
             }
         };
         const clearSavingAccount = async() =>{
@@ -452,6 +453,7 @@ export default defineComponent({
                 due_amount : 0,
                 payment_allocation : additionalFields.value[2].value,
                 bal_after_alloc : 0,
+                cost: additionalFields.value[2].value
             }
         };
         const clearShareAccount = async() =>{
@@ -460,7 +462,6 @@ export default defineComponent({
         };
         const handleLoanApplication = async(option) =>{
             await store.dispatch('Loan_Applications/handleSelectedApplication', option)
-            additionalFields.value[3].value = store.state.Loan_Applications.applicationID;
             itemObj.value = {
                 journal_no : "PREPAID LOAN",
                 type: "loan_prepayment",
@@ -471,6 +472,7 @@ export default defineComponent({
                 due_amount : 0,
                 payment_allocation : additionalFields.value[2].value,
                 bal_after_alloc : 0,
+                cost: additionalFields.value[2].value
             }
         };
         const clearLoanApplication = async() =>{
@@ -486,19 +488,19 @@ export default defineComponent({
                 {  
                     type:'search-dropdown', label:"Saving Account", value: '', componentKey: savComponentKey, disabled:'disabled-div',
                     selectOptions: savingsArray, optionSelected: handleSavingAccount, required: true,
-                    searchPlaceholder: 'Select Account...', dropdownWidth: '500px',
+                    searchPlaceholder: 'Select Account...', dropdownWidth: '300px',
                     fetchData: store.dispatch('Saving_Accounts/fetchSavingAccounts', {company:companyID.value,member: memberID.value}), clearSearch: clearSavingAccount
                 },
                 {  
                     type:'search-dropdown', label:"Share Account", value: '', componentKey: shaComponentKey, disabled:'disabled-div',
                     selectOptions: sharesArray, optionSelected: handleShareAccount, required: true,
-                    searchPlaceholder: 'Select Account...', dropdownWidth: '500px',
+                    searchPlaceholder: 'Select Account...', dropdownWidth: '300px',
                     fetchData: store.dispatch('Share_Accounts/fetchShareAccounts', {company:companyID.value,member: memberID.value}), clearSearch: clearShareAccount
                 },
                 {  
                     type:'search-dropdown', label:"Loan Applications", value: '', componentKey: lonComponentKey, disabled:'disabled-div',
                     selectOptions: loansArray, optionSelected: handleLoanApplication, required: true,
-                    searchPlaceholder: 'Select Application...', dropdownWidth: '500px',
+                    searchPlaceholder: 'Select Application...', dropdownWidth: '300px',
                     fetchData: store.dispatch('Loan_Applications/fetchLoanApplications', {company:companyID.value,member: memberID.value}), clearSearch: clearLoanApplication
                 },
             ]
@@ -530,39 +532,147 @@ export default defineComponent({
         const addPrepayment = () =>{
             updateAdditionalFields();
             prepModalVisible.value = true;
-            flex_basis_additional.value = '1/2';
-            flex_basis_percentage_additional.value = '50';
-        }
+            flex_basis_additional.value = '1/3';
+            flex_basis_percentage_additional.value = '33.333';
+        };
+        const selectReceiptItem = (value) =>{
+            if(value == "Savings"){
+                additionalFields1.value[2].disabled = '';
+                additionalFields1.value[3].disabled = 'disabled-div';
+                additionalFields1.value[4].disabled = 'disabled-div';
+                lonComponentKey.value += 1;
+                shaComponentKey.value += 1;
+            }else if(value == "Shares"){
+                additionalFields1.value[3].disabled = '';
+                additionalFields1.value[2].disabled = 'disabled-div';
+                additionalFields1.value[4].disabled = 'disabled-div';
+                lonComponentKey.value += 1;
+                savComponentKey.value += 1;
+            }else if(value == "Loan"){
+                additionalFields1.value[4].disabled = '';
+                additionalFields1.value[3].disabled = 'disabled-div';
+                additionalFields1.value[2].disabled = 'disabled-div';
+                savComponentKey.value += 1;
+                shaComponentKey.value += 1;
+            }else if(value == "Other Charges"){
+                additionalFields1.value[4].disabled = '';
+                additionalFields1.value[3].disabled = 'disabled-div';
+                additionalFields1.value[2].disabled = 'disabled-div';
+                savComponentKey.value += 1;
+                shaComponentKey.value += 1;
+            }
+        };
+        const handleSavingAccountItem = async(option) =>{
+            await store.dispatch('Saving_Accounts/handleSelectedAccount', option)
+            itemObj.value = {
+                journal_no : "SAVINGS ITEM",
+                type: "savings_prepayment",
+                journal_id : store.state.Saving_Accounts.accountID,
+                description : `Member ${additionalFields1.value[0].value}`,
+                total_amount : additionalFields1.value[1].value,
+                total_paid : additionalFields1.value[1].value,
+                due_amount : 0,
+                payment_allocation : additionalFields1.value[1].value,
+                bal_after_alloc : 0,
+                cost: additionalFields1.value[1].value
+            }
+        };
+        const clearSavingAccountItem = async() =>{
+            await store.dispatch('Saving_Accounts/updateState', {accountID: ''});
+            itemObj.value = {};
+        };
+        const handleShareAccountItem = async(option) =>{
+            await store.dispatch('Share_Accounts/handleSelectedAccount', option)
+            itemObj.value = {
+                journal_no : "SHARES ITEM",
+                type: "shares_prepayment",
+                journal_id : store.state.Share_Accounts.accountID,
+                description : `Member ${additionalFields1.value[0].value}`,
+                total_amount : additionalFields1.value[1].value,
+                total_paid : additionalFields1.value[1].value,
+                due_amount : 0,
+                payment_allocation : additionalFields1.value[1].value,
+                bal_after_alloc : 0,
+                cost: additionalFields1.value[1].value
+            }
+        };
+        const clearShareAccountItem = async() =>{
+            await store.dispatch('Share_Accounts/updateState', {accountID: ''});
+            itemObj.value = {};
+        };
+        const handleLoanApplicationItem = async(option) =>{
+            await store.dispatch('Loan_Applications/handleSelectedApplication', option)
+            itemObj.value = {
+                journal_no : "PREPAID LOAN",
+                type: "loan_prepayment",
+                journal_id : store.state.Loan_Applications.applicationID,
+                description : `${additionalFields1.value[0].value} Prepayment - ${store.state.Loan_Applications.applicationNumber}`,
+                total_amount : additionalFields1.value[1].value,
+                total_paid : additionalFields1.value[1].value,
+                due_amount : 0,
+                payment_allocation : additionalFields1.value[1].value,
+                bal_after_alloc : 0,
+                cost: additionalFields1.value[1].value
+            }
+        };
+        const clearLoanApplicationItem = async() =>{
+            await store.dispatch('Loan_Applications/updateState', {applicationID: ''});
+            itemObj.value = {};
+        };
         const additionalFields1 = ref([]);
         const updateAdditionalFields1 = () =>{
             additionalFields1.value = [
-                { type: 'dropdown', name: 'item',label: "Receipt Item", value: '', placeholder: "", required: true, options: [{ text: 'Savings', value: 'Savings' }, { text: 'Shares', value: 'Shares' }, { text: 'Loan', value: 'Loan' }, { text: 'Membership Fees', value: 'Membership Fees' }, { text: 'Other Charges', value: 'Other Charges' }], method: selectPrepaymentItem },
-                { type: 'text', name: 'prepayment_amount',label: "Amount", value: '0', required: true },
+                { type: 'dropdown', name: 'item',label: "Receipt Item", value: '', placeholder: "", required: true, options: [{ text: 'Savings', value: 'Savings' }, { text: 'Shares', value: 'Shares' }, { text: 'Loan', value: 'Loan' }, { text: 'Membership Fees', value: 'Membership Fees' }, { text: 'Other Charges', value: 'Other Charges' }], method: selectReceiptItem },
+                { type: 'text', name: 'amount',label: "Amount", value: '0', required: true },
                 {  
                     type:'search-dropdown', label:"Saving Account", value: '', componentKey: savComponentKey, disabled:'disabled-div',
-                    selectOptions: savingsArray, optionSelected: handleSavingAccount, required: true,
-                    searchPlaceholder: 'Select Account...', dropdownWidth: '500px',
-                    fetchData: store.dispatch('Saving_Accounts/fetchSavingAccounts', {company:companyID.value,member: memberID.value}), clearSearch: clearSavingAccount
+                    selectOptions: savingsArray, optionSelected: handleSavingAccountItem, required: true,
+                    searchPlaceholder: 'Select Account...', dropdownWidth: '310px',
+                    fetchData: store.dispatch('Saving_Accounts/fetchSavingAccounts', {company:companyID.value,member: memberID.value}), clearSearch: clearSavingAccountItem
                 },
                 {  
                     type:'search-dropdown', label:"Share Account", value: '', componentKey: shaComponentKey, disabled:'disabled-div',
-                    selectOptions: sharesArray, optionSelected: handleShareAccount, required: true,
-                    searchPlaceholder: 'Select Account...', dropdownWidth: '500px',
-                    fetchData: store.dispatch('Share_Accounts/fetchShareAccounts', {company:companyID.value,member: memberID.value}), clearSearch: clearShareAccount
+                    selectOptions: sharesArray, optionSelected: handleShareAccountItem, required: true,
+                    searchPlaceholder: 'Select Account...', dropdownWidth: '310px',
+                    fetchData: store.dispatch('Share_Accounts/fetchShareAccounts', {company:companyID.value,member: memberID.value}), clearSearch: clearShareAccountItem
                 },
                 {  
                     type:'search-dropdown', label:"Loan Applications", value: '', componentKey: lonComponentKey, disabled:'disabled-div',
-                    selectOptions: loansArray, optionSelected: handleLoanApplication, required: true,
-                    searchPlaceholder: 'Select Application...', dropdownWidth: '500px',
-                    fetchData: store.dispatch('Loan_Applications/fetchLoanApplications', {company:companyID.value,member: memberID.value}), clearSearch: clearLoanApplication
+                    selectOptions: loansArray, optionSelected: handleLoanApplicationItem, required: true,
+                    searchPlaceholder: 'Select Application...', dropdownWidth: '310px',
+                    fetchData: store.dispatch('Loan_Applications/fetchLoanApplications', {company:companyID.value,member: memberID.value}), clearSearch: clearLoanApplicationItem
                 },
             ]
+        };
+        const handleReceiptItem = async() =>{
+            showModalLoader();
+            if(additionalFields1.value[1].value <= 0 ){
+                toast.error("Invalid Receipt Item Amount");
+                hideModalLoader();
+            }else{
+                let formData = itemObj.value
+                await store.dispatch('Members/handleMemberPrepayment',formData);
+                toast.success("Receipt Item Added");
+                formFields.value[7].value += `${itemObj.value['description']}`
+                hideModalLoader();
+                addModalVisible.value = false;
+            }
+        }
+        const handleReceiptItemReset = () =>{
+            for(let i=0; i < additionalFields1.value.length; i++){
+                if(additionalFields1.value[i].type == 'number'){
+                    additionalFields1.value[i].value = 0;
+                }else{
+                    additionalFields1.value[i].value = '';
+                }
+                
+            }
         };
         const addReceiptItems = async() =>{
             updateAdditionalFields1();
             addModalVisible.value = true;
-            flex_basis_additional.value = '1/2';
-            flex_basis_percentage_additional.value = '50';
+            flex_basis_additional.value = '1/3';
+            flex_basis_percentage_additional.value = '33.333';
         }
         const closeModal = async() =>{
             prepModalVisible.value = false;
@@ -587,7 +697,7 @@ export default defineComponent({
             autoPopulatePaymentAlloc, outstanding_balance, hasPrepayment, addPrepayment, handlePrepayment, allocateInputAmount,
             title, modal_loader, modal_left, modal_top, modal_width, prepModalVisible, showModalLoader, hideModalLoader, closeModal,
             additionalFields,flex_basis_additional, flex_basis_percentage_additional, handlePrepaymentReset,allotable_prepayment,addReceiptItems,
-            actionsRcptItems,removeReceiptItem,rightsModule,addModalVisible,additionalFields1
+            actionsRcptItems,removeReceiptItem,rightsModule,addModalVisible,additionalFields1,handleReceiptItem,handleReceiptItemReset
         }
     }
 })

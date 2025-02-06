@@ -71,6 +71,18 @@
                             <p class="">Savings Deposits</p>
                         </button>
                     </div>
+                    <div class="py-2 px-3 pl-4 w-full hover:bg-slate-500 hover:w-full">
+                        <button class="flex text-sm w-full" @click="openPage({'MMS':'Saving_Withdrawals'})">
+                            <i class="fa fa-wallet pt-2 mr-2" aria-hidden="true"></i>
+                            <p class="">Savings Withdrawals</p>
+                        </button>
+                    </div>
+                    <div class="py-2 px-3 pl-4 w-full hover:bg-slate-500 hover:w-full">
+                        <button class="flex text-sm w-full" @click="openPage({'MMS':'Saving_Transfers'})">
+                            <i class="fa fa-exchange pt-2 mr-2" aria-hidden="true"></i>
+                            <p class="">Savings Transfers</p>
+                        </button>
+                    </div>
                 </div>
             </div>
             <div class="web-links dropdown w-36">
@@ -97,6 +109,12 @@
                         <button class="flex text-sm w-full" @click="openPage({'MMS':'Share_Deposits'})">
                             <i class="fa fa-arrow-circle-down pt-2 mr-2" aria-hidden="true"></i>
                             <p class="">Shares Deposits</p>
+                        </button>
+                    </div>
+                    <div class="py-2 px-3 pl-4 w-full hover:bg-slate-500 hover:w-full">
+                        <button class="flex text-sm w-full" @click="openPage({'MMS':'Share_Transfers'})">
+                            <i class="fa fa-exchange pt-2 mr-2" aria-hidden="true"></i>
+                            <p class="">Shares Transfers</p>
                         </button>
                     </div>
                 </div>

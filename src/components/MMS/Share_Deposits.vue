@@ -93,7 +93,7 @@ export default{
             {label: "Member No", key: "member_number", type: "text", editable: false},
             {label: "Member Name", key: "member_name", type: "text", editable: false},
             {label: "Share Product", key: "share_product", type: "text", editable: false},
-            {label: "Amount", key: "amount", type: "text", editable: false},
+            {label: "Amount", key: "amount", type: "number", editable: false},
             {label: "Ref. No.", key: "reference_no", type: "text", editable: false},
             {label: "Open. Bal.", key: "opening_balance", type: "text", editable: false},
             {label: "Posting Account", key: "posting_account", type: "text", editable: false},
@@ -101,7 +101,7 @@ export default{
         ]);
         const showTotals = ref(true);
         const actions = ref([
-            {name: 'delete', icon: 'fa fa-trash', title: 'Delete Deposit', rightName: 'Deleting Share Deposits'},
+            {name: 'delete', icon: 'fa fa-trash', title: 'Delete Deposit', rightName: 'Deletingg Share Deposits'},
         ])
         const companyID = computed(()=> store.state.userData.company_id);
         const accountID = ref('');

@@ -31,7 +31,7 @@ const state = {
   tenantLease: [],
   tenantDetails: [],
   tenantCurrency: [],
-  tenantProperty: [],
+  tenantProperty: "",
   tenantVariations: [],
   tenantUnitsArr: [],
   tenantUnitsList: [],
@@ -246,7 +246,7 @@ const actions = {
       commit('SET_TENANT_LEASE',response.data);
       commit('SET_TENANT_DETAILS',response.data.tenant);
       commit('SET_TENANT_CURRENCY',response.data.lease_currency);
-      commit('SET_TENANT_PROPERTY',response.data.property);
+      commit('SET_TENANT_PROPERTY',(response.data.property != null) ? (response.data.property.name) : "");
     })
     .catch((error)=>{
       console.log(error.message);
