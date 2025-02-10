@@ -55,7 +55,7 @@
                         </div>
                         <div class="flex mb-3">
                             <div class="basis-1/4 mr-3 relative">
-                                <label for="">Security Deposits Paybale A/c:<em>*</em></label><br />
+                                <label for="">Security Deposits Payable A/c:<em>*</em></label><br />
                                 <SearchableDropdown
                                     :options="liabilityLedgerArr"
                                     :updateValue="selectedSalesIncome"

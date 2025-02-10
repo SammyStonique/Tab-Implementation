@@ -270,7 +270,7 @@ const actions = {
     axios.post(`api/v1/get-tenant-units/`,formData)
     .then((response)=>{
       for(let i=0; i< response.data.length; i++){
-        state.tenantUnitsArr.push((response.data[i].unit.unit_number + ' - ' + response.data[i].tenant.tenant.tenant_name))
+        state.tenantUnitsArr.push((response.data[i].unit.unit_number + ' - ' + response.data[i].tenant.tenant.tenant_code + ' - ' + response.data[i].tenant.tenant.tenant_name))
       }
       commit('LIST_TENANT_UNITS', response.data);
     })
@@ -355,7 +355,7 @@ const actions = {
   },
   handleSelectedTenantUnit({ commit, state }, option){
 
-    const selectedUnit = state.tenantUnitsList.find(unit => (unit.unit.unit_number + ' - ' + unit.tenant.tenant.tenant_name) === option);
+    const selectedUnit = state.tenantUnitsList.find(unit => (unit.unit.unit_number + ' - ' + unit.tenant.tenant.tenant_code + ' - ' + unit.tenant.tenant.tenant_name) === option);
     if (selectedUnit) {
         state.tenantUnitID = selectedUnit.tenant_unit_id;
         state.tenantID = selectedUnit.tenant.tenant.tenant_id;

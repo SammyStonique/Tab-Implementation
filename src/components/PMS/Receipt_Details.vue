@@ -17,7 +17,8 @@
                         </div>
                         
                         <div class="px-3 min-h-[220px]">
-                            <DynamicTable :key="tableKey" :columns="receiptColumns" :rows="receiptRows" :showActions="showActions" :idField="idField" @update-receipt-amount="allocateInputAmount" @row-db-click="autoPopulatePaymentAlloc"/>
+                            <DynamicTable :key="tableKey" :columns="receiptColumns" :rows="receiptRows" :showActions="showActions" :idField="idField" :actions="actionsRcptItems" @update-receipt-amount="allocateInputAmount" @row-db-click="autoPopulatePaymentAlloc"
+                                            :showTotals="showTotals" @action-click="removeReceiptItem" :rightsModule="rightsModule"/>
                         </div>
                     </template>
                 </DynamicForm>
@@ -56,6 +57,7 @@ export default defineComponent({
         const current_date = new Date();
         const loader = ref('none');
         const modal_loader = ref('none');
+        const rightsModule = ref('PMS');
         const tableKey = ref(0);
         const mainComponentKey = ref(0);
         const tntComponentKey = ref(0);
@@ -77,7 +79,8 @@ export default defineComponent({
         const companyID = computed(()=> store.state.userData.company_id);
         const userID = computed(()=> store.state.userData.user_id);
         const displayButtons = ref(true);
-        const showActions = ref(false);
+        const showActions = ref(true);
+        const showTotals = ref(true);
         const idField = ref('');
         const flex_basis = ref('');
         const flex_basis_percentage = ref('');
@@ -94,12 +97,20 @@ export default defineComponent({
             {type: "checkbox"},
             {label: "Invoice", key:"journal_no", type: "text", editable: false},
             {label: "Description", key:"description", type: "text", editable: false},
-            {label: "Amount", key: "total_amount", type: "text", editable: false},
-            {label: "Paid", key: "total_paid", type: "text", editable: false},
-            {label: "Due Amnt", key: "due_amount", type: "text", editable: false},
+            {label: "Amount", key: "total_amount", type: "number", editable: false},
+            {label: "Paid", key: "total_paid", type: "number", editable: false},
+            {label: "Due Amnt", key: "due_amount", type: "number", editable: false},
             {label: "Payment", key: "payment_allocation", type: "number", editable: true},
             {label: "Balance", key: "bal_after_alloc", type: "text", editable: false},
-        ])
+        ]);
+        const actionsRcptItems = ref([
+            {name: 'delete', icon: 'fa fa-minus-circle', title: 'Delete Receipt Item',rightName: 'Adding Tenant Receipt'},
+        ]);
+
+        const removeReceiptItem = (rowIndex, action, row) =>{
+            store.dispatch('Journals/removeReceiptItem', rowIndex);
+            tableKey.value += 1;
+        }
 
         const fetchProperties = async() =>{
             await store.dispatch('Properties_List/fetchProperties', {company:companyID.value})
@@ -403,22 +414,22 @@ export default defineComponent({
         const additionalFields = ref([]);
         const updateAdditionalFields = () =>{
             additionalFields.value = [
-                { type: 'number', name: 'prepayment_amount',label: "Prepayment Amount", value: prepaymentAmount.value, required: true, disabled: true },
+                { type: 'text', name: 'prepayment_amount',label: "Prepayment Amount", value: prepaymentAmount.value, required: true, },
             ]
         };
         const handlePrepayment = async() =>{
             showModalLoader();
-            if(prepaymentAmount.value <= 0 ){
+            if(additionalFields.value[0].value <= 0 ){
                 toast.error("Invalid Prepayment Amount");
                 hideModalLoader();
             }else{
                 let formData = {
                     journal_no : "PREPAID",
                     description : "Tenant Prepayment",
-                    total_amount : prepaymentAmount.value,
-                    total_paid : prepaymentAmount.value,
+                    total_amount : additionalFields.value[0].value,
+                    total_paid : additionalFields.value[0].value,
                     due_amount : 0,
-                    payment_allocation : prepaymentAmount.value,
+                    payment_allocation : additionalFields.value[0].value,
                     bal_after_alloc : 0,
                 }
                 await store.dispatch('Journals/handleClientPrepayment',formData);
@@ -468,11 +479,12 @@ export default defineComponent({
         })
 
         return{
-            formFields, flex_basis, flex_basis_percentage, displayButtons, createTenantReceipt, mainComponentKey,
-            handleReset, loader, showLoader, hideLoader, tableKey, receiptColumns, receiptRows, showActions, idField,
+            formFields, flex_basis, flex_basis_percentage, displayButtons, createTenantReceipt, mainComponentKey,actionsRcptItems,
+            handleReset, loader, showLoader, hideLoader, tableKey, receiptColumns, receiptRows, showActions,showTotals, idField,
             autoPopulatePaymentAlloc, outstanding_balance, hasPrepayment, addPrepayment, handlePrepayment, allocateInputAmount,
             title, modal_loader, modal_left, modal_top, modal_width, prepModalVisible, showModalLoader, hideModalLoader, closeModal,
-            additionalFields,flex_basis_additional, flex_basis_percentage_additional, handlePrepaymentReset,allotable_prepayment,allocatePrepayment
+            additionalFields,flex_basis_additional, flex_basis_percentage_additional, handlePrepaymentReset,allotable_prepayment,allocatePrepayment,
+            rightsModule,removeReceiptItem
         }
     }
 })

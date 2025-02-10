@@ -30,6 +30,7 @@ import Tenant_Arrears from './PMS/Tenant_Arrears';
 import Lease_Fees from './PMS/Lease_Fees';
 import Exit_Charges from './PMS/Exit_Charges';
 import Templates from './PMS/Templates';
+import Late_Payment_Fees from './PMS/Late_Payment_Fees';
 
 import Client_Categories from './FA/Client_Categories';
 import Currencies from './FA/Currencies';
@@ -107,7 +108,7 @@ export default createStore({
     
     Properties_List, Zones, Landlords_List, Units_List, Active_Tenants, Utilities,Security_Deposits,Variation_Periods, Tenant_Deposits,Terminated_Leases,
     Meter_Setup, Meter_Readings,Tenant_Prepayments,Prepayment_Allocations,Statement_Transactions,Property_Statements,Tenant_Arrears,Lease_Fees,Exit_Charges,
-    Templates,
+    Templates,Late_Payment_Fees,
 
     Item_Categories,Items_Catalog,Uom,Retail_Outlets,Item_Location,Outlet_Counters,Direct_Sales,Counter_Channels,Direct_Purchases,
     Stock_Adjustments,Stock_Transfers,

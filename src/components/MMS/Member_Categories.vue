@@ -161,7 +161,7 @@ export default{
             }else{
                 try {
                     const response = await store.dispatch('Member_Categories/createMemberCategory', formData);
-                    if(response && response.status === 200) {
+                    if(response && response.status === 201) {
                         hideModalLoader();
                         toast.success('Category created successfully!');
                         handleReset();

@@ -172,6 +172,12 @@
                         <p class="">Credit Notes</p>
                         </button>
                     </div>
+                    <div class="py-2 px-3 pl-4 w-full hover:bg-slate-500 hover:w-full">
+                        <button class="flex text-sm w-full" @click="openPage({'PMS':'Late_Payment_Fees'})">
+                        <i class="fa fa-coins pt-2 mr-2" aria-hidden="true"></i>
+                        <p class="">Late Payment Fees</p>
+                        </button>
+                    </div>
                 </div>
             </div>
             <div class="web-links dropdown w-48">

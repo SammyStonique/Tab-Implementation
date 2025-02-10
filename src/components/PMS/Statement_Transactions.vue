@@ -221,10 +221,10 @@ export default{
                 },
                 { type: 'date', name: 'date',label: "Date", value: selectedTransaction.value?.date || "", required: true },
                 {type:'text-area', label:"Description", value: selectedTransaction.value?.description || "" , textarea_rows: '2', textarea_cols: '44', required: true},
-                { type: 'number', name: 'bill',label: "Bill", value: selectedTransaction.value?.bill || 0, required: true },
-                { type: 'number', name: 'bill_tax',label: "Bill Tax", value: selectedTransaction.value?.bill_tax || 0, required: false },
-                { type: 'number', name: 'paid',label: "Paid", value: selectedTransaction.value?.paid || 0, required: true },
-                { type: 'number', name: 'paid_tax',label: "Paid Tax", value: selectedTransaction.value?.paid_tax || 0, required: false },
+                { type: 'text', name: 'bill',label: "Bill", value: selectedTransaction.value?.bill || '0', required: true },
+                { type: 'text', name: 'bill_tax',label: "Bill Tax", value: selectedTransaction.value?.bill_tax || '0', required: false },
+                { type: 'text', name: 'paid',label: "Paid", value: selectedTransaction.value?.paid || '0', required: true },
+                { type: 'text', name: 'paid_tax',label: "Paid Tax", value: selectedTransaction.value?.paid_tax || '0', required: false },
             ];
         };
         const handleReset = () =>{
@@ -253,28 +253,28 @@ export default{
         const createTransaction = async() =>{
             showModalLoader();
             let formData = {
-                tenant: selectedTransaction.value.tenant.tenant_unit_id,
-                tenant_id: selectedTransaction.value.tenant.tenant_unit_id,
+                tenant: tenantID.value,
+                tenant_id: tenantID.value,
                 date: formFields.value[2].value,
-                banking_date: selectedTransaction.value.banking_date,
+                banking_date: formFields.value[2].value,
                 transaction_type: formFields.value[0].value,
                 description: formFields.value[3].value,
-                schedule: selectedTransaction.value.schedule,
-                journal: selectedTransaction.value.journal,
+                schedule: null,
+                journal: null,
                 utility: utilityValue.value,
                 utility_id: utilityValue.value,
-                client_id: selectedTransaction.value.client_id,
+                client_id: tenantID.value,
                 bill: formFields.value[4].value,
                 bill_tax: formFields.value[5].value,
                 paid: formFields.value[6].value,
                 paid_tax: formFields.value[7].value,
-                processed: selectedTransaction.value.processed,
+                processed: "False",
                 company: companyID.value
             }
 
             errors.value = [];
-            for(let i=2; i < formFields.value.length; i++){
-                if(formFields.value[i].value =='' && formFields.value[i].required == true){
+            for(let i=0; i < formFields.value.length; i++){
+                if(formFields.value[i].value =='' && formFields.value[i].required == true && formFields.value[i].type !='search-dropdown'){
                     errors.value.push(formFields.value[i].label);
                 }
             }

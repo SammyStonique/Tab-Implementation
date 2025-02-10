@@ -18,7 +18,7 @@
         </tr>
       </thead>
       <tbody class="table-body">
-        <tr v-for="(row, rowIndex) in rows" :key="rowIndex" @dblclick="handleRowClick(row)" class="cursor-pointer even:bg-gray-100 text-xxs sm:text-xs uppercase">
+        <tr v-for="(row, rowIndex) in rows" :key="rowIndex" @dblclick="handleRowClick(row)" :style="shouldAddLine(row) ? { textDecoration: 'line-through' } : {}" class="cursor-pointer even:bg-gray-100 text-xxs sm:text-xs uppercase">
           <td v-for="(column, colIndex) in columns" :key="colIndex" 
               :class="[{'ellipsis': column.maxWidth}, { 'max-w-[300px]': column.maxWidth }, { 'min-w-[120px]': column.minWidth }]">
             <template v-if="column.type === 'checkbox'">
@@ -134,6 +134,11 @@ export default defineComponent({
     props.rows.forEach(row => {
       row.selected = false;
     });
+
+    const shouldAddLine = (row) =>{
+    // Add your condition here based on the column value
+      return row.reversed === 'Yes'; 
+    };
 
     const handleRowClick = (row) => {
       emit('row-db-click', row);
@@ -292,7 +297,8 @@ export default defineComponent({
 
     return {
       handleRowClick, handleAction, handleChange, getNestedValue, handleInputChange,
-      tableRef, toggleSelectAll, selectedIds, allSelected, updateSelectedIds, calculateColumnTotal,isDisabled
+      tableRef, toggleSelectAll, selectedIds, allSelected, updateSelectedIds, calculateColumnTotal,isDisabled,
+      shouldAddLine
     };
   }
 });

@@ -27,6 +27,8 @@
             @lastPage="lastPage"
             :showNextBtn="showNextBtn"
             :showPreviousBtn="showPreviousBtn"
+            :selectedValue="selectedValue"
+            @selectSearchQuantity="selectSearchQuantity"
         />
         <MovableModal v-model:visible="propModalVisible" :title="title" :modal_top="modal_top" :modal_left="modal_left" :modal_width="modal_width"
             :loader="modal_loader" @showLoader="showModalLoader" @hideLoader="hideModalLoader" @closeModal="closeModal">
@@ -70,6 +72,7 @@ export default{
         const propArrLen = ref(0);
         const propCount = ref(0);
         const pageCount = ref(0);
+        const selectedValue = ref(50);
         const currentPage = ref(1);
         const showNextBtn = ref(false);
         const showPreviousBtn = ref(false);
@@ -322,7 +325,8 @@ export default{
             showPreviousBtn.value = false;
             let formData = {
                 fee_name: name_search.value,
-                company_id: companyID.value
+                company_id: companyID.value,
+                page_size: selectedValue.value
             } 
             axios
             .post(`api/v1/loan-fees-search/?page=${currentPage.value}`,formData)
@@ -332,7 +336,7 @@ export default{
                 propResults.value = response.data;
                 propArrLen.value = feesList.value.length;
                 propCount.value = propResults.value.count;
-                pageCount.value = Math.ceil(propCount.value / 50);
+                pageCount.value = Math.ceil(propCount.value / selectedValue.value);
                 if(response.data.next){
                     showNextBtn.value = true;
                 }
@@ -346,8 +350,13 @@ export default{
             .finally(()=>{
                 hideLoader();
             })
-        }
+        };
+        const selectSearchQuantity = (newValue) =>{
+            selectedValue.value = newValue;
+            searchFees(selectedValue.value);
+        };
         const resetFilters = () =>{
+            selectedValue.value = 50;
             name_search.value = "";
             searchFees();
         }
@@ -425,11 +434,11 @@ export default{
         })
         return{
             title, searchFees,resetFilters, addButtonLabel, searchFilters, tableColumns, feesList,
-            propResults, propArrLen, propCount, pageCount, showNextBtn, showPreviousBtn,
+            propResults, propArrLen, propCount, pageCount, showNextBtn, showPreviousBtn,selectSearchQuantity,selectedValue,
             loadPrev, loadNext, firstPage, lastPage, idField, actions, handleActionClick, propModalVisible, closeModal,
             submitButtonLabel, showModal, addNewFee, showLoader, loader, hideLoader, modal_loader, modal_top, modal_left, modal_width,displayButtons,
             showModalLoader, hideModalLoader, saveFee, formFields, handleSelectionChange, flex_basis,flex_basis_percentage,
-            removeFee, removeFees,addingRight,rightsModule
+            removeFee, removeFees,addingRight,rightsModule,
         }
     }
 };

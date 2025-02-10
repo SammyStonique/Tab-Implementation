@@ -6,6 +6,9 @@
                     <DynamicForm  :fields="formFields" :flex_basis="flex_basis" :flex_basis_percentage="flex_basis_percentage" @handleReset="handleReset" /> 
                     <button @click="fetchTenantReadings" class="rounded bg-green-400 text-sm h-8 w-24 mt-2 text-white px-1.5 py-1.5"><i class="fa fa-check-circle text-xs mr-1.5" aria-hidden="true"></i>Load</button>
                 </div>
+                <div>
+                    <p class="text-gray-400">The Prev Date Format Is "YYYY-MM-DD"</p>
+                </div>
                 <div class="min-h-[480px]">
                     <DynamicTable :key="tableKey" :columns="readingColumns" :rows="readingRows" :showActions="showActions" :idField="idField" :actions="actions" />
                 </div>

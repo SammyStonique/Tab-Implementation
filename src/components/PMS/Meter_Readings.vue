@@ -181,7 +181,7 @@ export default{
             {
                 type:'search-dropdown', value: propertySearchID.value, width:64, componentKey:propSearchComponentKey,
                 selectOptions: propertyArray, optionSelected: handleSearchProperty,
-                searchPlaceholder: 'Property Search...', dropdownWidth: '400px',
+                searchPlaceholder: 'Property Search...', dropdownWidth: '300px',
                 fetchData: fetchProperties(), clearSearch: clearSearchProperty          
             },
             

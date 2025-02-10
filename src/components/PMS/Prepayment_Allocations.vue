@@ -95,6 +95,7 @@ export default{
             {label: "Description", key:"description",type: "text", editable: false},
             {label: "Allocated", key: "allocated_amount", type: "number", editable: false},
             {label: "Receipt", key:"receipt_no",type: "text", editable: false},
+            {label: "Reversed", key:"reversed",type: "text", editable: false},
         ])
         const showTotals = ref(true);
         const actions = ref([
@@ -131,12 +132,18 @@ export default{
         const handleActionClick = async(rowIndex, action, row) =>{
             if(action == 'delete'){
                 const allocationID = [row['tenant_prepayment_alloc_id']];
-                let formData = {
-                    company: companyID.value,
-                    tenant_prepayment_allocs: allocationID
+                const reversalStatus = row['reversal_status']
+                if(reversalStatus == "Yes"){
+                    toast.error("Cannot Delete Reversed Allocation")
+                }else{
+                    let formData = {
+                        company: companyID.value,
+                        tenant_prepayment_allocs: allocationID
+                    }
+                    await store.dispatch('Prepayment_Allocations/deleteAllocation',formData)
+                    searchAllocations();
                 }
-                await store.dispatch('Prepayment_Allocations/deleteAllocation',formData)
-                searchAllocations();     
+                     
             }
         } 
         const showModalLoader = () =>{

@@ -3,19 +3,19 @@
         <PageComponent 
             :loader="loader" @showLoader="showLoader" @hideLoader="hideLoader"
             :addButtonLabel="addButtonLabel"
-            @handleAddNew="addNewLeaseFee"
+            @handleAddNew="addNewLatePaymentFee"
             :searchFilters="searchFilters"
             :dropdownOptions="dropdownOptions"
             @handleDynamicOption="handleDynamicOption"
-            @searchPage="searchLeaseFees"
+            @searchPage="searchLatePaymentFees"
             @resetFilters="resetFilters"
             @removeItem="removeLeaseFee"
             @removeSelectedItems="removeLeaseFees"
-            @printList="printLeaseFeesList"
+            @printList="printLatePaymentFeesList"
             :addingRight="addingRight"
             :rightsModule="rightsModule"
             :columns="tableColumns"
-            :rows="leaseFeeList"
+            :rows="penaltyList"
             :actions="actions"
             :showTotals="showTotals"
             :idField="idField"
@@ -38,7 +38,7 @@
         >
             <DynamicForm 
                 :fields="formFields" :flex_basis="flex_basis" :flex_basis_percentage="flex_basis_percentage" 
-                :displayButtons="displayButtons" @handleSubmit="createLeaseFee" @handleReset="handleReset"
+                :displayButtons="displayButtons" @handleSubmit="createLatePaymentFee" @handleReset="handleReset"
             />
         </MovableModal>
     </div>
@@ -56,30 +56,32 @@ import { useDateFormatter } from '@/composables/DateFormatter';
 import PrintJS from 'print-js';
 
 export default{
-    name: 'Lease_Fees',
+    name: 'Late_Payment_Fees',
     components:{
         PageComponent, MovableModal,DynamicForm
     },
     setup(){
         const store = useStore();     
         const toast = useToast();
+        const { formatDate } = useDateFormatter();
+        const current_date = new Date();
         const loader = ref('none');
         const modal_loader = ref('none');
-        const idField = 'lease_fee_id';
-        const addButtonLabel = ref('New Lease Fee');
-        const addingRight = ref('Adding Lease Fees');
+        const idField = 'late_payment_fee_id';
+        const addButtonLabel = ref('Process Penalty');
+        const addingRight = ref('Processing Late Payment Fees');
         const rightsModule = ref('PMS');
         const submitButtonLabel = ref('Add');
-        const title = ref('Lease Fee Details');
+        const title = ref('Late Payment Fee Details');
         const propComponentKey = ref(0);
         const propSearchComponentKey = ref(0);
         const tntComponentKey = ref(0);
         const invModalVisible = ref(false);
-        const modal_top = ref('150px');
-        const modal_left = ref('400px');
+        const modal_top = ref('200px');
+        const modal_left = ref('500px');
         const modal_width = ref('32vw');
         const selectedIds = ref([]);
-        const leaseFeeList = ref([]);
+        const penaltyList = ref([]);
         const propResults = ref([]);
         const propArrLen = ref(0);
         const propCount = ref(0);
@@ -93,8 +95,8 @@ export default{
         const flex_basis_percentage = ref('');
         const displayButtons = ref(true);
         const errors = ref([]);
-        const tenantID = ref(null);
-        const propertyID = ref(null);
+        const tenantID = ref("");
+        const propertyID = ref("");
         const propertySearchID = ref('');
         const propertyArray = computed(() => store.state.Properties_List.propertyArr);
         const tenantArray = computed(() => store.state.Active_Tenants.tenantUnitsArr);
@@ -128,20 +130,20 @@ export default{
             propertySearchID.value = ""
         }
         const tenant_name_search = computed({
-            get: () => store.state.Lease_Fees.tenant_name_search,
-            set: (value) => store.commit('Lease_Fees/SET_SEARCH_FILTERS', {"tenant_name_search":value}),
+            get: () => store.state.Late_Payment_Fees.tenant_name_search,
+            set: (value) => store.commit('Late_Payment_Fees/SET_SEARCH_FILTERS', {"tenant_name_search":value}),
         });
         const tenant_code_search = computed({
-            get: () => store.state.Lease_Fees.tenant_code_search,
-            set: (value) => store.commit('Lease_Fees/SET_SEARCH_FILTERS', {"tenant_code_search":value}),
+            get: () => store.state.Late_Payment_Fees.tenant_code_search,
+            set: (value) => store.commit('Late_Payment_Fees/SET_SEARCH_FILTERS', {"tenant_code_search":value}),
         });
         const from_date_search = computed({
-            get: () => store.state.Lease_Fees.from_date_search,
-            set: (value) => store.commit('Lease_Fees/SET_SEARCH_FILTERS', {"from_date_search":value}),
+            get: () => store.state.Late_Payment_Fees.from_date_search,
+            set: (value) => store.commit('Late_Payment_Fees/SET_SEARCH_FILTERS', {"from_date_search":value}),
         });
         const to_date_search = computed({
-            get: () => store.state.Lease_Fees.to_date_search,
-            set: (value) => store.commit('Lease_Fees/SET_SEARCH_FILTERS', {"to_date_search":value}),
+            get: () => store.state.Late_Payment_Fees.to_date_search,
+            set: (value) => store.commit('Late_Payment_Fees/SET_SEARCH_FILTERS', {"to_date_search":value}),
         });
         const searchFilters = ref([
             {type:'text', placeholder:"Tenant Code...", value: tenant_code_search, width:36},
@@ -195,8 +197,7 @@ export default{
                     searchPlaceholder: 'Select Tenant...', dropdownWidth: '400px', updateValue: "",
                     fetchData: fetchTenants(), clearSearch: clearSelectedTenant()            
                 },
-                { type: 'number', name: 'amount',label: "Amount", value: 0, required: true },
-                { type: 'date', name: 'date',label: "Date", value: "", required: true },
+                { type: 'date', name: 'date',label: "Date", value: "", required: true, maxDate: formatDate(current_date)},
             ]
         };
 
@@ -223,12 +224,12 @@ export default{
         const hideModalLoader = () =>{
             modal_loader.value = "none";
         }
-        const createLeaseFee = async() =>{
+        const createLatePaymentFee = async() =>{
             showModalLoader();
             let formData = {
                 tenant: tenantID.value,
-                amount: formFields.value[2].value,
-                date: formFields.value[3].value,
+                property: propertyID.value,
+                date: formFields.value[2].value,
                 company: companyID.value
             }
 
@@ -244,21 +245,21 @@ export default{
                 hideModalLoader();
             }else{
                 try {
-                    const response = await store.dispatch('Lease_Fees/createLeaseFee', formData);
+                    const response = await store.dispatch('Late_Payment_Fees/createLatePaymentFee', formData);
                     if (response && response.data.msg === "Success") {
                         hideModalLoader();
-                        toast.success('Lease Fee Added Successfully!');
+                        toast.success('Late Payment Fee(s) Processed Successfully!');
                         handleReset();
                         propComponentKey.value += 1;
                     } else {
-                        toast.error('An error occurred while adding the fee.');
+                        toast.error('An error occurred while processing the Late Payment Fee(s).');
                     }
                 } catch (error) {
                     console.error(error.message);
-                    toast.error('Failed to add lease fee: ' + error.message);
+                    toast.error('Failed to process Late Payment Fee(s): ' + error.message);
                 } finally {
                     hideModalLoader();
-                    searchLeaseFees();
+                    searchLatePaymentFees();
                 }
             }
         }
@@ -269,7 +270,7 @@ export default{
         const hideLoader = () =>{
             loader.value = "none";
         }
-        const searchLeaseFees = () =>{
+        const searchLatePaymentFees = () =>{
             showLoader();
             showNextBtn.value = false;
             showPreviousBtn.value = false;
@@ -284,12 +285,12 @@ export default{
             } 
    
             axios
-            .post(`api/v1/lease-fees-search/?page=${currentPage.value}`,formData)
+            .post(`api/v1/late-payment-fees-search/?page=${currentPage.value}`,formData)
             .then((response)=>{
-                leaseFeeList.value = response.data.results;
-                store.commit('Lease_Fees/LIST_LEASE_FEES', leaseFeeList.value)
+                penaltyList.value = response.data.results;
+                store.commit('Late_Payment_Fees/LIST_LATE_PAYMENT_FEES', penaltyList.value)
                 propResults.value = response.data;
-                propArrLen.value = leaseFeeList.value.length;
+                propArrLen.value = penaltyList.value.length;
                 propCount.value = propResults.value.count;
                 pageCount.value = Math.ceil(propCount.value / selectedValue.value);
                 if(response.data.next){
@@ -308,14 +309,14 @@ export default{
         };
         const selectSearchQuantity = (newValue) =>{
             selectedValue.value = newValue;
-            searchLeaseFees(selectedValue.value);
+            searchLatePaymentFees(selectedValue.value);
         };
         const resetFilters = () =>{
             selectedValue.value = 50;
             propSearchComponentKey.value += 1;
             propertySearchID.value  = "";
-            store.commit('Lease_Fees/RESET_SEARCH_FILTERS')
-            searchLeaseFees();
+            store.commit('Late_Payment_Fees/RESET_SEARCH_FILTERS')
+            searchLatePaymentFees();
         }
         const loadPrev = () =>{
             if (currentPage.value <= 1){
@@ -324,8 +325,7 @@ export default{
                 currentPage.value -= 1;
             }
             
-            searchLeaseFees();
-            // scrollToTop();
+            searchLatePaymentFees();
         }
         const loadNext = () =>{
             if(currentPage.value >= pageCount.value){
@@ -334,20 +334,17 @@ export default{
                 currentPage.value += 1;
             }
             
-            searchLeaseFees();
-            // scrollToTop(); 
+            searchLatePaymentFees();
         }
         const firstPage = ()=>{
             currentPage.value = 1;
-            searchLeaseFees();
-            // scrollToTop();
+            searchLatePaymentFees();
         }
         const lastPage = () =>{
             currentPage.value = pageCount.value;
-            searchLeaseFees();
-            // scrollToTop();
+            searchLatePaymentFees();
         }
-        const addNewLeaseFee = () =>{
+        const addNewLatePaymentFee = () =>{
             invModalVisible.value = true;
             updateFormFields();
             propertyID.value = "";
@@ -360,12 +357,12 @@ export default{
         }
         const handleActionClick = async(rowIndex, action, row) =>{
             if(action == 'delete'){
-                const feeID = [row['lease_fee_id']];
+                const feeID = [row['late_payment_fee_id']];
                 let formData = {
                     company: companyID.value,
-                    lease_fee: feeID,
+                    late_payment_fee: feeID,
                 }
-                await store.dispatch('Lease_Fees/deleteLeaseFees',formData).
+                await store.dispatch('Late_Payment_Fees/deleteLatePaymentFees',formData).
                 then(()=>{
                     searchInvoices();
                 })
@@ -401,7 +398,7 @@ export default{
                 store.state.pageTab.pmsActiveTab = 'Batch_Readings';
             }
         };
-        const printLeaseFeesList = () =>{
+        const printLatePaymentFeesList = () =>{
             showLoader();
             let formData = {
                 tenant_name: tenant_name_search.value,
@@ -413,7 +410,7 @@ export default{
             } 
 
             axios
-            .post("api/v1/export-lease-fees-pdf/", formData, { responseType: 'blob' })
+            .post("api/v1/export-late-payment-fees-pdf/", formData, { responseType: 'blob' })
                 .then((response)=>{
                     if(response.status == 200){
                         const blob1 = new Blob([response.data]);
@@ -430,16 +427,16 @@ export default{
             })
         }
         onBeforeMount(()=>{
-            searchLeaseFees();
+            searchLatePaymentFees();
             
         })
         return{
-            showTotals,title, searchLeaseFees,resetFilters, addButtonLabel, searchFilters, tableColumns, leaseFeeList,handleReset,
+            showTotals,title, searchLatePaymentFees,resetFilters, addButtonLabel, searchFilters, tableColumns, penaltyList,handleReset,
             propResults, propArrLen, propCount, pageCount, showNextBtn, showPreviousBtn,invModalVisible,
             loadPrev, loadNext, firstPage, lastPage, idField, actions, handleActionClick, propModalVisible, closeModal,
-            submitButtonLabel, showModal, addNewLeaseFee, showLoader, loader, hideLoader, modal_loader, modal_top, modal_left, modal_width,displayButtons,
+            submitButtonLabel, showModal, addNewLatePaymentFee, showLoader, loader, hideLoader, modal_loader, modal_top, modal_left, modal_width,displayButtons,
             showModalLoader, hideModalLoader, formFields, handleSelectionChange, flex_basis,flex_basis_percentage,
-            dropdownOptions, handleDynamicOption, createLeaseFee,addingRight,rightsModule,printLeaseFeesList,selectSearchQuantity,selectedValue
+            dropdownOptions, handleDynamicOption, createLatePaymentFee,addingRight,rightsModule,printLatePaymentFeesList,selectSearchQuantity,selectedValue
         }
     }
 };

@@ -126,7 +126,7 @@ export default{
         const updateFormFields = () => {
             formFields.value = [
                 { type: 'text', name: 'name',label: "Name", value: selectedUtility.value?.name || '', required: true },
-                { type: 'dropdown', name: 'default_mode',label: "Charge Mode", value: selectedUtility.value?.default_mode || '', placeholder: "Select Charge Mode", required: false, options: [{ text: 'Fixed Amount', value: 'Fixed Amount' }, { text: 'Rent Percentage', value: 'Rent Percentage' }, { text: 'Billed On Use', value: 'Billed On Use' }] },
+                { type: 'dropdown', name: 'default_mode',label: "Charge Mode", value: selectedUtility.value?.default_mode || '', placeholder: "", required: false, options: [{ text: 'Fixed Amount', value: 'Fixed Amount' }, { text: 'Rent Percentage', value: 'Rent Percentage' }, { text: 'Billed On Use', value: 'Billed On Use' }] },
                 { type: 'number', name: 'default_value',label: "Default Value", value: selectedUtility.value?.default_value || 0, required: false },
                 {  
                     type:'search-dropdown', label:"Posting Account", value: ledgerValue.value, componentKey: ledComponentKey,

@@ -99,6 +99,7 @@ export default{
             {label: "Code", key:"tenant_code",type: "text", editable: false},
             {label: "Tenant Name", key:"tenant_name",type: "text", editable: false},
             {label: "Receipt", key:"receipt_no",type: "text", editable: false},
+            {label: "Reversed", key:"reversed",type: "text", editable: false},
             {label: "Amount", key: "total_amount", type: "number", editable: false},
             {label: "Allocated", key: "allocated_amount", type: "number", editable: false},
             {label: "Balance", key: "due_amount", type: "number", editable: false},
@@ -180,19 +181,25 @@ export default{
         
         const handleActionClick = async(rowIndex, action, row) =>{
             if(action == 'allocate'){
-                let dueAmount = parseFloat(row['due_amount'].replace(/,/g, ''));
-                if (dueAmount > 0){
-                    appModalVisible.value = true;
-                    handleReset();
-                    flex_basis.value = '1/3';
-                    flex_basis_percentage.value = '33.333';
-                    tenantID.value = row['tenant_id'];
-                    prepaymentID.value = row["tenant_prepayment_id"]
-                    fetchInvoices(tenantID.value);
-                    prepaymentAmount.value = dueAmount;
+                const reversalStatus = row['reversal_status']
+                if (reversalStatus == "Yes"){
+                    toast.error("Cannot Allocate Reversed Receipt")
                 }else{
-                    toast.error("Prepayment Is Fully Allocated")
+                    let dueAmount = parseFloat(row['due_amount'].replace(/,/g, ''));
+                    if (dueAmount > 0){
+                        appModalVisible.value = true;
+                        handleReset();
+                        flex_basis.value = '1/3';
+                        flex_basis_percentage.value = '33.333';
+                        tenantID.value = row['tenant_id'];
+                        prepaymentID.value = row["tenant_prepayment_id"]
+                        fetchInvoices(tenantID.value);
+                        prepaymentAmount.value = dueAmount;
+                    }else{
+                        toast.error("Prepayment Is Fully Allocated")
+                    }
                 }
+                
                 
             }
         } 

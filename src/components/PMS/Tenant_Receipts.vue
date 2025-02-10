@@ -476,7 +476,10 @@ export default{
                         toast.success("Receipt Reversal Successful")
                         receiptID.value = null;
                         handleReset();
-                    }else{
+                    }else if(response.data.msg == "Prepayment Allocation"){
+                        toast.error("Receipt Has Prepayment Allocations")
+                    }
+                    else{
                         toast.error("Error Reversing Receipt")
                     }
                     

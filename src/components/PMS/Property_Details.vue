@@ -115,6 +115,7 @@ export default defineComponent({
                     searchPlaceholder: 'Select Zone...', dropdownWidth: '400px', updateValue: selectedZone.value,
                     fetchData: store.dispatch('Zones/fetchZones', {company:companyID.value})
                 },
+                {required:false},
             ];
         };
         const handleReset = () =>{
@@ -150,8 +151,11 @@ export default defineComponent({
         const updateAdditionalFormFields = () => {
             additionalFields.value = [
                 { type: 'dropdown', name: 'penalize',label: "Penalize", value: selectedProperty.value?.penalize || '', placeholder: "Penalize", required: false, options: [{ text: 'Yes', value: 'True' }, { text: 'No', value: 'False' }] },
-                { type: 'dropdown', name: 'penalty_charge_mode',label: "Penalty Charge Mode", value: selectedProperty.value?.penalty_charge_mode || '', placeholder: "Charge Mode", required: false, options: [{ text: 'Fixed Amount', value: 'Fixed Amount' }, { text: 'Rent Percentage', value: 'Rent Percentage' }] },
+                { type: 'dropdown', name: 'penalty_charge_mode',label: "Penalty Charge Mode", value: selectedProperty.value?.penalty_charge_mode || '', placeholder: "Charge Mode", required: false, options: [{ text: 'Fixed Amount', value: 'Fixed Amount' }, { text: '% of Current Balance', value: 'Current Balance Percentage' }, { text: '% of Total Balance', value: 'Total Balance Percentage' }, { text: '% of Current Rent Only Balance', value: 'Current Rent Only Balance Percentage' }, { text: '% of Total Rent Only Balance', value: 'Total Rent Only Balance Percentage' }] },
+                { type: 'text', name: 'penalty_charge_value',label: "Penalty Charge Value", value: selectedProperty.value?.penalty_charge_value || '0', required: false },
                 { type: 'text', name: 'penalty_day',label: "Penalty Day", value: selectedProperty.value?.penalty_day || '', required: false },
+                {required:false},
+                {required:false},
             ];
         };
         watch([selectedProperty, selectedLandlord, selectedZone], () => {
@@ -186,7 +190,8 @@ export default defineComponent({
                 address: formFields.value[6].value,
                 penalize: additionalFields.value[0].value,
                 penalty_charge_mode: additionalFields.value[1].value,
-                penalty_day: additionalFields.value[2].value,
+                penalty_charge_value: additionalFields.value[2].value,
+                penalty_day: additionalFields.value[3].value,
                 payment_terms: paymentTerms.value,
                 payment_info: paymentInfo.value,
                 zone: zoneID.value,
@@ -267,7 +272,8 @@ export default defineComponent({
                     address: formFields.value[6].value,
                     penalize: additionalFields.value[0].value,
                     penalty_charge_mode: additionalFields.value[1].value,
-                    penalty_day: additionalFields.value[2].value,
+                    penalty_charge_value: additionalFields.value[2].value,
+                    penalty_day: additionalFields.value[3].value,
                     payment_terms: paymentTerms.value,
                     payment_info: paymentInfo.value,
                     zone: zoneValue.value,

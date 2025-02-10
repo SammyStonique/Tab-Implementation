@@ -924,7 +924,12 @@ const actions = {
         console.log(error.message);
     })
   },
+  removeReceiptItem({commit, state}, index){
+    state.journalsClientList.splice(index, 1); 
+    commit('LIST_JOURNALS_CLIENT', state.journalsClientList);
+  },
 };
+
   
 const getters = {
   // users: (state) => state.users,
