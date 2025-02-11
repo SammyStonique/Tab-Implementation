@@ -3,6 +3,8 @@
         :loader="loader" @showLoader="showLoader" @hideLoader="hideLoader"
         :addButtonLabel="addButtonLabel"
         @handleAddNew="addNewBulkSMS"
+        :dropdownOptions="dropdownOptions"
+        @handleDynamicOption="handleDynamicOption"
         :searchFilters="searchFilters"
         @searchPage="searchBulkSMS"
         @resetFilters="resetFilters"
@@ -30,6 +32,13 @@
             :displayButtons="displayButtons" @handleSubmit="saveSMSProvider" @handleReset="handleReset"
         />
     </MovableModal>
+    <MovableModal v-model:visible="testModalVisible" :title="testTitle" :modal_top="modal_top" :modal_left="modal_left" :modal_width="modal_width"
+        :loader="test_modal_loader" @showLoader="showTestModalLoader" @hideLoader="hideTestModalLoader" >
+        <DynamicForm 
+            :fields="formFields1" :flex_basis="flex_basis" :flex_basis_percentage="flex_basis_percentage" 
+            :displayButtons="displayButtons" @handleSubmit="sendTestSMS" @handleReset="handleTestReset"
+        />
+    </MovableModal>
 </template>
 
 <script>
@@ -51,12 +60,15 @@ export default{
         const toast = useToast();
         const loader = ref('');
         const modal_loader = ref('none');
+        const test_modal_loader = ref('none');
         const title = ref('SMS Provider Details');
+        const testTitle = ref('Test Send SMS');
         const addButtonLabel = ref('New SMS Provider');
         const addingRight = ref('SMS Integrations');
         const rightsModule = ref('Settings');
         const idField = 'bulk_sms_id';
         const depModalVisible = ref(false);
+        const testModalVisible = ref(false);
         const depList = ref([]);
         const depResults = ref([]);
         const depArrLen = ref(0);
@@ -105,6 +117,74 @@ export default{
                 updateFormFields();
             }
         }, { immediate: true });
+
+        const formFields1 = ref([]);
+        const updateFormFields1 = () => {
+            formFields1.value = [
+                { type: 'text', name: 'recepient_names',label: "Recepient Name(s)", value: '', required: false, placeholder: "Jack,Jane" },
+                { type: 'text', name: 'phone_number',label: "Phone Number(s)", value: '', required: true, placeholder: "+2547XXXXXXXX,+2547XXXXXXXX" },
+                {type:'text-area', label:"Message", value: '', textarea_rows: '4', textarea_cols: '56', required: true},
+            ];
+        };
+        const dropdownOptions = ref([
+            {label: 'Test Send SMS', action: 'initiating-sms'},
+        ]);
+        const handleDynamicOption = (option) =>{
+            if(option == 'initiating-sms'){
+                flex_basis.value = '1/2';
+                flex_basis_percentage.value = '50';
+                testModalVisible.value = true;
+                updateFormFields1();
+            }
+        };
+        const sendTestSMS = async() =>{
+            showTestModalLoader();
+            let formData = {
+                content: formFields1.value[2].value,
+                recepient_names: [formFields1.value[0].value],
+                phone_numbers: [formFields1.value[1].value],
+                company: companyID.value
+            }
+            errors.value = [];
+            for(let i=0; i < formFields1.value.length; i++){
+                if(formFields1.value[i].value =='' && formFields1.value[i].required == true){
+                    errors.value.push('Error');
+                }
+            }
+            if(errors.value.length){
+                toast.error('Fill In Required Fields');
+                hideTestModalLoader();
+            }else{
+                try {
+                    const response = await axios.post('api/v1/test-send-sms/', formData)
+                    if(response && response.data.msg === "Success") {
+                        hideTestModalLoader();
+                        toast.success('SMS Sent!');
+                        handleTestReset();
+                    }else {
+                        toast.error('An error occurred while sending the SMS.');
+                    }
+                } catch (error) {
+                    console.error(error.message);
+                    toast.error('Failed to send SMS: ' + error.message);
+                } finally {
+                    hideTestModalLoader();
+                }
+            }
+
+        }
+        const handleTestReset = () =>{
+            for(let i=0; i < formFields1.value.length; i++){
+                formFields1.value[i].value = '';
+            }
+        }
+        const showTestModalLoader = () =>{
+            test_modal_loader.value = "block";
+        }
+        const hideTestModalLoader = () =>{
+            test_modal_loader.value = "none";
+        }
+        
         const addNewBulkSMS = () =>{
             updateFormFields();
             depModalVisible.value = true;
@@ -308,7 +388,9 @@ export default{
             depResults, depArrLen, depCount, pageCount, showNextBtn, showPreviousBtn,modal_top, modal_left, modal_width,
             loadPrev, loadNext, firstPage, lastPage, actions, formFields, depModalVisible, addNewBulkSMS,
             displayButtons,flex_basis,flex_basis_percentage, handleActionClick, handleReset, saveSMSProvider,
-            showLoader, loader, hideLoader, modal_loader, showModalLoader, hideModalLoader,addingRight,rightsModule
+            showLoader, loader, hideLoader, modal_loader, showModalLoader, hideModalLoader,addingRight,rightsModule,
+            dropdownOptions,handleDynamicOption,testModalVisible,testTitle,test_modal_loader,handleTestReset,showTestModalLoader,hideTestModalLoader,
+            formFields1,sendTestSMS
         }
     }
 }

@@ -95,6 +95,8 @@ import SMS_Integrations from './SET/SMS_Integrations';
 import Email_Integrations from './SET/Email_Integrations';
 import Mpesa_Integrations from './SET/Mpesa_Integrations';
 import Mpesa_Transactions from './SET/Mpesa_Transactions';
+import SMS_Templates from './SET/SMS_Templates';
+import Email_Templates from './SET/Email_Templates';
 
 
 export default createStore({
@@ -120,6 +122,6 @@ export default createStore({
     Member_Categories,Member_Sponsors,Members,Membership_Fees,Savings_Products,Shares_Products,Saving_Accounts,Share_Accounts,Saving_Deposits,Share_Deposits,
     Loan_Products,Loan_Fees,Loan_Applications,Loan_Guarantors,Loan_Disbursements,
 
-    Default_Settings,Companies,Branches,User_Rights,SMS_Integrations,Email_Integrations,Mpesa_Integrations,Mpesa_Transactions,Banks
+    Default_Settings,Companies,Branches,User_Rights,SMS_Integrations,Email_Integrations,Mpesa_Integrations,Mpesa_Transactions,Banks,SMS_Templates,Email_Templates
   },
 });
