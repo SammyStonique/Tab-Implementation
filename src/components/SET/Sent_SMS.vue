@@ -82,6 +82,7 @@ export default{
         const modal_width = ref('30vw');
         const displayButtons = ref(true);
         const showModal = ref(false);
+        const errors = ref([]);
         const tableColumns = ref([
             {type: "checkbox"},
             {label: "Date", key:"date"},
@@ -206,6 +207,7 @@ export default{
             searchSMSs(selectedValue.value);
         };
         const resetFilters = () =>{
+            selectedValue.value = 50;
             phone_number_search.value = "";
             status_search.value = "";
             searchSMSs();

@@ -160,6 +160,8 @@ export default{
         const actions = ref([
             {name: 'print', icon: 'fa fa-print', title: 'Print Invoice', rightName: 'Print Tenant Invoice'},
             {name: 'download', icon: 'fa fa-download', title: 'Download Invoice', rightName: 'Print Tenant Invoice'},
+            {name: 'send-sms', icon: 'fas fa-comment', title: 'Send SMS', rightName: 'Sending PMS SMS'},
+            {name: 'send-email', icon: 'fas fa-envelope', title: 'Send Email', rightName: 'Sending PMS Emails'},
             {name: 'delete', icon: 'fa fa-trash', title: 'Delete Invoice', rightName: 'Deleting Tenant Invoice'},
         ])
         const companyID = computed(()=> store.state.userData.company_id);
@@ -503,6 +505,36 @@ export default{
                 then(()=>{
                     hideLoader();
                 })
+            }else if(action == 'send-sms'){
+                showLoader();
+                const tenantID = [row['tenant_id']];
+                const particulars = [row['description']];
+                const particularsAmnt = [row['total_amount']];
+                const txnNo = [row['journal_no']];
+                let formData = {
+                    tenant: tenantID,
+                    particulars: particulars,
+                    transaction_numbers: txnNo,
+                    particulars_amount: particularsAmnt,
+                    journal: null,
+                    company: companyID.value
+                }
+                await axios.post('api/v1/tenant-invoice-sms/',formData).
+                then((response)=>{
+                    if(response.data.msg == "Success"){
+                        toast.success("SMS Sent!")
+                    }else if(response.data.msg == "Missing Template"){
+                        toast.error("Tenant Invoice Template Not Set!")
+                    }else{
+                        toast.error(response.data.msg)
+                    }
+                })
+                .catch((error)=>{
+                    toast.error(error.message)
+                })
+                .finally(()=>{
+                    hideLoader();
+                })
             }
         }
         const handleShowDetails = async(row) =>{
@@ -566,11 +598,41 @@ export default{
 
         const dropdownOptions = ref([
             {label: 'Withholding Tax', action: 'withholding-tax'},
+            {label: 'SMS Tenant Invoices', action: 'send-sms'},
+            {label: 'Email Tenant Invoices', action: 'send-email'},
         ]);
-        const handleDynamicOption = (option) =>{
-            if(option == 'batch-meter-reading'){
-                store.commit('pageTab/ADD_PAGE', {'PMS':'Batch_Readings'})
-                store.state.pageTab.pmsActiveTab = 'Batch_Readings';
+        const handleDynamicOption = async(option) =>{
+            if(option == 'send-sms'){
+                showLoader();
+                const tenantID = [];
+                const particulars = "";
+                const particularsAmnt = "";
+                const txnNo = "";
+                const journalID = selectedIds.value
+                let formData = {
+                    tenant: tenantID,
+                    particulars: particulars,
+                    transaction_numbers: txnNo,
+                    particulars_amount: particularsAmnt,
+                    journal: journalID,
+                    company: companyID.value
+                }
+                await axios.post('api/v1/tenant-invoice-sms/',formData).
+                then((response)=>{
+                    if(response.data.msg == "Success"){
+                        toast.success("SMS Sent!")
+                    }else if(response.data.msg == "Missing Template"){
+                        toast.error("Tenant Invoice Template Not Set!")
+                    }else{
+                        toast.error(response.data.msg)
+                    }
+                })
+                .catch((error)=>{
+                    toast.error(error.message)
+                })
+                .finally(()=>{
+                    hideLoader();
+                })
             }
         };
         const printInvoiceList = () =>{

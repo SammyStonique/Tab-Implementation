@@ -5,6 +5,8 @@
         :addButtonLabel="addButtonLabel"
         :showAddButton="showAddButton"
         :searchFilters="searchFilters"
+        :dropdownOptions="dropdownOptions"
+        @handleDynamicOption="handleDynamicOption"
         @searchPage="searchTenantArrears"
         @resetFilters="resetFilters"
         @removeItem="removeAllocation"
@@ -13,6 +15,7 @@
         :columns="tableColumns"
         :rows="arrearsList"
         :actions="actions"
+        :rightsModule="rightsModule"
         :idField="idField"
         :showTotals="showTotals"
         @handleSelectionChange="handleSelectionChange"
@@ -63,9 +66,10 @@ export default{
         const pageComponentKey = ref(0);
         const propComponentKey = ref(0);
         const showAddButton = ref(false);
-        const title = ref('Prepayment Allocation');
+        const title = ref('');
         const companyID = computed(()=> store.state.userData.company_id);
-        const idField = '';
+        const idField = 'tenant_lease_id';
+        const rightsModule = ref('PMS');
         const propertyID = ref('');
         const selectedIds = ref([]);
         const appModalVisible = ref(false);
@@ -97,7 +101,8 @@ export default{
         ])
         const showTotals = ref(true);
         const actions = ref([
-            {name: 'sms', icon: 'fa fa-envelope', title: 'SMS Balance'},
+            {name: 'send-sms', icon: 'fas fa-comment', title: 'Send SMS', rightName: 'Sending PMS SMS'},
+            {name: 'send-email', icon: 'fas fa-envelope', title: 'Send Email', rightName: 'Sending PMS Emails'},
         ])
         const tenant_name_search = computed({
             get: () => store.state.Tenant_Arrears.tenant_name_search,
@@ -140,8 +145,61 @@ export default{
         };
         
         const handleActionClick = async(rowIndex, action, row) =>{
-            
+            if(action == 'send-sms'){
+                showLoader();
+                const tenantID = [row['tenant_lease_id']];
+                let formData = {
+                    tenant: tenantID,
+                    company: companyID.value
+                }
+                await axios.post('api/v1/tenant-balance-reminder-sms/',formData).
+                then((response)=>{
+                    if(response.data.msg == "Success"){
+                        toast.success("SMS Sent!")
+                    }else if(response.data.msg == "Missing Template"){
+                        toast.error("Tenant Balance Reminder Template Not Set!")
+                    }else{
+                        toast.error(response.data.msg)
+                    }
+                })
+                .catch((error)=>{
+                    toast.error(error.message)
+                })
+                .finally(()=>{
+                    hideLoader();
+                })
+            }
         } 
+        const dropdownOptions = ref([
+            {label: 'SMS Tenant Balances', action: 'send-sms'},
+            {label: 'Email Tenant Balances', action: 'send-email'},
+        ]);
+        const handleDynamicOption = async(option) =>{
+            if(option == 'send-sms'){
+                showLoader();
+                const tenantID = selectedIds.value
+                let formData = {
+                    tenant: tenantID,
+                    company: companyID.value
+                }
+                await axios.post('api/v1/tenant-balance-reminder-sms/',formData).
+                then((response)=>{
+                    if(response.data.msg == "Success"){
+                        toast.success("SMS Sent!")
+                    }else if(response.data.msg == "Missing Template"){
+                        toast.error("Tenant Balance Reminder Template Not Set!")
+                    }else{
+                        toast.error(response.data.msg)
+                    }
+                })
+                .catch((error)=>{
+                    toast.error(error.message)
+                })
+                .finally(()=>{
+                    hideLoader();
+                })
+            }
+        };
         const showModalLoader = () =>{
             modal_loader.value = "block";
         }
@@ -258,9 +316,9 @@ export default{
         })
         return{
             showAddButton,title, searchTenantArrears, idField, selectedIds, actions, arrearsList, appArrLen,appCount,appResults,appModalVisible,
-            searchFilters,tableColumns,resetFilters,loadPrev,loadNext,firstPage,lastPage,
+            searchFilters,tableColumns,resetFilters,loadPrev,loadNext,firstPage,lastPage,dropdownOptions,handleDynamicOption,
             showNextBtn,showPreviousBtn, handleActionClick,displayButtons,
-            modal_top, modal_left, modal_width, showLoader, loader, hideLoader, modal_loader, showModalLoader, hideModalLoader,
+            modal_top, modal_left, modal_width, showLoader, loader, hideLoader, modal_loader, showModalLoader, hideModalLoader,rightsModule,
             handleSelectionChange, pageComponentKey, flex_basis, flex_basis_percentage,showTotals,printArrearsList,selectSearchQuantity,selectedValue
         }
     }

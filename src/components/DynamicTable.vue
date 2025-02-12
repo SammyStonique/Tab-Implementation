@@ -157,7 +157,6 @@ export default defineComponent({
       });
       selectedIds.value = isSelected ? props.rows.map(row => row[props.idField]) : [];
 
-      console.log("THE SELECTED IDs ARE ",selectedIds.value);
       emit('selection-changed', selectedIds.value);
     };
 
@@ -165,7 +164,6 @@ export default defineComponent({
       const rowId = row[props.idField];
       if (row.selected) {
         selectedIds.value.push(rowId);
-        console.log("THE SELECTED IDs ARE ",selectedIds.value)
       } else {
         const index = selectedIds.value.indexOf(rowId);
         if (index > -1) {

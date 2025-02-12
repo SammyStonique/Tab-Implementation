@@ -113,7 +113,7 @@ export default{
         const showTotals = ref(true);
         const actions = ref([
             {name: 'print', icon: 'fa fa-print', title: 'Print Invoice', rightName: 'Print Tenant Invoice'},
-            {name: 'delete', icon: 'fa fa-trash', title: 'Delete Lease Fee', rightName: 'Deleting Tenant Invoice'},
+            {name: 'delete', icon: 'fa fa-trash', title: 'Delete Lease Fee', rightName: 'Deleting Lease Fees'},
         ])
         const companyID = computed(()=> store.state.userData.company_id);
         const fetchProperties = async() =>{
@@ -367,7 +367,7 @@ export default{
                 }
                 await store.dispatch('Lease_Fees/deleteLeaseFees',formData).
                 then(()=>{
-                    searchInvoices();
+                    searchLeaseFees();
                 })
             }
             else if(action == 'print'){

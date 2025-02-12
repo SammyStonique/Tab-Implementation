@@ -37,7 +37,7 @@
     <div>
       <button @click="showDropdown" class="rounded bg-green-400 text-sm  text-white px-2 py-1.5">{{ actionsButtonLabel }} <i class="fa fa-caret-down pl-2" aria-hidden="true"></i></button>
       <button class="fixed inset-0 bg-gray-50 opacity-15 cursor-default w-full" v-if="dropdown" @click="dropdown = !dropdown"></button>
-      <div class=" text-left text-sm mt-1.5 absolute rounded bg-white w-36 py-1.5 px-1.5 shadow-md shadow-slate-500" v-if="dropdown">
+      <div class=" text-left text-sm mt-1.5 absolute rounded bg-white w-40 py-1.5 px-1.5 shadow-md shadow-slate-500" v-if="dropdown">
         <div class="actionsDropdown">
           <button @click="importData" class="hover:bg-slate-500 hover:w-full">Import</button><br />
           <button @click="removeItem" class="hover:bg-slate-500 hover:w-full">Remove</button><br />

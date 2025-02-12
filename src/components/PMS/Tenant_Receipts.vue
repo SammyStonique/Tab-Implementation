@@ -152,6 +152,8 @@ export default{
             {name: 'print', icon: 'fa fa-print', title: 'Print Receipt', rightName: 'Print Tenant Receipt'},
             {name: 'download', icon: 'fa fa-download', title: 'Download Receipt', rightName: 'Print Tenant Receipt'},
             {name: 'reverse', icon: 'fa fa-undo', title: 'Reverse Receipt', rightName: 'Reversing Tenant Receipt'},
+            {name: 'send-sms', icon: 'fas fa-comment', title: 'Send SMS', rightName: 'Sending PMS SMS'},
+            {name: 'send-email', icon: 'fas fa-envelope', title: 'Send Email', rightName: 'Sending PMS Emails'},
             {name: 'delete', icon: 'fa fa-trash', title: 'Delete Receipt', rightName: 'Deleting Tenant Receipt'},
         ])
         const companyID = computed(()=> store.state.userData.company_id);
@@ -592,6 +594,42 @@ export default{
                 }
 
                     
+            }else if(action == 'send-sms'){
+                const reversalStatus = row['reversed'];
+                if(reversalStatus == "No"){
+                    showLoader();
+                    const tenantID = [row['tenant_id']];
+                    const particulars = [row['description']];
+                    const particularsAmnt = [row['total_amount']];
+                    const txnNo = [row['journal_no']];
+                    let formData = {
+                        tenant: tenantID,
+                        particulars: particulars,
+                        transaction_numbers: txnNo,
+                        particulars_amount: particularsAmnt,
+                        journal: null,
+                        company: companyID.value
+                    }
+                    await axios.post('api/v1/tenant-receipt-sms/',formData).
+                    then((response)=>{
+                        if(response.data.msg == "Success"){
+                            toast.success("SMS Sent!")
+                        }else if(response.data.msg == "Missing Template"){
+                            toast.error("Tenant Receipt Template Not Set!")
+                        }else{
+                            toast.error(response.data.msg)
+                        }
+                    })
+                    .catch((error)=>{
+                        toast.error(error.message)
+                    })
+                    .finally(()=>{
+                        hideLoader();
+                    })
+                }else{
+                    toast.error("Cannot SMS Reversed Receipt")
+                }
+                
             }
         };
         const handleShowDetails = async(row) =>{
@@ -640,9 +678,10 @@ export default{
 
         const dropdownOptions = ref([
             {label: 'Cancel Reversal', action: 'cancel-receipt-reversal'},
+            {label: 'SMS Tenant Receipts', action: 'send-sms'},
+            {label: 'Email Tenant Receipts', action: 'send-email'},
         ]);
-        const handleDynamicOption = (option) =>{
-            
+        const handleDynamicOption = async(option) =>{           
             if(option == 'cancel-receipt-reversal'){
                 if(selectedIds.value.length > 1){
                     toast.error('You Have Selected More Than 1 Receipt')
@@ -699,6 +738,37 @@ export default{
                     })  
                 }
                 
+            }else if(option == 'send-sms'){
+                showLoader();
+                const tenantID = [];
+                const particulars = "";
+                const particularsAmnt = "";
+                const txnNo = "";
+                const journalID = selectedIds.value
+                let formData = {
+                    tenant: tenantID,
+                    particulars: particulars,
+                    transaction_numbers: txnNo,
+                    particulars_amount: particularsAmnt,
+                    journal: journalID,
+                    company: companyID.value
+                }
+                await axios.post('api/v1/tenant-receipt-sms/',formData).
+                then((response)=>{
+                    if(response.data.msg == "Success"){
+                        toast.success("SMS Sent!")
+                    }else if(response.data.msg == "Missing Template"){
+                        toast.error("Tenant Receipt Template Not Set!")
+                    }else{
+                        toast.error(response.data.msg)
+                    }
+                })
+                .catch((error)=>{
+                    toast.error(error.message)
+                })
+                .finally(()=>{
+                    hideLoader();
+                })
             }
         };
         const printReceiptsList = () =>{
