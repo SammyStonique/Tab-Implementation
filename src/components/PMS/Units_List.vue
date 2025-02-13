@@ -479,6 +479,7 @@ export default{
             searchUnits(selectedValue.value);
         };
         const resetFilters = () =>{
+            currentPage.value = 1;
             selectedValue.value = 50;
             store.commit('Units_List/RESET_SEARCH_FILTERS')
             propSearchComponentKey.value += 1;
@@ -654,7 +655,7 @@ export default{
         })
         return{
             title, searchUnits,resetFilters, addButtonLabel, searchFilters, tableColumns, unitList,
-            propResults, propArrLen, propCount, pageCount, showNextBtn, showPreviousBtn,
+            currentPage,propResults, propArrLen, propCount, pageCount, showNextBtn, showPreviousBtn,
             loadPrev, loadNext, firstPage, lastPage, idField, actions, handleActionClick, propModalVisible, closeModal,
             submitButtonLabel, showModal, addNewUnit, showLoader, loader, hideLoader, modal_loader, modal_top, modal_left, modal_width,displayButtons,
             showModalLoader, hideModalLoader, saveUnit, formFields, handleSelectionChange, flex_basis,flex_basis_percentage,

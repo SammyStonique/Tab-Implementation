@@ -338,6 +338,7 @@ export default{
             })
         }
         const resetFilters = () =>{
+            currentPage.value = 1;
             store.commit('Landlords_List/RESET_SEARCH_FILTERS')
             searchLandlords();
         }
@@ -439,7 +440,7 @@ export default{
         })
         return{
             title, searchLandlords,resetFilters, addButtonLabel, searchFilters, tableColumns, landlordList,
-            propResults, propArrLen, propCount, pageCount, showNextBtn, showPreviousBtn,
+            currentPage,propResults, propArrLen, propCount, pageCount, showNextBtn, showPreviousBtn,
             loadPrev, loadNext, firstPage, lastPage, idField, actions, handleActionClick, propModalVisible, closeModal,
             submitButtonLabel, showModal, addNewLandlord, showLoader, loader, hideLoader, modal_loader, modal_top, modal_left, modal_width,displayButtons,
             showModalLoader, hideModalLoader, saveLandlord, formFields, handleSelectionChange, flex_basis,flex_basis_percentage,

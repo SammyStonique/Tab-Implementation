@@ -312,6 +312,7 @@ export default{
             searchLatePaymentFees(selectedValue.value);
         };
         const resetFilters = () =>{
+            currentPage.value = 1;
             selectedValue.value = 50;
             propSearchComponentKey.value += 1;
             propertySearchID.value  = "";
@@ -432,7 +433,7 @@ export default{
         })
         return{
             showTotals,title, searchLatePaymentFees,resetFilters, addButtonLabel, searchFilters, tableColumns, penaltyList,handleReset,
-            propResults, propArrLen, propCount, pageCount, showNextBtn, showPreviousBtn,invModalVisible,
+            currentPage,propResults, propArrLen, propCount, pageCount, showNextBtn, showPreviousBtn,invModalVisible,
             loadPrev, loadNext, firstPage, lastPage, idField, actions, handleActionClick, propModalVisible, closeModal,
             submitButtonLabel, showModal, addNewLatePaymentFee, showLoader, loader, hideLoader, modal_loader, modal_top, modal_left, modal_width,displayButtons,
             showModalLoader, hideModalLoader, formFields, handleSelectionChange, flex_basis,flex_basis_percentage,

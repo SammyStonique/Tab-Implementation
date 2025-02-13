@@ -297,6 +297,7 @@ export default{
             searchReceipts(selectedValue.value);
         };
         const resetFilters = () =>{
+            currentPage.value = 1;
             selectedValue.value = 50;
             tenant_name_search.value = "";
             tenant_code_search.value = "";
@@ -439,7 +440,7 @@ export default{
         })
         return{
             showTotals,mainComponentKey, title, searchReceipts,resetFilters, addButtonLabel, searchFilters, tableColumns, receiptsList,
-            propResults, propArrLen, propCount, pageCount, showNextBtn, showPreviousBtn,
+            currentPage,propResults, propArrLen, propCount, pageCount, showNextBtn, showPreviousBtn,
             loadPrev, loadNext, firstPage, lastPage, idField, actions, handleActionClick, propModalVisible, closeModal,
             submitButtonLabel, showModal, addNewReceipt, showLoader, loader, hideLoader, modal_loader, modal_top, modal_left, modal_width,displayButtons,
             showModalLoader, hideModalLoader, handleSelectionChange, flex_basis,flex_basis_percentage,

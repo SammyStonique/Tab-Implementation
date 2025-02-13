@@ -261,6 +261,7 @@ export default{
             searchProperties(selectedValue.value);
         };
         const resetFilters = () =>{
+            currentPage.value = 1;
             selectedValue.value = 50;
             zoneSearchComponentKey.value += 1;
             lldSearchComponentKey.value += 1;
@@ -427,7 +428,7 @@ export default{
         })
         return{
             searchProperties,resetFilters, addButtonLabel, searchFilters, tableColumns, propertyList,
-            propResults, propArrLen, propCount, pageCount, showNextBtn, showPreviousBtn,selectSearchQuantity,selectedValue,
+            currentPage,propResults, propArrLen, propCount, pageCount, showNextBtn, showPreviousBtn,selectSearchQuantity,selectedValue,
             loadPrev, loadNext, firstPage, lastPage, idField, actions, handleActionClick, propModalVisible, closeModal,
             submitButtonLabel, showModal, addNewProperty, showLoader, loader, hideLoader, importProperties, removeProperty, removeProperties,
             handleSelectionChange,addingRight,rightsModule,printPropertiesList,downloadPropertiesCSV,downloadPropertiesExcel

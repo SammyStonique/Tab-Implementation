@@ -314,6 +314,7 @@ export default{
             })
         }
         const resetFilters = () =>{
+            currentPage.value = 1;
             store.commit('Zones/RESET_SEARCH_FILTERS')
             searchZones();
         }
@@ -387,7 +388,7 @@ export default{
         })
         return{
             title, searchZones,resetFilters, addButtonLabel, searchFilters, tableColumns, zonesList,
-            zoneResults, zoneArrLen, zoneCount, pageCount, showNextBtn, showPreviousBtn,
+            currentPage,zoneResults, zoneArrLen, zoneCount, pageCount, showNextBtn, showPreviousBtn,
             loadPrev, loadNext, firstPage, lastPage, idField, actions, handleActionClick, zoneModalVisible, closeModal,
             submitButtonLabel, showModal, addNewZone, showLoader, loader, hideLoader, modal_loader, modal_top, modal_left, modal_width,displayButtons,
             showModalLoader, hideModalLoader, saveZone, formFields, handleSelectionChange, flex_basis,flex_basis_percentage,

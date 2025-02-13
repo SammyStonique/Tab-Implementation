@@ -105,7 +105,7 @@ export default defineComponent({
                 { type: 'text', name: 'property_code',label: "Code", value: selectedProperty.value?.property_code || '', required: false },
                 { type: 'text', name: 'name',label: "Name", value: selectedProperty.value?.name || '', required: true },
                 { type: 'text', name: 'lr_number',label: "L.R Number", value: selectedProperty.value?.lr_number || '', required: true, placeholder: '' },
-                { type: 'dropdown', name: 'property_type',label: "Property Type", value: selectedProperty.value?.property_type || '', placeholder: "Property Type", required: true, options: [{ text: 'Residential', value: 'Residential' }, { text: 'Commercial', value: 'Commercial' }] },
+                { type: 'dropdown', name: 'property_type',label: "Property Type", value: selectedProperty.value?.property_type || '', placeholder: "", required: true, options: [{ text: 'Residential', value: 'Residential' }, { text: 'Commercial', value: 'Commercial' }] },
                 { type: 'text', name: 'kra_pin',label: "Tax Pin", value: selectedProperty.value?.kra_pin || '', required: true },
                 { type: 'text', name: 'address',label: "Address", value: selectedProperty.value?.address || '', required: true },
                 
@@ -115,12 +115,16 @@ export default defineComponent({
                     searchPlaceholder: 'Select Zone...', dropdownWidth: '400px', updateValue: selectedZone.value,
                     fetchData: store.dispatch('Zones/fetchZones', {company:companyID.value})
                 },
-                {required:false},
+                { type: 'dropdown', name: 'invoice_mode',label: "Invoice Mode", value: selectedProperty.value?.invoice_mode || 'Separate All', placeholder: "", required: true, options: [{ text: 'Combine All', value: 'Combine All' }, { text: 'Separate All', value: 'Separate All' },{ text: 'Combine Utilities', value: 'Combine Utilities' }] },
             ];
         };
         const handleReset = () =>{
             for(let i=0; i < formFields.value.length; i++){
-                formFields.value[i].value = '';
+                if(formFields.value[i].label == 'Invoice Mode'){
+                    formFields.value[i].value = 'Separate All';
+                }else{
+                    formFields.value[i].value = '';
+                }         
             }
             landlordID.value = '';
             zoneID.value = '';
@@ -150,7 +154,7 @@ export default defineComponent({
         const additionalFields = ref([]);
         const updateAdditionalFormFields = () => {
             additionalFields.value = [
-                { type: 'dropdown', name: 'penalize',label: "Penalize", value: selectedProperty.value?.penalize || '', placeholder: "Penalize", required: false, options: [{ text: 'Yes', value: 'True' }, { text: 'No', value: 'False' }] },
+                { type: 'dropdown', name: 'penalize',label: "Penalize", value: selectedProperty.value?.penalize || '', placeholder: "", required: false, options: [{ text: 'Yes', value: 'True' }, { text: 'No', value: 'False' }] },
                 { type: 'dropdown', name: 'penalty_charge_mode',label: "Penalty Charge Mode", value: selectedProperty.value?.penalty_charge_mode || '', placeholder: "Charge Mode", required: false, options: [{ text: 'Fixed Amount', value: 'Fixed Amount' }, { text: '% of Current Balance', value: 'Current Balance Percentage' }, { text: '% of Total Balance', value: 'Total Balance Percentage' }, { text: '% of Current Rent Only Balance', value: 'Current Rent Only Balance Percentage' }, { text: '% of Total Rent Only Balance', value: 'Total Rent Only Balance Percentage' }] },
                 { type: 'text', name: 'penalty_charge_value',label: "Penalty Charge Value", value: selectedProperty.value?.penalty_charge_value || '0', required: false },
                 { type: 'text', name: 'penalty_day',label: "Penalty Day", value: selectedProperty.value?.penalty_day || '', required: false },
@@ -188,6 +192,7 @@ export default defineComponent({
                 kra_pin: formFields.value[5].value,
                 lr_number: formFields.value[3].value,
                 address: formFields.value[6].value,
+                invoice_mode: formFields.value[8].value,
                 penalize: additionalFields.value[0].value,
                 penalty_charge_mode: additionalFields.value[1].value,
                 penalty_charge_value: additionalFields.value[2].value,
@@ -270,6 +275,7 @@ export default defineComponent({
                     kra_pin: formFields.value[5].value,
                     lr_number: formFields.value[3].value,
                     address: formFields.value[6].value,
+                    invoice_mode: formFields.value[8].value,
                     penalize: additionalFields.value[0].value,
                     penalty_charge_mode: additionalFields.value[1].value,
                     penalty_charge_value: additionalFields.value[2].value,

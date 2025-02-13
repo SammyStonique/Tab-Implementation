@@ -347,6 +347,7 @@ export default{
             })
         }
         const resetFilters = () =>{
+            currentPage.value = 1;
             store.commit('Utilities/RESET_SEARCH_FILTERS')
             searchUtilities();
         }
@@ -424,7 +425,7 @@ export default{
         })
         return{
             title, searchUtilities,resetFilters, addButtonLabel, searchFilters, tableColumns, utilityList,
-            propResults, propArrLen, propCount, pageCount, showNextBtn, showPreviousBtn,
+            currentPage,propResults, propArrLen, propCount, pageCount, showNextBtn, showPreviousBtn,
             loadPrev, loadNext, firstPage, lastPage, idField, actions, handleActionClick, propModalVisible, closeModal,
             submitButtonLabel, showModal, addNewUtility, showLoader, loader, hideLoader, modal_loader, modal_top, modal_left, modal_width,displayButtons,
             showModalLoader, hideModalLoader, saveUtility, formFields, handleSelectionChange, flex_basis,flex_basis_percentage,

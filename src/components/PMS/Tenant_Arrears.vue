@@ -61,7 +61,7 @@ export default{
     setup(){
         const store = useStore();
         const toast = useToast();
-        const loader = ref('');
+        const loader = ref('none');
         const modal_loader = ref('none');
         const pageComponentKey = ref(0);
         const propComponentKey = ref(0);
@@ -278,6 +278,7 @@ export default{
             searchTenantArrears();
         }
         const resetFilters = () =>{
+            currentPage.value = 1;
             selectedValue.value = 50;
             propComponentKey.value += 1;
             propertyID.value = ""
@@ -312,11 +313,11 @@ export default{
         }
 
         onMounted(() =>{
-            searchTenantArrears();
+            // searchTenantArrears();
         })
         return{
             showAddButton,title, searchTenantArrears, idField, selectedIds, actions, arrearsList, appArrLen,appCount,appResults,appModalVisible,
-            searchFilters,tableColumns,resetFilters,loadPrev,loadNext,firstPage,lastPage,dropdownOptions,handleDynamicOption,
+            currentPage,searchFilters,tableColumns,resetFilters,loadPrev,loadNext,firstPage,lastPage,dropdownOptions,handleDynamicOption,
             showNextBtn,showPreviousBtn, handleActionClick,displayButtons,
             modal_top, modal_left, modal_width, showLoader, loader, hideLoader, modal_loader, showModalLoader, hideModalLoader,rightsModule,
             handleSelectionChange, pageComponentKey, flex_basis, flex_basis_percentage,showTotals,printArrearsList,selectSearchQuantity,selectedValue

@@ -338,6 +338,7 @@ export default{
             })
         }
         const resetFilters = () =>{
+            currentPage.value = 1;
             store.commit('Exit_Charges/RESET_SEARCH_FILTERS')
             searchExitCharges();
         }
@@ -413,7 +414,7 @@ export default{
         })
         return{
             title, searchExitCharges,resetFilters, addButtonLabel, searchFilters, tableColumns, chargesList,
-            propResults, propArrLen, propCount, pageCount, showNextBtn, showPreviousBtn,
+            currentPage,propResults, propArrLen, propCount, pageCount, showNextBtn, showPreviousBtn,
             loadPrev, loadNext, firstPage, lastPage, idField, actions, handleActionClick, propModalVisible, closeModal,
             submitButtonLabel, showModal, addNewExitCharge, showLoader, loader, hideLoader, modal_loader, modal_top, modal_left, modal_width,displayButtons,
             showModalLoader, hideModalLoader, saveExitCharge, formFields, handleSelectionChange, flex_basis,flex_basis_percentage,

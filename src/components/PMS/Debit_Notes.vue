@@ -332,6 +332,7 @@ export default{
             searchInvoices(selectedValue.value);
         };
         const resetFilters = () =>{
+            currentPage.value = 1;
             selectedValue.value = 50;
             client_name_search.value = "";
             client_code_search.value = "";
@@ -510,7 +511,7 @@ export default{
         })
         return{
             showTotals,title, searchInvoices,resetFilters, addButtonLabel, searchFilters, tableColumns, invoicesList,
-            propResults, propArrLen, propCount, pageCount, showNextBtn, showPreviousBtn,invModalVisible,
+            currentPage,propResults, propArrLen, propCount, pageCount, showNextBtn, showPreviousBtn,invModalVisible,
             loadPrev, loadNext, firstPage, lastPage, idField, actions, handleActionClick, propModalVisible, closeModal,
             submitButtonLabel, showModal, showLoader, loader, hideLoader, modal_loader, modal_top, modal_left, modal_width,displayButtons,
             showModalLoader, hideModalLoader, formFields, handleSelectionChange, flex_basis,flex_basis_percentage,

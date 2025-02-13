@@ -3,17 +3,17 @@
         :key="pageComponentKey"
         :loader="loader" @showLoader="showLoader" @hideLoader="hideLoader"
         :addButtonLabel="addButtonLabel"
-        @handleAddNew="addNewDeposit"
+        @handleAddNew="addNewBalance"
         :searchFilters="searchFilters"
-        @searchPage="searchDeposits"
+        @searchPage="searchBalances"
         @resetFilters="resetFilters"
-        @removeItem="removeDeposit"
-        @removeSelectedItems="removeDeposits"
-        @printList="printDepositsList"
+        @removeItem="removeBalance"
+        @removeSelectedItems="removeBalances"
+        @printList="printBalancesList"
         :addingRight="addingRight"
         :rightsModule="rightsModule"
         :columns="tableColumns"
-        :rows="depositsList"
+        :rows="balancesList"
         :actions="actions"
         :idField="idField"
         :showTotals="showTotals"
@@ -36,7 +36,7 @@
     >
         <DynamicForm 
             :fields="formFields" :flex_basis="flex_basis" :flex_basis_percentage="flex_basis_percentage" 
-            :displayButtons="displayButtons" @handleSubmit="createTenantDeposit" @handleReset="handleReset"
+            :displayButtons="displayButtons" @handleSubmit="createTenantBalance" @handleReset="handleReset"
         />
     </MovableModal>
 </template>
@@ -53,7 +53,7 @@ import { useToast } from "vue-toastification";
 import PrintJS from 'print-js';
 
 export default{
-    name: 'Tenant_Deposits',
+    name: 'Tenant_Balances',
     props: ['scrollToTop','loader','showLoader','hideLoader',],
     components:{
         PageComponent,MovableModal,DynamicForm
@@ -63,25 +63,25 @@ export default{
         const toast = useToast();
         const loader = ref('');
         const modal_loader = ref('none');
-        const addButtonLabel = ref('New Deposit');
-        const addingRight = ref('Adding Tenant Deposit');
+        const addButtonLabel = ref('New Balance');
+        const addingRight = ref('Adding Tenant Take-On Balance');
         const rightsModule = ref('PMS');
         const pageComponentKey = ref(0);
         const depComponentKey = ref(0);
         const tntComponentKey = ref(0);
         const propComponentKey = ref(0);
-        const title = ref('Deposit Details');
+        const title = ref('Balance Details');
         const companyID = computed(()=> store.state.userData.company_id);
-        const depositID = ref('');
-        const depositArray = computed(() => store.state.Security_Deposits.depositArr);
+        const utilityID = ref('');
+        const utilityArray = computed(() => store.state.Utilities.utilityArr);
         const tenantID = ref('');
         const propertyID = ref('');
-        const tenantArray = computed(() => store.state.Tenant_Deposits.tenantLeaseArr);
+        const tenantArray = computed(() => store.state.Active_Tenants.tenantUnitsArr);
         const propertyArray = computed(() => store.state.Properties_List.propertyArr);;
-        const idField = 'tenant_deposit_id';
+        const idField = 'tenant_balance_id';
         const selectedIds = ref([]);
         const appModalVisible = ref(false);
-        const depositsList = ref([]);
+        const balancesList = ref([]);
         const appResults = ref([]);
         const appArrLen = ref(0);
         const appCount = ref(0);
@@ -99,40 +99,25 @@ export default{
         const modal_width = ref('35vw');
         const tableColumns = ref([
             {type: "checkbox"},
-            {label: "Date", key:"formatted_date",type: "text", editable: false},
+            {label: "Date", key:"date",type: "text", editable: false},
             {label: "Tenant", key:"tenant_name",type: "text", editable: false},
             {label: "Property", key:"property_name",type: "text", editable: false},
-            {label: "Deposit", key: "security_deposit", type: "text", editable: false},
-            {label: "Charge Mode", key: "deposit_charge_mode", type: "text", editable: false},
-            {label: "Value", key: "deposit_value", type: "text", editable: false},
-            {label: "Amount", key: "deposit_amount", type: "number", editable: false},
-            {label: "Posted", key: "posted", type: "text", editable: false},
-            {label: "Invoice#", key: "invoice_no", type: "text", editable: false},
+            {label: "Category", key: "category", type: "text", editable: false},
+            {label: "Type", key: "transaction_type", type: "text", editable: false},
+            {label: "Utility", key: "utility", type: "text", editable: false},
+            {label: "Description", key: "description", type: "text", editable: false},
+            {label: "Amount", key: "amount", type: "number", editable: false},
+            {label: "Vat", key: "tax_amount", type: "number", editable: false},
+            {label: "Txn#", key: "journal_no", type: "text", editable: false},
         ])
         const showTotals = ref(true);
         const actions = ref([
-            {name: 'delete', icon: 'fa fa-trash', title: 'Delete Deposit', rightName: 'Deleting Tenant Deposit'},
+            {name: 'delete', icon: 'fa fa-trash', title: 'Delete Balance', rightName: 'Deleting Tenant Take-On Balance'},
         ])
-        const tenant_name_search = computed({
-            get: () => store.state.Tenant_Deposits.tenant_name_search,
-            set: (value) => store.commit('Tenant_Deposits/SET_SEARCH_FILTERS', {"tenant_name_search":value}),
-        });
-        const tenant_code_search = computed({
-            get: () => store.state.Tenant_Deposits.tenant_code_search,
-            set: (value) => store.commit('Tenant_Deposits/SET_SEARCH_FILTERS', {"tenant_code_search":value}),
-        });
-        const posted_search = computed({
-            get: () => store.state.Tenant_Deposits.posted_search,
-            set: (value) => store.commit('Tenant_Deposits/SET_SEARCH_FILTERS', {"posted_search":value}),
-        });
-        const from_date_search = computed({
-            get: () => store.state.Tenant_Deposits.from_date_search,
-            set: (value) => store.commit('Tenant_Deposits/SET_SEARCH_FILTERS', {"from_date_search":value}),
-        });
-        const to_date_search = computed({
-            get: () => store.state.Tenant_Deposits.to_date_search,
-            set: (value) => store.commit('Tenant_Deposits/SET_SEARCH_FILTERS', {"to_date_search":value}),
-        });
+        const tenant_name_search = ref("");
+        const tenant_code_search = ref("");
+        const from_date_search = ref("");
+        const to_date_search = ref("");
         const fetchProperties = async() =>{
             await store.dispatch('Properties_List/fetchProperties', {company:companyID.value})
         };
@@ -150,10 +135,6 @@ export default{
             {type:'date', placeholder:"From Date...", value: from_date_search, width:36, title: "Date From Search"},
             {type:'date', placeholder:"To Date...", value: to_date_search, width:36, title: "Date To Search"},
             {
-                type:'dropdown', placeholder:"Posted", value: posted_search, width:48,
-                options: [{text:'Yes',value:'Yes'},{text:'No',value:'No'}]
-            },
-            {
                 type:'search-dropdown', value: propertyID.value, width:72, componentKey: propComponentKey,
                 selectOptions: propertyArray, optionSelected: handleSelectedProperty,
                 searchPlaceholder: 'Property...', dropdownWidth: '350px',
@@ -164,26 +145,26 @@ export default{
         const handleSelectionChange = (ids) => {
             selectedIds.value = ids;
         };
-        const handleSelectedDeposit = async(option) =>{
-            await store.dispatch('Security_Deposits/handleSelectedDeposit', option);
-            depositID.value = store.state.Security_Deposits.depositID;
+        const handleSelectedUtility = async(option) =>{
+            await store.dispatch('Utilities/handleSelectedUtility', option);
+            utilityID.value = store.state.Utilities.utilityID;
         }
         const handleSelectedTenant = async(option) =>{
-            await store.dispatch('Tenant_Deposits/handleSelectedTenantLease', option)
-            tenantID.value = store.state.Tenant_Deposits.tenantLeaseID;
+            await store.dispatch('Active_Tenants/handleSelectedTenantUnit', option)
+            tenantID.value = store.state.Active_Tenants.tenantUnitID;
         }
-        const fetchDeposits = async() =>{
-            await store.dispatch('Security_Deposits/fetchDeposits', {company:companyID.value})
+        const fetchUtilities = async() =>{
+            await store.dispatch('Utilities/fetchUtilities', {company:companyID.value})
         };
         const clearSelectedDeposit = async() =>{
-            await store.dispatch('Security_Deposits/updateState', {depositID: ''});
-            depositID.value = ""
+            await store.dispatch('Utilities/updateState', {utilityID: ''});
+            utilityID.value = ""
         };
         const fetchTenants = async() =>{
-            await store.dispatch('Tenant_Deposits/fetchTenantLease', {company:companyID.value})
+            await store.dispatch('Active_Tenants/fetchTenantUnits', {company:companyID.value})
         };
         const clearSelectedTenant = async() =>{
-            await store.dispatch('Tenant_Deposits/updateState', {tenantLeaseID: ''});
+            await store.dispatch('Active_Tenants/updateState', {tenantUnitID: ''});
             tenantID.value = ""
         };
         const formFields = ref([
@@ -191,17 +172,20 @@ export default{
                 type:'search-dropdown', label:"Tenant", value: tenantID.value, componentKey: tntComponentKey,
                 selectOptions: tenantArray, optionSelected: handleSelectedTenant, required: true,
                 searchPlaceholder: 'Select Tenant...', dropdownWidth: '450px', updateValue: "",
-                fetchData: fetchTenants(), clearSearch: clearSelectedTenan 
+                fetchData: fetchTenants(), clearSearch: clearSelectedTenant 
             },
             {  
-                type:'search-dropdown', label:"Security Deposit", value: depositID.value, componentKey: depComponentKey,
-                selectOptions: depositArray, optionSelected: handleSelectedDeposit, required: true,
-                searchPlaceholder: 'Select Deposit...', dropdownWidth: '450px', updateValue: "",
-                fetchData: fetchDeposits(), clearSearch: clearSelectedDeposit
+                type:'search-dropdown', label:"Utility", value: utilityID.value, componentKey: depComponentKey,
+                selectOptions: utilityArray, optionSelected: handleSelectedUtility, required: false,
+                searchPlaceholder: 'Select Utility...', dropdownWidth: '450px', updateValue: "",
+                fetchData: fetchUtilities(), clearSearch: clearSelectedDeposit
             },
             { type: 'date', name: 'date',label: "Date", value: '', required: true },
-            { type: 'dropdown', name: 'default_mode',label: "Charge Mode", value: '', placeholder: "", required: true, options: [{ text: 'Fixed Amount', value: 'Fixed Amount' }, { text: 'Rent Percentage', value: 'Rent Percentage' }] },
-            { type: 'number', name: 'default_value',label: "Default Value", value: 0, required: true },
+            { type: 'dropdown', name: 'transaction_type',label: "Type", value: 'Rent', placeholder: "", required: true, options: [{ text: 'Rent', value: 'Rent' }, { text: 'Utility', value: 'Utility' }, { text: 'Penalty', value: 'Penalty' }] },
+            { type: 'dropdown', name: 'category',label: "Category", value: 'Debit', placeholder: "", required: true, options: [{ text: 'Debit', value: 'Debit' }, { text: 'Credit', value: 'Credit' }] },
+            { type: 'text', name: 'amount',label: "Amount", value: '0', required: true },
+            { type: 'text', name: 'tax_amount',label: "Tax Amount", value: '0', required: true },
+            {required:false}
             
         ]);
         const handleReset = () =>{
@@ -209,12 +193,12 @@ export default{
                 formFields.value[i].value = '';
             }
             tenantID.value = '';
-            depositID.value = '';
+            utilityID.value = '';
         }
         
-        const addNewDeposit = () =>{
+        const addNewBalance = () =>{
             tenantID.value = "";
-            depositID.value = "";
+            utilityID.value = "";
             appModalVisible.value = true;
             handleReset();
             flex_basis.value = '1/3';
@@ -222,14 +206,14 @@ export default{
         }
         const handleActionClick = async(rowIndex, action, row) =>{
             if(action == 'delete'){
-                const depositID = [row[idField]];
+                const utilityID = [row[idField]];
                 let formData = {
                     company: companyID.value,
-                    tenant_deposit: depositID
+                    tenant_balance: utilityID
                 }
 
-                await store.dispatch('Tenant_Deposits/deleteTenantDeposit',formData)
-                searchDeposits();         
+                await store.dispatch('Tenant_Balances/deleteBalance',formData)
+                searchBalances();         
             }
         } 
         const showModalLoader = () =>{
@@ -238,17 +222,18 @@ export default{
         const hideModalLoader = () =>{
             modal_loader.value = "none";
         }
-        const createTenantDeposit = async() =>{
+        const createTenantBalance = async() =>{
             showModalLoader();
             let formData = {
-                security_deposit: depositID.value,
-                security_deposit_id: depositID.value,
+                utility: utilityID.value,
+                utility_id: utilityID.value,
                 date: formFields.value[2].value,
                 tenant: tenantID.value,
                 tenant_id: tenantID.value,
-                deposit_charge_mode: formFields.value[3].value,
-                deposit_value: formFields.value[4].value,
-                posted: 'No',
+                amount: parseFloat(formFields.value[5].value),
+                tax_amount: parseFloat(formFields.value[6].value),
+                transaction_type: formFields.value[3].value,
+                category: formFields.value[4].value,
                 company: companyID.value
             }
 
@@ -258,7 +243,7 @@ export default{
                     errors.value.push(formFields.value[i].label);
                 }
             }
-            if(tenantID.value == '' || depositID.value == ''){
+            if(tenantID.value == ''){
                 errors.value.push('error')
             }
 
@@ -267,77 +252,77 @@ export default{
                 hideModalLoader();
             }else{
                 try {
-                    const response = await store.dispatch('Tenant_Deposits/createTenantDeposit', formData);
+                    const response = await store.dispatch('Tenant_Balances/createTenantBalance', formData);
                     if (response && response.status === 200) {
                         hideModalLoader();
-                        toast.success('Tenant Deposit created successfully!');
+                        toast.success('Balance added successfully!');
                         handleReset();
                         tntComponentKey.value += 1;
                         depComponentKey.value += 1;
                     } else {
-                        toast.error('An error occurred while creating the deposit.');
+                        toast.error('An error occurred while adding the Balance.');
                     }
                 } catch (error) {
                     console.error(error.message);
-                    toast.error('Failed to create deposit: ' + error.message);
+                    toast.error('Failed to add Balance: ' + error.message);
                 } finally {
                     hideModalLoader();
-                    store.dispatch('Tenant_Deposits/updateState',{tenantLeaseID:''})
-                    store.dispatch('Security_Deposits/updateState',{depositID:''})
-                    searchDeposits();
+                    store.dispatch('Active_Tenants/updateState',{tenantUnitID:''})
+                    store.dispatch('Utilities/updateState',{utilityID:''})
+                    searchBalances();
                 }
             }
         }
-        const removeDeposit = async() =>{
+        const removeBalance = async() =>{
             if(selectedIds.value.length == 1){
                 let formData = {
                     company: companyID.value,
-                    tenant_deposit: selectedIds.value
+                    tenant_balance: selectedIds.value
                 }
                 try{
-                    const response = await store.dispatch('Tenant_Deposits/deleteTenantDeposit',formData)
-                    if(response && response.status == 200){
-                        toast.success("Tenant Deposit Removed Succesfully");
-                        searchDeposits();
+                    const response = await store.dispatch('Tenant_Balances/deleteBalance',formData)
+                    if(response && response.data.msg == "Success"){
+                        toast.success("Balance Removed Succesfully");
+                        searchBalances();
                     }
                 }
                 catch(error){
                     console.error(error.message);
-                    toast.error('Failed to remove deposit: ' + error.message);
+                    toast.error('Failed to remove Balance: ' + error.message);
                 }
                 finally{
                     selectedIds.value = [];
                     pageComponentKey.value += 1;
                 }
             }else if(selectedIds.value.length > 1){
-                toast.error("You have selected more than 1 deposit") 
+                toast.error("You have selected more than 1 Balance") 
             }else{
-                toast.error("Please Select A Deposit To Remove")
+                toast.error("Please Select A Balance To Remove")
             }
         }
-        const removeDeposits = async() =>{
+        const removeBalances = async() =>{
             if(selectedIds.value.length){
                 let formData = {
                     company: companyID.value,
-                    tenant_deposit: selectedIds.value
+                    tenant_balance: selectedIds.value
                 }
                 try{
-                    const response = await store.dispatch('Tenant_Deposits/deleteTenantDeposit',formData)
-                    if(response && response.status == 200){
-                        toast.success("Deposits Removed Succesfully");
-                        searchDeposits();
+                    const response = await store.dispatch('Tenant_Balances/deleteBalance',formData)
+                    if(response && response.data.msg == "Success"){
+                        toast.success("Balance(s) Removed Succesfully");
+                        searchBalances();
                     }
                 }
                 catch(error){
                     console.error(error.message);
-                    toast.error('Failed to remove deposit(s): ' + error.message);
+                    toast.error('Failed to remove Balance(s): ' + error.message);
                 }
                 finally{
                     selectedIds.value = [];
                     pageComponentKey.value += 1;
                 }
             }else{
-                toast.error("Please Select Deposit(s) To Remove")
+                toast.error("Please Select Balances(s) To Remove")
             }
         }
         const showLoader = () =>{
@@ -346,7 +331,7 @@ export default{
         const hideLoader = () =>{
             loader.value = "none";
         }
-        const searchDeposits = () =>{
+        const searchBalances = () =>{
             showLoader();
             let formData = {
                 tenant_code: tenant_code_search.value,
@@ -354,19 +339,17 @@ export default{
                 from_date: from_date_search.value,
                 to_date: to_date_search.value,
                 property: propertyID.value,
-                deposit: depositID.value,
-                posted: posted_search.value,
-                company_id: companyID.value,
+                company: companyID.value,
                 page_size: selectedValue.value
             }
  
             axios
-            .post(`api/v1/tenant-deposits-search/?page=${currentPage.value}`,formData)
+            .post(`api/v1/tenant-balances-search/?page=${currentPage.value}`,formData)
             .then((response)=>{
-                depositsList.value = response.data.results;
-                store.commit('Tenant_Deposits/LIST_TENANT_DEPOSITS', depositsList.value)
+                balancesList.value = response.data.results;
+                store.commit('Tenant_Balances/LIST_BALANCES', balancesList.value)
                 appResults.value = response.data;
-                appArrLen.value = depositsList.value.length;
+                appArrLen.value = balancesList.value.length;
                 appCount.value = appResults.value.count;
                 pageCount.value = Math.ceil(appCount.value / selectedValue.value);
                 
@@ -386,7 +369,7 @@ export default{
         };
         const selectSearchQuantity = (newValue) =>{
             selectedValue.value = newValue;
-            searchDeposits(selectedValue.value);
+            searchBalances(selectedValue.value);
         };
         const loadPrev = () =>{
             if (currentPage.value <= 1){
@@ -395,7 +378,7 @@ export default{
                 currentPage.value -= 1;
             }
             
-            searchDeposits();
+            searchBalances();
         }
         const loadNext = () =>{
             if(currentPage.value >= pageCount.value){
@@ -404,15 +387,15 @@ export default{
                 currentPage.value += 1;
             }
             
-            searchDeposits();
+            searchBalances();
         }
         const firstPage = ()=>{
             currentPage.value = 1;
-            searchDeposits();
+            searchBalances();
         }
         const lastPage = () =>{
             currentPage.value = pageCount.value;
-            searchDeposits();
+            searchBalances();
         }
         const resetFilters = () =>{
             currentPage.value = 1;
@@ -420,16 +403,16 @@ export default{
             propComponentKey.value += 1;
             propertyID.value = "";
             store.commit('Tenant_Deposits/RESET_SEARCH_FILTERS')
-            searchDeposits();
+            searchBalances();
         }
         const closeModal = () =>{
             appModalVisible.value = false;
-            depositID.value = "";
+            utilityID.value = "";
             tenantID.value = "";
-            store.dispatch('Tenant_Deposits/updateState',{tenantLeaseID:''})
-            store.dispatch('Security_Deposits/updateState',{depositID:''})
+            store.dispatch('Active_Tenants/updateState',{tenantUnitID:''})
+            store.dispatch('Utilities/updateState',{utilityID:''})
         };
-        const printDepositsList = () =>{
+        const printBalancesList = () =>{
             showLoader();
             let formData = {
                 tenant_code: tenant_code_search.value,
@@ -437,13 +420,11 @@ export default{
                 from_date: from_date_search.value,
                 to_date: to_date_search.value,
                 property: propertyID.value,
-                deposit: depositID.value,
-                posted: posted_search.value,
-                company_id: companyID.value
+                company_id: companyID.value,
             } 
 
             axios
-            .post("api/v1/export-tenant-deposits-pdf/", formData, { responseType: 'blob' })
+            .post("api/v1/export-tenant-balances-pdf/", formData, { responseType: 'blob' })
                 .then((response)=>{
                     if(response.status == 200){
                         const blob1 = new Blob([response.data]);
@@ -460,15 +441,15 @@ export default{
             })
         }
         onMounted(() =>{
-            searchDeposits();
+            searchBalances();
         })
         return{
-            showTotals,title, searchDeposits, idField, selectedIds, actions, depositsList, appArrLen,appCount,appResults,appModalVisible,formFields,
+            showTotals,title, searchBalances, idField, selectedIds, actions, balancesList, appArrLen,appCount,appResults,appModalVisible,formFields,
             addButtonLabel, searchFilters,tableColumns,resetFilters,loadPrev,loadNext,firstPage,lastPage,currentPage,
-            showNextBtn,showPreviousBtn,addNewDeposit, handleActionClick,createTenantDeposit,displayButtons,handleReset,
+            showNextBtn,showPreviousBtn,addNewBalance, handleActionClick,createTenantBalance,displayButtons,handleReset,
             modal_top, modal_left, modal_width, showLoader, loader, hideLoader, modal_loader, showModalLoader, hideModalLoader,
-            closeModal, handleSelectionChange, removeDeposit, removeDeposits, pageComponentKey, flex_basis, flex_basis_percentage,
-            addingRight,rightsModule,printDepositsList,selectSearchQuantity,selectedValue
+            closeModal, handleSelectionChange, removeBalance, removeBalances, pageComponentKey, flex_basis, flex_basis_percentage,
+            addingRight,rightsModule,printBalancesList,selectSearchQuantity,selectedValue
         }
     }
 }

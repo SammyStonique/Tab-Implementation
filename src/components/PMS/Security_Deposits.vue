@@ -307,6 +307,7 @@ export default{
             })
         }
         const resetFilters = () =>{
+            currentPage.value = 1;
             store.commit('Security_Deposits/RESET_SEARCH_FILTERS')
             searchDeposits();
         }
@@ -382,7 +383,7 @@ export default{
         })
         return{
             title, searchDeposits,resetFilters, addButtonLabel, searchFilters, tableColumns, depositList,
-            propResults, propArrLen, propCount, pageCount, showNextBtn, showPreviousBtn,
+            currentPage,propResults, propArrLen, propCount, pageCount, showNextBtn, showPreviousBtn,
             loadPrev, loadNext, firstPage, lastPage, idField, actions, handleActionClick, propModalVisible, closeModal,
             submitButtonLabel, showModal, addNewDeposit, showLoader, loader, hideLoader, modal_loader, modal_top, modal_left, modal_width,displayButtons,
             showModalLoader, hideModalLoader, saveDeposit, formFields, handleSelectionChange, flex_basis,flex_basis_percentage,

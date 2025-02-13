@@ -10,6 +10,7 @@ import Patients_List from './HMS/Patients_List';
 import Medical_Fees from './HMS/Medical_Fees';
 import Doctors from './HMS/Doctors';
 import userData from './userData';
+
 import Properties_List from './PMS/Properties_List';
 import Zones from './PMS/Zones';
 import Landlords_List from './PMS/Landlords_List';
@@ -31,6 +32,7 @@ import Lease_Fees from './PMS/Lease_Fees';
 import Exit_Charges from './PMS/Exit_Charges';
 import Templates from './PMS/Templates';
 import Late_Payment_Fees from './PMS/Late_Payment_Fees';
+import Tenant_Balances from './PMS/Tenant_Balances';
 
 import Client_Categories from './FA/Client_Categories';
 import Currencies from './FA/Currencies';
@@ -110,7 +112,7 @@ export default createStore({
     
     Properties_List, Zones, Landlords_List, Units_List, Active_Tenants, Utilities,Security_Deposits,Variation_Periods, Tenant_Deposits,Terminated_Leases,
     Meter_Setup, Meter_Readings,Tenant_Prepayments,Prepayment_Allocations,Statement_Transactions,Property_Statements,Tenant_Arrears,Lease_Fees,Exit_Charges,
-    Templates,Late_Payment_Fees,
+    Templates,Late_Payment_Fees,Tenant_Balances,
 
     Item_Categories,Items_Catalog,Uom,Retail_Outlets,Item_Location,Outlet_Counters,Direct_Sales,Counter_Channels,Direct_Purchases,
     Stock_Adjustments,Stock_Transfers,

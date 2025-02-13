@@ -277,6 +277,7 @@ export default{
             searchAllocations();
         }
         const resetFilters = () =>{
+            currentPage.value = 1;
             store.commit('Prepayment_Allocations/RESET_SEARCH_FILTERS')
             searchAllocations();
         }
@@ -290,7 +291,7 @@ export default{
         })
         return{
             showTotals,showAddButton,title, searchAllocations, idField, selectedIds, actions, prepaymentsList, appArrLen,appCount,appResults,appModalVisible,
-            addButtonLabel, searchFilters,tableColumns,resetFilters,loadPrev,loadNext,firstPage,lastPage,showNextBtn,showPreviousBtn, handleActionClick,displayButtons,
+            addButtonLabel, searchFilters,tableColumns,resetFilters,currentPage,loadPrev,loadNext,firstPage,lastPage,showNextBtn,showPreviousBtn, handleActionClick,displayButtons,
             modal_top, modal_left, modal_width, showLoader, loader, hideLoader, modal_loader, showModalLoader, hideModalLoader,
             closeModal, handleSelectionChange, pageComponentKey, flex_basis, flex_basis_percentage, removeAllocation, removeAllocations,
             rightsModule,selectSearchQuantity,selectedValue

@@ -280,7 +280,7 @@ export default{
         })
         return{
             searchTemplates,resetFilters, addButtonLabel, searchFilters, tableColumns, templatesList,
-            propResults, propArrLen, propCount, pageCount, showNextBtn, showPreviousBtn,selectSearchQuantity,selectedValue,
+            currentPage,propResults, propArrLen, propCount, pageCount, showNextBtn, showPreviousBtn,selectSearchQuantity,selectedValue,
             loadPrev, loadNext, firstPage, lastPage, idField, actions, handleActionClick,
             submitButtonLabel, addNewTemplate, showLoader, loader,handleSelectionChange,removeTemplate, removeTemplates,addingRight,rightsModule
         }

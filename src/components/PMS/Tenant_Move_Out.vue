@@ -485,6 +485,7 @@ export default{
             searchTenants(selectedValue.value);
         };
         const resetFilters = () =>{
+            currentPage.value = 1;
             selectedValue.value = 50;
             name_search.value = "";
             tenant_code_search.value = "";
@@ -683,7 +684,7 @@ export default{
         return{
             searchTenants,resetFilters, searchFilters, tableColumns, tenantList,dropdownWidth,showAddButton,displayButtons,
             propResults, propArrLen, propCount, pageCount, showNextBtn, showPreviousBtn,flex_basis,flex_basis_percentage,
-            loadPrev, loadNext, firstPage, lastPage, idField, actions, handleActionClick,
+            currentPage,loadPrev, loadNext, firstPage, lastPage, idField, actions, handleActionClick,
             submitButtonLabel, showModal, showLoader, loader, hideLoader,
             handleSelectionChange,rightsModule,printTenantsList,selectSearchQuantity,selectedValue,
             modal_left,modal_top,modal_width,trans_modal_loader,transModalVisible,title,showTransModalLoader,hideTransModalLoader,closeTransModal,

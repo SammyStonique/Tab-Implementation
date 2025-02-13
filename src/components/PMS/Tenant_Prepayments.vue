@@ -338,6 +338,7 @@ export default{
             searchPrepayments();
         }
         const resetFilters = () =>{
+            currentPage.value = 1;
             store.commit('Tenant_Prepayments/RESET_SEARCH_FILTERS')
             searchPrepayments();
         }
@@ -352,7 +353,7 @@ export default{
         return{
             showTotals,title, searchPrepayments, idField, selectedIds, actions, prepaymentsList, appArrLen,appCount,appResults,appModalVisible,formFields,
             addButtonLabel, searchFilters,tableColumns,resetFilters,loadPrev,loadNext,firstPage,lastPage,
-            showNextBtn,showPreviousBtn, handleActionClick,allocatePrepayment,displayButtons,handleReset,
+            currentPage,showNextBtn,showPreviousBtn, handleActionClick,allocatePrepayment,displayButtons,handleReset,
             modal_top, modal_left, modal_width, showLoader, loader, hideLoader, modal_loader, showModalLoader, hideModalLoader,
             closeModal, handleSelectionChange, pageComponentKey, flex_basis, flex_basis_percentage, prepaymentAllocations,
             addingRight,rightsModule,selectSearchQuantity,selectedValue

@@ -397,7 +397,9 @@ export default{
                 propResults.value = response.data;
                 propArrLen.value = invoicesList.value.length;
                 propCount.value = propResults.value.count;
+                console.log("THE RESULTS COUNT IS ",propCount.value)
                 pageCount.value = Math.ceil(propCount.value / selectedValue.value);
+                console.log("THE PAGE COUNT IS ",pageCount.value)
                 if(response.data.next){
                     showNextBtn.value = true;
                 }
@@ -417,6 +419,7 @@ export default{
             searchInvoices(selectedValue.value);
         };
         const resetFilters = () =>{
+            currentPage.value = 1;
             selectedValue.value = 50;
             tenant_name_search.value = "";
             tenant_code_search.value = "";
@@ -672,7 +675,7 @@ export default{
         })
         return{
             showTotals,title, searchInvoices,resetFilters, addButtonLabel, searchFilters, tableColumns, invoicesList,
-            propResults, propArrLen, propCount, pageCount, showNextBtn, showPreviousBtn,invModalVisible,
+            currentPage,propResults, propArrLen, propCount, pageCount, showNextBtn, showPreviousBtn,invModalVisible,
             loadPrev, loadNext, firstPage, lastPage, idField, actions, handleActionClick, propModalVisible, closeModal,
             submitButtonLabel, showModal, bookInvoice, showLoader, loader, hideLoader, modal_loader, modal_top, modal_left, modal_width,displayButtons,
             showModalLoader, hideModalLoader, formFields, handleSelectionChange, flex_basis,flex_basis_percentage,

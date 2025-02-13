@@ -456,6 +456,7 @@ export default{
             searchMeterReadings(selectedValue.value);
         };
         const resetFilters = () =>{
+            currentPage.value = 1;
             selectedValue.value = 50;
             unit_number_search.value = "";
             store.commit('Meter_Readings/RESET_SEARCH_FILTERS');
@@ -581,7 +582,7 @@ export default{
         })
         return{
             showTotals,title, searchMeterReadings,resetFilters, addButtonLabel, searchFilters, tableColumns, readingsList,
-            propResults, propArrLen, propCount, pageCount, showNextBtn, showPreviousBtn,
+            currentPage,propResults, propArrLen, propCount, pageCount, showNextBtn, showPreviousBtn,
             loadPrev, loadNext, firstPage, lastPage, idField, actions, handleActionClick, propModalVisible, closeModal,
             submitButtonLabel, showModal, addNewReading, showLoader, loader, hideLoader, modal_loader, modal_top, modal_left, modal_width,displayButtons,
             showModalLoader, hideModalLoader, saveMeterReading, formFields, handleSelectionChange, flex_basis,flex_basis_percentage,

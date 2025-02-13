@@ -418,6 +418,7 @@ export default{
             searchMeterSetups(selectedValue.value);
         };
         const resetFilters = () =>{
+            currentPage.value = 1;
             store.commit('Meter_Setup/RESET_SEARCH_FILTERS')
             searchMeterSetups();
         }
@@ -499,7 +500,7 @@ export default{
         })
         return{
             title, searchMeterSetups,resetFilters, addButtonLabel, searchFilters, tableColumns, setupList,
-            propResults, propArrLen, propCount, pageCount, showNextBtn, showPreviousBtn,selectSearchQuantity,selectedValue,
+            currentPage,propResults, propArrLen, propCount, pageCount, showNextBtn, showPreviousBtn,selectSearchQuantity,selectedValue,
             loadPrev, loadNext, firstPage, lastPage, idField, actions, handleActionClick, propModalVisible, closeModal,
             submitButtonLabel, showModal, addNewSetup, showLoader, loader, hideLoader, modal_loader, modal_top, modal_left, modal_width,displayButtons,
             showModalLoader, hideModalLoader, saveMeterSetup, formFields, handleSelectionChange, flex_basis,flex_basis_percentage,

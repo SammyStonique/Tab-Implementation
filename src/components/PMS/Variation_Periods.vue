@@ -303,6 +303,7 @@ export default{
             })
         }
         const resetFilters = () =>{
+            currentPage.value = 1;
             store.commit('Variation_Periods/RESET_SEARCH_FILTERS')
             searchPeriods();
         }
@@ -378,7 +379,7 @@ export default{
         })
         return{
             title, searchPeriods,resetFilters, addButtonLabel, searchFilters, tableColumns, periodList,
-            propResults, propArrLen, propCount, pageCount, showNextBtn, showPreviousBtn,addingRight,rightsModule,
+            currentPage,propResults, propArrLen, propCount, pageCount, showNextBtn, showPreviousBtn,addingRight,rightsModule,
             loadPrev, loadNext, firstPage, lastPage, idField, actions, handleActionClick, propModalVisible, closeModal,
             submitButtonLabel, showModal, addNewPeriod, showLoader, loader, hideLoader, modal_loader, modal_top, modal_left, modal_width,displayButtons,
             showModalLoader, hideModalLoader, savePeriod, formFields, handleSelectionChange, flex_basis,flex_basis_percentage,

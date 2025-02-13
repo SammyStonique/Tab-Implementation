@@ -132,6 +132,13 @@
     
                     </div>
                     <div class="py-2 px-3 pl-4 w-full hover:bg-slate-500 hover:w-full">
+                        <button class="flex text-sm w-full" @click="openPage({'PMS':'Tenant_Balances'})">
+                            <i class="fa fa-list-ul pt-2 mr-2" aria-hidden="true"></i>
+                            <p class="">Take-On Balances</p>
+                        </button>
+    
+                    </div>
+                    <div class="py-2 px-3 pl-4 w-full hover:bg-slate-500 hover:w-full">
                         <button class="flex text-sm w-full" @click="openPage({'PMS':'Tenant_Prepayments'})">
                             <i class="fa fa-list-ul pt-2 mr-2" aria-hidden="true"></i>
                             <p class="">Tenant Prepayments</p>

@@ -464,6 +464,7 @@ export default{
             searchTenants(selectedValue.value);
         };
         const resetFilters = () =>{
+            currentPage.value = 1;
             selectedValue.value = 50;
             propComponentKey.value += 1;
             propertyID.value = "";
@@ -631,7 +632,7 @@ export default{
         })
         return{
             searchTenants,resetFilters, addButtonLabel, searchFilters, tableColumns, tenantList,dropdownWidth,displayButtons,
-            propResults, propArrLen, propCount, pageCount, showNextBtn, showPreviousBtn,flex_basis,flex_basis_percentage,
+            currentPage,propResults, propArrLen, propCount, pageCount, showNextBtn, showPreviousBtn,flex_basis,flex_basis_percentage,
             loadPrev, loadNext, firstPage, lastPage, idField, actions, handleActionClick,utilFormFields,showDetails,detailsTitle,hideDetails,
             submitButtonLabel, showModal, addNewTenant, showLoader, loader, hideLoader, importTenants, removeTenant, removeTenants,
             handleSelectionChange,addingRight,rightsModule,printTenantsList,selectSearchQuantity,selectedValue,

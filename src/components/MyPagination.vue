@@ -10,6 +10,7 @@
                 <div class="hidden">{{ showNextBtn }}</div>
                 <button class="px-2  hover:bg-slate-800 hover:text-white" @click="lastPage"><i class="fa fa-angle-double-right" aria-hidden="true"></i></button>
             </div>
+            <p class="ml-3" style="font-size: 12px">Page {{ currentPage }}</p>
         </div>
         <div class="basis-1/2 flex justify-end text-right">
             <select @change="selectSearchQuantity" v-model="localValue" class="bg-slate-50 rounded border border-gray-400 text-sm pl-2 w-16 mr-3">

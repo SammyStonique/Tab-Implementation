@@ -290,6 +290,7 @@ export default{
             })
         }
         const resetFilters = () =>{
+            currentPage.value = 1;
             landlordSearchID.value = null;
             propertySearchID.value = null;
             propComponentKey.value += 1;
@@ -510,7 +511,7 @@ export default{
         })
         return{
             mainComponentKey, title, searchStatements,resetFilters, addButtonLabel, searchFilters, tableColumns, statementsList,
-            propResults, propArrLen, propCount, pageCount, showNextBtn, showPreviousBtn,
+            currentPage,propResults, propArrLen, propCount, pageCount, showNextBtn, showPreviousBtn,
             loadPrev, loadNext, firstPage, lastPage, idField, actions, handleActionClick, propModalVisible, closeModal,
             submitButtonLabel, showModal, addNewStatement, showLoader, loader, hideLoader, modal_loader, modal_top, modal_left, modal_width,displayButtons,
             showModalLoader, hideModalLoader, handleSelectionChange, flex_basis,flex_basis_percentage,

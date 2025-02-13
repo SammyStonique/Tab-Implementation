@@ -808,7 +808,7 @@ export default{
         })
         return{
             showTotals,mainComponentKey, title, searchReceipts,resetFilters, addButtonLabel, searchFilters, tableColumns, receiptsList,
-            propResults, propArrLen, propCount, pageCount, showNextBtn, showPreviousBtn,formFields,
+            currentPage,propResults, propArrLen, propCount, pageCount, showNextBtn, showPreviousBtn,formFields,
             loadPrev, loadNext, firstPage, lastPage, idField, actions, handleActionClick, propModalVisible, closeModal,handleReset,
             submitButtonLabel, showModal, addNewReceipt, showLoader, loader, hideLoader, modal_loader, modal_top, modal_left, modal_width,displayButtons,
             showModalLoader, hideModalLoader, handleSelectionChange, flex_basis,flex_basis_percentage,reverseTenantReceipt,

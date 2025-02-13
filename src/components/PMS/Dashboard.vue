@@ -37,7 +37,7 @@
                     </div>
                     <div class="w-3/4 px-2">
                       <p class="font-bold">{{tenantsCount}}</p>
-                      <p class="font-light text-sm">Tenants</p>
+                      <p class="font-light text-sm">Active Tenants</p>
                     </div>
                   </div>
                 </div>
@@ -67,31 +67,6 @@
           <div class="w-full rounded-lg py-3 px-8 bg-white appointments-table">
               <h1 class="font-bold mb-3">Rent Collection</h1>
               <BarChart :data="barChartData" :options="barChartOptions" />
-          </div>
-        </div>
-        <div class="w-1/4">
-          <div class="rounded-lg bg-blue-900 h-64 p-2 mb-3 text-white">
-            <h1 class="font-bold mb-2">Tenant Rewards List</h1>
-            <table class="table-auto border-collapse w-full">
-              <thead class="font-thin text-left text-sm bg-blue-900">
-                <th></th>
-                <th>Name</th>
-                <th>Status</th>
-            </thead>
-            <tbody class="text-sm py-2">
-              <tr class="py-8" v-for="doc,index in popularDoctors" :key="index">
-                <td class="py-2">{{ index + 1 }}</td>
-                <td class="py-2">{{ doc}}</td>
-                <td class="py-2">
-                  <button class="rounded-full w-full bg-white p-1.5 text-green-800">Available</button>
-                </td>
-              </tr>
-              
-            </tbody>
-            </table>
-          </div>
-          <div class="rounded-lg bg-white h-56 p-2 mb-3">
-            <h1 class="font-bold">Terminated Tenants</h1>
           </div>
         </div>
       </div>
