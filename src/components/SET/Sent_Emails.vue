@@ -3,15 +3,15 @@
         <PageComponent 
             :loader="loader" @showLoader="showLoader" @hideLoader="hideLoader"
             :addButtonLabel="addButtonLabel"
-            @handleAddNew="composeSMS"
+            @handleAddNew="composeEmail"
             :searchFilters="searchFilters"
-            @searchPage="searchSMSs"
+            @searchPage="searchEmails"
             @resetFilters="resetFilters"
             @printList="printList"
             :addingRight="addingRight"
             :rightsModule="rightsModule"
             :columns="tableColumns"
-            :rows="smsList"
+            :rows="emailsList"
             :actions="actions"
             :idField="idField"
             @handleSelectionChange="handleSelectionChange"
@@ -33,7 +33,8 @@
             :loader="test_modal_loader" @showLoader="showTestModalLoader" @hideLoader="hideTestModalLoader" >
             <DynamicForm 
                 :fields="formFields1" :flex_basis="flex_basis" :flex_basis_percentage="flex_basis_percentage" 
-                :displayButtons="displayButtons" @handleSubmit="sendTestSMS" @handleReset="handleTestReset"
+                :displayButtons="displayButtons" @handleSubmit="sendTestEmail" @handleReset="handleTestReset"
+                @file-changed="handleFileChange"
             />
         </MovableModal>
 </template>
@@ -48,7 +49,7 @@ import { useStore } from "vuex";
 import { useToast } from "vue-toastification";
 
 export default{
-    name: 'Sent_SMS',
+    name: 'Sent_Emails',
     components:{
         PageComponent,MovableModal,DynamicForm
     },
@@ -58,14 +59,14 @@ export default{
         const loader = ref('none');
         const test_modal_loader = ref('none');
         const testModalVisible = ref(false);
-        const idField = 'sent_sms_id';
-        const addButtonLabel = ref('Compose SMS');
-        const testTitle = ref('Compose SMS');
-        const addingRight = ref('Sending System SMS');
+        const idField = 'sent_email_id';
+        const addButtonLabel = ref('Compose Email');
+        const testTitle = ref('Compose Email');
+        const addingRight = ref('Sending System Emails');
         const rightsModule = ref('Settings');
         const submitButtonLabel = ref('Add');
         const selectedIds = ref([]);
-        const smsList = ref([]);
+        const emailsList = ref([]);
         const propResults = ref([]);
         const propArrLen = ref(0);
         const propCount = ref(0);
@@ -83,47 +84,70 @@ export default{
         const displayButtons = ref(true);
         const showModal = ref(false);
         const errors = ref([]);
+        const upload_file = ref('');
+        const filePath = ref('');
+        const computedFilePath = ref('');
         const tableColumns = ref([
             {type: "checkbox"},
             {label: "Date", key:"date"},
             {label: "Recipient Name", key:"recipient_name"},
-            {label: "Phone Number", key:"number"},
-            {label: "Message", key:"status_description",maxWidth:"2000px"},
+            {label: "Recipient Email", key:"recipient_email"},
+            {label: "Subject", key:"email_subject"},
+            {label: "Email Body", key:"email_body",maxWidth:"2000px"},
             {label: "Status", key:"status_code"},
-            // {label: "Message ID", key:"message_id",maxWidth:"500px"},
-            {label: "Cost", key:"cost"},
+            
         ])
         const actions = ref([
-            {name: 'resend', icon: 'fas fa-sync-alt', title: 'Resend', rightName: 'Sending System SMS'},
+            {name: 'resend', icon: 'fas fa-sync-alt', title: 'Resend', rightName: 'Sending System Emails'},
         ])
         const companyID = computed(()=> store.state.userData.company_id);
-        const phone_number_search = ref('');
+        const email_search = ref('');
         const status_search = ref('');
         const searchFilters = ref([
-            {type:'text', placeholder:"Phone Number...", value: phone_number_search, width:56,},
+            {type:'text', placeholder:"Email Address...", value: email_search, width:56,},
             {type:'text', placeholder:"Status...", value: status_search, width:56,},
         ]);
         const handleSelectionChange = (ids) => {
             selectedIds.value = ids;
         };
 
+        const handleFileChange = (fileData) => {
+            filePath.value = fileData.filePath;
+            upload_file.value = fileData.file;
+            console.log("File path updated to: ", filePath.value);
+            console.log("The file updated to: ", upload_file.value);
+        };
+
         const formFields1 = ref([]);
         const updateFormFields1 = () => {
             formFields1.value = [
                 { type: 'text', name: 'recepient_names',label: "Recepient Name(s)", value: '', required: false, placeholder: "Jack,Jane" },
-                { type: 'text', name: 'phone_number',label: "Phone Number(s)", value: '', required: true, placeholder: "+2547XXXXXXXX,+2547XXXXXXXX" },
+                { type: 'text', name: 'phone_number',label: "Email Address(s)", value: '', required: true, placeholder: "test@test.com" },
+                { type: 'text', name: 'subject',label: "Subject", value: '', required: false, placeholder: "" },
                 {type:'text-area', label:"Message", value: '', textarea_rows: '4', textarea_cols: '56', required: true},
+                { type: 'file', name: 'file-input',label: "Attachment", value: '', filePath: computedFilePath.value, required: false, placeholder: "", accepted_formats: "*/*", method: handleFileChange},
             ];
         };
   
-        const sendTestSMS = async() =>{
+        const sendTestEmail = async() =>{
             showTestModalLoader();
-            let formData = {
-                content: formFields1.value[2].value,
-                recepient_names: [formFields1.value[0].value],
-                phone_numbers: [formFields1.value[1].value],
-                company: companyID.value
-            }
+            let recepient_names_array = [formFields1.value[0].value]
+            let emails_array = [formFields1.value[1].value]
+            let formData = new FormData();
+            formData.append('subject', formFields1.value[2].value);
+            formData.append('content', formFields1.value[3].value);
+            formData.append('recepient_names', recepient_names_array);
+            formData.append('emails', emails_array);
+            formData.append('attachment', upload_file.value);
+            formData.append('company', companyID.value);
+            // let formData = {
+            //     subject: formFields1.value[2].value,
+            //     content: formFields1.value[3].value,
+            //     recepient_names: [formFields1.value[0].value],
+            //     emails: [formFields1.value[1].value],
+            //     attachment: upload_file.value,
+            //     company: companyID.value
+            // }
             errors.value = [];
             for(let i=0; i < formFields1.value.length; i++){
                 if(formFields1.value[i].value =='' && formFields1.value[i].required == true){
@@ -134,18 +158,20 @@ export default{
                 toast.error('Fill In Required Fields');
                 hideTestModalLoader();
             }else{
+                console.log("THE FORM DATA IS ",formData)
+                // hideTestModalLoader();
                 try {
-                    const response = await axios.post('api/v1/test-send-sms/', formData)
+                    const response = await axios.post('api/v1/test-send-email/', formData)
                     if(response && response.data.msg === "Success") {
                         hideTestModalLoader();
-                        toast.success('SMS Sent!');
+                        toast.success('Email Sent!');
                         handleTestReset();
                     }else {
-                        toast.error('An error occurred while sending the SMS.');
+                        toast.error('An error occurred while sending the Email.');
                     }
                 } catch (error) {
                     console.error(error.message);
-                    toast.error('Failed to send SMS: ' + error.message);
+                    toast.error('Failed to send Email: ' + error.message);
                 } finally {
                     hideTestModalLoader();
                 }
@@ -170,22 +196,22 @@ export default{
         const hideLoader = () =>{
             loader.value = "none";
         }
-        const searchSMSs = () =>{
+        const searchEmails = () =>{
             showLoader();
             showNextBtn.value = false;
             showPreviousBtn.value = false;
             let formData = {
-                phone_number: phone_number_search.value,
+                email: email_search.value,
                 status: status_search.value,
                 company_id: companyID.value,
                 page_size: selectedValue.value
             } 
             axios
-            .post(`api/v1/sent-sms-search/?page=${currentPage.value}`,formData)
+            .post(`api/v1/sent-emails-search/?page=${currentPage.value}`,formData)
             .then((response)=>{
-                smsList.value = response.data.results;
+                emailsList.value = response.data.results;
                 propResults.value = response.data;
-                propArrLen.value = smsList.value.length;
+                propArrLen.value = emailsList.value.length;
                 propCount.value = propResults.value.count;
                 pageCount.value = Math.ceil(propCount.value / selectedValue.value);
                 if(response.data.next){
@@ -204,13 +230,14 @@ export default{
         };
         const selectSearchQuantity = (newValue) =>{
             selectedValue.value = newValue;
-            searchSMSs(selectedValue.value);
+            searchEmails(selectedValue.value);
         };
         const resetFilters = () =>{
+            currentPage.value = 1;
             selectedValue.value = 50;
-            phone_number_search.value = "";
+            email_search.value = "";
             status_search.value = "";
-            searchSMSs();
+            searchEmails();
         }
         const loadPrev = () =>{
             if (currentPage.value <= 1){
@@ -219,7 +246,7 @@ export default{
                 currentPage.value -= 1;
             }
             
-            searchSMSs();
+            searchEmails();
             // scrollToTop();
         }
         const loadNext = () =>{
@@ -229,17 +256,17 @@ export default{
                 currentPage.value += 1;
             }
             
-            searchSMSs();
+            searchEmails();
             // scrollToTop(); 
         }
         const firstPage = ()=>{
             currentPage.value = 1;
-            searchSMSs();
+            searchEmails();
             // scrollToTop();
         }
         const lastPage = () =>{
             currentPage.value = pageCount.value;
-            searchSMSs();
+            searchEmails();
             // scrollToTop();
         }
         const handleActionClick = async(rowIndex, action, row) =>{
@@ -251,7 +278,7 @@ export default{
 
             }
         };
-        const composeSMS = async() =>{
+        const composeEmail = async() =>{
             updateFormFields1();
             handleTestReset();
             flex_basis.value = '1/2';
@@ -263,16 +290,16 @@ export default{
             propModalVisible.value = false;
         }
         onBeforeMount(()=>{
-            searchSMSs();
+            searchEmails();
             
         })
         return{
-            searchSMSs,resetFilters, addButtonLabel, searchFilters, tableColumns, smsList,flex_basis,flex_basis_percentage,
+            searchEmails,resetFilters, addButtonLabel, searchFilters, tableColumns, emailsList,flex_basis,flex_basis_percentage,
             currentPage,propResults, propArrLen, propCount, pageCount, showNextBtn, showPreviousBtn,selectSearchQuantity,selectedValue,
             loadPrev, loadNext, firstPage, lastPage, idField, actions, handleActionClick,modal_left,modal_top,modal_width,
             submitButtonLabel, showLoader, loader,handleSelectionChange,addingRight,rightsModule,displayButtons,
-            composeSMS,testModalVisible,testTitle,test_modal_loader,handleTestReset,showTestModalLoader,hideTestModalLoader,
-            formFields1,sendTestSMS
+            composeEmail,testModalVisible,testTitle,test_modal_loader,handleTestReset,showTestModalLoader,hideTestModalLoader,
+            formFields1,sendTestEmail,handleFileChange
         }
     }
 };

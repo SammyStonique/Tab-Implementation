@@ -164,7 +164,6 @@ export default defineComponent({
                 console.log("The file is ", file);
 
                 emit('file-changed', { file: localFile.value,filePath: localFilePath.value});
-                // displayExcelData();
             }
         };
 

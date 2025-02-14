@@ -59,31 +59,41 @@
           </select>
         </div>
         <div v-else-if="field.type === 'search-dropdown'" class="mr-2 text-left" :class="field.disabled">
-          <div v-if="field.required">
-            <label for="">{{ field.label }} : <em>*</em></label><br />
-          </div>
-          <div v-else>
-            <label for="">{{ field.label }}:</label><br />
-          </div>
-          <SearchableDropdown  
-            :key="field.componentKey"        
-            :options="field.selectOptions"
-            :updateValue="field.updateValue"
-            :dropdownWidth="field.dropdownWidth"
-            :searchPlaceholder="field.searchPlaceholder"
-            @option-selected="field.optionSelected"
-            @clearSearch="field.clearSearch"
-            @fetchData="field.fetchData"
-          />
+            <div v-if="field.required">
+              <label for="">{{ field.label }} : <em>*</em></label><br />
+            </div>
+            <div v-else>
+              <label for="">{{ field.label }}:</label><br />
+            </div>
+            <SearchableDropdown  
+              :key="field.componentKey"        
+              :options="field.selectOptions"
+              :updateValue="field.updateValue"
+              :dropdownWidth="field.dropdownWidth"
+              :searchPlaceholder="field.searchPlaceholder"
+              @option-selected="field.optionSelected"
+              @clearSearch="field.clearSearch"
+              @fetchData="field.fetchData"
+            />
         </div>
         <div v-if="field.type === 'text-area'" class="text-left">
+            <div v-if="field.required">
+              <label for="">{{ field.label }} : <em>*</em></label><br />
+            </div>
+            <div v-else>
+              <label for="">{{ field.label }}:</label><br />
+            </div>
+            <textarea v-model="field.value" :name="field.name" :disabled="field.disabled" class="bg-slate-50 rounded border border-gray-400 text-sm pl-2 pt-2" :rows="field.textarea_rows" :cols="field.textarea_cols"></textarea>
+        </div>
+        <div v-if="field.type === 'file'" class="mr-2 text-left">
           <div v-if="field.required">
             <label for="">{{ field.label }} : <em>*</em></label><br />
           </div>
           <div v-else>
             <label for="">{{ field.label }}:</label><br />
           </div>
-          <textarea v-model="field.value" :name="field.name" :disabled="field.disabled" class="bg-slate-50 rounded border border-gray-400 text-sm pl-2 pt-2" :rows="field.textarea_rows" :cols="field.textarea_cols"></textarea>
+          <input type="text" name="" class="rounded border-2 border-gray-400 text-gray-500 text-sm pl-2 mr-2 mb-4 w-80 h-8" placeholder="" v-model="field.filePath" >
+          <input :accept="field.accepted_formats" @change="onFileChange($event)" id="file-input" :name="field.name" type="file" :disabled="field.disabled" :class="`bg-slate-50 rounded pl-3 border border-gray-400 text-base w-full`" :placeholder="field.placeholder"/>
         </div>
       </div>
       <div class="flex-1 basis-full p-2">
@@ -125,12 +135,18 @@ export default{
       saveButtonLabel: {
         type: String,
         default: 'Save'
-      }
+      },
+      filePath:{
+          type: String,
+          required: true
+      },
   },
   components:{
     SearchableDropdown
   },
   setup(props, {emit}){
+    const localFile = ref(null);
+    const localFilePath = ref('');
     const {proxy} = getCurrentInstance();
     const handleSubmit = () =>{
       emit('handleSubmit');
@@ -153,9 +169,21 @@ export default{
         console.warn('Field method is not defined or is not a function');
       }
     }
+    const onFileChange = (event) =>{
+      const file = event.target.files[0];
+      if (file) {
+          localFile.value = file;
+          localFilePath.value = "C:\\fakepath\\" + file.name;
+
+          console.log("The target is ", event.target);
+          console.log("The file is ", file);
+
+          emit('file-changed', { file: localFile.value,filePath: localFilePath.value});
+      }
+    }
 
     return{
-      handleSubmit, handleReset, handleChange, 
+      handleSubmit, handleReset, handleChange, onFileChange,localFilePath
     }
   }
 
