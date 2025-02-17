@@ -168,6 +168,29 @@ export default{
                 .finally(()=>{
                     hideLoader();
                 })
+            }else if(action == 'send-email'){
+                showLoader();
+                const tenantID = [row['tenant_lease_id']];
+                let formData = {
+                    tenant: tenantID,
+                    company: companyID.value
+                }
+                await axios.post('api/v1/tenant-balance-reminder-email/',formData).
+                then((response)=>{
+                    if(response.data.msg == "Success"){
+                        toast.success("Email Sent!")
+                    }else if(response.data.msg == "Missing Template"){
+                        toast.error("Tenant Balance Reminder Template Not Set!")
+                    }else{
+                        toast.error(response.data.msg)
+                    }
+                })
+                .catch((error)=>{
+                    toast.error(error.message)
+                })
+                .finally(()=>{
+                    hideLoader();
+                })
             }
         } 
         const dropdownOptions = ref([
@@ -186,6 +209,29 @@ export default{
                 then((response)=>{
                     if(response.data.msg == "Success"){
                         toast.success("SMS Sent!")
+                    }else if(response.data.msg == "Missing Template"){
+                        toast.error("Tenant Balance Reminder Template Not Set!")
+                    }else{
+                        toast.error(response.data.msg)
+                    }
+                })
+                .catch((error)=>{
+                    toast.error(error.message)
+                })
+                .finally(()=>{
+                    hideLoader();
+                })
+            }else if(option == 'send-email'){
+                showLoader();
+                const tenantID = selectedIds.value;
+                let formData = {
+                    tenant: tenantID,
+                    company: companyID.value
+                }
+                await axios.post('api/v1/tenant-balance-reminder-email/',formData).
+                then((response)=>{
+                    if(response.data.msg == "Success"){
+                        toast.success("Email Sent!")
                     }else if(response.data.msg == "Missing Template"){
                         toast.error("Tenant Balance Reminder Template Not Set!")
                     }else{

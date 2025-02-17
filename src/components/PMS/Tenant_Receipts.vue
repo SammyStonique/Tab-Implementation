@@ -630,6 +630,43 @@ export default{
                     toast.error("Cannot SMS Reversed Receipt")
                 }
                 
+            }else if(action == 'send-email'){
+                const reversalStatus = row['reversed'];
+                if(reversalStatus == "No"){
+                    showLoader();
+                    const tenantID = [row['tenant_id']];
+                    const receiptID = row['journal_id'];
+                    const particulars = [row['description']];
+                    const particularsAmnt = [row['total_amount']];
+                    const txnNo = [row['journal_no']];
+                    let formData = {
+                        tenant: tenantID,
+                        receipt: receiptID,
+                        particulars: particulars,
+                        transaction_numbers: txnNo,
+                        particulars_amount: particularsAmnt,
+                        journal: null,
+                        company: companyID.value
+                    }
+                    await axios.post('api/v1/tenant-receipt-email/',formData).
+                    then((response)=>{
+                        if(response.data.msg == "Success"){
+                            toast.success("Email Sent!")
+                        }else if(response.data.msg == "Missing Template"){
+                            toast.error("Tenant Receipt Template Not Set!")
+                        }else{
+                            toast.error(response.data.msg)
+                        }
+                    })
+                    .catch((error)=>{
+                        toast.error(error.message)
+                    })
+                    .finally(()=>{
+                        hideLoader();
+                    })
+                }else{
+                    toast.error("Cannot Email Reversed Receipt")
+                }
             }
         };
         const handleShowDetails = async(row) =>{
@@ -757,6 +794,39 @@ export default{
                 then((response)=>{
                     if(response.data.msg == "Success"){
                         toast.success("SMS Sent!")
+                    }else if(response.data.msg == "Missing Template"){
+                        toast.error("Tenant Receipt Template Not Set!")
+                    }else{
+                        toast.error(response.data.msg)
+                    }
+                })
+                .catch((error)=>{
+                    toast.error(error.message)
+                })
+                .finally(()=>{
+                    hideLoader();
+                })
+            }else if(option == 'send-email'){
+                showLoader();
+                const tenantID = [];
+                const receiptID = "";
+                const particulars = "";
+                const particularsAmnt = "";
+                const txnNo = "";
+                const journalID = selectedIds.value
+                let formData = {
+                    tenant: tenantID,
+                    receipt: receiptID,
+                    particulars: particulars,
+                    transaction_numbers: txnNo,
+                    particulars_amount: particularsAmnt,
+                    journal: journalID,
+                    company: companyID.value
+                }
+                await axios.post('api/v1/tenant-receipt-email/',formData).
+                then((response)=>{
+                    if(response.data.msg == "Success"){
+                        toast.success("Email Sent!")
                     }else if(response.data.msg == "Missing Template"){
                         toast.error("Tenant Receipt Template Not Set!")
                     }else{

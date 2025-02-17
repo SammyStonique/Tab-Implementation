@@ -140,14 +140,7 @@ export default{
             formData.append('emails', emails_array);
             formData.append('attachment', upload_file.value);
             formData.append('company', companyID.value);
-            // let formData = {
-            //     subject: formFields1.value[2].value,
-            //     content: formFields1.value[3].value,
-            //     recepient_names: [formFields1.value[0].value],
-            //     emails: [formFields1.value[1].value],
-            //     attachment: upload_file.value,
-            //     company: companyID.value
-            // }
+
             errors.value = [];
             for(let i=0; i < formFields1.value.length; i++){
                 if(formFields1.value[i].value =='' && formFields1.value[i].required == true){
@@ -158,14 +151,13 @@ export default{
                 toast.error('Fill In Required Fields');
                 hideTestModalLoader();
             }else{
-                console.log("THE FORM DATA IS ",formData)
-                // hideTestModalLoader();
                 try {
                     const response = await axios.post('api/v1/test-send-email/', formData)
                     if(response && response.data.msg === "Success") {
                         hideTestModalLoader();
                         toast.success('Email Sent!');
                         handleTestReset();
+                        testModalVisible.value = false;
                     }else {
                         toast.error('An error occurred while sending the Email.');
                     }

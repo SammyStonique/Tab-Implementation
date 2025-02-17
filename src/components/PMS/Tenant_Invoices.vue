@@ -397,9 +397,7 @@ export default{
                 propResults.value = response.data;
                 propArrLen.value = invoicesList.value.length;
                 propCount.value = propResults.value.count;
-                console.log("THE RESULTS COUNT IS ",propCount.value)
                 pageCount.value = Math.ceil(propCount.value / selectedValue.value);
-                console.log("THE PAGE COUNT IS ",pageCount.value)
                 if(response.data.next){
                     showNextBtn.value = true;
                 }
@@ -539,6 +537,39 @@ export default{
                     hideLoader();
                 })
             }
+            else if(action == 'send-email'){
+                showLoader();
+                const tenantID = [row['tenant_id']];
+                const invoiceID = row['journal_id'];
+                const particulars = [row['description']];
+                const particularsAmnt = [row['total_amount']];
+                const txnNo = [row['journal_no']];
+                let formData = {
+                    tenant: tenantID,
+                    invoice: invoiceID,
+                    particulars: particulars,
+                    transaction_numbers: txnNo,
+                    particulars_amount: particularsAmnt,
+                    journal: null,
+                    company: companyID.value
+                }
+                await axios.post('api/v1/tenant-invoice-email/',formData).
+                then((response)=>{
+                    if(response.data.msg == "Success"){
+                        toast.success("Email Sent!")
+                    }else if(response.data.msg == "Missing Template"){
+                        toast.error("Tenant Invoice Template Not Set!")
+                    }else{
+                        toast.error(response.data.msg)
+                    }
+                })
+                .catch((error)=>{
+                    toast.error(error.message)
+                })
+                .finally(()=>{
+                    hideLoader();
+                })
+            }
         }
         const handleShowDetails = async(row) =>{
             activeTab.value = 0;
@@ -624,6 +655,39 @@ export default{
                 then((response)=>{
                     if(response.data.msg == "Success"){
                         toast.success("SMS Sent!")
+                    }else if(response.data.msg == "Missing Template"){
+                        toast.error("Tenant Invoice Template Not Set!")
+                    }else{
+                        toast.error(response.data.msg)
+                    }
+                })
+                .catch((error)=>{
+                    toast.error(error.message)
+                })
+                .finally(()=>{
+                    hideLoader();
+                })
+            }else if(option == 'send-email'){
+                showLoader();
+                const tenantID = [];
+                const invoiceID = "";
+                const particulars = "";
+                const particularsAmnt = "";
+                const txnNo = "";
+                const journalID = selectedIds.value
+                let formData = {
+                    tenant: tenantID,
+                    invoice: invoiceID,
+                    particulars: particulars,
+                    transaction_numbers: txnNo,
+                    particulars_amount: particularsAmnt,
+                    journal: journalID,
+                    company: companyID.value
+                }
+                await axios.post('api/v1/tenant-invoice-email/',formData).
+                then((response)=>{
+                    if(response.data.msg == "Success"){
+                        toast.success("Email Sent!")
                     }else if(response.data.msg == "Missing Template"){
                         toast.error("Tenant Invoice Template Not Set!")
                     }else{
