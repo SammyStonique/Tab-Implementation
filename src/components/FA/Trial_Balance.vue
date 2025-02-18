@@ -75,14 +75,26 @@ export default{
         const customer_ledger_totals = ref(0);
         const vendor_ledger_totals = ref(0);
         const tenant_ledger_totals = ref(0);
+        const member_ledger_totals = ref(0);
+        const loan_ledger_totals = ref(0);
+        const saving_ledger_totals = ref(0);
+        const share_ledger_totals = ref(0);
         const patientLedger = ref('');
         const vendorLedger = ref('');
         const customerLedger = ref('');
         const tenantLedger = ref('');
+        const memberLedger = ref('');
+        const loanLedger = ref('');
+        const savingLedger = ref('');
+        const shareLedger = ref('');
         const merge_patients_setting = ref('No');
         const merge_vendors_setting = ref('No');
         const merge_debtors_setting = ref('No');
         const merge_tenants_setting = ref('No');
+        const merge_members_setting = ref('Yes');
+        const merge_loans_setting = ref('Yes');
+        const merge_savings_setting = ref('Yes');
+        const merge_shares_setting = ref('Yes');
         const trialBalanceList = ref([]);
         const showModal = ref(false);
         const tableColumns = ref([
@@ -222,7 +234,51 @@ export default{
                                 tenantLedger.value = 'credit';
                             }
                             trialBalanceList.value.splice(i, 1);
-                        }
+                        }else if(response.data.results[i].ledger_category === "Members" && merge_members_setting.value === 'Yes'){
+                            if(trialBalanceList.value[i].debits !='-'){
+                                let debits = parseFloat(trialBalanceList.value[i].debits.replace(/,/g, ''))
+                                member_ledger_totals.value += debits;
+                                memberLedger.value = 'debit';
+                            }else if(trialBalanceList.value[i].credits !='-'){
+                                let credits = parseFloat(trialBalanceList.value[i].credits.replace(/,/g, ''))
+                                member_ledger_totals.value -= credits;
+                                memberLedger.value = 'credit';
+                            }
+                            trialBalanceList.value.splice(i, 1);
+                        }else if(response.data.results[i].ledger_category === "Loans" && merge_loans_setting.value === 'Yes'){
+                            if(trialBalanceList.value[i].debits !='-'){
+                                let debits = parseFloat(trialBalanceList.value[i].debits.replace(/,/g, ''))
+                                loan_ledger_totals.value += debits;
+                                loanLedger.value = 'debit';
+                            }else if(trialBalanceList.value[i].credits !='-'){
+                                let credits = parseFloat(trialBalanceList.value[i].credits.replace(/,/g, ''))
+                                loan_ledger_totals.value -= credits;
+                                loanLedger.value = 'credit';
+                            }
+                            trialBalanceList.value.splice(i, 1);
+                        }else if(response.data.results[i].ledger_category === "Savings" && merge_savings_setting.value === 'Yes'){
+                            if(trialBalanceList.value[i].debits !='-'){
+                                let debits = parseFloat(trialBalanceList.value[i].debits.replace(/,/g, ''))
+                                saving_ledger_totals.value += debits;
+                                tenantLedger.value = 'debit';
+                            }else if(trialBalanceList.value[i].credits !='-'){
+                                let credits = parseFloat(trialBalanceList.value[i].credits.replace(/,/g, ''))
+                                saving_ledger_totals.value -= credits;
+                                savingLedger.value = 'credit';
+                            }
+                            trialBalanceList.value.splice(i, 1);
+                        }else if(response.data.results[i].ledger_category === "Shares" && merge_shares_setting.value === 'Yes'){
+                            if(trialBalanceList.value[i].debits !='-'){
+                                let debits = parseFloat(trialBalanceList.value[i].debits.replace(/,/g, ''))
+                                share_ledger_totals.value += debits;
+                                shareLedger.value = 'debit';
+                            }else if(trialBalanceList.value[i].credits !='-'){
+                                let credits = parseFloat(trialBalanceList.value[i].credits.replace(/,/g, ''))
+                                share_ledger_totals.value -= credits;
+                                shareLedger.value = 'credit';
+                            }
+                            trialBalanceList.value.splice(i, 1);
+                        } 
 
                     }
                     if(patient_ledger_totals.value > 0){
@@ -325,6 +381,106 @@ export default{
                             "status": 'Active',
                         }
                         trialBalanceList.value.push(tenantsArr);
+                    }
+                    if(member_ledger_totals.value > 0){
+                        let membersArr ={
+                            "ledger_code": 'MEM',
+                            "ledger_name": 'MEMBERS',
+                            "ledger_type": 'Current Asset',
+                            "ledger_category": 'Members',
+                            "financial_statement": 'Balance Sheet',
+                            "debits": Number(member_ledger_totals.value).toLocaleString(),
+                            "credits": '-',
+                            "status": 'Active',
+                        }
+                        trialBalanceList.value.push(membersArr);
+                    }else if(member_ledger_totals.value < 0){
+                        let membersArr ={
+                            "ledger_code": 'MEM',
+                            "ledger_name": 'MEMBERS',
+                            "ledger_type": 'Current Asset',
+                            "ledger_category": 'Members',
+                            "financial_statement": 'Balance Sheet',
+                            "debits": '-',
+                            "credits": Number(Math.abs(member_ledger_totals.value)).toLocaleString(),
+                            "status": 'Active',
+                        }
+                        trialBalanceList.value.push(membersArr);
+                    }
+                    if(loan_ledger_totals.value > 0){
+                        let loansArr ={
+                            "ledger_code": 'LOAN',
+                            "ledger_name": 'LOANS',
+                            "ledger_type": 'Current Asset',
+                            "ledger_category": 'Loans',
+                            "financial_statement": 'Balance Sheet',
+                            "debits": Number(loan_ledger_totals.value).toLocaleString(),
+                            "credits": '-',
+                            "status": 'Active',
+                        }
+                        trialBalanceList.value.push(loansArr);
+                    }else if(loan_ledger_totals.value < 0){
+                        let loansArr ={
+                            "ledger_code": 'LOAN',
+                            "ledger_name": 'LOANS',
+                            "ledger_type": 'Current Asset',
+                            "ledger_category": 'Loans',
+                            "financial_statement": 'Balance Sheet',
+                            "debits": '-',
+                            "credits": Number(Math.abs(loan_ledger_totals.value)).toLocaleString(),
+                            "status": 'Active',
+                        }
+                        trialBalanceList.value.push(loansArr);
+                    }
+                    if(saving_ledger_totals.value > 0){
+                        let savingsArr ={
+                            "ledger_code": 'SAV',
+                            "ledger_name": 'SAVINGS',
+                            "ledger_type": 'Current Liability',
+                            "ledger_category": 'Savings',
+                            "financial_statement": 'Balance Sheet',
+                            "debits": Number(saving_ledger_totals.value).toLocaleString(),
+                            "credits": '-',
+                            "status": 'Active',
+                        }
+                        trialBalanceList.value.push(savingsArr);
+                    }else if(saving_ledger_totals.value < 0){
+                        let savingsArr ={
+                            "ledger_code": 'SAV',
+                            "ledger_name": 'SAVINGS',
+                            "ledger_type": 'Current Liability',
+                            "ledger_category": 'Savings',
+                            "financial_statement": 'Balance Sheet',
+                            "debits": '-',
+                            "credits": Number(Math.abs(saving_ledger_totals.value)).toLocaleString(),
+                            "status": 'Active',
+                        }
+                        trialBalanceList.value.push(savingsArr);
+                    }
+                    if(share_ledger_totals.value > 0){
+                        let sharesArr ={
+                            "ledger_code": 'SHA',
+                            "ledger_name": 'SHARES',
+                            "ledger_type": 'Owner Equity',
+                            "ledger_category": 'Shares',
+                            "financial_statement": 'Balance Sheet',
+                            "debits": Number(share_ledger_totals.value).toLocaleString(),
+                            "credits": '-',
+                            "status": 'Active',
+                        }
+                        trialBalanceList.value.push(sharesArr);
+                    }else if(share_ledger_totals.value < 0){
+                        let sharesArr ={
+                            "ledger_code": 'SHA',
+                            "ledger_name": 'SHARES',
+                            "ledger_type": 'Owner Equity',
+                            "ledger_category": 'Shares',
+                            "financial_statement": 'Balance Sheet',
+                            "debits": '-',
+                            "credits": Number(Math.abs(share_ledger_totals.value)).toLocaleString(),
+                            "status": 'Active',
+                        }
+                        trialBalanceList.value.push(sharesArr);
                     }
 
                 }

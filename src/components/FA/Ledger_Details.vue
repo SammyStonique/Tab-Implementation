@@ -54,7 +54,7 @@
                                 @printCSV="printCSV"
                             />
                         </div>
-                        <div class="table w-[90%] top-[17.1rem] z-30">
+                        <div class="table w-[95%] top-[17.1rem] z-30">
                             <DynamicTable :key="statementTableKey" :columns="statementColumns" :rows="statementRows" :idField="idFieldStatement" :showActions="showActions" :actions="actionsStatement"/>
                         </div>
                     </div>             
@@ -174,6 +174,12 @@ export default{
             }
 
         };
+        watch([ledgerRunningBalance], () => {
+            if (ledgerRunningBalance.value) {
+                pageComponentKey.value += 1;
+            }
+            
+        }, { immediate: true });
 
         const formFields = ref([]);
         const handleReset = () =>{
@@ -272,7 +278,8 @@ export default{
             showAddButton, searchFilters,statementColumns,resetFilters,loadPrev,loadNext,firstPage,lastPage,
             showNextBtn,showPreviousBtn, handleActionClick,displayButtons,handleReset,
             modal_top, modal_left, modal_width, showLoader, loader, hideLoader, modal_loader, showModalLoader, hideModalLoader,
-            closeModal, handleSelectionChange, pageComponentKey, flex_basis, flex_basis_percentage, ledgerDetails,ledgerRunningBalance, selectTab, activeTab,showActions
+            closeModal, handleSelectionChange, pageComponentKey, flex_basis, flex_basis_percentage, ledgerDetails,ledgerRunningBalance,
+            selectTab, activeTab,showActions
         }
     }
 }

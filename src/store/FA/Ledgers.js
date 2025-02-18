@@ -126,12 +126,27 @@ const actions = {
         })
 
         for(let i=0; i<state.journalsArray.length; i++){
-            if(state.journalsArray[i].debit_amount != 0){
+            if(state.journalsArray[i].txn_type == "BAL" && state.journalsArray[i].debit_amount != 0){
                 running_balance += state.journalsArray[i].debit_amount;
                 state.journalsArray[i]['running_balance'] = Number(running_balance).toLocaleString();
                 state.jnlArray.push(state.journalsArray[i])
             }
-            else if(state.journalsArray[i].credit_amount != 0){
+            else if(state.journalsArray[i].txn_type == "BAL" && state.journalsArray[i].credit_amount != 0){
+                running_balance -= state.journalsArray[i].credit_amount;
+                state.journalsArray[i]['running_balance'] = Number(running_balance).toLocaleString();
+                state.jnlArray.push(state.journalsArray[i])
+            }
+            else if(state.journalsArray[i].txn_type == "BAL" && state.journalsArray[i].credit_amount == 0 && state.journalsArray[i].debit_amount == 0){
+              running_balance += state.journalsArray[i].debit_amount;
+              state.journalsArray[i]['running_balance'] = Number(running_balance).toLocaleString();
+              state.jnlArray.push(state.journalsArray[i])
+            }
+            else if(state.journalsArray[i].debit_amount != 0 && state.journalsArray[i].txn_type != "BAL"){
+                running_balance += state.journalsArray[i].debit_amount;
+                state.journalsArray[i]['running_balance'] = Number(running_balance).toLocaleString();
+                state.jnlArray.push(state.journalsArray[i])
+            }
+            else if(state.journalsArray[i].credit_amount != 0 && state.journalsArray[i].txn_type != "BAL"){
                 running_balance -= state.journalsArray[i].credit_amount;
                 state.journalsArray[i]['running_balance'] = Number(running_balance).toLocaleString();
                 state.jnlArray.push(state.journalsArray[i])

@@ -121,6 +121,10 @@ export default{
         const customer_ledger_totals = ref(0);
         const vendor_ledger_totals = ref(0);
         const tenant_ledger_totals = ref(0);
+        const member_ledger_totals = ref(0);
+        const loan_ledger_totals = ref(0);
+        const saving_ledger_totals = ref(0);
+        const share_ledger_totals = ref(0);
         const assetTotals = ref(0);
         const liabilitiesTotals = ref(0);
         const balanceSheetList = ref([]);
@@ -132,6 +136,10 @@ export default{
         const merge_vendors_setting = ref('No');
         const merge_debtors_setting = ref('No');
         const merge_tenants_setting = ref('No');
+        const merge_members_setting = ref('Yes');
+        const merge_loans_setting = ref('Yes');
+        const merge_savings_setting = ref('Yes');
+        const merge_shares_setting = ref('Yes');
         
         const actions = ref([
            
@@ -192,6 +200,10 @@ export default{
             customer_ledger_totals.value = 0;
             vendor_ledger_totals.value = 0;
             tenant_ledger_totals.value = 0;
+            member_ledger_totals.value = 0;
+            saving_ledger_totals.value = 0;
+            share_ledger_totals.value = 0;
+            loan_ledger_totals.value = 0;
             assetTotals.value = 0;
             liabilitiesTotals.value = 0;
             balanceSheetList.value = [];
@@ -223,7 +235,19 @@ export default{
                         }else if(balanceSheetList.value[i].ledger_category === "Tenants" && merge_tenants_setting.value === 'Yes'){
                             tenant_ledger_totals.value += balanceSheetList.value[i].balance;
                             balanceSheetList.value.splice(i, 1);
-                        }
+                        }else if(balanceSheetList.value[i].ledger_category === "Members" && merge_members_setting.value === 'Yes'){
+                            member_ledger_totals.value += balanceSheetList.value[i].balance;
+                            balanceSheetList.value.splice(i, 1);
+                        }else if(balanceSheetList.value[i].ledger_category === "Loans" && merge_loans_setting.value === 'Yes'){
+                            loan_ledger_totals.value += balanceSheetList.value[i].balance;
+                            balanceSheetList.value.splice(i, 1);
+                        }else if(balanceSheetList.value[i].ledger_category === "Savings" && merge_savings_setting.value === 'Yes'){
+                            saving_ledger_totals.value += balanceSheetList.value[i].balance;
+                            balanceSheetList.value.splice(i, 1);
+                        }else if(balanceSheetList.value[i].ledger_category === "Shares" && merge_shares_setting.value === 'Yes'){
+                            share_ledger_totals.value += balanceSheetList.value[i].balance;
+                            balanceSheetList.value.splice(i, 1);
+                        } 
                     }
                     if(patient_ledger_totals.value !=0 ){
                         let patientArr ={
@@ -272,6 +296,54 @@ export default{
                             "status": 'Active',
                         }
                         balanceSheetList.value.push(tenantsArr);
+                    }
+                    if(member_ledger_totals.value != 0 ){
+                        let memberArr ={
+                            "ledger_code": 'MEM',
+                            "ledger_name": 'MEMBERS',
+                            "ledger_type": 'Current Asset',
+                            "ledger_category": 'Members',
+                            "financial_statement": 'Balance Sheet',
+                            "balance": member_ledger_totals.value,
+                            "status": 'Active',
+                        }
+                        balanceSheetList.value.push(memberArr);
+                    }
+                    if(loan_ledger_totals.value != 0 ){
+                        let loanArr ={
+                            "ledger_code": 'LOAN',
+                            "ledger_name": 'LOANS',
+                            "ledger_type": 'Current Asset',
+                            "ledger_category": 'Loans',
+                            "financial_statement": 'Balance Sheet',
+                            "balance": loan_ledger_totals.value,
+                            "status": 'Active',
+                        }
+                        balanceSheetList.value.push(loanArr);
+                    }
+                    if(saving_ledger_totals.value != 0 ){
+                        let savingArr ={
+                            "ledger_code": 'SAV',
+                            "ledger_name": 'SAVINGS',
+                            "ledger_type": 'Current Liability',
+                            "ledger_category": 'Savings',
+                            "financial_statement": 'Balance Sheet',
+                            "balance": saving_ledger_totals.value,
+                            "status": 'Active',
+                        }
+                        balanceSheetList.value.push(savingArr);
+                    }
+                    if(share_ledger_totals.value != 0 ){
+                        let shareArr ={
+                            "ledger_code": 'SHA',
+                            "ledger_name": 'SHARES',
+                            "ledger_type": 'Owner Equity',
+                            "ledger_category": 'Shares',
+                            "financial_statement": 'Balance Sheet',
+                            "balance": share_ledger_totals.value,
+                            "status": 'Active',
+                        }
+                        balanceSheetList.value.push(shareArr);
                     }
 
                 }
