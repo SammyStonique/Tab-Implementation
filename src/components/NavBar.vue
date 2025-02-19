@@ -1,5 +1,5 @@
 <template>
-  <div class="navbar flex z-30 h-12 top-0 w-full sticky-navbar bg-orange-400 border-b border-slate-300 shadow-sm shadow-slate-200 pl-6 py-1">
+  <div class="navbar flex z-30 h-8 top-0 w-full sticky-navbar bg-orange-400 border-b border-slate-300 shadow-sm shadow-slate-200 pl-6 py-1">
     <!-- Company Name Section -->
     <div class="w-full sm:w-1/4 flex items-center justify-between sm:justify-start">
       <h4 class="text-xs sm:text-sm font-bold uppercase py-2 ml-2">{{ company_name }}</h4>
@@ -20,10 +20,10 @@
       <!-- User Info and Dropdown -->
       <div class="w-3/4 sm:w-3/4 flex">
         <div class="w-1/4 grid justify-items-end"></div>
-        <div class="w-3/4 dropdown">
+        <div class="w-1/2 dropdown">
           <div class="flex">
             <div class="w-3/4 sm:w-3/4" v-if="isAuthenticated">
-              <p class="font-bold text-xs sm:text-sm">{{ user_names }}</p>
+              <p class="font-bold text-xs sm:text-xs">{{ user_names }}</p>
               <p class="text-xs">{{ user_profile }}</p>
             </div>        
             <div class="w-3/4 sm:w-3/4" v-else>
@@ -31,7 +31,7 @@
             </div>
 
             <!-- Dropdown Button -->
-            <button @click="showDropdown" class="ml-2">
+            <button @click="showDropdown" class="">
               <i class="fa fa-caret-down text-sm sm:text-base" aria-hidden="true"></i>
             </button>
           </div>
@@ -40,8 +40,8 @@
           <button class="fixed inset-0 bg-gray-50 opacity-15 cursor-default w-full sm:hidden z-40" v-if="dropdown" @click="dropdown = !dropdown"></button>
 
           <!-- Dropdown Content -->
-          <div class="dropdown-content mt-2 absolute rounded bg-white w-44 py-3 px-3 shadow-md shadow-slate-500 z-50" v-if="dropdown">
-            <router-link to="/my-account"><strong>My Account</strong></router-link><br />
+          <div class="dropdown-content mt-0.5 absolute text-sm text-left rounded bg-white w-32 py-1.5 px-1.5 shadow-md shadow-slate-500 z-50" v-if="dropdown">
+            <button @click=""><strong>My Account</strong></button><br />
             <button @click="logout"><strong>Logout</strong></button>
           </div>
         </div>

@@ -29,7 +29,7 @@
                     :searchPlaceholder="searchPlaceholder"
                     />
             </div>
-            <div class="fixed table w-[93%] top-[13.1rem] z-20">
+            <div class="fixed table w-[93%] top-[9.9rem] z-20">
                 <DynamicTable 
                     :columns="columns" 
                     :rows="rows"

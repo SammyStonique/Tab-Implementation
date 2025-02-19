@@ -1,7 +1,7 @@
 <template>
     <PageStyleComponent :key="mainComponentKey" :loader="loader" @showLoader="showLoader" @hideLoader="hideLoader">
         <template v-slot:body>
-            <div class="border border-slate-200 rounded relative py-1.5 mt-3 px-2 min-h-[750px]">
+            <div class="border border-slate-200 rounded relative py-1.5 mt-3 px-2 min-h-[600px]">
                 <h1 class="font-bold absolute top-[-13px] left-5 bg-white">Tenant Details</h1>
                 <div class="tabs pt-2">
                     <button v-for="(tab, index) in tabs" :key="tab" :class="['tab', { active: activeTab === index }]"@click="selectTab(index)">
@@ -129,7 +129,7 @@
                         </div>
                     </div>
                     <div v-if="activeTab == 1">
-                        <div class="relative w-[100%] bg-white z-50 px-6">
+                        <div class="relative w-[97%] bg-white z-50 px-6">
                             <FilterBar 
                                 :showAddButton="showAddButton"
                                 :filters="searchFilters" 
@@ -138,6 +138,8 @@
                                 @printList="printTenantStatement"
                                 @printExcel="printExcel"
                                 @printCSV="printCSV"
+                                :dropdownOptions="dropdownOptions"
+                                @handleDynamicOption="handleDynamicOption"
                             />
                         </div>
                         <div class="table w-[100%] top-[17.1rem] z-30 px-6">
@@ -414,7 +416,64 @@ export default defineComponent({
             }finally{
                 hideLoader();
             }  
-        }
+        };
+        const dropdownOptions = ref([
+            {label: 'SMS Tenant Statement', action: 'send-sms'},
+            {label: 'Email Tenant Statement', action: 'send-email'},
+        ]);
+        const handleDynamicOption = async(option) =>{           
+            if(option == 'send-sms'){
+                showLoader();
+                let formData = {
+                    client: [tenantLease.value.tenant_lease_id],
+                    company: companyID.value,
+                    date_from: from_date_search.value,
+                    date_to: to_date_search.value,
+                    company: companyID.value
+                }
+                await axios.post('api/v1/tenant-statement-sms/',formData).
+                then((response)=>{
+                    if(response.data.msg == "Success"){
+                        toast.success("SMS Sent!")
+                    }else if(response.data.msg == "Missing Template"){
+                        toast.error("Tenant Statement Template Not Set!")
+                    }else{
+                        toast.error(response.data.msg)
+                    }
+                })
+                .catch((error)=>{
+                    toast.error(error.message)
+                })
+                .finally(()=>{
+                    hideLoader();
+                })
+            }else if(option == 'send-email'){
+                showLoader();
+                let formData = {
+                    client: [tenantLease.value.tenant_lease_id],
+                    company: companyID.value,
+                    date_from: from_date_search.value,
+                    date_to: to_date_search.value,
+                    company: companyID.value
+                }
+                await axios.post('api/v1/tenant-statement-email/',formData).
+                then((response)=>{
+                    if(response.data.msg == "Success"){
+                        toast.success("Email Sent!")
+                    }else if(response.data.msg == "Missing Template"){
+                        toast.error("Tenant Statement Template Not Set!")
+                    }else{
+                        toast.error(response.data.msg)
+                    }
+                })
+                .catch((error)=>{
+                    toast.error(error.message)
+                })
+                .finally(()=>{
+                    hideLoader();
+                })
+            }
+        };
         const printTenantStatement = () =>{
             showLoader();
             let formData = {
@@ -1245,7 +1304,7 @@ export default defineComponent({
         })
 
         return{
-            tabs, activeTab, mainComponentKey, depositColumns, utilityColumns, selectTab, loader, showLoader, hideLoader, formFields, additionalFields,
+            tabs, activeTab, mainComponentKey, depositColumns, utilityColumns, selectTab, loader, showLoader, hideLoader, formFields, additionalFields,dropdownOptions,handleDynamicOption,
             tableKey,utilityTableKey, idFieldDeposit, idFieldUtility, actionsDeposit, actionsUtility, computedDepositRows, computedUtilityRows,
             scheduleTableKey, idFieldSchedule, scheduleColumns, actionsSchedule, scheduleRows, statementTableKey, idFieldStatement, statementRows,showActions,searchFilters,resetFilters,
             statementColumns, actionsStatement, tenantLease, tenantDetails, tenantCurrency, tenantProperty, scheduleActionClick,showAddButton,searchTenantTransactions,printTenantStatement,

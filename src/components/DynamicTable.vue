@@ -2,11 +2,11 @@
   <div class="table-container overflow-x-auto">
     <table ref="tableRef" class="dynamic-table rounded min-w-full">
       <thead class="bg-gray-800 text-white">
-        <tr class="rounded bg-slate-800 text-white font-semibold text-xs sm:text-sm uppercase">
+        <tr class="rounded bg-slate-800 text-white font-semibold text-xxs sm:text-xs uppercase">
           <th v-for="(column, index) in columns" :key="index" 
               :class="`min-w-[${column.minWidth}] max-w-[${column.maxWidth}]`">
             <template v-if="column.type === 'checkbox'">
-              <input type="checkbox" @change="toggleSelectAll" :checked="allSelected" />
+              <input type="checkbox" class="mt-0.5" @change="toggleSelectAll" :checked="allSelected" />
             </template>
             <template v-else>
               {{ column.label }}
@@ -17,12 +17,12 @@
           </th>
         </tr>
       </thead>
-      <tbody class="table-body">
+      <tbody class="table-body text-xxs">
         <tr v-for="(row, rowIndex) in rows" :key="rowIndex" @dblclick="handleRowClick(row)" :style="shouldAddLine(row) ? { textDecoration: 'line-through' } : {}" class="cursor-pointer even:bg-gray-100 text-xxs sm:text-xs uppercase">
           <td v-for="(column, colIndex) in columns" :key="colIndex" 
               :class="[{'ellipsis': column.maxWidth}, { 'max-w-[300px]': column.maxWidth }, { 'min-w-[120px]': column.minWidth }]">
             <template v-if="column.type === 'checkbox'">
-              <input type="checkbox" v-model="row.selected" class="checkbox" @change="updateSelectedIds(row)"/>
+              <input type="checkbox" v-model="row.selected" class="checkbox mt-0.5" @change="updateSelectedIds(row)"/>
             </template>
             <template v-else-if="column.type === 'dropdown'">
               <select @change="handleChange($event, row)" v-model="row[column.key]" :name="row[column.key]" class="bg-inherit outline-none h-full text-xxs sm:text-xs w-full uppercase">
@@ -46,7 +46,7 @@
               </div>
             </template>
           </td>
-          <td class="actions flex gap-2 border-0" v-if="showActions">
+          <td class="flex gap-2 border-0" v-if="showActions">
             <div v-for="action in actions">
               <button :class="{ 'disabled': isDisabled(`${action.rightName}`) }" @click.stop="handleAction(rowIndex, action.name, action.rightName, row)" :title="action.title">
                 <i :class="action.icon"></i>
@@ -54,14 +54,14 @@
             </div>
           </td>
         </tr>
-        <tr class="font-bold text-xs sm:text-sm" v-if="showTotals && rows.length">
+        <tr class="font-bold text-xxs sm:text-sm" v-if="showTotals && rows.length">
           <td v-for="(column, colIndex) in columns" :key="colIndex" 
               :class="[{'ellipsis': column.maxWidth}, { 'max-w-[300px]': column.maxWidth }, { 'min-w-[120px]': column.minWidth }]">
             <template v-if="column.type === 'number'">
               {{ Number(calculateColumnTotal(column.key)).toLocaleString() }}
             </template>
           </td>
-          <td class="actions" v-if="showActions"></td>
+          <td class="" v-if="showActions"></td>
         </tr>
       </tbody>
     </table>
@@ -314,7 +314,7 @@ input {
 .table-container {
   position: relative;
   /* max-height: 59vh; */
-  max-height: 68vh;
+  max-height: 70vh;
   min-height: 20vh;
   overflow-y: auto;
   overflow-x: auto;
@@ -328,13 +328,15 @@ input {
 
 .dynamic-table th {
   border: 1px solid #ccc;
-  padding: 6px;
+  padding: 2px;
   text-align: left;
 }
 
 .dynamic-table td {
   border: 1px solid #ccc;
-  padding: 3px;
+  padding-left: 3px;
+  padding-top: 1px;
+  padding-bottom: 1px;
   text-align: left;
 }
 
@@ -344,7 +346,8 @@ input {
   background-color: inherit;
 }
 .actions{
-  padding: 8px;
+  /* padding: 9px; */
+  height: inherit;
 }
 
 /* Style for fixed header */

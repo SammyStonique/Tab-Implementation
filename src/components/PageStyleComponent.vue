@@ -57,7 +57,7 @@ export default defineComponent({
 .main-content{
     z-index: -1;
     margin-left: 1px;
-    margin-top: 74px;
+    margin-top: 46px;
     min-height: 90vh;
 }
 .subsection{
@@ -67,7 +67,7 @@ export default defineComponent({
 .content{
     /* max-height: 75vh; */
     min-height: 80%;
-    max-height: 80%;
+    max-height: 90%;
     overflow-y: scroll;
 }
 

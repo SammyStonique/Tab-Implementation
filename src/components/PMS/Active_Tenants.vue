@@ -147,6 +147,8 @@ export default{
         const dropdownOptions = ref([
             {label: 'Add Tenant Utilities', action: 'add-tenant-utilties'},
             {label: 'Tenancy Agreement', action: 'tenancy-agreement-report'},
+            {label: 'SMS Tenant Statement', action: 'send-sms'},
+            {label: 'Email Tenant Statement', action: 'send-email'},
         ]);
         
         const name_search = computed({
@@ -552,7 +554,7 @@ export default{
             }
         };
 
-        const handleDynamicOption = (option) =>{
+        const handleDynamicOption = async(option) =>{
             if(option == 'add-tenant-utilties'){
                 fetchTaxes();
                 fetchUtilities();
@@ -592,6 +594,57 @@ export default{
                 }else{
                     toast.error("You have Selected More Than 1 Tenant")
                 }
+            }else if(option == 'send-sms'){
+                showLoader();
+                let formData = {
+                    client: selectedIds.value,
+                    company: companyID.value,
+                    date_from: "",
+                    date_to: "",
+                    company: companyID.value
+                }
+                await axios.post('api/v1/tenant-statement-sms/',formData).
+                then((response)=>{
+                    if(response.data.msg == "Success"){
+                        toast.success("SMS Sent!")
+                    }else if(response.data.msg == "Missing Template"){
+                        toast.error("Tenant Statement Template Not Set!")
+                    }else{
+                        toast.error(response.data.msg)
+                    }
+                })
+                .catch((error)=>{
+                    toast.error(error.message)
+                })
+                .finally(()=>{
+                    hideLoader();
+                })
+            }else if(option == 'send-email'){
+                showLoader();
+                let formData = {
+                    tenant: selectedIds.value,
+                    client: [],
+                    company: companyID.value,
+                    date_from: "",
+                    date_to: "",
+                    company: companyID.value
+                }
+                await axios.post('api/v1/tenant-statement-email/',formData).
+                then((response)=>{
+                    if(response.data.msg == "Success"){
+                        toast.success("Email Sent!")
+                    }else if(response.data.msg == "Missing Template"){
+                        toast.error("Tenant Statement Template Not Set!")
+                    }else{
+                        toast.error(response.data.msg)
+                    }
+                })
+                .catch((error)=>{
+                    toast.error(error.message)
+                })
+                .finally(()=>{
+                    hideLoader();
+                })
             }
         };
         

@@ -16,6 +16,7 @@
                                 <option value="Customized">Customized</option>
                                 <option value="Tenant Invoice">Tenant Invoice</option>
                                 <option value="Tenant Receipt">Tenant Receipt</option>
+                                <option value="Tenant Statement">Tenant Statement</option>
                                 <option value="Tenant Balance Reminder">Tenant Balance Reminder</option>
                                 <option value="Tenant Creation">Tenant Creation</option>
                                 <option value="Tenant Portal Invitation">Tenant Portal Invitation</option>

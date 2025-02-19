@@ -86,7 +86,6 @@ import PrintJS from 'print-js';
 
 export default{
     name: 'Ledger_Details',
-    props: ['scrollToTop','loader','showLoader','hideLoader',],
     components:{
         PageStyleComponent,MovableModal,DynamicForm,DynamicTable,FilterBar
     },
