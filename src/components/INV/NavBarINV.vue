@@ -1,27 +1,27 @@
 <template>
-    <div class="navbar flex top-0 w-full text-sm sticky-navbar bg-orange-400 border-b border-slate-300 shadow-sm shadow-slate-200 px-6 h-10">
+    <div class="navbar flex top-0 w-full text-sm sticky-navbar bg-orange-400 border-b border-slate-300 shadow-sm shadow-slate-200 px-6 h-8">
         <button class="fixed inset-0 bg-gray-50 opacity-15 cursor-default w-full" v-if="dropdown" @click="closeDropdown"></button>
         <div class="flex">
-            <div class="web-links py-1.5 px-2.5 w-32 h-full hover:bg-slate-500 hover:rounded">
+            <div class="web-links py-0.5 px-2.5 w-32 h-full hover:bg-slate-500 hover:rounded">
                 <button class="flex" @click="showHomePage">
                     <i class="fa fa-home pt-2 mr-2" aria-hidden="true"></i>
                     <p class="pt-1.5">Home Page</p>
                 </button>
             </div>
-            <div class="web-links py-1.5 px-2.5 w-32 h-full hover:bg-slate-500 hover:rounded">
+            <div class="web-links py-0.5 px-2.5 w-32 h-full hover:bg-slate-500 hover:rounded">
                 <button class="flex w-full" @click="openPage({'INV':'Dashboard'})">
                     <i class="fa fa-tachometer pt-2 mr-2" aria-hidden="true"></i>
                     <p class="pt-1.5">Dashboard</p>
                 </button>
             </div>
             <div class="web-links dropdown w-36">
-                <div class="py-1.5 px-2.5 h-full hover:bg-slate-500 hover:rounded">
+                <div class="py-0.5 px-2.5 h-full hover:bg-slate-500 hover:rounded">
                 <button class="flex w-full" @click="showItemsDropdown">
                     <i class="fa fa-bars pt-2 mr-2" aria-hidden="true"></i>
                     <p class="pt-1.5">Inventory Items</p>
                 </button>
                 </div>
-                <div class="dropdown-content w-52 absolute rounded border border-gray-200 bg-white shadow-slate-400 shadow-sm pt-2" v-if="items_dropdown">
+                <div class="dropdown-content w-52 absolute rounded border border-gray-200 bg-white shadow-slate-400 shadow-sm" v-if="items_dropdown">
                     <div class="py-2 px-3 pl-4 w-full hover:bg-slate-500 hover:w-full">
                         <button class="flex text-sm w-full" @click="openPage({'INV':'Item_Categories'})">
                             <i class="fa fa-bars pt-2 mr-2" aria-hidden="true"></i>
@@ -79,13 +79,13 @@
                 </div>
             </div>
             <div class="web-links dropdown w-36">
-                <div class="py-1.5 px-2.5 h-full hover:bg-slate-500 hover:rounded">
+                <div class="py-0.5 px-2.5 h-full hover:bg-slate-500 hover:rounded">
                 <button class="flex w-full" @click="showSalesDropdown">
                     <i class="fa fa-line-chart pt-2 mr-2" aria-hidden="true"></i>
                     <p class="pt-1.5">Sales</p>
                 </button>
                 </div>
-                <div class="dropdown-content w-52 absolute rounded border border-gray-200 bg-white shadow-slate-400 shadow-sm pt-2" v-if="sales_dropdown">
+                <div class="dropdown-content w-52 absolute rounded border border-gray-200 bg-white shadow-slate-400 shadow-sm" v-if="sales_dropdown">
                     <div class="py-2 px-3 pl-4 w-full hover:bg-slate-500 hover:w-full">
                         <button class="flex text-sm w-full" @click="openPage({'INV':'Direct_Sales'})">
                             <i class="fa fa-line-chart pt-2 mr-2" aria-hidden="true"></i>
@@ -132,13 +132,13 @@
                 </div>
             </div>
             <div class="web-links dropdown w-32">
-                <div class="py-1.5 px-2.5 h-full hover:bg-slate-500 hover:rounded">
+                <div class="py-0.5 px-2.5 h-full hover:bg-slate-500 hover:rounded">
                     <button class="flex w-full" @click="showPurchasesDropdown">
                         <i class="fa fa-money pt-2 mr-2" aria-hidden="true"></i>
                         <p class="pt-1.5">Purchases</p>
                     </button>
                 </div>
-                <div class="dropdown-content w-52 absolute rounded border border-gray-200 bg-white shadow-slate-400 shadow-sm pt-2" v-if="purchases_dropdown">       
+                <div class="dropdown-content w-52 absolute rounded border border-gray-200 bg-white shadow-slate-400 shadow-sm" v-if="purchases_dropdown">       
                     <div class="py-2 px-3 pl-4 w-full hover:bg-slate-500 hover:w-full">
                         <button class="flex text-sm w-full" @click="openPage({'INV':'Direct_Purchases'})">
                             <i class="fa fa-money pt-2 mr-2" aria-hidden="true"></i>
@@ -188,7 +188,7 @@
                 </div>
             </div>
             <div class="web-links dropdown w-36">
-                <div class="py-1.5 px-2.5 h-full hover:bg-slate-500 hover:rounded">
+                <div class="py-0.5 px-2.5 h-full hover:bg-slate-500 hover:rounded">
                     <button class="flex w-full" @click="showStockDropdown">
                         <i class="fa fa-database pt-2 mr-2" aria-hidden="true"></i>
                         <p class="pt-1.5">Stock Control</p>
@@ -216,7 +216,7 @@
                 </div>
             </div> 
             <div class="web-links dropdown w-36">
-                <div class="py-1.5 px-2.5 h-full hover:bg-slate-500 hover:rounded">
+                <div class="py-0.5 px-2.5 h-full hover:bg-slate-500 hover:rounded">
                     <button class="flex" @click="showSettingsDropdown">
                         <i class="fa fa-cogs pt-2 mr-2" aria-hidden="true"></i>
                         <p class="pt-1.5">Settings</p>

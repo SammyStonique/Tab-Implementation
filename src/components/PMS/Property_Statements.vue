@@ -152,13 +152,13 @@ export default{
             {
                 type:'search-dropdown', value: propertySearchID.value, width:64, componentKey: propComponentKey,
                 selectOptions: propertyArray, optionSelected: handleSearchProperty,
-                searchPlaceholder: 'Property Search...', dropdownWidth: '350px',
+                searchPlaceholder: 'Property Search...', dropdownWidth: '300px',
                 fetchData: fetchProperties(), clearSearch: clearSearchProperty()             
             },
             {
                 type:'search-dropdown', value: landlordSearchID.value, width:64, componentKey: landComponentKey,
                 selectOptions: landlordArray, optionSelected: handleSearchLandlord,
-                searchPlaceholder: 'Landlord Search...', dropdownWidth: '350px',
+                searchPlaceholder: 'Landlord Search...', dropdownWidth: '300px',
                 fetchData: fetchLandlords(), clearSearch: clearSearchLandlord()   
             },
             {

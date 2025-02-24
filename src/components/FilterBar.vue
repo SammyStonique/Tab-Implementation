@@ -10,7 +10,7 @@
           <input v-model="filter.value" type="date" :class="`bg-slate-100 rounded pl-3 pt-0.4 border border-gray-400 text-sm w-${filter.width}`" :placeholder="filter.placeholder" :title="filter.title"/>
         </div>
         <div v-else-if="filter.type === 'dropdown'" class="text-sm">
-          <select v-model="filter.value" :class="`rounded border border-gray-400 bg-slate-100 text-sm pl-2 pt-1 w-${filter.width}`">
+          <select v-model="filter.value" :class="`rounded border border-gray-400 bg-slate-100 text-sm pl-2 pt-0.5 w-${filter.width}`">
             <option value="" selected disabled>{{ filter.placeholder }}</option>
             <option v-for="(option, index) in filter.options" :key="index" :value="option.value">{{ option.text }}</option>
           </select>
@@ -116,8 +116,8 @@ export default defineComponent({
       default: () => []
     },
     printModalVisible:{
-      type: String,
-      default: () => ''
+      type: Boolean,
+      default: () => false
     },
     title:{
       type: String,
@@ -156,7 +156,7 @@ export default defineComponent({
     const dropdown = ref(false);
     const hoverDropdown =  ref(false);
     const allowedRights = ref([]);
-    const dropdownHeight = ref('24px');
+    const dropdownHeight = ref('22px');
     const companyID = computed(()=> store.state.userData.company_id);
     const userID = computed(()=> store.state.userData.user_id);
     const handleAddNew = () =>{

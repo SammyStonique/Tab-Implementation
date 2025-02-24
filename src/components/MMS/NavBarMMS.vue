@@ -1,21 +1,21 @@
 <template>
-    <div class="navbar flex top-0 w-full text-sm sticky-navbar bg-orange-400 border-b border-slate-300 shadow-sm shadow-slate-200 px-6 h-10">
+    <div class="navbar flex top-0 w-full text-sm sticky-navbar bg-orange-400 border-b border-slate-300 shadow-sm shadow-slate-200 px-6 h-8">
         <button class="fixed inset-0 bg-gray-50 opacity-15 cursor-default w-full" v-if="dropdown" @click="closeDropdown"></button>
         <div class="flex">
-            <div class="web-links py-1.5 px-2.5 w-32 h-full hover:bg-slate-500 hover:rounded">
+            <div class="web-links py-0.5 px-2.5 w-32 h-full hover:bg-slate-500 hover:rounded">
                 <button class="flex" @click="showHomePage">
                     <i class="fa fa-home pt-2 mr-2" aria-hidden="true"></i>
                     <p class="pt-1.5">Home Page</p>
                 </button>
             </div>
-            <div class="web-links py-1.5 px-2.5 w-32 h-full hover:bg-slate-500 hover:rounded">
+            <div class="web-links py-0.5 px-2.5 w-32 h-full hover:bg-slate-500 hover:rounded">
                 <button class="flex w-full" @click="openPage({'MMS':'Dashboard'})">
                     <i class="fa fa-tachometer pt-2 mr-2" aria-hidden="true"></i>
                     <p class="pt-1.5">Dashboard</p>
                 </button>
             </div>
             <div class="web-links dropdown w-32">
-                <div class="py-1.5 px-2.5 h-full hover:bg-slate-500 hover:rounded">
+                <div class="py-0.5 px-2.5 h-full hover:bg-slate-500 hover:rounded">
                     <button class="flex w-full" @click="showMembersDropdown">
                         <i class="fa fa-universal-access pt-2 mr-2" aria-hidden="true"></i>
                         <p class="pt-1.5">Members</p>
@@ -46,7 +46,7 @@
                 </div>
             </div>
             <div class="web-links dropdown w-36">
-                <div class="py-1.5 px-2.5 h-full hover:bg-slate-500 hover:rounded">
+                <div class="py-0.5 px-2.5 h-full hover:bg-slate-500 hover:rounded">
                 <button class="flex w-full" @click="showSavingsDropdown">
                     <i class="fa fa-piggy-bank pt-2 mr-2" aria-hidden="true"></i>
                     <p class="pt-1.5">Savings</p>
@@ -86,7 +86,7 @@
                 </div>
             </div>
             <div class="web-links dropdown w-36">
-                <div class="py-1.5 px-2.5 h-full hover:bg-slate-500 hover:rounded">
+                <div class="py-0.5 px-2.5 h-full hover:bg-slate-500 hover:rounded">
                 <button class="flex w-full" @click="showSharesDropdown">
                     <i class="fa fa-chart-line pt-2 mr-2" aria-hidden="true"></i>
                     <p class="pt-1.5">Shares</p>
@@ -121,7 +121,7 @@
             </div>
 
             <div class="web-links dropdown w-36">
-                <div class="py-1.5 px-2.5 h-full hover:bg-slate-500 hover:rounded">
+                <div class="py-0.5 px-2.5 h-full hover:bg-slate-500 hover:rounded">
                     <button class="flex w-full" @click="showLoansDropdown">
                         <i class="fa fa-file-contract pt-2 mr-2" aria-hidden="true"></i>
                         <p class="pt-1.5">Loans</p>
@@ -155,7 +155,7 @@
                 </div>
             </div>
             <div class="web-links dropdown w-36">
-                <div class="py-1.5 px-2.5 h-full hover:bg-slate-500 hover:rounded">
+                <div class="py-0.5 px-2.5 h-full hover:bg-slate-500 hover:rounded">
                     <button class="flex w-full" @click="showFinancesDropdown">
                         <i class="fa fa-money pt-2 mr-2" aria-hidden="true"></i>
                         <p class="pt-1.5">Finances</p>
@@ -177,7 +177,7 @@
                 </div>
             </div> 
             <div class="web-links dropdown w-36">
-                <div class="py-1.5 px-2.5 h-full hover:bg-slate-500 hover:rounded">
+                <div class="py-0.5 px-2.5 h-full hover:bg-slate-500 hover:rounded">
                     <button class="flex" @click="showSettingsDropdown">
                         <i class="fa fa-cogs pt-2 mr-2" aria-hidden="true"></i>
                         <p class="pt-1.5">Settings</p>

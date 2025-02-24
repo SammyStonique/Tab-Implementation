@@ -1,33 +1,33 @@
 <template>
-    <div class="navbar flex top-0 w-full text-sm sticky-navbar bg-orange-400 border-b border-slate-300 shadow-sm shadow-slate-200 px-6 h-10">
+    <div class="navbar flex top-0 w-full text-sm sticky-navbar bg-orange-400 border-b border-slate-300 shadow-sm shadow-slate-200 px-6 h-8">
         <button class="fixed inset-0 bg-gray-50 opacity-15 cursor-default w-full" v-if="dropdown" @click="closeDropdown"></button>
         <div class="flex">
-            <div class="web-links py-1.5 px-2.5 h-full hover:bg-slate-500 hover:rounded">
+            <div class="web-links py-0.5 px-2.5 h-full hover:bg-slate-500 hover:rounded">
                 <button class="flex" @click="showHomePage">
                     <i class="fa fa-home pt-2 mr-2" aria-hidden="true"></i>
                     <p class="pt-1.5">Home Page</p>
                 </button>
             </div>
-            <div class="web-links py-1.5 px-2.5 h-full hover:bg-slate-500 hover:rounded">
+            <div class="web-links py-0.5 px-2.5 h-full hover:bg-slate-500 hover:rounded">
                 <button class="flex" @click="openPage({'FA':'Dashboard'})">
                     <i class="fa fa-tachometer pt-2 mr-2" aria-hidden="true"></i>
                     <p class="pt-1.5">Dashboard</p>
                 </button>
             </div>
-            <div class="web-links py-1.5 px-2.5 h-full hover:bg-slate-500 hover:rounded">
+            <div class="web-links py-0.5 px-2.5 h-full hover:bg-slate-500 hover:rounded">
                 <button class="flex" @click="openPage({'FA':'Chart_Of_Accounts'})">
                     <i class="fa fa-briefcase pt-2 mr-2" aria-hidden="true"></i>
                     <p class="pt-1.5">Chart Of Accounts</p>
                 </button>
             </div>
-            <div class="web-links py-1.5 px-2.5 h-full hover:bg-slate-500 hover:rounded">
+            <div class="web-links py-0.5 px-2.5 h-full hover:bg-slate-500 hover:rounded">
                     <button class="flex" @click="openPage({'FA':'Client_Categories'})">
                     <i class="fa fa-bars pt-2 mr-2" aria-hidden="true"></i>
                     <p class="pt-1.5">Client Categories</p>
                     </button>
             </div> 
             <div class="web-links dropdown">
-                <div class="py-1.5 px-2.5 h-full hover:bg-slate-500 hover:rounded">
+                <div class="py-0.5 px-2.5 h-full hover:bg-slate-500 hover:rounded">
                 <button class="flex" @click="showInvoicesDropdown">
                     <i class="fa fa-file-invoice pt-2 mr-2" aria-hidden="true"></i>
                     <p class="pt-1.5">Invoices</p>
@@ -58,7 +58,7 @@
                 </div>
             </div>
             <div class="web-links dropdown">
-                <div class="py-1.5 px-2.5 h-full hover:bg-slate-500 hover:rounded">
+                <div class="py-0.5 px-2.5 h-full hover:bg-slate-500 hover:rounded">
                     <button class="flex" @click="showBillsDropdown">
                         <i class="fa fa-credit-card pt-2 mr-2" aria-hidden="true"></i>
                         <p class="pt-1.5">Bills</p>
@@ -88,14 +88,14 @@
                     </div>
                 </div>
             </div>
-            <div class="web-links py-1.5 px-2.5 h-full hover:bg-slate-500 hover:rounded">
+            <div class="web-links py-0.5 px-2.5 h-full hover:bg-slate-500 hover:rounded">
                     <button class="flex" @click="openPage({'FA':'Journals'})">
                     <i class="fa fa-book pt-2 mr-2" aria-hidden="true"></i>
                     <p class="pt-1.5">Journals</p>
                     </button>
             </div>
             <div class="web-links dropdown">
-                <div class="py-1.5 px-2.5 h-full hover:bg-slate-500 hover:rounded">
+                <div class="py-0.5 px-2.5 h-full hover:bg-slate-500 hover:rounded">
                     <button class="flex" @click="showTaxesDropdown">
                         <i class="fa fa-universal-access pt-2 mr-2" aria-hidden="true"></i>
                         <p class="pt-1.5">Taxes</p>
@@ -137,14 +137,14 @@
                     </div>
                 </div>
             </div>
-            <div class="web-links py-1.5 px-2.5 h-full hover:bg-slate-500 hover:rounded">
+            <div class="web-links py-0.5 px-2.5 h-full hover:bg-slate-500 hover:rounded">
                 <button class="flex" @click="openPage({'FA':'Fiscal_Periods'})">
                     <i class="fa fa-clock-o pt-2 mr-2" aria-hidden="true"></i>
                     <p class="pt-1.5">Fiscal Periods</p>
                 </button>
             </div>
             <div class="web-links dropdown">
-                <div class="py-1.5 px-2.5 h-full hover:bg-slate-500 hover:rounded">
+                <div class="py-0.5 px-2.5 h-full hover:bg-slate-500 hover:rounded">
                     <button class="flex" @click="showReportsDropdown">
                         <i class="fa fa-line-chart pt-2 mr-2" aria-hidden="true"></i>
                         <p class="pt-1.5">Reports</p>

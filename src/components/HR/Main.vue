@@ -49,6 +49,9 @@ import Payrolls from '@/components/HR/Payrolls.vue';
 import Payroll_Employees from '@/components/HR/Payroll_Employees.vue';
 import HR_Templates from '@/components/HR/HR_Templates.vue';
 import Design_HR_Template from '@/components/HR/Design_HR_Template.vue';
+import Salary_Advances from '@/components/HR/Salary_Advances.vue';
+import Loan_Applications from '@/components/HR/Loan_Applications.vue';
+import Loan_Application_Details from '@/components/HR/Loan_Application_Details.vue';
 
 import Default_Settings from '@/components/SET/Default_Settings.vue';
 
@@ -60,7 +63,8 @@ export default{
         Dashboard,
         Pay_Cycles,Pay_Groups,Deductions,Leave_Types,Holidays,Paye,Nssf,Shif,Housing_Levy,
         Employees,Employee_Biodata,Deduction_Details,Employee_Details,Import_Employees,Payrolls,Payroll_Employees,
-        HR_Templates,Design_HR_Template,Leave_Applications,Leave_Allocations,
+        HR_Templates,Design_HR_Template,Leave_Applications,Leave_Allocations,Salary_Advances,Loan_Applications,
+        Loan_Application_Details,
 
         Default_Settings
     },

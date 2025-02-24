@@ -115,7 +115,7 @@ export default defineComponent({
             await store.dispatch('Ledgers/fetchLedgers', {company:companyID.value})
         };
         const handleSelectedLedger = async(option) =>{
-            await store.dispatch('Ledgers/handleSelectedLedger', option)
+            await store.dispatch('Ledgers/handleSelectedLedgerInvoice', option)
             ledgerID.value = store.state.Ledgers.ledgerID;
             ledComponentKey.value += 1;
      

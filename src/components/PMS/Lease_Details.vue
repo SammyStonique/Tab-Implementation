@@ -25,7 +25,7 @@
                                 @fetchData="fetchData"
                             />
                         </div>                      
-                        <DynamicTable :key="tableKey" :columns="depositColumns" :rows="computedDepositRows" :idField="idFieldDeposit" :actions="actionsDeposit" @action-click="deleteDeposit" />
+                        <DynamicTable :key="tableKey" :columns="depositColumns" :rows="computedDepositRows" :idField="idFieldDeposit" :actions="actionsDeposit" @action-click="deleteDeposit" :rightsModule="rightsModule"/>
                     </div>
                     <div v-show="activeTab == 2">
                         <div class="text-left p-2">
@@ -39,7 +39,7 @@
                                 @fetchData="fetchData"
                             />
                         </div>                      
-                        <DynamicTable :key="utilityTableKey" :columns="utilityColumns" :rows="computedUtilityRows" :idField="idFieldUtility" :actions="actionsUtility" @action-click="deleteUtility" />
+                        <DynamicTable :key="utilityTableKey" :columns="utilityColumns" :rows="computedUtilityRows" :idField="idFieldUtility" :actions="actionsUtility" @action-click="deleteUtility" :rightsModule="rightsModule"/>
                     </div>
                 </div>
             </div>
@@ -83,6 +83,7 @@ export default defineComponent({
         const mainComponentKey = ref(0);
         const depositComponentKey = ref(0);
         const utilityComponentKey = ref(0);
+        const rightsModule = ref('PMS');
         const tableKey = ref(0);
         const utilityTableKey = ref(0);
         const propComponentKey = ref(0);
@@ -140,7 +141,7 @@ export default defineComponent({
 
         const idFieldDeposit = 'deposit_id';
         const actionsDeposit = ref([
-            {name: 'delete', icon: 'fa fa-minus-circle', title: 'Remove Deposit'},
+            {name: 'delete', icon: 'fa fa-minus-circle', title: 'Remove Deposit', rightName: 'Adding Tenants'},
         ])
 
         const utilityArr = computed({
@@ -157,7 +158,7 @@ export default defineComponent({
 
         const idFieldUtility = 'utility_id';
         const actionsUtility = ref([
-            {name: 'delete', icon: 'fa fa-minus-circle', title: 'Remove Utility'},
+            {name: 'delete', icon: 'fa fa-minus-circle', title: 'Remove Utility', rightName: 'Adding Tenants'},
         ]);
 
         const showLoader = () =>{
@@ -349,7 +350,7 @@ export default defineComponent({
                 {  
                     type:'search-dropdown', label:"Rent Currency", value: currencyValue.value, componentKey: currencyComponentKey,
                     selectOptions: currencyArray, optionSelected: handleSelectedCurrency, required: true,
-                    searchPlaceholder: 'Select Rent Currency...', dropdownWidth: '500px', updateValue: selectedTenantCurrency.value,
+                    searchPlaceholder: 'Select Rent Currency...', dropdownWidth: '380px', updateValue: selectedTenantCurrency.value,
                     fetchData: fetchCurrencies(), clearSearch: clearSelectedCurrency
                 },
                 { type: 'number', name: 'rent_amount',label: "Rent Amount", value: selectedTenant.value?.rent_amount || unit_market_rent.value, required: true },
@@ -362,7 +363,7 @@ export default defineComponent({
                     searchPlaceholder: 'Select Rent Vat...', dropdownWidth: '500px', updateValue: selectedTenantVat.value,
                     fetchData: fetchTaxes(), clearSearch: clearSelectedTax
                 },
-                { type: 'dropdown', name: 'variation_type',label: "Variation Type", value: selectedTenant.value?.variation_type || '', placeholder: "", required: false, options: [{ text: 'Review', value: 'Review' }, { text: 'Escalation', value: 'Rent Escalation' }] },
+                { type: 'dropdown', name: 'variation_type',label: "Variation Type", value: selectedTenant.value?.variation_type || 'Review', placeholder: "", required: false, options: [{ text: 'Review', value: 'Review' }, { text: 'Escalation', value: 'Rent Escalation' }] },
                 { type: 'dropdown', name: 'variation_mode',label: "Variation Mode", value: selectedTenant.value?.variation_mode || '', placeholder: "", required: false, options: [{ text: 'Fixed Amount', value: 'Fixed Amount' }, { text: 'Rent Percentage', value: 'Rent Percentage' }] },
                 {  
                     type:'search-dropdown', label:"Variation Frequency", value: periodValue.value, componentKey: periodComponentKey,
@@ -448,7 +449,7 @@ export default defineComponent({
         })
 
         return{
-            emitUpdatedFields, computedDepositRows, computedUtilityRows,
+            emitUpdatedFields, computedDepositRows, computedUtilityRows,rightsModule,
             tabs, selectTab,activeTab, depositComponentKey,utilityComponentKey, formFields, additionalFields, flex_basis, flex_basis_percentage, additional_flex_basis,
             additional_flex_basis_percentage, mainComponentKey,
             handleReset, isEditing, loader, showLoader, hideLoader,

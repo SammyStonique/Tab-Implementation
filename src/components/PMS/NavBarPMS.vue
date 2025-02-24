@@ -1,5 +1,5 @@
 <template>
-    <div class="navbar flex top-0 w-full text-xs sticky-navbar bg-orange-400 border-b border-slate-300 shadow-sm shadow-slate-200 px-6 h-8">
+    <div class="navbar flex top-0 w-full text-sm sticky-navbar bg-orange-400 border-b border-slate-300 shadow-sm shadow-slate-200 px-6 h-8">
         <button class="fixed inset-0 bg-gray-50 opacity-15 cursor-default w-full" v-if="dropdown" @click="closeDropdown"></button>
         <div class="flex">
             <div class="web-links py-0.5 px-2.5 w-32 h-full hover:bg-slate-500 hover:rounded">
@@ -14,7 +14,7 @@
                     <p class="pt-1.5">Dashboard</p>
                 </button>
             </div>
-            <div class="web-links dropdown w-36">
+            <div class="web-links dropdown w-32">
                 <div class="py-0.5 px-2.5 h-full hover:bg-slate-500 hover:rounded">
                 <button class="flex w-full" @click="showPropertyDropdown">
                     <i class="fa fa-building pt-2 mr-2" aria-hidden="true"></i>
@@ -42,7 +42,7 @@
                     </div>
                 </div>
             </div>
-            <div class="web-links dropdown w-36">
+            <div class="web-links dropdown w-28">
                 <div class="py-0.5 px-2.5 h-full hover:bg-slate-500 hover:rounded">
                 <button class="flex w-full" @click="showUnitsDropdown">
                     <i class="fa fa-cube pt-2 mr-2" aria-hidden="true"></i>
@@ -81,7 +81,7 @@
                         <p class="pt-1.5">Tenants</p>
                     </button>
                 </div>
-                <div class="dropdown-content w-44 absolute rounded border border-gray-200 bg-white shadow-slate-400 shadow-sm" v-if="tenants_dropdown">       
+                <div class="dropdown-content w-48 absolute rounded border border-gray-200 bg-white shadow-slate-400 shadow-sm" v-if="tenants_dropdown">       
                     <div class="py-2 px-3 pl-4 w-full hover:bg-slate-500 hover:w-full">
                         <button class="flex w-full" @click="openPage({'PMS':'Active_Tenants'})">
                             <i class="fa fa-universal-access mr-2" aria-hidden="true"></i>
@@ -147,7 +147,7 @@
                     </div>
                 </div>
             </div>
-            <div class="web-links dropdown w-36">
+            <div class="web-links dropdown w-32">
                 <div class="py-0.5 px-2.5 h-full hover:bg-slate-500 hover:rounded">
                     <button class="flex w-full" @click="showFinancesDropdown">
                         <i class="fa fa-money pt-2 mr-2" aria-hidden="true"></i>
@@ -194,7 +194,7 @@
                         <p class="pt-1.5">Landlord Statement</p>
                     </button>
                 </div>
-                <div class="dropdown-content w-48 absolute rounded border border-gray-200 bg-white shadow-slate-400 shadow-sm" v-if="statement_dropdown">
+                <div class="dropdown-content w-52 absolute rounded border border-gray-200 bg-white shadow-slate-400 shadow-sm" v-if="statement_dropdown">
                     <div class="py-2 px-3 pl-4 w-full hover:bg-slate-500 hover:w-full">
                         <button class="flex" @click="openPage({'PMS':'Property_Statements'})">
                             <i class="fa fa-file-alt mr-2" aria-hidden="true"></i>
@@ -216,7 +216,7 @@
                         <p class="pt-1.5">Settings</p>
                     </button>
                 </div>
-                <div class="dropdown-content w-48 absolute rounded border border-gray-200 bg-white shadow-slate-400 shadow-sm" v-if="settings_dropdown">
+                <div class="dropdown-content w-52 absolute rounded border border-gray-200 bg-white shadow-slate-400 shadow-sm" v-if="settings_dropdown">
                     <div class="py-2 px-3 pl-4 w-full hover:bg-slate-500 hover:w-full">
                         <button class="flex" @click="openPage({'PMS':'Utilities'})">
                             <i class="fa fa-water mr-2" aria-hidden="true"></i>

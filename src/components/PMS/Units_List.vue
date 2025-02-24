@@ -172,9 +172,16 @@ export default{
             {
                 type:'search-dropdown', value: landlords_array, width:48,
                 selectOptions: landlords_array, optionSelected: handleSearchLandlord,
-                searchPlaceholder: 'Landlord...', dropdownWidth: '200px',
+                searchPlaceholder: 'Landlord...', dropdownWidth: '250px',
                 fetchData: store.dispatch('Landlords_List/fetchLandlords', {company:companyID.value}),
                 clearSearch: clearSearchLandlord, componentKey: lldSearchComponentKey
+            },
+            {
+                type:'search-dropdown', value: properties_array, width:48,
+                selectOptions: properties_array, optionSelected: handleSearchProperty,
+                searchPlaceholder: 'Property...', dropdownWidth: '300px',
+                fetchData: store.dispatch('Properties_List/fetchProperties', {company:companyID.value}),
+                clearSearch: clearSearchProperty, componentKey: propSearchComponentKey
             },
             {
                 type:'dropdown', placeholder:"Status..", value: status_search, width:40,
@@ -196,13 +203,7 @@ export default{
                 type:'dropdown', placeholder:"Owner Occ...", value: owner_occupied_search, width:40,
                 options: [{text:'Yes',value:'True'},{text:'No',value:'False'}]
             }, 
-            {
-                type:'search-dropdown', value: properties_array, width:48,
-                selectOptions: properties_array, optionSelected: handleSearchProperty,
-                searchPlaceholder: 'Property...', dropdownWidth: '300px',
-                fetchData: store.dispatch('Properties_List/fetchProperties', {company:companyID.value}),
-                clearSearch: clearSearchProperty, componentKey: propSearchComponentKey
-            },              
+                          
             
         ]);
         const handleSelectionChange = (ids) => {

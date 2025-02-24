@@ -328,15 +328,13 @@ input {
 
 .dynamic-table th {
   border: 1px solid #ccc;
-  padding: 2px;
+  padding: 3px;
   text-align: left;
 }
 
 .dynamic-table td {
   border: 1px solid #ccc;
-  padding-left: 3px;
-  padding-top: 1px;
-  padding-bottom: 1px;
+  padding: 3px;
   text-align: left;
 }
 

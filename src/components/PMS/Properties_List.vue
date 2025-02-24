@@ -133,7 +133,7 @@ export default{
             {
                 type:'search-dropdown', value: landlords_array, width:48,
                 selectOptions: landlords_array, optionSelected: handleSearchLandlord,
-                searchPlaceholder: 'Landlord...', dropdownWidth: '300px',
+                searchPlaceholder: 'Landlord...', dropdownWidth: '250px',
                 fetchData: store.dispatch('Landlords_List/fetchLandlords', {company:companyID.value}),
                 clearSearch: clearSearchLandlord, componentKey: lldSearchComponentKey
             },

@@ -248,7 +248,7 @@
   .main-content{
     z-index: -1;
     margin-left: 1px;
-    margin-top: 64px;
+    margin-top: 40px;
     min-height: 90vh;
     overflow: hidden;
   }

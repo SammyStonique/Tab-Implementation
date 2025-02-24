@@ -135,7 +135,7 @@ export default{
             {label: "Net Ref.", key:"formatted_net_refund"},
             {label: "Claim.", key:"deposit_claim_status"},
             {label: "Ref.", key:"refund_status"},
-            {label: "R.Amnt", key:"refunded_amount"},
+            {label: "Amnt", key:"refunded_amount"},
             {label: "P.V#", key:"voucher_no"},
         ])
         const actions = ref([
@@ -313,6 +313,8 @@ export default{
                 for(let i=0; i < response.data.charges.length; i++){
                     if(response.data.charges[i].billed == "Yes"){
                         billedStatus.value = true;
+                    }else{
+                        billedStatus.value = false;  
                     }
                 }
                 store.dispatch('Exit_Charges/updateState', {exitChargesArray: response.data.charges})
@@ -551,6 +553,7 @@ export default{
                         let formData = {
                             tenant: row['tenant_id'],
                             amount: depHeld,
+                            net_refund: netRefund,
                             outstanding_balance: outstBal,
                             tenant_code: row['tenant_code'],
                             user: userID.value,

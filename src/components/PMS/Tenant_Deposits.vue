@@ -191,7 +191,7 @@ export default{
                 type:'search-dropdown', label:"Tenant", value: tenantID.value, componentKey: tntComponentKey,
                 selectOptions: tenantArray, optionSelected: handleSelectedTenant, required: true,
                 searchPlaceholder: 'Select Tenant...', dropdownWidth: '450px', updateValue: "",
-                fetchData: fetchTenants(), clearSearch: clearSelectedTenan 
+                fetchData: fetchTenants(), clearSearch: clearSelectedTenant 
             },
             {  
                 type:'search-dropdown', label:"Security Deposit", value: depositID.value, componentKey: depComponentKey,

@@ -83,8 +83,8 @@ export default{
         const ref_modal_loader = ref('none');
         const idField = 'loan_application_id';
         const addButtonLabel = ref('New Application');
-        const addingRight = ref('Adding Loan Applications');
-        const rightsModule = ref('MMS');
+        const addingRight = ref('Adding Employee Loan Applications');
+        const rightsModule = ref('HR');
         const submitButtonLabel = ref('Add');
         const selectedIds = ref([]);
         const applicationList = ref([]);
@@ -113,8 +113,7 @@ export default{
             {type: "checkbox"},
             {label: "Date", key:"application_date"},
             {label: "Loan No", key:"loan_number"},
-            {label: "Member Name", key:"member"},
-            {label: "Product Name", key:"loan_product"},
+            {label: "Employee Name", key:"employee"},
             {label: "Applied", key: "formatted_applied_amount"},
             {label: "Approved", key: "formatted_approved_amount"},
             {label: "Disbursed", key: "disbursed"},
@@ -123,11 +122,11 @@ export default{
             {label: "Appr. By", key:"approved_by"},
         ])
         const actions = ref([
-            {name: 'edit', icon: 'fa fa-edit', title: 'Edit Application', rightName: 'Editing Loan Applications'},
-            {name: 'view', icon: 'fa fa-file-pdf-o', title: 'View Loan', rightName: 'Viewing Loan Ledger'},
-            {name: 'approve/reject', icon: 'fa fa-check-circle', title: 'Approve/Reject Loan', rightName: 'Approving Loan Applications'},
-            {name: 'disburse', icon: 'fa fa-credit-card', title: 'Disburse Loan', rightName: 'Disbursing Member Loan'},
-            {name: 'delete', icon: 'fa fa-trash', title: 'Delete Application', rightName: 'Deleting Loan Applications'},
+            {name: 'edit', icon: 'fa fa-edit', title: 'Edit Application', rightName: 'Editing Employee Loan Applications'},
+            {name: 'view', icon: 'fa fa-file-pdf-o', title: 'View Loan', rightName: 'Viewing Employee Loan Ledger'},
+            {name: 'approve/reject', icon: 'fa fa-check-circle', title: 'Approve/Reject Loan', rightName: 'Approving Employee Loan Applications'},
+            {name: 'disburse', icon: 'fa fa-credit-card', title: 'Disburse Loan', rightName: 'Disbursing Employee Loan'},
+            {name: 'delete', icon: 'fa fa-trash', title: 'Delete Application', rightName: 'Deleting Employee Loan Applications'},
         ])
         const companyID = computed(()=> store.state.userData.company_id);
         const userID = computed(()=> store.state.userData.user_id);
@@ -144,14 +143,14 @@ export default{
         
         const name_search = ref('');
         const loan_number_search = ref("");
-        const member_number_search = ref("");
+        const staff_number = ref("");
         const approval_status_search = ref("");
         const disbursed_status_search = ref("");
  
         const searchFilters = ref([
             {type:'text', placeholder:"Loan No...", value: loan_number_search, width:48,},
-            {type:'text', placeholder:"Member Name...", value: name_search, width:48,},
-            {type:'text', placeholder:"Member No...", value: member_number_search, width:48,},
+            {type:'text', placeholder:"Employee Name...", value: name_search, width:48,},
+            {type:'text', placeholder:"Staff No...", value: staff_number, width:48,},
             {
                 type:'dropdown', placeholder:"Status..", value: approval_status_search, width:40,
                 options: [{text:'Pending',value:'Pending'},{text:'Approved',value:'Approved'},{text:'Rejected',value:'Rejected'}]
@@ -185,7 +184,7 @@ export default{
                     loan_application: selectedIds.value
                 }
                 try{
-                    const response = await store.dispatch('Loan_Applications/deleteLoanApplication',formData)
+                    const response = await store.dispatch('Employee_Loan_Applications/deleteLoanApplication',formData)
                     if(response && response.status == 200){
                         toast.success("Application Removed Succesfully");
                         searchApplications();
@@ -211,7 +210,7 @@ export default{
                     loan_application: selectedIds.value
                 }
                 try{
-                    const response = await store.dispatch('Loan_Applications/deleteLoanApplication',formData)
+                    const response = await store.dispatch('Employee_Loan_Applications/deleteLoanApplication',formData)
                     if(response && response.status == 200){
                         toast.success("Application(s) Removed Succesfully");
                         searchPropertys();
@@ -247,7 +246,7 @@ export default{
                 company: companyID.value
             }
 
-            axios.post(`api/v1/approve-member-loan/`,formData)
+            axios.post(`api/v1/approve-employee-loan/`,formData)
             .then((response)=>{
             if(response.data.msg == "Success"){
                 hideTransModalLoader();
@@ -282,19 +281,19 @@ export default{
             showNextBtn.value = false;
             showPreviousBtn.value = false;
             let formData = {
-                member_name: name_search.value,
+                employee_name: name_search.value,
                 loan_number: loan_number_search.value,
-                member_number: member_number_search.value,
+                staff_number: staff_number.value,
                 approval_status: approval_status_search.value,
                 disbursed: disbursed_status_search.value,
                 company_id: companyID.value,
                 page_size: selectedValue.value
             } 
             axios
-            .post(`api/v1/loan-applications-search/?page=${currentPage.value}`,formData)
+            .post(`api/v1/employee-loan-applications-search/?page=${currentPage.value}`,formData)
             .then((response)=>{
                 applicationList.value = response.data.results;
-                store.commit('Loan_Applications/LIST_APPLICATIONS', applicationList.value)
+                store.commit('Employee_Loan_Applications/LIST_APPLICATIONS', applicationList.value)
                 propResults.value = response.data;
                 propArrLen.value = applicationList.value.length;
                 propCount.value = propResults.value.count;
@@ -321,7 +320,7 @@ export default{
             currentPage.value = 1;
             selectedValue.value = 50;
             name_search.value = "";
-            member_number_search.value = "";
+            staff_number.value = "";
             loan_number_search.value = "";
             approval_status_search.value = "";
             disbursed_status_search.value = "";
@@ -358,16 +357,14 @@ export default{
             // scrollToTop();
         }
         const addNewApplication = async() =>{
-            await store.dispatch('Loan_Products/updateState', {loanCharges: [], productMaxAmount: 0, installments:0});
-            await store.dispatch('Loan_Guarantors/updateState', {memberArray: []});
-            store.commit('Loan_Applications/initializeStore');
-            await store.dispatch('Loan_Applications/updateState', {selectedApplication: null,selectedMember: null,selectedProduct: null,loanCharges: [],loanGuarantors: [],loanSchedules: [],isEditing: false});
-            store.commit('pageTab/ADD_PAGE', {'MMS':'Loan_Application_Details'});
-            store.state.pageTab.mmsActiveTab = 'Loan_Application_Details';          
+            store.commit('Employee_Loan_Applications/initializeStore');
+            await store.dispatch('Employee_Loan_Applications/updateState', {selectedApplication: null,selectedEmployee: null,loanSchedules: [],isEditing: false});
+            store.commit('pageTab/ADD_PAGE', {'HR':'Loan_Application_Details'});
+            store.state.pageTab.hrActiveTab = 'Loan_Application_Details';          
         }
         const handleActionClick = async(rowIndex, action, row) =>{
             if( action == 'edit'){
-                await store.dispatch('Loan_Applications/updateState', {selectedApplication: null,selectedMember: null,selectedProduct: null,loanCharges: [],loanGuarantors: [],loanSchedules: [],isEditing: false});
+                await store.dispatch('Employee_Loan_Applications/updateState', {selectedApplication: null,selectedEmployee: null,loanSchedules: [],isEditing: false});
                 const applicationID = row[idField];
                 const applicationStatus = row['approval_status']
                 if(applicationStatus == 'Pending'){
@@ -375,10 +372,10 @@ export default{
                         company: companyID.value,
                         loan_application: applicationID
                     }
-                    await store.dispatch('Loan_Applications/fetchLoanApplication',formData).
+                    await store.dispatch('Employee_Loan_Applications/fetchLoanApplication',formData).
                     then(()=>{
-                        store.commit('pageTab/ADD_PAGE', {'MMS':'Loan_Application_Details'})
-                        store.state.pageTab.mmsActiveTab = 'Loan_Application_Details';
+                        store.commit('pageTab/ADD_PAGE', {'HR':'Loan_Application_Details'})
+                        store.state.pageTab.hrActiveTab = 'Loan_Application_Details';
                     })
                 }else{
                     toast.error(`Cannot Edit ${applicationStatus} Loan`)
@@ -390,7 +387,7 @@ export default{
                     company: companyID.value,
                     loan_application: applicationID
                 }
-                await store.dispatch('Loan_Applications/deleteLoanApplication',formData).
+                await store.dispatch('Employee_Loan_Applications/deleteLoanApplication',formData).
                 then(()=>{
                     searchApplications();
                 })
@@ -398,7 +395,7 @@ export default{
                 const applicationStatus = row['approval_status']
                 if(applicationStatus == 'Pending'){
                     updateFormFields();
-                    applicationID.value = row['loan_application_id'];
+                    applicationID.value = row['employee_loan_application_id'];
                     appliedAmount.value = row['applied_amount'];
                     transModalVisible.value = true;
                     flex_basis.value = '1/2';
@@ -414,10 +411,10 @@ export default{
                         company: companyID.value,
                         loan_application: applicationID
                     }
-                    await store.dispatch('Loan_Applications/fetchLoanDetails',formData).
+                    await store.dispatch('Employee_Loan_Applications/fetchLoanDetails',formData).
                     then(()=>{
-                        store.commit('pageTab/ADD_PAGE', {'MMS':'Loan_Ledger'});
-                        store.state.pageTab.mmsActiveTab = 'Loan_Ledger'; 
+                        store.commit('pageTab/ADD_PAGE', {'HR':'Loan_Ledger'});
+                        store.state.pageTab.hrActiveTab = 'Loan_Ledger'; 
                     })
                 }else{
                     toast.error(`Cannot View ${applicationStatus} Loan`)
@@ -454,12 +451,12 @@ export default{
             let formData = {
                 product_name: name_search.value,
                 product_code: loan_number_search.value,
-                active_status: member_number_search.value,
+                active_status: staff_number.value,
                 company_id: companyID.value,
             } 
 
             axios
-            .post("api/v1/export-loan-applications-pdf/", formData, { responseType: 'blob' })
+            .post("api/v1/export-employee-loan-applications-pdf/", formData, { responseType: 'blob' })
                 .then((response)=>{
                     if(response.status == 200){
                         const blob1 = new Blob([response.data]);
@@ -540,7 +537,7 @@ export default{
                 user: userID.value,
                 company: companyID.value
             }
-            axios.post(`api/v1/disburse-member-loan/`,formData)
+            axios.post(`api/v1/disburse-employee-loan/`,formData)
             .then((response)=>{
                 if(response.data.msg == "Success"){
                     toast.success("Success")

@@ -185,7 +185,7 @@ export default defineComponent({
             showLoader();
             let formData = {
                 company: companyID.value,
-                property_code: formFields.value[1].value,
+                property_code: formFields.value[1].value || '-',
                 property_type: formFields.value[4].value,
                 status: "Active",
                 name: formFields.value[2].value,
@@ -206,8 +206,8 @@ export default defineComponent({
             }
 
             errors.value = [];
-            for(let i=1; i < (formFields.value.length - 1); i++){
-                if(formFields.value[i].value =='' && formFields.value[i].required == true){
+            for(let i=1; i < (formFields.value.length); i++){
+                if(formFields.value[i].value =='' && formFields.value[i].required == true && formFields.value[i].type != 'search-dropdown'){
                     errors.value.push(formFields.value[i].label);
                 }
             }
@@ -219,6 +219,7 @@ export default defineComponent({
                     errors.value.push(additionalFields.value[i].label);
                 }
             }
+
             if(errors.value.length){
                 toast.error('Fill In Required Fields');
                 hideLoader();                 
@@ -248,8 +249,8 @@ export default defineComponent({
         const updateProperty = async() => {
             showLoader();
             errors.value = [];
-            for(let i=2; i < (formFields.value.length -1); i++){
-                if(formFields.value[i].value =='' && formFields.value[i].required == true){
+            for(let i=1; i < (formFields.value.length -1); i++){
+                if(formFields.value[i].value =='' && formFields.value[i].required == true && formFields.value[i].type != 'search-dropdown'){
                     errors.value.push(formFields.value[i].label);
                 }
             }
