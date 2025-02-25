@@ -63,9 +63,9 @@ export default{
         const prodComponentKey = ref(0);
         const title = ref('Disbursement Details');
         const addButtonLabel = ref('New Disbursement');
-        const addingRight = ref('Adding Loan Disbursements');
-        const rightsModule = ref('MMS');
-        const idField = 'loan_disbursement_id';
+        const addingRight = ref('Adding Employee Loan Disbursements');
+        const rightsModule = ref('HR');
+        const idField = 'employee_loan_disbursement_id';
         const depModalVisible = ref(false);
         const selectedIds = ref([]);
         const disbursementsList = ref([]);
@@ -84,11 +84,11 @@ export default{
         const modal_top = ref('170px');
         const modal_left = ref('400px');
         const modal_width = ref('30vw');
-        const isEditing = computed(()=> store.state.Loan_Disbursements.isEditing)
-        const selectedDisbursement = computed(()=> store.state.Loan_Disbursements.selectedDisbursement);
-        const selectedApplication = computed(()=> store.state.Loan_Disbursements.selectedApplication);
-        const selectedLedger = computed(()=> store.state.Loan_Disbursements.selectedLedger);
-        const applicationArray = computed(() => store.state.Loan_Applications.applicationArr);
+        const isEditing = computed(()=> store.state.Employee_Employee_Loan_Disbursements.isEditing)
+        const selectedDisbursement = computed(()=> store.state.Employee_Loan_Disbursements.selectedDisbursement);
+        const selectedApplication = computed(()=> store.state.Employee_Loan_Disbursements.selectedApplication);
+        const selectedLedger = computed(()=> store.state.Employee_Loan_Disbursements.selectedLedger);
+        const applicationArray = computed(() => store.state.Employee_Loan_Applications.applicationArr);
         const ledgerArray = computed(() => store.state.Ledgers.cashbookLedgerArr);
         const approvedAmount = ref(400000);
         const loanApprvAmnt = ref(400000);
@@ -97,14 +97,13 @@ export default{
             {type: "checkbox"},
             {label: "Date", key: "date", type: "text", editable: false},
             {label: "Loan No", key: "loan_number", type: "text", editable: false},
-            {label: "Loan Product", key: "loan_product", type: "text", editable: false},
-            {label: "Member No", key: "member_number", type: "text", editable: false},
-            {label: "Member Name", key: "member_name", type: "text", editable: false},
+            {label: "Staff No", key: "staff_number", type: "text", editable: false},
+            {label: "Employee Name", key: "employee_name", type: "text", editable: false},
             {label: "Amount", key: "amount", type: "text", editable: false},
             {label: "P.V#", key: "journal_no", type: "text", editable: false},
         ])
         const actions = ref([
-            {name: 'delete', icon: 'fa fa-trash', title: 'Delete Disbursement', rightName: 'Deleting Loan Disbursements'},
+            {name: 'delete', icon: 'fa fa-trash', title: 'Delete Disbursement', rightName: 'Deleting Employee Loan Disbursements'},
         ])
         const companyID = computed(()=> store.state.userData.company_id);
         const userID = computed(()=> store.state.userData.user_id);
@@ -113,23 +112,23 @@ export default{
         const loan_number_search = ref('');
         const journal_number_search = ref('');
         const name_search = ref('');
-        const member_number_search = ref("");
+        const staff_number_search = ref("");
         const searchFilters = ref([
             {type:'text', placeholder:"P.V No...", value: journal_number_search, width:36,},
             {type:'text', placeholder:"Loan No...", value: loan_number_search, width:36,},
-            {type:'text', placeholder:"Member No...", value: member_number_search, width:36,},
-            {type:'text', placeholder:"Search Name...", value: name_search, width:48,},
+            {type:'text', placeholder:"Staff No...", value: staff_number_search, width:36,},
+            {type:'text', placeholder:"Employee Name...", value: name_search, width:48,},
         ]);
         const handleSelectionChange = (ids) => {
             selectedIds.value = ids;
         };
         const handleSelectedApplication = async(option) =>{
-            await store.dispatch('Loan_Applications/handleSelectedApplication', option)
-            applicationID.value = store.state.Loan_Applications.applicationID;
+            await store.dispatch('Employee_Loan_Applications/handleSelectedApplication', option)
+            applicationID.value = store.state.Employee_Loan_Applications.applicationID;
         };
         const clearSelectedApplication = async() =>{
-            await store.dispatch('Loan_Applications/updateState', {applicationID: ''});
-            applicationID.value = store.state.Loan_Applications.applicationID;
+            await store.dispatch('Employee_Loan_Applications/updateState', {applicationID: ''});
+            applicationID.value = store.state.Employee_Loan_Applications.applicationID;
         };
         const handleSelectedLedger = async(option) =>{
             await store.dispatch('Ledgers/handleSelectedLedger', option)
@@ -138,6 +137,9 @@ export default{
         const clearSelectedLedger = async() =>{
             await store.dispatch('Ledgers/updateState', {ledgerID: ''});
             cashbookID.value = store.state.Ledgers.ledgerID;
+        };
+        const fetchAllLedgers = async() =>{
+            await store.dispatch('Ledgers/fetchLedgers', {company:companyID.value})
         };
         const fetchLedgers = async() =>{
             await store.dispatch('Ledgers/fetchCashbookLedgers', {company:companyID.value, ledger_type: 'Cashbook'})
@@ -161,7 +163,7 @@ export default{
                     type:'search-dropdown', label:"Application", value: applicationValue.value, componentKey: memComponentKey,
                     selectOptions: applicationArray, optionSelected: handleSelectedApplication, required: true,
                     searchPlaceholder: 'Select Application...', dropdownWidth: '400px', updateValue: selectedApplication.value,
-                    fetchData: store.dispatch('Loan_Applications/fetchLoanApplications', {company:companyID.value}), clearSearch: clearSelectedApplication
+                    fetchData: store.dispatch('Employee_Loan_Applications/fetchLoanApplications', {company:companyID.value}), clearSearch: clearSelectedApplication
                 },
                 {  
                     type:'search-dropdown', label:"Cashbook", value: ledgerValue.value, componentKey: prodComponentKey,
@@ -188,9 +190,10 @@ export default{
             }
         }, { immediate: true });
         const addNewDisbursement = () =>{
+            fetchAllLedgers();
             depModalVisible.value = true;
             handleReset();
-            store.dispatch("Loan_Disbursements/updateState",{selectedDisbursement:null, selectedApplication:null, selectedLedger:null,isEditing:false})
+            store.dispatch("Employee_Loan_Disbursements/updateState",{selectedDisbursement:null, selectedApplication:null, selectedLedger:null,isEditing:false})
             flex_basis.value = '1/3';
             flex_basis_percentage.value = '33.333';
         }
@@ -201,14 +204,14 @@ export default{
                     company: companyID.value,
                     loan_disbursement: accountID
                 }
-                await store.dispatch('Loan_Disbursements/deleteLoanDisbursement',formData).
+                await store.dispatch('Employee_Loan_Disbursements/deleteLoanDisbursement',formData).
                 then(()=>{
                     searchDisbursements();
                 })
             }
         } 
         const handleReset = () =>{
-            store.dispatch("Loan_Disbursements/updateState",{selectedDisbursement:null, selectedApplication:null, selectedLedger:null,isEditing:false})
+            store.dispatch("Employee_Loan_Disbursements/updateState",{selectedDisbursement:null, selectedApplication:null, selectedLedger:null,isEditing:false})
             for(let i=0; i < formFields.value.length; i++){
                 if(formFields.value[i].name == 'partial_disbursement'){
                     formFields.value[i].value = 'No';
@@ -243,7 +246,7 @@ export default{
                 user: userID.value,
                 company: companyID.value
             }
-            axios.post(`api/v1/disburse-member-loan/`,formData)
+            axios.post(`api/v1/disburse-employee-loan/`,formData)
             .then((response)=>{
                 if(response.data.msg == "Success"){
                     toast.success("Success")
@@ -272,7 +275,7 @@ export default{
                     loan_disbursement: selectedIds.value,
                 }
                 try{
-                    const response = await store.dispatch('Loan_Disbursements/deleteLoanDisbursement',formData)
+                    const response = await store.dispatch('Employee_Loan_Disbursements/deleteLoanDisbursement',formData)
                     if(response && response.status == 200){
                         toast.success("Disbursement Removed Succesfully");
                         searchDisbursements();
@@ -298,7 +301,7 @@ export default{
                     loan_disbursement: selectedIds.value,
                 }
                 try{
-                    const response = await store.dispatch('Loan_Disbursements/deleteLoanDisbursement',formData)
+                    const response = await store.dispatch('Employee_Loan_Disbursements/deleteLoanDisbursement',formData)
                     if(response && response.status == 200){
                         toast.success("Disbursement(s) Removed Succesfully");
                         searchDisbursements();
@@ -328,16 +331,16 @@ export default{
             let formData = {
                 loan_number: loan_number_search.value,
                 journal_no: journal_number_search.value,
-                member_name: name_search.value,
-                member_number: member_number_search.value,
+                employee_name: name_search.value,
+                staff_number: staff_number_search.value,
                 company_id: companyID.value,
                 page_size: selectedValue.value
             }
             axios
-            .post(`api/v1/loan-disbursements-search/?page=${currentPage.value}`,formData)
+            .post(`api/v1/employee-loan-disbursements-search/?page=${currentPage.value}`,formData)
             .then((response)=>{
                 disbursementsList.value = response.data.results;
-                store.commit('Loan_Disbursements/LIST_DISBURSEMENTS', disbursementsList.value)
+                store.commit('Employee_Loan_Disbursements/LIST_DISBURSEMENTS', disbursementsList.value)
                 depResults.value = response.data;
                 depArrLen.value = disbursementsList.value.length;
                 depCount.value = depResults.value.count;
@@ -392,7 +395,7 @@ export default{
             selectedValue.value = 50;
             name_search.value = "";
             loan_number_search.value = "";
-            member_number_search.value = "";
+            staff_number_search.value = "";
             journal_number_search.value = "";
             searchDisbursements();
         };

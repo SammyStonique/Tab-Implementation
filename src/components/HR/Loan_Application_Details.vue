@@ -245,7 +245,7 @@ export default defineComponent({
             showLoader();
             let formData = {
                 loan_number: "-",
-                loan_due_date: formFields.value[5].value || '1',
+                loan_due_date: formFields.value[4].value || '1',
                 interest_charged: formFields.value[7].value,
                 interest_calculation: formFields.value[9].value,
                 interest_rate: formFields.value[8].value,
@@ -294,16 +294,20 @@ export default defineComponent({
             showLoader();
             errors.value = [];
             let formData = {
-                loan_application: selectedApplication.value.loan_application_id,
+                loan_application: selectedApplication.value.employee_loan_application_id,
                 loan_number: selectedApplication.value.loan_number,
-                loan_due_date: formFields.value[5].value || '1',
-                application_date: formFields.value[3].value,
-                repayment_start_date: formFields.value[4].value,
-                installments: formFields.value[6].value,
+                loan_due_date: formFields.value[4].value || '1',
+                application_date: formFields.value[2].value,
+                repayment_start_date: formFields.value[3].value,
+                installments: formFields.value[5].value,
+                interest_charged: formFields.value[7].value,
+                interest_calculation: formFields.value[9].value,
+                interest_rate: formFields.value[8].value,
+                loan_period: formFields.value[6].value,
                 employee: employeeValue.value,
                 employee_id: employeeValue.value,
-                loan_remarks: formFields.value[7].value,
-                applied_amount: formFields.value[2].value,
+                loan_remarks: formFields.value[10].value,
+                applied_amount: formFields.value[1].value,
                 company: companyID.value,
             }
             errors.value = [];
@@ -356,7 +360,7 @@ export default defineComponent({
             additional_flex_basis_percentage.value = '33.333';
         })
         onMounted(()=>{
-            
+            fetchAllLedgers();
         })
 
         return{

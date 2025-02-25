@@ -230,7 +230,7 @@ export default defineComponent({
                 date_to: to_date_search.value,
             }
             axios
-            .post("api/v1/tenant-statement-pdf/", formData, { responseType: 'blob' })
+            .post("api/v1/loan-statement-pdf/", formData, { responseType: 'blob' })
             .then((response)=>{
                 if(response.status == 200){
                     const blob1 = new Blob([response.data]);

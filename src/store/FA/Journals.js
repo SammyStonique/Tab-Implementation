@@ -604,9 +604,9 @@ const actions = {
                 icon: "success",
               }); 
               toast.success("Payment Voucher(s) removed succesfully")
-          }else if(response.data.msg == "Paid"){
+          }else if(response.data.msg == "Failed"){
             Swal.fire({
-              title: "Cannot Delete Paid Payment Voucher",
+              title: "Cannot Delete Payment Voucher",
               icon: "warning",
             });
           }                   

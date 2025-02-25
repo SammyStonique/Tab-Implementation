@@ -51,6 +51,12 @@
                         </button>
                     </div>
                     <div class="py-2 px-3 pl-4 w-full hover:bg-slate-500 hover:w-full">
+                        <button class="flex text-sm w-full" @click="openPage({'HR':'Loan_Disbursements'})">
+                            <i class="fa fa-credit-card pt-2 mr-2" aria-hidden="true"></i>
+                            <p class="">Loan Disbursements</p>
+                        </button>
+                    </div>
+                    <div class="py-2 px-3 pl-4 w-full hover:bg-slate-500 hover:w-full">
                         <button class="flex text-sm w-full" @click="openPage({'HR':'Payrolls'})">
                             <i class="fa fa-spinner pt-2 mr-2" aria-hidden="true"></i>
                             <p class="">Payroll Processing</p>

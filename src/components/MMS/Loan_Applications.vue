@@ -186,8 +186,11 @@ export default{
                 }
                 try{
                     const response = await store.dispatch('Loan_Applications/deleteLoanApplication',formData)
-                    if(response && response.status == 200){
-                        toast.success("Application Removed Succesfully");
+                    if(response && response.data.msg == "Success"){
+                        toast.success("Application(s) Removed Succesfully");
+                        searchApplications();
+                    }else if(response && response.data.msg == "Failed"){
+                        toast.error("Failed To Remove Application");
                         searchApplications();
                     }
                 }
@@ -212,9 +215,12 @@ export default{
                 }
                 try{
                     const response = await store.dispatch('Loan_Applications/deleteLoanApplication',formData)
-                    if(response && response.status == 200){
+                    if(response && response.data.msg == "Success"){
                         toast.success("Application(s) Removed Succesfully");
-                        searchPropertys();
+                        searchApplications();
+                    }else if(response && response.data.msg == "Failed"){
+                        toast.error("Failed To Remove Application");
+                        searchApplications();
                     }
                 }
                 catch(error){

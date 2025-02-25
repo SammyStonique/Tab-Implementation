@@ -207,6 +207,7 @@ const actions = {
         state.applicationID = selectedApplication.employee_loan_application_id;
         state.applicationNumber = selectedApplication.loan_number;
         state.applicationArray = [...state.applicationArray, selectedApplication];
+
     }
     commit('APPLICATIONS_ARRAY', state.applicationArray);
       
@@ -241,7 +242,7 @@ const actions = {
       if (result.value) {
         axios.post(`api/v1/delete-employee-loan-application/`,formData)
         .then((response)=>{
-          if(response.status == 200){
+          if(response.data.msg == "Success"){
               Swal.fire("Poof! Loan Application(s) removed succesfully!", {
                 icon: "success",
               }); 

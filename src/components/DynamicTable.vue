@@ -46,7 +46,7 @@
               </div>
             </template>
           </td>
-          <td class="flex gap-2 border-0" v-if="showActions">
+          <td class="flex gap-x-2 h-6 border-0" v-if="showActions">
             <div v-for="action in actions">
               <button :class="{ 'disabled': isDisabled(`${action.rightName}`) }" @click.stop="handleAction(rowIndex, action.name, action.rightName, row)" :title="action.title">
                 <i :class="action.icon"></i>
@@ -334,7 +334,7 @@ input {
 
 .dynamic-table td {
   border: 1px solid #ccc;
-  padding: 3px;
+  padding: 2px;
   text-align: left;
 }
 

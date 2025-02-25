@@ -207,8 +207,11 @@ export default{
                 }
                 try{
                     const response = await store.dispatch('Journals/deletePaymentVoucher',formData)
-                    if(response && response.status == 200){
+                    if(response && response.data.msg == "Success"){
                         toast.success("Payment Voucher Removed Succesfully");
+                        searchPaymentVouchers();
+                    }else if(response && response.data.msg == "Failed"){
+                        toast.error("Failed to remove Payment Voucher");
                         searchPaymentVouchers();
                     }
                 }
@@ -236,8 +239,11 @@ export default{
 
                 try{
                     const response = await store.dispatch('Journals/deletePaymentVoucher',formData)
-                    if(response && response.msg == "Success"){
+                    if(response && response.data.msg == "Success"){
                         toast.success("Payment Voucher(s) Removed Succesfully");
+                        searchPaymentVouchers();
+                    }else if(response && response.data.msg == "Failed"){
+                        toast.error("Failed to remove Payment Voucher");
                         searchPaymentVouchers();
                     }
                 }

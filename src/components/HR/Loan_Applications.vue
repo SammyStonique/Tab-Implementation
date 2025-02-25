@@ -20,6 +20,7 @@
             :idField="idField"
             @handleSelectionChange="handleSelectionChange"
             @handleActionClick="handleActionClick"
+            @handleShowDetails="handleShowDetails"
             :count="propCount"
             :currentPage="currentPage"
             :result="propArrLen"
@@ -34,7 +35,23 @@
             :showDetails="showDetails"
             :detailsTitle="detailsTitle"
             @hideDetails="hideDetails"
-        />
+            >
+            <div>
+                <div class="tabs pt-2">
+                    <button v-for="(tab, index) in tabs" :key="tab" :class="['tab', { active: activeTab === index }]"@click="selectTab(index)">
+                        {{ tab }}
+                    </button>
+                </div>
+                <div class="tab-content mt-3">
+                    <div v-if="activeTab == 0">
+                        <LoanSchedules 
+                            :loanSchedulesRows="loanScheduleRows"
+                        />
+                    </div>
+                </div>
+                
+            </div>
+        </PageComponent>
     </div>
     <MovableModal v-model:visible="transModalVisible" :title="transTitle" :modal_top="modal_top" :modal_left="modal_left" :modal_width="modal_width"
         :loader="trans_modal_loader" @showLoader="showTransModalLoader" @hideLoader="hideTransModalLoader" @closeModal="closeTransModal">
@@ -64,12 +81,13 @@ import PrintJS from 'print-js';
 import MovableModal from '@/components/MovableModal.vue';
 import DynamicForm from '@/components/NewDynamicForm.vue';
 import SearchableDropdown from '@/components/SearchableDropdown.vue';
+import LoanSchedules from "@/components/LoanSchedules.vue";
 import Swal from 'sweetalert2';
 
 export default{
     name: 'Loan_Applications',
     components:{
-        PageComponent,MovableModal,SearchableDropdown,DynamicForm
+        PageComponent,MovableModal,SearchableDropdown,DynamicForm,LoanSchedules
     },
     setup(){
         const store = useStore();
@@ -81,13 +99,14 @@ export default{
         const displayButtons = ref(true);
         const trans_modal_loader = ref('none');
         const ref_modal_loader = ref('none');
-        const idField = 'loan_application_id';
+        const idField = 'employee_loan_application_id';
         const addButtonLabel = ref('New Application');
         const addingRight = ref('Adding Employee Loan Applications');
         const rightsModule = ref('HR');
         const submitButtonLabel = ref('Add');
         const selectedIds = ref([]);
         const applicationList = ref([]);
+        const loanScheduleRows = ref([]);
         const propResults = ref([]);
         const propArrLen = ref(0);
         const propCount = ref(0);
@@ -97,9 +116,12 @@ export default{
         const currentPage = ref(1);
         const showNextBtn = ref(false);
         const showPreviousBtn = ref(false);
-        const detailsTitle = ref('Application Documents');
         const transTitle = ref('Approve/Reject Loan');
         const refTitle = ref('Disburse Loan');
+        const detailsTitle = ref('Application Schedules');
+        const tabs = ref(['Armotization Schedule']);
+        const activeTab = ref(0);
+        const appID = ref(null);
         const transModalVisible = ref(false);
         const refModalVisible = ref(false);
         const dropdownWidth = ref("500px")
@@ -185,8 +207,11 @@ export default{
                 }
                 try{
                     const response = await store.dispatch('Employee_Loan_Applications/deleteLoanApplication',formData)
-                    if(response && response.status == 200){
-                        toast.success("Application Removed Succesfully");
+                    if(response && response.data.msg == "Success"){
+                        toast.success("Application(s) Removed Succesfully");
+                        searchApplications();
+                    }else if(response && response.data.msg == "Failed"){
+                        toast.error("Failed To Remove Application");
                         searchApplications();
                     }
                 }
@@ -211,9 +236,12 @@ export default{
                 }
                 try{
                     const response = await store.dispatch('Employee_Loan_Applications/deleteLoanApplication',formData)
-                    if(response && response.status == 200){
+                    if(response && response.data.msg == "Success"){
                         toast.success("Application(s) Removed Succesfully");
-                        searchPropertys();
+                        searchApplications();
+                    }else if(response && response.data.msg == "Failed"){
+                        toast.error("Failed To Remove Application");
+                        searchApplications();
                     }
                 }
                 catch(error){
@@ -442,6 +470,40 @@ export default{
             }
         };
 
+        const handleShowDetails = async(row) =>{
+            activeTab.value = 0;
+            appID.value = row['employee_loan_application_id'];
+            detailsTitle.value = row['loan_number'] + ' Schedules';
+            showDetails.value = true;
+            let formData = {
+                loan_application: row['employee_loan_application_id'],
+                company: companyID.value
+            }
+            axios.post('api/v1/employee-armotization-schedules-search/',formData)
+            .then((response)=>{
+                loanScheduleRows.value = response.data.armotization_schedules;
+            })
+            .catch((error)=>{
+                console.log(error.message)
+            })
+        };
+        const selectTab = async(index) => {
+            let formData = {
+                company: companyID.value,
+                loan_application: appID.value,
+            }
+            if(index == 1){
+                activeTab.value = index;
+            }else{
+                activeTab.value = index;
+                hideLoader();
+            }
+
+        };
+        const hideDetails = async() =>{
+            showDetails.value = false;
+        };
+
         const handleDynamicOption = (option) =>{
             
         };
@@ -472,9 +534,7 @@ export default{
                 hideLoader();
             })
         };
-        const hideDetails = async() =>{
-            showDetails.value = false;
-        };
+
         const fetchLedgers = async() =>{
             await store.dispatch('Ledgers/fetchCashbookLedgers', {company:companyID.value, ledger_type: 'Cashbook'})
         };
@@ -576,8 +636,26 @@ export default{
             handleSelectionChange,addingRight,rightsModule,printApplicationList,selectSearchQuantity,selectedValue,
             modal_left,modal_top,modal_width,trans_modal_loader,transModalVisible,transTitle,showTransModalLoader,hideTransModalLoader,approveLoan,closeTransModal,
             dropdownOptions,handleDynamicOption,refTitle,refFormFields,refModalVisible,ref_modal_loader,handleRefReset,showRefModalLoader,hideRefModalLoader,closeRefModal,
-            disburseMemberLoan
+            disburseMemberLoan,showDetails,detailsTitle,hideDetails,handleShowDetails,loanScheduleRows,tabs,selectTab,activeTab
         }
     }
 };
 </script>
+
+<style scoped>
+.tabs {
+    display: flex;
+    border-bottom: 1px solid #ccc;
+}
+.tab {
+    padding: 2px 20px 2px 20px;
+    cursor: pointer;
+}
+
+.tab.active {
+    border-bottom: 2px solid #000;
+}
+
+.tab-content {
+    padding: 1px;
+}</style>
