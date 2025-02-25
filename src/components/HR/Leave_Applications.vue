@@ -169,10 +169,26 @@ export default{
         const calculateDaysRequested = (value) =>{
             const start = new Date(formFields.value[2].value);
             const end = new Date(formFields.value[4].value);
-            
-            // Calculate the difference in days
-            const differenceInTime = end.getTime() - start.getTime();
-            const differenceInDays = differenceInTime / (1000 * 3600 * 24); // Convert from milliseconds to days
+
+            let differenceInDays = 0;
+            let totalDays = 0;
+
+            if(formFields.value[3].value == "Full Day" && formFields.value[5].value == "Full Day"){
+                differenceInDays = (end.getTime() - start.getTime()) / (1000 * 3600 * 24);
+                totalDays = differenceInDays;
+            }
+            else if(formFields.value[3].value == "Half Day" && formFields.value[5].value == "Half Day"){
+                differenceInDays = (end.getTime() - start.getTime()) / (1000 * 3600 * 24);
+                totalDays = differenceInDays - 1;
+            }
+            else if(formFields.value[3].value == "Full Day" && formFields.value[5].value == "Half Day"){
+                differenceInDays = (end.getTime() - start.getTime()) / (1000 * 3600 * 24);
+                totalDays = differenceInDays - 0.5;
+            }
+            else if(formFields.value[3].value == "Half Day" && formFields.value[5].value == "Full Day"){
+                differenceInDays = (end.getTime() - start.getTime()) / (1000 * 3600 * 24);
+                totalDays = differenceInDays - 0.5;
+            }
 
             let saturdays = 0
             let sundays = 0
@@ -186,7 +202,7 @@ export default{
                 
             }
 
-            requestedDays.value = differenceInDays + 1
+            requestedDays.value = totalDays + 1
 
             if (excSaturday.value == "Yes"){
                 requestedDays.value -= saturdays;
@@ -298,7 +314,7 @@ export default{
             if(errors.value.length){
                 toast.error('Fill In Required Fields');
                 hideModalLoader();
-            }else if(requestedDays.value > leaveBalance.value){
+            }else if(requestedDays.value > leaveBalance.value || requestedDays.value <= 0){
                 toast.error('Invalid Requested Days');
                 hideModalLoader();
             }else{

@@ -50,6 +50,7 @@ import MovableModal from '@/components/MovableModal.vue'
 import DynamicForm from '../NewDynamicForm.vue';
 import { useStore } from "vuex";
 import { useToast } from "vue-toastification";
+import { useDateFormatter } from '@/composables/DateFormatter';
 import PrintJS from 'print-js';
 
 export default{
@@ -60,6 +61,9 @@ export default{
     setup(){
         const store = useStore();     
         const toast = useToast();
+        const { getYear } = useDateFormatter();
+        const { getMonth } = useDateFormatter();
+        const current_date = new Date();
         const loader = ref('none');
         const modal_loader = ref('none');
         const emplComponentKey = ref(0);
@@ -105,6 +109,8 @@ export default{
             {label: "Employee Name", key: "employee_name"},
             {label: "Leave Type", key: "leave_name"},
             {label: "Max Alloc.", key:"maximum_allocation"},
+            {label: "Year", key:"year"},
+            {label: "Balance B/f", key:"balance_bf"},
             {label: "Alloted", key:"total_leave_days"},
             {label: "Used", key:"used_leave_days"},
             {label: "Balance", key:"remaining_leave_days"},
@@ -116,9 +122,11 @@ export default{
         const companyID = computed(()=> store.state.userData.company_id);
         const employee_name_search = ref('');
         const staff_number_search = ref('');
+        const year_search = ref('');
         const searchFilters = ref([
             {type:'text', placeholder:"Staff No...", value: staff_number_search, width:32,},
             {type:'text', placeholder:"Employee Name...", value: employee_name_search, width:64,},
+            {type:'text', placeholder:"Year...", value: year_search, width:32,},
 
         ]);
         const handleSelectionChange = (ids) => {
@@ -171,11 +179,18 @@ export default{
                 { type: 'text', name: 'max_allocations',label: "Max Allocations", value: computedLeaveDays.value, required: false, disabled:true },
                 { type: 'text', name: 'used_leave_days',label: "Used Days", value: selectedAllocation.value?.used_leave_days || '0', required: false, disabled:true },
                 { type: 'text', name: 'remaining_leave_days',label: "Balance", value: selectedAllocation.value?.remaining_leave_days || '0', required: false, disabled:true },
+                { type: 'text', name: 'year',label: "Year", value: selectedAllocation.value?.year || getYear(current_date), required: true },
+                { type: 'text', name: 'balance_bf',label: "Balance B/f", value: selectedAllocation.value?.balance_bf || '0', required: true },
             ];
         };
         const handleReset = () =>{
             for(let i=0; i < formFields.value.length; i++){
-                formFields.value[i].value = '';
+                if(formFields.value[i].label == "Year"){
+                    formFields.value[i].value = getYear(current_date);
+                }else{
+                    formFields.value[i].value = '';
+                }
+                
             }
             emplComponentKey.value += 1;
             employeeID.value = '';
@@ -205,6 +220,8 @@ export default{
             let formData = {
                 total_leave_days: formFields.value[2].value,
                 used_leave_days: formFields.value[4].value,
+                year: formFields.value[6].value,
+                balance_bf: formFields.value[7].value,
                 employee: employeeID.value,
                 employee_id: employeeID.value,
                 leave_type: leaveID.value,
@@ -256,6 +273,8 @@ export default{
                 leave_balance: selectedAllocation.value.leave_balance_id,
                 total_leave_days: formFields.value[2].value,
                 used_leave_days: formFields.value[4].value,
+                year: formFields.value[6].value,
+                balance_bf: formFields.value[7].value,
                 employee: employeeValue.value,
                 employee_id: employeeValue.value,
                 leave_type: leaveValue.value,
@@ -369,6 +388,7 @@ export default{
                 employee_name: employee_name_search.value,
                 staff_number: staff_number_search.value,
                 company_id: companyID.value,
+                year: year_search.value,
                 page_size: selectedValue.value
             } 
             axios
@@ -399,9 +419,11 @@ export default{
             searchAllocations(selectedValue.value);
         };
         const resetFilters = () =>{
+            currentPage.value = 1;
             selectedValue.value = 50;
             staff_number_search.value = "";
             employee_name_search.value = "";
+            year_search.value = "";
             searchAllocations();
         }
         const loadPrev = () =>{
@@ -556,7 +578,7 @@ export default{
         })
         return{
             title, searchAllocations,resetFilters, addButtonLabel, searchFilters, tableColumns, allocationsList,
-            propResults, propArrLen, propCount, pageCount, showNextBtn, showPreviousBtn,
+            currentPage,propResults, propArrLen, propCount, pageCount, showNextBtn, showPreviousBtn,
             loadPrev, loadNext, firstPage, lastPage, idField, actions, handleActionClick, propModalVisible, closeModal,
             submitButtonLabel, showModal, addNewAllocation, showLoader, loader, hideLoader, modal_loader, modal_top, modal_left, modal_width,displayButtons,
             showModalLoader, hideModalLoader, saveAllocation, formFields, handleSelectionChange, flex_basis,flex_basis_percentage,
