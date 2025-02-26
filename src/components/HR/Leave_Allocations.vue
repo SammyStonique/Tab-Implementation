@@ -5,6 +5,8 @@
             :addButtonLabel="addButtonLabel"
             @handleAddNew="addNewAllocation"
             :searchFilters="searchFilters"
+            :dropdownOptions="dropdownOptions"
+            @handleDynamicOption="handleDynamicOption"
             @searchPage="searchAllocations"
             @resetFilters="resetFilters"
             @removeItem="removeAllocation"
@@ -39,6 +41,13 @@
                 :displayButtons="displayButtons" @handleSubmit="saveAllocation" @handleReset="handleReset"
             />
         </MovableModal>
+        <MovableModal v-model:visible="allocModalVisible" :title="allocTitle" :modal_top="modal_top" :modal_left="modal_left" :modal_width="modal_width"
+            :loader="alloc_modal_loader" @showLoader="showAllocModalLoader" @hideLoader="hideAllocModalLoader" @closeModal="closeAllocModal">
+            <DynamicForm 
+                :fields="formFields1" :flex_basis="flex_basis" :flex_basis_percentage="flex_basis_percentage" 
+                :displayButtons="displayButtons" @handleSubmit="autoGenerateAllocations" @handleReset="handleAllocReset"
+            />
+        </MovableModal>
     </div>
 </template>
 
@@ -66,6 +75,7 @@ export default{
         const current_date = new Date();
         const loader = ref('none');
         const modal_loader = ref('none');
+        const alloc_modal_loader = ref('none');
         const emplComponentKey = ref(0);
         const levComponentKey = ref(0);
         const idField = 'leave_balance_id';
@@ -73,6 +83,7 @@ export default{
         const addingRight = ref('Adding Leave Allocations');
         const rightsModule = ref('HR');
         const title = ref('Leave Allocation Details');
+        const allocTitle = ref('Auto Generate Allocations');
         const submitButtonLabel = ref('Add');
         const selectedIds = ref([]);
         const allocationsList = ref([]);
@@ -85,6 +96,7 @@ export default{
         const showNextBtn = ref(false);
         const showPreviousBtn = ref(false);
         const propModalVisible = ref(false);
+        const allocModalVisible = ref(false);
         const flex_basis = ref('');
         const flex_basis_percentage = ref('');
         const displayButtons = ref(true);
@@ -110,8 +122,11 @@ export default{
             {label: "Leave Type", key: "leave_name"},
             {label: "Max Alloc.", key:"maximum_allocation"},
             {label: "Year", key:"year"},
-            {label: "Balance B/f", key:"balance_bf"},
+            {label: "Start Date", key:"start_date"},
+            {label: "End Date", key:"end_date"},
+            {label: "Bal B/f", key:"balance_bf"},
             {label: "Alloted", key:"total_leave_days"},
+            {label: "Entitled", key:"current_entitlement"},
             {label: "Used", key:"used_leave_days"},
             {label: "Balance", key:"remaining_leave_days"},
         ])
@@ -214,7 +229,22 @@ export default{
         }
         const hideModalLoader = () =>{
             modal_loader.value = "none";
+        };
+        const formFields1 = ref([]);
+        const updateFormFields1 = () => {
+            formFields1.value = [
+                { type: 'text', name: 'year',label: "Year", value: getYear(current_date), required: true },
+            ];
+        };
+        const showAllocModalLoader = () =>{
+            alloc_modal_loader.value = "block";
         }
+        const hideAllocModalLoader = () =>{
+            alloc_modal_loader.value = "none";
+        };
+        const closeAllocModal = () =>{
+            allocModalVisible.value = false;
+        };
         const createAllocation = async() =>{
             showModalLoader();
             let formData = {
@@ -226,6 +256,8 @@ export default{
                 employee_id: employeeID.value,
                 leave_type: leaveID.value,
                 leave_type_id: leaveID.value,
+                start_date: null,
+                end_date: null,
                 company: companyID.value
             }
   
@@ -245,7 +277,7 @@ export default{
             }else{
                 try {
                     const response = await store.dispatch('Leave_Allocations/createLeaveAllocation', formData);
-                    if (response && response.status === 200 && response.data.msg != 'Exists') {
+                    if (response && response.status === 201 && response.data.msg != 'Exists') {
                         hideModalLoader();
                         toast.success('Leave Allocation created successfully!');
                         handleReset();
@@ -271,6 +303,8 @@ export default{
             errors.value = [];
             let formData = {
                 leave_balance: selectedAllocation.value.leave_balance_id,
+                start_date: selectedAllocation.value.start_date,
+                end_date: selectedAllocation.value.end_date,
                 total_leave_days: formFields.value[2].value,
                 used_leave_days: formFields.value[4].value,
                 year: formFields.value[6].value,
@@ -496,6 +530,36 @@ export default{
         const closeModal = () =>{
             propModalVisible.value = false;
         };
+        const dropdownOptions = ref([
+            {label: 'Autogenerate Allocations', action: 'generate-allocations'},
+        ]);
+        const autoGenerateAllocations = async() =>{
+            showAllocModalLoader();
+                let formData = {
+                    year: formFields1.value[0].value,
+                    company: companyID.value
+                }
+                await axios.post('api/v1/auto-generate-leave-allocations/',formData).
+                then((response)=>{
+                    if(response.data.msg == "Success"){
+                        toast.success("Allocations Generated!")
+                    }else{
+                        toast.error(response.data.msg)
+                    }
+                })
+                .catch((error)=>{
+                    toast.error(error.message)
+                })
+                .finally(()=>{
+                    hideAllocModalLoader();
+                })
+        };
+        const handleDynamicOption = async(option) =>{
+            if(option == 'generate-allocations'){
+                allocModalVisible.value = true;
+                updateFormFields1()
+            }
+        };
         const printAllocationsList = () =>{
             showLoader();
             let formData = {
@@ -578,10 +642,11 @@ export default{
         })
         return{
             title, searchAllocations,resetFilters, addButtonLabel, searchFilters, tableColumns, allocationsList,
-            currentPage,propResults, propArrLen, propCount, pageCount, showNextBtn, showPreviousBtn,
+            currentPage,propResults, propArrLen, propCount, pageCount, showNextBtn, showPreviousBtn,dropdownOptions,handleDynamicOption,
             loadPrev, loadNext, firstPage, lastPage, idField, actions, handleActionClick, propModalVisible, closeModal,
             submitButtonLabel, showModal, addNewAllocation, showLoader, loader, hideLoader, modal_loader, modal_top, modal_left, modal_width,displayButtons,
             showModalLoader, hideModalLoader, saveAllocation, formFields, handleSelectionChange, flex_basis,flex_basis_percentage,
+            alloc_modal_loader,allocTitle,formFields1,allocModalVisible,showAllocModalLoader,hideAllocModalLoader,closeAllocModal,autoGenerateAllocations,
             removeAllocation, removeAllocations,addingRight,rightsModule,printAllocationsList,selectSearchQuantity,selectedValue,
             downloadAllocationsCSV,downloadAllocationsExcel
         }

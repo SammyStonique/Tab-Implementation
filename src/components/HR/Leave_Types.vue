@@ -107,9 +107,9 @@ export default{
         const displayButtons = ref(true);
         const errors = ref([]);
         const dropdownWidth = ref("320px")
-        const modal_top = ref('250px');
-        const modal_left = ref('500px');
-        const modal_width = ref('40vw');
+        const modal_top = ref('130px');
+        const modal_left = ref('300px');
+        const modal_width = ref('60vw');
         const hol_modal_width = ref('35vw');
         const isEditing = computed(()=> store.state.Leave_Types.isEditing);
         const selectedLeave = computed(()=> store.state.Leave_Types.selectedLeave);
@@ -263,24 +263,73 @@ export default{
             leaveID.value = null;
             hideHolModalLoader();
         };
+        const displayAccrualOptions = (value) =>{
+            if (value == "Accrual"){
+                formFields.value[2].hidden = false;
+                formFields.value[3].hidden = false;
+                formFields.value[4].hidden = false;
+                formFields.value[5].hidden = false;
+            }else{
+                formFields.value[2].hidden = true;
+                formFields.value[3].hidden = true;
+                formFields.value[4].hidden = true;
+                formFields.value[5].hidden = true;
+            }
+        }
+        const accrualIntervalLabel = (value) =>{
+            if(value == "Monthly"){
+                formFields.value[3].label = "Days Accrued Per Month";
+            }else if(value == "Daily"){
+                formFields.value[3].label = "Hours Accrued Per Day";
+            }else if(value == "Weekly"){
+                formFields.value[3].label = "Days Accrued Per Week";
+            }
+        }
         const formFields = ref([]);
         const updateFormFields = () => {
             formFields.value = [
                 { type: 'text', name: 'leave_name',label: "Name", value: selectedLeave.value?.leave_name || '', required: true },
-                { type: 'dropdown', name: 'calculation_mode',label: "Calculation Mode", value: selectedLeave.value?.calculation_mode || 'Provided Days', placeholder: "", required: true, options: [{ text: 'Accrual', value: 'Accrual' }, { text: 'Provided Days', value: 'Provided Days' }] },
+                { type: 'dropdown', name: 'calculation_mode',label: "Calculation Mode", value: selectedLeave.value?.calculation_mode || 'Provided Days', placeholder: "", required: true, options: [{ text: 'Accrual', value: 'Accrual' }, { text: 'Provided Days', value: 'Provided Days' }] , method: displayAccrualOptions},
+                { type: 'dropdown', name: 'accrual_interval',label: "Accrual Interval", value: selectedLeave.value?.accrual_interval || 'Monthly', placeholder: "", required: false, hidden: true , options: [{ text: 'Daily', value: 'Daily' }, { text: 'Weekly', value: 'Weekly' }, { text: 'Monthly', value: 'Monthly' }], method: accrualIntervalLabel },
+                { type: 'text', name: 'accrual_period_per_interval',label: "Days Accrued Per Month", value: selectedLeave.value?.accrual_period_per_interval || '0', placeholder: "", required: false, hidden: true },
+                { type: 'dropdown', name: 'accrued_leave_expiration',label: "Accrual Leave Expiration", value: selectedLeave.value?.accrued_leave_expiration || 'Months', placeholder: "", required: false, hidden: true  , options: [{ text: 'Days', value: 'Days' }, { text: 'Weeks', value: 'Weeks' }, { text: 'Months', value: 'Months' }] },
+                { type: 'text', name: 'accrued_leave_expiration_value',label: "Expiration Value", value: selectedLeave.value?.accrued_leave_expiration_value || '0', placeholder: "", required: false, hidden: true },
+                { type: 'dropdown', name: 'leave_periodicity',label: "Leave Period", value: selectedLeave.value?.leave_periodicity || 'Calendar Period', placeholder: "", required: true , options: [{ text: 'Calendar Period', value: 'Calendar Period' }, { text: 'Employment Start Date', value: 'Employment Start Date' }] },
                 { type: 'number', name: 'max_days_per_year',label: "Max Days Per Year", value: selectedLeave.value?.max_days_per_year || 0, required: false },
                 { type: 'dropdown', name: 'paid_leave',label: "Paid Leave", value: selectedLeave.value?.paid_leave || 'Yes', placeholder: "", required: true, options: [{ text: 'Yes', value: 'Yes' }, { text: 'No', value: 'No' }] },
                 { type: 'dropdown', name: 'carry_over',label: "Carry Over", value: selectedLeave.value?.carry_over || 'No', placeholder: "", required: true, options: [{ text: 'Yes', value: 'Yes' }, { text: 'No', value: 'No' }] },
                 { type: 'number', name: 'max_accrual',label: "Days Carried Over", value: selectedLeave.value?.max_accrual || 0, required: false },
                 { type: 'dropdown', name: 'exclude_saturday',label: "Exclude Saturday", value: selectedLeave.value?.exclude_saturday || 'Yes', placeholder: "", required: true, options: [{ text: 'Yes', value: 'Yes' }, { text: 'No', value: 'No' }] },
                 { type: 'dropdown', name: 'exclude_sunday',label: "Exclude Sunday", value: selectedLeave.value?.exclude_sunday || 'Yes', placeholder: "", required: true, options: [{ text: 'Yes', value: 'Yes' }, { text: 'No', value: 'No' }] },
-                { type: 'dropdown', name: 'print_on_payslip',label: "Display on Pay Slip", value: selectedLeave.value?.print_on_payslip || 'No', placeholder: "", required: true, options: [{ text: 'Yes', value: 'Yes' }, { text: 'No', value: 'No' }] },
+                { type: 'dropdown', name: 'print_on_payslip',label: "Display on Pay Slip", value: selectedLeave.value?.print_on_payslip || 'No', placeholder: "", required: true , options: [{ text: 'Yes', value: 'Yes' }, { text: 'No', value: 'No' }] },
                 {required: false}
             ];  
         };
         const handleReset = () =>{
+            formFields.value[2].hidden = true;
+            formFields.value[3].hidden = true;
+            formFields.value[4].hidden = true;
+            formFields.value[5].hidden = true;
             for(let i=0; i < formFields.value.length; i++){
-                formFields.value[i].value = '';
+                if(formFields.value[i].label == "Exclude Saturday" || formFields.value[i].label == "Exclude Sunday" || formFields.value[i].label == "Paid Leave"){
+                    formFields.value[i].value = 'Yes';
+                }else if(formFields.value[i].label == "Carry Over" || formFields.value[i].label == "Display on Pay Slip"){
+                    formFields.value[i].value = 'No';
+                }else if(formFields.value[i].label == "Calculation Mode" ){
+                    formFields.value[i].value = 'Provided Days';
+                }else if(formFields.value[i].label == "Days Carried Over" || formFields.value[i].label == "Max Days Per Year" || formFields.value[i].name == "accrual_period_per_interval" || formFields.value[i].label == "Expiration Value"){
+                    formFields.value[i].value = 0;
+                }
+                else if(formFields.value[i].label == "Leave Period" ){
+                    formFields.value[i].value = 'Calendar Period';
+                }else if(formFields.value[i].label == "Accrual Interval" ){
+                    formFields.value[i].value = 'Monthly';
+                }else if(formFields.value[i].label == "Accrual Leave Expiration" ){
+                    formFields.value[i].value = 'Months';
+                }else{
+                    formFields.value[i].value = '';
+                }
+                
             }
         }
 
@@ -303,14 +352,19 @@ export default{
             showModalLoader();
             let formData = {
                 leave_name: formFields.value[0].value,
-                carry_over: formFields.value[4].value,
-                paid_leave: formFields.value[3].value,
+                carry_over: formFields.value[9].value,
+                paid_leave: formFields.value[8].value,
                 calculation_mode: formFields.value[1].value,
-                exclude_saturday: formFields.value[6].value,
-                exclude_sunday: formFields.value[7].value,
+                exclude_saturday: formFields.value[11].value,
+                exclude_sunday: formFields.value[12].value,
                 print_on_payslip: formFields.value[8].value,
-                max_days_per_year: formFields.value[2].value || 0,
-                max_accrual: formFields.value[5].value || 0,
+                max_days_per_year: formFields.value[7].value || 0,
+                max_accrual: formFields.value[10].value || 0,
+                leave_periodicity: formFields.value[6].value,
+                accrual_interval: formFields.value[2].value,
+                accrual_period_per_interval: formFields.value[3].value || 0,
+                accrued_leave_expiration: formFields.value[4].value,
+                accrued_leave_expiration_value: formFields.value[5].value || 0,
                 company: companyID.value
             }
 
@@ -348,14 +402,19 @@ export default{
             let formData = {
                 leave_type: selectedLeave.value.leave_type_id,
                 leave_name: formFields.value[0].value,
-                carry_over: formFields.value[4].value,
-                paid_leave: formFields.value[3].value,
+                carry_over: formFields.value[9].value,
+                paid_leave: formFields.value[8].value,
                 calculation_mode: formFields.value[1].value,
-                exclude_saturday: formFields.value[6].value,
-                exclude_sunday: formFields.value[7].value,
+                exclude_saturday: formFields.value[11].value,
+                exclude_sunday: formFields.value[12].value,
                 print_on_payslip: formFields.value[8].value,
-                max_days_per_year: formFields.value[2].value || 0,
-                max_accrual: formFields.value[5].value || 0,
+                max_days_per_year: formFields.value[7].value || 0,
+                max_accrual: formFields.value[10].value || 0,
+                leave_periodicity: formFields.value[6].value,
+                accrual_interval: formFields.value[2].value,
+                accrual_period_per_interval: formFields.value[3].value || 0,
+                accrued_leave_expiration: formFields.value[4].value,
+                accrued_leave_expiration_value: formFields.value[5].value || 0,
                 company: companyID.value
             }
 

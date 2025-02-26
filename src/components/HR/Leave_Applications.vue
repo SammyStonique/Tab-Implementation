@@ -219,7 +219,13 @@ export default{
             }
             axios.post('api/v1/get-leave-allocations/', formData)
             .then((response)=>{
-                leaveBalance.value = response.data.remaining_leave_days;
+                if(response.data.msg == "Failed"){
+                    toast.error("Employee Has No Leave Allocation");
+                    closeModal();
+                }else{
+                    leaveBalance.value = response.data.remaining_leave_days;
+                }
+                
             })
             .catch((error)=>{
                 toast.error(error.message)
@@ -320,7 +326,7 @@ export default{
             }else{
                 try {
                     const response = await store.dispatch('Leave_Applications/createLeaveApplication', formData);
-                    if (response && response.status === 200) {
+                    if (response && response.status === 201) {
                         hideModalLoader();
                         toast.success('Leave Application created successfully!');
                         handleReset();

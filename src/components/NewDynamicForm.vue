@@ -1,7 +1,7 @@
 <template>
   <div class="flex flex-wrap gap-x-2 w-full">
       <div v-for="(field, index) in fields" :key="index" :class="`filter items-end flex-1 basis-${flex_basis} max-w-[calc(${flex_basis_percentage}%-1.5rem)] p-1`">
-        <div v-if="field.type === 'text'" class="text-left text-sm">
+        <div v-if="field.type === 'text'" class="text-left text-sm" :hidden="field.hidden">
           <div v-if="field.required">
             <label for="">{{ field.label }} : <em>*</em></label><br />
           </div>
@@ -10,7 +10,7 @@
           </div>
           <input v-model="field.value" @change="handleChange($event, field)" :disabled="field.disabled" :name="field.name" type="text" :class="`bg-slate-50 rounded pl-3 border border-gray-400 text-sm w-full`" :placeholder="field.placeholder"/>
         </div>
-        <div v-if="field.type === 'password'" class="text-left text-sm">
+        <div v-if="field.type === 'password'" class="text-left text-sm" :hidden="field.hidden">
           <div v-if="field.required">
             <label for="">{{ field.label }} : <em>*</em></label><br />
           </div>
@@ -19,7 +19,7 @@
           </div>
           <input v-model="field.value" :disabled="field.disabled" :name="field.name" type="password" :class="`bg-slate-50 rounded pl-3 border border-gray-400 text-sm w-full`" :placeholder="field.placeholder"/>
         </div>
-        <div v-if="field.type === 'number'" class="text-left text-sm">
+        <div v-if="field.type === 'number'" class="text-left text-sm" :hidden="field.hidden">
           <div v-if="field.required">
             <label for="">{{ field.label }} : <em>*</em></label><br />
           </div>
@@ -28,7 +28,7 @@
           </div>
           <input v-model="field.value" @change="handleChange($event, field)" :disabled="field.disabled" :name="field.name" type="number" pattern="[0-9]*" oninput="this.value = this.value.replace(/[^0-9]/g, '')" :class="`bg-slate-50 rounded pl-3 border border-gray-400 text-sm w-full`" :placeholder="field.placeholder"/>
         </div>
-        <div v-if="field.type === 'date'" class="mr-2 text-left text-sm">
+        <div v-if="field.type === 'date'" class="mr-2 text-left text-sm" :hidden="field.hidden">
           <div v-if="field.required">
             <label for="">{{ field.label }} : <em>*</em></label><br />
           </div>
@@ -37,7 +37,7 @@
           </div>
           <input v-model="field.value" @change="handleChange($event, field)" :name="field.name" type="date" :disabled="field.disabled" :min="field.minDate" :max="field.maxDate" :class="`bg-slate-50 rounded pl-3 border border-gray-400 text-sm w-full`" :placeholder="field.placeholder"/>
         </div>
-        <div v-if="field.type === 'time'" class="mr-2 text-left text-sm">
+        <div v-if="field.type === 'time'" class="mr-2 text-left text-sm" :hidden="field.hidden">
           <div v-if="field.required">
             <label for="">{{ field.label }} : <em>*</em></label><br />
           </div>
@@ -46,7 +46,7 @@
           </div>
           <input v-model="field.value" :name="field.name" type="time" :disabled="field.disabled" :class="`bg-slate-50 rounded pl-3 border border-gray-400 text-base w-full`" :placeholder="field.placeholder"/>
         </div>
-        <div v-else-if="field.type === 'dropdown'" class="mr-2 text-left text-sm">
+        <div v-else-if="field.type === 'dropdown'" class="mr-2 text-left text-sm" :hidden="field.hidden">
           <div v-if="field.required">
             <label for="">{{ field.label }} : <em>*</em></label><br />
           </div>
@@ -58,7 +58,7 @@
             <option v-for="(option, index) in field.options" :key="index" :value="option.value" class="text-sm">{{ option.text }}</option>
           </select>
         </div>
-        <div v-else-if="field.type === 'search-dropdown'" class="mr-2 text-left text-sm" :class="field.disabled">
+        <div v-else-if="field.type === 'search-dropdown'" class="mr-2 text-left text-sm" :class="field.disabled" :hidden="field.hidden">
             <div v-if="field.required">
               <label for="">{{ field.label }} : <em>*</em></label><br />
             </div>
@@ -76,7 +76,7 @@
               @fetchData="field.fetchData"
             />
         </div>
-        <div v-if="field.type === 'text-area'" class="text-left text-sm">
+        <div v-if="field.type === 'text-area'" class="text-left text-sm" :hidden="field.hidden">
             <div v-if="field.required">
               <label for="">{{ field.label }} : <em>*</em></label><br />
             </div>
@@ -85,7 +85,7 @@
             </div>
             <textarea v-model="field.value" :name="field.name" :disabled="field.disabled" class="bg-slate-50 rounded border border-gray-400 text-sm pl-2 pt-2" :rows="field.textarea_rows" :cols="field.textarea_cols"></textarea>
         </div>
-        <div v-if="field.type === 'file'" class="mr-2 text-left text-sm">
+        <div v-if="field.type === 'file'" class="mr-2 text-left text-sm" :hidden="field.hidden">
           <div v-if="field.required">
             <label for="">{{ field.label }} : <em>*</em></label><br />
           </div>
@@ -93,7 +93,7 @@
             <label for="">{{ field.label }}:</label><br />
           </div>
           <input type="text" name="" class="rounded border-2 border-gray-400 text-gray-500 text-sm pl-2 mr-2 mb-4 w-80 h-6" placeholder="" v-model="field.filePath" >
-          <input :accept="field.accepted_formats" @change="onFileChange($event)" id="file-input" :name="field.name" type="file" :disabled="field.disabled" :class="`bg-slate-50 rounded pl-3 border border-gray-400 text-sm w-full`" :placeholder="field.placeholder"/>
+          <input :accept="field.accepted_formats" @change="onFileChange($event)" id="file-input" :name="field.name" type="file"  :disabled="field.disabled" :class="`bg-slate-50 rounded pl-3 border border-gray-400 text-sm w-full`" :placeholder="field.placeholder"/>
         </div>
       </div>
       <div class="flex-1 basis-full p-2">
