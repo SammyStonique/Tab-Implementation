@@ -143,7 +143,7 @@ const actions = {
       if (result.value) {
         axios.post(`api/v1/delete-leave-allocation/`,formData)
         .then((response)=>{
-          if(response.status == 200){
+          if(response.data.msg == "Success"){
               Swal.fire("Poof! Leave Allocation removed succesfully!", {
                 icon: "success",
               }); 

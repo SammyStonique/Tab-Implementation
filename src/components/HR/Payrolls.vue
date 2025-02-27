@@ -155,6 +155,7 @@ export default{
         const tableColumns = ref([
             {type: "checkbox"},
             {label: "Date", key: "date"},
+            {label: "Pay Group", key: "pay_group_name"},
             {label: "Month", key:"month"},
             {label: "Year", key:"year"},
             {label: "Basic Pay", key:"base_salary", type: "number"},
@@ -286,9 +287,7 @@ export default{
                         hideModalLoader();
                         toast.error('Pay Group Has No Active Employees!');
                     }
-                    else {
-                        toast.error('An error occurred while Running the Payroll.');
-                    }
+
                 } catch (error) {
                     console.error(error.message);
                     toast.error('Failed to Run Payroll: ' + error.message);

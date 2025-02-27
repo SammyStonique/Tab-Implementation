@@ -123,7 +123,8 @@ export default{
             {label: "Leave Type", key: "leave_name"},
             {label: "Start Date", key:"start_date"},
             {label: "End Date", key:"end_date"},
-            {label: "Days", key:"days_requested"},
+            {label: "Applied", key:"days_requested"},
+            {label: "Approved", key:"days_approved"},
             {label: "Status", key:"status"},
         ])
         const actions = ref([
@@ -332,6 +333,7 @@ export default{
                         handleReset();
                         emplComponentKey.value += 1;
                         levComponentKey.value += 1;
+                        closeModal();
                     } else {
                         toast.error('An error occurred while creating the Leave Application.');
                     }
@@ -381,7 +383,8 @@ export default{
                         handleReset();
                         emplComponentKey.value += 1;
                         levComponentKey.value += 1;
-                        toast.success("Leave Application updated successfully!");              
+                        toast.success("Leave Application updated successfully!");    
+                        closeModal();          
                     } else {
                         toast.error('An error occurred while updating the Leave Application.');
                     }
@@ -407,6 +410,7 @@ export default{
         const updateFormFields1 = () =>{
             formFields1.value = [
                 { type: 'date', name: 'date',label: "Date", value: "", required: true },
+                { type: 'text', name: 'days_approved',label: "Days Approved", value: computedRequestedDays.value, required: true },
                 { type: 'dropdown', name: 'status',label: "Status", value: '', placeholder: "", required: true, options: [{ text: 'Approve', value: 'Approved' }, { text: 'Reject', value: 'Rejected' }] },
                 {type:'text-area', label:"Reason", value: '', textarea_rows: '2', textarea_cols: '56', required: true},
 
@@ -417,6 +421,7 @@ export default{
             for(let i=0; i < formFields1.value.length; i++){
                 formFields1.value[i].value = '';
             }
+            
         }
         
         const showAppModalLoader = () =>{
@@ -430,8 +435,9 @@ export default{
             let formData = {
                 leave_application: applicationID.value,
                 date: formFields1.value[0].value,
-                status: formFields1.value[1].value,
-                reason: formFields1.value[2].value,
+                days_approved: formFields1.value[1].value,
+                status: formFields1.value[2].value,
+                reason: formFields1.value[3].value,
                 company: companyID.value
             }
 
@@ -467,6 +473,7 @@ export default{
         const closeAppModal = async() =>{
             appModalVisible.value = false;
             handleAppReset();
+            requestedDays.value = 0;
         }
         const removeApplication = async() =>{
             if(selectedIds.value.length == 1){
@@ -601,6 +608,7 @@ export default{
             // scrollToTop();
         }
         const addNewApplication = () =>{
+            requestedDays.value = 0;
             store.dispatch("Leave_Applications/updateState",{selectedApplication:null, selectedEmployee:null, selectedLeave:null});
             emplComponentKey.value += 1;
             levComponentKey.value += 1;
@@ -635,6 +643,7 @@ export default{
                 })
             }else if(action == 'approve'){
                 const approvalStatus = row['status'];
+                requestedDays.value = row['days_requested'];
                 if (approvalStatus == "Approved"){
                     toast.error("Application Already Approved!")
                 }else{

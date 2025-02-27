@@ -141,7 +141,7 @@ export default{
         const searchFilters = ref([
             {type:'text', placeholder:"Staff No...", value: staff_number_search, width:32,},
             {type:'text', placeholder:"Employee Name...", value: employee_name_search, width:64,},
-            {type:'text', placeholder:"Year...", value: year_search, width:32,},
+            {type:'text', placeholder:"Year...", value: getYear(current_date), width:32,},
 
         ]);
         const handleSelectionChange = (ids) => {
@@ -249,7 +249,7 @@ export default{
             showModalLoader();
             let formData = {
                 total_leave_days: formFields.value[2].value,
-                used_leave_days: formFields.value[4].value,
+                used_leave_days: formFields.value[4].value || 0,
                 year: formFields.value[6].value,
                 balance_bf: formFields.value[7].value,
                 employee: employeeID.value,
@@ -365,9 +365,10 @@ export default{
                 }
                 try{
                     const response = await store.dispatch('Leave_Allocations/deleteLeaveAllocation',formData)
-                    if(response && response.status == 200){
-                        toast.success("Leave Allocation Removed Succesfully");
-                        searchAllocations();
+                    if(response && response.data.msg == "Success"){
+                        toast.success("Leave Allocation(s) Removed Succesfully");                       
+                    }else if(response && response.data.msg == "Failed"){
+                        toast.error("Allocation Already Used in Leave Application")
                     }
                 }
                 catch(error){
@@ -376,6 +377,7 @@ export default{
                 }
                 finally{
                     selectedIds.value = [];
+                    searchAllocations();
                 }
             }else if(selectedIds.value.length > 1){
                 toast.error("You have selected more than 1 Leave Allocation") 
@@ -391,9 +393,10 @@ export default{
                 }
                 try{
                     const response = await store.dispatch('Leave_Allocations/deleteLeaveAllocation',formData)
-                    if(response && response.status == 200){
-                        toast.success("Leave Allocation(s) Removed Succesfully");
-                        searchAllocations();
+                    if(response && response.data.msg == "Success"){
+                        toast.success("Leave Allocation(s) Removed Succesfully");                       
+                    }else if(response && response.data.msg == "Failed"){
+                        toast.error("Allocation Already Used in Leave Application")
                     }
                 }
                 catch(error){
@@ -402,7 +405,7 @@ export default{
                 }
                 finally{
                     selectedIds.value = [];
-
+                    searchAllocations();
                 }
             }else{
                 toast.error("Please Select A Leave Allocation To Remove")
@@ -422,7 +425,7 @@ export default{
                 employee_name: employee_name_search.value,
                 staff_number: staff_number_search.value,
                 company_id: companyID.value,
-                year: year_search.value,
+                year: searchFilters.value[2].value,
                 page_size: selectedValue.value
             } 
             axios
@@ -457,7 +460,7 @@ export default{
             selectedValue.value = 50;
             staff_number_search.value = "";
             employee_name_search.value = "";
-            year_search.value = "";
+            searchFilters.value[2].value = getYear(current_date);
             searchAllocations();
         }
         const loadPrev = () =>{
@@ -515,14 +518,20 @@ export default{
 
             }else if(action == 'delete'){
                 const allocationID = [row[idField]];
-                let formData = {
-                    company: companyID.value,
-                    leave_balance: allocationID
+                const usedDays = row['used_leave_days'];
+                if(usedDays == 0){
+                    let formData = {
+                        company: companyID.value,
+                        leave_balance: allocationID
+                    }
+                    await store.dispatch('Leave_Allocations/deleteLeaveAllocation',formData).
+                    then(()=>{
+                        searchAllocations();
+                    })
+                }else{
+                    toast.error("Cannot Delete Used Allocation")
                 }
-                await store.dispatch('Leave_Allocations/deleteLeaveAllocation',formData).
-                then(()=>{
-                    searchAllocations();
-                })
+                
             }else if(action == 'view'){
                 console.log("VIEWING TAKING PLACE");
             }
@@ -551,6 +560,7 @@ export default{
                     toast.error(error.message)
                 })
                 .finally(()=>{
+                    searchAllocations();
                     hideAllocModalLoader();
                 })
         };
