@@ -6,7 +6,10 @@ const state = {
   applicationArr: [],
   applicationArray: [],
   applicationID: '',
+  leaveID: '',
+  employeeID: '',
   applicationDate: '',
+  approvedDays: 0,
   selectedApplication: null,
   selectedEmployee: null,
   selectedLeave: null,
@@ -19,11 +22,14 @@ const mutations = {
     state.applicationArr = [];
     state.applicationArray = [];
     state.applicationID = "";
+    state.leaveID = "";
+    state.employeeID = "";
     state.applicationDate = "";
     state.selectedApplication = null;
     state.selectedEmployee = null;
     state.selectedLeave = null;
     state.isEditing = false;
+    state.approvedDays = 0;
   },
   SET_SELECTED_APPLICATION(state, application) {
     state.selectedApplication = application;
@@ -79,7 +85,7 @@ const actions = {
     axios.post(`api/v1/get-leave-applications/`,formData)
     .then((response)=>{
       for(let i=0; i< response.data.length; i++){
-        state.applicationArr.push((response.data[i].employee.employee_name + " - " + response.data[i].leave_type.leave_name));
+        state.applicationArr.push((response.data[i].employee.employee_name + " - " + response.data[i].leave_type.leave_name + " (" +response.data[i].start_date +")"));
       }
       commit('LIST_APPLICATIONS', response.data);
     })
@@ -104,10 +110,13 @@ const actions = {
     
   },
   handleSelectedLeaveApplication({ commit, state }, option){
-    const selectedApplication = state.applicationsList.find(application => (application.employee.employee_name + " - " + application.leave_type.leave_name) === option);
+    const selectedApplication = state.applicationsList.find(application => (application.employee.employee_name + " - " + application.leave_type.leave_name + " (" + application.start_date + ")") === option);
     if (selectedApplication) {
         state.applicationID = selectedApplication.leave_application_id;
+        state.leaveID = selectedApplication.leave_type.leave_type_id;
+        state.employeeID = selectedApplication.employee.employee_id;
         state.applicationDate = selectedApplication.date;
+        state.approvedDays = selectedApplication.days_approved;
         state.applicationArray = [...state.applicationArray, selectedApplication];
     }
     commit('APPLICATIONS_ARRAY', state.applicationArray);

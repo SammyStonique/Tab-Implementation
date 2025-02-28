@@ -78,6 +78,7 @@ export default{
         const alloc_modal_loader = ref('none');
         const emplComponentKey = ref(0);
         const levComponentKey = ref(0);
+        const levSearchComponentKey = ref(0);
         const idField = 'leave_balance_id';
         const addButtonLabel = ref('New Leave Allocation');
         const addingRight = ref('Adding Leave Allocations');
@@ -106,6 +107,7 @@ export default{
         const modal_width = ref('30vw');
         const employeeID = ref('');
         const leaveID = ref('');
+        const leaveSearchID = ref('');
         const maxLeaveDays = ref(0);
         const computedLeaveDays = computed(()=> maxLeaveDays);
         const isEditing = computed(()=> store.state.Leave_Allocations.isEditing);
@@ -138,11 +140,30 @@ export default{
         const employee_name_search = ref('');
         const staff_number_search = ref('');
         const year_search = ref('');
+        const leave_array = computed({
+            get: () => store.state.Leave_Types.leaveArr,
+        });
+
+        const handleSelectedSearchLeave = async(option) =>{
+            await store.dispatch('Leave_Types/handleSelectedLeaveType', option)
+            leaveSearchID.value = store.state.Leave_Types.leaveID;
+            
+        };
+        const clearSelectedSearchLeave = async() =>{
+            await store.dispatch('Leave_Types/updateState', {leaveID: ''});
+            leaveSearchID.value = store.state.Leave_Types.leaveID;
+        };
         const searchFilters = ref([
             {type:'text', placeholder:"Staff No...", value: staff_number_search, width:32,},
             {type:'text', placeholder:"Employee Name...", value: employee_name_search, width:64,},
             {type:'text', placeholder:"Year...", value: getYear(current_date), width:32,},
-
+            {  
+                type:'search-dropdown', value: leave_array, componentKey: levSearchComponentKey,
+                selectOptions: leave_array, optionSelected: handleSelectedSearchLeave,
+                searchPlaceholder: 'Select Leave Type...', dropdownWidth: '200px',
+                fetchData: store.dispatch('Leave_Types/fetchLeaveTypes', {company:companyID.value}),
+                clearSearch: clearSelectedSearchLeave
+            },
         ]);
         const handleSelectionChange = (ids) => {
             selectedIds.value = ids;
@@ -426,6 +447,7 @@ export default{
                 staff_number: staff_number_search.value,
                 company_id: companyID.value,
                 year: searchFilters.value[2].value,
+                leave_type: leaveSearchID.value,
                 page_size: selectedValue.value
             } 
             axios
@@ -456,6 +478,8 @@ export default{
             searchAllocations(selectedValue.value);
         };
         const resetFilters = () =>{
+            levSearchComponentKey.value += 1;
+            leaveSearchID.value = "";
             currentPage.value = 1;
             selectedValue.value = 50;
             staff_number_search.value = "";
