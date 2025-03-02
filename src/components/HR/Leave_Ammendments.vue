@@ -154,21 +154,22 @@ export default{
             applicationSearchID.value = store.state.Leave_Applications.applicationID;
         };
         const searchFilters = ref([
-            {type:'text', placeholder:"Staff No...", value: staff_number_search, width:24,},
-            {type:'text', placeholder:"Employee Name...", value: employee_name_search, width:44,},
-            {  
-                type:'search-dropdown', value: applicationSearchID.value, componentKey: levSearchComponentKey,
-                selectOptions: applicationArray, optionSelected: handleSelectedSearchApplication,
-                searchPlaceholder: 'Select Leave Application...', dropdownWidth: '300px',
-                fetchData: store.dispatch('Leave_Applications/fetchLeaveApplications', {company:companyID.value, status:"Approved"}),
-                clearSearch: clearSelectedSearchApplication
-            },
+            {type:'text', placeholder:"Staff No...", value: staff_number_search, width:32,},
+            {type:'text', placeholder:"Employee Name...", value: employee_name_search, width:64,},
+
             {
                 type:'dropdown', placeholder:"Status..", value: status_search, width:24,
                 options: [{text:'Pending',value:'Pending'},{text:'Approved',value:'Approved'},{text:'Rejected',value:'Rejected'}]
             },
-            {type:'date', placeholder:"Start Date...", value: start_date_search, width:28,},
-            {type:'date', placeholder:"End Date...", value: end_date_search, width:28,},
+            {type:'date', placeholder:"Start Date...", value: start_date_search, width:32,},
+            {type:'date', placeholder:"End Date...", value: end_date_search, width:32,},
+            {  
+                type:'search-dropdown', value: applicationSearchID.value, componentKey: levSearchComponentKey,
+                selectOptions: applicationArray, optionSelected: handleSelectedSearchApplication,
+                searchPlaceholder: 'Select Leave Application...', dropdownWidth: '350px',
+                fetchData: store.dispatch('Leave_Applications/fetchLeaveApplications', {company:companyID.value, status:"Approved"}),
+                clearSearch: clearSelectedSearchApplication
+            },
         ]);
         const handleSelectionChange = (ids) => {
             selectedIds.value = ids;
@@ -640,14 +641,19 @@ export default{
         const handleActionClick = async(rowIndex, action, row) =>{
             if( action == 'edit'){
                 const ammendmentID = row['leave_ammendment_id'];
-                let formData = {
-                    company: companyID.value,
-                    leave_ammendment: ammendmentID
+                const approvalStatus = row['status'];
+                if (approvalStatus != "Pending"){
+                    toast.error(`Cannot Edit ${approvalStatus} Ammendment!`)
+                }else{
+                    let formData = {
+                        company: companyID.value,
+                        leave_ammendment: ammendmentID
+                    }
+                    await store.dispatch('Leave_Ammendments/fetchLeaveAmmendment',formData)
+                    propModalVisible.value = true;
+                    flex_basis.value = '1/3';
+                    flex_basis_percentage.value = '33.333';
                 }
-                await store.dispatch('Leave_Ammendments/fetchLeaveAmmendment',formData)
-                propModalVisible.value = true;
-                flex_basis.value = '1/3';
-                flex_basis_percentage.value = '33.333';
 
             }else if(action == 'delete'){
                 const ammendmentID = [row[idField]];

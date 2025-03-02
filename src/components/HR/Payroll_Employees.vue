@@ -85,6 +85,8 @@ export default{
             {label: "N.S.S.F", key:"nssf_amount", type: "number", textColor: "black"},
             {label: "A.H.L", key:"housing_levy_amount", type: "number", textColor: "black"},
             {label: "Net P.A.Y.E", key:"tax", type: "number", textColor: "black"},
+            {label: "Advances", key:"salary_advances", type: "number", textColor: "black"},
+            {label: "Loans", key:"company_loans", type: "number", textColor: "black"},
             {label: "Other Ded.", key:"deductions", type: "number", textColor: "black"},
             {label: "Net Pay", key:"net_pay", type: "number", textColor: "black"},
         ])

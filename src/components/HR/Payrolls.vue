@@ -280,6 +280,7 @@ export default{
                         toast.success('Payroll Run Successfully!');
                         handleReset();
                         propComponentKey.value += 1;
+                        closeModal();
                     }else if(response && response.data.msg === "Failed"){
                         hideModalLoader();
                         toast.error('Payroll Already Run!');

@@ -651,14 +651,19 @@ export default{
         const handleActionClick = async(rowIndex, action, row) =>{
             if( action == 'edit'){
                 const applicationID = row['leave_application_id'];
-                let formData = {
-                    company: companyID.value,
-                    leave_application: applicationID
+                const approvalStatus = row['status'];
+                if (approvalStatus != "Pending"){
+                    toast.error(`Cannot Edit ${approvalStatus} Application!`)
+                }else{
+                    let formData = {
+                        company: companyID.value,
+                        leave_application: applicationID
+                    }
+                    await store.dispatch('Leave_Applications/fetchLeaveApplication',formData)
+                    propModalVisible.value = true;
+                    flex_basis.value = '1/3';
+                    flex_basis_percentage.value = '33.333';
                 }
-                await store.dispatch('Leave_Applications/fetchLeaveApplication',formData)
-                propModalVisible.value = true;
-                flex_basis.value = '1/3';
-                flex_basis_percentage.value = '33.333';
 
             }else if(action == 'delete'){
                 const applicationID = [row[idField]];

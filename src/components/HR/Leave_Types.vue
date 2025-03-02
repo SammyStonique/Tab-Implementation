@@ -267,13 +267,11 @@ export default{
             if (value == "Accrual"){
                 formFields.value[2].hidden = false;
                 formFields.value[3].hidden = false;
-                formFields.value[4].hidden = false;
-                formFields.value[5].hidden = false;
+                
             }else{
                 formFields.value[2].hidden = true;
                 formFields.value[3].hidden = true;
-                formFields.value[4].hidden = true;
-                formFields.value[5].hidden = true;
+                
             }
         }
         const accrualIntervalLabel = (value) =>{
@@ -292,8 +290,8 @@ export default{
                 { type: 'dropdown', name: 'calculation_mode',label: "Calculation Mode", value: selectedLeave.value?.calculation_mode || 'Provided Days', placeholder: "", required: true, options: [{ text: 'Accrual', value: 'Accrual' }, { text: 'Provided Days', value: 'Provided Days' }] , method: displayAccrualOptions},
                 { type: 'dropdown', name: 'accrual_interval',label: "Accrual Interval", value: selectedLeave.value?.accrual_interval || 'Monthly', placeholder: "", required: false, hidden: true , options: [{ text: 'Daily', value: 'Daily' }, { text: 'Weekly', value: 'Weekly' }, { text: 'Monthly', value: 'Monthly' }], method: accrualIntervalLabel },
                 { type: 'text', name: 'accrual_period_per_interval',label: "Days Accrued Per Month", value: selectedLeave.value?.accrual_period_per_interval || '0', placeholder: "", required: false, hidden: true },
-                { type: 'dropdown', name: 'accrued_leave_expiration',label: "Accrual Leave Expiration", value: selectedLeave.value?.accrued_leave_expiration || 'Months', placeholder: "", required: false, hidden: true  , options: [{ text: 'Days', value: 'Days' }, { text: 'Weeks', value: 'Weeks' }, { text: 'Months', value: 'Months' }] },
-                { type: 'text', name: 'accrued_leave_expiration_value',label: "Expiration Value", value: selectedLeave.value?.accrued_leave_expiration_value || '0', placeholder: "", required: false, hidden: true },
+                { type: 'dropdown', name: 'accrued_leave_expiration',label: "Leave Expiration", value: selectedLeave.value?.accrued_leave_expiration || 'Months', placeholder: "", required: false, options: [{ text: 'Days', value: 'Days' }, { text: 'Weeks', value: 'Weeks' }, { text: 'Months', value: 'Months' }] },
+                { type: 'text', name: 'accrued_leave_expiration_value',label: "Expiration Value", value: selectedLeave.value?.accrued_leave_expiration_value || '0', placeholder: "", required: false},
                 { type: 'dropdown', name: 'leave_periodicity',label: "Leave Period", value: selectedLeave.value?.leave_periodicity || 'Calendar Period', placeholder: "", required: true , options: [{ text: 'Calendar Period', value: 'Calendar Period' }, { text: 'Employment Start Date', value: 'Employment Start Date' }] },
                 { type: 'number', name: 'max_days_per_year',label: "Max Days Per Year", value: selectedLeave.value?.max_days_per_year || 0, required: false },
                 { type: 'dropdown', name: 'paid_leave',label: "Paid Leave", value: selectedLeave.value?.paid_leave || 'Yes', placeholder: "", required: true, options: [{ text: 'Yes', value: 'Yes' }, { text: 'No', value: 'No' }] },
@@ -308,8 +306,7 @@ export default{
         const handleReset = () =>{
             formFields.value[2].hidden = true;
             formFields.value[3].hidden = true;
-            formFields.value[4].hidden = true;
-            formFields.value[5].hidden = true;
+
             for(let i=0; i < formFields.value.length; i++){
                 if(formFields.value[i].label == "Exclude Saturday" || formFields.value[i].label == "Exclude Sunday" || formFields.value[i].label == "Paid Leave"){
                     formFields.value[i].value = 'Yes';
@@ -324,7 +321,7 @@ export default{
                     formFields.value[i].value = 'Calendar Period';
                 }else if(formFields.value[i].label == "Accrual Interval" ){
                     formFields.value[i].value = 'Monthly';
-                }else if(formFields.value[i].label == "Accrual Leave Expiration" ){
+                }else if(formFields.value[i].label == "Leave Expiration" ){
                     formFields.value[i].value = 'Months';
                 }else{
                     formFields.value[i].value = '';

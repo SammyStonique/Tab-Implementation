@@ -127,6 +127,7 @@ export default{
             {label: "Start Date", key:"start_date"},
             {label: "End Date", key:"end_date"},
             {label: "Bal B/f", key:"balance_bf"},
+            {label: "Expired", key:"expired"},
             {label: "Alloted", key:"total_leave_days"},
             {label: "Entitled", key:"current_entitlement"},
             {label: "Used", key:"used_leave_days"},
