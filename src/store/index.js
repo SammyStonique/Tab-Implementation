@@ -73,6 +73,11 @@ import Leave_Allocations from './HR/Leave_Allocations';
 import Salary_Advances from './HR/Salary_Advances';
 import Employee_Loan_Applications from './HR/Loan_Applications';
 import Employee_Loan_Disbursements from './HR/Loan_Disbursements';
+import Appraisals from './HR/Appraisals';
+import Performance_Indicators from './HR/Performance_Indicators';
+import Skill_Ratings from './HR/Skill_Ratings';
+import Appraisal_Periods from './HR/Appraisal_Periods';
+import Appraisal_Categories from './HR/Appraisal_Categories';
 
 
 import Member_Categories from './MMS/Member_Categories';
@@ -124,7 +129,7 @@ export default createStore({
     Ledgers, Currencies, Taxes, Journals, Customers, Vendors,Fiscal_Periods,
 
     Pay_Cycles,Pay_Groups,Deductions,Leave_Types,Holidays,Paye,Nssf,Shif,Housing_Levy,Employees,Payrolls,Leave_Applications,Leave_Allocations,Salary_Advances,
-    Employee_Loan_Applications,Employee_Loan_Disbursements,Leave_Ammendments,
+    Employee_Loan_Applications,Employee_Loan_Disbursements,Leave_Ammendments,Appraisals,Performance_Indicators,Skill_Ratings,Appraisal_Periods,Appraisal_Categories,
 
     Member_Categories,Member_Sponsors,Members,Membership_Fees,Savings_Products,Shares_Products,Saving_Accounts,Share_Accounts,Saving_Deposits,Share_Deposits,
     Loan_Products,Loan_Fees,Loan_Applications,Loan_Guarantors,Loan_Disbursements,

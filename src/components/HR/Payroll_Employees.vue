@@ -6,6 +6,8 @@
             :searchFilters="searchFilters"
             @searchPage="searchEmployees"
             @resetFilters="resetFilters"
+            :dropdownOptions="dropdownOptions"
+            @handleDynamicOption="handleDynamicOption"
             @removeItem="removeItem"
             @removeSelectedItems="removeItem"
             @printList="printEmployeesList"
@@ -248,10 +250,32 @@ export default{
             // scrollToTop();
         }
         const handleActionClick = async(rowIndex, action, row) =>{
-            if( action == 'email-payslip'){
-                const employeeID = row[idField];
-                emailPaySlip(employeeID)
-
+            if(action == 'email-payslip'){
+                showLoader();
+                const employeeID = [row['employee_id']];
+                const payrollID = row['payroll_id'];
+      
+                let formData = {
+                    employee: employeeID,
+                    payroll: payrollID,
+                    company: companyID.value
+                }
+                await axios.post('api/v1/employee-payslip-email/',formData).
+                then((response)=>{
+                    if(response.data.msg == "Success"){
+                        toast.success("Email Sent!")
+                    }else if(response.data.msg == "Missing Template"){
+                        toast.error("Employee Payslip Template Not Set!")
+                    }else{
+                        toast.error(response.data.msg)
+                    }
+                })
+                .catch((error)=>{
+                    toast.error(error.message)
+                })
+                .finally(()=>{
+                    hideLoader();
+                })
             }else if(action == 'print'){
                 const employeeID = row['employee_id'];
                 showLoader();
@@ -278,7 +302,37 @@ export default{
                 })
                 
             }
-        }
+        };
+        const dropdownOptions = ref([
+            {label: 'Email Employee Payslips', action: 'email-payslip'},
+        ]);
+        const handleDynamicOption = async(option) =>{           
+            if(option == 'email-payslip'){
+                showLoader();
+                const employeeID = selectedIds.value;
+      
+                let formData = {
+                    employee: employeeID,
+                    company: companyID.value
+                }
+                await axios.post('api/v1/employee-payslip-email/',formData).
+                then((response)=>{
+                    if(response.data.msg == "Success"){
+                        toast.success("Email Sent!")
+                    }else if(response.data.msg == "Missing Template"){
+                        toast.error("Employee Payslip Template Not Set!")
+                    }else{
+                        toast.error(response.data.msg)
+                    }
+                })
+                .catch((error)=>{
+                    toast.error(error.message)
+                })
+                .finally(()=>{
+                    hideLoader();
+                })
+            }
+        };
         
         const printEmployeesList = () =>{
             showLoader();
@@ -315,7 +369,7 @@ export default{
             propResults, propArrLen, propCount, pageCount, showNextBtn, showPreviousBtn,
             loadPrev, loadNext, firstPage, lastPage, idField, actions, handleActionClick,
             submitButtonLabel, showModal, showLoader, loader, hideLoader,showTotals,
-            handleSelectionChange,rightsModule,printEmployeesList,selectSearchQuantity,selectedValue,
+            handleSelectionChange,rightsModule,printEmployeesList,selectSearchQuantity,selectedValue, dropdownOptions, handleDynamicOption,
             modal_left,modal_top,modal_width,trans_modal_loader,transModalVisible,transTitle,showTransModalLoader,hideTransModalLoader,closeTransModal,
         }
     }

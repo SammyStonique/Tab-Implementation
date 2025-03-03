@@ -3,19 +3,19 @@
         <PageComponent 
             :loader="loader" @showLoader="showLoader" @hideLoader="hideLoader"
             :addButtonLabel="addButtonLabel"
-            @handleAddNew="addNewDeduction"
+            @handleAddNew="addNewIndicator"
             :searchFilters="searchFilters"
-            @searchPage="searchDeductions"
+            @searchPage="searchIndicators"
             @resetFilters="resetFilters"
-            @removeItem="removeDeduction"
-            @removeSelectedItems="removeDeductions"
-            @printList="printDeductionsList"
+            @removeItem="removeIndicator"
+            @removeSelectedItems="removeIndicators"
+            @printList="printindicatorsList"
             @printExcel="downloadDeductionsExcel"
             @printCSV="downloadDeductionsCSV"
             :addingRight="addingRight"
             :rightsModule="rightsModule"
             :columns="tableColumns"
-            :rows="deductionsList"
+            :rows="indicatorsList"
             :actions="actions"
             :idField="idField"
             @handleSelectionChange="handleSelectionChange"
@@ -36,7 +36,7 @@
             :loader="modal_loader" @showLoader="showModalLoader" @hideLoader="hideModalLoader" @closeModal="closeModal">
             <DynamicForm 
                 :fields="formFields" :flex_basis="flex_basis" :flex_basis_percentage="flex_basis_percentage" 
-                :displayButtons="displayButtons" @handleSubmit="saveDeduction" @handleReset="handleReset"
+                :displayButtons="displayButtons" @handleSubmit="saveIndicator" @handleReset="handleReset"
             />
         </MovableModal>
     </div>
@@ -53,7 +53,7 @@ import { useToast } from "vue-toastification";
 import PrintJS from 'print-js';
 
 export default{
-    name: 'Deductions',
+    name: 'Performance_Indicators',
     components:{
         PageComponent, MovableModal,DynamicForm
     },
@@ -64,13 +64,13 @@ export default{
         const modal_loader = ref('none');
         const ledComponentKey = ref(0);
         const idField = 'deduction_id';
-        const addButtonLabel = ref('New Earning/Deduction');
-        const addingRight = ref('Adding Earnings/Deductions');
+        const addButtonLabel = ref('New Indicator');
+        const addingRight = ref('Adding Performance Indicators');
         const rightsModule = ref('HR');
-        const title = ref('Earning/Deduction Details');
+        const title = ref('Performance Indicator Details');
         const submitButtonLabel = ref('Add');
         const selectedIds = ref([]);
-        const deductionsList = ref([]);
+        const indicatorsList = ref([]);
         const propResults = ref([]);
         const propArrLen = ref(0);
         const propCount = ref(0);
@@ -87,78 +87,68 @@ export default{
         const modal_top = ref('200px');
         const modal_left = ref('500px');
         const modal_width = ref('30vw');
-        const ledgerID = ref('');
-        const isEditing = computed(()=> store.state.Deductions.isEditing);
-        const selectedDeduction = computed(()=> store.state.Deductions.selectedDeduction);
-        const selectedLedger = computed(()=> store.state.Deductions.selectedLedger);
-        const ledgerArray = computed(() => store.state.Ledgers.ledgerArr);
+        const categoryID = ref('');
+        const isEditing = computed(()=> store.state.Performance_Indicators.isEditing);
+        const selectedIndicator = computed(()=> store.state.Performance_Indicators.selectedIndicator);
+        const selectedCategory = computed(()=> store.state.Performance_Indicators.selectedCategory);
+        const catArray = computed(() => store.state.Appraisal_Categories.categoryArr);
         const showModal = ref(false);
         const tableColumns = ref([
             {type: "checkbox"},
-            {label: "Earning/Deduction Name", key:"deduction_name"},
-            {label: "Type", key: "deduction_type"},
-            {label: "Taxed", key:"taxation_status"},
-            {label: "Charge Mode", key:"default_mode"},
-            {label: "Amount", key:"default_value"},
-            {label: "Posting Account", key:"posting_account_name"},
+            {label: "KPI Name", key:"indicator_name"},
+            {label: "Category", key: "category_name"},
+            {label: "Min Weight", key:"min_weight"},
+            {label: "Max Weight", key:"max_weight"},
         ])
         const actions = ref([
-            {name: 'edit', icon: 'fa fa-edit', title: 'Edit Earnings/Deductions', rightName: 'Editing Earnings/Deductions'},
-            {name: 'delete', icon: 'fa fa-trash', title: 'Delete Earnings/Deductions', rightName: 'Deleting Earnings/Deductions'},
+            {name: 'edit', icon: 'fa fa-edit', title: 'Edit Indicator', rightName: 'Editing Performance Indicators'},
+            {name: 'delete', icon: 'fa fa-trash', title: 'Delete Indicator', rightName: 'Deleting Performance Indicators'},
         ])
         const companyID = computed(()=> store.state.userData.company_id);
-        const deduction_name_search = ref('');
-        const deduction_type_search = ref('');
+        const name_search = ref('');
         const searchFilters = ref([
-            {type:'text', placeholder:"Group Name...", value: deduction_name_search, width:56,},
-            {
-                type:'dropdown', placeholder:"Type..", value: deduction_type_search, width:56,
-                options: [{text:'Earning',value:'Earning'},{text:'Deduction',value:'Deduction'}]
-            },
+            {type:'text', placeholder:"KPI Name...", value: name_search, width:56,},
         ]);
         const handleSelectionChange = (ids) => {
             selectedIds.value = ids;
         };
-        const handleSelectedLedger = async(option) =>{
-            await store.dispatch('Ledgers/handleSelectedLedger', option)
-            ledgerID.value = store.state.Ledgers.ledgerID;
+        const handleSelectedCategory = async(option) =>{
+            await store.dispatch('Appraisal_Categories/handleSelectedCategory', option)
+            categoryID.value = store.state.Appraisal_Categories.categoryID;
         };
-        const clearSelectedLedger = async() =>{
-            await store.dispatch('Ledgers/updateState', {ledgerID: ''});
-            ledgerID.value = store.state.Ledgers.ledgerID;
+        const clearSelectedCategory = async() =>{
+            await store.dispatch('Appraisal_Categories/updateState', {categoryID: ''});
+            categoryID.value = store.state.Appraisal_Categories.categoryID;
         }
         const formFields = ref([]);
-        const ledgerValue = computed(() => {
-           return (selectedDeduction.value && selectedDeduction.value.posting_account && !ledgerID.value) ? selectedDeduction.value.posting_account.ledger_id : ledgerID.value;
+        const categoryValue = computed(() => {
+           return (selectedIndicator.value && selectedIndicator.value.category && !categoryID.value) ? selectedIndicator.value.category.appraisal_category_id : categoryID.value;
 
         });
         const updateFormFields = () => {
             formFields.value = [
-                
-                { type: 'text', name: 'deduction_name',label: "Name", value: selectedDeduction.value?.deduction_name || '', required: true },
-                { type: 'dropdown', name: 'deduction_type',label: "Type", value: selectedDeduction.value?.deduction_type || '', placeholder: "", required: true, options: [{ text: 'Earning', value: 'Earning' }, { text: 'Deduction', value: 'Deduction' }] },
-                { type: 'dropdown', name: 'default_mode',label: "Charge Mode", value: selectedDeduction.value?.default_mode || '', placeholder: "", required: true, options: [{ text: 'Fixed Amount', value: 'Fixed Amount' }, { text: 'Basic Percentage', value: 'Basic Percentage' },{ text: 'Gross Percentage', value: 'Gross Percentage' }, { text: 'Net Percentage', value: 'Net Percentage' }] },
-                { type: 'number', name: 'default_value',label: "Value", value: selectedDeduction.value?.default_value || 0, required: false },
-                { type: 'dropdown', name: 'taxation_status',label: "Taxed", value: selectedDeduction.value?.taxation_status || 'No', placeholder: "", required: true, options: [{ text: 'Yes', value: 'Yes' }, { text: 'No', value: 'No' }] },
                 {  
-                    type:'search-dropdown', label:"Posting Account", value: ledgerValue.value, componentKey: ledComponentKey,
-                    selectOptions: ledgerArray, optionSelected: handleSelectedLedger, required: true,
-                    searchPlaceholder: 'Select Posting Account...', dropdownWidth: '500px', updateValue: selectedLedger.value,
-                    fetchData: store.dispatch('Ledgers/fetchLedgers', {company:companyID.value}),
-                    clearSearch: clearSelectedLedger
+                    type:'search-dropdown', label:"Category", value: categoryValue.value, componentKey: ledComponentKey,
+                    selectOptions: catArray, optionSelected: handleSelectedCategory, required: true,
+                    searchPlaceholder: 'Select Category...', dropdownWidth: '500px', updateValue: selectedCategory.value,
+                    fetchData: store.dispatch('Appraisal_Categories/fetchAppraisalCategories', {company:companyID.value}),
+                    clearSearch: clearSelectedCategory
                 },
+                { type: 'text', name: 'indicator_name',label: "KPI Name", value: selectedIndicator.value?.indicator_name || '', required: true },
+                { type: 'text', name: 'min_weight',label: "Min Weight", value: selectedIndicator.value?.min_weight || '', required: false },
+                { type: 'text', name: 'max_weight',label: "Max Weight", value: selectedIndicator.value?.max_weight || '', required: false },
             ];
         };
         const handleReset = () =>{
-            for(let i=0; i < formFields.value.length; i++){
+            for(let i=1; i < formFields.value.length; i++){
                 formFields.value[i].value = '';
             }
             ledComponentKey.value += 1;
-            ledgerID.value = '';
+            categoryID.value = '';
         }
 
-        watch([selectedDeduction, selectedLedger], () => {
-            if (selectedDeduction.value && selectedLedger.value) {
+        watch([selectedIndicator, selectedCategory], () => {
+            if (selectedIndicator.value && selectedCategory.value) {
                 ledComponentKey.value += 1;
                 updateFormFields();
             }
@@ -172,16 +162,14 @@ export default{
         const hideModalLoader = () =>{
             modal_loader.value = "none";
         }
-        const createDeduction = async() =>{
+        const createPerformanceIndicator = async() =>{
             showModalLoader();
             let formData = {
-                deduction_name: formFields.value[0].value,
-                deduction_type: formFields.value[1].value,
-                default_mode: formFields.value[2].value,
-                default_value: formFields.value[3].value,
-                taxation_status: formFields.value[4].value || 'No',
-                posting_account: ledgerID.value,
-                posting_account_id: ledgerID.value,
+                indicator_name: formFields.value[1].value,
+                min_weight: formFields.value[2].value,
+                max_weight: formFields.value[3].value,
+                category: categoryID.value,
+                category_id: categoryID.value,
                 company: companyID.value
             }
   
@@ -191,7 +179,7 @@ export default{
                     errors.value.push(formFields.value[i].label);
                 }
             }
-            if(ledgerValue.value == ''){
+            if(categoryValue.value == ''){
                 errors.value.push('error')
             }
 
@@ -200,45 +188,43 @@ export default{
                 hideModalLoader();
             }else{
                 try {
-                    const response = await store.dispatch('Deductions/createDeduction', formData);
-                    if (response && response.status === 200) {
+                    const response = await store.dispatch('Performance_Indicators/createPerformanceIndicator', formData);
+                    if (response && response.status === 201) {
                         hideModalLoader();
-                        toast.success('Earning/Deduction created successfully!');
+                        toast.success('KPI created successfully!');
                         handleReset();
                         ledComponentKey.value += 1;
                     } else {
-                        toast.error('An error occurred while creating the Earning/Deduction.');
+                        toast.error('An error occurred while creating the KPI.');
                     }
                 } catch (error) {
                     console.error(error.message);
-                    toast.error('Failed to create Earning/Deduction: ' + error.message);
+                    toast.error('Failed to create KPI: ' + error.message);
                 } finally {
                     hideModalLoader();
-                    searchDeductions();
+                    searchIndicators();
                 }
             }
         }
-        const updateDeduction = async() =>{
+        const updatePerformanceIndicator = async() =>{
             showModalLoader();
             errors.value = [];
             let formData = {
-                deduction: selectedDeduction.value.deduction_id,
-                deduction_name: formFields.value[0].value,
-                deduction_type: formFields.value[1].value,
-                default_mode: formFields.value[2].value,
-                default_value: formFields.value[3].value,
-                taxation_status: formFields.value[4].value || 'No',
-                posting_account: ledgerValue.value,
-                posting_account_id: ledgerValue.value,
+                performance_indicator: selectedIndicator.value.performance_indicator_id,
+                indicator_name: formFields.value[1].value,
+                min_weight: formFields.value[2].value,
+                max_weight: formFields.value[3].value,
+                category: categoryValue.value,
+                category_id: categoryValue.value,
                 company: companyID.value
             }
 
-            for(let i=0; i < formFields.value.length; i++){
+            for(let i=1; i < formFields.value.length; i++){
                 if(formFields.value[i].value =='' && formFields.value[i].type != 'search-dropdown'  && formFields.value[i].required == true){
                     errors.value.push('Error');
                 }
             }
-            if(ledgerValue.value == ''){
+            if(categoryValue.value == ''){
                 errors.value.push('error')
             }
             if(errors.value.length){
@@ -246,82 +232,82 @@ export default{
                 hideModalLoader();
             }else{
                 try {
-                    const response = await store.dispatch('Deductions/updateDeduction', formData);
+                    const response = await store.dispatch('Performance_Indicators/updatePerformanceIndicator', formData);
                     if (response && response.status === 200) {
                         hideModalLoader();
                         handleReset();
                         ledComponentKey.value += 1;
-                        toast.success("Earning/Deduction updated successfully!");              
+                        toast.success("KPI updated successfully!");              
                     } else {
-                        toast.error('An error occurred while updating the Earning/Deduction.');
+                        toast.error('An error occurred while updating the KPI.');
                     }
                 } catch (error) {
                     console.error(error.message);
-                    toast.error('Failed to update Earning/Deduction: ' + error.message);
+                    toast.error('Failed to update KPI: ' + error.message);
                 } finally {
                     hideModalLoader();
                     propModalVisible.value = false;
-                    store.dispatch("Deductions/updateState",{selectedDeduction:null})
-                    searchDeductions();
+                    store.dispatch("Performance_Indicators/updateState",{selectedIndicator:null})
+                    searchIndicators();
                 }             
             }
         }
-        const saveDeduction = () =>{
+        const saveIndicator = () =>{
             if(isEditing.value == true){
-                updateDeduction();
+                updatePerformanceIndicator();
             }else{
-                createDeduction();
+                createPerformanceIndicator();
             }
         }
-        const removeDeduction = async() =>{
+        const removeIndicator = async() =>{
             if(selectedIds.value.length == 1){
                 let formData = {
                     company: companyID.value,
-                    deduction: selectedIds.value
+                    performance_indicator: selectedIds.value
                 }
                 try{
-                    const response = await store.dispatch('Deductions/deleteDeduction',formData)
+                    const response = await store.dispatch('Performance_Indicators/deletePerformanceIndicator',formData)
                     if(response && response.status == 200){
-                        toast.success("Earning/Deduction Removed Succesfully");
-                        searchDeductions();
+                        toast.success("KPI Removed Succesfully");
+                        searchIndicators();
                     }
                 }
                 catch(error){
                     console.error(error.message);
-                    toast.error('Failed to remove Earning/Deduction: ' + error.message);
+                    toast.error('Failed to remove KPI: ' + error.message);
                 }
                 finally{
                     selectedIds.value = [];
                 }
             }else if(selectedIds.value.length > 1){
-                toast.error("You have selected more than 1 Earning/Deduction") 
+                toast.error("You have selected more than 1 KPI") 
             }else{
-                toast.error("Please Select An Earning/Deduction To Remove")
+                toast.error("Please Select An KPI To Remove")
             }
         }
-        const removeDeductions = async() =>{
+        const removeIndicators = async() =>{
             if(selectedIds.value.length){
                 let formData = {
                     company: companyID.value,
-                    deduction: selectedIds.value
+                    performance_indicator: selectedIds.value
                 }
                 try{
-                    const response = await store.dispatch('Deductions/deleteDeduction',formData)
+                    const response = await store.dispatch('Performance_Indicators/deletePerformanceIndicator',formData)
                     if(response && response.status == 200){
-                        toast.success("Earning/Deduction(s) Removed Succesfully");
-                        searchDeductions();
+                        toast.success("KPI(s) Removed Succesfully");
+                        searchIndicators();
                     }
                 }
                 catch(error){
                     console.error(error.message);
-                    toast.error('Failed to remove Earning/Deduction: ' + error.message);
+                    toast.error('Failed to remove KPI: ' + error.message);
                 }
                 finally{
                     selectedIds.value = [];
 
                 }
             }else{
-                toast.error("Please Select An Earning/Deduction To Remove")
+                toast.error("Please Select An KPI To Remove")
             }
         }
         const showLoader = () =>{
@@ -330,23 +316,22 @@ export default{
         const hideLoader = () =>{
             loader.value = "none";
         }
-        const searchDeductions = () =>{
+        const searchIndicators = () =>{
             showLoader();
             showNextBtn.value = false;
             showPreviousBtn.value = false;
             let formData = {
-                deduction_name: deduction_name_search.value,
-                deduction_type: deduction_type_search.value,
+                indicator_name: name_search.value,
                 company_id: companyID.value,
                 page_size: selectedValue.value
             } 
             axios
-            .post(`api/v1/deductions-search/?page=${currentPage.value}`,formData)
+            .post(`api/v1/performance-indicators-search/?page=${currentPage.value}`,formData)
             .then((response)=>{
-                deductionsList.value = response.data.results;
-                store.commit('Deductions/LIST_DEDUCTIONS', deductionsList.value)
+                indicatorsList.value = response.data.results;
+                store.commit('Performance_Indicators/LIST_INDICATORS', indicatorsList.value)
                 propResults.value = response.data;
-                propArrLen.value = deductionsList.value.length;
+                propArrLen.value = indicatorsList.value.length;
                 propCount.value = propResults.value.count;
                 pageCount.value = Math.ceil(propCount.value / selectedValue.value);
                 if(response.data.next){
@@ -365,14 +350,13 @@ export default{
         };
         const selectSearchQuantity = (newValue) =>{
             selectedValue.value = newValue;
-            searchDeductions(selectedValue.value);
+            searchIndicators(selectedValue.value);
         };
         const resetFilters = () =>{
             currentPage.value = 1;
             selectedValue.value = 50;
-            deduction_name_search.value = "";
-            deduction_type_search.value = "";
-            searchDeductions();
+            name_search.value = "";
+            searchIndicators();
         }
         const loadPrev = () =>{
             if (currentPage.value <= 1){
@@ -381,7 +365,7 @@ export default{
                 currentPage.value -= 1;
             }
             
-            searchDeductions();
+            searchIndicators();
             // scrollToTop();
         }
         const loadNext = () =>{
@@ -391,50 +375,50 @@ export default{
                 currentPage.value += 1;
             }
             
-            searchDeductions();
+            searchIndicators();
             // scrollToTop(); 
         }
         const firstPage = ()=>{
             currentPage.value = 1;
-            searchDeductions();
+            searchIndicators();
             // scrollToTop();
         }
         const lastPage = () =>{
             currentPage.value = pageCount.value;
-            searchDeductions();
+            searchIndicators();
             // scrollToTop();
         }
-        const addNewDeduction = () =>{
-            store.dispatch("Deductions/updateState",{selectedDeduction:null, selectedLedger:null});
+        const addNewIndicator = () =>{
+            store.dispatch("Performance_Indicators/updateState",{selectedIndicator:null, selectedCategory:null});
             ledComponentKey.value += 1;
             handleReset();
             updateFormFields();
             propModalVisible.value = true;
-            store.dispatch("Deductions/updateState",{isEditing:false})
+            store.dispatch("Performance_Indicators/updateState",{isEditing:false})
             flex_basis.value = '1/2';
             flex_basis_percentage.value = '50';
         }
         const handleActionClick = async(rowIndex, action, row) =>{
             if( action == 'edit'){
-                const deductionID = row['deduction_id'];
+                const indicatorID = row['performance_indicator_id'];
                 let formData = {
                     company: companyID.value,
-                    deduction: deductionID
+                    performance_indicator: indicatorID
                 }
-                await store.dispatch('Deductions/fetchDeduction',formData)
+                await store.dispatch('Performance_Indicators/fetchPerformanceIndicator',formData)
                 propModalVisible.value = true;
                 flex_basis.value = '1/2';
                 flex_basis_percentage.value = '50';
 
             }else if(action == 'delete'){
-                const deductionID = [row[idField]];
+                const indicatorID = [row[idField]];
                 let formData = {
                     company: companyID.value,
-                    deduction: deductionID
+                    performance_indicator: indicatorID
                 }
-                await store.dispatch('Deductions/deleteDeduction',formData).
+                await store.dispatch('Performance_Indicators/deletePerformanceIndicator',formData).
                 then(()=>{
-                    searchDeductions();
+                    searchIndicators();
                 })
             }else if(action == 'view'){
                 console.log("VIEWING TAKING PLACE");
@@ -443,17 +427,16 @@ export default{
         const closeModal = () =>{
             propModalVisible.value = false;
         };
-        const printDeductionsList = () =>{
+        const printindicatorsList = () =>{
             showLoader();
             let formData = {
-                deduction_name: deduction_name_search.value,
-                deduction_type: deduction_type_search.value,
+                indicator_name: name_search.value,
                 company_id: companyID.value,
                 page_size: selectedValue.value
             } 
 
             axios
-            .post("api/v1/export-deductions-pdf/", formData, { responseType: 'blob' })
+            .post("api/v1/export-performance-indicators-pdf/", formData, { responseType: 'blob' })
                 .then((response)=>{
                     if(response.status == 200){
                         const blob1 = new Blob([response.data]);
@@ -472,18 +455,17 @@ export default{
         const downloadDeductionsExcel = () =>{
             showLoader();
             let formData = {
-                deduction_name: deduction_name_search.value,
-                deduction_type: deduction_type_search.value,
+                indicator_name: name_search.value,
                 company_id: companyID.value,
                 page_size: selectedValue.value
             }
-            axios.post("api/v1/export-deductions-excel/", formData, { responseType: 'blob' })
+            axios.post("api/v1/export-performance-indicators-excel/", formData, { responseType: 'blob' })
             .then((response)=>{
                 if(response.status == 200){
                 const url = window.URL.createObjectURL(new Blob([response.data]));
                 const link = document.createElement('a');
                 link.href = url;
-                link.setAttribute('download', 'Earning/Deductions.xlsx');
+                link.setAttribute('download', 'KPIs.xlsx');
                 document.body.appendChild(link);
                 link.click();
                 }
@@ -498,18 +480,17 @@ export default{
         const downloadDeductionsCSV = () =>{
             showLoader();
             let formData = {
-                deduction_name: deduction_name_search.value,
-                deduction_type: deduction_type_search.value,
+                indicator_name: name_search.value,
                 company_id: companyID.value,
                 page_size: selectedValue.value
             }
-            axios.post("api/v1/export-deductions-csv/", formData, { responseType: 'blob' })
+            axios.post("api/v1/export-performance-indicators-csv/", formData, { responseType: 'blob' })
             .then((response)=>{
                 if(response.status == 200){
                 const url = window.URL.createObjectURL(new Blob([response.data]));
                 const link = document.createElement('a');
                 link.href = url;
-                link.setAttribute('download', 'Deductions.csv');
+                link.setAttribute('download', 'KPIs.csv');
                 document.body.appendChild(link);
                 link.click();
                 }
@@ -522,16 +503,16 @@ export default{
             })
         };
         onBeforeMount(()=>{
-            searchDeductions();
+            searchIndicators();
             
         })
         return{
-            title, searchDeductions,resetFilters, addButtonLabel, searchFilters, tableColumns, deductionsList,
+            title, searchIndicators,resetFilters, addButtonLabel, searchFilters, tableColumns, indicatorsList,
             currentPage,propResults, propArrLen, propCount, pageCount, showNextBtn, showPreviousBtn,
             loadPrev, loadNext, firstPage, lastPage, idField, actions, handleActionClick, propModalVisible, closeModal,
-            submitButtonLabel, showModal, addNewDeduction, showLoader, loader, hideLoader, modal_loader, modal_top, modal_left, modal_width,displayButtons,
-            showModalLoader, hideModalLoader, saveDeduction, formFields, handleSelectionChange, flex_basis,flex_basis_percentage,
-            removeDeduction, removeDeductions,addingRight,rightsModule,printDeductionsList,selectSearchQuantity,selectedValue,
+            submitButtonLabel, showModal, addNewIndicator, showLoader, loader, hideLoader, modal_loader, modal_top, modal_left, modal_width,displayButtons,
+            showModalLoader, hideModalLoader, saveIndicator, formFields, handleSelectionChange, flex_basis,flex_basis_percentage,
+            removeIndicator, removeIndicators,addingRight,rightsModule,printindicatorsList,selectSearchQuantity,selectedValue,
             downloadDeductionsCSV,downloadDeductionsExcel
         }
     }

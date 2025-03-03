@@ -21,6 +21,7 @@
                                 <option value="Tenant Creation">Tenant Creation</option>
                                 <option value="Tenant Portal Invitation">Tenant Portal Invitation</option>
                                 <option value="Tenant Meter Reading">Tenant Meter Reading</option>
+                                <option value="Employee Payslip">Employee Payslip</option>
                                 <option value="Customer Invoice">Customer Invoice</option>
                                 <option value="Customer Receipt">Customer Receipt</option>
                                 <option value="Customer Balance Reminder">Customer Balance Reminder</option>
@@ -215,6 +216,59 @@
                                 </tr>
                             </table>
                         </div>
+                        <div class="w-full" v-else-if="human_resource">
+                            <table class="text-left">  
+                                <h2 class="text-center font-bold uppercase mb-4 mt-4">Employees</h2>
+                                <tr>
+                                    <td class="font-semibold">Employee Name: </td>
+                                    <td> &#123;&#123; employee_name &#125;&#125;</td>
+                                </tr>
+                                <tr>
+                                    <td class="font-semibold">Employee Phone No: </td>
+                                    <td> &#123;&#123; employee_phone_number &#125;&#125;</td>
+                                </tr>
+                                <tr>
+                                    <td class="font-semibold">Staff Number: </td>
+                                    <td> &#123;&#123; staff_number &#125;&#125;</td>
+                                </tr>
+                                <tr>
+                                    <td class="font-semibold">Employee ID No: </td>
+                                    <td> &#123;&#123; employee_id_number &#125;&#125;</td>
+                                </tr>
+                                <tr>
+                                    <td class="font-semibold">Employee Email: </td>
+                                    <td> &#123;&#123; employee_email &#125;&#125;</td>
+                                </tr>
+                                <tr>
+                                    <td class="font-semibold">Employee Address: </td>
+                                    <td> &#123;&#123; employee_address &#125;&#125;</td>
+                                </tr>
+                                <tr>
+                                    <td class="font-semibold">Employment Start Date: </td>
+                                    <td> &#123;&#123; employment_start_date &#125;&#125;</td>
+                                </tr>
+                                <tr>
+                                    <td class="font-semibold">Employment End Date: </td>
+                                    <td> &#123;&#123; employment_end_date &#125;&#125;</td>
+                                </tr>
+                                <tr>
+                                    <td class="font-semibold">Department: </td>
+                                    <td> &#123;&#123; department &#125;&#125;</td>
+                                </tr>
+                                <tr>
+                                    <td class="font-semibold">Supervisor: </td>
+                                    <td> &#123;&#123; supervisor &#125;&#125;</td>
+                                </tr>
+                                <tr>
+                                    <td class="font-semibold">Employee Currency: </td>
+                                    <td> &#123;&#123; employee_currency_code &#125;&#125;</td>
+                                </tr>
+                                <tr>
+                                    <td class="font-semibold">Basic Pay: </td>
+                                    <td> &#123;&#123; basic_pay &#125;&#125;</td>
+                                </tr>
+                            </table>
+                        </div>
                     </div>
                     <div class="basis-1/2 text-left">
                         <quill-editor :key="editorComponentKey" v-model:value="templateContent"></quill-editor>
@@ -318,6 +372,7 @@ export default defineComponent({
         const editorComponentKey = ref(0);
         const property_management = ref(false);
         const member_management = ref(false);
+        const human_resource = ref(false);
         const errors = ref([]);
         const companyID = computed(()=> store.state.userData.company_id);
         const idField = ref('');
@@ -354,8 +409,14 @@ export default defineComponent({
             if(selectedValue.includes("Tenant")){
                 property_management.value = true;
                 member_management.value = false;
+                human_resource.value = false;
             }else if(selectedValue.includes("Member")){
                 member_management.value = true;
+                property_management.value = false;
+                human_resource.value = false;
+            }else if(selectedValue.includes("Employee")){
+                human_resource.value = true;
+                member_management.value = false;
                 property_management.value = false;
             }
         }
@@ -446,7 +507,7 @@ export default defineComponent({
 
         return{
             saveTemplate, mainComponentKey,handleReset, loader, showLoader, hideLoader, idField,handleChange,
-            templateContent, templateName, templateType, editorComponentKey,property_management,member_management
+            templateContent, templateName, templateType, editorComponentKey,property_management,member_management,human_resource
         }
     }
 })

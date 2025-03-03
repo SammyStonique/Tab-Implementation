@@ -516,14 +516,19 @@ export default{
         const handleActionClick = async(rowIndex, action, row) =>{
             if(action == 'delete'){
                 const payrollID = [row['payroll_id']];
-                let formData = {
-                    company: companyID.value,
-                    payroll: payrollID,
+                const approvalStatus = row['status'];
+                if (approvalStatus == "Approved"){
+                    toast.error("Cannot Delete Approved Payroll!")
+                }else{
+                    let formData = {
+                        company: companyID.value,
+                        payroll: payrollID,
+                    }
+                    await store.dispatch('Payrolls/deletePayroll',formData).
+                    then(()=>{
+                        searchPayrolls();
+                    })
                 }
-                await store.dispatch('Payrolls/deletePayroll',formData).
-                then(()=>{
-                    searchPayrolls();
-                })
             }else if(action == 'view'){
                 const payrollID = row['payroll_id'];
                 await store.dispatch('Payrolls/updateState',{payrollID: payrollID})

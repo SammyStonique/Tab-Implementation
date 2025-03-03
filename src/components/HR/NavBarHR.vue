@@ -109,6 +109,47 @@
                     </div>
                 </div>
             </div>
+
+            <div class="web-links dropdown w-48">
+                <div class="py-0.5 px-2.5 h-full hover:bg-slate-500 hover:rounded">
+                    <button class="flex w-full" @click="showAppraisalDropdown">
+                        <i class="fa fa-clock pt-2 mr-2" aria-hidden="true"></i>
+                        <p class="pt-1.5">Employee Appraisal</p>
+                    </button>
+                </div>
+                <div class="dropdown-content w-56 absolute rounded border border-gray-200 bg-white shadow-slate-400 shadow-sm" v-if="appraisal_dropdown">
+                    <div class="py-2 px-3 pl-4 w-full hover:bg-slate-500 hover:w-full">
+                        <button class="flex text-sm w-full" @click="openPage({'HR':'Employee_Appraisals'})">
+                            <i class="fa fa-clock pt-2 mr-2" aria-hidden="true"></i>
+                            <p class="">Employee Appraisals</p>
+                        </button>
+                    </div>
+                    <div class="py-2 px-3 pl-4 w-full hover:bg-slate-500 hover:w-full">
+                        <button class="flex text-sm w-full" @click="openPage({'HR':'Skill_Ratings'})">
+                            <i class="fa fa-clock pt-2 mr-2" aria-hidden="true"></i>
+                            <p class="">Skill Ratings</p>
+                        </button>
+                    </div>
+                    <div class="py-2 px-3 pl-4 w-full hover:bg-slate-500 hover:w-full">
+                        <button class="flex text-sm w-full" @click="openPage({'HR':'Performance_Indicators'})">
+                            <i class="fa fa-clock pt-2 mr-2" aria-hidden="true"></i>
+                            <p class="">Performance Indicators</p>
+                        </button>
+                    </div>
+                    <div class="py-2 px-3 pl-4 w-full hover:bg-slate-500 hover:w-full">
+                        <button class="flex text-sm w-full" @click="openPage({'HR':'Appraisal_Categories'})">
+                            <i class="fa fa-clock pt-2 mr-2" aria-hidden="true"></i>
+                            <p class="">Appraisal Categories</p>
+                        </button>
+                    </div>
+                    <div class="py-2 px-3 pl-4 w-full hover:bg-slate-500 hover:w-full">
+                        <button class="flex text-sm w-full" @click="openPage({'HR':'Appraisal_Periods'})">
+                            <i class="fa fa-clock pt-2 mr-2" aria-hidden="true"></i>
+                            <p class="">Appraisal Periods</p>
+                        </button>
+                    </div>
+                </div>
+            </div>
             <div class="web-links dropdown w-48">
                 <div class="py-0.5 px-2.5 h-full hover:bg-slate-500 hover:rounded">
                     <button class="flex" @click="showAssetsDropdown">
@@ -224,6 +265,7 @@ export default defineComponent({
         const leave_dropdown = ref(false);
         const employees_dropdown = ref(false);
         const attendance_dropdown = ref(false);
+        const appraisal_dropdown = ref(false);
         const assets_dropdown = ref(false);
         const userDetails = ref([]);
         const dropdown = ref(false);
@@ -235,6 +277,7 @@ export default defineComponent({
             attendance_dropdown.value = false;
             dropdown.value = true;
             assets_dropdown.value  = false;
+            appraisal_dropdown.value  = false;
             payroll_dropdown.value  = !payroll_dropdown.value ;
         }
         const showEmployeesDropdown = () =>{
@@ -243,6 +286,7 @@ export default defineComponent({
             payroll_dropdown.value  = false;
             attendance_dropdown.value = false;
             assets_dropdown.value  = false;
+            appraisal_dropdown.value  = false;
             dropdown.value = true;
             employees_dropdown.value  = !employees_dropdown.value ;
         }
@@ -252,6 +296,7 @@ export default defineComponent({
             employees_dropdown.value = false;
             attendance_dropdown.value = false;
             assets_dropdown.value  = false;
+            appraisal_dropdown.value  = false;
             dropdown.value = true;
             leave_dropdown.value  = !leave_dropdown.value ;
         }
@@ -261,6 +306,7 @@ export default defineComponent({
             employees_dropdown.value  = false;
             attendance_dropdown.value = false;
             assets_dropdown.value  = false;
+            appraisal_dropdown.value  = false;
             dropdown.value = true;
             settings_dropdown.value  = !settings_dropdown.value ;
         }
@@ -270,6 +316,7 @@ export default defineComponent({
             employees_dropdown.value  = false;
             settings_dropdown.value = false;
             assets_dropdown.value  = false;
+            appraisal_dropdown.value  = false;
             dropdown.value = true;
             attendance_dropdown.value  = !attendance_dropdown.value ;
         }
@@ -279,8 +326,19 @@ export default defineComponent({
             employees_dropdown.value  = false;
             settings_dropdown.value = false;
             attendance_dropdown.value = false;
+            appraisal_dropdown.value  = false;
             dropdown.value = true;
             assets_dropdown.value  = !assets_dropdown.value ;
+        }
+        const showAppraisalDropdown = () =>{
+            leave_dropdown.value = false;
+            payroll_dropdown.value  = false;
+            employees_dropdown.value  = false;
+            settings_dropdown.value = false;
+            attendance_dropdown.value = false;
+            assets_dropdown.value  = false;
+            dropdown.value = true;
+            appraisal_dropdown.value  = !appraisal_dropdown.value ;
         }
         const closeDropdown = () =>{
             leave_dropdown.value = false;
@@ -290,6 +348,7 @@ export default defineComponent({
             attendance_dropdown.value = false;
             assets_dropdown.value  = false;
             dropdown.value = false;
+            appraisal_dropdown.value  = false;
         }
         const openPage = (pageName) =>{
             closeDropdown();
@@ -300,9 +359,9 @@ export default defineComponent({
             store.commit('modulesTab/MINIMIZE_TAB')
         };
         return{
-            dropdown, settings_dropdown, leave_dropdown, payroll_dropdown, attendance_dropdown,employees_dropdown, assets_dropdown,
+            dropdown, settings_dropdown, leave_dropdown, payroll_dropdown, attendance_dropdown,employees_dropdown, assets_dropdown, appraisal_dropdown,
             user_profile,userDetails, closeDropdown,showPayrollDropdown, showLeaveDropdown,showEmployeesDropdown, showAttendanceDropdown,
-            showSettingsDropdown, showAssetsDropdown,openPage,showHomePage
+            showSettingsDropdown, showAssetsDropdown, showAppraisalDropdown,openPage,showHomePage
         }
     },
 

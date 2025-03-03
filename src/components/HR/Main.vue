@@ -54,6 +54,9 @@ import Salary_Advances from '@/components/HR/Salary_Advances.vue';
 import Loan_Applications from '@/components/HR/Loan_Applications.vue';
 import Loan_Application_Details from '@/components/HR/Loan_Application_Details.vue';
 import Loan_Disbursements from '@/components/HR/Loan_Disbursements.vue';
+import Appraisal_Categories from '@/components/HR/Appraisal_Categories.vue';
+import Appraisal_Periods from '@/components/HR/Appraisal_Periods.vue';
+import Performance_Indicators from '@/components/HR/Performance_Indicators.vue';
 
 import Default_Settings from '@/components/SET/Default_Settings.vue';
 
@@ -66,7 +69,7 @@ export default{
         Pay_Cycles,Pay_Groups,Deductions,Leave_Types,Holidays,Paye,Nssf,Shif,Housing_Levy,
         Employees,Employee_Biodata,Deduction_Details,Employee_Details,Import_Employees,Payrolls,Payroll_Employees,
         HR_Templates,Design_HR_Template,Leave_Applications,Leave_Allocations,Salary_Advances,Loan_Applications,
-        Loan_Application_Details,Loan_Disbursements,Leave_Ammendments,
+        Loan_Application_Details,Loan_Disbursements,Leave_Ammendments,Appraisal_Categories,Appraisal_Periods,Performance_Indicators,
 
         Default_Settings
     },
