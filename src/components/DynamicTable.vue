@@ -3,7 +3,7 @@
     <table ref="tableRef" class="dynamic-table rounded min-w-full">
       <thead class="bg-gray-800 text-white">
         <tr class="rounded bg-slate-800 text-white font-semibold text-xxs sm:text-xs uppercase">
-          <th v-for="(column, index) in columns" :key="index" 
+          <th v-for="(column, index) in columns" :key="index"  :hidden="column.hidden"
               :class="`min-w-[${column.minWidth}] max-w-[${column.maxWidth}]`">
             <template v-if="column.type === 'checkbox'">
               <input type="checkbox" class="mt-0.5" @change="toggleSelectAll" :checked="allSelected" />
@@ -19,7 +19,7 @@
       </thead>
       <tbody class="table-body text-xxs">
         <tr v-for="(row, rowIndex) in rows" :key="rowIndex" @dblclick="handleRowClick(row)" :style="shouldAddLine(row) ? { textDecoration: 'line-through' } : {}" class="cursor-pointer even:bg-gray-100 text-xxs sm:text-xs uppercase">
-          <td v-for="(column, colIndex) in columns" :key="colIndex" 
+          <td v-for="(column, colIndex) in columns" :key="colIndex" :hidden="column.hidden" 
               :class="[{'ellipsis': column.maxWidth}, { 'max-w-[300px]': column.maxWidth }, { 'min-w-[120px]': column.minWidth }]">
             <template v-if="column.type === 'checkbox'">
               <input type="checkbox" v-model="row.selected" class="checkbox mt-0.5" @change="updateSelectedIds(row)"/>
@@ -36,7 +36,7 @@
             </template>
             <template v-else>
               <div v-if="column.editable === true && column.type === 'number'" class="max-w-[100px]" :class="`text-${column.textColor}-800 font-bold`">
-                <input :type="column.type" @change="handleInputChange($event, row)" pattern="[0-9]*" oninput="this.value = this.value.replace(/[^0-9]/g, '')" class="w-full" v-model="row[column.key]" />             
+                <input :type="column.type" @change="handleInputChange($event, row)" pattern="^\d+(\.\d{0,2})?$" oninput="this.value = this.value.replace(/[^0-9.]/g, '').replace(/(\.\d{2})\d+/g, '$1')" class="w-full" v-model="row[column.key]" />             
               </div>
               <div v-else-if="column.editable === true">
                 <input :type="column.type" @change="handleInputChange($event, row)" class="w-inherit" v-model="row[column.key]" /> 
@@ -222,6 +222,39 @@ export default defineComponent({
       }
     };
 
+    const calculateAverageRating = (row) =>{
+
+      const employeeRating = parseFloat(row.employee_rating)|| 0;
+      const supervisorRating = parseFloat(row.supervisor_rating)|| 0;
+      const appraisalMethod = row.appraisal_method || "Supervisor Only";
+      let averageRating = parseFloat(row.average_rating)|| 0;
+      const minWeight = parseFloat(row.min_weight)|| 0;
+      const maxWeight = parseFloat(row.max_weight)|| 0;
+
+      if(appraisalMethod == "Employee & Supervisor" ){
+        if(((minWeight > employeeRating) && (minWeight > supervisorRating)) || ((maxWeight < employeeRating) && (maxWeight < supervisorRating))){
+          averageRating = 0;
+          row.employee_rating = minWeight;
+          row.supervisor_rating = minWeight;
+          row.average_rating = minWeight;
+        }else{
+          averageRating = ((employeeRating + supervisorRating) / 2).toFixed(2);
+          row.average_rating = averageRating;
+        }
+        
+      }else{
+        if((minWeight > supervisorRating) || (maxWeight < supervisorRating)){
+          averageRating = 0;
+          row.supervisor_rating = minWeight;
+          row.average_rating = minWeight;
+        }else{
+          row.average_rating = supervisorRating;
+        }
+        
+      }
+      emit('update-average-rating', row.average_rating)
+    };
+
     const handleChange = (event, row) =>{
       const selectedValue = event.target.value;
       calculateTaxAmount(row);
@@ -233,6 +266,7 @@ export default defineComponent({
     }
 
     const handleInputChange = (event, row) =>{
+      calculateAverageRating(row);
       calculateTaxAmount(row);
       updateUnits(row);
       receiptAllocation(row);

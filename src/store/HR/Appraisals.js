@@ -7,10 +7,12 @@ const state = {
   appraisalArray: [],
   appraisalID: '',
   appraisalDate: '',
+  performanceIndicators: [],
   selectedAppraisal: null,
   selectedEmployee: null,
   selectedPeriod: null,
   selectedCategory: null,
+  selectedIndicators: [],
   isEditing: false
 };
   
@@ -21,17 +23,19 @@ const mutations = {
     state.appraisalArray = [];
     state.appraisalID = '';
     state.appraisalDate = '';
+    state.performanceIndicators = [];
     state.selectedAppraisal = null;
     state.selectedEmployee = null;
     state.selectedPeriod = null;
     state.selectedCategory = null;
+    state.selectedIndicators = [];
     state.isEditing = false;
   },
   SET_SELECTED_APPRAISAL(state, appraisal) {
     state.selectedAppraisal = appraisal;
     state.isEditing = true;
   },
-  SET_SELECTED_EMLOYEE(state, employee) {
+  SET_SELECTED_EMPLOYEE(state, employee) {
     state.selectedEmployee = employee;
   },
   SET_SELECTED_PERIOD(state, period) {
@@ -39,6 +43,12 @@ const mutations = {
   },
   SET_SELECTED_CATEGORY(state, category) {
     state.selectedCategory = category;
+  },
+  SET_SELECTED_INDICATORS(state, indicators){
+    state.performanceIndicators = indicators;
+  },
+  SET_APPRAISAL_INDICATORS(state, indicators){
+    state.performanceIndicators = indicators
   },
   LIST_APPRAISALS(state, appraisals) {
     state.appraisalsList = appraisals;
@@ -80,6 +90,18 @@ const actions = {
     })
   },
 
+  generateKPIs({ commit,state }, formData) {
+    state.performanceIndicators = [];
+    axios.post(`api/v1/get-performance-indicators/`,formData)
+    .then((response)=>{
+      commit('SET_APPRAISAL_INDICATORS', response.data);
+    })
+    .catch((error)=>{
+      console.log(error.message);
+    })
+    
+  },
+
   fetchAppraisals({ commit,state }, formData) {
     state.appraisalArr = [];
     axios.post(`api/v1/get-appraisals/`,formData)
@@ -99,12 +121,14 @@ const actions = {
     .then((response)=>{
       state.selectedAppraisal = response.data;
       const selectedCategory = response.data.category.category_name;
-      const selectedEmployee = response.data.employee.employee_name;
+      const selectedEmployee = response.data.employee.staff_number + ' - ' + response.data.employee.employee_name;
       const selectedPeriod = response.data.period.period_name;
+
       commit('SET_SELECTED_CATEGORY',selectedCategory);
       commit('SET_SELECTED_EMPLOYEE',selectedEmployee);
       commit('SET_SELECTED_PERIOD',selectedPeriod);
       commit('SET_SELECTED_APPRAISAL',response.data);
+      commit('SET_SELECTED_INDICATORS',(response.data.performance_indicators != null) ? (response.data.performance_indicators) : []);
     })
     .catch((error)=>{
       console.log(error.message);

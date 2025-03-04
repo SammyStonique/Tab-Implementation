@@ -113,38 +113,38 @@
             <div class="web-links dropdown w-48">
                 <div class="py-0.5 px-2.5 h-full hover:bg-slate-500 hover:rounded">
                     <button class="flex w-full" @click="showAppraisalDropdown">
-                        <i class="fa fa-clock pt-2 mr-2" aria-hidden="true"></i>
+                        <i class="fa fa-chart-line pt-2 mr-2" aria-hidden="true"></i>
                         <p class="pt-1.5">Employee Appraisal</p>
                     </button>
                 </div>
                 <div class="dropdown-content w-56 absolute rounded border border-gray-200 bg-white shadow-slate-400 shadow-sm" v-if="appraisal_dropdown">
                     <div class="py-2 px-3 pl-4 w-full hover:bg-slate-500 hover:w-full">
                         <button class="flex text-sm w-full" @click="openPage({'HR':'Employee_Appraisals'})">
-                            <i class="fa fa-clock pt-2 mr-2" aria-hidden="true"></i>
+                            <i class="fa fa-chart-line pt-2 mr-2" aria-hidden="true"></i>
                             <p class="">Employee Appraisals</p>
                         </button>
                     </div>
                     <div class="py-2 px-3 pl-4 w-full hover:bg-slate-500 hover:w-full">
                         <button class="flex text-sm w-full" @click="openPage({'HR':'Skill_Ratings'})">
-                            <i class="fa fa-clock pt-2 mr-2" aria-hidden="true"></i>
+                            <i class="fa fa-trophy pt-2 mr-2" aria-hidden="true"></i>
                             <p class="">Skill Ratings</p>
                         </button>
                     </div>
                     <div class="py-2 px-3 pl-4 w-full hover:bg-slate-500 hover:w-full">
                         <button class="flex text-sm w-full" @click="openPage({'HR':'Performance_Indicators'})">
-                            <i class="fa fa-clock pt-2 mr-2" aria-hidden="true"></i>
+                            <i class="fa fa-smile pt-2 mr-2" aria-hidden="true"></i>
                             <p class="">Performance Indicators</p>
                         </button>
                     </div>
                     <div class="py-2 px-3 pl-4 w-full hover:bg-slate-500 hover:w-full">
                         <button class="flex text-sm w-full" @click="openPage({'HR':'Appraisal_Categories'})">
-                            <i class="fa fa-clock pt-2 mr-2" aria-hidden="true"></i>
+                            <i class="fa fa-bars pt-2 mr-2" aria-hidden="true"></i>
                             <p class="">Appraisal Categories</p>
                         </button>
                     </div>
                     <div class="py-2 px-3 pl-4 w-full hover:bg-slate-500 hover:w-full">
                         <button class="flex text-sm w-full" @click="openPage({'HR':'Appraisal_Periods'})">
-                            <i class="fa fa-clock pt-2 mr-2" aria-hidden="true"></i>
+                            <i class="fa fa-clock-o pt-2 mr-2" aria-hidden="true"></i>
                             <p class="">Appraisal Periods</p>
                         </button>
                     </div>

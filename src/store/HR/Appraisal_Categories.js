@@ -6,6 +6,7 @@ const state = {
     categoryArr: [],
     categoryArray: [],
     categoryID: "",
+    categoryMethod: "Supervisor Only",
     selectedCategory: null,
     isEditing: "",
     category_name_search: '',
@@ -17,6 +18,7 @@ const state = {
       state.categoryArr = [];
       state.categoryArray = [];
       state.categoryID = '';
+      state.categoryMethod = "Supervisor Only";
       state.category_name_search = '';
       state.selectedCategory = null;
       state.isEditing = false;
@@ -97,6 +99,7 @@ const state = {
       const selectedCategory = state.categoryList.find(category => (category.category_name) === option);
       if (selectedCategory) {
           state.categoryID = selectedCategory.appraisal_category_id;
+          state.categoryMethod = selectedCategory.appraisal_method;
           state.categoryArray = [...state.categoryArray, selectedCategory];
       }
       commit('CATEGORIES_ARRAY', state.categoryArray);
