@@ -14,7 +14,7 @@
                     <p class="pt-1.5">Dashboard</p>
                 </button>
             </div>
-            <div class="web-links dropdown w-32">
+            <div class="web-links dropdown w-28">
                 <div class="py-0.5 px-2.5 h-full hover:bg-slate-500 hover:rounded">
                     <button class="flex w-full" @click="showEmployeesDropdown">
                         <i class="fa fa-universal-access pt-2 mr-2" aria-hidden="true"></i>
@@ -30,7 +30,7 @@
                     </div>
                 </div>
             </div>
-            <div class="web-links dropdown w-36">
+            <div class="web-links dropdown w-24">
                 <div class="py-0.5 px-2.5 h-full hover:bg-slate-500 hover:rounded">
                     <button class="flex w-full" @click="showPayrollDropdown">
                         <i class="fa fa-spinner pt-2 mr-2" aria-hidden="true"></i>
@@ -64,7 +64,7 @@
                     </div>
                 </div>
             </div>
-            <div class="web-links dropdown w-48">
+            <div class="web-links dropdown w-44">
                 <div class="py-0.5 px-2.5 h-full hover:bg-slate-500 hover:rounded">
                 <button class="flex w-full" @click="showLeaveDropdown">
                     <i class="fa fa-calendar-alt pt-2 mr-2" aria-hidden="true"></i>
@@ -110,7 +110,7 @@
                 </div>
             </div>
 
-            <div class="web-links dropdown w-48">
+            <div class="web-links dropdown w-44">
                 <div class="py-0.5 px-2.5 h-full hover:bg-slate-500 hover:rounded">
                     <button class="flex w-full" @click="showAppraisalDropdown">
                         <i class="fa fa-chart-line pt-2 mr-2" aria-hidden="true"></i>
@@ -146,6 +146,52 @@
                         <button class="flex text-sm w-full" @click="openPage({'HR':'Appraisal_Periods'})">
                             <i class="fa fa-clock-o pt-2 mr-2" aria-hidden="true"></i>
                             <p class="">Appraisal Periods</p>
+                        </button>
+                    </div>
+                </div>
+            </div>
+            <div class="web-links dropdown w-32">
+                <div class="py-0.5 px-2.5 h-full hover:bg-slate-500 hover:rounded">
+                    <button class="flex w-full" @click="showDisciplinaryDropdown">
+                        <i class="fa fa-chart-line pt-2 mr-2" aria-hidden="true"></i>
+                        <p class="pt-1.5">Disciplinary</p>
+                    </button>
+                </div>
+                <div class="dropdown-content w-56 absolute rounded border border-gray-200 bg-white shadow-slate-400 shadow-sm" v-if="disciplinary_dropdown">
+                    <div class="py-2 px-3 pl-4 w-full hover:bg-slate-500 hover:w-full">
+                        <button class="flex text-sm w-full" @click="openPage({'HR':'Disciplinary_Cases'})">
+                            <i class="fa fa-chart-line pt-2 mr-2" aria-hidden="true"></i>
+                            <p class="">Disciplinary Cases</p>
+                        </button>
+                    </div>
+                    <div class="py-2 px-3 pl-4 w-full hover:bg-slate-500 hover:w-full">
+                        <button class="flex text-sm w-full" @click="openPage({'HR':'Disciplinary_Meetings'})">
+                            <i class="fa fa-smile pt-2 mr-2" aria-hidden="true"></i>
+                            <p class="">Disciplinary Meetings</p>
+                        </button>
+                    </div>
+                    <div class="py-2 px-3 pl-4 w-full hover:bg-slate-500 hover:w-full">
+                        <button class="flex text-sm w-full" @click="openPage({'HR':'Disciplinary_Reviews'})">
+                            <i class="fa fa-trophy pt-2 mr-2" aria-hidden="true"></i>
+                            <p class="">Disciplinary Reviews</p>
+                        </button>
+                    </div>  
+                    <div class="py-2 px-3 pl-4 w-full hover:bg-slate-500 hover:w-full">
+                        <button class="flex text-sm w-full" @click="openPage({'HR':'Disciplinary_Actions'})">
+                            <i class="fa fa-trophy pt-2 mr-2" aria-hidden="true"></i>
+                            <p class="">Disciplinary Actions</p>
+                        </button>
+                    </div>   
+                    <div class="py-2 px-3 pl-4 w-full hover:bg-slate-500 hover:w-full">
+                        <button class="flex text-sm w-full" @click="openPage({'HR':'Disciplinary_Categories'})">
+                            <i class="fa fa-bars pt-2 mr-2" aria-hidden="true"></i>
+                            <p class="">Disciplinary Categories</p>
+                        </button>
+                    </div>
+                    <div class="py-2 px-3 pl-4 w-full hover:bg-slate-500 hover:w-full">
+                        <button class="flex text-sm w-full" @click="openPage({'HR':'Disciplinary_Appeals'})">
+                            <i class="fa fa-clock-o pt-2 mr-2" aria-hidden="true"></i>
+                            <p class="">Disciplinary Appeals</p>
                         </button>
                     </div>
                 </div>
@@ -267,6 +313,7 @@ export default defineComponent({
         const attendance_dropdown = ref(false);
         const appraisal_dropdown = ref(false);
         const assets_dropdown = ref(false);
+        const disciplinary_dropdown = ref(false);
         const userDetails = ref([]);
         const dropdown = ref(false);
 
@@ -275,6 +322,7 @@ export default defineComponent({
             settings_dropdown.value = false;
             employees_dropdown.value  = false;
             attendance_dropdown.value = false;
+            disciplinary_dropdown.value  = false;
             dropdown.value = true;
             assets_dropdown.value  = false;
             appraisal_dropdown.value  = false;
@@ -287,6 +335,7 @@ export default defineComponent({
             attendance_dropdown.value = false;
             assets_dropdown.value  = false;
             appraisal_dropdown.value  = false;
+            disciplinary_dropdown.value  = false;
             dropdown.value = true;
             employees_dropdown.value  = !employees_dropdown.value ;
         }
@@ -297,6 +346,7 @@ export default defineComponent({
             attendance_dropdown.value = false;
             assets_dropdown.value  = false;
             appraisal_dropdown.value  = false;
+            disciplinary_dropdown.value  = false;
             dropdown.value = true;
             leave_dropdown.value  = !leave_dropdown.value ;
         }
@@ -307,6 +357,7 @@ export default defineComponent({
             attendance_dropdown.value = false;
             assets_dropdown.value  = false;
             appraisal_dropdown.value  = false;
+            disciplinary_dropdown.value  = false;
             dropdown.value = true;
             settings_dropdown.value  = !settings_dropdown.value ;
         }
@@ -317,6 +368,7 @@ export default defineComponent({
             settings_dropdown.value = false;
             assets_dropdown.value  = false;
             appraisal_dropdown.value  = false;
+            disciplinary_dropdown.value  = false;
             dropdown.value = true;
             attendance_dropdown.value  = !attendance_dropdown.value ;
         }
@@ -327,6 +379,7 @@ export default defineComponent({
             settings_dropdown.value = false;
             attendance_dropdown.value = false;
             appraisal_dropdown.value  = false;
+            disciplinary_dropdown.value  = false;
             dropdown.value = true;
             assets_dropdown.value  = !assets_dropdown.value ;
         }
@@ -337,9 +390,21 @@ export default defineComponent({
             settings_dropdown.value = false;
             attendance_dropdown.value = false;
             assets_dropdown.value  = false;
+            disciplinary_dropdown.value  = false;
             dropdown.value = true;
             appraisal_dropdown.value  = !appraisal_dropdown.value ;
-        }
+        };
+        const showDisciplinaryDropdown = () =>{
+            leave_dropdown.value = false;
+            payroll_dropdown.value  = false;
+            employees_dropdown.value  = false;
+            settings_dropdown.value = false;
+            attendance_dropdown.value = false;
+            assets_dropdown.value  = false;
+            appraisal_dropdown.value = false;
+            dropdown.value = true;
+            disciplinary_dropdown.value  = !disciplinary_dropdown.value ;
+        };
         const closeDropdown = () =>{
             leave_dropdown.value = false;
             payroll_dropdown.value  = false;
@@ -349,6 +414,7 @@ export default defineComponent({
             assets_dropdown.value  = false;
             dropdown.value = false;
             appraisal_dropdown.value  = false;
+            disciplinary_dropdown.value  = false;
         }
         const openPage = (pageName) =>{
             closeDropdown();
@@ -360,8 +426,8 @@ export default defineComponent({
         };
         return{
             dropdown, settings_dropdown, leave_dropdown, payroll_dropdown, attendance_dropdown,employees_dropdown, assets_dropdown, appraisal_dropdown,
-            user_profile,userDetails, closeDropdown,showPayrollDropdown, showLeaveDropdown,showEmployeesDropdown, showAttendanceDropdown,
-            showSettingsDropdown, showAssetsDropdown, showAppraisalDropdown,openPage,showHomePage
+            disciplinary_dropdown,user_profile,userDetails, closeDropdown,showPayrollDropdown, showLeaveDropdown,showEmployeesDropdown, showAttendanceDropdown,
+            showDisciplinaryDropdown,showSettingsDropdown, showAssetsDropdown, showAppraisalDropdown,openPage,showHomePage
         }
     },
 

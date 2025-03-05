@@ -45,7 +45,7 @@ import { useStore } from "vuex";
 import { useToast } from "vue-toastification";
 
 export default{
-    name: 'Appraisal_Categories',
+    name: 'Disciplinary_Categories',
     components:{
         PageComponent,MovableModal,DynamicForm
     },
@@ -56,9 +56,9 @@ export default{
         const modal_loader = ref('none');
         const title = ref('Category Details');
         const addButtonLabel = ref('New Category');
-        const addingRight = ref('Adding Appraisal Categories');
+        const addingRight = ref('Adding Disciplinary Categories');
         const rightsModule = ref('HR');
-        const idField = 'appraisal_category_id';
+        const idField = 'disciplinary_category_id';
         const depModalVisible = ref(false);
         const selectedIds = ref([]);
         const categoryList = ref([]);
@@ -76,26 +76,21 @@ export default{
         const modal_top = ref('200px');
         const modal_left = ref('400px');
         const modal_width = ref('30vw');
-        const isEditing = computed(()=> store.state.Appraisal_Categories.isEditing)
-        const selectedCategory = computed(()=> store.state.Appraisal_Categories.selectedCategory);
+        const isEditing = computed(()=> store.state.Disciplinary_Categories.isEditing)
+        const selectedCategory = computed(()=> store.state.Disciplinary_Categories.selectedCategory);
         const tableColumns = ref([
             {type: "checkbox"},
             {label: "Name", key: "category_name", type: "text", editable: false},
-            {label: "Method", key: "appraisal_method", type: "text", editable: false},
+            {label: "Description", key: "description", type: "text", editable: false},
         ])
         const actions = ref([
-            {name: 'edit', icon: 'fa fa-edit', title: 'Edit Category', rightName: 'Editing Appraisal Categories'},
-            {name: 'delete', icon: 'fa fa-trash', title: 'Delete Category', rightName: 'Deleting Appraisal Categories'},
+            {name: 'edit', icon: 'fa fa-edit', title: 'Edit Category', rightName: 'Editing Disciplinary Categories'},
+            {name: 'delete', icon: 'fa fa-trash', title: 'Delete Category', rightName: 'Deleting Disciplinary Categories'},
         ])
         const companyID = computed(()=> store.state.userData.company_id);
         const name_search = ref("");
-        const method_search = ref("");
         const searchFilters = ref([
             {type:'text', placeholder:"Search Name...", value: name_search},
-            {
-                type:'dropdown', placeholder:"Appraisal Method..", value: method_search, width:40,
-                options: [{text:'Supervisor Only',value:'Supervisor Only'},{text:'Employee & Supervisor',value:'Employee & Supervisor'}]
-            },
         ]);
         const handleSelectionChange = (ids) => {
             selectedIds.value = ids;
@@ -104,7 +99,7 @@ export default{
         const updateFormFields = (category) => {
             formFields.value = [
                 { type: 'text', name: 'name',label: "Name", value: category?.category_name || '', required: true },
-                { type: 'dropdown', name: 'appraisal_method',label: "Appraisal Method", value: category?.appraisal_method || '', placeholder: "", required: true, options: [{ text: 'Supervisor Only', value: 'Supervisor Only' }, { text: 'Employee & Supervisor', value: 'Employee & Supervisor' }] },
+                { type: 'text-area', name: 'description',label: "Description", value: category?.description || '', required: false,textarea_rows: '2', textarea_cols: '56'},
 
             ];
         };
@@ -114,7 +109,7 @@ export default{
         const addNewCategory = () =>{
             depModalVisible.value = true;
             handleReset();
-            store.dispatch("Appraisal_Categories/updateState",{isEditing:false})
+            store.dispatch("Disciplinary_Categories/updateState",{isEditing:false})
             flex_basis.value = '1/2';
             flex_basis_percentage.value = '50';
         }
@@ -123,9 +118,9 @@ export default{
                 const categoryID = row[idField];
                 let formData = {
                     company: companyID.value,
-                    appraisal_category: categoryID
+                    disciplinary_category: categoryID
                 }
-                await store.dispatch('Appraisal_Categories/fetchAppraisalCategory',formData).
+                await store.dispatch('Disciplinary_Categories/fetchDisciplinaryCategory',formData).
                 then(()=>{
                     depModalVisible.value = true;
                     flex_basis.value = '1/2';
@@ -136,9 +131,9 @@ export default{
                 const categoryID = [row[idField]];
                 let formData = {
                     company: companyID.value,
-                    appraisal_category: categoryID
+                    disciplinary_category: categoryID
                 }
-                await store.dispatch('Appraisal_Categories/deleteAppraisalCategory',formData).
+                await store.dispatch('Disciplinary_Categories/deleteDisciplinaryCategory',formData).
                 then(()=>{
                     searchCategories();
                 })
@@ -159,7 +154,7 @@ export default{
             showModalLoader();
             let formData = {
                 category_name: formFields.value[0].value,
-                appraisal_method: formFields.value[1].value,
+                description: formFields.value[1].value,
                 company: companyID.value
             }
             errors.value = [];
@@ -173,7 +168,7 @@ export default{
                 hideModalLoader();
             }else{
                 try {
-                    const response = await store.dispatch('Appraisal_Categories/createAppraisalCategory', formData);
+                    const response = await store.dispatch('Disciplinary_Categories/createDisciplinaryCategory', formData);
                     if(response && response.status === 201) {
                         hideModalLoader();
                         toast.success('Category created successfully!');
@@ -196,9 +191,9 @@ export default{
             errors.value = [];
             let formData = {
                 category_name: formFields.value[0].value,
-                appraisal_method: formFields.value[1].value,
+                description: formFields.value[1].value,
                 company: companyID.value,
-                appraisal_category: selectedCategory.value.appraisal_category_id
+                disciplinary_category: selectedCategory.value.disciplinary_category_id
             }
             for(let i=0; i < formFields.value.length; i++){
                 if(formFields.value[i].value =='' && formFields.value[i].required == true){
@@ -209,7 +204,7 @@ export default{
                     toast.error('Fill In Required Fields');
             }else{
                 try {
-                    const response = await store.dispatch('Appraisal_Categories/updateAppraisalCategory', formData);
+                    const response = await store.dispatch('Disciplinary_Categories/updateDisciplinaryCategory', formData);
                     if (response && response.status === 200) {
                         hideModalLoader();
                         toast.success("Category updated successfully!");
@@ -237,10 +232,10 @@ export default{
             if(selectedIds.value.length == 1){
                 let formData = {
                     company: companyID.value,
-                    appraisal_category: selectedIds.value,
+                    disciplinary_category: selectedIds.value,
                 }
                 try{
-                    const response = await store.dispatch('Appraisal_Categories/deleteAppraisalCategory',formData)
+                    const response = await store.dispatch('Disciplinary_Categories/deleteDisciplinaryCategory',formData)
                     if(response && response.status == 200){
                         toast.success("Category Removed Succesfully");
                         searchCategories();
@@ -263,10 +258,10 @@ export default{
             if(selectedIds.value.length){
                 let formData = {
                     company: companyID.value,
-                    appraisal_category: selectedIds.value,
+                    disciplinary_category: selectedIds.value,
                 }
                 try{
-                    const response = await store.dispatch('Appraisal_Categories/deleteAppraisalCategory',formData)
+                    const response = await store.dispatch('Disciplinary_Categories/deleteDisciplinaryCategory',formData)
                     if(response && response.status == 200){
                         toast.success("Category(s) Removed Succesfully");
                         searchCategories();
@@ -299,10 +294,10 @@ export default{
                 company_id: companyID.value
             }
             axios
-            .post(`api/v1/appraisal-categories-search/?page=${currentPage.value}`,formData)
+            .post(`api/v1/disciplinary-categories-search/?page=${currentPage.value}`,formData)
             .then((response)=>{
                 categoryList.value = response.data.results;
-                store.commit('Appraisal_Categories/LIST_APPRAISAL_CATEGORIES', categoryList.value)
+                store.commit('Disciplinary_Categories/LIST_DISCIPLINARY_CATEGORIES', categoryList.value)
                 depResults.value = response.data;
                 depArrLen.value = categoryList.value.length;
                 depCount.value = depResults.value.count;
