@@ -3,20 +3,22 @@
         <PageComponent 
             :loader="loader" @showLoader="showLoader" @hideLoader="hideLoader"
             :addButtonLabel="addButtonLabel"
-            @handleAddNew="addNewAction"
+            :showAddButton="showAddButton"
+            @handleAddNew="addNewAppeal"
             :searchFilters="searchFilters"
-            @searchPage="searchActions"
+            @searchPage="searchAppeals"
             @resetFilters="resetFilters"
-            @removeItem="removeAction"
-            @removeSelectedItems="removeActions"
+            @removeItem="removeAppeal"
+            @removeSelectedItems="removeAppeals"
             @printList="printCasesList"
             @printExcel="downloadCasesExcel"
             @printCSV="downloadCasesCSV"
             :addingRight="addingRight"
             :rightsModule="rightsModule"
             :columns="tableColumns"
-            :rows="actionsList"
+            :rows="appealsList"
             :actions="actions"
+            :showActions="showActions"
             :idField="idField"
             @handleSelectionChange="handleSelectionChange"
             @handleActionClick="handleActionClick"
@@ -36,7 +38,7 @@
             :loader="modal_loader" @showLoader="showModalLoader" @hideLoader="hideModalLoader" @closeModal="closeModal">
             <DynamicForm 
                 :fields="formFields" :flex_basis="flex_basis" :flex_basis_percentage="flex_basis_percentage" 
-                :displayButtons="displayButtons" @handleSubmit="saveAction" @handleReset="handleReset"
+                :displayButtons="displayButtons" @handleSubmit="saveAppeal" @handleReset="handleReset"
             />
         </MovableModal>
     </div>
@@ -53,7 +55,7 @@ import { useToast } from "vue-toastification";
 import PrintJS from 'print-js';
 
 export default{
-    name: 'Disciplinary_Actions',
+    name: 'Disciplinary_Appeals',
     components:{
         PageComponent, MovableModal,DynamicForm
     },
@@ -64,14 +66,16 @@ export default{
         const modal_loader = ref('none');
         const emplComponentKey = ref(0);
         const levComponentKey = ref(0);
-        const idField = 'disciplinary_action_id';
-        const addButtonLabel = ref('New Disciplinary Action');
-        const addingRight = ref('Adding Disciplinary Actions');
+        const idField = 'disciplinary_appeal_id';
+        const addButtonLabel = ref('New Disciplinary Appeal');
+        const addingRight = ref('Adding Disciplinary Appeals');
         const rightsModule = ref('HR');
-        const title = ref('Disciplinary Action Details');
+        const showAddButton = ref(false);
+        const showActions = ref(false);
+        const title = ref('Disciplinary Appeal Details');
         const submitButtonLabel = ref('Add');
         const selectedIds = ref([]);
-        const actionsList = ref([]);
+        const appealsList = ref([]);
         const propResults = ref([]);
         const propArrLen = ref(0);
         const propCount = ref(0);
@@ -89,26 +93,27 @@ export default{
         const modal_left = ref('500px');
         const modal_width = ref('30vw');
         const caseID = ref('');
-        const isEditing = computed(()=> store.state.Disciplinary_Actions.isEditing);
-        const selectedAction = computed(()=> store.state.Disciplinary_Actions.selectedAction);
-        const selectedCase = computed(()=> store.state.Disciplinary_Actions.selectedCase);
+        const isEditing = computed(()=> store.state.Disciplinary_Appeals.isEditing);
+        const selectedAppeal = computed(()=> store.state.Disciplinary_Appeals.selectedAppeal);
+        const selectedCase = computed(()=> store.state.Disciplinary_Appeals.selectedCase);
         const casesArray = computed(() => store.state.Disciplinary_Cases.caseArr);
         const showModal = ref(false);
         const tableColumns = ref([
             {type: "checkbox"},
-            {label: "Date", key: "action_date"},
+            {label: "Date", key: "appeal_date"},
             {label: "Case#", key: "case_number"},
             {label: "Staff No", key: "staff_number"},
             {label: "Employee Name", key: "employee_name"},
-            {label: "Action", key:"action_taken", maxWidth: "500px"},
-            {label: "Description", key:"action_description", maxWidth: "500px"},
-            
+            {label: "Reason", key:"appeal_reason", maxWidth: "500px"},
+            {label: "Decision", key:"decision", maxWidth: "500px"},
+                   
         ])
         const actions = ref([
-            {name: 'edit', icon: 'fa fa-edit', title: 'Edit Action', rightName: 'Editing Disciplinary Actions'},
-            {name: 'delete', icon: 'fa fa-trash', title: 'Delete Action', rightName: 'Deleting Disciplinary Actions'},
+            {name: 'edit', icon: 'fa fa-edit', title: 'Edit Appeal', rightName: 'Editing Disciplinary Appeals'},
+            {name: 'delete', icon: 'fa fa-trash', title: 'Delete Appeal', rightName: 'Deleting Disciplinary Appeals'},
         ])
         const companyID = computed(()=> store.state.userData.company_id);
+        const userID = computed(()=> store.state.userData.user_id);
         const employee_name_search = ref('');
         const staff_number_search = ref('');
         const date_from_search = ref('');
@@ -116,8 +121,6 @@ export default{
         const case_number_search = ref('');
         const searchFilters = ref([
             {type:'text', placeholder:"Case No...", value: case_number_search, width:32,},
-            {type:'text', placeholder:"Staff No...", value: staff_number_search, width:32,},
-            {type:'text', placeholder:"Employee Name...", value: employee_name_search, width:64,},
             {type:'date',value: date_from_search, width:32, title: "Date From"},
             {type:'date',value: date_to_search, width:32, title: "Date To"},
         ]);
@@ -135,7 +138,7 @@ export default{
         const formFields = ref([]);
 
         const caseValue = computed(() => {
-           return (selectedAction.value && selectedAction.value.disciplinary_case && !caseID.value) ? selectedAction.value.disciplinary_case.disciplinary_case_id : caseID.value;
+           return (selectedAppeal.value && selectedAppeal.value.disciplinary_case && !caseID.value) ? selectedAppeal.value.disciplinary_case.disciplinary_case_id : caseID.value;
 
         });
         const updateFormFields = () => {
@@ -147,10 +150,9 @@ export default{
                     fetchData: store.dispatch('Disciplinary_Cases/fetchDisciplinaryCases', {company:companyID.value}),
                     clearSearch: clearSelectedCase
                 },
-                { type: 'date', name: 'action_date',label: "Date", value: selectedAction.value?.action_date || '', required: true },
-                { type: 'dropdown', name: 'action_taken',label: "Action Taken", value: selectedAction.value?.action_taken || '', placeholder: "", required: true, options: [{ text: 'Verbal Warning', value: 'Verbal Warning' }, { text: 'Written Warning', value: 'Written Warning' }, { text: 'Suspension', value: 'Suspension' },{ text: 'Termination', value: 'Termination' },
-                                                                                                                                                                                 { text: 'Probation', value: 'Probation' }, { text: 'Demotion', value: 'Demotion' }, { text: 'Reprimand', value: 'Reprimand' }, { text: 'Other', value: 'Other' }] },
-                {type:'text-area', label:"Description", value: selectedAction.value?.action_description || '', textarea_rows: '4', textarea_cols: '56', required: true},
+                { type: 'date', name: 'appeal_date',label: "Date", value: selectedAppeal.value?.appeal_date || '', required: true },
+                { type: 'dropdown', name: 'decision',label: "Decision", value: selectedAppeal.value?.decision || 'Pending', placeholder: "", required: true, options: [{ text: 'Pending', value: 'Pending' }, { text: 'Accepted', value: 'Accepted' }, { text: 'Rejected', value: 'Rejected' }] },
+                {type:'text-area', label:"Appeal Reason", value: selectedAppeal.value?.appeal_reason || '', textarea_rows: '4', textarea_cols: '56', required: true},
 
             ];
         };
@@ -163,8 +165,8 @@ export default{
         }
 
 
-        watch([selectedAction, selectedCase], () => {
-            if (selectedAction.value && selectedCase.value) {
+        watch([selectedAppeal, selectedCase], () => {
+            if (selectedAppeal.value && selectedCase.value) {
                 levComponentKey.value += 1;
                 updateFormFields();
             }
@@ -178,14 +180,14 @@ export default{
         const hideModalLoader = () =>{
             modal_loader.value = "none";
         }
-        const createDisciplinaryAction = async() =>{
+        const createDisciplinaryAppeal = async() =>{
             showModalLoader();
             let formData = {
-                action_date: formFields.value[1].value,
+                appeal_date: formFields.value[1].value,
                 disciplinary_case: caseID.value,
                 disciplinary_case_id: caseID.value,
-                action_taken: formFields.value[2].value,
-                action_description: formFields.value[3].value,
+                decision: formFields.value[2].value,
+                appeal_reason: formFields.value[3].value,
                 company: companyID.value
             }
   
@@ -204,36 +206,35 @@ export default{
                 hideModalLoader();
             }else{
                 try {
-                    const response = await store.dispatch('Disciplinary_Actions/createDisciplinaryAction', formData);
+                    const response = await store.dispatch('Disciplinary_Appeals/createDisciplinaryAppeal', formData);
                     if (response && response.status === 201) {
                         hideModalLoader();
-                        toast.success('Disciplinary Action created successfully!');
+                        toast.success('Disciplinary Appeal created successfully!');
                         handleReset();
-                        emplComponentKey.value += 1;
                         levComponentKey.value += 1;
                     }
                     else {
-                        toast.error('An error occurred while creating the Disciplinary Action.');
+                        toast.error('An error occurred while creating the Disciplinary Appeal.');
                     }
                 } catch (error) {
                     console.error(error.message);
-                    toast.error('Failed to create Disciplinary Action: ' + error.message);
+                    toast.error('Failed to create Disciplinary Appeal: ' + error.message);
                 } finally {
                     hideModalLoader();
-                    searchActions();
+                    searchAppeals();
                 }
             }
         }
-        const updateDisciplinaryAction = async() =>{
+        const updateDisciplinaryAppeal = async() =>{
             showModalLoader();
             errors.value = [];
             let formData = {
-                disciplinary_action: selectedAction.value.disciplinary_action_id,
-                action_date: formFields.value[1].value,
+                disciplinary_appeal: selectedAppeal.value.disciplinary_appeal_id,
+                appeal_date: formFields.value[1].value,
                 disciplinary_case: caseValue.value,
                 disciplinary_case_id: caseValue.value,
-                action_taken: formFields.value[2].value,
-                action_description: formFields.value[3].value,
+                decision: formFields.value[2].value,
+                appeal_reason: formFields.value[3].value,
                 company: companyID.value
             }
 
@@ -250,83 +251,38 @@ export default{
                 hideModalLoader();
             }else{
                 try {
-                    const response = await store.dispatch('Disciplinary_Actions/updateDisciplinaryAction', formData);
+                    const response = await store.dispatch('Disciplinary_Appeals/updateDisciplinaryAppeal', formData);
                     if (response && response.status === 200) {
                         hideModalLoader();
                         handleReset();
                         emplComponentKey.value += 1;
-                        toast.success("Disciplinary Action updated successfully!");              
+                        toast.success("Disciplinary Appeal updated successfully!");              
                     } else {
-                        toast.error('An error occurred while updating the Disciplinary Action.');
+                        toast.error('An error occurred while updating the Disciplinary Appeal.');
                     }
                 } catch (error) {
                     console.error(error.message);
-                    toast.error('Failed to update Disciplinary Action: ' + error.message);
+                    toast.error('Failed to update Disciplinary Appeal: ' + error.message);
                 } finally {
                     hideModalLoader();
                     propModalVisible.value = false;
-                    store.dispatch("Disciplinary_Action/updateState",{selectedAction:null})
-                    searchActions();
+                    store.dispatch("Disciplinary_Appeals/updateState",{selectedAppeal:null})
+                    searchAppeals();
                 }             
             }
         }
-        const saveAction = () =>{
+        const saveAppeal = () =>{
             if(isEditing.value == true){
-                updateDisciplinaryAction();
+                updateDisciplinaryAppeal();
             }else{
-                createDisciplinaryAction();
+                createDisciplinaryAppeal();
             }
         }
-        const removeAction = async() =>{
-            if(selectedIds.value.length == 1){
-                let formData = {
-                    company: companyID.value,
-                    disciplinary_action: selectedIds.value
-                }
-                try{
-                    const response = await store.dispatch('Disciplinary_Actions/deleteDisciplinaryAction',formData)
-                    if(response && response.status == 200){
-                        toast.success("Disciplinary Action Removed Succesfully");
-                        searchActions();
-                    }
-                }
-                catch(error){
-                    console.error(error.message);
-                    toast.error('Failed to remove Disciplinary Action: ' + error.message);
-                }
-                finally{
-                    selectedIds.value = [];
-                }
-            }else if(selectedIds.value.length > 1){
-                toast.error("You have selected more than 1 Disciplinary Action") 
-            }else{
-                toast.error("Please Select A Disciplinary Action To Remove")
-            }
-        }
-        const removeActions = async() =>{
-            if(selectedIds.value.length){
-                let formData = {
-                    company: companyID.value,
-                    disciplinary_action: selectedIds.value
-                }
-                try{
-                    const response = await store.dispatch('Disciplinary_Actions/deleteDisciplinaryAction',formData)
-                    if(response && response.status == 200){
-                        toast.success("Disciplinary Action(s) Removed Succesfully");
-                        searchActions();
-                    }
-                }
-                catch(error){
-                    console.error(error.message);
-                    toast.error('Failed to remove Disciplinary Action: ' + error.message);
-                }
-                finally{
-                    selectedIds.value = [];
+        const removeAppeal = async() =>{
 
-                }
-            }else{
-                toast.error("Please Select A Disciplinary Action To Remove")
-            }
+        }
+        const removeAppeals = async() =>{
+
         }
         const showLoader = () =>{
             loader.value = "block";
@@ -334,7 +290,7 @@ export default{
         const hideLoader = () =>{
             loader.value = "none";
         }
-        const searchActions = () =>{
+        const searchAppeals = () =>{
             showLoader();
             showNextBtn.value = false;
             showPreviousBtn.value = false;
@@ -344,17 +300,17 @@ export default{
                 date_from: date_from_search.value,
                 date_to: date_to_search.value,
                 case_number: case_number_search.value,
-                user: "",
+                user: userID.value,
                 company_id: companyID.value,
                 page_size: selectedValue.value
             } 
             axios
-            .post(`api/v1/disciplinary-actions-search/?page=${currentPage.value}`,formData)
+            .post(`api/v1/disciplinary-appeals-search/?page=${currentPage.value}`,formData)
             .then((response)=>{
-                actionsList.value = response.data.results;
-                store.commit('Disciplinary_Actions/LIST_ACTIONS', actionsList.value)
+                appealsList.value = response.data.results;
+                store.commit('Disciplinary_Appeals/LIST_APPEALS', appealsList.value)
                 propResults.value = response.data;
-                propArrLen.value = actionsList.value.length;
+                propArrLen.value = appealsList.value.length;
                 propCount.value = propResults.value.count;
                 pageCount.value = Math.ceil(propCount.value / selectedValue.value);
                 if(response.data.next){
@@ -373,7 +329,7 @@ export default{
         };
         const selectSearchQuantity = (newValue) =>{
             selectedValue.value = newValue;
-            searchActions(selectedValue.value);
+            searchAppeals(selectedValue.value);
         };
         const resetFilters = () =>{
             currentPage.value = 1;
@@ -383,7 +339,7 @@ export default{
             date_from_search.value = "";
             date_to_search.value = "";
             case_number_search.value = "";
-            searchActions();
+            searchAppeals();
         }
         const loadPrev = () =>{
             if (currentPage.value <= 1){
@@ -392,7 +348,7 @@ export default{
                 currentPage.value -= 1;
             }
             
-            searchActions();
+            searchAppeals();
             // scrollToTop();
         }
         const loadNext = () =>{
@@ -402,38 +358,38 @@ export default{
                 currentPage.value += 1;
             }
             
-            searchActions();
+            searchAppeals();
             // scrollToTop(); 
         }
         const firstPage = ()=>{
             currentPage.value = 1;
-            searchActions();
+            searchAppeals();
             // scrollToTop();
         }
         const lastPage = () =>{
             currentPage.value = pageCount.value;
-            searchActions();
+            searchAppeals();
             // scrollToTop();
         }
-        const addNewAction = () =>{
-            store.dispatch("Disciplinary_Actions/updateState",{selectedAction:null,selectedCase:null});
+        const addNewAppeal = () =>{
+            store.dispatch("Disciplinary_Appeals/updateState",{selectedAppeal:null,selectedCase:null});
             emplComponentKey.value += 1;
             levComponentKey.value += 1;
             handleReset();
             updateFormFields();
             propModalVisible.value = true;
-            store.dispatch("Disciplinary_Actions/updateState",{isEditing:false})
+            store.dispatch("Disciplinary_Appeals/updateState",{isEditing:false})
             flex_basis.value = '1/3';
             flex_basis_percentage.value = '33.333';
         }
         const handleActionClick = async(rowIndex, action, row) =>{
             if( action == 'edit'){
-                const advanceID = row['disciplinary_action_id'];
+                const advanceID = row['disciplinary_appeal_id'];
                 let formData = {
                     company: companyID.value,
-                    disciplinary_action: advanceID
+                    disciplinary_appeal: advanceID
                 }
-                await store.dispatch('Disciplinary_Actions/fetchDisciplinaryAction',formData)
+                await store.dispatch('Disciplinary_Appeals/fetchDisciplinaryAppeal',formData)
                 propModalVisible.value = true;
                 flex_basis.value = '1/3';
                 flex_basis_percentage.value = '33.333';
@@ -442,11 +398,11 @@ export default{
                 const advanceID = [row[idField]];
                 let formData = {
                     company: companyID.value,
-                    disciplinary_action: advanceID
+                    disciplinary_appeal: advanceID
                 }
-                await store.dispatch('Disciplinary_Actions/deleteDisciplinaryAction',formData).
+                await store.dispatch('Disciplinary_Appeals/deleteDisciplinaryAppeal',formData).
                 then(()=>{
-                    searchActions();
+                    searchAppeals();
                 })
             }else if(action == 'view'){
                 console.log("VIEWING TAKING PLACE");
@@ -532,16 +488,16 @@ export default{
             })
         };
         onBeforeMount(()=>{
-            searchActions();
+            searchAppeals();
             
         })
         return{
-            title, searchActions,resetFilters, addButtonLabel, searchFilters, tableColumns, actionsList,
+            showAddButton,showActions,title, searchAppeals,resetFilters, addButtonLabel, searchFilters, tableColumns, appealsList,
             currentPage,propResults, propArrLen, propCount, pageCount, showNextBtn, showPreviousBtn,
             loadPrev, loadNext, firstPage, lastPage, idField, actions, handleActionClick, propModalVisible, closeModal,
-            submitButtonLabel, showModal, addNewAction, showLoader, loader, hideLoader, modal_loader, modal_top, modal_left, modal_width,displayButtons,
-            showModalLoader, hideModalLoader, saveAction, formFields, handleSelectionChange, flex_basis,flex_basis_percentage,
-            removeAction, removeActions,addingRight,rightsModule,printCasesList,selectSearchQuantity,selectedValue,
+            submitButtonLabel, showModal, addNewAppeal, showLoader, loader, hideLoader, modal_loader, modal_top, modal_left, modal_width,displayButtons,
+            showModalLoader, hideModalLoader, saveAppeal, formFields, handleSelectionChange, flex_basis,flex_basis_percentage,
+            removeAppeal, removeAppeals,addingRight,rightsModule,printCasesList,selectSearchQuantity,selectedValue,
             downloadCasesCSV,downloadCasesExcel
         }
     }

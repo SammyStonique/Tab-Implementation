@@ -3,6 +3,7 @@
         <PageComponent 
             :loader="loader" @showLoader="showLoader" @hideLoader="hideLoader"
             :addButtonLabel="addButtonLabel"
+            :showAddButton="showAddButton"
             @handleAddNew="addNewAllocation"
             :searchFilters="searchFilters"
             :dropdownOptions="dropdownOptions"
@@ -19,6 +20,7 @@
             :columns="tableColumns"
             :rows="allocationsList"
             :actions="actions"
+            :showActions="showActions"
             :idField="idField"
             @handleSelectionChange="handleSelectionChange"
             @handleActionClick="handleActionClick"
@@ -83,6 +85,8 @@ export default{
         const addButtonLabel = ref('New Leave Allocation');
         const addingRight = ref('Adding Leave Allocations');
         const rightsModule = ref('HR');
+        const showAddButton = ref(false);
+        const showActions = ref(false);
         const title = ref('Leave Allocation Details');
         const allocTitle = ref('Auto Generate Allocations');
         const submitButtonLabel = ref('Add');
@@ -138,6 +142,7 @@ export default{
             {name: 'delete', icon: 'fa fa-trash', title: 'Delete Leave Allocations', rightName: 'Deleting Leave Allocations'},
         ])
         const companyID = computed(()=> store.state.userData.company_id);
+        const userID = computed(()=> store.state.userData.user_id);
         const employee_name_search = ref('');
         const staff_number_search = ref('');
         const year_search = ref('');
@@ -155,8 +160,6 @@ export default{
             leaveSearchID.value = store.state.Leave_Types.leaveID;
         };
         const searchFilters = ref([
-            {type:'text', placeholder:"Staff No...", value: staff_number_search, width:32,},
-            {type:'text', placeholder:"Employee Name...", value: employee_name_search, width:64,},
             {type:'text', placeholder:"Year...", value: getYear(current_date), width:32,},
             {  
                 type:'search-dropdown', value: leave_array, componentKey: levSearchComponentKey,
@@ -380,58 +383,10 @@ export default{
             }
         }
         const removeAllocation = async() =>{
-            if(selectedIds.value.length == 1){
-                let formData = {
-                    company: companyID.value,
-                    leave_balance: selectedIds.value
-                }
-                try{
-                    const response = await store.dispatch('Leave_Allocations/deleteLeaveAllocation',formData)
-                    if(response && response.data.msg == "Success"){
-                        toast.success("Leave Allocation(s) Removed Succesfully");                       
-                    }else if(response && response.data.msg == "Failed"){
-                        toast.error("Allocation Already Used in Leave Application")
-                    }
-                }
-                catch(error){
-                    console.error(error.message);
-                    toast.error('Failed to remove Leave Allocation: ' + error.message);
-                }
-                finally{
-                    selectedIds.value = [];
-                    searchAllocations();
-                }
-            }else if(selectedIds.value.length > 1){
-                toast.error("You have selected more than 1 Leave Allocation") 
-            }else{
-                toast.error("Please Select A Leave Allocation To Remove")
-            }
+
         }
         const removeAllocations = async() =>{
-            if(selectedIds.value.length){
-                let formData = {
-                    company: companyID.value,
-                    leave_balance: selectedIds.value
-                }
-                try{
-                    const response = await store.dispatch('Leave_Allocations/deleteLeaveAllocation',formData)
-                    if(response && response.data.msg == "Success"){
-                        toast.success("Leave Allocation(s) Removed Succesfully");                       
-                    }else if(response && response.data.msg == "Failed"){
-                        toast.error("Allocation Already Used in Leave Application")
-                    }
-                }
-                catch(error){
-                    console.error(error.message);
-                    toast.error('Failed to remove Leave Allocation: ' + error.message);
-                }
-                finally{
-                    selectedIds.value = [];
-                    searchAllocations();
-                }
-            }else{
-                toast.error("Please Select A Leave Allocation To Remove")
-            }
+
         }
         const showLoader = () =>{
             loader.value = "block";
@@ -446,9 +401,9 @@ export default{
             let formData = {
                 employee_name: employee_name_search.value,
                 staff_number: staff_number_search.value,
-                user: "",
+                user: userID.value,
                 company_id: companyID.value,
-                year: searchFilters.value[2].value,
+                year: searchFilters.value[0].value,
                 leave_type: leaveSearchID.value,
                 page_size: selectedValue.value
             } 
@@ -677,7 +632,7 @@ export default{
             
         })
         return{
-            title, searchAllocations,resetFilters, addButtonLabel, searchFilters, tableColumns, allocationsList,
+            showAddButton,showActions,title, searchAllocations,resetFilters, addButtonLabel, searchFilters, tableColumns, allocationsList,
             currentPage,propResults, propArrLen, propCount, pageCount, showNextBtn, showPreviousBtn,dropdownOptions,handleDynamicOption,
             loadPrev, loadNext, firstPage, lastPage, idField, actions, handleActionClick, propModalVisible, closeModal,
             submitButtonLabel, showModal, addNewAllocation, showLoader, loader, hideLoader, modal_loader, modal_top, modal_left, modal_width,displayButtons,

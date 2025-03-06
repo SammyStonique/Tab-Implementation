@@ -2,6 +2,7 @@
     <PageComponent 
         :loader="loader" @showLoader="showLoader" @hideLoader="hideLoader"
         :addButtonLabel="addButtonLabel"
+        :showAddButton="showAddButton"
         @handleAddNew="addNewDisbursement"
         :searchFilters="searchFilters"
         @searchPage="searchDisbursements"
@@ -13,6 +14,7 @@
         :columns="tableColumns"
         :rows="disbursementsList"
         :actions="actions"
+        :showActions="showActions"
         :idField="idField"
         @handleSelectionChange="handleSelectionChange"
         @handleActionClick="handleActionClick"
@@ -65,6 +67,8 @@ export default{
         const addButtonLabel = ref('New Disbursement');
         const addingRight = ref('Adding Employee Loan Disbursements');
         const rightsModule = ref('HR');
+        const showAddButton = ref(false);
+        const showActions = ref(false);
         const idField = 'employee_loan_disbursement_id';
         const depModalVisible = ref(false);
         const selectedIds = ref([]);
@@ -116,8 +120,6 @@ export default{
         const searchFilters = ref([
             {type:'text', placeholder:"P.V No...", value: journal_number_search, width:36,},
             {type:'text', placeholder:"Loan No...", value: loan_number_search, width:36,},
-            {type:'text', placeholder:"Staff No...", value: staff_number_search, width:36,},
-            {type:'text', placeholder:"Employee Name...", value: name_search, width:48,},
         ]);
         const handleSelectionChange = (ids) => {
             selectedIds.value = ids;
@@ -269,54 +271,10 @@ export default{
         
         };
         const removeDisbursement = async() =>{
-            if(selectedIds.value.length == 1){
-                let formData = {
-                    company: companyID.value,
-                    loan_disbursement: selectedIds.value,
-                }
-                try{
-                    const response = await store.dispatch('Employee_Loan_Disbursements/deleteLoanDisbursement',formData)
-                    if(response && response.status == 200){
-                        toast.success("Disbursement Removed Succesfully");
-                        searchDisbursements();
-                    }
-                }
-                catch(error){
-                    console.error(error.message);
-                    toast.error('Failed to remove Disbursement: ' + error.message);
-                }
-                finally{
-                    selectedIds.value = [];
-                }
-            }else if(selectedIds.value.length > 1){
-                toast.error("You have selected more than 1 Disbursement") 
-            }else{
-                toast.error("Please Select A Disbursement To Remove")
-            }
+
         }
         const removeDisbursements = async() =>{
-            if(selectedIds.value.length){
-                let formData = {
-                    company: companyID.value,
-                    loan_disbursement: selectedIds.value,
-                }
-                try{
-                    const response = await store.dispatch('Employee_Loan_Disbursements/deleteLoanDisbursement',formData)
-                    if(response && response.status == 200){
-                        toast.success("Disbursement(s) Removed Succesfully");
-                        searchDisbursements();
-                    }
-                }
-                catch(error){
-                    console.error(error.message);
-                    toast.error('Failed to remove Disbursement(s): ' + error.message);
-                }
-                finally{
-                    selectedIds.value = [];
-                }
-            }else{
-                toast.error("Please Select A Disbursement To Remove")
-            }
+
         }
         const showLoader = () =>{
             loader.value = "block";
@@ -333,7 +291,7 @@ export default{
                 journal_no: journal_number_search.value,
                 employee_name: name_search.value,
                 staff_number: staff_number_search.value,
-                user: "",
+                user: userID.value,
                 company_id: companyID.value,
                 page_size: selectedValue.value
             }
@@ -408,7 +366,7 @@ export default{
             searchDisbursements();
         })
         return{
-            title,idField, searchDisbursements, addButtonLabel, searchFilters, resetFilters, tableColumns, disbursementsList,
+            showAddButton,showActions,title,idField, searchDisbursements, addButtonLabel, searchFilters, resetFilters, tableColumns, disbursementsList,
             currentPage,depResults, depArrLen, depCount, pageCount, showNextBtn, showPreviousBtn,modal_top, modal_left, modal_width,
             loadPrev, loadNext, firstPage, lastPage, actions, formFields, depModalVisible, addNewDisbursement,
             displayButtons,flex_basis,flex_basis_percentage, handleActionClick, handleReset, disburseMemberLoan,

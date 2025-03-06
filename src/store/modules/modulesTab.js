@@ -77,6 +77,16 @@ const state = {
             state.modulePage = false;
             state.selectedModule = '';
           }
+        }else if(key == 'EPS'){
+          state.tabArray.delete(value);
+          let myArray = Array.from(state.tabArray);
+          if(myArray.length >= 1){
+            state.selectedModule = myArray[myArray.length - 1];
+          }else if(myArray.length < 1){
+            state.homePage = true;
+            state.modulePage = false;
+            state.selectedModule = '';
+          }
         }else if(key == 'MMS'){
           state.tabArray.delete(value);
           let myArray = Array.from(state.tabArray);

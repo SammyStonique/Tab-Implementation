@@ -25,6 +25,9 @@
     <div v-show="hmsOpen && selectedModule === 'Hotel Management'">
         <HHS />
     </div>
+    <div v-show="hmsOpen && selectedModule === 'Employee Portal'">
+        <EPS />
+    </div>
     <div v-show="hmsOpen && selectedModule === 'Settings'">
         <SET />
     </div>
@@ -83,11 +86,12 @@ import HR from '@/components/HR/Main.vue';
 import SET from '@/components/SET/Main.vue';
 import HHS from '@/components/HHS/Main.vue';
 import MMS from '@/components/MMS/Main.vue';
+import EPS from '@/components/EPS/Main.vue';
 import Loader from '@/components/Loader.vue';
 
 export default {
     components: {
-        ModulesTab, Loader, HMS, FA, INV, PMS, HR, HHS, MMS, SET
+        ModulesTab, Loader, HMS, FA, INV, PMS, HR, HHS, MMS, SET, EPS
     },
     setup() {
         const store = useStore();

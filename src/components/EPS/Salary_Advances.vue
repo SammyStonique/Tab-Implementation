@@ -3,20 +3,22 @@
         <PageComponent 
             :loader="loader" @showLoader="showLoader" @hideLoader="hideLoader"
             :addButtonLabel="addButtonLabel"
-            @handleAddNew="addNewAction"
+            :showAddButton="showAddButton"
+            @handleAddNew="addNewAdvance"
             :searchFilters="searchFilters"
-            @searchPage="searchActions"
+            @searchPage="searchAdvances"
             @resetFilters="resetFilters"
-            @removeItem="removeAction"
-            @removeSelectedItems="removeActions"
-            @printList="printCasesList"
-            @printExcel="downloadCasesExcel"
-            @printCSV="downloadCasesCSV"
+            @removeItem="removeAdvance"
+            @removeSelectedItems="removeAdvances"
+            @printList="printAdvancesList"
+            @printExcel="downloadAdvancesExcel"
+            @printCSV="downloadAdvancesCSV"
             :addingRight="addingRight"
             :rightsModule="rightsModule"
             :columns="tableColumns"
-            :rows="actionsList"
+            :rows="advancesList"
             :actions="actions"
+            :showActions="showActions"
             :idField="idField"
             @handleSelectionChange="handleSelectionChange"
             @handleActionClick="handleActionClick"
@@ -36,7 +38,7 @@
             :loader="modal_loader" @showLoader="showModalLoader" @hideLoader="hideModalLoader" @closeModal="closeModal">
             <DynamicForm 
                 :fields="formFields" :flex_basis="flex_basis" :flex_basis_percentage="flex_basis_percentage" 
-                :displayButtons="displayButtons" @handleSubmit="saveAction" @handleReset="handleReset"
+                :displayButtons="displayButtons" @handleSubmit="saveAdvance" @handleReset="handleReset"
             />
         </MovableModal>
     </div>
@@ -53,7 +55,7 @@ import { useToast } from "vue-toastification";
 import PrintJS from 'print-js';
 
 export default{
-    name: 'Disciplinary_Actions',
+    name: 'Salary_Advances',
     components:{
         PageComponent, MovableModal,DynamicForm
     },
@@ -64,14 +66,16 @@ export default{
         const modal_loader = ref('none');
         const emplComponentKey = ref(0);
         const levComponentKey = ref(0);
-        const idField = 'disciplinary_action_id';
-        const addButtonLabel = ref('New Disciplinary Action');
-        const addingRight = ref('Adding Disciplinary Actions');
+        const idField = 'salary_advance_id';
+        const addButtonLabel = ref('New Salary Advance');
+        const addingRight = ref('Adding Salary Advances');
         const rightsModule = ref('HR');
-        const title = ref('Disciplinary Action Details');
+        const showAddButton = ref(false);
+        const showActions = ref(false);
+        const title = ref('Salary Advance Details');
         const submitButtonLabel = ref('Add');
         const selectedIds = ref([]);
-        const actionsList = ref([]);
+        const advancesList = ref([]);
         const propResults = ref([]);
         const propArrLen = ref(0);
         const propCount = ref(0);
@@ -85,72 +89,75 @@ export default{
         const flex_basis_percentage = ref('');
         const displayButtons = ref(true);
         const errors = ref([]);
-        const modal_top = ref('150px');
+        const modal_top = ref('200px');
         const modal_left = ref('500px');
         const modal_width = ref('30vw');
-        const caseID = ref('');
-        const isEditing = computed(()=> store.state.Disciplinary_Actions.isEditing);
-        const selectedAction = computed(()=> store.state.Disciplinary_Actions.selectedAction);
-        const selectedCase = computed(()=> store.state.Disciplinary_Actions.selectedCase);
-        const casesArray = computed(() => store.state.Disciplinary_Cases.caseArr);
+        const employeeID = ref('');
+        const isEditing = computed(()=> store.state.Salary_Advances.isEditing);
+        const selectedAdvance = computed(()=> store.state.Salary_Advances.selectedAdvance);
+        const selectedEmployee = computed(()=> store.state.Salary_Advances.selectedEmployee);
+        const employeeArray = computed(() => store.state.Employees.employeeArr);
         const showModal = ref(false);
         const tableColumns = ref([
             {type: "checkbox"},
-            {label: "Date", key: "action_date"},
-            {label: "Case#", key: "case_number"},
+            {label: "Date", key: "date"},
             {label: "Staff No", key: "staff_number"},
             {label: "Employee Name", key: "employee_name"},
-            {label: "Action", key:"action_taken", maxWidth: "500px"},
-            {label: "Description", key:"action_description", maxWidth: "500px"},
-            
+            {label: "Month", key:"month"},
+            {label: "Year", key:"year"},
+            {label: "Amount", key:"amount"},
+            {label: "Notes", key:"notes"},
         ])
         const actions = ref([
-            {name: 'edit', icon: 'fa fa-edit', title: 'Edit Action', rightName: 'Editing Disciplinary Actions'},
-            {name: 'delete', icon: 'fa fa-trash', title: 'Delete Action', rightName: 'Deleting Disciplinary Actions'},
+            {name: 'edit', icon: 'fa fa-edit', title: 'Edit Advance', rightName: 'Editing Salary Advances'},
+            {name: 'delete', icon: 'fa fa-trash', title: 'Delete Advance', rightName: 'Deleting Salary Advances'},
         ])
         const companyID = computed(()=> store.state.userData.company_id);
+        const userID = computed(()=> store.state.userData.user_id);
         const employee_name_search = ref('');
         const staff_number_search = ref('');
-        const date_from_search = ref('');
-        const date_to_search = ref('');
-        const case_number_search = ref('');
+        const month_search = ref('');
+        const year_search = ref('');
         const searchFilters = ref([
-            {type:'text', placeholder:"Case No...", value: case_number_search, width:32,},
             {type:'text', placeholder:"Staff No...", value: staff_number_search, width:32,},
             {type:'text', placeholder:"Employee Name...", value: employee_name_search, width:64,},
-            {type:'date',value: date_from_search, width:32, title: "Date From"},
-            {type:'date',value: date_to_search, width:32, title: "Date To"},
+            {
+                type:'dropdown', placeholder:"Month..", value: month_search, width:32,
+                options: [{text:'January',value:'January'},{text:'February',value:'February'},{text:'March',value:'March'},{text:'April',value:'April'},{text:'May',value:'May'},{text:'June',value:'June'},
+                        {text:'July',value:'July'},{text:'August',value:'August'},{text:'September',value:'September'},{text:'October',value:'October'},{text:'November',value:'November'},{text:'December',value:'December'}]
+            },
+            {type:'text', placeholder:"Year...", value: year_search, width:32,},
         ]);
         const handleSelectionChange = (ids) => {
             selectedIds.value = ids;
         };
-        const handleSelectedCase = async(option) =>{
-            await store.dispatch('Disciplinary_Cases/handleSelectedDisciplinaryCase', option)
-            caseID.value = store.state.Disciplinary_Cases.caseID;
+        const handleSelectedEmployee = async(option) =>{
+            await store.dispatch('Employees/handleSelectedEmployee', option)
+            employeeID.value = store.state.Employees.employeeID;
         };
-        const clearSelectedCase = async() =>{
-            await store.dispatch('Disciplinary_Cases/updateState', {caseID: ''});
-            caseID.value = store.state.Disciplinary_Cases.caseID;
+        const clearSelectedEmployee = async() =>{
+            await store.dispatch('Employees/updateState', {employeeID: ''});
+            employeeID.value = store.state.Employees.employeeID;
         };
         const formFields = ref([]);
-
-        const caseValue = computed(() => {
-           return (selectedAction.value && selectedAction.value.disciplinary_case && !caseID.value) ? selectedAction.value.disciplinary_case.disciplinary_case_id : caseID.value;
+        const employeeValue = computed(() => {
+           return (selectedAdvance.value && selectedAdvance.value.employee && !employeeID.value) ? selectedAdvance.value.employee.employee_id : employeeID.value;
 
         });
         const updateFormFields = () => {
             formFields.value = [
                 {  
-                    type:'search-dropdown', label:"Disciplinary Case", value: caseValue.value, componentKey: levComponentKey,
-                    selectOptions: casesArray, optionSelected: handleSelectedCase, required: true,
-                    searchPlaceholder: 'Select Case...', dropdownWidth: '500px', updateValue: selectedCase.value,
-                    fetchData: store.dispatch('Disciplinary_Cases/fetchDisciplinaryCases', {company:companyID.value}),
-                    clearSearch: clearSelectedCase
+                    type:'search-dropdown', label:"Employee", value: employeeValue.value, componentKey: emplComponentKey,
+                    selectOptions: employeeArray, optionSelected: handleSelectedEmployee, required: true,
+                    searchPlaceholder: 'Select Employee...', dropdownWidth: '500px', updateValue: selectedEmployee.value,
+                    fetchData: store.dispatch('Employees/fetchEmployees', {company:companyID.value}),
+                    clearSearch: clearSelectedEmployee
                 },
-                { type: 'date', name: 'action_date',label: "Date", value: selectedAction.value?.action_date || '', required: true },
-                { type: 'dropdown', name: 'action_taken',label: "Action Taken", value: selectedAction.value?.action_taken || '', placeholder: "", required: true, options: [{ text: 'Verbal Warning', value: 'Verbal Warning' }, { text: 'Written Warning', value: 'Written Warning' }, { text: 'Suspension', value: 'Suspension' },{ text: 'Termination', value: 'Termination' },
-                                                                                                                                                                                 { text: 'Probation', value: 'Probation' }, { text: 'Demotion', value: 'Demotion' }, { text: 'Reprimand', value: 'Reprimand' }, { text: 'Other', value: 'Other' }] },
-                {type:'text-area', label:"Description", value: selectedAction.value?.action_description || '', textarea_rows: '4', textarea_cols: '56', required: true},
+                { type: 'date', name: 'date',label: "Date", value: selectedAdvance.value?.date || '', required: true },
+                { type: 'dropdown', name: 'month',label: "Month", value: selectedAdvance.value?.month || '', placeholder: "", required: true, options: [{ text: 'January', value: 'January' }, { text: 'February', value: 'February' },{ text: 'March', value: 'March' }, { text: 'April', value: 'April' },{ text: 'May', value: 'May' }, { text: 'June', value: 'June' },{ text: 'July', value: 'July' }, { text: 'August', value: 'August' },{ text: 'September', value: 'September' }, { text: 'October', value: 'October' },{ text: 'November', value: 'November' }, { text: 'December', value: 'December' }] },
+                { type: 'text', name: 'year',label: "Year", value: selectedAdvance.value?.year || '', required: true},
+                { type: 'number', name: 'amount',label: "Amount", value: selectedAdvance.value?.amount || '0', required: true},
+                {type:'text-area', label:"Notes", value: selectedAdvance.value?.notes || '', textarea_rows: '2', textarea_cols: '56', required: false},
 
             ];
         };
@@ -158,14 +165,14 @@ export default{
             for(let i=0; i < formFields.value.length; i++){
                 formFields.value[i].value = '';
             }
-            levComponentKey.value += 1;
-            caseID.value = '';
+            emplComponentKey.value += 1;
+            employeeID.value = '';
         }
 
 
-        watch([selectedAction, selectedCase], () => {
-            if (selectedAction.value && selectedCase.value) {
-                levComponentKey.value += 1;
+        watch([selectedAdvance, selectedEmployee], () => {
+            if (selectedAdvance.value && selectedEmployee.value) {
+                emplComponentKey.value += 1;
                 updateFormFields();
             }
             
@@ -178,14 +185,16 @@ export default{
         const hideModalLoader = () =>{
             modal_loader.value = "none";
         }
-        const createDisciplinaryAction = async() =>{
+        const createAdvance = async() =>{
             showModalLoader();
             let formData = {
-                action_date: formFields.value[1].value,
-                disciplinary_case: caseID.value,
-                disciplinary_case_id: caseID.value,
-                action_taken: formFields.value[2].value,
-                action_description: formFields.value[3].value,
+                amount: formFields.value[4].value,
+                date: formFields.value[1].value,
+                employee: employeeID.value,
+                employee_id: employeeID.value,
+                notes: formFields.value[5].value,
+                month: formFields.value[2].value,
+                year: formFields.value[3].value,
                 company: companyID.value
             }
   
@@ -195,7 +204,7 @@ export default{
                     errors.value.push(formFields.value[i].label);
                 }
             }
-            if(caseValue.value == ''){
+            if(employeeValue.value == ''){
                 errors.value.push('error')
             }
 
@@ -204,36 +213,38 @@ export default{
                 hideModalLoader();
             }else{
                 try {
-                    const response = await store.dispatch('Disciplinary_Actions/createDisciplinaryAction', formData);
+                    const response = await store.dispatch('Salary_Advances/createSalaryAdvance', formData);
                     if (response && response.status === 201) {
                         hideModalLoader();
-                        toast.success('Disciplinary Action created successfully!');
+                        toast.success('Salary Advance created successfully!');
                         handleReset();
                         emplComponentKey.value += 1;
                         levComponentKey.value += 1;
                     }
                     else {
-                        toast.error('An error occurred while creating the Disciplinary Action.');
+                        toast.error('An error occurred while creating the Salary Advance.');
                     }
                 } catch (error) {
                     console.error(error.message);
-                    toast.error('Failed to create Disciplinary Action: ' + error.message);
+                    toast.error('Failed to create Salary Advance: ' + error.message);
                 } finally {
                     hideModalLoader();
-                    searchActions();
+                    searchAdvances();
                 }
             }
         }
-        const updateDisciplinaryAction = async() =>{
+        const updateAdvance = async() =>{
             showModalLoader();
             errors.value = [];
             let formData = {
-                disciplinary_action: selectedAction.value.disciplinary_action_id,
-                action_date: formFields.value[1].value,
-                disciplinary_case: caseValue.value,
-                disciplinary_case_id: caseValue.value,
-                action_taken: formFields.value[2].value,
-                action_description: formFields.value[3].value,
+                salary_advance: selectedAdvance.value.salary_advance_id,
+                amount: formFields.value[4].value,
+                date: formFields.value[1].value,
+                employee: employeeValue.value,
+                employee_id: employeeValue.value,
+                notes: formFields.value[5].value,
+                month: formFields.value[2].value,
+                year: formFields.value[3].value,
                 company: companyID.value
             }
 
@@ -242,7 +253,7 @@ export default{
                     errors.value.push('Error');
                 }
             }
-            if(caseValue.value == ''){
+            if(employeeValue.value == ''){
                 errors.value.push('error')
             }
             if(errors.value.length){
@@ -250,83 +261,37 @@ export default{
                 hideModalLoader();
             }else{
                 try {
-                    const response = await store.dispatch('Disciplinary_Actions/updateDisciplinaryAction', formData);
+                    const response = await store.dispatch('Salary_Advances/updateSalaryAdvance', formData);
                     if (response && response.status === 200) {
                         hideModalLoader();
                         handleReset();
                         emplComponentKey.value += 1;
-                        toast.success("Disciplinary Action updated successfully!");              
+                        toast.success("Salary Advance updated successfully!");              
                     } else {
-                        toast.error('An error occurred while updating the Disciplinary Action.');
+                        toast.error('An error occurred while updating the Salary Advance.');
                     }
                 } catch (error) {
                     console.error(error.message);
-                    toast.error('Failed to update Disciplinary Action: ' + error.message);
+                    toast.error('Failed to update Salary Advance: ' + error.message);
                 } finally {
                     hideModalLoader();
                     propModalVisible.value = false;
-                    store.dispatch("Disciplinary_Action/updateState",{selectedAction:null})
-                    searchActions();
+                    store.dispatch("Salary_Advances/updateState",{selectedAdvance:null})
+                    searchAdvances();
                 }             
             }
         }
-        const saveAction = () =>{
+        const saveAdvance = () =>{
             if(isEditing.value == true){
-                updateDisciplinaryAction();
+                updateAdvance();
             }else{
-                createDisciplinaryAction();
+                createAdvance();
             }
         }
-        const removeAction = async() =>{
-            if(selectedIds.value.length == 1){
-                let formData = {
-                    company: companyID.value,
-                    disciplinary_action: selectedIds.value
-                }
-                try{
-                    const response = await store.dispatch('Disciplinary_Actions/deleteDisciplinaryAction',formData)
-                    if(response && response.status == 200){
-                        toast.success("Disciplinary Action Removed Succesfully");
-                        searchActions();
-                    }
-                }
-                catch(error){
-                    console.error(error.message);
-                    toast.error('Failed to remove Disciplinary Action: ' + error.message);
-                }
-                finally{
-                    selectedIds.value = [];
-                }
-            }else if(selectedIds.value.length > 1){
-                toast.error("You have selected more than 1 Disciplinary Action") 
-            }else{
-                toast.error("Please Select A Disciplinary Action To Remove")
-            }
+        const removeAdvance = async() =>{
         }
-        const removeActions = async() =>{
-            if(selectedIds.value.length){
-                let formData = {
-                    company: companyID.value,
-                    disciplinary_action: selectedIds.value
-                }
-                try{
-                    const response = await store.dispatch('Disciplinary_Actions/deleteDisciplinaryAction',formData)
-                    if(response && response.status == 200){
-                        toast.success("Disciplinary Action(s) Removed Succesfully");
-                        searchActions();
-                    }
-                }
-                catch(error){
-                    console.error(error.message);
-                    toast.error('Failed to remove Disciplinary Action: ' + error.message);
-                }
-                finally{
-                    selectedIds.value = [];
-
-                }
-            }else{
-                toast.error("Please Select A Disciplinary Action To Remove")
-            }
+        const removeAdvances = async() =>{
+ 
         }
         const showLoader = () =>{
             loader.value = "block";
@@ -334,27 +299,26 @@ export default{
         const hideLoader = () =>{
             loader.value = "none";
         }
-        const searchActions = () =>{
+        const searchAdvances = () =>{
             showLoader();
             showNextBtn.value = false;
             showPreviousBtn.value = false;
             let formData = {
                 employee_name: employee_name_search.value,
                 staff_number: staff_number_search.value,
-                date_from: date_from_search.value,
-                date_to: date_to_search.value,
-                case_number: case_number_search.value,
-                user: "",
+                month: month_search.value,
+                year: year_search.value,
+                user: userID.value,
                 company_id: companyID.value,
                 page_size: selectedValue.value
             } 
             axios
-            .post(`api/v1/disciplinary-actions-search/?page=${currentPage.value}`,formData)
+            .post(`api/v1/salary-advances-search/?page=${currentPage.value}`,formData)
             .then((response)=>{
-                actionsList.value = response.data.results;
-                store.commit('Disciplinary_Actions/LIST_ACTIONS', actionsList.value)
+                advancesList.value = response.data.results;
+                store.commit('Salary_Advances/LIST_ADVANCES', advancesList.value)
                 propResults.value = response.data;
-                propArrLen.value = actionsList.value.length;
+                propArrLen.value = advancesList.value.length;
                 propCount.value = propResults.value.count;
                 pageCount.value = Math.ceil(propCount.value / selectedValue.value);
                 if(response.data.next){
@@ -373,17 +337,16 @@ export default{
         };
         const selectSearchQuantity = (newValue) =>{
             selectedValue.value = newValue;
-            searchActions(selectedValue.value);
+            searchAdvances(selectedValue.value);
         };
         const resetFilters = () =>{
             currentPage.value = 1;
             selectedValue.value = 50;
             staff_number_search.value = "";
             employee_name_search.value = "";
-            date_from_search.value = "";
-            date_to_search.value = "";
-            case_number_search.value = "";
-            searchActions();
+            month_search.value = "";
+            year_search.value = "";
+            searchAdvances();
         }
         const loadPrev = () =>{
             if (currentPage.value <= 1){
@@ -392,7 +355,7 @@ export default{
                 currentPage.value -= 1;
             }
             
-            searchActions();
+            searchAdvances();
             // scrollToTop();
         }
         const loadNext = () =>{
@@ -402,38 +365,38 @@ export default{
                 currentPage.value += 1;
             }
             
-            searchActions();
+            searchAdvances();
             // scrollToTop(); 
         }
         const firstPage = ()=>{
             currentPage.value = 1;
-            searchActions();
+            searchAdvances();
             // scrollToTop();
         }
         const lastPage = () =>{
             currentPage.value = pageCount.value;
-            searchActions();
+            searchAdvances();
             // scrollToTop();
         }
-        const addNewAction = () =>{
-            store.dispatch("Disciplinary_Actions/updateState",{selectedAction:null,selectedCase:null});
+        const addNewAdvance = () =>{
+            store.dispatch("Salary_Advances/updateState",{selectedAdvance:null, selectedEmployee:null});
             emplComponentKey.value += 1;
             levComponentKey.value += 1;
             handleReset();
             updateFormFields();
             propModalVisible.value = true;
-            store.dispatch("Disciplinary_Actions/updateState",{isEditing:false})
+            store.dispatch("Salary_Advances/updateState",{isEditing:false})
             flex_basis.value = '1/3';
             flex_basis_percentage.value = '33.333';
         }
         const handleActionClick = async(rowIndex, action, row) =>{
             if( action == 'edit'){
-                const advanceID = row['disciplinary_action_id'];
+                const advanceID = row['salary_advance_id'];
                 let formData = {
                     company: companyID.value,
-                    disciplinary_action: advanceID
+                    salary_advance: advanceID
                 }
-                await store.dispatch('Disciplinary_Actions/fetchDisciplinaryAction',formData)
+                await store.dispatch('Salary_Advances/fetchSalaryAdvance',formData)
                 propModalVisible.value = true;
                 flex_basis.value = '1/3';
                 flex_basis_percentage.value = '33.333';
@@ -442,11 +405,11 @@ export default{
                 const advanceID = [row[idField]];
                 let formData = {
                     company: companyID.value,
-                    disciplinary_action: advanceID
+                    salary_advance: advanceID
                 }
-                await store.dispatch('Disciplinary_Actions/deleteDisciplinaryAction',formData).
+                await store.dispatch('Salary_Advances/deleteSalaryAdvance',formData).
                 then(()=>{
-                    searchActions();
+                    searchAdvances();
                 })
             }else if(action == 'view'){
                 console.log("VIEWING TAKING PLACE");
@@ -455,7 +418,7 @@ export default{
         const closeModal = () =>{
             propModalVisible.value = false;
         };
-        const printCasesList = () =>{
+        const printAdvancesList = () =>{
             showLoader();
             let formData = {
                 employee_name: employee_name_search.value,
@@ -464,7 +427,7 @@ export default{
             } 
 
             axios
-            .post("api/v1/export-disciplinary-meetings-pdf/", formData, { responseType: 'blob' })
+            .post("api/v1/export-salary-advances-pdf/", formData, { responseType: 'blob' })
                 .then((response)=>{
                     if(response.status == 200){
                         const blob1 = new Blob([response.data]);
@@ -480,7 +443,7 @@ export default{
                 hideLoader();
             })
         };
-        const downloadCasesExcel = () =>{
+        const downloadAdvancesExcel = () =>{
             showLoader();
             let formData = {
                 employee_name: employee_name_search.value,
@@ -488,13 +451,13 @@ export default{
                 status: status_search.value,
                 company_id: companyID.value,
             }
-            axios.post("api/v1/export-disciplinary-meetings-excel/", formData, { responseType: 'blob' })
+            axios.post("api/v1/export-salary-advances-excel/", formData, { responseType: 'blob' })
             .then((response)=>{
                 if(response.status == 200){
                 const url = window.URL.createObjectURL(new Blob([response.data]));
                 const link = document.createElement('a');
                 link.href = url;
-                link.setAttribute('download', 'Disciplinary Meetings.xlsx');
+                link.setAttribute('download', 'Salary Advances.xlsx');
                 document.body.appendChild(link);
                 link.click();
                 }
@@ -506,20 +469,20 @@ export default{
                 hideLoader();
             })
         };
-        const downloadCasesCSV = () =>{
+        const downloadAdvancesCSV = () =>{
             showLoader();
             let formData = {
                 employee_name: employee_name_search.value,
                 staff_number: staff_number_search.value,
                 company_id: companyID.value,
             }
-            axios.post("api/v1/export-disciplinary-meetings-csv/", formData, { responseType: 'blob' })
+            axios.post("api/v1/export-salary-advances-csv/", formData, { responseType: 'blob' })
             .then((response)=>{
                 if(response.status == 200){
                 const url = window.URL.createObjectURL(new Blob([response.data]));
                 const link = document.createElement('a');
                 link.href = url;
-                link.setAttribute('download', 'Disciplinary Meetings.csv');
+                link.setAttribute('download', 'Salary Advances.csv');
                 document.body.appendChild(link);
                 link.click();
                 }
@@ -532,17 +495,17 @@ export default{
             })
         };
         onBeforeMount(()=>{
-            searchActions();
+            searchAdvances();
             
         })
         return{
-            title, searchActions,resetFilters, addButtonLabel, searchFilters, tableColumns, actionsList,
+            showAddButton,showActions,title, searchAdvances,resetFilters, addButtonLabel, searchFilters, tableColumns, advancesList,
             currentPage,propResults, propArrLen, propCount, pageCount, showNextBtn, showPreviousBtn,
             loadPrev, loadNext, firstPage, lastPage, idField, actions, handleActionClick, propModalVisible, closeModal,
-            submitButtonLabel, showModal, addNewAction, showLoader, loader, hideLoader, modal_loader, modal_top, modal_left, modal_width,displayButtons,
-            showModalLoader, hideModalLoader, saveAction, formFields, handleSelectionChange, flex_basis,flex_basis_percentage,
-            removeAction, removeActions,addingRight,rightsModule,printCasesList,selectSearchQuantity,selectedValue,
-            downloadCasesCSV,downloadCasesExcel
+            submitButtonLabel, showModal, addNewAdvance, showLoader, loader, hideLoader, modal_loader, modal_top, modal_left, modal_width,displayButtons,
+            showModalLoader, hideModalLoader, saveAdvance, formFields, handleSelectionChange, flex_basis,flex_basis_percentage,
+            removeAdvance, removeAdvances,addingRight,rightsModule,printAdvancesList,selectSearchQuantity,selectedValue,
+            downloadAdvancesCSV,downloadAdvancesExcel
         }
     }
 };

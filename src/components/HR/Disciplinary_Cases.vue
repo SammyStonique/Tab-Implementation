@@ -106,7 +106,7 @@ export default{
             {label: "Category", key: "category_name"},
             {label: "Description", key:"case_description", maxWidth: "500px"},
             {label: "Status", key:"status"},
-            {label: "Action", key:"action_taken", maxWidth: "500px"},
+            {label: "Action Taken", key:"action_taken", maxWidth: "500px"},
         ])
         const actions = ref([
             {name: 'edit', icon: 'fa fa-edit', title: 'Edit Case', rightName: 'Editing Disciplinary Cases'},
@@ -376,6 +376,7 @@ export default{
                 date_from: date_from_search.value,
                 date_to: date_to_search.value,
                 case_number: case_number_search.value,
+                user: "",
                 company_id: companyID.value,
                 page_size: selectedValue.value
             } 

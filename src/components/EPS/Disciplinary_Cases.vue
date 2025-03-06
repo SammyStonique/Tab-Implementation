@@ -3,20 +3,22 @@
         <PageComponent 
             :loader="loader" @showLoader="showLoader" @hideLoader="hideLoader"
             :addButtonLabel="addButtonLabel"
-            @handleAddNew="addNewAction"
+            :showAddButton="showAddButton"
+            @handleAddNew="addNewCase"
             :searchFilters="searchFilters"
-            @searchPage="searchActions"
+            @searchPage="searchCases"
             @resetFilters="resetFilters"
-            @removeItem="removeAction"
-            @removeSelectedItems="removeActions"
+            @removeItem="removeCase"
+            @removeSelectedItems="removeCases"
             @printList="printCasesList"
             @printExcel="downloadCasesExcel"
             @printCSV="downloadCasesCSV"
             :addingRight="addingRight"
             :rightsModule="rightsModule"
             :columns="tableColumns"
-            :rows="actionsList"
+            :rows="casesList"
             :actions="actions"
+            :showActions="showActions"
             :idField="idField"
             @handleSelectionChange="handleSelectionChange"
             @handleActionClick="handleActionClick"
@@ -36,7 +38,7 @@
             :loader="modal_loader" @showLoader="showModalLoader" @hideLoader="hideModalLoader" @closeModal="closeModal">
             <DynamicForm 
                 :fields="formFields" :flex_basis="flex_basis" :flex_basis_percentage="flex_basis_percentage" 
-                :displayButtons="displayButtons" @handleSubmit="saveAction" @handleReset="handleReset"
+                :displayButtons="displayButtons" @handleSubmit="saveCase" @handleReset="handleReset"
             />
         </MovableModal>
     </div>
@@ -53,7 +55,7 @@ import { useToast } from "vue-toastification";
 import PrintJS from 'print-js';
 
 export default{
-    name: 'Disciplinary_Actions',
+    name: 'Disciplinary_Cases',
     components:{
         PageComponent, MovableModal,DynamicForm
     },
@@ -64,14 +66,15 @@ export default{
         const modal_loader = ref('none');
         const emplComponentKey = ref(0);
         const levComponentKey = ref(0);
-        const idField = 'disciplinary_action_id';
-        const addButtonLabel = ref('New Disciplinary Action');
-        const addingRight = ref('Adding Disciplinary Actions');
+        const idField = 'disciplinary_case_id';
+        const addButtonLabel = ref('New Disciplinary Case');
+        const addingRight = ref('Adding Disciplinary Cases');
         const rightsModule = ref('HR');
-        const title = ref('Disciplinary Action Details');
+        const showAddButton = ref(false);
+        const title = ref('Disciplinary Case Details');
         const submitButtonLabel = ref('Add');
         const selectedIds = ref([]);
-        const actionsList = ref([]);
+        const casesList = ref([]);
         const propResults = ref([]);
         const propArrLen = ref(0);
         const propCount = ref(0);
@@ -84,31 +87,37 @@ export default{
         const flex_basis = ref('');
         const flex_basis_percentage = ref('');
         const displayButtons = ref(true);
+        const showActions = ref(false);
         const errors = ref([]);
         const modal_top = ref('150px');
         const modal_left = ref('500px');
         const modal_width = ref('30vw');
-        const caseID = ref('');
-        const isEditing = computed(()=> store.state.Disciplinary_Actions.isEditing);
-        const selectedAction = computed(()=> store.state.Disciplinary_Actions.selectedAction);
-        const selectedCase = computed(()=> store.state.Disciplinary_Actions.selectedCase);
-        const casesArray = computed(() => store.state.Disciplinary_Cases.caseArr);
+        const employeeID = ref('');
+        const categoryID = ref('');
+        const isEditing = computed(()=> store.state.Disciplinary_Cases.isEditing);
+        const selectedCase = computed(()=> store.state.Disciplinary_Cases.selectedCase);
+        const selectedEmployee = computed(()=> store.state.Disciplinary_Cases.selectedEmployee);
+        const selectedCategory = computed(()=> store.state.Disciplinary_Cases.selectedCategory);
+        const employeeArray = computed(() => store.state.Employees.employeeArr);
+        const categoryArray = computed(() => store.state.Disciplinary_Categories.categoryArr);
         const showModal = ref(false);
         const tableColumns = ref([
             {type: "checkbox"},
-            {label: "Date", key: "action_date"},
+            {label: "Date", key: "date_reported"},
             {label: "Case#", key: "case_number"},
             {label: "Staff No", key: "staff_number"},
             {label: "Employee Name", key: "employee_name"},
-            {label: "Action", key:"action_taken", maxWidth: "500px"},
-            {label: "Description", key:"action_description", maxWidth: "500px"},
-            
+            {label: "Category", key: "category_name"},
+            {label: "Description", key:"case_description", maxWidth: "500px"},
+            {label: "Status", key:"status"},
+            {label: "Action Taken", key:"action_taken", maxWidth: "500px"},
         ])
         const actions = ref([
-            {name: 'edit', icon: 'fa fa-edit', title: 'Edit Action', rightName: 'Editing Disciplinary Actions'},
-            {name: 'delete', icon: 'fa fa-trash', title: 'Delete Action', rightName: 'Deleting Disciplinary Actions'},
+            {name: 'edit', icon: 'fa fa-edit', title: 'Edit Case', rightName: 'Editing Disciplinary Cases'},
+            {name: 'delete', icon: 'fa fa-trash', title: 'Delete Case', rightName: 'Deleting Disciplinary Cases'},
         ])
         const companyID = computed(()=> store.state.userData.company_id);
+        const userID = computed(()=> store.state.userData.user_id);
         const employee_name_search = ref('');
         const staff_number_search = ref('');
         const date_from_search = ref('');
@@ -124,33 +133,50 @@ export default{
         const handleSelectionChange = (ids) => {
             selectedIds.value = ids;
         };
-        const handleSelectedCase = async(option) =>{
-            await store.dispatch('Disciplinary_Cases/handleSelectedDisciplinaryCase', option)
-            caseID.value = store.state.Disciplinary_Cases.caseID;
+        const handleSelectedEmployee = async(option) =>{
+            await store.dispatch('Employees/handleSelectedEmployee', option)
+            employeeID.value = store.state.Employees.employeeID;
         };
-        const clearSelectedCase = async() =>{
-            await store.dispatch('Disciplinary_Cases/updateState', {caseID: ''});
-            caseID.value = store.state.Disciplinary_Cases.caseID;
+        const clearSelectedEmployee = async() =>{
+            await store.dispatch('Employees/updateState', {employeeID: ''});
+            employeeID.value = store.state.Employees.employeeID;
+        };
+        const handleSelectedCategory = async(option) =>{
+            await store.dispatch('Disciplinary_Categories/handleSelectedCategory', option)
+            categoryID.value = store.state.Disciplinary_Categories.categoryID;
+        };
+        const clearSelectedCategory = async() =>{
+            await store.dispatch('Disciplinary_Categories/updateState', {categoryID: ''});
+            categoryID.value = store.state.Disciplinary_Categories.categoryID;
         };
         const formFields = ref([]);
+        const employeeValue = computed(() => {
+           return (selectedCase.value && selectedCase.value.employee && !employeeID.value) ? selectedCase.value.employee.employee_id : employeeID.value;
 
-        const caseValue = computed(() => {
-           return (selectedAction.value && selectedAction.value.disciplinary_case && !caseID.value) ? selectedAction.value.disciplinary_case.disciplinary_case_id : caseID.value;
+        });
+        const categoryValue = computed(() => {
+           return (selectedCase.value && selectedCase.value.category && !categoryID.value) ? selectedCase.value.category.disciplinary_category_id : categoryID.value;
 
         });
         const updateFormFields = () => {
             formFields.value = [
                 {  
-                    type:'search-dropdown', label:"Disciplinary Case", value: caseValue.value, componentKey: levComponentKey,
-                    selectOptions: casesArray, optionSelected: handleSelectedCase, required: true,
-                    searchPlaceholder: 'Select Case...', dropdownWidth: '500px', updateValue: selectedCase.value,
-                    fetchData: store.dispatch('Disciplinary_Cases/fetchDisciplinaryCases', {company:companyID.value}),
-                    clearSearch: clearSelectedCase
+                    type:'search-dropdown', label:"Category", value: categoryValue.value, componentKey: levComponentKey,
+                    selectOptions: categoryArray, optionSelected: handleSelectedCategory, required: true,
+                    searchPlaceholder: 'Select Category...', dropdownWidth: '500px', updateValue: selectedCategory.value,
+                    fetchData: store.dispatch('Disciplinary_Categories/fetchDisciplinaryCategories', {company:companyID.value}),
+                    clearSearch: clearSelectedCategory
                 },
-                { type: 'date', name: 'action_date',label: "Date", value: selectedAction.value?.action_date || '', required: true },
-                { type: 'dropdown', name: 'action_taken',label: "Action Taken", value: selectedAction.value?.action_taken || '', placeholder: "", required: true, options: [{ text: 'Verbal Warning', value: 'Verbal Warning' }, { text: 'Written Warning', value: 'Written Warning' }, { text: 'Suspension', value: 'Suspension' },{ text: 'Termination', value: 'Termination' },
-                                                                                                                                                                                 { text: 'Probation', value: 'Probation' }, { text: 'Demotion', value: 'Demotion' }, { text: 'Reprimand', value: 'Reprimand' }, { text: 'Other', value: 'Other' }] },
-                {type:'text-area', label:"Description", value: selectedAction.value?.action_description || '', textarea_rows: '4', textarea_cols: '56', required: true},
+                {  
+                    type:'search-dropdown', label:"Employee", value: employeeValue.value, componentKey: emplComponentKey,
+                    selectOptions: employeeArray, optionSelected: handleSelectedEmployee, required: true,
+                    searchPlaceholder: 'Select Employee...', dropdownWidth: '500px', updateValue: selectedEmployee.value,
+                    fetchData: store.dispatch('Employees/fetchEmployees', {company:companyID.value}),
+                    clearSearch: clearSelectedEmployee
+                },
+                { type: 'date', name: 'date_reported',label: "Date", value: selectedCase.value?.date_reported || '', required: true },
+                {type:'text-area', label:"Description", value: selectedCase.value?.case_description || '', textarea_rows: '4', textarea_cols: '56', required: true},
+                {type:'text-area', label:"Action Taken", value: selectedCase.value?.action_taken || '', textarea_rows: '4', textarea_cols: '56', required: false},
 
             ];
         };
@@ -158,13 +184,16 @@ export default{
             for(let i=0; i < formFields.value.length; i++){
                 formFields.value[i].value = '';
             }
+            emplComponentKey.value += 1;
             levComponentKey.value += 1;
-            caseID.value = '';
+            categoryID.value = '';
+            employeeID.value = '';
         }
 
 
-        watch([selectedAction, selectedCase], () => {
-            if (selectedAction.value && selectedCase.value) {
+        watch([selectedCase, selectedEmployee, selectedCategory], () => {
+            if (selectedCase.value && selectedEmployee.value && selectedCategory.value) {
+                emplComponentKey.value += 1;
                 levComponentKey.value += 1;
                 updateFormFields();
             }
@@ -178,24 +207,28 @@ export default{
         const hideModalLoader = () =>{
             modal_loader.value = "none";
         }
-        const createDisciplinaryAction = async() =>{
+        const createDisciplinaryCase = async() =>{
             showModalLoader();
             let formData = {
-                action_date: formFields.value[1].value,
-                disciplinary_case: caseID.value,
-                disciplinary_case_id: caseID.value,
-                action_taken: formFields.value[2].value,
-                action_description: formFields.value[3].value,
+                case_number: '-',
+                date_reported: formFields.value[2].value,
+                employee: employeeID.value,
+                employee_id: employeeID.value,
+                category: categoryID.value,
+                category_id: categoryID.value,
+                case_description: formFields.value[3].value,
+                action_taken: formFields.value[4].value,
+                status: "Open",
                 company: companyID.value
             }
   
             errors.value = [];
-            for(let i=1; i < formFields.value.length; i++){
+            for(let i=2; i < formFields.value.length; i++){
                 if(formFields.value[i].value =='' && formFields.value[i].type != 'search-dropdown' && formFields.value[i].required == true){
                     errors.value.push(formFields.value[i].label);
                 }
             }
-            if(caseValue.value == ''){
+            if(employeeValue.value == '' || categoryValue.value == ''){
                 errors.value.push('error')
             }
 
@@ -204,36 +237,40 @@ export default{
                 hideModalLoader();
             }else{
                 try {
-                    const response = await store.dispatch('Disciplinary_Actions/createDisciplinaryAction', formData);
+                    const response = await store.dispatch('Disciplinary_Cases/createDisciplinaryCase', formData);
                     if (response && response.status === 201) {
                         hideModalLoader();
-                        toast.success('Disciplinary Action created successfully!');
+                        toast.success('Disciplinary Case created successfully!');
                         handleReset();
                         emplComponentKey.value += 1;
                         levComponentKey.value += 1;
                     }
                     else {
-                        toast.error('An error occurred while creating the Disciplinary Action.');
+                        toast.error('An error occurred while creating the Disciplinary Case.');
                     }
                 } catch (error) {
                     console.error(error.message);
-                    toast.error('Failed to create Disciplinary Action: ' + error.message);
+                    toast.error('Failed to create Disciplinary Case: ' + error.message);
                 } finally {
                     hideModalLoader();
-                    searchActions();
+                    searchCases();
                 }
             }
         }
-        const updateDisciplinaryAction = async() =>{
+        const updateDisciplinaryCase = async() =>{
             showModalLoader();
             errors.value = [];
             let formData = {
-                disciplinary_action: selectedAction.value.disciplinary_action_id,
-                action_date: formFields.value[1].value,
-                disciplinary_case: caseValue.value,
-                disciplinary_case_id: caseValue.value,
-                action_taken: formFields.value[2].value,
-                action_description: formFields.value[3].value,
+                disciplinary_case: selectedCase.value.disciplinary_case_id,
+                case_number: selectedCase.value.case_number,
+                date_reported: formFields.value[2].value,
+                employee: employeeValue.value,
+                employee_id: employeeValue.value,
+                category: categoryValue.value,
+                category_id: categoryValue.value,
+                case_description: formFields.value[3].value,
+                action_taken: formFields.value[4].value,
+                status: selectedCase.value.status,
                 company: companyID.value
             }
 
@@ -242,7 +279,7 @@ export default{
                     errors.value.push('Error');
                 }
             }
-            if(caseValue.value == ''){
+            if(employeeValue.value == '' || categoryValue.value == ''){
                 errors.value.push('error')
             }
             if(errors.value.length){
@@ -250,83 +287,38 @@ export default{
                 hideModalLoader();
             }else{
                 try {
-                    const response = await store.dispatch('Disciplinary_Actions/updateDisciplinaryAction', formData);
+                    const response = await store.dispatch('Disciplinary_Cases/updateDisciplinaryCase', formData);
                     if (response && response.status === 200) {
                         hideModalLoader();
                         handleReset();
                         emplComponentKey.value += 1;
-                        toast.success("Disciplinary Action updated successfully!");              
+                        toast.success("Disciplinary Case updated successfully!");              
                     } else {
-                        toast.error('An error occurred while updating the Disciplinary Action.');
+                        toast.error('An error occurred while updating the Disciplinary Case.');
                     }
                 } catch (error) {
                     console.error(error.message);
-                    toast.error('Failed to update Disciplinary Action: ' + error.message);
+                    toast.error('Failed to update Disciplinary Case: ' + error.message);
                 } finally {
                     hideModalLoader();
                     propModalVisible.value = false;
-                    store.dispatch("Disciplinary_Action/updateState",{selectedAction:null})
-                    searchActions();
+                    store.dispatch("Disciplinary_Cases/updateState",{selectedCase:null})
+                    searchCases();
                 }             
             }
         }
-        const saveAction = () =>{
+        const saveCase = () =>{
             if(isEditing.value == true){
-                updateDisciplinaryAction();
+                updateDisciplinaryCase();
             }else{
-                createDisciplinaryAction();
+                createDisciplinaryCase();
             }
         }
-        const removeAction = async() =>{
-            if(selectedIds.value.length == 1){
-                let formData = {
-                    company: companyID.value,
-                    disciplinary_action: selectedIds.value
-                }
-                try{
-                    const response = await store.dispatch('Disciplinary_Actions/deleteDisciplinaryAction',formData)
-                    if(response && response.status == 200){
-                        toast.success("Disciplinary Action Removed Succesfully");
-                        searchActions();
-                    }
-                }
-                catch(error){
-                    console.error(error.message);
-                    toast.error('Failed to remove Disciplinary Action: ' + error.message);
-                }
-                finally{
-                    selectedIds.value = [];
-                }
-            }else if(selectedIds.value.length > 1){
-                toast.error("You have selected more than 1 Disciplinary Action") 
-            }else{
-                toast.error("Please Select A Disciplinary Action To Remove")
-            }
-        }
-        const removeActions = async() =>{
-            if(selectedIds.value.length){
-                let formData = {
-                    company: companyID.value,
-                    disciplinary_action: selectedIds.value
-                }
-                try{
-                    const response = await store.dispatch('Disciplinary_Actions/deleteDisciplinaryAction',formData)
-                    if(response && response.status == 200){
-                        toast.success("Disciplinary Action(s) Removed Succesfully");
-                        searchActions();
-                    }
-                }
-                catch(error){
-                    console.error(error.message);
-                    toast.error('Failed to remove Disciplinary Action: ' + error.message);
-                }
-                finally{
-                    selectedIds.value = [];
+        const removeCase = async() =>{
 
-                }
-            }else{
-                toast.error("Please Select A Disciplinary Action To Remove")
-            }
+        }
+        const removeCases = async() =>{
+
         }
         const showLoader = () =>{
             loader.value = "block";
@@ -334,7 +326,7 @@ export default{
         const hideLoader = () =>{
             loader.value = "none";
         }
-        const searchActions = () =>{
+        const searchCases = () =>{
             showLoader();
             showNextBtn.value = false;
             showPreviousBtn.value = false;
@@ -344,17 +336,17 @@ export default{
                 date_from: date_from_search.value,
                 date_to: date_to_search.value,
                 case_number: case_number_search.value,
-                user: "",
+                user: userID.value,
                 company_id: companyID.value,
                 page_size: selectedValue.value
             } 
             axios
-            .post(`api/v1/disciplinary-actions-search/?page=${currentPage.value}`,formData)
+            .post(`api/v1/disciplinary-cases-search/?page=${currentPage.value}`,formData)
             .then((response)=>{
-                actionsList.value = response.data.results;
-                store.commit('Disciplinary_Actions/LIST_ACTIONS', actionsList.value)
+                casesList.value = response.data.results;
+                store.commit('Disciplinary_Cases/LIST_CASES', casesList.value)
                 propResults.value = response.data;
-                propArrLen.value = actionsList.value.length;
+                propArrLen.value = casesList.value.length;
                 propCount.value = propResults.value.count;
                 pageCount.value = Math.ceil(propCount.value / selectedValue.value);
                 if(response.data.next){
@@ -373,7 +365,7 @@ export default{
         };
         const selectSearchQuantity = (newValue) =>{
             selectedValue.value = newValue;
-            searchActions(selectedValue.value);
+            searchCases(selectedValue.value);
         };
         const resetFilters = () =>{
             currentPage.value = 1;
@@ -383,7 +375,7 @@ export default{
             date_from_search.value = "";
             date_to_search.value = "";
             case_number_search.value = "";
-            searchActions();
+            searchCases();
         }
         const loadPrev = () =>{
             if (currentPage.value <= 1){
@@ -392,7 +384,7 @@ export default{
                 currentPage.value -= 1;
             }
             
-            searchActions();
+            searchCases();
             // scrollToTop();
         }
         const loadNext = () =>{
@@ -402,38 +394,38 @@ export default{
                 currentPage.value += 1;
             }
             
-            searchActions();
+            searchCases();
             // scrollToTop(); 
         }
         const firstPage = ()=>{
             currentPage.value = 1;
-            searchActions();
+            searchCases();
             // scrollToTop();
         }
         const lastPage = () =>{
             currentPage.value = pageCount.value;
-            searchActions();
+            searchCases();
             // scrollToTop();
         }
-        const addNewAction = () =>{
-            store.dispatch("Disciplinary_Actions/updateState",{selectedAction:null,selectedCase:null});
+        const addNewCase = () =>{
+            store.dispatch("Disciplinary_Cases/updateState",{selectedCase:null, selectedEmployee:null, selectedCategory:null});
             emplComponentKey.value += 1;
             levComponentKey.value += 1;
             handleReset();
             updateFormFields();
             propModalVisible.value = true;
-            store.dispatch("Disciplinary_Actions/updateState",{isEditing:false})
+            store.dispatch("Disciplinary_Cases/updateState",{isEditing:false})
             flex_basis.value = '1/3';
             flex_basis_percentage.value = '33.333';
         }
         const handleActionClick = async(rowIndex, action, row) =>{
             if( action == 'edit'){
-                const advanceID = row['disciplinary_action_id'];
+                const advanceID = row['disciplinary_case_id'];
                 let formData = {
                     company: companyID.value,
-                    disciplinary_action: advanceID
+                    disciplinary_case: advanceID
                 }
-                await store.dispatch('Disciplinary_Actions/fetchDisciplinaryAction',formData)
+                await store.dispatch('Disciplinary_Cases/fetchDisciplinaryCase',formData)
                 propModalVisible.value = true;
                 flex_basis.value = '1/3';
                 flex_basis_percentage.value = '33.333';
@@ -442,11 +434,11 @@ export default{
                 const advanceID = [row[idField]];
                 let formData = {
                     company: companyID.value,
-                    disciplinary_action: advanceID
+                    disciplinary_case: advanceID
                 }
-                await store.dispatch('Disciplinary_Actions/deleteDisciplinaryAction',formData).
+                await store.dispatch('Disciplinary_Cases/deleteDisciplinaryCase',formData).
                 then(()=>{
-                    searchActions();
+                    searchCases();
                 })
             }else if(action == 'view'){
                 console.log("VIEWING TAKING PLACE");
@@ -464,7 +456,7 @@ export default{
             } 
 
             axios
-            .post("api/v1/export-disciplinary-meetings-pdf/", formData, { responseType: 'blob' })
+            .post("api/v1/export-disciplinary-cases-pdf/", formData, { responseType: 'blob' })
                 .then((response)=>{
                     if(response.status == 200){
                         const blob1 = new Blob([response.data]);
@@ -488,13 +480,13 @@ export default{
                 status: status_search.value,
                 company_id: companyID.value,
             }
-            axios.post("api/v1/export-disciplinary-meetings-excel/", formData, { responseType: 'blob' })
+            axios.post("api/v1/export-disciplinary-casess-excel/", formData, { responseType: 'blob' })
             .then((response)=>{
                 if(response.status == 200){
                 const url = window.URL.createObjectURL(new Blob([response.data]));
                 const link = document.createElement('a');
                 link.href = url;
-                link.setAttribute('download', 'Disciplinary Meetings.xlsx');
+                link.setAttribute('download', 'Disciplinary Cases.xlsx');
                 document.body.appendChild(link);
                 link.click();
                 }
@@ -513,13 +505,13 @@ export default{
                 staff_number: staff_number_search.value,
                 company_id: companyID.value,
             }
-            axios.post("api/v1/export-disciplinary-meetings-csv/", formData, { responseType: 'blob' })
+            axios.post("api/v1/export-disciplinary-cases-csv/", formData, { responseType: 'blob' })
             .then((response)=>{
                 if(response.status == 200){
                 const url = window.URL.createObjectURL(new Blob([response.data]));
                 const link = document.createElement('a');
                 link.href = url;
-                link.setAttribute('download', 'Disciplinary Meetings.csv');
+                link.setAttribute('download', 'Disciplinary Cases.csv');
                 document.body.appendChild(link);
                 link.click();
                 }
@@ -532,16 +524,16 @@ export default{
             })
         };
         onBeforeMount(()=>{
-            searchActions();
+            searchCases();
             
         })
         return{
-            title, searchActions,resetFilters, addButtonLabel, searchFilters, tableColumns, actionsList,
+            showAddButton,showActions,title, searchCases,resetFilters, addButtonLabel, searchFilters, tableColumns, casesList,
             currentPage,propResults, propArrLen, propCount, pageCount, showNextBtn, showPreviousBtn,
             loadPrev, loadNext, firstPage, lastPage, idField, actions, handleActionClick, propModalVisible, closeModal,
-            submitButtonLabel, showModal, addNewAction, showLoader, loader, hideLoader, modal_loader, modal_top, modal_left, modal_width,displayButtons,
-            showModalLoader, hideModalLoader, saveAction, formFields, handleSelectionChange, flex_basis,flex_basis_percentage,
-            removeAction, removeActions,addingRight,rightsModule,printCasesList,selectSearchQuantity,selectedValue,
+            submitButtonLabel, showModal, addNewCase, showLoader, loader, hideLoader, modal_loader, modal_top, modal_left, modal_width,displayButtons,
+            showModalLoader, hideModalLoader, saveCase, formFields, handleSelectionChange, flex_basis,flex_basis_percentage,
+            removeCase, removeCases,addingRight,rightsModule,printCasesList,selectSearchQuantity,selectedValue,
             downloadCasesCSV,downloadCasesExcel
         }
     }

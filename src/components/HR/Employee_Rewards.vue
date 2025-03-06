@@ -340,6 +340,7 @@ export default{
                 staff_number: staff_number_search.value,
                 date_from: date_from_search.value,
                 date_to: date_to_search.value,
+                user: "",
                 company_id: companyID.value,
                 page_size: selectedValue.value
             } 

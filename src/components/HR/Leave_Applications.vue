@@ -564,6 +564,7 @@ export default{
                 start_date: start_date_search.value,
                 end_date: end_date_search.value,
                 leave_type: leaveSearchID.value,
+                user: "",
                 company_id: companyID.value,
                 page_size: selectedValue.value
             } 

@@ -146,8 +146,6 @@ export default{
         const actions = ref([
             {name: 'edit', icon: 'fa fa-edit', title: 'Edit Application', rightName: 'Editing Employee Loan Applications'},
             {name: 'view', icon: 'fa fa-file-pdf-o', title: 'View Loan', rightName: 'Viewing Employee Loan Ledger'},
-            {name: 'approve/reject', icon: 'fa fa-check-circle', title: 'Approve/Reject Loan', rightName: 'Approving Employee Loan Applications'},
-            {name: 'disburse', icon: 'fa fa-credit-card', title: 'Disburse Loan', rightName: 'Disbursing Employee Loan'},
             {name: 'delete', icon: 'fa fa-trash', title: 'Delete Application', rightName: 'Deleting Employee Loan Applications'},
         ])
         const companyID = computed(()=> store.state.userData.company_id);
@@ -171,8 +169,6 @@ export default{
  
         const searchFilters = ref([
             {type:'text', placeholder:"Loan No...", value: loan_number_search, width:48,},
-            {type:'text', placeholder:"Employee Name...", value: name_search, width:48,},
-            {type:'text', placeholder:"Staff No...", value: staff_number, width:48,},
             {
                 type:'dropdown', placeholder:"Status..", value: approval_status_search, width:40,
                 options: [{text:'Pending',value:'Pending'},{text:'Approved',value:'Approved'},{text:'Rejected',value:'Rejected'}]
@@ -200,61 +196,10 @@ export default{
             }
         }
         const removeApplication = async() =>{
-            if(selectedIds.value.length == 1){
-                let formData = {
-                    company: companyID.value,
-                    loan_application: selectedIds.value
-                }
-                try{
-                    const response = await store.dispatch('Employee_Loan_Applications/deleteLoanApplication',formData)
-                    if(response && response.data.msg == "Success"){
-                        toast.success("Application(s) Removed Succesfully");
-                        searchApplications();
-                    }else if(response && response.data.msg == "Failed"){
-                        toast.error("Failed To Remove Application");
-                        searchApplications();
-                    }
-                }
-                catch(error){
-                    console.error(error.message);
-                    toast.error('Failed to remove Application: ' + error.message);
-                }
-                finally{
-                    selectedIds.value = [];
-                }
-            }else if(selectedIds.value.length > 1){
-                toast.error("You have selected more than 1 Application") 
-            }else{
-                toast.error("Please Select An Application To Remove")
-            }
+
         }
         const removeApplications = async() =>{
-            if(selectedIds.value.length){
-                let formData = {
-                    company: companyID.value,
-                    loan_application: selectedIds.value
-                }
-                try{
-                    const response = await store.dispatch('Employee_Loan_Applications/deleteLoanApplication',formData)
-                    if(response && response.data.msg == "Success"){
-                        toast.success("Application(s) Removed Succesfully");
-                        searchApplications();
-                    }else if(response && response.data.msg == "Failed"){
-                        toast.error("Failed To Remove Application");
-                        searchApplications();
-                    }
-                }
-                catch(error){
-                    console.error(error.message);
-                    toast.error('Failed to remove Application: ' + error.message);
-                }
-                finally{
-                    selectedIds.value = [];
 
-                }
-            }else{
-                toast.error("Please Select An Application To Remove")
-            }
         };
         const showTransModalLoader = () =>{
             trans_modal_loader.value = "block";
@@ -314,7 +259,7 @@ export default{
                 staff_number: staff_number.value,
                 approval_status: approval_status_search.value,
                 disbursed: disbursed_status_search.value,
-                user: "",
+                user: userID.value,
                 company_id: companyID.value,
                 page_size: selectedValue.value
             } 
@@ -388,7 +333,7 @@ export default{
         const addNewApplication = async() =>{
             store.commit('Employee_Loan_Applications/initializeStore');
             await store.dispatch('Employee_Loan_Applications/updateState', {selectedApplication: null,selectedEmployee: null,loanSchedules: [],isEditing: false});
-            store.commit('pageTab/ADD_PAGE', {'HR':'Loan_Application_Details'});
+            store.commit('pageTab/ADD_PAGE', {'EPS':'Loan_Application_Details'});
             store.state.pageTab.hrActiveTab = 'Loan_Application_Details';          
         }
         const handleActionClick = async(rowIndex, action, row) =>{
@@ -403,7 +348,7 @@ export default{
                     }
                     await store.dispatch('Employee_Loan_Applications/fetchLoanApplication',formData).
                     then(()=>{
-                        store.commit('pageTab/ADD_PAGE', {'HR':'Loan_Application_Details'})
+                        store.commit('pageTab/ADD_PAGE', {'EPS':'Loan_Application_Details'})
                         store.state.pageTab.hrActiveTab = 'Loan_Application_Details';
                     })
                 }else{
@@ -442,7 +387,7 @@ export default{
                     }
                     await store.dispatch('Employee_Loan_Applications/fetchLoanDetails',formData).
                     then(()=>{
-                        store.commit('pageTab/ADD_PAGE', {'HR':'Loan_Ledger'});
+                        store.commit('pageTab/ADD_PAGE', {'EPS':'Loan_Ledger'});
                         store.state.pageTab.hrActiveTab = 'Loan_Ledger'; 
                     })
                 }else{

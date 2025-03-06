@@ -67,6 +67,7 @@ export default{
         const showAddButton = ref(false);
         const title = ref('');
         const companyID = computed(()=> store.state.userData.company_id);
+        const userID = computed(()=> store.state.userData.user_id);
         const idField = 'skill_rating_id';
         const rightsModule = ref('HR');
         const periodID = ref('');
@@ -129,8 +130,6 @@ export default{
                 fetchData: store.dispatch('Appraisal_Periods/fetchAppraisalPeriods', {company:companyID.value}),
                 clearSearch: clearSelectedPeriod
             },
-            {type:'text', placeholder:"Staff No...", value: staff_number_search, width:32},
-            {type:'text', placeholder:"Employee Name...", value: employee_name_search, width:64},
             {type:'date', placeholder:"From Date...", value: date_from_search, width:36, title: "From Date Search"},
             {type:'date', placeholder:"To Date...", value: date_to_search, width:36, title: "To Date Search"},
         ]);
@@ -162,7 +161,7 @@ export default{
                 date_from: date_from_search.value,
                 date_to: date_to_search.value,
                 period: periodID.value,
-                user: "",
+                user: userID.value,
                 company: companyID.value,
                 page_size: selectedValue.value
             }

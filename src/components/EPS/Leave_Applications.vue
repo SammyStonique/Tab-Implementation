@@ -3,19 +3,19 @@
         <PageComponent 
             :loader="loader" @showLoader="showLoader" @hideLoader="hideLoader"
             :addButtonLabel="addButtonLabel"
-            @handleAddNew="addNewAmmendment"
+            @handleAddNew="addNewApplication"
             :searchFilters="searchFilters"
-            @searchPage="searchAmmendments"
+            @searchPage="searchApplications"
             @resetFilters="resetFilters"
-            @removeItem="removeAmmendment"
-            @removeSelectedItems="removeAmmendments"
-            @printList="printAmmendmentsList"
-            @printExcel="downloadAmmendmentsExcel"
-            @printCSV="downloadAmmendmentsCSV"
+            @removeItem="removeApplication"
+            @removeSelectedItems="removeApplications"
+            @printList="printApplicationsList"
+            @printExcel="downloadApplicationsExcel"
+            @printCSV="downloadApplicationsCSV"
             :addingRight="addingRight"
             :rightsModule="rightsModule"
             :columns="tableColumns"
-            :rows="ammendmentsList"
+            :rows="applicationsList"
             :actions="actions"
             :idField="idField"
             @handleSelectionChange="handleSelectionChange"
@@ -36,7 +36,7 @@
             :loader="modal_loader" @showLoader="showModalLoader" @hideLoader="hideModalLoader" @closeModal="closeModal">
             <DynamicForm 
                 :fields="formFields" :flex_basis="flex_basis" :flex_basis_percentage="flex_basis_percentage" 
-                :displayButtons="displayButtons" @handleSubmit="saveAmmendment" @handleReset="handleReset"
+                :displayButtons="displayButtons" @handleSubmit="saveApplication" @handleReset="handleReset"
             />
         </MovableModal>
         <MovableModal v-model:visible="appModalVisible" :title="appTitle" :modal_top="modal_top" :modal_left="modal_left" :modal_width="modal_width"
@@ -44,7 +44,7 @@
         >
             <DynamicForm 
                 :fields="formFields1" :flex_basis="flex_basis" :flex_basis_percentage="flex_basis_percentage" 
-                :displayButtons="displayButtons" @handleSubmit="approveLeaveAmmendment" @handleReset="handleAppReset"
+                :displayButtons="displayButtons" @handleSubmit="approveLeaveApplication" @handleReset="handleAppReset"
             />
         </MovableModal>
     </div>
@@ -61,7 +61,7 @@ import { useToast } from "vue-toastification";
 import PrintJS from 'print-js';
 
 export default{
-    name: 'Leave_Ammendments',
+    name: 'Leave_Applications',
     components:{
         PageComponent, MovableModal,DynamicForm
     },
@@ -74,15 +74,15 @@ export default{
         const emplComponentKey = ref(0);
         const levComponentKey = ref(0);
         const levSearchComponentKey = ref(0);
-        const idField = 'leave_ammendment_id';
-        const addButtonLabel = ref('New Leave Ammendment');
-        const addingRight = ref('Adding Leave Ammendments');
+        const idField = 'leave_application_id';
+        const addButtonLabel = ref('New Leave Application');
+        const addingRight = ref('Adding Leave Applications');
         const rightsModule = ref('HR');
-        const title = ref('Leave Ammendment Details');
-        const appTitle = ref('Approve Leave Ammendment');
+        const title = ref('Leave Application Details');
+        const appTitle = ref('Approve Leave Application');
         const submitButtonLabel = ref('Add');
         const selectedIds = ref([]);
-        const ammendmentsList = ref([]);
+        const applicationsList = ref([]);
         const propResults = ref([]);
         const propArrLen = ref(0);
         const propCount = ref(0);
@@ -101,21 +101,19 @@ export default{
         const modal_left = ref('500px');
         const modal_width = ref('30vw');
         const employeeID = ref('');
-        const applicationID = ref('');
         const leaveID = ref('');
-        const applicationSearchID = ref('');
-        const ammendmentID = ref('');
+        const leaveSearchID = ref('');
+        const applicationID = ref('');
         const requestedDays = ref(0);
         const computedRequestedDays = computed(()=> requestedDays);
         const leaveBalance = ref(0);
         const computedLeaveBalance = computed(()=> leaveBalance);
-        const approvedDays = ref(0);
-        const computedApprovedDays = computed(()=> approvedDays);
-        const isEditing = computed(()=> store.state.Leave_Ammendments.isEditing);
-        const selectedAmmendment = computed(()=> store.state.Leave_Ammendments.selectedAmmendment);
-        const selectedEmployee = computed(()=> store.state.Leave_Ammendments.selectedEmployee);
-        const selectedLeave = computed(()=> store.state.Leave_Ammendments.selectedLeave);
-        const applicationArray = computed(() => store.state.Leave_Applications.applicationArr);
+        const isEditing = computed(()=> store.state.Leave_Applications.isEditing);
+        const selectedApplication = computed(()=> store.state.Leave_Applications.selectedApplication);
+        const selectedEmployee = computed(()=> store.state.Leave_Applications.selectedEmployee);
+        const selectedLeave = computed(()=> store.state.Leave_Applications.selectedLeave);
+        const leaveArray = computed(() => store.state.Leave_Types.leaveArr);
+        const employeeArray = computed(() => store.state.Employees.employeeArr);
         const excSaturday = computed(()=> store.state.Leave_Types.excSaturday);
         const excSunday = computed(()=> store.state.Leave_Types.excSunday);
         const showModal = ref(false);
@@ -127,88 +125,89 @@ export default{
             {label: "Leave Type", key: "leave_name"},
             {label: "Start Date", key:"start_date"},
             {label: "End Date", key:"end_date"},
-            {label: "Type", key:"ammendment_type"},
-            {label: "Days", key:"days_ammended"},
-            {label: "Reason", key: "reason"},
+            {label: "Applied", key:"days_requested"},
             {label: "Approved", key:"days_approved"},
             {label: "Status", key:"status"},
         ])
         const actions = ref([
-            {name: 'edit', icon: 'fa fa-edit', title: 'Edit Ammendment', rightName: 'Editing Leave Ammendments'},
-            {name: 'approve', icon: 'fa fa-check-circle', title: 'Approve Ammendment', rightName: 'Approve Leave Ammendments'},
-            {name: 'delete', icon: 'fa fa-trash', title: 'Delete Ammendment', rightName: 'Deleting Leave Ammendments'},
+            {name: 'edit', icon: 'fa fa-edit', title: 'Edit Application', rightName: 'Editing Leave Applications'},
+            {name: 'delete', icon: 'fa fa-trash', title: 'Delete Application', rightName: 'Deleting Leave Applications'},
         ])
         const companyID = computed(()=> store.state.userData.company_id);
+        const userID = computed(()=> store.state.userData.user_id);
         const employee_name_search = ref('');
         const staff_number_search = ref('');
         const status_search = ref('');
         const start_date_search = ref('');
         const end_date_search = ref('');
-        const handleSelectedSearchApplication = async(option) =>{
-            await store.dispatch('Leave_Applications/handleSelectedLeaveApplication', option)
-            applicationSearchID.value = store.state.Leave_Applications.applicationID;
+        const handleSelectedSearchLeave = async(option) =>{
+            await store.dispatch('Leave_Types/handleSelectedLeaveType', option)
+            leaveSearchID.value = store.state.Leave_Types.leaveID;
             
         };
-        const clearSelectedSearchApplication = async() =>{
-            await store.dispatch('Leave_Applications/updateState', {applicationID: ''});
-            applicationSearchID.value = store.state.Leave_Applications.applicationID;
+        const clearSelectedSearchLeave = async() =>{
+            await store.dispatch('Leave_Types/updateState', {leaveID: ''});
+            leaveSearchID.value = store.state.Leave_Types.leaveID;
         };
         const searchFilters = ref([
-            {type:'text', placeholder:"Staff No...", value: staff_number_search, width:32,},
-            {type:'text', placeholder:"Employee Name...", value: employee_name_search, width:64,},
 
+            {  
+                type:'search-dropdown', value: leaveSearchID.value, componentKey: levSearchComponentKey,
+                selectOptions: leaveArray, optionSelected: handleSelectedSearchLeave,
+                searchPlaceholder: 'Select Leave Type...', dropdownWidth: '200px',
+                fetchData: store.dispatch('Leave_Types/fetchLeaveTypes', {company:companyID.value}),
+                clearSearch: clearSelectedSearchLeave
+            },
             {
-                type:'dropdown', placeholder:"Status..", value: status_search, width:24,
+                type:'dropdown', placeholder:"Status..", value: status_search, width:32,
                 options: [{text:'Pending',value:'Pending'},{text:'Approved',value:'Approved'},{text:'Rejected',value:'Rejected'}]
             },
             {type:'date', placeholder:"Start Date...", value: start_date_search, width:32,},
             {type:'date', placeholder:"End Date...", value: end_date_search, width:32,},
-            {  
-                type:'search-dropdown', value: applicationSearchID.value, componentKey: levSearchComponentKey,
-                selectOptions: applicationArray, optionSelected: handleSelectedSearchApplication,
-                searchPlaceholder: 'Select Leave Application...', dropdownWidth: '350px',
-                fetchData: store.dispatch('Leave_Applications/fetchLeaveApplications', {company:companyID.value, status:"Approved"}),
-                clearSearch: clearSelectedSearchApplication
-            },
         ]);
         const handleSelectionChange = (ids) => {
             selectedIds.value = ids;
         };
-        const handleSelectedApplication = async(option) =>{
-            await store.dispatch('Leave_Applications/handleSelectedLeaveApplication', option)
-            applicationID.value = store.state.Leave_Applications.applicationID;
-            leaveID.value = store.state.Leave_Applications.leaveID;
-            employeeID.value = store.state.Leave_Applications.employeeID;
-            approvedDays.value = store.state.Leave_Applications.approvedDays;
+        const handleSelectedEmployee = async(option) =>{
+            await store.dispatch('Employees/handleSelectedEmployee', option)
+            employeeID.value = store.state.Employees.employeeID;
+        };
+        const clearSelectedEmployee = async() =>{
+            await store.dispatch('Employees/updateState', {employeeID: ''});
+            employeeID.value = store.state.Employees.employeeID;
+        };
+        const handleSelectedLeave = async(option) =>{
+            await store.dispatch('Leave_Types/handleSelectedLeaveType', option)
+            leaveID.value = store.state.Leave_Types.leaveID;
             if(leaveID.value && employeeID.value){
                 getLeaveBalance();
             }
             
         };
-        const clearSelectedApplication = async() =>{
-            await store.dispatch('Leave_Applications/updateState', {applicationID: ''});
-            applicationID.value = store.state.Leave_Applications.applicationID;
+        const clearSelectedLeave = async() =>{
+            await store.dispatch('Leave_Types/updateState', {leaveID: ''});
+            leaveID.value = store.state.Leave_Types.leaveID;
         };
         const calculateDaysRequested = (value) =>{
-            const start = new Date(formFields.value[1].value);
-            const end = new Date(formFields.value[3].value);
+            const start = new Date(formFields.value[2].value);
+            const end = new Date(formFields.value[4].value);
 
             let differenceInDays = 0;
             let totalDays = 0;
 
-            if(formFields.value[2].value == "Full Day" && formFields.value[4].value == "Full Day"){
+            if(formFields.value[3].value == "Full Day" && formFields.value[5].value == "Full Day"){
                 differenceInDays = (end.getTime() - start.getTime()) / (1000 * 3600 * 24);
                 totalDays = differenceInDays;
             }
-            else if(formFields.value[2].value == "Half Day" && formFields.value[4].value == "Half Day"){
+            else if(formFields.value[3].value == "Half Day" && formFields.value[5].value == "Half Day"){
                 differenceInDays = (end.getTime() - start.getTime()) / (1000 * 3600 * 24);
                 totalDays = differenceInDays - 1;
             }
-            else if(formFields.value[2].value == "Full Day" && formFields.value[4].value == "Half Day"){
+            else if(formFields.value[3].value == "Full Day" && formFields.value[5].value == "Half Day"){
                 differenceInDays = (end.getTime() - start.getTime()) / (1000 * 3600 * 24);
                 totalDays = differenceInDays - 0.5;
             }
-            else if(formFields.value[2].value == "Half Day" && formFields.value[4].value == "Full Day"){
+            else if(formFields.value[3].value == "Half Day" && formFields.value[5].value == "Full Day"){
                 differenceInDays = (end.getTime() - start.getTime()) / (1000 * 3600 * 24);
                 totalDays = differenceInDays - 0.5;
             }
@@ -255,27 +254,36 @@ export default{
             })
         }
         const formFields = ref([]);
+        const employeeValue = computed(() => {
+           return (selectedApplication.value && selectedApplication.value.employee && !employeeID.value) ? selectedApplication.value.employee.employee_id : employeeID.value;
+
+        });
         const leaveValue = computed(() => {
-           return (selectedAmmendment.value && selectedAmmendment.value.leave_application && !applicationID.value) ? selectedAmmendment.value.leave_application.leave_application_id : applicationID.value;
+           return (selectedApplication.value && selectedApplication.value.leave_type && !leaveID.value) ? selectedApplication.value.leave_type.leave_type_id : leaveID.value;
 
         });
         const updateFormFields = () => {
             formFields.value = [
                 {  
-                    type:'search-dropdown', label:"Leave Application", value: leaveValue.value, componentKey: levComponentKey,
-                    selectOptions: applicationArray, optionSelected: handleSelectedApplication, required: true,
-                    searchPlaceholder: 'Select Leave Application...', dropdownWidth: '500px', updateValue: selectedLeave.value,
-                    clearSearch: clearSelectedApplication
+                    type:'search-dropdown', label:"Employee", value: employeeValue.value, componentKey: emplComponentKey,
+                    selectOptions: employeeArray, optionSelected: handleSelectedEmployee, required: true,
+                    searchPlaceholder: 'Select Employee...', dropdownWidth: '500px', updateValue: selectedEmployee.value,
+                    fetchData: store.dispatch('Employees/fetchEmployees', {company:companyID.value}),
+                    clearSearch: clearSelectedEmployee
                 },
-                { type: 'date', name: 'start_date',label: "Start Date", value: selectedAmmendment.value?.start_date || '', required: true },
-                { type: 'dropdown', name: 'start_date_type',label: "Type", value: selectedAmmendment.value?.start_date_type || 'Full Day', placeholder: "", required: true, options: [{ text: 'Full Day', value: 'Full Day' }, { text: 'Half Day', value: 'Half Day' }] },
-                { type: 'date', name: 'end_date',label: "End Date", value: selectedAmmendment.value?.end_date || '', required: true, method: calculateDaysRequested },
-                { type: 'dropdown', name: 'end_date_type',label: "Type", value: selectedAmmendment.value?.end_date_type || 'Full Day', placeholder: "", required: true, options: [{ text: 'Full Day', value: 'Full Day' }, { text: 'Half Day', value: 'Half Day' }] },
-                {type:'text-area', label:"Reason", value: selectedAmmendment.value?.reason || '', textarea_rows: '2', textarea_cols: '56', required: true},
-                { type: 'dropdown', name: 'ammendment_type',label: "Ammendment Type", value: selectedAmmendment.value?.ammendment_type || '', placeholder: "", required: true, options: [{ text: 'Recall', value: 'Recall' }, { text: 'Extension', value: 'Extension' }] },
-                { type: 'text', name: 'days_ammended',label: "Days Ammended", value: selectedAmmendment.value?.days_ammended || computedRequestedDays.value, required: true},
-                { type: 'text', name: 'approved_days',label: "Approved Days", value:  computedApprovedDays.value, required: false, disabled:true },
-                { type: 'text', name: 'leave_balance',label: "Balance", value: selectedAmmendment.value?.leave_balance || computedLeaveBalance.value, required: false, disabled:true },
+                {  
+                    type:'search-dropdown', label:"Leave Type", value: leaveValue.value, componentKey: levComponentKey,
+                    selectOptions: leaveArray, optionSelected: handleSelectedLeave, required: true,
+                    searchPlaceholder: 'Select Leave Type...', dropdownWidth: '500px', updateValue: selectedLeave.value,
+                    clearSearch: clearSelectedLeave
+                },
+                { type: 'date', name: 'start_date',label: "Start Date", value: selectedApplication.value?.start_date || '', required: true },
+                { type: 'dropdown', name: 'start_date_type',label: "Type", value: selectedApplication.value?.start_date_type || 'Full Day', placeholder: "", required: true, options: [{ text: 'Full Day', value: 'Full Day' }, { text: 'Half Day', value: 'Half Day' }] },
+                { type: 'date', name: 'end_date',label: "End Date", value: selectedApplication.value?.end_date || '', required: true, method: calculateDaysRequested },
+                { type: 'dropdown', name: 'end_date_type',label: "Type", value: selectedApplication.value?.end_date_type || 'Full Day', placeholder: "", required: true, options: [{ text: 'Full Day', value: 'Full Day' }, { text: 'Half Day', value: 'Half Day' }] },
+                {type:'text-area', label:"Reason", value: selectedApplication.value?.reason || '', textarea_rows: '2', textarea_cols: '56', required: true},
+                { type: 'text', name: 'days_requested',label: "Days Requested", value: selectedApplication.value?.days_requested || computedRequestedDays.value, required: false, disabled:true },
+                { type: 'text', name: 'leave_balance',label: "Balance", value: selectedApplication.value?.leave_balance || computedLeaveBalance.value, required: false, disabled:true },
             ];
         };
         const handleReset = () =>{
@@ -285,12 +293,11 @@ export default{
             emplComponentKey.value += 1;
             employeeID.value = '';
             levComponentKey.value += 1;
-            applicationID.value = '';
-            leaveID.value = "";
+            leaveID.value = '';
         }
 
-        watch([selectedAmmendment, selectedEmployee, selectedLeave], () => {
-            if (selectedAmmendment.value && selectedEmployee.value && selectedLeave.value) {
+        watch([selectedApplication, selectedEmployee, selectedLeave], () => {
+            if (selectedApplication.value && selectedEmployee.value && selectedLeave.value) {
                 emplComponentKey.value += 1;
                 levComponentKey.value += 1;
                 updateFormFields();
@@ -305,73 +312,75 @@ export default{
         const hideModalLoader = () =>{
             modal_loader.value = "none";
         }
-        const createAmmendment = async() =>{
+        const createApplication = async() =>{
             showModalLoader();
             let formData = {
-                start_date: formFields.value[1].value,
-                start_date_type: formFields.value[2].value,
-                end_date: formFields.value[3].value,
-                end_date_type: formFields.value[4].value,
-                reason: formFields.value[5].value,
-                ammendment_type: formFields.value[6].value,
-                days_ammended: formFields.value[7].value,
-                leave_application: applicationID.value,
-                leave_application_id: applicationID.value,
+                start_date: formFields.value[2].value,
+                start_date_type: formFields.value[3].value,
+                end_date: formFields.value[4].value,
+                end_date_type: formFields.value[5].value,
+                reason: formFields.value[6].value,
+                days_requested: formFields.value[7].value,
+                employee: employeeID.value,
+                employee_id: employeeID.value,
+                leave_type: leaveID.value,
+                leave_type_id: leaveID.value,
                 company: companyID.value
             }
   
             errors.value = [];
-            for(let i=1; i < formFields.value.length; i++){
+            for(let i=2; i < formFields.value.length; i++){
                 if(formFields.value[i].value =='' && formFields.value[i].type != 'search-dropdown' && formFields.value[i].required == true){
                     errors.value.push(formFields.value[i].label);
                 }
             }
-            if(leaveValue.value == ''){
+            if(employeeValue.value == '' || leaveValue.value == ''){
                 errors.value.push('error')
             }
 
             if(errors.value.length){
                 toast.error('Fill In Required Fields');
                 hideModalLoader();
-            }else if(((requestedDays.value > leaveBalance.value) && formFields.value[6].value == "Extension") || requestedDays.value <= 0){
+            }else if(requestedDays.value > leaveBalance.value || requestedDays.value <= 0){
                 toast.error('Invalid Requested Days');
                 hideModalLoader();
             }else{
                 try {
-                    const response = await store.dispatch('Leave_Ammendments/createLeaveAmmendment', formData);
+                    const response = await store.dispatch('Leave_Applications/createLeaveApplication', formData);
                     if (response && response.status === 201) {
                         hideModalLoader();
-                        toast.success('Leave Ammendment created successfully!');
+                        toast.success('Leave Application created successfully!');
                         handleReset();
                         emplComponentKey.value += 1;
                         levComponentKey.value += 1;
                         closeModal();
                     } else {
-                        toast.error('An error occurred while creating the Leave Ammendment.');
+                        toast.error('An error occurred while creating the Leave Application.');
                     }
                 } catch (error) {
                     console.error(error.message);
-                    toast.error('Failed to create Leave Ammendment: ' + error.message);
+                    toast.error('Failed to create Leave Application: ' + error.message);
                 } finally {
                     hideModalLoader();
-                    searchAmmendments();
+                    searchApplications();
                 }
             }
         }
-        const updateAmmendment = async() =>{
+        const updateApplication = async() =>{
             showModalLoader();
             errors.value = [];
             let formData = {
-                leave_ammendment: selectedAmmendment.value.leave_ammendment_id,
-                start_date: formFields.value[1].value,
-                start_date_type: formFields.value[2].value,
-                end_date: formFields.value[3].value,
-                end_date_type: formFields.value[4].value,
-                reason: formFields.value[5].value,
-                ammendment_type: formFields.value[6].value,
-                days_ammended: formFields.value[7].value,
-                leave_application: leaveValue.value,
-                leave_application_id: leaveValue.value,
+                leave_application: selectedApplication.value.leave_application_id,
+                start_date: formFields.value[2].value,
+                start_date_type: formFields.value[3].value,
+                end_date: formFields.value[4].value,
+                end_date_type: formFields.value[5].value,
+                reason: formFields.value[6].value,
+                days_requested: formFields.value[7].value,
+                employee: employeeValue.value,
+                employee_id: employeeValue.value,
+                leave_type: leaveValue.value,
+                leave_type_id: leaveValue.value,
                 company: companyID.value
             }
 
@@ -380,7 +389,7 @@ export default{
                     errors.value.push('Error');
                 }
             }
-            if(leaveValue.value == ''){
+            if(employeeValue.value == '' || leaveValue.value == ''){
                 errors.value.push('error')
             }
             if(errors.value.length){
@@ -388,33 +397,33 @@ export default{
                 hideModalLoader();
             }else{
                 try {
-                    const response = await store.dispatch('Leave_Ammendments/updateLeaveAmmendment', formData);
+                    const response = await store.dispatch('Leave_Applications/updateLeaveApplication', formData);
                     if (response && response.status === 200) {
                         hideModalLoader();
                         handleReset();
                         emplComponentKey.value += 1;
                         levComponentKey.value += 1;
-                        toast.success("Leave Ammendment updated successfully!");    
+                        toast.success("Leave Application updated successfully!");    
                         closeModal();          
                     } else {
-                        toast.error('An error occurred while updating the Leave Ammendment.');
+                        toast.error('An error occurred while updating the Leave Application.');
                     }
                 } catch (error) {
                     console.error(error.message);
-                    toast.error('Failed to update Leave Ammendment: ' + error.message);
+                    toast.error('Failed to update Leave Application: ' + error.message);
                 } finally {
                     hideModalLoader();
                     propModalVisible.value = false;
-                    store.dispatch("Leave_Ammendments/updateState",{selectedAmmendment:null})
-                    searchAmmendments();
+                    store.dispatch("Leave_Applications/updateState",{selectedApplication:null})
+                    searchApplications();
                 }             
             }
         }
-        const saveAmmendment = () =>{
+        const saveApplication = () =>{
             if(isEditing.value == true){
-                updateAmmendment();
+                updateApplication();
             }else{
-                createAmmendment();
+                createApplication();
             }
         };
         const formFields1 = ref([]);
@@ -441,10 +450,10 @@ export default{
         const hideAppModalLoader = () =>{
             app_modal_loader.value = "none";
         }
-        const approveLeaveAmmendment = async() =>{
+        const approveLeaveApplication = async() =>{
             showAppModalLoader();
             let formData = {
-                leave_ammendment: ammendmentID.value,
+                leave_application: applicationID.value,
                 date: formFields1.value[0].value,
                 days_approved: formFields1.value[1].value,
                 status: formFields1.value[2].value,
@@ -464,20 +473,20 @@ export default{
                 hideAppModalLoader();
             }else{
                 try {
-                    const response = await store.dispatch('Leave_Ammendments/approveLeaveAmmendment', formData);
+                    const response = await store.dispatch('Leave_Applications/approveLeaveApplication', formData);
                     if (response && response.status === 200) {
                         hideAppModalLoader();
                         toast.success('Success!');
                         handleAppReset();
                     } else {
-                        toast.error('An error occurred while Approving the Leave Ammendment.');
+                        toast.error('An error occurred while Approving the Leave Application.');
                     }
                 } catch (error) {
                     console.error(error.message);
-                    toast.error('Failed to Approve Leave Ammendment: ' + error.message);
+                    toast.error('Failed to Approve Leave Application: ' + error.message);
                 } finally {
                     hideAppModalLoader();
-                    searchAmmendments();
+                    searchApplications();
                 }
             }
         };
@@ -486,56 +495,11 @@ export default{
             handleAppReset();
             requestedDays.value = 0;
         }
-        const removeAmmendment = async() =>{
-            if(selectedIds.value.length == 1){
-                let formData = {
-                    company: companyID.value,
-                    leave_ammendment: selectedIds.value
-                }
-                try{
-                    const response = await store.dispatch('Leave_Ammendments/deleteLeaveAmmendment',formData)
-                    if(response && response.status == 200){
-                        toast.success("Leave Ammendment Removed Succesfully");
-                        searchAmmendments();
-                    }
-                }
-                catch(error){
-                    console.error(error.message);
-                    toast.error('Failed to remove Leave Ammendment: ' + error.message);
-                }
-                finally{
-                    selectedIds.value = [];
-                }
-            }else if(selectedIds.value.length > 1){
-                toast.error("You have selected more than 1 Leave Ammendment") 
-            }else{
-                toast.error("Please Select A Leave Ammendment To Remove")
-            }
-        }
-        const removeAmmendments = async() =>{
-            if(selectedIds.value.length){
-                let formData = {
-                    company: companyID.value,
-                    leave_ammendment: selectedIds.value
-                }
-                try{
-                    const response = await store.dispatch('Leave_Ammendments/deleteLeaveAmmendment',formData)
-                    if(response && response.status == 200){
-                        toast.success("Leave Ammendment(s) Removed Succesfully");
-                        searchAmmendments();
-                    }
-                }
-                catch(error){
-                    console.error(error.message);
-                    toast.error('Failed to remove Leave Ammendment: ' + error.message);
-                }
-                finally{
-                    selectedIds.value = [];
+        const removeApplication = async() =>{
 
-                }
-            }else{
-                toast.error("Please Select A Leave Ammendment To Remove")
-            }
+        }
+        const removeApplications = async() =>{
+   
         }
         const showLoader = () =>{
             loader.value = "block";
@@ -543,7 +507,7 @@ export default{
         const hideLoader = () =>{
             loader.value = "none";
         }
-        const searchAmmendments = () =>{
+        const searchApplications = () =>{
             showLoader();
             showNextBtn.value = false;
             showPreviousBtn.value = false;
@@ -553,18 +517,18 @@ export default{
                 status: status_search.value,
                 start_date: start_date_search.value,
                 end_date: end_date_search.value,
-                leave_type: applicationSearchID.value,
-                user: "",
+                leave_type: leaveSearchID.value,
+                user: userID.value,
                 company_id: companyID.value,
                 page_size: selectedValue.value
             } 
             axios
-            .post(`api/v1/leave-ammendments-search/?page=${currentPage.value}`,formData)
+            .post(`api/v1/leave-applications-search/?page=${currentPage.value}`,formData)
             .then((response)=>{
-                ammendmentsList.value = response.data.results;
-                store.commit('Leave_Ammendments/LIST_AmmendmentS', ammendmentsList.value)
+                applicationsList.value = response.data.results;
+                store.commit('Leave_Applications/LIST_APPLICATIONS', applicationsList.value)
                 propResults.value = response.data;
-                propArrLen.value = ammendmentsList.value.length;
+                propArrLen.value = applicationsList.value.length;
                 propCount.value = propResults.value.count;
                 pageCount.value = Math.ceil(propCount.value / selectedValue.value);
                 if(response.data.next){
@@ -583,11 +547,11 @@ export default{
         };
         const selectSearchQuantity = (newValue) =>{
             selectedValue.value = newValue;
-            searchAmmendments(selectedValue.value);
+            searchApplications(selectedValue.value);
         };
         const resetFilters = () =>{
             levSearchComponentKey.value += 1;
-            applicationSearchID.value = "";
+            leaveSearchID.value = "";
             currentPage.value = 1;
             selectedValue.value = 50;
             staff_number_search.value = "";
@@ -595,7 +559,7 @@ export default{
             status_search.value = "";
             start_date_search.value = "";
             end_date_search.value = "";
-            searchAmmendments();
+            searchApplications();
         }
         const loadPrev = () =>{
             if (currentPage.value <= 1){
@@ -604,7 +568,7 @@ export default{
                 currentPage.value -= 1;
             }
             
-            searchAmmendments();
+            searchApplications();
             // scrollToTop();
         }
         const loadNext = () =>{
@@ -614,65 +578,65 @@ export default{
                 currentPage.value += 1;
             }
             
-            searchAmmendments();
+            searchApplications();
             // scrollToTop(); 
         }
         const firstPage = ()=>{
             currentPage.value = 1;
-            searchAmmendments();
+            searchApplications();
             // scrollToTop();
         }
         const lastPage = () =>{
             currentPage.value = pageCount.value;
-            searchAmmendments();
+            searchApplications();
             // scrollToTop();
         }
-        const addNewAmmendment = () =>{
+        const addNewApplication = () =>{
             requestedDays.value = 0;
-            store.dispatch("Leave_Ammendments/updateState",{selectedAmmendment:null, selectedEmployee:null, selectedLeave:null});
+            store.dispatch("Leave_Applications/updateState",{selectedApplication:null, selectedEmployee:null, selectedLeave:null});
             emplComponentKey.value += 1;
             levComponentKey.value += 1;
             handleReset();
             updateFormFields();
             propModalVisible.value = true;
-            store.dispatch("Leave_Ammendments/updateState",{isEditing:false})
+            store.dispatch("Leave_Applications/updateState",{isEditing:false})
             flex_basis.value = '1/3';
             flex_basis_percentage.value = '33.333';
         }
         const handleActionClick = async(rowIndex, action, row) =>{
             if( action == 'edit'){
-                const ammendmentID = row['leave_ammendment_id'];
+                const applicationID = row['leave_application_id'];
                 const approvalStatus = row['status'];
                 if (approvalStatus != "Pending"){
-                    toast.error(`Cannot Edit ${approvalStatus} Ammendment!`)
+                    toast.error(`Cannot Edit ${approvalStatus} Application!`)
                 }else{
                     let formData = {
                         company: companyID.value,
-                        leave_ammendment: ammendmentID
+                        leave_application: applicationID
                     }
-                    await store.dispatch('Leave_Ammendments/fetchLeaveAmmendment',formData)
+                    await store.dispatch('Leave_Applications/fetchLeaveApplication',formData)
                     propModalVisible.value = true;
                     flex_basis.value = '1/3';
                     flex_basis_percentage.value = '33.333';
                 }
 
             }else if(action == 'delete'){
-                const ammendmentID = [row[idField]];
+                const applicationID = [row[idField]];
                 let formData = {
                     company: companyID.value,
-                    leave_ammendment: ammendmentID
+                    leave_application: applicationID
                 }
-                await store.dispatch('Leave_Ammendments/deleteLeaveAmmendment',formData).
+                await store.dispatch('Leave_Applications/deleteLeaveApplication',formData).
                 then(()=>{
-                    searchAmmendments();
+                    searchApplications();
                 })
             }else if(action == 'approve'){
                 const approvalStatus = row['status'];
-                requestedDays.value = row['days_ammended'];
+                requestedDays.value = row['days_requested'];
                 if (approvalStatus == "Approved"){
-                    toast.error("Ammendment Already Approved!")
+                    toast.error("Application Already Approved!")
                 }else{
-                    ammendmentID.value = row['leave_ammendment_id'];
+                    applicationID.value = row['leave_application_id'];
                     appModalVisible.value = true;
                     flex_basis.value = '1/2';
                     flex_basis_percentage.value = '50';
@@ -683,7 +647,7 @@ export default{
         const closeModal = () =>{
             propModalVisible.value = false;
         };
-        const printAmmendmentsList = () =>{
+        const printApplicationsList = () =>{
             showLoader();
             let formData = {
                 employee_name: employee_name_search.value,
@@ -693,7 +657,7 @@ export default{
             } 
 
             axios
-            .post("api/v1/export-leave-ammendments-pdf/", formData, { responseType: 'blob' })
+            .post("api/v1/export-leave-applications-pdf/", formData, { responseType: 'blob' })
                 .then((response)=>{
                     if(response.status == 200){
                         const blob1 = new Blob([response.data]);
@@ -709,7 +673,7 @@ export default{
                 hideLoader();
             })
         };
-        const downloadAmmendmentsExcel = () =>{
+        const downloadApplicationsExcel = () =>{
             showLoader();
             let formData = {
                 employee_name: employee_name_search.value,
@@ -717,13 +681,13 @@ export default{
                 status: status_search.value,
                 company_id: companyID.value,
             }
-            axios.post("api/v1/export-leave-ammendments-excel/", formData, { responseType: 'blob' })
+            axios.post("api/v1/export-leave-applications-excel/", formData, { responseType: 'blob' })
             .then((response)=>{
                 if(response.status == 200){
                 const url = window.URL.createObjectURL(new Blob([response.data]));
                 const link = document.createElement('a');
                 link.href = url;
-                link.setAttribute('download', 'Leave Ammendments.xlsx');
+                link.setAttribute('download', 'Leave Applications.xlsx');
                 document.body.appendChild(link);
                 link.click();
                 }
@@ -735,7 +699,7 @@ export default{
                 hideLoader();
             })
         };
-        const downloadAmmendmentsCSV = () =>{
+        const downloadApplicationsCSV = () =>{
             showLoader();
             let formData = {
                 employee_name: employee_name_search.value,
@@ -743,13 +707,13 @@ export default{
                 status: status_search.value,
                 company_id: companyID.value,
             }
-            axios.post("api/v1/export-leave-ammendments-csv/", formData, { responseType: 'blob' })
+            axios.post("api/v1/export-leave-applications-csv/", formData, { responseType: 'blob' })
             .then((response)=>{
                 if(response.status == 200){
                 const url = window.URL.createObjectURL(new Blob([response.data]));
                 const link = document.createElement('a');
                 link.href = url;
-                link.setAttribute('download', 'Leave Ammendments.csv');
+                link.setAttribute('download', 'Leave Applications.csv');
                 document.body.appendChild(link);
                 link.click();
                 }
@@ -762,17 +726,17 @@ export default{
             })
         };
         onBeforeMount(()=>{
-            searchAmmendments();
+            searchApplications();
             
         })
         return{
-            title, searchAmmendments,resetFilters, addButtonLabel, searchFilters, tableColumns, ammendmentsList,
+            title, searchApplications,resetFilters, addButtonLabel, searchFilters, tableColumns, applicationsList,
             currentPage,propResults, propArrLen, propCount, pageCount, showNextBtn, showPreviousBtn,
             loadPrev, loadNext, firstPage, lastPage, idField, actions, handleActionClick, propModalVisible, closeModal,
-            submitButtonLabel, showModal, addNewAmmendment, showLoader, loader, hideLoader, modal_loader, modal_top, modal_left, modal_width,displayButtons,
-            showModalLoader, hideModalLoader, saveAmmendment, formFields, handleSelectionChange, flex_basis,flex_basis_percentage,
-            removeAmmendment, removeAmmendments,addingRight,rightsModule,printAmmendmentsList,selectSearchQuantity,selectedValue,
-            downloadAmmendmentsCSV,downloadAmmendmentsExcel,app_modal_loader,appTitle,appModalVisible,approveLeaveAmmendment,showAppModalLoader,hideAppModalLoader,
+            submitButtonLabel, showModal, addNewApplication, showLoader, loader, hideLoader, modal_loader, modal_top, modal_left, modal_width,displayButtons,
+            showModalLoader, hideModalLoader, saveApplication, formFields, handleSelectionChange, flex_basis,flex_basis_percentage,
+            removeApplication, removeApplications,addingRight,rightsModule,printApplicationsList,selectSearchQuantity,selectedValue,
+            downloadApplicationsCSV,downloadApplicationsExcel,app_modal_loader,appTitle,appModalVisible,approveLeaveApplication,showAppModalLoader,hideAppModalLoader,
             formFields1,closeAppModal,handleAppReset
         }
     }

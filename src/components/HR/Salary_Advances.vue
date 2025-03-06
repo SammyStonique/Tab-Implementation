@@ -349,6 +349,7 @@ export default{
                 staff_number: staff_number_search.value,
                 month: month_search.value,
                 year: year_search.value,
+                user: "",
                 company_id: companyID.value,
                 page_size: selectedValue.value
             } 

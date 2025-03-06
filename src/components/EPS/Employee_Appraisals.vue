@@ -110,7 +110,6 @@ export default{
         ])
         const actions = ref([
             {name: 'edit', icon: 'fa fa-edit', title: 'Edit Appraisal', rightName: 'Editing Employee Appraisals'},
-            {name: 'approve/reject', icon: 'fa fa-check-circle', title: 'Approve/Reject Appraisal', rightName: 'Approving Employee Appraisals'},
             {name: 'delete', icon: 'fa fa-trash', title: 'Delete Appraisal', rightName: 'Deleting Employee Appraisals'},
         ])
         const companyID = computed(()=> store.state.userData.company_id);
@@ -143,61 +142,10 @@ export default{
             }
         }
         const removeAppraisal = async() =>{
-            if(selectedIds.value.length == 1){
-                let formData = {
-                    company: companyID.value,
-                    employee_appraisal: selectedIds.value
-                }
-                try{
-                    const response = await store.dispatch('Appraisals/deleteAppraisal',formData)
-                    if(response && response.data.msg == "Success"){
-                        toast.success("Appraisal(s) Removed Succesfully");
-                        searchAppraisals();
-                    }else if(response && response.data.msg == "Failed"){
-                        toast.error("Failed To Remove Appraisal");
-                        searchAppraisals();
-                    }
-                }
-                catch(error){
-                    console.error(error.message);
-                    toast.error('Failed to remove Appraisal: ' + error.message);
-                }
-                finally{
-                    selectedIds.value = [];
-                }
-            }else if(selectedIds.value.length > 1){
-                toast.error("You have selected more than 1 Appraisal") 
-            }else{
-                toast.error("Please Select An Appraisal To Remove")
-            }
+
         }
         const removeAppraisals = async() =>{
-            if(selectedIds.value.length){
-                let formData = {
-                    company: companyID.value,
-                    employee_appraisal: selectedIds.value
-                }
-                try{
-                    const response = await store.dispatch('Appraisals/deleteAppraisal',formData)
-                    if(response && response.data.msg == "Success"){
-                        toast.success("Appraisal(s) Removed Succesfully");
-                        searchAppraisals();
-                    }else if(response && response.data.msg == "Failed"){
-                        toast.error("Failed To Remove Appraisal");
-                        searchAppraisals();
-                    }
-                }
-                catch(error){
-                    console.error(error.message);
-                    toast.error('Failed to remove Appraisal: ' + error.message);
-                }
-                finally{
-                    selectedIds.value = [];
 
-                }
-            }else{
-                toast.error("Please Select An Appraisal To Remove")
-            }
         };
         const showTransModalLoader = () =>{
             trans_modal_loader.value = "block";
@@ -252,7 +200,7 @@ export default{
             let formData = {
                 employee_name: name_search.value,
                 staff_number: staff_number.value,
-                user: "",
+                user: userID.value,
                 company_id: companyID.value,
                 page_size: selectedValue.value
             } 

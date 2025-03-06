@@ -347,6 +347,7 @@ export default{
                 date_from: date_from_search.value,
                 date_to: date_to_search.value,
                 case_number: case_number_search.value,
+                user: "",
                 company_id: companyID.value,
                 page_size: selectedValue.value
             } 

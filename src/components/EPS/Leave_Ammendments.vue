@@ -135,10 +135,10 @@ export default{
         ])
         const actions = ref([
             {name: 'edit', icon: 'fa fa-edit', title: 'Edit Ammendment', rightName: 'Editing Leave Ammendments'},
-            {name: 'approve', icon: 'fa fa-check-circle', title: 'Approve Ammendment', rightName: 'Approve Leave Ammendments'},
             {name: 'delete', icon: 'fa fa-trash', title: 'Delete Ammendment', rightName: 'Deleting Leave Ammendments'},
         ])
         const companyID = computed(()=> store.state.userData.company_id);
+        const userID = computed(()=> store.state.userData.user_id);
         const employee_name_search = ref('');
         const staff_number_search = ref('');
         const status_search = ref('');
@@ -154,22 +154,12 @@ export default{
             applicationSearchID.value = store.state.Leave_Applications.applicationID;
         };
         const searchFilters = ref([
-            {type:'text', placeholder:"Staff No...", value: staff_number_search, width:32,},
-            {type:'text', placeholder:"Employee Name...", value: employee_name_search, width:64,},
-
             {
                 type:'dropdown', placeholder:"Status..", value: status_search, width:24,
                 options: [{text:'Pending',value:'Pending'},{text:'Approved',value:'Approved'},{text:'Rejected',value:'Rejected'}]
             },
             {type:'date', placeholder:"Start Date...", value: start_date_search, width:32,},
             {type:'date', placeholder:"End Date...", value: end_date_search, width:32,},
-            {  
-                type:'search-dropdown', value: applicationSearchID.value, componentKey: levSearchComponentKey,
-                selectOptions: applicationArray, optionSelected: handleSelectedSearchApplication,
-                searchPlaceholder: 'Select Leave Application...', dropdownWidth: '350px',
-                fetchData: store.dispatch('Leave_Applications/fetchLeaveApplications', {company:companyID.value, status:"Approved"}),
-                clearSearch: clearSelectedSearchApplication
-            },
         ]);
         const handleSelectionChange = (ids) => {
             selectedIds.value = ids;
@@ -487,55 +477,10 @@ export default{
             requestedDays.value = 0;
         }
         const removeAmmendment = async() =>{
-            if(selectedIds.value.length == 1){
-                let formData = {
-                    company: companyID.value,
-                    leave_ammendment: selectedIds.value
-                }
-                try{
-                    const response = await store.dispatch('Leave_Ammendments/deleteLeaveAmmendment',formData)
-                    if(response && response.status == 200){
-                        toast.success("Leave Ammendment Removed Succesfully");
-                        searchAmmendments();
-                    }
-                }
-                catch(error){
-                    console.error(error.message);
-                    toast.error('Failed to remove Leave Ammendment: ' + error.message);
-                }
-                finally{
-                    selectedIds.value = [];
-                }
-            }else if(selectedIds.value.length > 1){
-                toast.error("You have selected more than 1 Leave Ammendment") 
-            }else{
-                toast.error("Please Select A Leave Ammendment To Remove")
-            }
+
         }
         const removeAmmendments = async() =>{
-            if(selectedIds.value.length){
-                let formData = {
-                    company: companyID.value,
-                    leave_ammendment: selectedIds.value
-                }
-                try{
-                    const response = await store.dispatch('Leave_Ammendments/deleteLeaveAmmendment',formData)
-                    if(response && response.status == 200){
-                        toast.success("Leave Ammendment(s) Removed Succesfully");
-                        searchAmmendments();
-                    }
-                }
-                catch(error){
-                    console.error(error.message);
-                    toast.error('Failed to remove Leave Ammendment: ' + error.message);
-                }
-                finally{
-                    selectedIds.value = [];
 
-                }
-            }else{
-                toast.error("Please Select A Leave Ammendment To Remove")
-            }
         }
         const showLoader = () =>{
             loader.value = "block";
@@ -554,7 +499,7 @@ export default{
                 start_date: start_date_search.value,
                 end_date: end_date_search.value,
                 leave_type: applicationSearchID.value,
-                user: "",
+                user: userID.value,
                 company_id: companyID.value,
                 page_size: selectedValue.value
             } 

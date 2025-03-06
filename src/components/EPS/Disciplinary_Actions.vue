@@ -3,6 +3,7 @@
         <PageComponent 
             :loader="loader" @showLoader="showLoader" @hideLoader="hideLoader"
             :addButtonLabel="addButtonLabel"
+            :showAddButton="showAddButton"
             @handleAddNew="addNewAction"
             :searchFilters="searchFilters"
             @searchPage="searchActions"
@@ -17,6 +18,7 @@
             :columns="tableColumns"
             :rows="actionsList"
             :actions="actions"
+            :showActions="showActions"
             :idField="idField"
             @handleSelectionChange="handleSelectionChange"
             @handleActionClick="handleActionClick"
@@ -65,6 +67,8 @@ export default{
         const emplComponentKey = ref(0);
         const levComponentKey = ref(0);
         const idField = 'disciplinary_action_id';
+        const showAddButton = ref(false);
+        const showActions = ref(false);
         const addButtonLabel = ref('New Disciplinary Action');
         const addingRight = ref('Adding Disciplinary Actions');
         const rightsModule = ref('HR');
@@ -109,6 +113,7 @@ export default{
             {name: 'delete', icon: 'fa fa-trash', title: 'Delete Action', rightName: 'Deleting Disciplinary Actions'},
         ])
         const companyID = computed(()=> store.state.userData.company_id);
+        const userID = computed(()=> store.state.userData.user_id);
         const employee_name_search = ref('');
         const staff_number_search = ref('');
         const date_from_search = ref('');
@@ -116,8 +121,6 @@ export default{
         const case_number_search = ref('');
         const searchFilters = ref([
             {type:'text', placeholder:"Case No...", value: case_number_search, width:32,},
-            {type:'text', placeholder:"Staff No...", value: staff_number_search, width:32,},
-            {type:'text', placeholder:"Employee Name...", value: employee_name_search, width:64,},
             {type:'date',value: date_from_search, width:32, title: "Date From"},
             {type:'date',value: date_to_search, width:32, title: "Date To"},
         ]);
@@ -278,55 +281,10 @@ export default{
             }
         }
         const removeAction = async() =>{
-            if(selectedIds.value.length == 1){
-                let formData = {
-                    company: companyID.value,
-                    disciplinary_action: selectedIds.value
-                }
-                try{
-                    const response = await store.dispatch('Disciplinary_Actions/deleteDisciplinaryAction',formData)
-                    if(response && response.status == 200){
-                        toast.success("Disciplinary Action Removed Succesfully");
-                        searchActions();
-                    }
-                }
-                catch(error){
-                    console.error(error.message);
-                    toast.error('Failed to remove Disciplinary Action: ' + error.message);
-                }
-                finally{
-                    selectedIds.value = [];
-                }
-            }else if(selectedIds.value.length > 1){
-                toast.error("You have selected more than 1 Disciplinary Action") 
-            }else{
-                toast.error("Please Select A Disciplinary Action To Remove")
-            }
+
         }
         const removeActions = async() =>{
-            if(selectedIds.value.length){
-                let formData = {
-                    company: companyID.value,
-                    disciplinary_action: selectedIds.value
-                }
-                try{
-                    const response = await store.dispatch('Disciplinary_Actions/deleteDisciplinaryAction',formData)
-                    if(response && response.status == 200){
-                        toast.success("Disciplinary Action(s) Removed Succesfully");
-                        searchActions();
-                    }
-                }
-                catch(error){
-                    console.error(error.message);
-                    toast.error('Failed to remove Disciplinary Action: ' + error.message);
-                }
-                finally{
-                    selectedIds.value = [];
 
-                }
-            }else{
-                toast.error("Please Select A Disciplinary Action To Remove")
-            }
         }
         const showLoader = () =>{
             loader.value = "block";
@@ -344,7 +302,7 @@ export default{
                 date_from: date_from_search.value,
                 date_to: date_to_search.value,
                 case_number: case_number_search.value,
-                user: "",
+                user: userID.value,
                 company_id: companyID.value,
                 page_size: selectedValue.value
             } 
@@ -536,7 +494,7 @@ export default{
             
         })
         return{
-            title, searchActions,resetFilters, addButtonLabel, searchFilters, tableColumns, actionsList,
+            showAddButton,showActions,title, searchActions,resetFilters, addButtonLabel, searchFilters, tableColumns, actionsList,
             currentPage,propResults, propArrLen, propCount, pageCount, showNextBtn, showPreviousBtn,
             loadPrev, loadNext, firstPage, lastPage, idField, actions, handleActionClick, propModalVisible, closeModal,
             submitButtonLabel, showModal, addNewAction, showLoader, loader, hideLoader, modal_loader, modal_top, modal_left, modal_width,displayButtons,
