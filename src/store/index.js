@@ -84,6 +84,7 @@ import Disciplinary_Meetings from './HR/Disciplinary_Meetings';
 import Disciplinary_Reviews from './HR/Disciplinary_Reviews';
 import Disciplinary_Actions from './HR/Disciplinary_Actions';
 import Disciplinary_Appeals from './HR/Disciplinary_Appeals';
+import Employee_Rewards from './HR/Employee_Rewards';
 
 
 import Member_Categories from './MMS/Member_Categories';
@@ -136,7 +137,7 @@ export default createStore({
 
     Pay_Cycles,Pay_Groups,Deductions,Leave_Types,Holidays,Paye,Nssf,Shif,Housing_Levy,Employees,Payrolls,Leave_Applications,Leave_Allocations,Salary_Advances,
     Employee_Loan_Applications,Employee_Loan_Disbursements,Leave_Ammendments,Appraisals,Performance_Indicators,Skill_Ratings,Appraisal_Periods,Appraisal_Categories,
-    Disciplinary_Categories,Disciplinary_Cases,Disciplinary_Meetings,Disciplinary_Reviews,Disciplinary_Actions,Disciplinary_Appeals,
+    Disciplinary_Categories,Disciplinary_Cases,Disciplinary_Meetings,Disciplinary_Reviews,Disciplinary_Actions,Disciplinary_Appeals,Employee_Rewards,
 
     Member_Categories,Member_Sponsors,Members,Membership_Fees,Savings_Products,Shares_Products,Saving_Accounts,Share_Accounts,Saving_Deposits,Share_Deposits,
     Loan_Products,Loan_Fees,Loan_Applications,Loan_Guarantors,Loan_Disbursements,

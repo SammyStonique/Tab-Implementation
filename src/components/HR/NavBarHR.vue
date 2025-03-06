@@ -148,37 +148,43 @@
                             <p class="">Appraisal Periods</p>
                         </button>
                     </div>
+                    <div class="py-2 px-3 pl-4 w-full hover:bg-slate-500 hover:w-full">
+                        <button class="flex text-sm w-full" @click="openPage({'HR':'Employee_Rewards'})">
+                            <i class="fa fa-gift pt-2 mr-2" aria-hidden="true"></i>
+                            <p class="">Employee Rewards</p>
+                        </button>
+                    </div>
                 </div>
             </div>
             <div class="web-links dropdown w-32">
                 <div class="py-0.5 px-2.5 h-full hover:bg-slate-500 hover:rounded">
                     <button class="flex w-full" @click="showDisciplinaryDropdown">
-                        <i class="fa fa-chart-line pt-2 mr-2" aria-hidden="true"></i>
+                        <i class="fa fa-exclamation-triangle pt-2 mr-2" aria-hidden="true"></i>
                         <p class="pt-1.5">Disciplinary</p>
                     </button>
                 </div>
                 <div class="dropdown-content w-56 absolute rounded border border-gray-200 bg-white shadow-slate-400 shadow-sm" v-if="disciplinary_dropdown">
                     <div class="py-2 px-3 pl-4 w-full hover:bg-slate-500 hover:w-full">
                         <button class="flex text-sm w-full" @click="openPage({'HR':'Disciplinary_Cases'})">
-                            <i class="fa fa-chart-line pt-2 mr-2" aria-hidden="true"></i>
+                            <i class="fa fa-exclamation-triangle pt-2 mr-2" aria-hidden="true"></i>
                             <p class="">Disciplinary Cases</p>
                         </button>
                     </div>
                     <div class="py-2 px-3 pl-4 w-full hover:bg-slate-500 hover:w-full">
                         <button class="flex text-sm w-full" @click="openPage({'HR':'Disciplinary_Meetings'})">
-                            <i class="fa fa-smile pt-2 mr-2" aria-hidden="true"></i>
+                            <i class="fa fa-chalkboard pt-2 mr-2" aria-hidden="true"></i>
                             <p class="">Disciplinary Meetings</p>
                         </button>
                     </div>
                     <div class="py-2 px-3 pl-4 w-full hover:bg-slate-500 hover:w-full">
                         <button class="flex text-sm w-full" @click="openPage({'HR':'Disciplinary_Reviews'})">
-                            <i class="fa fa-trophy pt-2 mr-2" aria-hidden="true"></i>
+                            <i class="fa fa-shield-alt pt-2 mr-2" aria-hidden="true"></i>
                             <p class="">Disciplinary Reviews</p>
                         </button>
                     </div>  
                     <div class="py-2 px-3 pl-4 w-full hover:bg-slate-500 hover:w-full">
                         <button class="flex text-sm w-full" @click="openPage({'HR':'Disciplinary_Actions'})">
-                            <i class="fa fa-trophy pt-2 mr-2" aria-hidden="true"></i>
+                            <i class="fa fa-gavel pt-2 mr-2" aria-hidden="true"></i>
                             <p class="">Disciplinary Actions</p>
                         </button>
                     </div>   
@@ -190,7 +196,7 @@
                     </div>
                     <div class="py-2 px-3 pl-4 w-full hover:bg-slate-500 hover:w-full">
                         <button class="flex text-sm w-full" @click="openPage({'HR':'Disciplinary_Appeals'})">
-                            <i class="fa fa-clock-o pt-2 mr-2" aria-hidden="true"></i>
+                            <i class="fa fa-balance-scale pt-2 mr-2" aria-hidden="true"></i>
                             <p class="">Disciplinary Appeals</p>
                         </button>
                     </div>

@@ -103,7 +103,7 @@ const actions = {
     })
     
   },
-  handleselectedDisciplinaryCase({ commit, state }, option){
+  handleSelectedDisciplinaryCase({ commit, state }, option){
     const selectedCase = state.casesList.find(cases => (cases.case_number + " - " + cases.employee.employee_name +" ("+ cases.employee.staff_number +")") === option);
     if (selectedCase) {
         state.caseID = selectedCase.disciplinary_case_id;

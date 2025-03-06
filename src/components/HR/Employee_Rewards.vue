@@ -3,19 +3,19 @@
         <PageComponent 
             :loader="loader" @showLoader="showLoader" @hideLoader="hideLoader"
             :addButtonLabel="addButtonLabel"
-            @handleAddNew="addNewReview"
+            @handleAddNew="addNewReward"
             :searchFilters="searchFilters"
-            @searchPage="searchReviews"
+            @searchPage="searchRewards"
             @resetFilters="resetFilters"
-            @removeItem="removeReview"
-            @removeSelectedItems="removeReviews"
-            @printList="printCasesList"
+            @removeItem="removeReward"
+            @removeSelectedItems="removeRewards"
+            @printList="printrewardsList"
             @printExcel="downloadCasesExcel"
             @printCSV="downloadCasesCSV"
             :addingRight="addingRight"
             :rightsModule="rightsModule"
             :columns="tableColumns"
-            :rows="reviewsList"
+            :rows="rewardsList"
             :actions="actions"
             :idField="idField"
             @handleSelectionChange="handleSelectionChange"
@@ -36,7 +36,7 @@
             :loader="modal_loader" @showLoader="showModalLoader" @hideLoader="hideModalLoader" @closeModal="closeModal">
             <DynamicForm 
                 :fields="formFields" :flex_basis="flex_basis" :flex_basis_percentage="flex_basis_percentage" 
-                :displayButtons="displayButtons" @handleSubmit="saveReview" @handleReset="handleReset"
+                :displayButtons="displayButtons" @handleSubmit="saveReward" @handleReset="handleReset"
             />
         </MovableModal>
     </div>
@@ -53,7 +53,7 @@ import { useToast } from "vue-toastification";
 import PrintJS from 'print-js';
 
 export default{
-    name: 'Disciplinary_Reviews',
+    name: 'Employee_Rewards',
     components:{
         PageComponent, MovableModal,DynamicForm
     },
@@ -64,14 +64,14 @@ export default{
         const modal_loader = ref('none');
         const emplComponentKey = ref(0);
         const levComponentKey = ref(0);
-        const idField = 'disciplinary_review_id';
-        const addButtonLabel = ref('New Disciplinary Review');
-        const addingRight = ref('Adding Disciplinary Reviews');
+        const idField = 'employee_reward_id';
+        const addButtonLabel = ref('New Employee Reward');
+        const addingRight = ref('Adding Employee Rewards');
         const rightsModule = ref('HR');
-        const title = ref('Disciplinary Review Details');
+        const title = ref('Employee Reward Details');
         const submitButtonLabel = ref('Add');
         const selectedIds = ref([]);
-        const reviewsList = ref([]);
+        const rewardsList = ref([]);
         const propResults = ref([]);
         const propArrLen = ref(0);
         const propCount = ref(0);
@@ -88,34 +88,31 @@ export default{
         const modal_top = ref('150px');
         const modal_left = ref('500px');
         const modal_width = ref('30vw');
-        const caseID = ref('');
-        const isEditing = computed(()=> store.state.Disciplinary_Reviews.isEditing);
-        const selectedReview = computed(()=> store.state.Disciplinary_Reviews.selectedReview);
-        const selectedCase = computed(()=> store.state.Disciplinary_Reviews.selectedCase);
-        const casesArray = computed(() => store.state.Disciplinary_Cases.caseArr);
+        const employeeID = ref('');
+        const isEditing = computed(()=> store.state.Employee_Rewards.isEditing);
+        const selectedReward = computed(()=> store.state.Employee_Rewards.selectedReward);
+        const selectedEmployee = computed(()=> store.state.Employee_Rewards.selectedEmployee);
+        const employeeArray = computed(() => store.state.Employees.employeeArr);
         const showModal = ref(false);
         const tableColumns = ref([
             {type: "checkbox"},
-            {label: "Date", key: "review_date"},
-            {label: "Case#", key: "case_number"},
+            {label: "Date", key: "date_awarded"},
             {label: "Staff No", key: "staff_number"},
             {label: "Employee Name", key: "employee_name"},
-            {label: "Outcome", key:"outcome", maxWidth: "500px"},
-            {label: "Notes", key:"review_notes", maxWidth: "500px"},
-            
+            {label: "Type", key: "reward_type"},
+            {label: "Description", key:"description", maxWidth: "500px"},
+            {label: "Amount", key:"amount"},
         ])
         const actions = ref([
-            {name: 'edit', icon: 'fa fa-edit', title: 'Edit Review', rightName: 'Editing Disciplinary Reviews'},
-            {name: 'delete', icon: 'fa fa-trash', title: 'Delete Review', rightName: 'Deleting Disciplinary Reviews'},
+            {name: 'edit', icon: 'fa fa-edit', title: 'Edit Reward', rightName: 'Editing Employee Rewards'},
+            {name: 'delete', icon: 'fa fa-trash', title: 'Delete Reward', rightName: 'Deleting Employee Rewards'},
         ])
         const companyID = computed(()=> store.state.userData.company_id);
         const employee_name_search = ref('');
         const staff_number_search = ref('');
         const date_from_search = ref('');
         const date_to_search = ref('');
-        const case_number_search = ref('');
         const searchFilters = ref([
-            {type:'text', placeholder:"Case No...", value: case_number_search, width:32,},
             {type:'text', placeholder:"Staff No...", value: staff_number_search, width:32,},
             {type:'text', placeholder:"Employee Name...", value: employee_name_search, width:64,},
             {type:'date',value: date_from_search, width:32, title: "Date From"},
@@ -124,32 +121,32 @@ export default{
         const handleSelectionChange = (ids) => {
             selectedIds.value = ids;
         };
-        const handleSelectedCase = async(option) =>{
-            await store.dispatch('Disciplinary_Cases/handleSelectedDisciplinaryCase', option)
-            caseID.value = store.state.Disciplinary_Cases.caseID;
+        const handleSelectedEmployee = async(option) =>{
+            await store.dispatch('Employees/handleSelectedEmployee', option)
+            employeeID.value = store.state.Employees.employeeID;
         };
-        const clearSelectedCase = async() =>{
-            await store.dispatch('Disciplinary_Cases/updateState', {caseID: ''});
-            caseID.value = store.state.Disciplinary_Cases.caseID;
+        const clearSelectedEmployee = async() =>{
+            await store.dispatch('Employees/updateState', {employeeID: ''});
+            employeeID.value = store.state.Employees.employeeID;
         };
         const formFields = ref([]);
-
-        const caseValue = computed(() => {
-           return (selectedReview.value && selectedReview.value.disciplinary_case && !caseID.value) ? selectedReview.value.disciplinary_case.disciplinary_case_id : caseID.value;
+        const employeeValue = computed(() => {
+           return (selectedReward.value && selectedReward.value.employee && !employeeID.value) ? selectedReward.value.employee.employee_id : employeeID.value;
 
         });
         const updateFormFields = () => {
             formFields.value = [
                 {  
-                    type:'search-dropdown', label:"Disciplinary Case", value: caseValue.value, componentKey: levComponentKey,
-                    selectOptions: casesArray, optionSelected: handleSelectedCase, required: true,
-                    searchPlaceholder: 'Select Case...', dropdownWidth: '500px', updateValue: selectedCase.value,
-                    fetchData: store.dispatch('Disciplinary_Cases/fetchDisciplinaryCases', {company:companyID.value}),
-                    clearSearch: clearSelectedCase
+                    type:'search-dropdown', label:"Employee", value: employeeValue.value, componentKey: emplComponentKey,
+                    selectOptions: employeeArray, optionSelected: handleSelectedEmployee, required: true,
+                    searchPlaceholder: 'Select Employee...', dropdownWidth: '500px', updateValue: selectedEmployee.value,
+                    fetchData: store.dispatch('Employees/fetchEmployees', {company:companyID.value}),
+                    clearSearch: clearSelectedEmployee
                 },
-                { type: 'date', name: 'review_date',label: "Date", value: selectedReview.value?.review_date || '', required: true },
-                { type: 'dropdown', name: 'outcome',label: "Outcome", value: selectedReview.value?.outcome || '', placeholder: "", required: true, options: [{ text: 'Pending', value: 'Pending' }, { text: 'Guilty', value: 'Guilty' }, { text: 'Not Guilty', value: 'Not Guilty' }] },
-                {type:'text-area', label:"Review Notes", value: selectedReview.value?.review_notes || '', textarea_rows: '4', textarea_cols: '56', required: true},
+                { type: 'date', name: 'date_awarded',label: "Date", value: selectedReward.value?.date_awarded || '', required: true },
+                { type: 'dropdown', name: 'reward_type',label: "Reward Type", value: selectedReward.value?.reward_type || '', placeholder: "", required: true, options: [{ text: 'Bonus', value: 'Bonus' }, { text: 'Recognition', value: 'Recognition' }, { text: 'Promotion', value: 'Promotion' },{ text: 'Gift', value: 'Gift' }, { text: 'Voucher', value: 'Voucher' }, { text: 'Other', value: 'Other' }] },
+                { type: 'text', name: 'amount',label: "Amount", value: selectedReward.value?.date_awarded || '0', required: false },
+                {type:'text-area', label:"Description", value: selectedReward.value?.description || '', textarea_rows: '4', textarea_cols: '56', required: true},
 
             ];
         };
@@ -157,14 +154,14 @@ export default{
             for(let i=0; i < formFields.value.length; i++){
                 formFields.value[i].value = '';
             }
-            levComponentKey.value += 1;
-            caseID.value = '';
+            emplComponentKey.value += 1;
+            employeeID.value = '';
         }
 
 
-        watch([selectedReview, selectedCase], () => {
-            if (selectedReview.value && selectedCase.value) {
-                levComponentKey.value += 1;
+        watch([selectedReward, selectedEmployee], () => {
+            if (selectedReward.value && selectedEmployee.value) {
+                emplComponentKey.value += 1;
                 updateFormFields();
             }
             
@@ -177,14 +174,15 @@ export default{
         const hideModalLoader = () =>{
             modal_loader.value = "none";
         }
-        const createDisciplinaryReview = async() =>{
+        const createEmployeeReward = async() =>{
             showModalLoader();
             let formData = {
-                review_date: formFields.value[1].value,
-                disciplinary_case: caseID.value,
-                disciplinary_case_id: caseID.value,
-                outcome: formFields.value[2].value,
-                review_notes: formFields.value[3].value,
+                date_awarded: formFields.value[1].value,
+                employee: employeeID.value,
+                employee_id: employeeID.value,
+                reward_type: formFields.value[2].value,
+                amount: formFields.value[3].value || '0',
+                description: formFields.value[4].value,
                 company: companyID.value
             }
   
@@ -194,7 +192,7 @@ export default{
                     errors.value.push(formFields.value[i].label);
                 }
             }
-            if(caseValue.value == ''){
+            if(employeeValue.value == ''){
                 errors.value.push('error')
             }
 
@@ -203,36 +201,36 @@ export default{
                 hideModalLoader();
             }else{
                 try {
-                    const response = await store.dispatch('Disciplinary_Reviews/createDisciplinaryReview', formData);
+                    const response = await store.dispatch('Employee_Rewards/createEmployeeReward', formData);
                     if (response && response.status === 201) {
                         hideModalLoader();
-                        toast.success('Disciplinary Review created successfully!');
+                        toast.success('Employee Reward created successfully!');
                         handleReset();
                         emplComponentKey.value += 1;
-                        levComponentKey.value += 1;
                     }
                     else {
-                        toast.error('An error occurred while creating the Disciplinary Review.');
+                        toast.error('An error occurred while creating the Employee Reward.');
                     }
                 } catch (error) {
                     console.error(error.message);
-                    toast.error('Failed to create Disciplinary Review: ' + error.message);
+                    toast.error('Failed to create Employee Reward: ' + error.message);
                 } finally {
                     hideModalLoader();
-                    searchReviews();
+                    searchRewards();
                 }
             }
         }
-        const updateDisciplinaryReview = async() =>{
+        const updateEmployeeReward = async() =>{
             showModalLoader();
             errors.value = [];
             let formData = {
-                disciplinary_review: selectedReview.value.disciplinary_review_id,
-                review_date: formFields.value[1].value,
-                disciplinary_case: caseValue.value,
-                disciplinary_case_id: caseValue.value,
-                outcome: formFields.value[2].value,
-                review_notes: formFields.value[3].value,
+                employee_reward: selectedReward.value.employee_reward_id,
+                date_awarded: formFields.value[1].value,
+                employee: employeeValue.value,
+                employee_id: employeeValue.value,
+                reward_type: formFields.value[2].value,
+                amount: formFields.value[3].value,
+                description: formFields.value[4].value,
                 company: companyID.value
             }
 
@@ -241,7 +239,7 @@ export default{
                     errors.value.push('Error');
                 }
             }
-            if(caseValue.value == ''){
+            if(employeeValue.value == ''){
                 errors.value.push('error')
             }
             if(errors.value.length){
@@ -249,82 +247,82 @@ export default{
                 hideModalLoader();
             }else{
                 try {
-                    const response = await store.dispatch('Disciplinary_Reviews/updateDisciplinaryReview', formData);
+                    const response = await store.dispatch('Employee_Rewards/updateEmployeeReward', formData);
                     if (response && response.status === 200) {
                         hideModalLoader();
                         handleReset();
                         emplComponentKey.value += 1;
-                        toast.success("Disciplinary Review updated successfully!");              
+                        toast.success("Employee Reward updated successfully!");              
                     } else {
-                        toast.error('An error occurred while updating the Disciplinary Review.');
+                        toast.error('An error occurred while updating the Employee Reward.');
                     }
                 } catch (error) {
                     console.error(error.message);
-                    toast.error('Failed to update Disciplinary Review: ' + error.message);
+                    toast.error('Failed to update Employee Reward: ' + error.message);
                 } finally {
                     hideModalLoader();
                     propModalVisible.value = false;
-                    store.dispatch("Disciplinary_Reviews/updateState",{selectedReview:null})
-                    searchReviews();
+                    store.dispatch("Employee_Rewards/updateState",{selectedReward:null})
+                    searchRewards();
                 }             
             }
         }
-        const saveReview = () =>{
+        const saveReward = () =>{
             if(isEditing.value == true){
-                updateDisciplinaryReview();
+                updateEmployeeReward();
             }else{
-                createDisciplinaryReview();
+                createEmployeeReward();
             }
         }
-        const removeReview = async() =>{
+        const removeReward = async() =>{
             if(selectedIds.value.length == 1){
                 let formData = {
                     company: companyID.value,
-                    disciplinary_review: selectedIds.value
+                    employee_reward: selectedIds.value
                 }
                 try{
-                    const response = await store.dispatch('Disciplinary_Reviews/deleteDisciplinaryReview',formData)
+                    const response = await store.dispatch('Employee_Rewards/deleteEmployeeReward',formData)
                     if(response && response.status == 200){
-                        toast.success("Disciplinary Review Removed Succesfully");
-                        searchReviews();
+                        toast.success("Employee Reward Removed Succesfully");
+                        searchRewards();
                     }
                 }
                 catch(error){
                     console.error(error.message);
-                    toast.error('Failed to remove Disciplinary Review: ' + error.message);
+                    toast.error('Failed to remove Employee Reward: ' + error.message);
                 }
                 finally{
                     selectedIds.value = [];
                 }
             }else if(selectedIds.value.length > 1){
-                toast.error("You have selected more than 1 Disciplinary Review") 
+                toast.error("You have selected more than 1 Employee Reward") 
             }else{
-                toast.error("Please Select A Disciplinary Review To Remove")
+                toast.error("Please Select An Employee Reward To Remove")
             }
         }
-        const removeReviews = async() =>{
+        const removeRewards = async() =>{
             if(selectedIds.value.length){
                 let formData = {
                     company: companyID.value,
-                    disciplinary_review: selectedIds.value
+                    employee_reward: selectedIds.value
                 }
                 try{
-                    const response = await store.dispatch('Disciplinary_Reviews/deleteDisciplinaryReview',formData)
+                    const response = await store.dispatch('Employee_Rewards/deleteEmployeeReward',formData)
                     if(response && response.status == 200){
-                        toast.success("Disciplinary Review(s) Removed Succesfully");
-                        searchReviews();
+                        toast.success("Employee Reward(s) Removed Succesfully");
+                        searchRewards();
                     }
                 }
                 catch(error){
                     console.error(error.message);
-                    toast.error('Failed to remove Disciplinary Review: ' + error.message);
+                    toast.error('Failed to remove Employee Reward: ' + error.message);
                 }
                 finally{
                     selectedIds.value = [];
 
                 }
             }else{
-                toast.error("Please Select A Disciplinary Review To Remove")
+                toast.error("Please Select An Employee Reward To Remove")
             }
         }
         const showLoader = () =>{
@@ -333,7 +331,7 @@ export default{
         const hideLoader = () =>{
             loader.value = "none";
         }
-        const searchReviews = () =>{
+        const searchRewards = () =>{
             showLoader();
             showNextBtn.value = false;
             showPreviousBtn.value = false;
@@ -342,17 +340,16 @@ export default{
                 staff_number: staff_number_search.value,
                 date_from: date_from_search.value,
                 date_to: date_to_search.value,
-                case_number: case_number_search.value,
                 company_id: companyID.value,
                 page_size: selectedValue.value
             } 
             axios
-            .post(`api/v1/disciplinary-reviews-search/?page=${currentPage.value}`,formData)
+            .post(`api/v1/employee-rewards-search/?page=${currentPage.value}`,formData)
             .then((response)=>{
-                reviewsList.value = response.data.results;
-                store.commit('Disciplinary_Reviews/LIST_REVIEWS', reviewsList.value)
+                rewardsList.value = response.data.results;
+                store.commit('Employee_Rewards/LIST_REWARDS', rewardsList.value)
                 propResults.value = response.data;
-                propArrLen.value = reviewsList.value.length;
+                propArrLen.value = rewardsList.value.length;
                 propCount.value = propResults.value.count;
                 pageCount.value = Math.ceil(propCount.value / selectedValue.value);
                 if(response.data.next){
@@ -371,7 +368,7 @@ export default{
         };
         const selectSearchQuantity = (newValue) =>{
             selectedValue.value = newValue;
-            searchReviews(selectedValue.value);
+            searchRewards(selectedValue.value);
         };
         const resetFilters = () =>{
             currentPage.value = 1;
@@ -380,8 +377,7 @@ export default{
             employee_name_search.value = "";
             date_from_search.value = "";
             date_to_search.value = "";
-            case_number_search.value = "";
-            searchReviews();
+            searchRewards();
         }
         const loadPrev = () =>{
             if (currentPage.value <= 1){
@@ -390,7 +386,7 @@ export default{
                 currentPage.value -= 1;
             }
             
-            searchReviews();
+            searchRewards();
             // scrollToTop();
         }
         const loadNext = () =>{
@@ -400,38 +396,38 @@ export default{
                 currentPage.value += 1;
             }
             
-            searchReviews();
+            searchRewards();
             // scrollToTop(); 
         }
         const firstPage = ()=>{
             currentPage.value = 1;
-            searchReviews();
+            searchRewards();
             // scrollToTop();
         }
         const lastPage = () =>{
             currentPage.value = pageCount.value;
-            searchReviews();
+            searchRewards();
             // scrollToTop();
         }
-        const addNewReview = () =>{
-            store.dispatch("Disciplinary_Reviews/updateState",{selectedReview:null,selectedCase:null});
+        const addNewReward = () =>{
+            store.dispatch("Employee_Rewards/updateState",{selectedReward:null, selectedEmployee:null});
             emplComponentKey.value += 1;
             levComponentKey.value += 1;
             handleReset();
             updateFormFields();
             propModalVisible.value = true;
-            store.dispatch("Disciplinary_Reviews/updateState",{isEditing:false})
+            store.dispatch("Employee_Rewards/updateState",{isEditing:false})
             flex_basis.value = '1/3';
             flex_basis_percentage.value = '33.333';
         }
         const handleActionClick = async(rowIndex, action, row) =>{
             if( action == 'edit'){
-                const advanceID = row['disciplinary_review_id'];
+                const advanceID = row['employee_reward_id'];
                 let formData = {
                     company: companyID.value,
-                    disciplinary_review: advanceID
+                    employee_reward: advanceID
                 }
-                await store.dispatch('Disciplinary_Reviews/fetchDisciplinaryReview',formData)
+                await store.dispatch('Employee_Rewards/fetchEmployeeReward',formData)
                 propModalVisible.value = true;
                 flex_basis.value = '1/3';
                 flex_basis_percentage.value = '33.333';
@@ -440,11 +436,11 @@ export default{
                 const advanceID = [row[idField]];
                 let formData = {
                     company: companyID.value,
-                    disciplinary_review: advanceID
+                    employee_reward: advanceID
                 }
-                await store.dispatch('Disciplinary_Reviews/deleteDisciplinaryReview',formData).
+                await store.dispatch('Employee_Rewards/deleteEmployeeReward',formData).
                 then(()=>{
-                    searchReviews();
+                    searchRewards();
                 })
             }else if(action == 'view'){
                 console.log("VIEWING TAKING PLACE");
@@ -453,7 +449,7 @@ export default{
         const closeModal = () =>{
             propModalVisible.value = false;
         };
-        const printCasesList = () =>{
+        const printrewardsList = () =>{
             showLoader();
             let formData = {
                 employee_name: employee_name_search.value,
@@ -462,7 +458,7 @@ export default{
             } 
 
             axios
-            .post("api/v1/export-disciplinary-meetings-pdf/", formData, { responseType: 'blob' })
+            .post("api/v1/export-employee-rewards-pdf/", formData, { responseType: 'blob' })
                 .then((response)=>{
                     if(response.status == 200){
                         const blob1 = new Blob([response.data]);
@@ -486,13 +482,13 @@ export default{
                 status: status_search.value,
                 company_id: companyID.value,
             }
-            axios.post("api/v1/export-disciplinary-meetings-excel/", formData, { responseType: 'blob' })
+            axios.post("api/v1/export-employee-rewardss-excel/", formData, { responseType: 'blob' })
             .then((response)=>{
                 if(response.status == 200){
                 const url = window.URL.createObjectURL(new Blob([response.data]));
                 const link = document.createElement('a');
                 link.href = url;
-                link.setAttribute('download', 'Disciplinary Meetings.xlsx');
+                link.setAttribute('download', 'Employee Rewards.xlsx');
                 document.body.appendChild(link);
                 link.click();
                 }
@@ -511,13 +507,13 @@ export default{
                 staff_number: staff_number_search.value,
                 company_id: companyID.value,
             }
-            axios.post("api/v1/export-disciplinary-meetings-csv/", formData, { responseType: 'blob' })
+            axios.post("api/v1/export-employee-rewards-csv/", formData, { responseType: 'blob' })
             .then((response)=>{
                 if(response.status == 200){
                 const url = window.URL.createObjectURL(new Blob([response.data]));
                 const link = document.createElement('a');
                 link.href = url;
-                link.setAttribute('download', 'Disciplinary Meetings.csv');
+                link.setAttribute('download', 'Employee Rewards.csv');
                 document.body.appendChild(link);
                 link.click();
                 }
@@ -530,16 +526,16 @@ export default{
             })
         };
         onBeforeMount(()=>{
-            searchReviews();
+            searchRewards();
             
         })
         return{
-            title, searchReviews,resetFilters, addButtonLabel, searchFilters, tableColumns, reviewsList,
+            title, searchRewards,resetFilters, addButtonLabel, searchFilters, tableColumns, rewardsList,
             currentPage,propResults, propArrLen, propCount, pageCount, showNextBtn, showPreviousBtn,
             loadPrev, loadNext, firstPage, lastPage, idField, actions, handleActionClick, propModalVisible, closeModal,
-            submitButtonLabel, showModal, addNewReview, showLoader, loader, hideLoader, modal_loader, modal_top, modal_left, modal_width,displayButtons,
-            showModalLoader, hideModalLoader, saveReview, formFields, handleSelectionChange, flex_basis,flex_basis_percentage,
-            removeReview, removeReviews,addingRight,rightsModule,printCasesList,selectSearchQuantity,selectedValue,
+            submitButtonLabel, showModal, addNewReward, showLoader, loader, hideLoader, modal_loader, modal_top, modal_left, modal_width,displayButtons,
+            showModalLoader, hideModalLoader, saveReward, formFields, handleSelectionChange, flex_basis,flex_basis_percentage,
+            removeReward, removeRewards,addingRight,rightsModule,printrewardsList,selectSearchQuantity,selectedValue,
             downloadCasesCSV,downloadCasesExcel
         }
     }

@@ -125,7 +125,7 @@ export default{
             selectedIds.value = ids;
         };
         const handleSelectedCase = async(option) =>{
-            await store.dispatch('Disciplinary_Cases/handleselectedDisciplinaryCase', option)
+            await store.dispatch('Disciplinary_Cases/handleSelectedDisciplinaryCase', option)
             caseID.value = store.state.Disciplinary_Cases.caseID;
         };
         const clearSelectedCase = async() =>{
