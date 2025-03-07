@@ -170,7 +170,7 @@ export default{
             leaveID.value = store.state.Leave_Applications.leaveID;
             employeeID.value = store.state.Leave_Applications.employeeID;
             approvedDays.value = store.state.Leave_Applications.approvedDays;
-            if(leaveID.value && employeeID.value){
+            if(leaveID.value && userID.value){
                 getLeaveBalance();
             }
             
@@ -226,7 +226,7 @@ export default{
         }
         const getLeaveBalance = () => {
             let formData = {
-                employee: employeeID.value,
+                user: userID.value,
                 leave: leaveID.value,
                 company: companyID.value
             }
@@ -255,6 +255,7 @@ export default{
                     type:'search-dropdown', label:"Leave Application", value: leaveValue.value, componentKey: levComponentKey,
                     selectOptions: applicationArray, optionSelected: handleSelectedApplication, required: true,
                     searchPlaceholder: 'Select Leave Application...', dropdownWidth: '500px', updateValue: selectedLeave.value,
+                    fetchData: store.dispatch('Leave_Applications/fetchLeaveApplications', {company:companyID.value,user:userID.value,status:"Approved"}),
                     clearSearch: clearSelectedApplication
                 },
                 { type: 'date', name: 'start_date',label: "Start Date", value: selectedAmmendment.value?.start_date || '', required: true },

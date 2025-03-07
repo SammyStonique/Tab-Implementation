@@ -100,7 +100,7 @@ export default{
         const modal_top = ref('200px');
         const modal_left = ref('500px');
         const modal_width = ref('30vw');
-        const employeeID = ref('');
+        const employeeID = ref('-');
         const leaveID = ref('');
         const leaveSearchID = ref('');
         const applicationID = ref('');
@@ -179,7 +179,7 @@ export default{
         const handleSelectedLeave = async(option) =>{
             await store.dispatch('Leave_Types/handleSelectedLeaveType', option)
             leaveID.value = store.state.Leave_Types.leaveID;
-            if(leaveID.value && employeeID.value){
+            if(leaveID.value && userID.value){
                 getLeaveBalance();
             }
             
@@ -189,25 +189,25 @@ export default{
             leaveID.value = store.state.Leave_Types.leaveID;
         };
         const calculateDaysRequested = (value) =>{
-            const start = new Date(formFields.value[2].value);
-            const end = new Date(formFields.value[4].value);
+            const start = new Date(formFields.value[1].value);
+            const end = new Date(formFields.value[3].value);
 
             let differenceInDays = 0;
             let totalDays = 0;
 
-            if(formFields.value[3].value == "Full Day" && formFields.value[5].value == "Full Day"){
+            if(formFields.value[2].value == "Full Day" && formFields.value[4].value == "Full Day"){
                 differenceInDays = (end.getTime() - start.getTime()) / (1000 * 3600 * 24);
                 totalDays = differenceInDays;
             }
-            else if(formFields.value[3].value == "Half Day" && formFields.value[5].value == "Half Day"){
+            else if(formFields.value[2].value == "Half Day" && formFields.value[4].value == "Half Day"){
                 differenceInDays = (end.getTime() - start.getTime()) / (1000 * 3600 * 24);
                 totalDays = differenceInDays - 1;
             }
-            else if(formFields.value[3].value == "Full Day" && formFields.value[5].value == "Half Day"){
+            else if(formFields.value[2].value == "Full Day" && formFields.value[4].value == "Half Day"){
                 differenceInDays = (end.getTime() - start.getTime()) / (1000 * 3600 * 24);
                 totalDays = differenceInDays - 0.5;
             }
-            else if(formFields.value[3].value == "Half Day" && formFields.value[5].value == "Full Day"){
+            else if(formFields.value[2].value == "Half Day" && formFields.value[4].value == "Full Day"){
                 differenceInDays = (end.getTime() - start.getTime()) / (1000 * 3600 * 24);
                 totalDays = differenceInDays - 0.5;
             }
@@ -235,7 +235,7 @@ export default{
         }
         const getLeaveBalance = () => {
             let formData = {
-                employee: employeeID.value,
+                user: userID.value,
                 leave: leaveID.value,
                 company: companyID.value
             }
@@ -265,13 +265,6 @@ export default{
         const updateFormFields = () => {
             formFields.value = [
                 {  
-                    type:'search-dropdown', label:"Employee", value: employeeValue.value, componentKey: emplComponentKey,
-                    selectOptions: employeeArray, optionSelected: handleSelectedEmployee, required: true,
-                    searchPlaceholder: 'Select Employee...', dropdownWidth: '500px', updateValue: selectedEmployee.value,
-                    fetchData: store.dispatch('Employees/fetchEmployees', {company:companyID.value}),
-                    clearSearch: clearSelectedEmployee
-                },
-                {  
                     type:'search-dropdown', label:"Leave Type", value: leaveValue.value, componentKey: levComponentKey,
                     selectOptions: leaveArray, optionSelected: handleSelectedLeave, required: true,
                     searchPlaceholder: 'Select Leave Type...', dropdownWidth: '500px', updateValue: selectedLeave.value,
@@ -288,7 +281,11 @@ export default{
         };
         const handleReset = () =>{
             for(let i=0; i < formFields.value.length; i++){
-                formFields.value[i].value = '';
+                if(formFields.value[i].label == 'Days Requested' || formFields.value[i].label == 'Balance'){
+                    formFields.value[i].value = '0';
+                }else{
+                    formFields.value[i].value = '';
+                }
             }
             emplComponentKey.value += 1;
             employeeID.value = '';
@@ -315,26 +312,27 @@ export default{
         const createApplication = async() =>{
             showModalLoader();
             let formData = {
-                start_date: formFields.value[2].value,
-                start_date_type: formFields.value[3].value,
-                end_date: formFields.value[4].value,
-                end_date_type: formFields.value[5].value,
-                reason: formFields.value[6].value,
-                days_requested: formFields.value[7].value,
+                start_date: formFields.value[1].value,
+                start_date_type: formFields.value[2].value,
+                end_date: formFields.value[3].value,
+                end_date_type: formFields.value[4].value,
+                reason: formFields.value[5].value,
+                days_requested: formFields.value[6].value,
                 employee: employeeID.value,
                 employee_id: employeeID.value,
+                user: userID.value,
                 leave_type: leaveID.value,
                 leave_type_id: leaveID.value,
                 company: companyID.value
             }
   
             errors.value = [];
-            for(let i=2; i < formFields.value.length; i++){
+            for(let i=1; i < formFields.value.length; i++){
                 if(formFields.value[i].value =='' && formFields.value[i].type != 'search-dropdown' && formFields.value[i].required == true){
                     errors.value.push(formFields.value[i].label);
                 }
             }
-            if(employeeValue.value == '' || leaveValue.value == ''){
+            if(userID.value == '' || leaveValue.value == ''){
                 errors.value.push('error')
             }
 
@@ -371,14 +369,15 @@ export default{
             errors.value = [];
             let formData = {
                 leave_application: selectedApplication.value.leave_application_id,
-                start_date: formFields.value[2].value,
-                start_date_type: formFields.value[3].value,
-                end_date: formFields.value[4].value,
-                end_date_type: formFields.value[5].value,
-                reason: formFields.value[6].value,
-                days_requested: formFields.value[7].value,
+                start_date: formFields.value[1].value,
+                start_date_type: formFields.value[2].value,
+                end_date: formFields.value[3].value,
+                end_date_type: formFields.value[4].value,
+                reason: formFields.value[5].value,
+                days_requested: formFields.value[6].value,
                 employee: employeeValue.value,
                 employee_id: employeeValue.value,
+                user: userID.value,
                 leave_type: leaveValue.value,
                 leave_type_id: leaveValue.value,
                 company: companyID.value
@@ -389,7 +388,7 @@ export default{
                     errors.value.push('Error');
                 }
             }
-            if(employeeValue.value == '' || leaveValue.value == ''){
+            if(userID.value == '' || leaveValue.value == ''){
                 errors.value.push('error')
             }
             if(errors.value.length){
@@ -440,6 +439,7 @@ export default{
         const handleAppReset = async() =>{
             for(let i=0; i < formFields1.value.length; i++){
                 formFields1.value[i].value = '';
+                
             }
             
         }
@@ -451,44 +451,7 @@ export default{
             app_modal_loader.value = "none";
         }
         const approveLeaveApplication = async() =>{
-            showAppModalLoader();
-            let formData = {
-                leave_application: applicationID.value,
-                date: formFields1.value[0].value,
-                days_approved: formFields1.value[1].value,
-                status: formFields1.value[2].value,
-                reason: formFields1.value[3].value,
-                company: companyID.value
-            }
-
-            errors.value = [];
-            for(let i=0; i < (formFields1.value.length); i++){
-                if(formFields1.value[i].value =='' && formFields1.value[i].required == true){
-                    errors.value.push(formFields1.value[i].label);
-                }
-            }
-
-            if(errors.value.length){
-                toast.error('Fill In Required Fields');
-                hideAppModalLoader();
-            }else{
-                try {
-                    const response = await store.dispatch('Leave_Applications/approveLeaveApplication', formData);
-                    if (response && response.status === 200) {
-                        hideAppModalLoader();
-                        toast.success('Success!');
-                        handleAppReset();
-                    } else {
-                        toast.error('An error occurred while Approving the Leave Application.');
-                    }
-                } catch (error) {
-                    console.error(error.message);
-                    toast.error('Failed to Approve Leave Application: ' + error.message);
-                } finally {
-                    hideAppModalLoader();
-                    searchApplications();
-                }
-            }
+            
         };
         const closeAppModal = async() =>{
             appModalVisible.value = false;
@@ -622,14 +585,19 @@ export default{
 
             }else if(action == 'delete'){
                 const applicationID = [row[idField]];
-                let formData = {
-                    company: companyID.value,
-                    leave_application: applicationID
+                const approvalStatus = row['status'];
+                if (approvalStatus != "Pending"){
+                    toast.error(`Cannot Delete ${approvalStatus} Application!`)
+                }else{
+                    let formData = {
+                        company: companyID.value,
+                        leave_application: applicationID
+                    }
+                    await store.dispatch('Leave_Applications/deleteLeaveApplication',formData).
+                    then(()=>{
+                        searchApplications();
+                    })
                 }
-                await store.dispatch('Leave_Applications/deleteLeaveApplication',formData).
-                then(()=>{
-                    searchApplications();
-                })
             }else if(action == 'approve'){
                 const approvalStatus = row['status'];
                 requestedDays.value = row['days_requested'];
