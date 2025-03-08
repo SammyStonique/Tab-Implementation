@@ -36,8 +36,7 @@ import Employees from '@/components/EPS/Employees.vue';
 import Employee_Biodata from '@/components/EPS/Employee_Biodata.vue';
 import Deduction_Details from '@/components/EPS/Deduction_Details.vue';
 import Employee_Details from '@/components/EPS/Employee_Details.vue';
-import Payrolls from '@/components/EPS/Payrolls.vue';
-import Payroll_Employees from '@/components/EPS/Payroll_Employees.vue';
+import Processed_Payrolls from '@/components/EPS/Processed_Payrolls.vue';
 import Salary_Advances from '@/components/EPS/Salary_Advances.vue';
 import Loan_Applications from '@/components/EPS/Loan_Applications.vue';
 import Loan_Application_Details from '@/components/EPS/Loan_Application_Details.vue';
@@ -58,7 +57,7 @@ export default{
         NavBarEPS,
         PagesTab,
         Dashboard,
-        Employees,Employee_Biodata,Employee_Details,Payrolls,Payroll_Employees,Deduction_Details,Leave_Applications,Leave_Allocations,
+        Employees,Employee_Biodata,Employee_Details,Processed_Payrolls,Deduction_Details,Leave_Applications,Leave_Allocations,
         Salary_Advances,Loan_Applications,Loan_Application_Details,Loan_Disbursements,Leave_Ammendments,
         Employee_Appraisals,Appraisal_Details,Skill_Ratings,Disciplinary_Cases,Disciplinary_Meetings,
         Disciplinary_Actions,Disciplinary_Appeals,Employee_Rewards,

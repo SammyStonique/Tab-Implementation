@@ -40,9 +40,9 @@ export default{
     });
 
     onBeforeMount(()=>{
-      store.dispatch('userData/reloadPage');
+      // store.dispatch('userData/reloadPage');
       store.state.idleVue.isIdle = false;
-      axios.get('api/v1/get-session-data')
+      axios.get('api/v1/get-session-data/')
       .then((response)=>{
         if(response.status == 200){
           const userData = {
@@ -70,6 +70,7 @@ export default{
         console.log(error.message)
         store.dispatch('userData/updateState',{activeComponent:"Login"})
       })
+
     })
     return{
       activeComponent,isIdle

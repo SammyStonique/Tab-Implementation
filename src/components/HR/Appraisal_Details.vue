@@ -71,7 +71,7 @@ export default defineComponent({
         const periodID = ref("");
         const categoryID = ref("");
         const average_rating = ref(0);
-        const appraisalMethod = computed(()=> store.state.Appraisal_Categories.categoryMethod);
+        const appraisalMethod = ref("Supervisor Only");
         const showActions = ref(false);
         const showTotals = ref(true);
         const scheduleColumns = ref([
@@ -101,7 +101,7 @@ export default defineComponent({
         const handleSelectedCategory = async(option) =>{
             await store.dispatch('Appraisal_Categories/handleSelectedCategory', option)
             categoryID.value = store.state.Appraisal_Categories.categoryID;
-            appraisalMethod.value = store.state.Appraisal_Categories.appraisalMethod;
+            appraisalMethod.value = store.state.Appraisal_Categories.categoryMethod;
             generateKPIs();
             if(selectedCategory.value){
                 selectedAppraisal.value.category.appraisal_category_id = categoryID.value;
@@ -174,10 +174,43 @@ export default defineComponent({
             }else if(categoryID.value != ""){
                 formFields.value[2].value = categoryID.value;
             }
+
             if(appraisalMethod.value == "Employee & Supervisor"){
-                scheduleColumns.value[3].hidden = false;
+                for(let i=0; i<scheduleColumns.value.length; i++){
+                    if(scheduleColumns.value[i].key == "supervisor_rating"){
+                        scheduleColumns.value[i].hidden = false;
+                        scheduleColumns.value[i].editable = true;
+                    }
+                    if(scheduleColumns.value[i].key == "employee_rating"){
+                        scheduleColumns.value[i].hidden = false;
+                        scheduleColumns.value[i].editable = false;
+                    }
+                    if(scheduleColumns.value[i].key == "comments"){
+                        scheduleColumns.value[i].editable = true;
+                        scheduleColumns.value[i].type = "text";
+                    }
+                    if(scheduleColumns.value[i].key == "average_rating"){
+                        scheduleColumns.value[i].type = "number";
+                    }
+                }
             }else{
-                scheduleColumns.value[3].hidden = true;
+                for(let i=0; i<scheduleColumns.value.length; i++){
+                    if(scheduleColumns.value[i].key == "supervisor_rating"){
+                        scheduleColumns.value[i].hidden = false;
+                        scheduleColumns.value[i].editable = true;
+                    }
+                    if(scheduleColumns.value[i].key == "employee_rating"){
+                        scheduleColumns.value[i].hidden = true;
+                        scheduleColumns.value[i].editable = false;
+                    }
+                    if(scheduleColumns.value[i].key == "comments"){
+                        scheduleColumns.value[i].editable = true;
+                        scheduleColumns.value[i].type = "text";
+                    }
+                    if(scheduleColumns.value[i].key == "average_rating"){
+                        scheduleColumns.value[i].type = "number";
+                    }
+                }
             }
         }, { immediate: true });
 
@@ -188,12 +221,9 @@ export default defineComponent({
                 periodComponentKey.value += 1;
                 updateFormFields();
                 updateAdditionalFormFields();
-        
+                appraisalMethod.value = store.state.Appraisals.categoryMethod;
             }
-            // else{
-            //     updateFormFields();
-            //     updateAdditionalFormFields();
-            // }
+
         }, { immediate: true });
 
         const handleReset = async() =>{

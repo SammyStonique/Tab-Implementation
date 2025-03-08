@@ -323,7 +323,7 @@ const actions = {
                 token: ""
             }
             commit('SET_STATE',newState); 
-            // commit('reloadingPage');
+            commit('reloadingPage');
             dispatch('deleteCSRFAndSessionCookies');
         })
     }

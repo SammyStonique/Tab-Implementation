@@ -54,6 +54,7 @@ export default defineComponent({
         const componentKey = ref(0);
         const errors = ref([]);
         const companyID = computed(()=> store.state.userData.company_id);
+        const userID = computed(()=> store.state.userData.user_id);
         const flex_basis = ref('');
         const flex_basis_percentage = ref('');
         const additional_flex_basis = ref('');
@@ -116,28 +117,13 @@ export default defineComponent({
         });
         const updateFormFields = () => {
             formFields.value = [
-                {  
-                    type:'search-dropdown', label:"Employee", value: employeeValue.value, componentKey: catComponentKey,
-                    selectOptions: employeeArray, optionSelected: handleSelectedEmployee, required: true,
-                    searchPlaceholder: 'Select Employee...', dropdownWidth: '400px', updateValue: selectedEmployee.value,
-                    fetchData: store.dispatch('Employees/fetchEmployees', {company:companyID.value}), clearSearch: clearSelectedEmployee
-                },
-                { type: 'text', name: 'applied_amount',label: "Applied Amount", value: selectedApplication.value?.applied_amount || '0', required: true},
                 { type: 'date', name: 'application_date',label: "Application Date", value: selectedApplication.value?.application_date || '', required: true, placeholder: '' },
+                { type: 'text', name: 'applied_amount',label: "Applied Amount", value: selectedApplication.value?.applied_amount || '0', required: true},
                 { type: 'date', name: 'repayment_start_date',label: "Repayment Start Date", value: selectedApplication.value?.repayment_start_date || '', required: true, placeholder: '' },
                 { type: 'text', name: 'loan_due_date',label: "Due Day", value: selectedApplication.value?.loan_due_date || '1', required: true },
                 { type: 'text', name: 'installments',label: "Installments", value: selectedApplication.value?.installments || '1', required: true },
-                { type: 'dropdown', name: 'loan_period',label: "Repayment Frequency", value: selectedApplication.value?.loan_period || 'Monthly', placeholder: "", required: true, options: [{ text: 'Daily', value: 'Daily' }, { text: 'Weekly', value: 'Weekly' },{ text: 'Monthly', value: 'Monthly' }, { text: 'Annually', value: 'Annually' }] },
-                { type: 'dropdown', name: 'interest_charged',label: "Charge Interest", value: selectedApplication.value?.interest_charged || 'No', placeholder: "", required: true, options: [{ text: 'Yes', value: 'Yes' }, { text: 'No', value: 'No' }] },
-                { type: 'text', name: 'interest_rate',label: "Interest Rate", value: selectedApplication.value?.interest_rate || '0', required: false },
-                { type: 'dropdown', name: 'interest_calculation',label: "Interest Method", value: selectedApplication.value?.interest_calculation || 'Simple Interest', placeholder: "", required: false, options: [{ text: 'Reducing Interest EMI', value: 'Reducing Interest EMI' }, { text: 'Reducing Interest Fixed Principal', value: 'Reducing Interest Principal Payments' },{ text: 'Flat Interest EMI', value: 'Flat Interest EMI' }, { text: 'Flat Interest Principal Payments', value: 'Flat Interest Principal Payments' },{ text: 'Simple Interest', value: 'Simple Interest' }] },
                 { type: 'text-area', name: 'loan_remarks',label: "Remarks", value: selectedApplication.value?.loan_remarks || '', required: false,textarea_rows: '2', textarea_cols: '56'},
-                {  
-                    type:'search-dropdown', label:"Interest Posting Account", value: intLedgerValue.value, componentKey: intComponentKey,
-                    selectOptions: ledgerArray, optionSelected: handleSelectedInterestLedger, required: false,
-                    searchPlaceholder: 'Select Posting Acc...', dropdownWidth: '400px', updateValue: selectedInterestLedger.value,
-                    fetchData: store.dispatch('Ledgers/fetchLedger', {company:companyID.value}), clearSearch: clearSelectedInterestLedger
-                },
+         
                 {required: false}
             ];
         };
@@ -202,15 +188,15 @@ export default defineComponent({
         const generateSchedules = async() =>{
             showLoader();
             let formData = {
-                interest_charged: formFields.value[7].value,
-                interest_calculation: formFields.value[9].value,
-                interest_rate: formFields.value[8].value,
-                loan_period: formFields.value[6].value,
-                due_day: formFields.value[4].value || '1',
-                application_date: formFields.value[2].value,
-                repayment_start_date: formFields.value[3].value,
+                interest_charged: 'No',
+                interest_calculation: 'Simple Interest',
+                interest_rate: '0',
+                loan_period: 'Monthly',
+                due_day: formFields.value[3].value || '1',
+                application_date: formFields.value[0].value,
+                repayment_start_date: formFields.value[2].value,
                 applied_amount: formFields.value[1].value,
-                installments: formFields.value[5].value,
+                installments: formFields.value[4].value,
                 company: companyID.value
             }
             errors.value = [];
@@ -219,13 +205,10 @@ export default defineComponent({
                     errors.value.push('Error');
                 }
             }
-            if(employeeValue.value == ''){
-                errors.value.push('Error');
-            }
             if(errors.value.length){
                 toast.error('Fill In Required Fields');
                 hideLoader();
-            }else if(parseFloat(formFields.value[2].value) <= 0){
+            }else if(parseFloat(formFields.value[1].value) <= 0){
                 toast.error('Invalid Amount');
                 hideLoader();
             }
@@ -245,18 +228,19 @@ export default defineComponent({
             showLoader();
             let formData = {
                 loan_number: "-",
-                loan_due_date: formFields.value[4].value || '1',
-                interest_charged: formFields.value[7].value,
-                interest_calculation: formFields.value[9].value,
-                interest_rate: formFields.value[8].value,
-                loan_period: formFields.value[6].value,
-                application_date: formFields.value[2].value,
-                repayment_start_date: formFields.value[3].value,
+                loan_due_date: formFields.value[3].value || '1',
+                interest_charged: "No",
+                interest_calculation: "Simple Interest",
+                interest_rate: "0",
+                loan_period: 'Monthly',
+                application_date: formFields.value[0].value,
+                repayment_start_date: formFields.value[2].value,
                 applied_amount: formFields.value[1].value,
-                installments: formFields.value[5].value,
+                installments: formFields.value[4].value,
                 employee: employeeID.value,
                 employee_id: employeeID.value,
-                loan_remarks: formFields.value[10].value,
+                user: userID.value,
+                loan_remarks: formFields.value[5].value,
                 company: companyID.value
             }
             errors.value = [];
@@ -264,9 +248,6 @@ export default defineComponent({
                 if(formFields.value[i].value =='' && formFields.value[i].required == true && formFields.value[i].type != 'search-dropdown'){
                     errors.value.push('Error');
                 }
-            }
-            if(employeeValue.value == ''){
-                errors.value.push('Error');
             }
             if(errors.value.length){
                 toast.error('Fill In Required Fields');
@@ -296,17 +277,17 @@ export default defineComponent({
             let formData = {
                 loan_application: selectedApplication.value.employee_loan_application_id,
                 loan_number: selectedApplication.value.loan_number,
-                loan_due_date: formFields.value[4].value || '1',
-                application_date: formFields.value[2].value,
-                repayment_start_date: formFields.value[3].value,
-                installments: formFields.value[5].value,
-                interest_charged: formFields.value[7].value,
-                interest_calculation: formFields.value[9].value,
-                interest_rate: formFields.value[8].value,
-                loan_period: formFields.value[6].value,
+                loan_due_date: formFields.value[3].value || '1',
+                application_date: formFields.value[0].value,
+                repayment_start_date: formFields.value[2].value,
+                installments: formFields.value[4].value,
+                interest_charged: selectedApplication.value.interest_charged,
+                interest_calculation: selectedApplication.value.interest_calculation,
+                interest_rate: selectedApplication.value.interest_rate,
+                loan_period: selectedApplication.value.loan_period,
                 employee: employeeValue.value,
                 employee_id: employeeValue.value,
-                loan_remarks: formFields.value[10].value,
+                loan_remarks: formFields.value[5].value,
                 applied_amount: formFields.value[1].value,
                 company: companyID.value,
             }
@@ -316,9 +297,7 @@ export default defineComponent({
                     errors.value.push('Error');
                 }
             }
-            if(employeeValue.value == ''){
-                errors.value.push('Error');
-            }
+
             if(errors.value.length){
                     toast.error('Fill In Required Fields');
             }else{

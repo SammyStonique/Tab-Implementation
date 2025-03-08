@@ -145,12 +145,15 @@ export default {
                 "company_name": companyList.value[selectedCompany].company_name
             };
             try {
-                await axios.post("api/v1/update-session-data/", company_data);
+                await axios.post("api/v1/update-session-data/", company_data).
+                then(()=>{
+                    store.dispatch('userData/reloadPage');
+                })
             } catch (error) {
                 console.log(error);
             } finally {
                 hideLoader();
-                store.dispatch('userData/reloadPage');
+                
             }
         };
 

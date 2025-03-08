@@ -54,6 +54,7 @@ export default defineComponent({
         const componentKey = ref(0);
         const errors = ref([]);
         const companyID = computed(()=> store.state.userData.company_id);
+        const userID = computed(()=> store.state.userData.user_id);
         const flex_basis = ref('');
         const flex_basis_percentage = ref('');
         const additional_flex_basis = ref('');
@@ -71,37 +72,26 @@ export default defineComponent({
         const periodID = ref("");
         const categoryID = ref("");
         const average_rating = ref(0);
-        const appraisalMethod = computed(()=> store.state.Appraisal_Categories.categoryMethod);
+        const appraisalMethod = ref("Supervisor Only");
         const showActions = ref(false);
         const showTotals = ref(true);
         const scheduleColumns = ref([
             {label: "KPI Name", key:"indicator_name", type: "text", editable: false},
             {label: "Min.", key:"min_weight", type: "number", editable: false},
             {label: "Max.", key:"max_weight", type: "number", editable: false},
-            {label: "Empl. Rating", key:"employee_rating", type: "number", editable: true, hidden: true},
-            {label: "Sup. Rating", key:"supervisor_rating", type: "number", editable: true},
+            {label: "Empl. Rating", key:"employee_rating", type: "number", editable: true, hidden: false},
+            {label: "Sup. Rating", key:"supervisor_rating", type: "number", editable: false, hidden: true},
             {label: "Avg Rating", key:"average_rating", type: "text", editable: false},
             {label: "Appraisal Comments/Remarks", key:"comments", type: "text", editable: true},
         ]);
         const scheduleRows = computed(() => {
             return store.state.Appraisals.performanceIndicators;
         });
-        const handleSelectedEmployee = async(option) =>{
-            await store.dispatch('Employees/handleSelectedEmployee', option)
-            employeeID.value = store.state.Employees.employeeID;
-            if(selectedAppraisal.value){
-                selectedAppraisal.value.employee.employee_id = employeeID.value;
-                employeeValue.value = employeeID.value
-            }
-        };
-        const clearSelectedEmployee = async() =>{
-            await store.dispatch('Employees/updateState', {employeeID: ''});
-            employeeID.value = store.state.Employees.employeeID;
-        };
+
         const handleSelectedCategory = async(option) =>{
             await store.dispatch('Appraisal_Categories/handleSelectedCategory', option)
             categoryID.value = store.state.Appraisal_Categories.categoryID;
-            appraisalMethod.value = store.state.Appraisal_Categories.appraisalMethod;
+            appraisalMethod.value = store.state.Appraisal_Categories.categoryMethod;
             generateKPIs();
             if(selectedCategory.value){
                 selectedAppraisal.value.category.appraisal_category_id = categoryID.value;
@@ -137,12 +127,6 @@ export default defineComponent({
         const updateFormFields = () => {
             formFields.value = [
                 {  
-                    type:'search-dropdown', label:"Employee", value: employeeValue.value, componentKey: empComponentKey,
-                    selectOptions: employeeArray, optionSelected: handleSelectedEmployee, required: true,
-                    searchPlaceholder: 'Select Employee...', dropdownWidth: '420px', updateValue: selectedEmployee.value,
-                    fetchData: store.dispatch('Employees/fetchEmployees', {company:companyID.value}), clearSearch: clearSelectedEmployee
-                },
-                {  
                     type:'search-dropdown', label:"Period", value: periodValue.value, componentKey: periodComponentKey,
                     selectOptions: periodArr, optionSelected: handleSelectedPeriod, required: true,
                     searchPlaceholder: 'Select Period...', dropdownWidth: '420px', updateValue: selectedPeriod.value,
@@ -155,7 +139,7 @@ export default defineComponent({
                     fetchData: store.dispatch('Appraisal_Categories/fetchAppraisalCategories', {company:companyID.value}), clearSearch: clearSelectedCategory
                 },
                 { type: 'text', name: 'overall_rating',label: "Overall Rating", value: selectedAppraisal.value?.overall_rating || average_rating.value, required: true, disabled:true},
-                { type: 'text-area', name: 'comments',label: "Remarks", value: selectedAppraisal.value?.comments || '', required: true,textarea_rows: '2', textarea_cols: '56'},
+                { type: 'text-area', name: 'comments',label: "Remarks", value: selectedAppraisal.value?.comments || '', required: false,textarea_rows: '2', textarea_cols: '56'},
                 {required:false}
             ];
         };
@@ -166,18 +150,44 @@ export default defineComponent({
                 ];
         };
 
-        watch([employeeID,periodID,categoryID,appraisalMethod], () => {
-            if(employeeID.value != ""){
-                formFields.value[0].value = employeeID.value;
-            }else if(periodID.value != ""){
-                formFields.value[1].value = periodID.value;
+        watch([periodID,categoryID,appraisalMethod], () => {
+            if(periodID.value != ""){
+                formFields.value[0].value = periodID.value;
             }else if(categoryID.value != ""){
-                formFields.value[2].value = categoryID.value;
+                formFields.value[1].value = categoryID.value;
             }
             if(appraisalMethod.value == "Employee & Supervisor"){
-                scheduleColumns.value[3].hidden = false;
+                for(let i=0; i<scheduleColumns.value.length; i++){
+                    if(scheduleColumns.value[i].key == "supervisor_rating"){
+                        scheduleColumns.value[i].hidden = false;
+                        scheduleColumns.value[i].editable = false;
+                    }
+                    if(scheduleColumns.value[i].key == "employee_rating"){
+                        scheduleColumns.value[i].hidden = false;
+                        scheduleColumns.value[i].editable = true;
+                    }
+                    if(scheduleColumns.value[i].key == "comments"){
+                        scheduleColumns.value[i].editable = true;
+                    }
+                    if(scheduleColumns.value[i].key == "average_rating"){
+                        scheduleColumns.value[i].type = "number";
+                    }
+                }
             }else{
-                scheduleColumns.value[3].hidden = true;
+                for(let i=0; i<scheduleColumns.value.length; i++){
+                    if(scheduleColumns.value[i].key == "supervisor_rating"){
+                        scheduleColumns.value[i].hidden = false;
+                        scheduleColumns.value[i].editable = false;
+                    }
+                    if(scheduleColumns.value[i].key == "employee_rating"){
+                        scheduleColumns.value[i].hidden = true;
+                        scheduleColumns.value[i].editable = false;
+                    }
+                    if(scheduleColumns.value[i].key == "comments"){
+                        scheduleColumns.value[i].editable = false;
+                        scheduleColumns.value[i].type = "text";
+                    }
+                }
             }
         }, { immediate: true });
 
@@ -188,12 +198,9 @@ export default defineComponent({
                 periodComponentKey.value += 1;
                 updateFormFields();
                 updateAdditionalFormFields();
+                appraisalMethod.value = store.state.Appraisals.categoryMethod;
         
             }
-            // else{
-            //     updateFormFields();
-            //     updateAdditionalFormFields();
-            // }
         }, { immediate: true });
 
         const handleReset = async() =>{
@@ -248,30 +255,31 @@ export default defineComponent({
 
         watch([average_rating], () => {
             if (average_rating.value) {
-                formFields.value[3].value = average_rating.value;
+                formFields.value[2].value = average_rating.value;
             } 
         }, { immediate: true });
         const createAppraisal = async() =>{
             showLoader();
             let formData = {
-                overall_rating: formFields.value[3].value,
+                overall_rating: formFields.value[2].value,
                 employee: employeeID.value,
                 employee_id: employeeID.value,
                 period: periodID.value,
                 period_id: periodID.value,
                 category: categoryID.value,
                 category_id: categoryID.value,
-                comments: formFields.value[4].value,
+                comments: formFields.value[3].value,
+                user: userID.value,
                 skill_ratings: scheduleRows.value,
                 company: companyID.value
             }
             errors.value = [];
-            for(let i=3; i < formFields.value.length; i++){
+            for(let i=2; i < formFields.value.length; i++){
                 if(formFields.value[i].value =='' && formFields.value[i].required == true && formFields.value[i].type != 'search-dropdown'){
                     errors.value.push('Error');
                 }
             }
-            if(employeeValue.value == '' || periodValue.value == '' || categoryValue.value == ''){
+            if(periodValue.value == '' || categoryValue.value == ''){
                 errors.value.push('Error');
             }
             if(errors.value.length){
@@ -301,14 +309,14 @@ export default defineComponent({
             errors.value = [];
             let formData = {
                 employee_appraisal: selectedAppraisal.value.employee_appraisal_id,
-                overall_rating: formFields.value[3].value,
+                overall_rating: formFields.value[2].value,
                 employee: employeeValue.value,
                 employee_id: employeeValue.value,
                 period: periodValue.value,
                 period_id: periodValue.value,
                 category: categoryValue.value,
                 category_id: categoryValue.value,
-                comments: formFields.value[4].value,
+                comments: formFields.value[3].value,
                 skill_ratings: scheduleRows.value,
                 company: companyID.value,
             }
@@ -317,9 +325,6 @@ export default defineComponent({
                 if(formFields.value[i].value =='' && formFields.value[i].required == true && formFields.value[i].type != 'search-dropdown'){
                     errors.value.push('Error');
                 }
-            }
-            if(employeeValue.value == ''){
-                errors.value.push('Error');
             }
             if(errors.value.length){
                     toast.error('Fill In Required Fields');

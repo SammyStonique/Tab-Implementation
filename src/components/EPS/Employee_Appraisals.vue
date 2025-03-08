@@ -104,8 +104,11 @@ export default{
             {label: "Employee Name", key:"employee_name"},
             {label: "Period", key: "period_name"},
             {label: "Category", key: "category_name"},
+            {label: "Min", key: "min_weight"},
+            {label: "Max", key: "max_weight"},
             {label: "Score", key: "overall_rating"},
             {label: "Comments/Remarks", key:"comments"},
+            {label: "Status", key: "status"},
             {label: "Appr. By", key:"reveiewer_name"},
         ])
         const actions = ref([
@@ -271,8 +274,8 @@ export default{
         const addNewAppraisal = async() =>{
             store.commit('Appraisals/initializeStore');
             await store.dispatch('Appraisals/updateState', {selectedAppraisal: null,selectedCategory: null,selectedEmployee: null,selectedPeriod: null,performanceIndicators: [],isEditing: false});
-            store.commit('pageTab/ADD_PAGE', {'HR':'Appraisal_Details'});
-            store.state.pageTab.hrActiveTab = 'Appraisal_Details';          
+            store.commit('pageTab/ADD_PAGE', {'EPS':'Appraisal_Details'});
+            store.state.pageTab.epsActiveTab = 'Appraisal_Details';          
         }
         const handleActionClick = async(rowIndex, action, row) =>{
             if( action == 'edit'){
@@ -286,8 +289,8 @@ export default{
                     }
                     await store.dispatch('Appraisals/fetchAppraisal',formData).
                     then(()=>{
-                        store.commit('pageTab/ADD_PAGE', {'HR':'Appraisal_Details'})
-                        store.state.pageTab.hrActiveTab = 'Appraisal_Details';
+                        store.commit('pageTab/ADD_PAGE', {'EPS':'Appraisal_Details'})
+                        store.state.pageTab.epsActiveTab = 'Appraisal_Details';
                     })
                 }else{
                     toast.error(`Cannot Edit ${applicationStatus} Appraisal`)
@@ -295,14 +298,19 @@ export default{
                 
             }else if(action == 'delete'){
                 const appraisalID = [row[idField]];
-                let formData = {
-                    company: companyID.value,
-                    employee_appraisal: appraisalID
+                const applicationStatus = row['status']
+                if(applicationStatus == 'Pending'){
+                    let formData = {
+                        company: companyID.value,
+                        employee_appraisal: appraisalID
+                    }
+                    await store.dispatch('Appraisals/deleteAppraisal',formData).
+                    then(()=>{
+                        searchAppraisals();
+                    })
+                }else{
+                    toast.error(`Cannot Delete ${applicationStatus} Appraisal`)
                 }
-                await store.dispatch('Appraisals/deleteAppraisal',formData).
-                then(()=>{
-                    searchAppraisals();
-                })
             }else if(action == 'approve/reject'){
                 const applicationStatus = row['status']
                 if(applicationStatus == 'Pending'){

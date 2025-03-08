@@ -13,7 +13,8 @@ const state = {
   selectedPeriod: null,
   selectedCategory: null,
   selectedIndicators: [],
-  isEditing: false
+  isEditing: false,
+  categoryMethod: "Supervisor Only",
 };
   
 const mutations = {
@@ -30,6 +31,7 @@ const mutations = {
     state.selectedCategory = null;
     state.selectedIndicators = [];
     state.isEditing = false;
+    state.categoryMethod = "Supervisor Only";
   },
   SET_SELECTED_APPRAISAL(state, appraisal) {
     state.selectedAppraisal = appraisal;
@@ -123,6 +125,7 @@ const actions = {
       const selectedCategory = response.data.category.category_name;
       const selectedEmployee = response.data.employee.staff_number + ' - ' + response.data.employee.employee_name;
       const selectedPeriod = response.data.period.period_name;
+      state.categoryMethod = response.data.category.appraisal_method;
 
       commit('SET_SELECTED_CATEGORY',selectedCategory);
       commit('SET_SELECTED_EMPLOYEE',selectedEmployee);

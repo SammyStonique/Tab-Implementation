@@ -357,14 +357,19 @@ export default{
                 
             }else if(action == 'delete'){
                 const applicationID = [row[idField]];
-                let formData = {
-                    company: companyID.value,
-                    loan_application: applicationID
+                const applicationStatus = row['approval_status']
+                if(applicationStatus == 'Pending'){
+                    let formData = {
+                        company: companyID.value,
+                        loan_application: applicationID
+                    }
+                    await store.dispatch('Employee_Loan_Applications/deleteLoanApplication',formData).
+                    then(()=>{
+                        searchApplications();
+                    })
+                }else{
+                    toast.error(`Cannot Delete ${applicationStatus} Loan`)
                 }
-                await store.dispatch('Employee_Loan_Applications/deleteLoanApplication',formData).
-                then(()=>{
-                    searchApplications();
-                })
             }else if(action == 'approve/reject'){
                 const applicationStatus = row['approval_status']
                 if(applicationStatus == 'Pending'){

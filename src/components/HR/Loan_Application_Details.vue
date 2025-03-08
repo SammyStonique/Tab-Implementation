@@ -225,7 +225,7 @@ export default defineComponent({
             if(errors.value.length){
                 toast.error('Fill In Required Fields');
                 hideLoader();
-            }else if(parseFloat(formFields.value[2].value) <= 0){
+            }else if(parseFloat(formFields.value[1].value) <= 0){
                 toast.error('Invalid Amount');
                 hideLoader();
             }

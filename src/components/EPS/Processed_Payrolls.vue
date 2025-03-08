@@ -43,16 +43,19 @@ import { useToast } from "vue-toastification";
 import PrintJS from 'print-js';
 import MovableModal from '@/components/MovableModal.vue';
 import SearchableDropdown from '@/components/SearchableDropdown.vue';
+import { useDateFormatter } from '@/composables/DateFormatter';
 import Swal from 'sweetalert2';
 
 export default{
-    name: 'Payroll_Employees',
+    name: 'Processed_Payrolls',
     components:{
         PageComponent,MovableModal,SearchableDropdown
     },
     setup(){
         const store = useStore();
         const toast = useToast();
+        const { getYear } = useDateFormatter();
+        const current_date = new Date();
         const loader = ref('');
         const trans_modal_loader = ref('none');
         const idField = 'payroll_employee_id';
@@ -78,8 +81,8 @@ export default{
         const showModal = ref(false);
         const tableColumns = ref([
             {type: "checkbox"},
-            {label: "Staff No", key:"staff_number"},
-            {label: "Employee Name", key:"employee_name"},
+            {label: "Year", key:"payroll_year"},
+            {label: "Month", key:"payroll_month"},
             {label: "Basic Pay", key:"base_salary", type: "number", textColor: "black"},
             {label: "Allowances", key: "allowances", type: "number", textColor: "black"},
             {label: "Gross Pay", key:"gross_pay", type: "number", textColor: "black"},
@@ -94,17 +97,16 @@ export default{
         ])
         const showTotals = ref(true);
         const actions = ref([
-            {name: 'email-payslip', icon: 'fa fa-envelope', title: 'Email Payslip', rightName: 'Sending HR Emails'},
             {name: 'print', icon: 'fa fa-print', title: 'Print Payslip', rightName: 'Print Payslip'},
 
         ])
         const companyID = computed(()=> store.state.userData.company_id);
+        const userID = computed(()=> store.state.userData.user_id);
         const payrollID = computed(()=> store.state.Payrolls.payrollID);
-        const staff_number_search = ref('');
+        const year_search = ref('');
         const employee_name_search = ref('');
         const searchFilters = ref([
-            {type:'text', placeholder:"Staff No...", value: staff_number_search, width:64,},
-            {type:'text', placeholder:"Employee Name...", value: employee_name_search, width:64,},
+            {type:'text', placeholder:"Year...", value: getYear(current_date), width:64,},
         ]);
 
         const handleSelectionChange = (ids) => {
@@ -180,17 +182,15 @@ export default{
             showNextBtn.value = false;
             showPreviousBtn.value = false;
             let formData = {
-                staff_number: staff_number_search.value,
-                employee_name: employee_name_search.value,
-                payroll: payrollID.value,
+                employee: userID.value,
+                year: searchFilters.value[0].value ,
                 company: companyID.value,
                 page_size: selectedValue.value
             } 
             axios
-            .post(`api/v1/payroll-employees-search/?page=${currentPage.value}`,formData)
+            .post(`api/v1/employee-payrolls-search/?page=${currentPage.value}`,formData)
             .then((response)=>{
                 employeesList.value = response.data.results;
-                // store.commit('Terminated_Leases/LIST_TENANTS', employeesList.value)
                 propResults.value = response.data;
                 propArrLen.value = employeesList.value.length;
                 propCount.value = propResults.value.count;
@@ -214,9 +214,11 @@ export default{
             searchEmployees(selectedValue.value);
         };
         const resetFilters = () =>{
+            currentPage.value = 1;
             selectedValue.value = 50;
-            staff_number_search.value = "";
+            year_search.value = "";
             employee_name_search.value = "";
+            searchFilters.value[0].value = getYear(current_date);
             searchEmployees();
         }
         const loadPrev = () =>{
@@ -278,11 +280,12 @@ export default{
                 })
             }else if(action == 'print'){
                 const employeeID = row['employee_id'];
+                const payrollID = row['payroll_id'];
                 showLoader();
                 let formData = {
                     company: companyID.value,
                     employee: employeeID,
-                    payroll: payrollID.value
+                    payroll: payrollID
                 }
                 axios
                 .post("api/v1/print-employee-payslip-pdf/", formData, { responseType: 'blob' })
@@ -366,7 +369,7 @@ export default{
         })
         return{
             searchEmployees,resetFilters, searchFilters, tableColumns, employeesList,dropdownWidth,showAddButton,
-            propResults, propArrLen, propCount, pageCount, showNextBtn, showPreviousBtn,
+            currentPage,propResults, propArrLen, propCount, pageCount, showNextBtn, showPreviousBtn,
             loadPrev, loadNext, firstPage, lastPage, idField, actions, handleActionClick,
             submitButtonLabel, showModal, showLoader, loader, hideLoader,showTotals,
             handleSelectionChange,rightsModule,printEmployeesList,selectSearchQuantity,selectedValue, dropdownOptions, handleDynamicOption,

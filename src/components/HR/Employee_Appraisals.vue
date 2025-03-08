@@ -86,7 +86,7 @@ export default{
         const currentPage = ref(1);
         const showNextBtn = ref(false);
         const showPreviousBtn = ref(false);
-        const transTitle = ref('Approve/Reject Loan');
+        const transTitle = ref('Approve/Reject Appraisal');
         const refTitle = ref('Disburse Loan');
         const transModalVisible = ref(false);
         const refModalVisible = ref(false);
@@ -104,8 +104,11 @@ export default{
             {label: "Employee Name", key:"employee_name"},
             {label: "Period", key: "period_name"},
             {label: "Category", key: "category_name"},
+            {label: "Min", key: "min_weight"},
+            {label: "Max", key: "max_weight"},
             {label: "Score", key: "overall_rating"},
             {label: "Comments/Remarks", key:"comments"},
+            {label: "Status", key: "status"},
             {label: "Appr. By", key:"reveiewer_name"},
         ])
         const actions = ref([
@@ -347,14 +350,19 @@ export default{
                 
             }else if(action == 'delete'){
                 const appraisalID = [row[idField]];
-                let formData = {
-                    company: companyID.value,
-                    employee_appraisal: appraisalID
+                const applicationStatus = row['status']
+                if(applicationStatus == 'Pending'){
+                    let formData = {
+                        company: companyID.value,
+                        employee_appraisal: appraisalID
+                    }
+                    await store.dispatch('Appraisals/deleteAppraisal',formData).
+                    then(()=>{
+                        searchAppraisals();
+                    })
+                }else{
+                    toast.error(`Cannot Delete ${applicationStatus} Appraisal`)
                 }
-                await store.dispatch('Appraisals/deleteAppraisal',formData).
-                then(()=>{
-                    searchAppraisals();
-                })
             }else if(action == 'approve/reject'){
                 const applicationStatus = row['status']
                 if(applicationStatus == 'Pending'){

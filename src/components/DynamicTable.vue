@@ -238,7 +238,18 @@ export default defineComponent({
           row.supervisor_rating = minWeight;
           row.average_rating = minWeight;
         }else{
-          averageRating = ((employeeRating + supervisorRating) / 2).toFixed(2);
+          if(supervisorRating == 0){
+            if((minWeight > employeeRating) || (maxWeight < employeeRating)){
+              row.employee_rating = minWeight;
+              row.average_rating = minWeight;
+            }else{
+              averageRating = employeeRating;
+            }
+            
+          }else{
+            averageRating = ((employeeRating + supervisorRating) / 2).toFixed(2);
+          }
+          
           row.average_rating = averageRating;
         }
         
