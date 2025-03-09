@@ -147,6 +147,12 @@
                         </button>
                     </div>
                     <div class="py-2 px-3 pl-4 w-full hover:bg-slate-500 hover:w-full">
+                        <button class="flex text-sm w-full" @click="openPage({'MMS':'Loan_Securities'})">
+                            <i class="fa fa-user-shield pt-2 mr-2" aria-hidden="true"></i>
+                            <p class="">Loan Securities</p>
+                        </button>
+                    </div>
+                    <div class="py-2 px-3 pl-4 w-full hover:bg-slate-500 hover:w-full">
                         <button class="flex text-sm w-full" @click="openPage({'MMS':'Loan_Disbursements'})">
                             <i class="fa fa-credit-card pt-2 mr-2" aria-hidden="true"></i>
                             <p class="">Loan Disbursements</p>
@@ -197,57 +203,16 @@
                         </button>
                     </div>
                     <div class="py-2 px-3 pl-4 w-full hover:bg-slate-500 hover:w-full">
-                        <button class="flex text-sm" @click="openPage({'HR':'Deductions'})">
-                        <i class="fa fa-layer-group pt-2 mr-2" aria-hidden="true"></i>
-                        <p class="">Earnings/Deductions</p>
+                        <button class="flex text-sm" @click="openPage({'MMS':'Security_Types'})">
+                        <i class="fa fa-user-shield pt-2 mr-2" aria-hidden="true"></i>
+                        <p class="">Security Types</p>
                         </button>
                     </div>
+
                     <div class="py-2 px-3 pl-4 w-full hover:bg-slate-500 hover:w-full">
-                        <button class="flex text-sm" @click="openPage({'HR':'Leave_Types'})">
-                        <i class="fa fa-sliders-h pt-2 mr-2" aria-hidden="true"></i>
-                        <p class="">Leave Types</p>
-                        </button>
-                    </div>
-                    <div class="py-2 px-3 pl-4 w-full hover:bg-slate-500 hover:w-full">
-                        <button class="flex text-sm" @click="openPage({'HR':'Holidays'})">
-                        <i class="fa fa-door-open pt-2 mr-2" aria-hidden="true"></i>
-                        <p class="">Holidays</p>
-                        </button>
-                    </div>
-                    <div class="py-2 px-3 pl-4 w-full hover:bg-slate-500 hover:w-full">
-                        <button class="flex text-sm" @click="openPage({'HR':'Paye'})">
-                        <i class="fa fa-money-bill-wave pt-2 mr-2" aria-hidden="true"></i>
-                        <p class="">P.A.Y.E</p>
-                        </button>
-                    </div>
-                    <div class="py-2 px-3 pl-4 w-full hover:bg-slate-500 hover:w-full">
-                        <button class="flex text-sm" @click="openPage({'HR':'Shif'})">
-                        <i class="fa fa-layer-group pt-2 mr-2" aria-hidden="true"></i>
-                        <p class="">S.H.I.F</p>
-                        </button>
-                    </div>
-                    <div class="py-2 px-3 pl-4 w-full hover:bg-slate-500 hover:w-full">
-                        <button class="flex text-sm" @click="openPage({'HR':'Nssf'})">
-                        <i class="fa fa-sliders-h pt-2 mr-2" aria-hidden="true"></i>
-                        <p class="">N.S.S.F</p>
-                        </button>
-                    </div>
-                    <div class="py-2 px-3 pl-4 w-full hover:bg-slate-500 hover:w-full">
-                        <button class="flex text-sm" @click="openPage({'HR':'Housing_Levy'})">
-                        <i class="fa fa-money-bill-wave pt-2 mr-2" aria-hidden="true"></i>
-                        <p class="">Housing Levy</p>
-                        </button>
-                    </div>
-                    <div class="py-2 px-3 pl-4 w-full hover:bg-slate-500 hover:w-full">
-                        <button class="flex text-sm" @click="openPage({'HR':'Default_Settings'})">
+                        <button class="flex text-sm" @click="openPage({'MMS':'Default_Settings'})">
                         <i class="fa fa-link pt-2 mr-2" aria-hidden="true"></i>
                         <p class="">Posting Acc. Mapping</p>
-                        </button>
-                    </div>
-                    <div class="py-2 px-3 pl-4 w-full hover:bg-slate-500 hover:w-full">
-                        <button class="flex text-sm" @click="openPage({'HR':'HR_Templates'})">
-                        <i class="fa fa-image pt-2 mr-2" aria-hidden="true"></i>
-                        <p class="">User Defined Templates</p>
                         </button>
                     </div>
                 </div>

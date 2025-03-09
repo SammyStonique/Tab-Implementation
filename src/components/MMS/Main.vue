@@ -58,6 +58,8 @@ import Loan_Guarantors from '@/components/MMS/Loan_Guarantors.vue';
 import Loan_Ledger from '@/components/MMS/Loan_Ledger.vue';
 import Receipt_Details from '@/components/MMS/Receipt_Details.vue';
 import Loan_Disbursements from '@/components/MMS/Loan_Disbursements.vue';
+import Security_Types from '@/components/MMS/Security_Types.vue';
+import Loan_Securities from '@/components/MMS/Loan_Securities.vue';
 
 import Default_Settings from '@/components/SET/Default_Settings.vue';
 
@@ -70,7 +72,7 @@ export default{
         Member_Categories,Member_Sponsors,Members,Import_Members,Member_Details,Membership_Fees,Receipt_Details,
         Member_Invoices,Member_Receipts,Savings_Products,Saving_Product_Details,Shares_Products,Share_Product_Details,Saving_Accounts,Share_Accounts,
         Saving_Deposits,Share_Deposits,Loan_Products,Loan_Product_Details,Loan_Fees,Loan_Applications,Loan_Application_Details,Loan_Guarantors,Loan_Ledger,
-        Loan_Disbursements,Import_Saving_Accounts,Import_Share_Accounts,Import_Saving_Deposits,Import_Share_Deposits,
+        Loan_Disbursements,Import_Saving_Accounts,Import_Share_Accounts,Import_Saving_Deposits,Import_Share_Deposits,Security_Types,Loan_Securities,
 
         Default_Settings
     },

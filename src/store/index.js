@@ -102,6 +102,8 @@ import Loan_Fees from './MMS/Loan_Fees';
 import Loan_Applications from './MMS/Loan_Applications';
 import Loan_Guarantors from './MMS/Loan_Guarantors';
 import Loan_Disbursements from './MMS/Loan_Disbursements';
+import Security_Types from './MMS/Security_Types';
+import Loan_Securities from './MMS/Loan_Securities';
 
 
 import Default_Settings from './SET/Default_Settings';
@@ -140,7 +142,7 @@ export default createStore({
     Disciplinary_Categories,Disciplinary_Cases,Disciplinary_Meetings,Disciplinary_Reviews,Disciplinary_Actions,Disciplinary_Appeals,Employee_Rewards,
 
     Member_Categories,Member_Sponsors,Members,Membership_Fees,Savings_Products,Shares_Products,Saving_Accounts,Share_Accounts,Saving_Deposits,Share_Deposits,
-    Loan_Products,Loan_Fees,Loan_Applications,Loan_Guarantors,Loan_Disbursements,
+    Loan_Products,Loan_Fees,Loan_Applications,Loan_Guarantors,Loan_Disbursements,Security_Types,Loan_Securities,
 
     Default_Settings,Companies,Branches,User_Rights,SMS_Integrations,Email_Integrations,Mpesa_Integrations,Mpesa_Transactions,Banks,SMS_Templates,Email_Templates
   },

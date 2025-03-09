@@ -102,6 +102,7 @@ const actions = {
         state.feeID = selectedFee.loan_fee_id;
         state.feeName = selectedFee.fee_name;
         selectedFee.member_loan_fee_id = null;
+        selectedFee.loan_loan_fee_id = null;
         state.feeArray = [...state.feeArray, selectedFee];
     }
     commit('FEES_ARRAY', state.feeArray);

@@ -41,7 +41,20 @@
                                             @fetchData="fetchData"
                                         />
                                     </div>                      
-                                    <DynamicTable :key="table2Key" :columns="guarantorColumns" :rows="guarantorRows" :idField="idFieldCharge" :actions="actionCharges" @action-click="deleteGuarantor" :rightsModule="rightsModule" />
+                                    <DynamicTable :key="table2Key" :columns="guarantorColumns" :rows="guarantorRows" :idField="idFieldCharge" :actions="actionGuarantors" @action-click="deleteGuarantor" :rightsModule="rightsModule" />
+                                </div>
+                                <div v-show="activeTab == 3">
+                                    <div class="text-left p-2">
+                                        <SearchableDropdown 
+                                            :key="secComponentKey"
+                                            :options="securityArr"
+                                            :dropdownWidth="chargesDropdownWidth"
+                                            :searchPlaceholder="secSearchPlaceholder"
+                                            @option-selected="handleSelectedSecurity"
+                                            @fetchData="fetchData"
+                                        />
+                                    </div>                      
+                                    <DynamicTable :key="table3Key" :columns="securityColumns" :rows="securityRows" :idField="idFieldCharge" :actions="actionSecurities" @action-click="deleteSecurity" :rightsModule="rightsModule" />
                                 </div>
                             </div>
                         </div>
@@ -70,12 +83,13 @@ export default defineComponent({
         const store = useStore();
         const toast = useToast();
         const loader = ref('none');
-        const tabs = ref(['Amortization Schedule','Loan Charges','Guarantors']);
+        const tabs = ref(['Amortization Schedule','Loan Charges','Guarantors','Security']);
         const mainComponentKey = ref(0);
         const intComponentKey = ref(0);
         const catComponentKey = ref(0);
         const chargeComponentKey = ref(0);
         const grntComponentKey = ref(0);
+        const secComponentKey = ref(0);
         const activeTab = ref(0);
         const rightsModule = ref('MMS');
         const displayButtons = ref(true);
@@ -83,6 +97,7 @@ export default defineComponent({
         const tableKey = ref(0);
         const table1Key = ref(0);
         const table2Key = ref(0);
+        const table3Key = ref(0);
         const errors = ref([]);
         const companyID = computed(()=> store.state.userData.company_id);
         const flex_basis = ref('');
@@ -96,15 +111,18 @@ export default defineComponent({
         const loanGuarantors = computed(()=> store.state.Loan_Applications.loanGuarantors);
         const loanSchedules = computed(()=> store.state.Loan_Applications.loanSchedules);
         const loanCharges = computed(()=> store.state.Loan_Applications.loanCharges);
+        const loanSecurities = computed(()=> store.state.Loan_Applications.loanSecurities);
         const memberArray = computed(() => store.state.Members.memberArr);
         const productArray = computed(() => store.state.Loan_Products.productArr);
         const productMaxAmount = computed(() => store.state.Loan_Products.productMaxAmount);
         const computedMaxAmnt = computed(() => productMaxAmount);
         const chargeArr = computed(() => store.state.Loan_Products.chargeArr);
         const memberArr = computed(() => store.state.Loan_Guarantors.memberArr);
+        const securityArr = computed(() => store.state.Security_Types.securityArr);
         const chargesDropdownWidth = ref('400px');
         const chargesSearchPlaceholder = ref('Select Charge...');
         const grntSearchPlaceholder = ref('Select Guarantor...');
+        const secSearchPlaceholder = ref('Select Security...');
         const memberID = ref('');
         const installments = computed(() => store.state.Loan_Products.installments);
         const computedInstlmnts = computed(() => installments);
@@ -132,19 +150,36 @@ export default defineComponent({
         const chargeRows = computed(() => {
             return store.state.Loan_Products.loanCharges;
         });
+        const idFieldCharge = 'loan_fee_id';
+        const actionCharges = ref([
+            {name: 'delete', icon: 'fa fa-minus-circle', title: 'Remove Charge', rightName: 'Adding Loan Applications'},
+        ])
         const guarantorColumns = ref([
             {label: "Name", key:"member_name", type: "text", editable: false},
             {label: "Phone No", key:"phone_number", type: "text", editable: false},
             {label: "Savings", key:"total_savings", type: "text", editable: false},
             {label: "Shares", key:"total_shares", type: "text", editable: false},
-            {label: "Amount", key: "guarantee_amount", type: "number", editable: true},
+            {label: "Amount", key: "amount", type: "number", editable: true},
         ]);
         const guarantorRows = computed(() => {
             return store.state.Loan_Guarantors.memberArray;
         });
-        const idFieldCharge = 'loan_fee_id';
-        const actionCharges = ref([
-            {name: 'delete', icon: 'fa fa-minus-circle', title: 'Remove Charge', rightName: 'Adding Loan Applications'},
+        const actionGuarantors = ref([
+            {name: 'delete', icon: 'fa fa-minus-circle', title: 'Remove Guarantor', rightName: 'Adding Loan Applications'},
+        ])
+        const securityColumns = ref([
+            {label: "Type", key:"security_name", type: "text", editable: false},
+            {label: "Security Name", key:"name", type: "text", editable: true},
+            {label: "Reg/ID No", key:"registration_number", type: "text", editable: true},
+            {label: "Phone No", key:"phone_number", type: "text", editable: true},
+            {label: "Value", key:"security_value", type: "text", editable: true},
+            {label: "Security Description", key:"description", type: "text", editable: true},
+        ]);
+        const securityRows = computed(() => {
+            return store.state.Security_Types.securityArray;
+        });
+        const actionSecurities = ref([
+            {name: 'delete', icon: 'fa fa-minus-circle', title: 'Remove Security', rightName: 'Adding Loan Applications'},
         ])
 
         const handleSelectedMember = async(option) =>{
@@ -182,6 +217,9 @@ export default defineComponent({
         };
         const fetchGuarantors = async() =>{
             await store.dispatch('Loan_Guarantors/fetchMembers', {company:companyID.value})
+        };
+        const fetchSecurities = async() =>{
+            await store.dispatch('Security_Types/fetchSecurityTypes', {company:companyID.value})
         };
 
         const checkMemberEligiility = (value) =>{
@@ -244,7 +282,7 @@ export default defineComponent({
             }
         }, { immediate: true });
 
-        watch([selectedApplication, selectedProduct, selectedMember, loanCharges, loanGuarantors, loanSchedules], () => {
+        watch([selectedApplication, selectedProduct, selectedMember, loanCharges, loanGuarantors, loanSchedules, loanSecurities], () => {
             if(loanCharges.value){
                 store.dispatch('Loan_Products/updateState',{loanCharges: loanCharges.value})
                 table1Key.value += 1;
@@ -252,6 +290,10 @@ export default defineComponent({
             if(loanGuarantors.value){
                 store.dispatch('Loan_Guarantors/updateState',{memberArray: loanGuarantors.value})
                 table2Key.value += 1;
+            }
+            if(loanSecurities.value){
+                store.dispatch('Security_Types/updateState',{securityArray: loanSecurities.value})
+                table3Key.value += 1; 
             }
             if(selectedApplication.value && loanSchedules.value){
                 store.dispatch('Loan_Products/updateState',{installments: loanSchedules.value.length})
@@ -281,7 +323,7 @@ export default defineComponent({
                 }
             }
             await store.dispatch('Loan_Products/updateState', {loanCharges: [], productMaxAmount: 0, installments:0});
-            await store.dispatch('Loan_Applications/updateState', {selectedApplication: null,selectedMember: null,selectedProduct: null, loanCharges: [], loanGuarantors: [], loanSchedules: [], isEditing:false});
+            await store.dispatch('Loan_Applications/updateState', {selectedApplication: null,selectedMember: null,selectedProduct: null, loanCharges: [], loanGuarantors: [], loanSecurities: [], loanSchedules: [], isEditing:false});
             mainComponentKey.value += 1;
             intComponentKey.value += 1;
             catComponentKey.value += 1;
@@ -307,6 +349,11 @@ export default defineComponent({
                 installments: formFields.value[6].value,
                 company: companyID.value
             }
+            let formData1 = {
+                company: companyID.value,
+                loan_product: productID.value
+            }
+            await store.dispatch('Loan_Products/fetchLoanProductCharges', formData1);
             errors.value = [];
             for(let i=0; i < formFields.value.length; i++){
                 if(formFields.value[i].value =='' && formFields.value[i].required == true && formFields.value[i].type != 'search-dropdown'){
@@ -351,6 +398,7 @@ export default defineComponent({
                 loan_product_id: productID.value,
                 charges: chargeRows.value,
                 guarantors: guarantorRows.value,
+                securities: securityRows.value,
                 company: companyID.value
             }
             errors.value = [];
@@ -402,6 +450,7 @@ export default defineComponent({
                 loan_product_id: productValue.value,
                 company: companyID.value,
                 guarantors: guarantorRows.value,
+                securities: securityRows.value,
                 charges: chargeRows.value,
             }
             errors.value = [];
@@ -461,10 +510,19 @@ export default defineComponent({
             store.dispatch('Loan_Guarantors/removeMemberGuarantor', rowIndex);
             table2Key.value += 1;
         }
+        const handleSelectedSecurity = async(option) =>{
+            await store.dispatch('Security_Types/handleSelectedSecurity', option);
+            secComponentKey.value += 1;
+        }
+        const deleteSecurity = (rowIndex, action, row) =>{
+            store.dispatch('Security_Types/removeSecurityType', rowIndex);
+            table3Key.value += 1;
+        }
         
         onBeforeMount(()=>{ 
             fetchCharges();
             fetchGuarantors();
+            fetchSecurities();
             updateFormFields();
             updateAdditionalFormFields();
             flex_basis.value = '1/4';
@@ -481,8 +539,9 @@ export default defineComponent({
             additional_flex_basis_percentage, mainComponentKey,handleReset, loader, showLoader, hideLoader,
             displayButtons,saveLoanApplication,chargeArr,chargesDropdownWidth,chargesSearchPlaceholder,selectTab,handleSelectedCharge,
             deleteCharge,activeTab,rightsModule,idFieldCharge,chargeRows,chargeColumns,actionCharges,chargeComponentKey,
-            scheduleColumns,scheduleRows,generateSchedules,showActions,showTotals,tableKey,table1Key,table2Key,memberArr,
-            grntComponentKey,grntSearchPlaceholder,handleSelectedGuarantor,deleteGuarantor,guarantorColumns,guarantorRows
+            scheduleColumns,scheduleRows,generateSchedules,showActions,showTotals,tableKey,table1Key,table2Key,table2Key,
+            memberArr,grntComponentKey,grntSearchPlaceholder,actionGuarantors,handleSelectedGuarantor,deleteGuarantor,guarantorColumns,guarantorRows,
+            securityArr,secComponentKey,secSearchPlaceholder,actionSecurities,handleSelectedSecurity,deleteSecurity,securityColumns,securityRows,
         }
     }
 })

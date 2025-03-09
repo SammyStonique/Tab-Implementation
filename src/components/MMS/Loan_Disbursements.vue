@@ -161,7 +161,7 @@ export default{
                     type:'search-dropdown', label:"Application", value: applicationValue.value, componentKey: memComponentKey,
                     selectOptions: applicationArray, optionSelected: handleSelectedApplication, required: true,
                     searchPlaceholder: 'Select Application...', dropdownWidth: '400px', updateValue: selectedApplication.value,
-                    fetchData: store.dispatch('Loan_Applications/fetchLoanApplications', {company:companyID.value}), clearSearch: clearSelectedApplication
+                    fetchData: store.dispatch('Loan_Applications/fetchLoanApplications', {company:companyID.value, status:"Approved"}), clearSearch: clearSelectedApplication
                 },
                 {  
                     type:'search-dropdown', label:"Cashbook", value: ledgerValue.value, componentKey: prodComponentKey,

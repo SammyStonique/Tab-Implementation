@@ -10,6 +10,7 @@ const state = {
   applicationMaxAmount: 0,
   loanCharges: [],
   loanGuarantors: [],
+  loanSecurities: [],
   loanSchedules: [],
   selectedApplication: null,
   selectedProduct: null,
@@ -20,6 +21,7 @@ const state = {
   selectedSchedules: [],
   selectedCharges: [],
   selectedGuarantors: [],
+  selectedSecurities: [],
   selectedTransactions: [],
   loanMember: [],
   loanProduct: [],
@@ -37,6 +39,7 @@ const mutations = {
     state.selectedApplication = null;
     state.loanCharges = [];
     state.loanGuarantors = [];
+    state.loanSecurities = [];
     state.loanSchedules = [];
     state.selectedProduct = null;
     state.selectedMember = null;
@@ -45,6 +48,7 @@ const mutations = {
     state.selectedSchedules = [];
     state.selectedCharges = [];
     state.selectedGuarantors = [];
+    state.selectedSecurities = [];
     state.selectedTransactions = [];
     state.loanMember = [];
     state.loanProduct = [];
@@ -57,6 +61,12 @@ const mutations = {
   },
   SET_SELECTED_REPAYMENTS(state, repayment) {
     state.selectedRepayments = repayment;
+  },
+  SET_SELECTED_GUARANTORS(state, guarantors) {
+    state.selectedGuarantors = guarantors;
+  },
+  SET_SELECTED_SECURITIES(state, securities) {
+    state.selectedSecurities = securities;
   },
   LIST_APPLICATIONS(state, applications) {
     state.applicationsList = applications;
@@ -71,6 +81,9 @@ const mutations = {
   SET_APPLICATION_GUARANTORS(state, guarantors){
     state.loanGuarantors = guarantors
   },
+  SET_APPLICATION_SECURITIES(state, securities){
+    state.loanSecurities = securities
+  },
   SET_APPLICATION_SCHEDULES(state, schedules){
     state.loanSchedules = schedules
   },
@@ -82,6 +95,9 @@ const mutations = {
   },
   SET_LOAN_GUARANTORS(state, guarantors){
     state.selectedGuarantors = guarantors;
+  },
+  SET_LOAN_SECURITIES(state, securities){
+    state.selectedSecurities = securities;
   },
   SET_LOAN_SCHEDULES(state, schedules){
     state.selectedSchedules = schedules;
@@ -165,6 +181,7 @@ const actions = {
         commit('SET_SELECTED_PRODUCT',selectedProduct);
         commit('SET_APPLICATION_CHARGES',(response.data.loan_charges != null) ? (response.data.loan_charges) : []);
         commit('SET_APPLICATION_GUARANTORS',(response.data.loan_guarantors != null) ? (response.data.loan_guarantors) : []);
+        commit('SET_APPLICATION_SECURITIES',(response.data.loan_securities != null) ? (response.data.loan_securities) : []);
         commit('SET_APPLICATION_SCHEDULES',(response.data.loan_schedules != null) ? (response.data.loan_schedules) : []);
     })
     .catch((error)=>{
@@ -182,6 +199,7 @@ const actions = {
         commit('SET_LOAN_DETAILS',response.data);
         commit('SET_LOAN_CHARGES',(response.data.loan_charges != null) ? (response.data.loan_charges) : []);
         commit('SET_LOAN_GUARANTORS',(response.data.loan_guarantors != null) ? (response.data.loan_guarantors) : []);
+        commit('SET_LOAN_SECURITIES',(response.data.loan_securities != null) ? (response.data.loan_securities) : []);
         commit('SET_LOAN_SCHEDULES',(response.data.loan_schedules != null) ? (response.data.loan_schedules) : []);
     })
     .catch((error)=>{
@@ -223,6 +241,28 @@ const actions = {
     .then((response)=>{
         state.selectedRepayments = response.data;
         commit('SET_SELECTED_REPAYMENTS',response.data);
+    })
+    .catch((error)=>{
+      console.log(error.message);
+    })
+    
+  },
+  fetchLoanGuarantors({ commit,state }, formData) {
+    axios.post(`api/v1/get-loan-guarantors/`,formData)
+    .then((response)=>{
+        state.selectedGuarantors = response.data;
+        commit('SET_SELECTED_GUARANTORS',response.data);
+    })
+    .catch((error)=>{
+      console.log(error.message);
+    })
+    
+  },
+  fetchLoanSecurities({ commit,state }, formData) {
+    axios.post(`api/v1/get-loan-securities/`,formData)
+    .then((response)=>{
+        state.selectedSecurities = response.data;
+        commit('SET_SELECTED_SECURITIES',response.data);
     })
     .catch((error)=>{
       console.log(error.message);

@@ -144,7 +144,7 @@ export default defineComponent({
                 {  
                     type:'search-dropdown', label:"Member Category", value: categoryValue.value, componentKey: catComponentKey,
                     selectOptions: categoryArray, optionSelected: handleSelectedCategory, required: false,
-                    searchPlaceholder: 'Select Category...', dropdownWidth: '400px', updateValue: selectedCategory.value,
+                    searchPlaceholder: 'Select Category...', dropdownWidth: '450px', updateValue: selectedCategory.value,
                     fetchData: store.dispatch('Member_Categories/fetchMemberCategories', {company:companyID.value}), clearSearch: clearSelectedCategory
                 },
                 { type: 'text', name: 'product_code',label: "Code", value: selectedProduct.value?.product_code || '', required: false },
@@ -153,22 +153,25 @@ export default defineComponent({
                 { type: 'dropdown', name: 'repayment_frequency',label: "Repayment Frequency", value: selectedProduct.value?.repayment_frequency || 'Monthly', placeholder: "", required: true, options: [{ text: 'Daily', value: 'Daily' }, { text: 'Weekly', value: 'Weekly' },{ text: 'Monthly', value: 'Monthly' }, { text: 'Annually', value: 'Annually' }] },
                 { type: 'text', name: 'min_amount',label: "Min Amount", value: selectedProduct.value?.min_amount || '', required: true },
                 { type: 'text', name: 'max_amount',label: "Max Amount", value: selectedProduct.value?.max_amount || '0', required: false },
-                { type: 'text', name: 'interest_rate',label: "Interest Rate", value: selectedProduct.value?.interest_rate || '0', required: false },
+                { type: 'text', name: 'interest_rate',label: "Interest Rate(%)", value: selectedProduct.value?.interest_rate || '0', required: false },
                 { type: 'dropdown', name: 'interest_calculation',label: "Interest Method", value: selectedProduct.value?.interest_calculation || 'Simple Interest', placeholder: "", required: true, options: [{ text: 'Reducing Interest EMI', value: 'Reducing Interest EMI' }, { text: 'Reducing Interest Fixed Principal', value: 'Reducing Interest Principal Payments' },{ text: 'Flat Interest EMI', value: 'Flat Interest EMI' }, { text: 'Flat Interest Principal Payments', value: 'Flat Interest Principal Payments' },{ text: 'Simple Interest', value: 'Simple Interest' }] },
                 { type: 'dropdown', name: 'loan_period',label: "Loan Period", value: selectedProduct.value?.loan_period || 'Months', placeholder: "", required: true, options: [{ text: 'Days', value: 'Days' }, { text: 'Weeks', value: 'Weeks' },{ text: 'Months', value: 'Months' }, { text: 'Years', value: 'Years' }] },
                 { type: 'text', name: 'max_repayment',label: "Max Repay. Period", value: selectedProduct.value?.max_repayment || '0', required: false },
-                { type: 'dropdown', name: 'mandatory_savings',label: "Use Savings", value: selectedProduct.value?.mandatory_savings || 'Yes', placeholder: "", required: true, options: [{ text: 'Yes', value: 'Yes' }, { text: 'No', value: 'No' }] },
-                { type: 'text', name: 'savings_percentage',label: "Savings Percentage(%)", value: selectedProduct.value?.savings_percentage || '0', required: false },
+                { type: 'dropdown', name: 'mandatory_savings',label: "Use Savings/Shares", value: selectedProduct.value?.mandatory_savings || 'Yes', placeholder: "", required: true, options: [{ text: 'Yes', value: 'Yes' }, { text: 'No', value: 'No' }] },
+                { type: 'dropdown', name: 'guarantee_option',label: "Savings/Shares Option", value: selectedProduct.value?.guarantee_option || 'Savings', placeholder: "", required: true, options: [{ text: 'Savings', value: 'Savings' }, { text: 'Shares', value: 'Shares' }] },
+                { type: 'text', name: 'savings_percentage',label: "Savings/Shares Percentage(%)", value: selectedProduct.value?.savings_percentage || '0', required: false },
                 { type: 'dropdown', name: 'penalize',label: "Penalize", value: selectedProduct.value?.penalize || 'No', placeholder: "", required: false, options: [{ text: 'Yes', value: 'Yes' }, { text: 'No', value: 'No' }] },
+                { type: 'dropdown', name: 'penalty_frequency',label: "Penalty Frequency", value: selectedProduct.value?.penalty_frequency || 'Monthly', placeholder: "", required: true, options: [{ text: 'Daily', value: 'Daily' }, { text: 'Weekly', value: 'Weekly' },{ text: 'Monthly', value: 'Monthly' }, { text: 'Annually', value: 'Annually' }, { text: 'One-Off', value: 'One-Off' }] },
                 { type: 'dropdown', name: 'penalty_mode',label: "Penalty Mode", value: selectedProduct.value?.penalty_mode || 'Flat Amount', placeholder: "", required: false, options: [{ text: 'Flat Amount', value: 'Flat Amount' }, { text: '% of Installment Principal', value: 'Installment Principal' },{ text: '% of Installment Interest', value: 'Installment Interest' }, { text: '% of Installment Principal + Interest', value: 'Installment Principal + Interest' },{ text: '% of Principal Balance', value: 'Principal Balance' }, { text: '% of Loan Balance', value: 'Loan Balance' }] },
                 { type: 'text', name: 'penalty_value',label: "Penalty Value", value: selectedProduct.value?.penalty_value || '0', required: false },
                 { type: 'dropdown', name: 'use_guarantors',label: "Use Guarantors", value: selectedProduct.value?.use_guarantors || 'Yes', placeholder: "", required: true, options: [{ text: 'Yes', value: 'Yes' }, { text: 'No', value: 'No' }] },
                 { type: 'text', name: 'min_guarantors',label: "Minimum Guarantors", value: selectedProduct.value?.min_guarantors || '0', required: false },
                 { type: 'text', name: 'guarantors_percentage',label: "Guarantors Percentage(%)", value: selectedProduct.value?.guarantors_percentage || '0', required: false },
+                { type: 'dropdown', name: 'use_security',label: "Use Security", value: selectedProduct.value?.use_security || 'No', placeholder: "", required: true, options: [{ text: 'Yes', value: 'Yes' }, { text: 'No', value: 'No' }] },
                 {  
                     type:'search-dropdown', label:"Interest Posting Account", value: intLedgerValue.value, componentKey: intComponentKey,
                     selectOptions: ledgerArray, optionSelected: handleSelectedInterestLedger, required: true,
-                    searchPlaceholder: 'Select Posting Acc...', dropdownWidth: '400px', updateValue: selectedInterestLedger.value,
+                    searchPlaceholder: 'Select Posting Acc...', dropdownWidth: '450px', updateValue: selectedInterestLedger.value,
                     fetchData: store.dispatch('Ledgers/fetchLedger', {company:companyID.value}), clearSearch: clearSelectedInterestLedger
                 },
                 {required: false}
@@ -187,7 +190,7 @@ export default defineComponent({
                 formFields.value[0].value = categoryID.value;
             }
             if(intLedgerID.value != ""){
-                formFields.value[19].value = intLedgerID.value;
+                formFields.value[22].value = intLedgerID.value;
             }
         }, { immediate: true });
 
@@ -252,14 +255,17 @@ export default defineComponent({
                 loan_period: formFields.value[9].value,
                 max_repayment: formFields.value[10].value,
                 mandatory_savings: formFields.value[11].value,
-                savings_percentage: formFields.value[12].value,
-                penalize: formFields.value[13].value,
-                penalty_value: formFields.value[15].value,
+                guarantee_option: formFields.value[12].value,
+                savings_percentage: formFields.value[13].value,
+                penalize: formFields.value[14].value,
+                penalty_frequency: formFields.value[15].value,
+                penalty_value: formFields.value[17].value,
                 status: 'Active',
-                penalty_mode: formFields.value[14].value,
-                use_guarantors: formFields.value[16].value,
-                min_guarantors: formFields.value[17].value,
-                guarantors_percentage: formFields.value[18].value,
+                penalty_mode: formFields.value[16].value,
+                use_guarantors: formFields.value[18].value,
+                min_guarantors: formFields.value[19].value,
+                guarantors_percentage: formFields.value[20].value,
+                use_security: formFields.value[21].value,
                 interest_posting_account: intLedgerID.value,
                 interest_posting_account_id: intLedgerID.value,
                 member_category: categoryID.value,
@@ -314,14 +320,17 @@ export default defineComponent({
                 loan_period: formFields.value[9].value,
                 max_repayment: formFields.value[10].value,
                 mandatory_savings: formFields.value[11].value,
-                savings_percentage: formFields.value[12].value,
-                penalize: formFields.value[13].value,
-                penalty_value: formFields.value[15].value,
+                guarantee_option: formFields.value[12].value,
+                savings_percentage: formFields.value[13].value,
+                penalize: formFields.value[14].value,
+                penalty_frequency: formFields.value[15].value,
+                penalty_value: formFields.value[17].value,
                 status: selectedProduct.value.status,
-                penalty_mode: formFields.value[14].value,
-                use_guarantors: formFields.value[16].value,
-                min_guarantors: formFields.value[17].value,
-                guarantors_percentage: formFields.value[18].value,
+                penalty_mode: formFields.value[16].value,
+                use_guarantors: formFields.value[18].value,
+                min_guarantors: formFields.value[19].value,
+                guarantors_percentage: formFields.value[20].value,
+                use_security: formFields.value[21].value,
                 interest_posting_account: intLedgerValue.value,
                 interest_posting_account_id: intLedgerValue.value,
                 member_category: categoryValue.value,
@@ -384,9 +393,9 @@ export default defineComponent({
             updateFormFields();
             updateAdditionalFormFields();
             flex_basis.value = '1/4';
-            flex_basis_percentage.value = '20';
-            additional_flex_basis.value = '1/3';
-            additional_flex_basis_percentage.value = '33.333';
+            flex_basis_percentage.value = '25';
+            additional_flex_basis.value = '1/4';
+            additional_flex_basis_percentage.value = '25';
         })
         onMounted(()=>{
             fetchAllLedgers();

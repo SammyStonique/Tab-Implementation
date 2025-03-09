@@ -35,11 +35,11 @@
               </select>
             </template>
             <template v-else>
-              <div v-if="column.editable === true && column.type === 'number'" class="max-w-[100px]" :class="`text-${column.textColor}-800 font-bold`">
+              <div v-if="column.editable === true && column.type === 'number'" :class="`text-${column.textColor}-800 font-bold`">
                 <input :type="column.type" @change="handleInputChange($event, row)" pattern="^\d+(\.\d{0,2})?$" oninput="this.value = this.value.replace(/[^0-9.]/g, '').replace(/(\.\d{2})\d+/g, '$1')" class="w-full" v-model="row[column.key]" />             
               </div>
               <div v-else-if="column.editable === true">
-                <input :type="column.type" @change="handleInputChange($event, row)" class="w-inherit" v-model="row[column.key]" /> 
+                <input :type="column.type" @change="handleInputChange($event, row)" v-model="row[column.key]" /> 
               </div>
               <div v-else :class="`text-${column.textColor}-500`">
                 {{ getNestedValue(row, column.key) }}

@@ -367,13 +367,13 @@ export default{
             await store.dispatch('Loan_Products/updateState', {loanCharges: [], productMaxAmount: 0, installments:0});
             await store.dispatch('Loan_Guarantors/updateState', {memberArray: []});
             store.commit('Loan_Applications/initializeStore');
-            await store.dispatch('Loan_Applications/updateState', {selectedApplication: null,selectedMember: null,selectedProduct: null,loanCharges: [],loanGuarantors: [],loanSchedules: [],isEditing: false});
+            await store.dispatch('Loan_Applications/updateState', {selectedApplication: null,selectedMember: null,selectedProduct: null,loanCharges: [],loanGuarantors: [], loanSecurities: [],loanSchedules: [],isEditing: false});
             store.commit('pageTab/ADD_PAGE', {'MMS':'Loan_Application_Details'});
             store.state.pageTab.mmsActiveTab = 'Loan_Application_Details';          
         }
         const handleActionClick = async(rowIndex, action, row) =>{
             if( action == 'edit'){
-                await store.dispatch('Loan_Applications/updateState', {selectedApplication: null,selectedMember: null,selectedProduct: null,loanCharges: [],loanGuarantors: [],loanSchedules: [],isEditing: false});
+                await store.dispatch('Loan_Applications/updateState', {selectedApplication: null,selectedMember: null,selectedProduct: null,loanCharges: [],loanGuarantors: [], loanSecurities: [],loanSchedules: [],isEditing: false});
                 const applicationID = row[idField];
                 const applicationStatus = row['approval_status']
                 if(applicationStatus == 'Pending'){
