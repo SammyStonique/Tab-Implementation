@@ -59,6 +59,7 @@ import Stock_Transfers from './INV/Stock_Transfers';
 import Pay_Cycles from './HR/Pay_Cycles';
 import Pay_Groups from './HR/Pay_Groups';
 import Deductions from './HR/Deductions';
+import Employee_Deductions from './HR/Employee_Deductions';
 import Leave_Types from './HR/Leave_Types';
 import Holidays from './HR/Holidays';
 import Paye from './HR/Paye';
@@ -139,7 +140,7 @@ export default createStore({
 
     Pay_Cycles,Pay_Groups,Deductions,Leave_Types,Holidays,Paye,Nssf,Shif,Housing_Levy,Employees,Payrolls,Leave_Applications,Leave_Allocations,Salary_Advances,
     Employee_Loan_Applications,Employee_Loan_Disbursements,Leave_Ammendments,Appraisals,Performance_Indicators,Skill_Ratings,Appraisal_Periods,Appraisal_Categories,
-    Disciplinary_Categories,Disciplinary_Cases,Disciplinary_Meetings,Disciplinary_Reviews,Disciplinary_Actions,Disciplinary_Appeals,Employee_Rewards,
+    Disciplinary_Categories,Disciplinary_Cases,Disciplinary_Meetings,Disciplinary_Reviews,Disciplinary_Actions,Disciplinary_Appeals,Employee_Rewards,Employee_Deductions,
 
     Member_Categories,Member_Sponsors,Members,Membership_Fees,Savings_Products,Shares_Products,Saving_Accounts,Share_Accounts,Saving_Deposits,Share_Deposits,
     Loan_Products,Loan_Fees,Loan_Applications,Loan_Guarantors,Loan_Disbursements,Security_Types,Loan_Securities,

@@ -169,13 +169,13 @@ export default defineComponent({
                 formFields.value[5].value = 0;
                 hasPrepayment.value = false;
             }
-            else if((receiptTotals.value > 0) && (receiptTotals.value <= outstanding_balance.value)){
+            else if(receiptTotals.value > 0 && (receiptTotals.value <= outstanding_balance.value)){
                 hasPrepayment.value = false;
                 for(let i=0; i<receiptRows.value.length; i++){
                     if(receiptRows.value[i].due_amount <= receiptTotals.value && receiptTotals.value != 0){
                         receiptRows.value[i].payment_allocation = receiptRows.value[i].due_amount;
                         receiptRows.value[i].bal_after_alloc = receiptRows.value[i].due_amount - receiptRows.value[i].payment_allocation;
-                        receiptTotals.value = (receiptTotals.value - receiptRows.value[i].payment_allocation).toFixed(2);
+                        receiptTotals.value = receiptTotals.value - receiptRows.value[i].payment_allocation;
                         receipt_memo.value += receiptRows.value[i].description + ', '
                     }else{
                         receiptRows.value[i].payment_allocation = receiptTotals.value;
@@ -184,7 +184,7 @@ export default defineComponent({
                         break
                     }
                 }
-            }else if((receiptTotals.value > 0) && (receiptTotals.value > outstanding_balance.value)){
+            }else if(receiptTotals.value > 0 && receiptTotals.value > outstanding_balance.value){
                 hasPrepayment.value = true;
                 prepaymentAmount.value = (receiptTotals.value  - outstanding_balance.value).toFixed(2);
                 for(let i=0; i<receiptRows.value.length; i++){

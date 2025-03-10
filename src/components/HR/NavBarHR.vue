@@ -37,7 +37,13 @@
                         <p class="pt-1.5">Payroll</p>
                     </button>
                 </div>
-                <div class="dropdown-content w-52 absolute rounded border border-gray-200 bg-white shadow-slate-400 shadow-sm" v-if="payroll_dropdown">
+                <div class="dropdown-content w-64 absolute rounded border border-gray-200 bg-white shadow-slate-400 shadow-sm" v-if="payroll_dropdown">
+                    <div class="py-2 px-3 pl-4 w-full hover:bg-slate-500 hover:w-full">
+                        <button class="flex text-sm w-full" @click="openPage({'HR':'Employee_Deductions'})">
+                            <i class="fa fa-arrow-down pt-2 mr-2" aria-hidden="true"></i>
+                            <p class="">Monthly Earnings/Deductions</p>
+                        </button>
+                    </div>
                     <div class="py-2 px-3 pl-4 w-full hover:bg-slate-500 hover:w-full">
                         <button class="flex text-sm w-full" @click="openPage({'HR':'Salary_Advances'})">
                             <i class="fa fa-coins pt-2 mr-2" aria-hidden="true"></i>

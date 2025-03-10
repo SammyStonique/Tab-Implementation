@@ -168,13 +168,13 @@ export default defineComponent({
                 { type: 'text', name: 'min_guarantors',label: "Minimum Guarantors", value: selectedProduct.value?.min_guarantors || '0', required: false },
                 { type: 'text', name: 'guarantors_percentage',label: "Guarantors Percentage(%)", value: selectedProduct.value?.guarantors_percentage || '0', required: false },
                 { type: 'dropdown', name: 'use_security',label: "Use Security", value: selectedProduct.value?.use_security || 'No', placeholder: "", required: true, options: [{ text: 'Yes', value: 'Yes' }, { text: 'No', value: 'No' }] },
+                { type: 'dropdown', name: 'credit_reduction',label: "Credit Reduction", value: selectedProduct.value?.credit_reduction || 'No', placeholder: "", required: true, options: [{ text: 'Yes', value: 'Yes' }, { text: 'No', value: 'No' }] },
                 {  
                     type:'search-dropdown', label:"Interest Posting Account", value: intLedgerValue.value, componentKey: intComponentKey,
                     selectOptions: ledgerArray, optionSelected: handleSelectedInterestLedger, required: true,
                     searchPlaceholder: 'Select Posting Acc...', dropdownWidth: '450px', updateValue: selectedInterestLedger.value,
                     fetchData: store.dispatch('Ledgers/fetchLedger', {company:companyID.value}), clearSearch: clearSelectedInterestLedger
                 },
-                {required: false}
 
             ];
         };
@@ -190,7 +190,7 @@ export default defineComponent({
                 formFields.value[0].value = categoryID.value;
             }
             if(intLedgerID.value != ""){
-                formFields.value[22].value = intLedgerID.value;
+                formFields.value[23].value = intLedgerID.value;
             }
         }, { immediate: true });
 
@@ -266,6 +266,7 @@ export default defineComponent({
                 min_guarantors: formFields.value[19].value,
                 guarantors_percentage: formFields.value[20].value,
                 use_security: formFields.value[21].value,
+                credit_reduction: formFields.value[22].value,
                 interest_posting_account: intLedgerID.value,
                 interest_posting_account_id: intLedgerID.value,
                 member_category: categoryID.value,
@@ -331,6 +332,7 @@ export default defineComponent({
                 min_guarantors: formFields.value[19].value,
                 guarantors_percentage: formFields.value[20].value,
                 use_security: formFields.value[21].value,
+                credit_reduction: formFields.value[22].value,
                 interest_posting_account: intLedgerValue.value,
                 interest_posting_account_id: intLedgerValue.value,
                 member_category: categoryValue.value,

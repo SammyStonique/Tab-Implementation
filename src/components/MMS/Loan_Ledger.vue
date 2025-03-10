@@ -176,6 +176,8 @@ export default defineComponent({
         const actionsSchedule = ref([
             {name: 'post-interest', icon: 'fa fa-spinner', title: 'Post Interest', rightName: 'Posting Loan Interest'},
             {name: 'unpost-interest', icon: 'fa fa-minus-circle', title: 'Unpost Interest', rightName: 'Posting Loan Interest'},
+            {name: 'process-credit-reduction', icon: 'fa fa-arrow-down', title: 'Process C.R', rightName: 'Posting Loan Interest'},
+            {name: 'unprocess-credit-reduction', icon: 'fa fa-minus-circle', title: 'Unprocess C.R', rightName: 'Posting Loan Interest'},
         ]);
 
         const paymentColumns = ref([
@@ -474,6 +476,119 @@ export default defineComponent({
                     })
                 }else{
                     toast.error("Interest Not Posted")
+                }
+                           
+            }
+            if( action == 'process-credit-reduction'){
+                const postedStatus = row['credit_reduction_applied']
+                const scheduleID = [row['armotization_schedule_id']]
+                if(postedStatus == 'No'){
+                    let formData = {
+                        armotization_schedule: scheduleID,
+                        company: companyID.value
+                    }
+                    Swal.fire({
+                        title: "Are you sure?",
+                        text: `Do you wish to Process Credit Reduction?`,
+                        type: 'warning',
+                        showCloseButton: true,
+                        showCancelButton: true,
+                        confirmButtonText: 'Yes, Post!',
+                        cancelButtonText: 'Cancel!',
+                        customClass: {
+                            confirmButton: 'swal2-confirm-custom',
+                            cancelButton: 'swal2-cancel-custom',
+                        },
+                        showLoaderOnConfirm: true,
+                        }).then((result) => {
+                        if (result.value) {
+                            axios.post(`api/v1/process-credit-reduction/`,formData)
+                            .then((response)=>{
+                            if(response.data.msg == 'Success'){
+                                Swal.fire("C.R Done Succesfully!", {
+                                    icon: "success",
+                                }); 
+                            }else if(response.data.msg == 'Failed'){
+                                Swal.fire("C.R Already Processed!", {
+                                    icon: "warning",
+                                });
+                            }
+                            else{
+                                Swal.fire({
+                                    title: "Error Processing C.R",
+                                    icon: "warning",
+                                });
+                            }                   
+                            })
+                            .catch((error)=>{
+                                console.log(error.message);
+                                Swal.fire({
+                                    title: error.message,
+                                    icon: "warning",
+                                });
+                            })
+                        }else{
+                            Swal.fire(`C.R(s) has not been processed!`);
+                        }
+                    })
+                }else{
+                    toast.error("C.R Already Processed")
+                }
+                           
+            }else if( action == 'process-credit-reduction'){
+                const postedStatus = row['credit_reduction_applied']
+                const scheduleID = [row['armotization_schedule_id']]
+                if(postedStatus == 'Yes'){
+                    let formData = {
+                        armotization_schedule: scheduleID,
+                        company: companyID.value
+                    }
+                    Swal.fire({
+                        title: "Are you sure?",
+                        text: `Do you wish to Unprocess Credit Reduction?`,
+                        type: 'warning',
+                        showCloseButton: true,
+                        showCancelButton: true,
+                        confirmButtonText: 'Yes, Unprocess!',
+                        cancelButtonText: 'Cancel!',
+                        customClass: {
+                            confirmButton: 'swal2-confirm-custom',
+                            cancelButton: 'swal2-cancel-custom',
+                        },
+                        showLoaderOnConfirm: true,
+                        }).then((result) => {
+                        if (result.value) {
+                            axios.post(`api/v1/unprocess-credit-reduction/`,formData)
+                            .then((response)=>{
+                            if(response.data.msg == 'Success'){
+                                Swal.fire("Credit Reduction Unprocessed Succesfully!", {
+                                    icon: "success",
+                                }); 
+                            }else if(response.data.msg == 'Failed'){
+                                Swal.fire("Credit Reduction Not Processed!", {
+                                    icon: "warning",
+                                });
+                            }
+                            else{
+                                Swal.fire({
+                                    title: "Error Unprocessing Credit Reduction",
+                                    icon: "warning",
+                                });
+                            }                   
+                            })
+                            .catch((error)=>{
+                                console.log(error.message);
+                                Swal.fire({
+                                    title: error.message,
+                                    icon: "warning",
+                                });
+                            })
+                        }else{
+                            Swal.fire(`Credit Reduction(s) has not been unprocessed!`);
+                        }
+                    })
+                }else{
+                    toast.error("Credit Reduction Not Processed")
                 }
                            
             }

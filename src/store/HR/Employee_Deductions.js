@@ -6,11 +6,10 @@ const state = {
   deductionArr: [],
   deductionArray: [],
   deductionID: '',
-  deductionName: '',
-  deduction_name_search: '',
-  deduction_type_search: '',
+  deductionDate: '',
   selectedDeduction: null,
-  selectedLedger: null,
+  selectedEmployee: null,
+  selectedDeductionType: null,
   isEditing: false
 };
   
@@ -20,15 +19,14 @@ const mutations = {
     state.deductionArr = [];
     state.deductionArray = [];
     state.deductionID = "";
-    state.deductionName = "";
-    state.deduction_name_search = '';
-    state.deduction_type_search = '';
+    state.deductionDate = "";
     state.selectedDeduction = null;
-    state.selectedLedger = null;
+    state.selectedEmployee = null;
+    state.selectedDeductionType = null;
     state.isEditing = false;
   },
-  SET_SELECTED_DEDUCTION(state, deduction) {
-    state.selectedDeduction = deduction;
+  SET_SELECTED_DEDUCTION(state, deductions) {
+    state.selectedDeduction = deductions;
     state.isEditing = true;
   },
   LIST_DEDUCTIONS(state, deductions) {
@@ -37,8 +35,11 @@ const mutations = {
   DEDUCTIONS_ARRAY(state, deductions){
     state.deductionArray = deductions;
   },
-  SET_SELECTED_LEDGER(state, ledger) {
-    state.selectedLedger = ledger;
+  SET_SELECTED_DEDUCTION_TYPE(state, deductions) {
+    state.selectedDeductionType = deductions;
+  },
+  SET_SELECTED_EMPLOYEE(state, employee) {
+    state.selectedEmployee = employee;
   },
   SET_STATE(state, payload) {
     for (const key in payload) {
@@ -49,16 +50,11 @@ const mutations = {
   },
   SET_SEARCH_FILTERS(state, search_filter){
     for(const [key, value] of Object.entries(search_filter)){
-      if(key == 'deduction_name_search'){
-        state.deduction_name_search = value;
-      }else if(key == 'deduction_type_search'){
-        state.deduction_type_search = value;
-      }
+
     }
   },
   RESET_SEARCH_FILTERS(state){
-    state.deduction_name_search = '';
-    state.deduction_type_search = '';
+
   }
 };
   
@@ -67,8 +63,8 @@ const actions = {
     commit('SET_STATE', newState);
   },
   
-  async createDeduction({ commit,state }, formData) {
-    return axios.post('api/v1/create-deduction/', formData)
+  async createEmployeeDeduction({ commit,state }, formData) {
+    return axios.post('api/v1/create-employee-deduction/', formData)
     .then((response)=>{
       return response;
     })
@@ -78,12 +74,12 @@ const actions = {
     })
   },
 
-  fetchDeductions({ commit,state }, formData) {
+  fetchEmployeeDeductions({ commit,state }, formData) {
     state.deductionArr = [];
-    axios.post(`api/v1/get-deductions/`,formData)
+    axios.post(`api/v1/get-employee-deductions/`,formData)
     .then((response)=>{
       for(let i=0; i< response.data.length; i++){
-        state.deductionArr.push((response.data[i].deduction_name));
+        state.deductionArr.push((response.data[i].deduction.deduction_name + " - " + response.data[i].employee.employee_name +" ("+ response.data[i].employee.staff_number +")"));
       }
       commit('LIST_DEDUCTIONS', response.data);
     })
@@ -92,33 +88,33 @@ const actions = {
     })
     
   },
-  fetchDeduction({ commit,state }, formData) {
-    axios.post(`api/v1/get-deductions/`,formData)
+  fetchEmployeeDeduction({ commit,state }, formData) {
+    axios.post(`api/v1/get-employee-deductions/`,formData)
     .then((response)=>{
       state.selectedDeduction = response.data;
-      const selectedLedger = response.data.posting_account.ledger_code + " - " + response.data.posting_account.ledger_name;
+      const selectedEmployee = response.data.employee.staff_number + " - " + response.data.employee.employee_name;
+      const selectedDeductionType = response.data.deduction.deduction_name;
       commit('SET_SELECTED_DEDUCTION',response.data);
-      commit('SET_SELECTED_LEDGER', selectedLedger);
+      commit('SET_SELECTED_EMPLOYEE', selectedEmployee);
+      commit('SET_SELECTED_DEDUCTION_TYPE', selectedDeductionType);
     })
     .catch((error)=>{
       console.log(error.message);
     })
     
   },
-  handleSelectedDeduction({ commit, state }, option){
-    const selectedDeduction = state.deductionsList.find(deduction => (deduction.deduction_name) === option);
+  handleSelectedEmployeeDeduction({ commit, state }, option){
+    const selectedDeduction = state.deductionsList.find(deductions => (deductions.deduction.deduction_name + " - " + deductions.employee.employee_name +" ("+ deductions.employee.staff_number +")") === option);
     if (selectedDeduction) {
-        state.deductionID = selectedDeduction.deduction_id;
-        state.deductionName = selectedDeduction.deduction_name;
-        selectedDeduction.employee_deduction_id = null;
+        state.deductionID = selectedDeduction.employee_deduction_id;
         state.deductionArray = [...state.deductionArray, selectedDeduction];
     }
     commit('DEDUCTIONS_ARRAY', state.deductionArray);
       
   },
 
-  async updateDeduction({ commit,state }, formData) {
-    return axios.put(`api/v1/update-deduction/`,formData)
+  async updateEmployeeDeduction({ commit,state }, formData) {
+    return axios.put(`api/v1/update-employee-deduction/`,formData)
     .then((response)=>{
       return response;
     })
@@ -128,14 +124,14 @@ const actions = {
     })  
   },
 
-  deleteDeduction({ commit,state }, formData) {
+  deleteEmployeeDeduction({ commit,state }, formData) {
     Swal.fire({
       title: "Are you sure?",
-      text: `Do you wish to delete Earning/Deduction?`,
+      text: `Do you wish to delete Employee Deduction?`,
       type: 'warning',
       showCloseButton: true,
       showCancelButton: true,
-      confirmButtonText: 'Yes Delete Earning/Deduction!',
+      confirmButtonText: 'Yes Delete Employee Deduction!',
       cancelButtonText: 'Cancel!',
       customClass: {
           confirmButton: 'swal2-confirm-custom',
@@ -144,15 +140,15 @@ const actions = {
       showLoaderOnConfirm: true,
     }).then((result) => {
       if (result.value) {
-        axios.post(`api/v1/delete-deduction/`,formData)
+        axios.post(`api/v1/delete-employee-deduction/`,formData)
         .then((response)=>{
           if(response.status == 200){
-              Swal.fire("Poof! Earning/Deduction removed succesfully!", {
+              Swal.fire("Poof! Employee Deduction removed succesfully!", {
                 icon: "success",
               }); 
           }else{
             Swal.fire({
-              title: "Error Deleting Earning/Deduction",
+              title: "Error Deleting Employee Deduction",
               icon: "warning",
             });
           }                   
@@ -165,14 +161,11 @@ const actions = {
           });
         })
       }else{
-        Swal.fire(`Earning/Deduction has not been deleted!`);
+        Swal.fire(`Employee Deduction has not been deleted!`);
       }
     })
   },
-  removeDeduction({commit, state}, index){
-    state.deductionArray.splice(index, 1); 
-    commit('DEDUCTIONS_ARRAY', state.deductionArray);
-  },
+
 };
   
 const getters = {

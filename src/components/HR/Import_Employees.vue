@@ -38,9 +38,14 @@ export default defineComponent({
             {label: "Employee Name", key:"employee_name"},
             {label: "Phone No", key: "phone_number"},
             {label: "Email", key:"email"},
-            {label: "Pay Group", key:"pay_group"},
             {label: "Gender", key:"gender"},
+            {label: "Pay Group", key:"pay_group"},
             {label: "Title", key:"job_title"},
+            {label: "Basic Pay", key:"basic_pay"},
+            {label: "Start Date", key:"employment_start_date"},
+            {label: "Emp. Status", key:"employment_status"},
+            {label: "Department", key:"employee_department"},
+            {label: "Supervisor", key:"supervisor"},
         ])
         const excelEmployeesList = ref([]);
         const idField = 'employee_id';
@@ -73,7 +78,7 @@ export default defineComponent({
 
                 axios.post("api/v1/display-employees-import-excel/", formData)
                 .then((response)=>{
-                    excelEmployeesList.value = response.data.tenants;
+                    excelEmployeesList.value = response.data.employees;
                     console.log(excelEmployeesList.value);
                 })
                 .catch((error)=>{
