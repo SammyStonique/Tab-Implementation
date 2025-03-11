@@ -203,6 +203,10 @@
                                     <td> &#123;&#123; member_loan_balance &#125;&#125;</td>
                                 </tr>
                                 <tr>
+                                    <td class="font-semibold">Loan Due Date: </td>
+                                    <td> &#123;&#123; loan_due_date &#125;&#125;</td>
+                                </tr>
+                                <tr>
                                     <td class="font-semibold">Member Savings Deposit: </td>
                                     <td> &#123;&#123; member_savings_deposit &#125;&#125;</td>
                                 </tr>

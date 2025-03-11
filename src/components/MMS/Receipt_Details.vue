@@ -84,12 +84,13 @@ export default defineComponent({
         const addTitle = ref('Other Receipt Items')
         const modal_top = ref('120px');
         const modal_left = ref('400px');
-        const modal_width = ref('45vw');
+        const modal_width = ref('30vw');
         const outstanding_balance = computed(()=> store.state.Members.outstandingBalance);
         const allotable_prepayment = computed(()=> store.state.Active_Tenants.allotablePrepayment);
         const savingsArray = computed(() => store.state.Saving_Accounts.accountArr);
         const sharesArray = computed(() => store.state.Share_Accounts.accountArr);
         const loansArray = computed(() => store.state.Loan_Applications.applicationArr);
+        const loanFeesArray = computed(() => store.state.Application_Fees.feeArr);
         const errors = ref([]);
         const itemObj = ref({});
         const companyID = computed(()=> store.state.userData.company_id);
@@ -406,18 +407,27 @@ export default defineComponent({
                 additionalFields.value[3].disabled = '';
                 additionalFields.value[4].disabled = 'disabled-div';
                 additionalFields.value[5].disabled = 'disabled-div';
+                additionalFields.value[3].hidden = false;
+                additionalFields.value[4].hidden = true;
+                additionalFields.value[5].hidden = true;
                 lonComponentKey.value += 1;
                 shaComponentKey.value += 1;
             }else if(value == "Shares"){
                 additionalFields.value[4].disabled = '';
                 additionalFields.value[3].disabled = 'disabled-div';
                 additionalFields.value[5].disabled = 'disabled-div';
+                additionalFields.value[4].hidden = false;
+                additionalFields.value[3].hidden = true;
+                additionalFields.value[5].hidden = true;
                 lonComponentKey.value += 1;
                 savComponentKey.value += 1;
             }else if(value == "Loan"){
                 additionalFields.value[5].disabled = '';
                 additionalFields.value[4].disabled = 'disabled-div';
                 additionalFields.value[3].disabled = 'disabled-div';
+                additionalFields.value[4].hidden = true;
+                additionalFields.value[3].hidden = true;
+                additionalFields.value[5].hidden = false;
                 savComponentKey.value += 1;
                 shaComponentKey.value += 1;
             }
@@ -487,20 +497,20 @@ export default defineComponent({
                 { type: 'text', name: 'prepayment_amount',label: "Allocated Amount", value: '0', required: true, method: checkPrepaymentLimit },
                 {  
                     type:'search-dropdown', label:"Saving Account", value: '', componentKey: savComponentKey, disabled:'disabled-div',
-                    selectOptions: savingsArray, optionSelected: handleSavingAccount, required: true,
-                    searchPlaceholder: 'Select Account...', dropdownWidth: '300px',
+                    selectOptions: savingsArray, optionSelected: handleSavingAccount, required: false,
+                    searchPlaceholder: 'Select Account...', dropdownWidth: '500px', hidden: true,
                     fetchData: store.dispatch('Saving_Accounts/fetchSavingAccounts', {company:companyID.value,member: memberID.value}), clearSearch: clearSavingAccount
                 },
                 {  
                     type:'search-dropdown', label:"Share Account", value: '', componentKey: shaComponentKey, disabled:'disabled-div',
-                    selectOptions: sharesArray, optionSelected: handleShareAccount, required: true,
-                    searchPlaceholder: 'Select Account...', dropdownWidth: '300px',
+                    selectOptions: sharesArray, optionSelected: handleShareAccount, required: false,
+                    searchPlaceholder: 'Select Account...', dropdownWidth: '500px', hidden: true,
                     fetchData: store.dispatch('Share_Accounts/fetchShareAccounts', {company:companyID.value,member: memberID.value}), clearSearch: clearShareAccount
                 },
                 {  
                     type:'search-dropdown', label:"Loan Applications", value: '', componentKey: lonComponentKey, disabled:'disabled-div',
-                    selectOptions: loansArray, optionSelected: handleLoanApplication, required: true,
-                    searchPlaceholder: 'Select Application...', dropdownWidth: '300px',
+                    selectOptions: loansArray, optionSelected: handleLoanApplication, required: false,
+                    searchPlaceholder: 'Select Application...', dropdownWidth: '500px', hidden: true,
                     fetchData: store.dispatch('Loan_Applications/fetchLoanApplications', {company:companyID.value,member: memberID.value}), clearSearch: clearLoanApplication
                 },
             ]
@@ -532,41 +542,73 @@ export default defineComponent({
         const addPrepayment = () =>{
             updateAdditionalFields();
             prepModalVisible.value = true;
-            flex_basis_additional.value = '1/3';
-            flex_basis_percentage_additional.value = '33.333';
+            flex_basis_additional.value = '1/2';
+            flex_basis_percentage_additional.value = '50';
         };
         const selectReceiptItem = (value) =>{
             if(value == "Savings"){
                 additionalFields1.value[2].disabled = '';
                 additionalFields1.value[3].disabled = 'disabled-div';
                 additionalFields1.value[4].disabled = 'disabled-div';
+                additionalFields1.value[5].disabled = 'disabled-div';
+                additionalFields1.value[2].hidden = false;
+                additionalFields1.value[3].hidden = true;
+                additionalFields1.value[4].hidden = true;
+                additionalFields1.value[5].hidden = true;
                 lonComponentKey.value += 1;
                 shaComponentKey.value += 1;
             }else if(value == "Shares"){
                 additionalFields1.value[3].disabled = '';
                 additionalFields1.value[2].disabled = 'disabled-div';
                 additionalFields1.value[4].disabled = 'disabled-div';
+                additionalFields1.value[5].disabled = 'disabled-div';
+                additionalFields1.value[3].hidden = false;
+                additionalFields1.value[2].hidden = true;
+                additionalFields1.value[4].hidden = true;
+                additionalFields1.value[5].hidden = true;
                 lonComponentKey.value += 1;
                 savComponentKey.value += 1;
             }else if(value == "Loan"){
                 additionalFields1.value[4].disabled = '';
                 additionalFields1.value[3].disabled = 'disabled-div';
                 additionalFields1.value[2].disabled = 'disabled-div';
+                additionalFields1.value[5].disabled = 'disabled-div';
+                additionalFields1.value[2].hidden = true;
+                additionalFields1.value[3].hidden = true;
+                additionalFields1.value[4].hidden = false;
+                additionalFields1.value[5].hidden = true;
                 savComponentKey.value += 1;
                 shaComponentKey.value += 1;
-            }else if(value == "Other Charges"){
-                additionalFields1.value[4].disabled = '';
+            }else if(value == "Loan Fees"){
+                additionalFields1.value[5].disabled = '';
                 additionalFields1.value[3].disabled = 'disabled-div';
                 additionalFields1.value[2].disabled = 'disabled-div';
+                additionalFields1.value[4].disabled = 'disabled-div';
+                additionalFields1.value[2].hidden = true;
+                additionalFields1.value[3].hidden = true;
+                additionalFields1.value[5].hidden = false;
+                additionalFields1.value[4].hidden = true;
                 savComponentKey.value += 1;
                 shaComponentKey.value += 1;
             }
+            // else if(value == "Other Charges"){
+            //     additionalFields1.value[4].disabled = '';
+            //     additionalFields1.value[3].disabled = 'disabled-div';
+            //     additionalFields1.value[2].disabled = 'disabled-div';
+            //     additionalFields1.value[5].disabled = 'disabled-div';
+            //     additionalFields1.value[2].hidden = true;
+            //     additionalFields1.value[3].hidden = true;
+            //     additionalFields1.value[4].hidden = false;
+            //     additionalFields1.value[5].hidden = true;
+            //     savComponentKey.value += 1;
+            //     shaComponentKey.value += 1;
+            // }
         };
         const handleSavingAccountItem = async(option) =>{
             await store.dispatch('Saving_Accounts/handleSelectedAccount', option)
             itemObj.value = {
                 journal_no : "SAVINGS ITEM",
-                type: "savings_prepayment",
+                type: "savings",
                 journal_id : store.state.Saving_Accounts.accountID,
                 description : `Member ${additionalFields1.value[0].value}`,
                 total_amount : additionalFields1.value[1].value,
@@ -585,7 +627,7 @@ export default defineComponent({
             await store.dispatch('Share_Accounts/handleSelectedAccount', option)
             itemObj.value = {
                 journal_no : "SHARES ITEM",
-                type: "shares_prepayment",
+                type: "shares",
                 journal_id : store.state.Share_Accounts.accountID,
                 description : `Member ${additionalFields1.value[0].value}`,
                 total_amount : additionalFields1.value[1].value,
@@ -603,7 +645,7 @@ export default defineComponent({
         const handleLoanApplicationItem = async(option) =>{
             await store.dispatch('Loan_Applications/handleSelectedApplication', option)
             itemObj.value = {
-                journal_no : "PREPAID LOAN",
+                journal_no : "LOAN PREPAYMENT",
                 type: "loan_prepayment",
                 journal_id : store.state.Loan_Applications.applicationID,
                 description : `${additionalFields1.value[0].value} Prepayment - ${store.state.Loan_Applications.applicationNumber}`,
@@ -619,28 +661,53 @@ export default defineComponent({
             await store.dispatch('Loan_Applications/updateState', {applicationID: ''});
             itemObj.value = {};
         };
+        const handleLoanApplicationFeeItem = async(option) =>{
+            await store.dispatch('Application_Fees/handleSelectedFee', option)
+            itemObj.value = {
+                journal_no : "LOAN APPLICATION FEES",
+                type: "loan_application_fees",
+                journal_id : store.state.Application_Fees.feeID,
+                description : `${store.state.Application_Fees.feeName} for ${store.state.Application_Fees.loanNumber} - ${store.state.Application_Fees.memberName}`,
+                total_amount : additionalFields1.value[1].value,
+                total_paid : 0,
+                due_amount : additionalFields1.value[1].value,
+                payment_allocation : 0,
+                bal_after_alloc : "",
+                cost: additionalFields1.value[1].value
+            }
+        };
+        const clearLoanApplicationFeeItem = async() =>{
+            await store.dispatch('Application_Fees/updateState', {feeID: ''});
+            itemObj.value = {};
+        };
         const additionalFields1 = ref([]);
         const updateAdditionalFields1 = () =>{
             additionalFields1.value = [
-                { type: 'dropdown', name: 'item',label: "Receipt Item", value: '', placeholder: "", required: true, options: [{ text: 'Savings', value: 'Savings' }, { text: 'Shares', value: 'Shares' }, { text: 'Loan', value: 'Loan' }, { text: 'Membership Fees', value: 'Membership Fees' }, { text: 'Other Charges', value: 'Other Charges' }], method: selectReceiptItem },
+                { type: 'dropdown', name: 'item',label: "Receipt Item", value: '', placeholder: "", required: true, options: [{ text: 'Savings', value: 'Savings' }, { text: 'Shares', value: 'Shares' }, { text: 'Loan', value: 'Loan' }, { text: 'Loan Fees', value: 'Loan Fees' }, { text: 'Membership Fees', value: 'Membership Fees' }, { text: 'Other Charges', value: 'Other Charges' }], method: selectReceiptItem },
                 { type: 'text', name: 'amount',label: "Amount", value: '0', required: true },
                 {  
                     type:'search-dropdown', label:"Saving Account", value: '', componentKey: savComponentKey, disabled:'disabled-div',
-                    selectOptions: savingsArray, optionSelected: handleSavingAccountItem, required: true,
-                    searchPlaceholder: 'Select Account...', dropdownWidth: '310px',
+                    selectOptions: savingsArray, optionSelected: handleSavingAccountItem, required: false,
+                    searchPlaceholder: 'Select Account...', dropdownWidth: '500px', hidden: true,
                     fetchData: store.dispatch('Saving_Accounts/fetchSavingAccounts', {company:companyID.value,member: memberID.value}), clearSearch: clearSavingAccountItem
                 },
                 {  
                     type:'search-dropdown', label:"Share Account", value: '', componentKey: shaComponentKey, disabled:'disabled-div',
-                    selectOptions: sharesArray, optionSelected: handleShareAccountItem, required: true,
-                    searchPlaceholder: 'Select Account...', dropdownWidth: '310px',
+                    selectOptions: sharesArray, optionSelected: handleShareAccountItem, required: false,
+                    searchPlaceholder: 'Select Account...', dropdownWidth: '500px', hidden: true,
                     fetchData: store.dispatch('Share_Accounts/fetchShareAccounts', {company:companyID.value,member: memberID.value}), clearSearch: clearShareAccountItem
                 },
                 {  
                     type:'search-dropdown', label:"Loan Applications", value: '', componentKey: lonComponentKey, disabled:'disabled-div',
-                    selectOptions: loansArray, optionSelected: handleLoanApplicationItem, required: true,
-                    searchPlaceholder: 'Select Application...', dropdownWidth: '310px',
+                    selectOptions: loansArray, optionSelected: handleLoanApplicationItem, required: false,
+                    searchPlaceholder: 'Select Application...', dropdownWidth: '500px', hidden: true,
                     fetchData: store.dispatch('Loan_Applications/fetchLoanApplications', {company:companyID.value,member: memberID.value}), clearSearch: clearLoanApplicationItem
+                },
+                {  
+                    type:'search-dropdown', label:"Loan Fees", value: '', componentKey: lonComponentKey, disabled:'disabled-div',
+                    selectOptions: loanFeesArray, optionSelected: handleLoanApplicationFeeItem, required: false,
+                    searchPlaceholder: 'Select Loan Fees...', dropdownWidth: '500px', hidden: true,
+                    fetchData: store.dispatch('Application_Fees/fetchApplicationFees', {company:companyID.value,member: memberID.value}), clearSearch: clearLoanApplicationFeeItem
                 },
             ]
         };
@@ -651,9 +718,10 @@ export default defineComponent({
                 hideModalLoader();
             }else{
                 let formData = itemObj.value
+                console.log("THE FORM DATA IS ",formData);
                 await store.dispatch('Members/handleMemberPrepayment',formData);
                 toast.success("Receipt Item Added");
-                formFields.value[7].value += `${itemObj.value['description']}`
+                formFields.value[7].value += `${itemObj.value['description']},`
                 hideModalLoader();
                 addModalVisible.value = false;
             }
@@ -671,8 +739,8 @@ export default defineComponent({
         const addReceiptItems = async() =>{
             updateAdditionalFields1();
             addModalVisible.value = true;
-            flex_basis_additional.value = '1/3';
-            flex_basis_percentage_additional.value = '33.333';
+            flex_basis_additional.value = '1/2';
+            flex_basis_percentage_additional.value = '50';
         }
         const closeModal = async() =>{
             prepModalVisible.value = false;

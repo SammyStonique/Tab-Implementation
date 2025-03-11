@@ -362,7 +362,25 @@ export default{
             currentPage.value = pageCount.value;
             searchApplications();
             // scrollToTop();
-        }
+        };
+        const calculateDisbursalAmount = async() =>{
+            console.log("HEEEEERE")
+            let formData = {
+                company: companyID.value,
+                loan_application: applicationID.value
+            }
+           await axios.post('api/v1/check-member-disbursal-amount/', formData).
+            then((response)=>{
+                loanApprvAmnt.value = response.data.disbursal_amount;
+                approvedAmount.value = response.data.disbursal_amount;
+            })
+            .catch((error)=>{
+                toast.error(error.message)
+            })
+            .finally(()=>{
+
+            })
+        };
         const addNewApplication = async() =>{
             await store.dispatch('Loan_Products/updateState', {loanCharges: [], productMaxAmount: 0, installments:0});
             await store.dispatch('Loan_Guarantors/updateState', {memberArray: []});
@@ -436,10 +454,9 @@ export default{
                     toast.error(`Loan Already Disbursed`)
                 }else{
                     if(applicationStatus == 'Approved'){
-                        fetchAllLedgers();
                         applicationID.value = row[idField];
-                        approvedAmount.value = row['approved_amount'];
-                        loanApprvAmnt.value = row['approved_amount'];
+                        fetchAllLedgers();
+                        calculateDisbursalAmount();
                         refModalVisible.value = true;
                         flex_basis.value = '1/3';
                         flex_basis_percentage.value = '33.333';

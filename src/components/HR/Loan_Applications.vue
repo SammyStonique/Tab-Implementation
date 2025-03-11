@@ -384,7 +384,8 @@ export default{
             currentPage.value = pageCount.value;
             searchApplications();
             // scrollToTop();
-        }
+        };
+        
         const addNewApplication = async() =>{
             store.commit('Employee_Loan_Applications/initializeStore');
             await store.dispatch('Employee_Loan_Applications/updateState', {selectedApplication: null,selectedEmployee: null,loanSchedules: [],isEditing: false});
@@ -455,7 +456,7 @@ export default{
                 if(disburseStatus == 'Yes' && partDisburse == 'No'){
                     toast.error(`Loan Already Disbursed`)
                 }else{
-                    if(applicationStatus == 'Approved'){
+                    if(applicationStatus == 'Approved'){     
                         fetchAllLedgers();
                         applicationID.value = row[idField];
                         approvedAmount.value = row['approved_amount'];
@@ -542,6 +543,7 @@ export default{
         const fetchAllLedgers = async() =>{
             await store.dispatch('Ledgers/fetchLedgers', {company:companyID.value})
         };
+        
         const handleSelectedLedger = async(option) =>{
             await store.dispatch('Ledgers/handleSelectedLedger', option)
             cashbookID.value = store.state.Ledgers.ledgerID;
@@ -552,7 +554,7 @@ export default{
         };
         const checkApprovedLimit = (value) =>{
             if(parseFloat(loanApprvAmnt.value) < parseFloat(value)){
-                toast.error(`Approved Amount is ${loanApprvAmnt.value}`)
+                toast.error(`Disbursabal Amount is ${loanApprvAmnt.value}`)
                 refFormFields.value[6].value = loanApprvAmnt.value;
             }
         };

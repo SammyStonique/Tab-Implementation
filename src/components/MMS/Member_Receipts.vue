@@ -357,8 +357,9 @@ export default{
                 const journalID = row['journal_id'];
                 let formData = {
                     receipt: journalID,
-                    client: row['customer_id'],
+                    client: row['member_id'],
                     type: 'RCPT',
+                    client_type: "Member",
                     company: companyID.value
                 }
                 await store.dispatch('Journals/previewClientReceipt',formData).
@@ -370,7 +371,7 @@ export default{
                 const journalID = row['journal_id'];
                 let formData = {
                     receipt: journalID,
-                    client: row['customer_id'],
+                    client: row['member_id'],
                     type: 'RCPT',
                     company: companyID.value
                 }
