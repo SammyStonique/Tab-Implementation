@@ -221,10 +221,10 @@ export default defineComponent({
                 {
                     type:'search-dropdown', label:"Member", value: memberID.value, componentKey: memComponentKey,
                     selectOptions: memberArray, optionSelected: handleSelectedMember, required: true,
-                    searchPlaceholder: 'Select Member...', dropdownWidth: '500px', updateValue: "",
+                    searchPlaceholder: 'Select Member...', dropdownWidth: '450px', updateValue: "",
                     fetchData: fetchMembers(), clearSearch: clearSelectedMember()  
                 },
-                { type: 'date', name: 'issue_date',label: "Recording Date", value: formatDate(current_date), required: true, maxDate: formatDate(current_date) },
+                { type: 'date', name: 'issue_date',label: "Recording Date", value: formatDate(current_date), required: true, maxDate: formatDate(current_date), method: fetchReceiptItems },
                 { type: 'date', name: 'banking_date',label: "Banking Date", value: '', required: true, maxDate: formatDate(current_date) },
                 { type: 'dropdown', name: 'payment_method',label: "Payment Method", value: '', placeholder: "", required: true, options: [{ text: 'Cash', value: 'Cash' }, { text: 'Mpesa', value: 'Mpesa' },{ text: 'Bank Deposit', value: 'Bank Deposit' }, { text: 'Cheque', value: 'Cheque' },{ text: 'Check-off', value: 'Check-off' }, { text: 'RTGS', value: 'RTGS' },{ text: 'EFT', value: 'EFT' }, { text: 'Not Applicable', value: 'Not Applicable' }] },
                 { type: 'text', name: 'reference_no',label: "Reference No", value: '', required: true,},

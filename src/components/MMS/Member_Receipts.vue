@@ -373,6 +373,7 @@ export default{
                     receipt: journalID,
                     client: row['member_id'],
                     type: 'RCPT',
+                    client_type: "Member",
                     company: companyID.value
                 }
                 await store.dispatch('Journals/downloadClientReceipt',formData).

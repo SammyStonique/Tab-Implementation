@@ -610,6 +610,7 @@ export default{
             {label: 'Batch Unpost Interest', action: 'batch-unpost-interest'},
             {label: 'SMS Schedule Balances', action: 'send-sms'},
             {label: 'Email Schedule Balances', action: 'send-email'},
+            {label: 'Process Penalty', action: 'process-penalty'},
         ]);
         const handleDynamicOption = async(option) =>{
             if(option == 'send-sms'){
@@ -858,6 +859,60 @@ export default{
                     }
                 })
                 
+                           
+            }else if( option == 'process-penalty'){
+                let formData = {
+                    armotization_schedule: selectedIds.value,
+                    from_date: from_date_search.value,
+                    to_date: to_date_search.value,
+                    company: companyID.value
+                }
+                Swal.fire({
+                    title: "Are you sure?",
+                    text: `Do you wish to Process Penalty?`,
+                    type: 'warning',
+                    showCloseButton: true,
+                    showCancelButton: true,
+                    confirmButtonText: 'Yes, Process!',
+                    cancelButtonText: 'Cancel!',
+                    customClass: {
+                        confirmButton: 'swal2-confirm-custom',
+                        cancelButton: 'swal2-cancel-custom',
+                    },
+                    showLoaderOnConfirm: true,
+                    }).then((result) => {
+                    if (result.value) {
+                        axios.post(`api/v1/process-loan-penalty/`,formData)
+                        .then((response)=>{
+                        if(response.data.msg == 'Success'){
+                            Swal.fire("Penalty Processed Succesfully!", {
+                                icon: "success",
+                            }); 
+                            searchSchedules();
+                        }else if(response.data.msg == 'Processed'){
+                            Swal.fire({
+                                title: "Penalty Already Processed!",
+                                icon: "warning",
+                            });
+                        } 
+                        else{
+                            Swal.fire({
+                                title: "Error Processing Penalty",
+                                icon: "warning",
+                            });
+                        }                   
+                        })
+                        .catch((error)=>{
+                            console.log(error.message);
+                            Swal.fire({
+                                title: error.message,
+                                icon: "warning",
+                            });
+                        })
+                    }else{
+                        Swal.fire(`Penalty(s) has not been processed!`);
+                    }
+                })
                            
             }
         };

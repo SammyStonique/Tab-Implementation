@@ -247,13 +247,13 @@ export default defineComponent({
                 {  
                     type:'search-dropdown', label:"Member", value: memberValue.value, componentKey: catComponentKey,
                     selectOptions: memberArray, optionSelected: handleSelectedMember, required: true,
-                    searchPlaceholder: 'Select Member...', dropdownWidth: '400px', updateValue: selectedMember.value,
+                    searchPlaceholder: 'Select Member...', dropdownWidth: '450px', updateValue: selectedMember.value,
                     fetchData: store.dispatch('Members/fetchMembers', {company:companyID.value}), clearSearch: clearSelectedMember
                 },
                 {  
                     type:'search-dropdown', label:"Loan Product", value: productValue.value, componentKey: catComponentKey,
                     selectOptions: productArray, optionSelected: handleSelectedProduct, required: true,
-                    searchPlaceholder: 'Select Loan Product...', dropdownWidth: '400px', updateValue: selectedProduct.value,
+                    searchPlaceholder: 'Select Loan Product...', dropdownWidth: '450px', updateValue: selectedProduct.value,
                     fetchData: store.dispatch('Loan_Products/fetchLoanProducts', {company:companyID.value}), clearSearch: clearSelectedProduct
                 },
                 { type: 'text', name: 'applied_amount',label: "Applied Amount", value: selectedApplication.value?.applied_amount || '0', required: true , method: checkMemberEligiility},
@@ -390,6 +390,7 @@ export default defineComponent({
                 application_date: formFields.value[3].value,
                 repayment_start_date: formFields.value[4].value,
                 installments: formFields.value[6].value,
+                exempt_penalty: "No",
                 member: memberID.value,
                 member_id: memberID.value,
                 loan_remarks: formFields.value[7].value,
@@ -442,6 +443,7 @@ export default defineComponent({
                 application_date: formFields.value[3].value,
                 repayment_start_date: formFields.value[4].value,
                 installments: formFields.value[6].value,
+                exempt_penalty: "No",
                 member: memberValue.value,
                 member_id: memberValue.value,
                 loan_remarks: formFields.value[7].value,

@@ -32,7 +32,7 @@
         <SET />
     </div>
 
-    <div v-if="mainOpen" class="text-black h-screen bg-[url('@/assets/image1.jpg')] bg-cover bg-center px-4 sm:px-12 w-full">
+    <div v-if="mainOpen" class="text-black h-screen bg-[url('@/assets/image2.jpg')] bg-cover bg-center px-4 sm:px-12 w-full">
         <div class="border-b border-gray-300 py-2 w-full flex pl-6 sm:pl-8">
             <p class="text-left basis-1/3 sm:basis-3/6 text-sm sm:text-base">Welcome, <strong class="uppercase">{{ username }}</strong></p>
             <p class="text-left basis-1/3 sm:basis-2/6 uppercase font-semibold text-sm sm:text-base"><strong>{{ company_name }}</strong></p>
