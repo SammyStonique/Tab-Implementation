@@ -119,6 +119,7 @@ export default{
             {name: 'delete', icon: 'fas fa-trash', title: 'Delete Penalty', rightName: 'Deleting Loan Penalties'},
         ])
         const companyID = computed(()=> store.state.userData.company_id);
+        const batchID = computed(()=> store.state.Penalty_Batches.batchID);
         const member_number_search = ref("");
         const member_name_search = ref("");
         const loan_number_search = ref("");
@@ -204,11 +205,107 @@ export default{
             }
         }
 
-        const removePenalty = async() =>{
-
-        }
         const removePenalties = async() =>{
-
+            let formData = {
+                company: companyID.value,
+                loan_penalty: selectedIds.value
+            }
+            Swal.fire({
+                title: "Are you sure?",
+                text: `Do you wish to Delete Penalty?`,
+                type: 'warning',
+                showCloseButton: true,
+                showCancelButton: true,
+                confirmButtonText: 'Yes, Delete!',
+                cancelButtonText: 'Cancel!',
+                customClass: {
+                    confirmButton: 'swal2-confirm-custom',
+                    cancelButton: 'swal2-cancel-custom',
+                },
+                showLoaderOnConfirm: true,
+                }).then((result) => {
+                if (result.value) {
+                    axios.post(`api/v1/delete-loan-penalty/`,formData)
+                    .then((response)=>{
+                    if(response.data.msg == 'Success'){
+                        Swal.fire("Penalty Deleted Succesfully!", {
+                            icon: "success",
+                        }); 
+                        searchPenalties();
+                    } 
+                    else{
+                        Swal.fire({
+                            title: "Error Deleting Penalty",
+                            icon: "warning",
+                        });
+                    }                   
+                    })
+                    .catch((error)=>{
+                        console.log(error.message);
+                        Swal.fire({
+                            title: error.message,
+                            icon: "warning",
+                        });
+                    })
+                }else{
+                    Swal.fire(`Penalty(s) has not been deleted!`);
+                }
+            })
+        }
+        const removePenalty = async() =>{
+            if(selectedIds.value.length == 1){
+                let formData = {
+                    company: companyID.value,
+                    loan_penalty: selectedIds.value
+                }
+                Swal.fire({
+                    title: "Are you sure?",
+                    text: `Do you wish to Delete Penalty?`,
+                    type: 'warning',
+                    showCloseButton: true,
+                    showCancelButton: true,
+                    confirmButtonText: 'Yes, Delete!',
+                    cancelButtonText: 'Cancel!',
+                    customClass: {
+                        confirmButton: 'swal2-confirm-custom',
+                        cancelButton: 'swal2-cancel-custom',
+                    },
+                    showLoaderOnConfirm: true,
+                    }).then((result) => {
+                    if (result.value) {
+                        axios.post(`api/v1/delete-loan-penalty/`,formData)
+                        .then((response)=>{
+                        if(response.data.msg == 'Success'){
+                            Swal.fire("Penalty Deleted Succesfully!", {
+                                icon: "success",
+                            }); 
+                            searchPenalties();
+                        } 
+                        else{
+                            Swal.fire({
+                                title: "Error Deleting Penalty",
+                                icon: "warning",
+                            });
+                        }                   
+                        })
+                        .catch((error)=>{
+                            console.log(error.message);
+                            Swal.fire({
+                                title: error.message,
+                                icon: "warning",
+                            });
+                        })
+                    }else{
+                        Swal.fire(`Penalty(s) has not been deleted!`);
+                    }
+                })
+            }else if(selectedIds.value.length > 1){
+                toast.error("You Have Selected More Than 1 Penalty")
+            }
+            else{
+                toast.error("Please Select A Penalty To Remove")
+            }
+            
         }
         const showLoader = () =>{
             loader.value = "block";
@@ -218,6 +315,7 @@ export default{
         }
         const searchPenalties = () =>{
             showLoader();
+            selectedIds.value = [];
             showNextBtn.value = false;
             showPreviousBtn.value = false;
             let formData = {
@@ -226,6 +324,7 @@ export default{
                 member_name: member_name_search.value,
                 from_date: from_date_search.value,
                 to_date: to_date_search.value,
+                penalty_batch: batchID.value,
                 company: companyID.value,
                 page_size: selectedValue.value
             } 
@@ -258,6 +357,7 @@ export default{
             searchPenalties(selectedValue.value);
         };
         const resetFilters = () =>{
+            store.dispatch('Penalty_Batches/updateState',{batchID: ""})
             currentPage.value = 1;
             selectedValue.value = 50;
             loan_number_search.value = "";
@@ -305,7 +405,54 @@ export default{
             flex_basis_percentage.value = '50';
         }
         const handleActionClick = async(rowIndex, action, row) =>{
-
+            if(action == 'delete'){
+                const penaltyID = [row['loan_penalty_id']];
+                let formData = {
+                    company: companyID.value,
+                    loan_penalty: penaltyID
+                }
+                Swal.fire({
+                    title: "Are you sure?",
+                    text: `Do you wish to Delete Penalty?`,
+                    type: 'warning',
+                    showCloseButton: true,
+                    showCancelButton: true,
+                    confirmButtonText: 'Yes, Delete!',
+                    cancelButtonText: 'Cancel!',
+                    customClass: {
+                        confirmButton: 'swal2-confirm-custom',
+                        cancelButton: 'swal2-cancel-custom',
+                    },
+                    showLoaderOnConfirm: true,
+                    }).then((result) => {
+                    if (result.value) {
+                        axios.post(`api/v1/delete-loan-penalty/`,formData)
+                        .then((response)=>{
+                        if(response.data.msg == 'Success'){
+                            Swal.fire("Penalty Deleted Succesfully!", {
+                                icon: "success",
+                            }); 
+                            searchPenalties();
+                        } 
+                        else{
+                            Swal.fire({
+                                title: "Error Deleting Penalty",
+                                icon: "warning",
+                            });
+                        }                   
+                        })
+                        .catch((error)=>{
+                            console.log(error.message);
+                            Swal.fire({
+                                title: error.message,
+                                icon: "warning",
+                            });
+                        })
+                    }else{
+                        Swal.fire(`Penalty(s) has not been deleted!`);
+                    }
+                })
+            }
         }
 
         const closeModal = async() =>{

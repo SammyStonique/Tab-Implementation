@@ -228,6 +228,21 @@
                     </div>
                 </div>
                 <div class="border-b-2 border-gray-500 px-3 py-2 text-left">
+                    <button class="w-full text-left font-semibold" @click="showMembershipSettings">Membership Default Settings</button>
+                    <div class="w-full mt-4" v-if="membership_settings_options">
+                        <div class="flex mb-3">
+                            <div class="basis-1/4 relative mr-12">
+                                <label for="">Loan Penalty Automation:<em>*</em></label><br />
+                                <select  v-model="mmsAutoPenalizeOption" name="" class="bg-slate-50 rounded border border-gray-400 text-sm pl-2 pt-2 w-full">
+                                    <option value="Yes">Yes</option>
+                                    <option value="No">No</option>
+                                </select>
+                                <button type="button" class="absolute ml-2 rounded px-2 bg-green-500 text-white" @click="saveDefaultSetting('MMS','Loan Penalty Automation',mmsAutoPenalizeOption,mmsAutoPenalizeOption)"><i class="fa fa-check"></i></button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="border-b-2 border-gray-500 px-3 py-2 text-left">
                     <button class="w-full text-left font-semibold" @click="showHRSettings">HR Default Settings</button>
                     <div class="w-full mt-4" v-if="hr_settings_options">
                         <div class="flex mb-3">
@@ -496,6 +511,7 @@ export default defineComponent({
         const hr_settings_options = ref(false);
         const settings_settings_options = ref(false);
         const accounts_settings_options = ref(false);
+        const membership_settings_options = ref(false);
 
         const rentalIncome = ref("");
         const rentalSecurityDeposit = ref("");
@@ -509,6 +525,8 @@ export default defineComponent({
         const debtorsOption = ref("");
         const vendorsOption = ref("");
         const tenantsOption = ref("");
+
+        const mmsAutoPenalizeOption = ref("");
 
         const retailOutlet = ref("");
         const outletCounter = ref("");
@@ -540,6 +558,7 @@ export default defineComponent({
             pms_settings_options.value = false;
             hr_settings_options.value  = false;
             settings_settings_options.value = false;
+            membership_settings_options.value  = false;
             hms_settings_options.value  = !hms_settings_options.value ;
         }
 
@@ -550,7 +569,18 @@ export default defineComponent({
             hms_settings_options.value = false;
             hr_settings_options.value  = false;
             settings_settings_options.value = false;
+            membership_settings_options.value  = false;
             pms_settings_options.value  = !pms_settings_options.value ;
+        }
+        const showMembershipSettings = () =>{
+            fetchDefaultSetting('MMS');
+            inventory_settings_options.value = false;
+            accounts_settings_options.value = false;
+            pms_settings_options.value = false;
+            hr_settings_options.value  = false;
+            settings_settings_options.value = false;
+            hms_settings_options.value = false;
+            membership_settings_options.value  = !membership_settings_options.value ;
         }
         const showAccountsSettings = () =>{
             fetchDefaultSetting('Accounts');
@@ -559,6 +589,7 @@ export default defineComponent({
             pms_settings_options.value = false;
             hr_settings_options.value  = false;
             settings_settings_options.value = false;
+            membership_settings_options.value  = false;
             accounts_settings_options.value  = !accounts_settings_options.value ;
         }
         const showInventorySettings = () =>{
@@ -569,6 +600,7 @@ export default defineComponent({
             pms_settings_options.value = false;
             hr_settings_options.value  = false;
             settings_settings_options.value = false;
+            membership_settings_options.value  = false;
             inventory_settings_options.value  = !inventory_settings_options.value ;
         }
         const showHRSettings = () =>{
@@ -578,6 +610,7 @@ export default defineComponent({
             pms_settings_options.value = false;
             inventory_settings_options.value  = false;
             settings_settings_options.value = false;
+            membership_settings_options.value  = false;
             hr_settings_options.value  = !hr_settings_options.value ;
         }    
         const showSettingsSettings = () =>{
@@ -587,6 +620,7 @@ export default defineComponent({
             pms_settings_options.value = false;
             inventory_settings_options.value  = false;
             inventory_settings_options.value = false;
+            membership_settings_options.value  = false;
             settings_settings_options.value  = !settings_settings_options.value ;
         }
 
@@ -727,20 +761,25 @@ export default defineComponent({
                 for(let i=0; i<response.data.length; i++){
                     if(response.data[i].setting_name === 'Rental Income Posting A/c'){
                         rentalIncome.value = response.data[i].setting_value_name;
-                    }
-                    else if(response.data[i].setting_name === 'Lease Fees Income Posting A/c'){
+                    }else if(response.data[i].setting_name === 'Lease Fees Income Posting A/c'){
                         rentalLeaseIncome.value = response.data[i].setting_value_name;
-                    }
-                    else if(response.data[i].setting_name === 'Rental Security Deposits Posting A/c'){
+                    }else if(response.data[i].setting_name === 'Rental Security Deposits Posting A/c'){
                         rentalSecurityDeposit.value = response.data[i].setting_value_name;
-                    }
-                    else if(response.data[i].setting_name === 'Penalty Income Posting A/c'){
+                    }else if(response.data[i].setting_name === 'Penalty Income Posting A/c'){
                         rentalPenaltyIncome.value = response.data[i].setting_value_name;
                     }else if(response.data[i].setting_name === 'Tenant Code Prefix'){
                         tenantCodePrefix.value = response.data[i].setting_value_name;
                     }else if(response.data[i].setting_name === 'Tenant Code Zero Padding'){
                         tenantCodeCounter.value = response.data[i].setting_value_name;
-                    }else if(response.data[i].setting_name === 'Merge Patients Ledgers in Reports'){
+                    }
+
+
+                    else if(response.data[i].setting_name === 'Loan Penalty Automation'){
+                        mmsAutoPenalizeOption.value = response.data[i].setting_value_name;
+                    }
+
+                    
+                    else if(response.data[i].setting_name === 'Merge Patients Ledgers in Reports'){
                         patientsOption.value = response.data[i].setting_value_name;
                     }else if(response.data[i].setting_name === 'Merge Debtors Ledgers in Reports'){
                         debtorsOption.value = response.data[i].setting_value_name;
@@ -751,6 +790,7 @@ export default defineComponent({
                     }else if(response.data[i].setting_name === 'Allow Duplicate Transactions'){
                         duplicatesOption.value = response.data[i].setting_value_name;
                     }
+
                     
                     else if(response.data[i].setting_name === 'Default Retail Outlet'){
                         retailOutlet.value = response.data[i].setting_value_name;
@@ -855,14 +895,15 @@ export default defineComponent({
         })
 
         return{
-            loader,showLoader,hideLoader,hms_settings_options,inventory_settings_options,pms_settings_options,hr_settings_options,accounts_settings_options,
-            settings_settings_options, showHMSSettings, showPMSSettings, showAccountsSettings, showInventorySettings, showHRSettings, showSettingsSettings,
+            loader,showLoader,hideLoader,hms_settings_options,inventory_settings_options,pms_settings_options,hr_settings_options,accounts_settings_options,membership_settings_options,
+            settings_settings_options, showHMSSettings, showPMSSettings, showAccountsSettings, showInventorySettings, showHRSettings, showSettingsSettings,showMembershipSettings,
             dropdownWidth,incomePlaceholder, ledgerArr, incomeLedgerArr, expenseLedgerArr, liabilityLedgerArr, cashbookLedgerArr, fetchIncomeLedgers, fetchExpenseLedgers,
             fetchCashbookLedgers, fetchLiabilityLedgers, rentalIncome, rentalSecurityDeposit, rentalLeaseIncome, rentalPenaltyIncome,fetchLedgers,
             ledgerID,ledgerName, handleSelectedLedger, clearSelectedLedger, saveDefaultSetting, removeDefaultSetting, tenantCodePrefix, tenantCodeCounter,
             patientsOption,duplicatesOption, debtorsOption, vendorsOption, tenantsOption, fetchRetailOutlets,handleSelectedOutlet, clearSelectedOutlet, fetchOutletCounters,outletID,outletName,counterID,counterName,
             channelID,channelName,handleSelectedCounter, clearSelectedCounter, fetchCounterChannels,handleSelectedChannel, clearSelectedChannel,outletCounterArr,retailOutletArr,counterChannelArr,
-            retailOutlet, outletCounter, counterChannel, salesIncome, invTakeOn, stockControl, stockType,directSaleOrder,defaultTimeout
+            retailOutlet, outletCounter, counterChannel, salesIncome, invTakeOn, stockControl, stockType,directSaleOrder,defaultTimeout,
+            mmsAutoPenalizeOption
         }
     }
 });

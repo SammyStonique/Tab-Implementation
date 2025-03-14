@@ -127,7 +127,7 @@
                         <p class="pt-1.5">Loans</p>
                     </button>
                 </div>
-                <div class="dropdown-content w-48 absolute rounded border border-gray-200 bg-white shadow-slate-400 shadow-sm" v-if="loans_dropdowns">
+                <div class="dropdown-content w-56 absolute rounded border border-gray-200 bg-white shadow-slate-400 shadow-sm" v-if="loans_dropdowns">
                     <div class="py-2 px-3 pl-4 w-full hover:bg-slate-500 hover:w-full">
                         <button class="flex text-sm w-full" @click="openPage({'MMS':'Loan_Products'})">
                             <i class="fa fa-file-contract pt-2 mr-2" aria-hidden="true"></i>
@@ -162,6 +162,12 @@
                         <button class="flex text-sm w-full" @click="openPage({'MMS':'Loan_Schedules'})">
                             <i class="fa fa-calendar-check pt-2 mr-2" aria-hidden="true"></i>
                             <p class="">Loan Schedules</p>
+                        </button>
+                    </div>
+                    <div class="py-2 px-3 pl-4 w-full hover:bg-slate-500 hover:w-full">
+                        <button class="flex text-sm w-full" @click="openPage({'MMS':'Penalty_Batches'})">
+                            <i class="fa fa-coins pt-2 mr-2" aria-hidden="true"></i>
+                            <p class="">Processed_Penalties</p>
                         </button>
                     </div>
                     <div class="py-2 px-3 pl-4 w-full hover:bg-slate-500 hover:w-full">

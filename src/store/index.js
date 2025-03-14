@@ -107,6 +107,7 @@ import Loan_Disbursements from './MMS/Loan_Disbursements';
 import Security_Types from './MMS/Security_Types';
 import Loan_Securities from './MMS/Loan_Securities';
 import Application_Fees from './MMS/Application_Fees';
+import Penalty_Batches from './MMS/Penalty_Batches';
 import Loan_Penalties from './MMS/Loan_Penalties';
 
 
@@ -147,6 +148,7 @@ export default createStore({
 
     Member_Categories,Member_Sponsors,Members,Membership_Fees,Savings_Products,Shares_Products,Saving_Accounts,Share_Accounts,Saving_Deposits,Share_Deposits,
     Loan_Products,Loan_Fees,Loan_Applications,Loan_Guarantors,Loan_Disbursements,Security_Types,Loan_Securities,Application_Fees,Loan_Schedules,Loan_Penalties,
+    Penalty_Batches,
 
     Default_Settings,Companies,Branches,User_Rights,SMS_Integrations,Email_Integrations,Mpesa_Integrations,Mpesa_Transactions,Banks,SMS_Templates,Email_Templates
   },

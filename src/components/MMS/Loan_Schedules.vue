@@ -233,6 +233,7 @@ export default{
         }
         const searchSchedules = () =>{
             showLoader();
+            selectedIds.value = [];
             showNextBtn.value = false;
             showPreviousBtn.value = false;
             let formData = {
@@ -684,7 +685,8 @@ export default{
                         if(response.data.msg == 'Success'){
                             Swal.fire("Interest Posted Succesfully!", {
                                 icon: "success",
-                            }); 
+                            });
+                            searchSchedules(); 
                         }else if(response.data.msg == 'Failed'){
                             Swal.fire("Interest Already Posted!", {
                                 icon: "warning",
@@ -735,6 +737,7 @@ export default{
                             Swal.fire("Interest Unposted Succesfully!", {
                                 icon: "success",
                             }); 
+                            searchSchedules();
                         }else if(response.data.msg == 'Failed'){
                             Swal.fire("Interest Not Posted!", {
                                 icon: "warning",
