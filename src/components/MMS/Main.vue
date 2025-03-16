@@ -63,6 +63,7 @@ import Loan_Securities from '@/components/MMS/Loan_Securities.vue';
 import Loan_Schedules from '@/components/MMS/Loan_Schedules.vue';
 import Penalty_Batches from '@/components/MMS/Penalty_Batches.vue';
 import Loan_Penalties from '@/components/MMS/Loan_Penalties.vue';
+import Loan_Documents from '@/components/MMS/Loan_Documents.vue';
 
 import Default_Settings from '@/components/SET/Default_Settings.vue';
 
@@ -76,7 +77,7 @@ export default{
         Member_Invoices,Member_Receipts,Savings_Products,Saving_Product_Details,Shares_Products,Share_Product_Details,Saving_Accounts,Share_Accounts,
         Saving_Deposits,Share_Deposits,Loan_Products,Loan_Product_Details,Loan_Fees,Loan_Applications,Loan_Application_Details,Loan_Guarantors,Loan_Ledger,
         Loan_Disbursements,Import_Saving_Accounts,Import_Share_Accounts,Import_Saving_Deposits,Import_Share_Deposits,Security_Types,Loan_Securities,
-        Loan_Schedules,Loan_Penalties,Penalty_Batches,
+        Loan_Schedules,Loan_Penalties,Penalty_Batches,Loan_Documents,
 
         Default_Settings
     },

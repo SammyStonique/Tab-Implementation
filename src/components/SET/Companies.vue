@@ -34,11 +34,11 @@
     <MovableModal v-model:visible="depModalVisible" :title="title" :modal_top="modal_top" :modal_left="modal_left" :modal_width="modal_width"
         :loader="modal_loader" @showLoader="showModalLoader" @hideLoader="hideModalLoader" @closeModal="closeModal">
         <div>
-            <label for="" class="mb-2 mr-3">Select System Logo(png/jpg/jpeg):<em>*</em></label>
+            <label for="" class="mb-2 mr-3">Select Company Logo(png/jpg/jpeg):<em>*</em></label>
             <input type="text" name="" class="rounded border-2 border-gray-600 text-gray-500 text-sm pl-2 mr-2 mb-4 w-80 h-8" placeholder="" v-model="imageName" >
             <input type="file" name="file-input" @change="onFileChange" id="file-input" accept="image/jpg, image/png, image/jpeg"><br />
             <!-- <label class="rounded border bg-gray-200 px-2 py-1.5 w-30 cursor-pointer mr-6" for="file-input">Browse...</label> -->
-            <button type="button" class="rounded bg-green-400 text-sm mt-3 w-24 text-white px-2 py-1.5" @click="uploadSystemImage">Upload</button>
+            <button type="button" class="rounded bg-green-400 text-sm mt-3 w-24 text-white px-2 py-1.5" @click="uploadCompanyLogo">Upload</button>
         </div>
     </MovableModal>
 </template>
@@ -117,8 +117,7 @@ export default{
         const onFileChange = (e) =>{
             imageLogo.value = e.target.files[0];
             imageName.value = "C:\\fakepath\\" + imageLogo.value.name;
-            console.log(imageLogo.value)
-            console.log("IMAGE NAME IS ",imageName.value)
+    
         };
 
         const showModalLoader = () =>{
@@ -128,18 +127,19 @@ export default{
             modal_loader.value = "none";
         };
 
-        const uploadSystemImage = () =>{
+        const uploadCompanyLogo = () =>{
             showModalLoader();
-            let formData = {
-                image: imageLogo.value
-            }
-            axios.post('api/v1/system-logo/', formData,{ headers: { "Content-Type": "multipart/form-data",}}).
+   
+            let formData = new FormData();
+            formData.append('image', imageLogo.value);
+            formData.append('company', companyID.value);
+
+            axios.post('api/v1/upload-company-logo/', formData).
             then((response)=>{
                 toast.success('Success');
                 closeModal();
             })
             .catch((error)=>{
-                console.log(error.message);
                 toast.error(error.message);
             })
             .finally(()=>{
@@ -340,7 +340,7 @@ export default{
             depModalVisible.value = false;
         };
         const dropdownOptions = ref([
-            {label: 'System Logo', action: 'set-logo'},
+            {label: 'Upload Logo', action: 'set-logo'},
         ]);
         const handleDynamicOption = (option) =>{
             if(option == 'set-logo'){
@@ -358,7 +358,7 @@ export default{
             loadPrev, loadNext, firstPage, lastPage, idField, actions, handleActionClick, closeModal,
             submitButtonLabel, showModal, addNewCompany, showLoader, loader, hideLoader, removeCompany, removeCompanies,
             handleSelectionChange,addingRight,rightsModule,dropdownOptions,handleDynamicOption,onFileChange,imageLogo,imageName,
-            depModalVisible,showModalLoader,hideModalLoader,uploadSystemImage,title,modal_top,modal_width,modal_left
+            depModalVisible,showModalLoader,hideModalLoader,uploadCompanyLogo,title,modal_top,modal_width,modal_left
         }
     }
 };

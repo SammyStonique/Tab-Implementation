@@ -12,6 +12,7 @@ const state = {
   loanGuarantors: [],
   loanSecurities: [],
   loanSchedules: [],
+  loanDocuments: [],
   selectedApplication: null,
   selectedProduct: null,
   selectedMember: null,
@@ -22,6 +23,7 @@ const state = {
   selectedCharges: [],
   selectedGuarantors: [],
   selectedSecurities: [],
+  selectedDocuments: [],
   selectedTransactions: [],
   loanMember: [],
   loanProduct: [],
@@ -40,6 +42,7 @@ const mutations = {
     state.loanCharges = [];
     state.loanGuarantors = [];
     state.loanSecurities = [];
+    state.loanDocuments = [];
     state.loanSchedules = [];
     state.selectedProduct = null;
     state.selectedMember = null;
@@ -49,6 +52,7 @@ const mutations = {
     state.selectedCharges = [];
     state.selectedGuarantors = [];
     state.selectedSecurities = [];
+    state.selectedDocuments = [];
     state.selectedTransactions = [];
     state.loanMember = [];
     state.loanProduct = [];
@@ -67,6 +71,9 @@ const mutations = {
   },
   SET_SELECTED_SECURITIES(state, securities) {
     state.selectedSecurities = securities;
+  },
+  SET_SELECTED_DOCUMENTS(state, documents) {
+    state.selectedDocuments = documents;
   },
   LIST_APPLICATIONS(state, applications) {
     state.applicationsList = applications;
@@ -87,6 +94,9 @@ const mutations = {
   SET_APPLICATION_SCHEDULES(state, schedules){
     state.loanSchedules = schedules
   },
+  SET_APPLICATION_DOCUMENTS(state, documents){
+    state.loanDocuments = documents
+  },
   SET_LOAN_CHARGES(state, charges){
     state.selectedCharges = charges
   },
@@ -101,6 +111,9 @@ const mutations = {
   },
   SET_LOAN_SCHEDULES(state, schedules){
     state.selectedSchedules = schedules;
+  },
+  SET_LOAN_DOCUMENTS(state, documents){
+    state.selectedDocuments = documents;
   },
   SET_LOAN_TRANSACTIONS(state, transactions){
     state.selectedTransactions = transactions;
@@ -183,6 +196,7 @@ const actions = {
         commit('SET_APPLICATION_GUARANTORS',(response.data.loan_guarantors != null) ? (response.data.loan_guarantors) : []);
         commit('SET_APPLICATION_SECURITIES',(response.data.loan_securities != null) ? (response.data.loan_securities) : []);
         commit('SET_APPLICATION_SCHEDULES',(response.data.loan_schedules != null) ? (response.data.loan_schedules) : []);
+        commit('SET_APPLICATION_DOCUMENTS',(response.data.loan_documents != null) ? (response.data.loan_documents) : []);
     })
     .catch((error)=>{
       console.log(error.message);
@@ -201,6 +215,7 @@ const actions = {
         commit('SET_LOAN_GUARANTORS',(response.data.loan_guarantors != null) ? (response.data.loan_guarantors) : []);
         commit('SET_LOAN_SECURITIES',(response.data.loan_securities != null) ? (response.data.loan_securities) : []);
         commit('SET_LOAN_SCHEDULES',(response.data.loan_schedules != null) ? (response.data.loan_schedules) : []);
+        commit('SET_LOAN_DOCUMENTS',(response.data.loan_documents != null) ? (response.data.loan_documents) : []);
     })
     .catch((error)=>{
       console.log(error.message);
@@ -263,6 +278,17 @@ const actions = {
     .then((response)=>{
         state.selectedSecurities = response.data;
         commit('SET_SELECTED_SECURITIES',response.data);
+    })
+    .catch((error)=>{
+      console.log(error.message);
+    })
+    
+  },
+  fetchLoanDocuments({ commit,state }, formData) {
+    axios.post(`api/v1/get-loan-documents/`,formData)
+    .then((response)=>{
+        state.selectedDocuments = response.data;
+        commit('SET_SELECTED_DOCUMENTS',response.data);
     })
     .catch((error)=>{
       console.log(error.message);

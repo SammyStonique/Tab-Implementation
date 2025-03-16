@@ -90,7 +90,10 @@
                     <div v-show="activeTab == 5">                  
                         <DynamicTable :key="securityTableKey" :rightsModule="rightsModule" :columns="securityColumns" :rows="computedSecurityRows" :idField="idFieldSecurity" :actions="actionsUtility" @action-click="securityActionClick" 
                                         :showActions="showActions" :showTotals="showTotals"/>
-                    </div>   
+                    </div>  
+                    <div v-show="activeTab == 6">                  
+                        <DynamicTable :key="documentTableKey" :rightsModule="rightsModule" :columns="documentColumns" :rows="computedDocumentRows" :idField="idFieldDocument" :actions="actionsDocument" @action-click="documentActionClick"/>
+                    </div>  
                 </div>
             </div>
         </template>
@@ -137,13 +140,14 @@ export default defineComponent({
         const modal_width = ref('30vw');
         const companyID = computed(()=> store.state.userData.company_id);
         const userID = computed(()=> store.state.userData.user_id);
-        const tabs = ref(['Loan Details','Armotization Schedule','Loan Ledger','Loan Repayment','Loan Guarantors','Loan Securities']);
+        const tabs = ref(['Loan Details','Armotization Schedule','Loan Ledger','Loan Repayment','Loan Guarantors','Loan Securities','Loan Documents']);
         const activeTab = ref(0);
         const mainComponentKey = ref(0);
         const tableKey = ref(0);
         const paymentTableKey = ref(0);
         const scheduleTableKey = ref(0);
         const statementTableKey = ref(0);
+        const documentTableKey = ref(0);
         const idFieldSchedule = ref('armotization_schedule_id');
         const idFieldPayment = ref('utility_id');
         const idFieldStatement = ref('');
@@ -152,6 +156,7 @@ export default defineComponent({
         const computedPaymentRows = computed(()=> store.state.Loan_Applications.selectedRepayments);
         const computedGuarantorRows = computed(()=> store.state.Loan_Applications.selectedGuarantors);
         const computedSecurityRows = computed(()=> store.state.Loan_Applications.selectedSecurities);
+        const computedDocumentRows = computed(()=> store.state.Loan_Applications.selectedDocuments);
         const statementRows = computed(()=> store.state.Loan_Applications.selectedTransactions);
         const loanDetails = computed(()=> store.state.Loan_Applications.loanDetails);
         const loanMember = computed(()=> store.state.Loan_Applications.loanMember);
@@ -165,10 +170,14 @@ export default defineComponent({
             {label: "Interest", key:"formatted_interest_amount", type: "number", editable: false},
             {label: "Penalty", key:"penalty", type: "number", editable: false},
             {label: "Sch. Total", key:"formatted_schedule_repayment", type: "number", editable: false},
-            {label: "Prepayment", key:"formatted_loan_prepayment", type: "number", editable: false},
-            {label: "Paid Principal", key:"formatted_repaid_principal_amount", type: "number", editable: false},
-            {label: "Paid Interest", key:"formatted_repaid_interest_amount", type: "number", editable: false},
-            {label: "Total Payment", key:"formatted_schedule_payment", type: "number", editable: false},
+            {label: "Prepay.", key:"formatted_loan_prepayment", type: "number", editable: false},
+            {label: "Paid Princ.", key:"formatted_repaid_principal_amount", type: "number", editable: false},
+            {label: "Paid Int.", key:"formatted_repaid_interest_amount", type: "number", editable: false},
+            {label: "Paid Pen.", key:"formatted_repaid_penalty", type: "number", editable: false},
+            {label: "Total Paid", key:"formatted_schedule_payment", type: "number", editable: false, },
+            {label: "Princ. Bal", key:"formatted_principal_balance", type: "number", editable: false},
+            {label: "Int. Bal.", key:"formatted_interest_balance", type: "number", editable: false},
+            {label: "Total Bal.", key:"formatted_installment_balance", type: "number", editable: false},
             {label: "I.P", key:"interest_posted", type: "text", editable: false},
             {label: "C.R.P", key:"credit_reduction_applied", type: "text", editable: false},
         ]);
@@ -189,20 +198,27 @@ export default defineComponent({
         ]);
         const guarantorColumns = ref([
             {type: "checkbox"},
-            {label: "Member No", key:"member_number", type: "text", editable: false},
-            {label: "Member Name", key:"member_name", type: "text", editable: false},
-            {label: "Phone Number", key:"phone_number", type: "text", editable: false},
-            {label: "Amount", key: "guarantee_amount", type: "number", editable: false},
+            {label: "Member No", key:"member_number", type: "text"},
+            {label: "Member Name", key:"member_name", type: "text"},
+            {label: "Phone Number", key:"phone_number", type: "text"},
+            {label: "Amount", key: "guarantee_amount", type: "number"},
         ]);
         const securityColumns = ref([
             {type: "checkbox"},
-            {label: "Type", key:"security_name", type: "text", editable: false},
-            {label: "Security Name", key:"name", type: "text", editable: false},
-            {label: "Reg/ID No", key:"registration_number", type: "text", editable: false},
-            {label: "Phone No", key:"phone_number", type: "text", editable: false},
-            {label: "Value", key:"security_value", type: "number", editable: false},
-            {label: "Security Description", key:"description", type: "text", editable: false},
+            {label: "Type", key:"security_name", type: "text"},
+            {label: "Security Name", key:"name", type: "text"},
+            {label: "Reg/ID No", key:"registration_number", type: "text"},
+            {label: "Phone No", key:"phone_number", type: "text"},
+            {label: "Value", key:"security_value", type: "number"},
+            {label: "Security Description", key:"description", type: "text"},
         ])
+        const documentColumns = ref([
+            {label: "Document Type", key:"document_type", type: "text"},
+            {label: "Document Name", key:"document_name", type: "text"},
+        ]);
+        const actionsDocument = ref([
+            {name: 'preview', icon: 'fa fa-paperclip', title: 'View Document',rightName: 'Adding Loan Documents'},
+        ]);
 
         const actionsUtility = ref([
 
@@ -596,6 +612,36 @@ export default defineComponent({
  
             }
         }
+        const previewDocument = (formData) =>{
+            showLoader();
+            axios
+            .post("api/v1/preview-loan-document-pdf/", formData, { responseType: 'blob' })
+                .then((response)=>{
+                    if(response.status == 200){
+                        const blob1 = new Blob([response.data]);
+                        // Convert blob to URL
+                        const url = URL.createObjectURL(blob1);
+                        PrintJS({printable: url, type: 'pdf'});
+                    }
+                })
+            .catch((error)=>{
+                console.log(error.message);
+            })
+            .finally(()=>{
+                hideLoader();
+            })
+        };
+        const documentActionClick = async(rowIndex, action, row) =>{
+            if( action == 'preview'){
+                const docID = row['loan_document_id'];
+                let formData = {
+                    loan_document: docID,
+                    company: companyID.value
+                } 
+                previewDocument(formData);
+                
+            }
+        }
 
         const paymentActionClick = async(rowIndex, action, row) =>{
             if( action == 'void-utility'){
@@ -670,6 +716,7 @@ export default defineComponent({
             scheduleTableKey, idFieldSchedule, scheduleColumns, actionsSchedule, statementTableKey, idFieldStatement, statementRows,showActions,searchFilters,resetFilters,
             statementColumns, actionsStatement, loanDetails,loanProduct,loanMember, scheduleActionClick,showAddButton,searchLoanTransactions,printLoanLedger,
             scheduleActionClick,tnt_modal_loader, dep_modal_loader, util_modal_loader, depModalVisible, displayButtons,guarantorColumns,securityColumns,
+            documentActionClick,documentColumns,documentTableKey,actionsDocument,computedDocumentRows,
             modal_top, modal_left, modal_width, showDepModalLoader, hideDepModalLoader, handleDepReset,
             flex_basis, flex_basis_percentage, paymentActionClick,rightsModule,isDisabled,
         }

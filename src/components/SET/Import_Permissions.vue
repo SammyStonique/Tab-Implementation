@@ -1,6 +1,6 @@
 <template>
     <ImportComponent 
-        :rows="excelDepList"
+        :rows="excelPermList"
         :columns="tableColumns"
         :idField="idField"
         :loader="loader"
@@ -10,7 +10,7 @@
         :filePath="filePath"
         @file-changed="handleFileChange"
         @displayExcelData="displayExcelData"
-        @handleSubmit="importDepartmentsExcel" 
+        @handleSubmit="importPermissionsList" 
         @handleReset="handleReset" 
         @downloadExcelTemplate="downloadExcelTemplate"
     />
@@ -24,7 +24,7 @@ import { useToast } from "vue-toastification";
 import ImportComponent from '../ImportComponent.vue';
 
 export default defineComponent({
-    name: 'Import_Departments',
+    name: 'Import_Permissions',
     components:{
         ImportComponent
     },
@@ -34,11 +34,11 @@ export default defineComponent({
         const loader = ref('none');
         const hospitalID = computed(()=> store.state.userData.company_id);
         const tableColumns = ref([
-            {label: "Code", key:"code",type: "text", editable: false},
-            {label: "Department", key:"name",type: "text", editable: false},
+            {label: "Permission Name", key:"permission_name",type: "text", editable: false},
+            {label: "Module", key:"module",type: "text", editable: false},
         ])
-        const excelDepList = ref([]);
-        const idField = 'department_id';
+        const excelPermList = ref([]);
+        const idField = 'permission_id';
         const excel_file = ref('');
         const filePath = ref('');
 
@@ -63,12 +63,12 @@ export default defineComponent({
                 hideLoader();
             }else{
                 let formData = new FormData()
-                formData.append("departments_excel", excel_file.value) 
+                formData.append("permissions_excel", excel_file.value) 
 
-                axios.post("api/v1/display-departments-import-excel/", formData)
+                axios.post("api/v1/display-permissions-import-excel/", formData)
                 .then((response)=>{
-                    excelDepList.value = response.data.departments;
-                    console.log(excelDepList.value);
+                    excelPermList.value = response.data.permissions;
+                    console.log(excelPermList.value);
                 })
                 .catch((error)=>{
                     console.log(error.message);
@@ -78,23 +78,22 @@ export default defineComponent({
                 })
             }
         };
-        const importDepartmentsExcel = () =>{
+        const importPermissionsList = () =>{
             showLoader();
-            if(!excelDepList.value.length){
+            if(!excelPermList.value.length){
                 toast.error("Please Import Excel Template")
                 hideLoader();
             }
             else{
                 let formData = new FormData()
-                formData.append("departments_excel", excel_file.value)
-                formData.append("company_id", hospitalID.value)
+                formData.append("permissions_excel", excel_file.value)
 
-                axios.post("api/v1/import-departments-excel/", formData)
+                axios.post("api/v1/import-permissions-excel/", formData)
                 .then((response)=>{
                     if(response.data == "Success"){
-                        toast.success("Departments Imported Succesfully")
+                        toast.success("Permissions Imported Succesfully")
                         handleReset();
-                        excelDepList.value = [];
+                        excelPermList.value = [];
                         excel_file.value = "";
                     }else{
                         toast.error(response.data) 
@@ -116,13 +115,13 @@ export default defineComponent({
             let formData = {
 
             }
-            axios.post("api/v1/download-departments-excel/", formData, { responseType: 'blob' })
+            axios.post("api/v1/download-permissions-excel/", formData, { responseType: 'blob' })
                 .then((response)=>{
                     if(response.status == 200){
                         const url = window.URL.createObjectURL(new Blob([response.data]));
                         const link = document.createElement('a');
                         link.href = url;
-                        link.setAttribute('download', 'Departments_Import.xls');
+                        link.setAttribute('download', 'Permissions_Import.xls');
                         document.body.appendChild(link);
                         link.click();
                     }
@@ -135,14 +134,14 @@ export default defineComponent({
             })
         }
         const handleReset = () =>{
-            excelDepList.value = [];
+            excelPermList.value = [];
             filePath.value = "";
             excel_file.value = "";
         }
 
         return{
-            tableColumns, excelDepList, idField, loader, showLoader, hideLoader, excel_file, filePath, displayExcelData, handleFileChange,
-            handleReset,importDepartmentsExcel,downloadExcelTemplate
+            tableColumns, excelPermList, idField, loader, showLoader, hideLoader, excel_file, filePath, displayExcelData, handleFileChange,
+            handleReset,importPermissionsList,downloadExcelTemplate
         }
     }
 })

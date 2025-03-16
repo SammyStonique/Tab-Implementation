@@ -5,7 +5,9 @@
         @handleAddNew="addNewRight"
         :searchFilters="searchFilters"
         @searchPage="searchRights"
+        @importData="importPermissions"
         @resetFilters="resetFilters"
+        @printExcel="printPermissionsList"
         :addingRight="addingRight"
         :rightsModule="rightsModule"
         :columns="tableColumns"
@@ -234,6 +236,10 @@ export default{
                 createRight();
             }
         }
+        const importPermissions = () =>{
+            store.commit('pageTab/ADD_PAGE', {'SET':'Import_Permissions'})
+            store.state.pageTab.setActiveTab = 'Import_Permissions';
+        }
         const showLoader = () =>{
             loader.value = "block";
         }
@@ -302,6 +308,32 @@ export default{
             store.commit('User_Rights/RESET_SEARCH_FILTERS')
             searchRights();
         }
+        const printPermissionsList = () =>{
+            showLoader();
+            let formData = {
+                module: module_search.value,
+                permission_name: name_search.value,
+            } 
+
+            axios
+            .post("api/v1/export-permissions-excel/", formData, { responseType: 'blob' })
+                .then((response)=>{
+                    if(response.status == 200){
+                        const url = window.URL.createObjectURL(new Blob([response.data]));
+                        const link = document.createElement('a');
+                        link.href = url;
+                        link.setAttribute('download', 'Permissions.xls');
+                        document.body.appendChild(link);
+                        link.click();
+                    }
+                })
+            .catch((error)=>{
+                console.log(error.message);
+            })
+            .finally(()=>{
+                hideLoader();
+            })
+        }
         onMounted(()=>{
             searchRights();
         })
@@ -310,7 +342,8 @@ export default{
             depResults, depArrLen, depCount, pageCount, showNextBtn, showPreviousBtn,modal_top, modal_left, modal_width,
             loadPrev, loadNext, firstPage, lastPage, actions, formFields, depModalVisible, addNewRight,
             displayButtons,flex_basis,flex_basis_percentage, handleActionClick, handleReset, saveRight,
-            showLoader, loader, hideLoader, modal_loader, showModalLoader, hideModalLoader,addingRight,rightsModule
+            showLoader, loader, hideLoader, modal_loader, showModalLoader, hideModalLoader,addingRight,rightsModule,
+            importPermissions,printPermissionsList
         }
     }
 }

@@ -2,16 +2,16 @@
     <PageComponent 
         :loader="loader" @showLoader="showLoader" @hideLoader="hideLoader"
         :addButtonLabel="addButtonLabel"
-        @handleAddNew="addNewSecurity"
+        @handleAddNew="addNewDocument"
         :searchFilters="searchFilters"
-        @searchPage="searchSecurities"
+        @searchPage="searchDocuments"
         @resetFilters="resetFilters"
-        @removeItem="removeSecurity"
-        @removeSelectedItems="removeSecurities"
+        @removeItem="removeDocument"
+        @removeSelectedItems="removeDocuments"
         :addingRight="addingRight"
         :rightsModule="rightsModule"
         :columns="tableColumns"
-        :rows="securitiesList"
+        :rows="documentsList"
         :actions="actions"
         :idField="idField"
         @handleSelectionChange="handleSelectionChange"
@@ -32,7 +32,7 @@
         :loader="modal_loader" @showLoader="showModalLoader" @hideLoader="hideModalLoader"  @closeModal="closeModal">
         <DynamicForm 
             :fields="formFields" :flex_basis="flex_basis" :flex_basis_percentage="flex_basis_percentage" 
-            :displayButtons="displayButtons" @handleSubmit="createLoanSecurity" @handleReset="handleReset"
+            :displayButtons="displayButtons" @handleSubmit="createLoanDocument" @handleReset="handleReset" @file-changed="handleFileChange"
         />
     </MovableModal>
 </template>
@@ -45,9 +45,10 @@ import MovableModal from '@/components/MovableModal.vue'
 import DynamicForm from '../NewDynamicForm.vue';
 import { useStore } from "vuex";
 import { useToast } from "vue-toastification";
+import PrintJS from 'print-js';
 
 export default{
-    name: 'Loan_Securities',
+    name: 'Loan_Documents',
     components:{
         PageComponent,MovableModal,DynamicForm
     },
@@ -58,13 +59,13 @@ export default{
         const modal_loader = ref('none');
         const memComponentKey = ref(0);
         const prodComponentKey = ref(0);
-        const title = ref('Saving Account Details');
-        const addButtonLabel = ref('New Security');
-        const addingRight = ref('Adding Loan Securities');
+        const title = ref('Document Details');
+        const addButtonLabel = ref('New Document');
+        const addingRight = ref('Adding Loan Documents');
         const rightsModule = ref('MMS');
-        const idField = 'loan_security_id';
+        const idField = 'loan_document_id';
         const depModalVisible = ref(false);
-        const securitiesList = ref([]);
+        const documentsList = ref([]);
         const selectedIds = ref([]);
         const depResults = ref([]);
         const depArrLen = ref(0);
@@ -80,28 +81,27 @@ export default{
         const errors = ref([]);
         const modal_top = ref('200px');
         const modal_left = ref('400px');
-        const modal_width = ref('35vw');
-        const isEditing = computed(()=> store.state.Loan_Securities.isEditing)
-        const selectedSecurity = computed(()=> store.state.Loan_Securities.selectedSecurity);
-        const selectedApplication = computed(()=> store.state.Loan_Securities.selectedApplication);
-        const securityArray = computed(() => store.state.Security_Types.securityArr);
+        const modal_width = ref('30vw');
+        const upload_file = ref('');
+        const filePath = ref('');
+        const computedFilePath = ref('');
+        const isEditing = computed(()=> store.state.Loan_Documents.isEditing)
+        const selectedDocument = computed(()=> store.state.Loan_Documents.selectedDocument);
+        const selectedApplication = computed(()=> store.state.Loan_Documents.selectedApplication);
         const applicationArray = computed(() => store.state.Loan_Applications.applicationArr);
         const tableColumns = ref([
             {type: "checkbox"},
             {label: "Member No", key: "member_number", type: "text", editable: false},
             {label: "Member Name", key: "member_name", type: "text", editable: false},
             {label: "Loan No", key: "loan_number", type: "text", editable: false},
-            {label: "Security Type", key: "security_name", type: "text", editable: false},
-            {label: "Name", key: "name", type: "text", editable: false},
-            {label: "Reg/ID No", key: "registration_number", type: "text", editable: false},
-            {label: "Phone No", key: "phone_number", type: "text", editable: false},
-            {label: "Amount", key: "amount", type: "text", editable: false},
+            {label: "Document Type", key: "document_type", type: "text", editable: false},
+            {label: "Name", key: "document_name", type: "text", editable: false},
         ])
         const actions = ref([
-            {name: 'delete', icon: 'fa fa-trash', title: 'Delete Security', rightName: 'Deleting Loan Securities'},
+            {name: 'preview', icon: 'fa fa-paperclip', title: 'View Document', rightName: 'Adding Loan Documents'},
+            {name: 'delete', icon: 'fa fa-trash', title: 'Delete Document', rightName: 'Deleting Loan Documents'},
         ])
         const companyID = computed(()=> store.state.userData.company_id);
-        const securityID = ref('');
         const applicationID = ref('');
         const loan_number_search = ref('');
         const name_search = ref('');
@@ -114,18 +114,6 @@ export default{
         const handleSelectionChange = (ids) => {
             selectedIds.value = ids;
         };
-        const handleSelectedSecurity = async(option) =>{
-            await store.dispatch('Security_Types/handleSelectedSecurity', option)
-            securityID.value = store.state.Security_Types.securityID;
-            if(selectedSecurity.value){
-                selectedSecurity.value.security_type.security_type_id = securityID.value;
-                securityValue.value = securityID.value
-            }
-        };
-        const clearSelectedSecurity = async() =>{
-            await store.dispatch('Security_Types/updateState', {securityID: ''});
-            securityID.value = store.state.Security_Types.securityID;
-        };
         const handleSelectedApplication = async(option) =>{
             await store.dispatch('Loan_Applications/handleSelectedApplication', option)
             applicationID.value = store.state.Loan_Applications.applicationID;
@@ -135,35 +123,30 @@ export default{
             applicationID.value = store.state.Loan_Applications.applicationID;
         };
         const formFields = ref([]);
-        const securityValue = computed(() => {
-            return (selectedSecurity.value && selectedSecurity.value.security_type && !securityID.value) ? selectedSecurity.value.security_type.security_type_id : securityID.value;
-        });
+
         const applicationValue = computed(() => {
-            return (selectedSecurity.value && selectedSecurity.value.loan_application && !applicationID.value) ? selectedSecurity.value.loan_application.savings_product_id : applicationID.value;
+            return (selectedDocument.value && selectedDocument.value.loan_application && !applicationID.value) ? selectedDocument.value.loan_application.savings_product_id : applicationID.value;
         });
+        const handleFileChange = (fileData) => {
+            filePath.value = fileData.filePath;
+            upload_file.value = fileData.file;
+
+        };
         const updateFormFields = () => {
             formFields.value = [
-                {  
-                    type:'search-dropdown', label:"Security", value: securityValue.value, componentKey: memComponentKey,
-                    selectOptions: securityArray, optionSelected: handleSelectedSecurity, required: true,
-                    searchPlaceholder: 'Select Security...', dropdownWidth: '500px', updateValue: selectedSecurity.value,
-                    fetchData: store.dispatch('Security_Types/fetchSecurityTypes', {company:companyID.value}), clearSearch: clearSelectedSecurity
-                },
                 {  
                     type:'search-dropdown', label:"Loan Application", value: applicationValue.value, componentKey: prodComponentKey,
                     selectOptions: applicationArray, optionSelected: handleSelectedApplication, required: true,
                     searchPlaceholder: 'Select Loan Application...', dropdownWidth: '500px', updateValue: selectedApplication.value,
                     fetchData: store.dispatch('Loan_Applications/fetchLoanApplications', {company:companyID.value}), clearSearch: clearSelectedApplication
                 },
-                { type: 'text', name: 'name',label: "Name", value: selectedSecurity.value?.name || '', required: true },
-                { type: 'text', name: 'registration_number',label: "Reg/ID No", value: selectedSecurity.value?.registration_number || '', required: true },
-                { type: 'text', name: 'phone_number',label: "Phone No", value: selectedSecurity.value?.phone_number || '0', required: true },
-                { type: 'text', name: 'amount',label: "Amount", value: selectedSecurity.value?.amount || '0', required: true },
-                { type: 'text-area', name: 'description',label: "Description", value: selectedApplication.value?.description || '', required: false,textarea_rows: '4', textarea_cols: '56'},
+                { type: 'text', name: 'document_name',label: "Name", value: selectedDocument.value?.document_name || '', required: true },
+                { type: 'dropdown', name: 'document_type',label: "Type", value: selectedDocument?.document_type || '', placeholder: "", required: true, options: [{ text: 'Personal Identification', value: 'Personal Identification' }, { text: 'Collateral Documents', value: 'Collateral Documents' }, { text: 'Payslip', value: 'Payslip' },{ text: 'Credit Score', value: 'Credit Score' }, { text: 'Application Form', value: 'Application Form' }, { text: 'Financial Statement', value: 'Financial Statement' }, { text: 'Other', value: 'Other' }] },
+                { type: 'file', name: 'file-input',label: "Attachment", value: '', filePath: computedFilePath.value, required: false, placeholder: "", accepted_formats: "*/*", method: handleFileChange}
             ];
         };
-        watch([selectedSecurity, selectedSecurity, selectedApplication], () => {
-            if (selectedSecurity.value && selectedSecurity.value && selectedApplication.value) {
+        watch([selectedDocument, selectedDocument, selectedApplication], () => {
+            if (selectedDocument.value && selectedDocument.value && selectedApplication.value) {
                 memComponentKey.value += 1;
                 prodComponentKey.value += 1;
                 updateFormFields();
@@ -172,45 +155,58 @@ export default{
                 updateFormFields();
             }
         }, { immediate: true });
-        const addNewSecurity = () =>{
+        const addNewDocument = () =>{
             depModalVisible.value = true;
             handleReset();
-            store.dispatch("Loan_Securities/updateState",{selectedSecurity:null, selectedSecurityType:null, selectedApplication:null,isEditing:false})
-            flex_basis.value = '1/3';
-            flex_basis_percentage.value = '33.333';
-        }
-        const handleActionClick = async(rowIndex, action, row) =>{
-            if( action == 'edit'){
-                const accountID = row[idField];
-                let formData = {
-                    company: companyID.value,
-                    loan_security: accountID
-                }
-                await store.dispatch('Loan_Securities/fetchLoanSecurity',formData).
-                then(()=>{
-                    depModalVisible.value = true;
-                    flex_basis.value = '1/3';
-                    flex_basis_percentage.value = '33.333';
+            store.dispatch("Loan_Documents/updateState",{selectedDocument:null, selectedApplication:null,isEditing:false})
+            flex_basis.value = '1/2';
+            flex_basis_percentage.value = '50';
+        };
+        const previewDocument = (formData) =>{
+            showLoader();
+            axios
+            .post("api/v1/preview-loan-document-pdf/", formData, { responseType: 'blob' })
+                .then((response)=>{
+                    if(response.status == 200){
+                        const blob1 = new Blob([response.data]);
+                        // Convert blob to URL
+                        const url = URL.createObjectURL(blob1);
+                        PrintJS({printable: url, type: 'pdf'});
+                    }
                 })
+            .catch((error)=>{
+                console.log(error.message);
+            })
+            .finally(()=>{
+                hideLoader();
+            })
+        };
+        const handleActionClick = async(rowIndex, action, row) =>{
+            if( action == 'preview'){
+                const docID = row['loan_document_id'];
+                let formData = {
+                    loan_document: docID,
+                    company: companyID.value
+                } 
+                previewDocument(formData);
                 
             }else if(action == 'delete'){
                 const accountID = [row[idField]];
                 let formData = {
                     company: companyID.value,
-                    loan_security: accountID
+                    loan_document: accountID
                 }
-                await store.dispatch('Loan_Securities/deleteLoanSecurity',formData).
+                await store.dispatch('Loan_Documents/deleteLoanDocument',formData).
                 then(()=>{
-                    searchSecurities();
+                    searchDocuments();
                 })
             }
         } 
         const handleReset = () =>{
-            store.dispatch("Loan_Securities/updateState",{selectedSecurity:null, selectedSecurityType:null, selectedApplication:null,isEditing:false})
+            store.dispatch("Loan_Documents/updateState",{selectedDocument:null, selectedApplication:null,isEditing:false})
             for(let i=0; i < formFields.value.length; i++){
                 formFields.value[i].value = '';
             }
-            securityID.value = "";
             applicationID.value = "";
             prodComponentKey.value += 1;
             memComponentKey.value += 1;
@@ -222,28 +218,23 @@ export default{
         const hideModalLoader = () =>{
             modal_loader.value = "none";
         }
-        const createLoanSecurity = async() =>{
+        const createLoanDocument = async() =>{
             showModalLoader();
-            let formData = {
-                name: formFields.value[2].value,
-                amount: formFields.value[5].value,
-                phone_number: formFields.value[4].value,
-                registration_number: formFields.value[3].value,
-                description: formFields.value[6].value,
-                security_type: securityID.value,
-                security_type_id: securityID.value,
-                loan_application: applicationID.value,
-                loan_application_id: applicationID.value,
-                company: companyID.value
-            }
+            let formData = new FormData();
+            formData.append('document_name', formFields.value[1].value);
+            formData.append('document_type', formFields.value[2].value);
+            formData.append('document_file', upload_file.value);
+            formData.append('loan_application', applicationID.value);
+            formData.append('loan_application_id', applicationID.value);
+            formData.append('company', companyID.value);
 
             errors.value = [];
-            for(let i=2; i < formFields.value.length; i++){
+            for(let i=1; i < formFields.value.length; i++){
                 if(formFields.value[i].value =='' && formFields.value[i].required == true && formFields.value[i].type !='search-dropdown'){
                     errors.value.push('Error');
                 }
             }
-            if(securityValue.value == '' || applicationValue.value == ''){
+            if(applicationValue.value == ''){
                 errors.value.push('Error');
             }
             if(errors.value.length){
@@ -251,74 +242,74 @@ export default{
                 hideModalLoader();
             }else{
                 try {
-                    const response = await store.dispatch('Loan_Securities/createLoanSecurity', formData);
+                    const response = await store.dispatch('Loan_Documents/createLoanDocument', formData);
                     if(response && response.status === 201) {
                         hideModalLoader();
-                        toast.success('Security created successfully!');
+                        toast.success('Document created successfully!');
                         handleReset();
                         memComponentKey.value += 1;
                         prodComponentKey.value += 1;
                     }else {
-                        toast.error('An error occurred while creating the Security.');
+                        toast.error('An error occurred while creating the Document.');
                     }
                 } catch (error) {
                     console.error(error.message);
-                    toast.error('Failed to create Security: ' + error.message);
+                    toast.error('Failed to create Document: ' + error.message);
                 } finally {
                     hideModalLoader();
-                    searchSecurities();
+                    searchDocuments();
                 }
             }
 
         };
-        const removeSecurity = async() =>{
+        const removeDocument = async() =>{
             if(selectedIds.value.length == 1){
                 let formData = {
                     company: companyID.value,
-                    loan_security: selectedIds.value,
+                    loan_document: selectedIds.value,
                 }
                 try{
-                    const response = await store.dispatch('Loan_Securities/deleteLoanSecurity',formData)
+                    const response = await store.dispatch('Loan_Documents/deleteLoanDocument',formData)
                     if(response && response.status == 200){
-                        toast.success("Security Removed Succesfully");
-                        searchSecurities();
+                        toast.success("Document Removed Succesfully");
+                        searchDocuments();
                     }
                 }
                 catch(error){
                     console.error(error.message);
-                    toast.error('Failed to remove Security: ' + error.message);
+                    toast.error('Failed to remove Document: ' + error.message);
                 }
                 finally{
                     selectedIds.value = [];
                 }
             }else if(selectedIds.value.length > 1){
-                toast.error("You have selected more than 1 Security") 
+                toast.error("You have selected more than 1 Document") 
             }else{
-                toast.error("Please Select A Security To Remove")
+                toast.error("Please Select A Document To Remove")
             }
         }
-        const removeSecurities = async() =>{
+        const removeDocuments = async() =>{
             if(selectedIds.value.length){
                 let formData = {
                     company: companyID.value,
-                    loan_security: selectedIds.value,
+                    loan_document: selectedIds.value,
                 }
                 try{
-                    const response = await store.dispatch('Loan_Securities/deleteLoanSecurity',formData)
+                    const response = await store.dispatch('Loan_Documents/deleteLoanDocument',formData)
                     if(response && response.status == 200){
-                        toast.success("Security(s) Removed Succesfully");
-                        searchSecurities();
+                        toast.success("Document(s) Removed Succesfully");
+                        searchDocuments();
                     }
                 }
                 catch(error){
                     console.error(error.message);
-                    toast.error('Failed to remove Security(s): ' + error.message);
+                    toast.error('Failed to remove Document(s): ' + error.message);
                 }
                 finally{
                     selectedIds.value = [];
                 }
             }else{
-                toast.error("Please Select A Security To Remove")
+                toast.error("Please Select A Document To Remove")
             }
         }
         const showLoader = () =>{
@@ -327,7 +318,7 @@ export default{
         const hideLoader = () =>{
             loader.value = "none";
         }
-        const searchSecurities = () =>{
+        const searchDocuments = () =>{
             showLoader();
             showNextBtn.value = false;
             showPreviousBtn.value = false;
@@ -339,12 +330,12 @@ export default{
                 page_size: selectedValue.value
             }
             axios
-            .post(`api/v1/loan-securities-search/?page=${currentPage.value}`,formData)
+            .post(`api/v1/loan-documents-search/?page=${currentPage.value}`,formData)
             .then((response)=>{
-                securitiesList.value = response.data.results;
-                store.commit('Loan_Securities/LIST_LOAN_SECURITIES', securitiesList.value)
+                documentsList.value = response.data.results;
+                store.commit('Loan_Documents/LIST_LOAN_DOCUMENTS', documentsList.value)
                 depResults.value = response.data;
-                depArrLen.value = securitiesList.value.length;
+                depArrLen.value = documentsList.value.length;
                 depCount.value = depResults.value.count;
                 pageCount.value = Math.ceil(depCount.value / selectedValue.value);
                 
@@ -364,7 +355,7 @@ export default{
         };
         const selectSearchQuantity = (newValue) =>{
             selectedValue.value = newValue;
-            searchSecurities(selectedValue.value);
+            searchDocuments(selectedValue.value);
         };
         const loadPrev = () =>{
             if (currentPage.value <= 1){
@@ -373,7 +364,7 @@ export default{
                 currentPage.value -= 1;
             }
             
-            searchSecurities();
+            searchDocuments();
         }
         const loadNext = () =>{
             if(currentPage.value >= pageCount.value){
@@ -382,15 +373,15 @@ export default{
                 currentPage.value += 1;
             }
             
-            searchSecurities();
+            searchDocuments();
         }
         const firstPage = ()=>{
             currentPage.value = 1;
-            searchSecurities();
+            searchDocuments();
         }
         const lastPage = () =>{
             currentPage.value = pageCount.value;
-            searchSecurities();
+            searchDocuments();
         }
         const resetFilters = () =>{
             currentPage.value = 1;
@@ -398,22 +389,23 @@ export default{
             name_search.value = "";
             loan_number_search.value = "";
             member_number_search.value = "";
-            searchSecurities();
+            searchDocuments();
         };
         const closeModal = async() =>{
             depModalVisible.value = false;
             handleReset();
         }
         onMounted(()=>{
-            searchSecurities();
+            searchDocuments();
         })
         return{
-            title,idField, searchSecurities, addButtonLabel, searchFilters, resetFilters, tableColumns, securitiesList,
+            title,idField, searchDocuments, addButtonLabel, searchFilters, resetFilters, tableColumns, documentsList,
             currentPage,depResults, depArrLen, depCount, pageCount, showNextBtn, showPreviousBtn,modal_top, modal_left, modal_width,
-            loadPrev, loadNext, firstPage, lastPage, actions, formFields, depModalVisible, addNewSecurity,
-            displayButtons,flex_basis,flex_basis_percentage, handleActionClick, handleReset, createLoanSecurity,
-            showLoader, loader, hideLoader, modal_loader, showModalLoader, hideModalLoader, removeSecurity, removeSecurities,
-            addingRight,rightsModule, closeModal,selectSearchQuantity,selectedValue,handleSelectionChange
+            loadPrev, loadNext, firstPage, lastPage, actions, formFields, depModalVisible, addNewDocument,
+            displayButtons,flex_basis,flex_basis_percentage, handleActionClick, handleReset, createLoanDocument,
+            showLoader, loader, hideLoader, modal_loader, showModalLoader, hideModalLoader, removeDocument, removeDocuments,
+            addingRight,rightsModule, closeModal,selectSearchQuantity,selectedValue,handleSelectionChange,
+            handleFileChange
         }
     }
 }

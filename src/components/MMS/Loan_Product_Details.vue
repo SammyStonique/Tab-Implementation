@@ -61,6 +61,7 @@ export default defineComponent({
         const tabs = ref(['Loan Charges']);
         const mainComponentKey = ref(0);
         const intComponentKey = ref(0);
+        const penComponentKey = ref(0);
         const catComponentKey = ref(0);
         const chargeComponentKey = ref(0);
         const activeTab = ref(0);
@@ -77,11 +78,13 @@ export default defineComponent({
         const isEditing = computed(()=> store.state.Loan_Products.isEditing);
         const selectedProduct = computed(()=> store.state.Loan_Products.selectedProduct);
         const selectedInterestLedger = computed(()=> store.state.Loan_Products.selectedInterestLedger);
+        const selectedPenaltyLedger = computed(()=> store.state.Loan_Products.selectedPenaltyLedger);
         const selectedCategory = computed(()=> store.state.Loan_Products.selectedCategory);
         const loanCharges = computed(()=> store.state.Loan_Products.loanCharges);
         const categoryArray = computed(() => store.state.Member_Categories.categoryArr);
         const ledgerArray = computed(() => store.state.Ledgers.ledgerArr);
         const intLedgerID = ref('');
+        const penaltyLedgerID = ref('');
         const chargeArr = computed(() => store.state.Loan_Fees.feeArr);
         const chargesDropdownWidth = ref('400px');
         const chargesSearchPlaceholder = ref('Select Charge...');
@@ -128,6 +131,18 @@ export default defineComponent({
             await store.dispatch('Ledgers/updateState', {ledgerID: ''});
             intLedgerID.value = store.state.Ledgers.ledgerID;
         };
+        const handleSelectedPenaltyLedger = async(option) =>{
+            await store.dispatch('Ledgers/handleSelectedLedger', option)
+            penaltyLedgerID.value = store.state.Ledgers.ledgerID;
+            if(selectedProduct.value){
+                selectedProduct.value.interest_posting_account.ledger_id = penaltyLedgerID.value;
+                intLedgerValue.value = penaltyLedgerID.value
+            }
+        };
+        const clearSelectedPenaltyLedger = async() =>{
+            await store.dispatch('Ledgers/updateState', {ledgerID: ''});
+            penaltyLedgerID.value = store.state.Ledgers.ledgerID;
+        };
         const fetchCharges = async() =>{
             await store.dispatch('Loan_Fees/fetchLoanFees', {company:companyID.value})
         };
@@ -138,6 +153,9 @@ export default defineComponent({
         });
         const intLedgerValue = computed(() => {
             return (selectedProduct.value && selectedProduct.value.interest_posting_account && !intLedgerID.value) ? selectedProduct.value.interest_posting_account.ledger_id : intLedgerID.value;
+        });
+        const penaltyLedgerValue = computed(() => {
+            return (selectedProduct.value && selectedProduct.value.penalty_posting_account && !penaltyLedgerID.value) ? selectedProduct.value.penalty_posting_account.ledger_id : penaltyLedgerID.value;
         });
         const updateFormFields = () => {
             formFields.value = [
@@ -175,6 +193,12 @@ export default defineComponent({
                     searchPlaceholder: 'Select Posting Acc...', dropdownWidth: '450px', updateValue: selectedInterestLedger.value,
                     fetchData: store.dispatch('Ledgers/fetchLedger', {company:companyID.value}), clearSearch: clearSelectedInterestLedger
                 },
+                {  
+                    type:'search-dropdown', label:"Penalty Income Posting Account", value: penaltyLedgerValue.value, componentKey: penComponentKey,
+                    selectOptions: ledgerArray, optionSelected: handleSelectedPenaltyLedger, required: false,
+                    searchPlaceholder: 'Select Posting Acc...', dropdownWidth: '450px', updateValue: selectedPenaltyLedger.value,
+                    fetchData: store.dispatch('Ledgers/fetchLedger', {company:companyID.value}), clearSearch: clearSelectedPenaltyLedger
+                },
 
             ];
         };
@@ -192,14 +216,25 @@ export default defineComponent({
             if(intLedgerID.value != ""){
                 formFields.value[23].value = intLedgerID.value;
             }
+            if(penaltyLedgerID.value != ""){
+                formFields.value[24].value = penaltyLedgerID.value;
+            }
         }, { immediate: true });
 
-        watch([selectedProduct, selectedInterestLedger, selectedCategory, loanCharges], () => {
+        watch([selectedProduct, selectedInterestLedger, selectedPenaltyLedger, selectedCategory, loanCharges], () => {
             if(loanCharges.value){
                 store.dispatch('Loan_Fees/updateState',{feeArray: loanCharges.value})
                 tableKey.value += 1;
             }
-            if (selectedProduct.value && selectedInterestLedger.value && selectedCategory.value) {
+            if (selectedProduct.value && selectedInterestLedger.value && selectedCategory.value && selectedPenaltyLedger.value) {
+                catComponentKey.value += 1;
+                intComponentKey.value += 1;
+                penComponentKey.value += 1;
+                updateFormFields();
+                updateAdditionalFormFields();
+
+            }
+            else if (selectedProduct.value && selectedInterestLedger.value && selectedCategory.value) {
                 catComponentKey.value += 1;
                 intComponentKey.value += 1;
                 updateFormFields();
@@ -227,11 +262,13 @@ export default defineComponent({
                 additionalFields.value[i].value = '';
             }
             await store.dispatch('Loan_Fees/updateState', {feeArray: []});
-            await store.dispatch('Loan_Products/updateState', {selectedProduct: null, loanCharges: [], selectedInterestLedger: null, selectedCategory: null, isEditing:false});
+            await store.dispatch('Loan_Products/updateState', {selectedProduct: null, loanCharges: [], selectedInterestLedger: null, selectedPenaltyLedger: null, selectedCategory: null, isEditing:false});
             mainComponentKey.value += 1;
             intComponentKey.value += 1;
             catComponentKey.value += 1;
+            penComponentKey.value += 1;
             intLedgerID.value = "";
+            penaltyLedgerID.value = "";
             categoryID.value = "";
         }
          
@@ -269,6 +306,8 @@ export default defineComponent({
                 credit_reduction: formFields.value[22].value,
                 interest_posting_account: intLedgerID.value,
                 interest_posting_account_id: intLedgerID.value,
+                penalty_posting_account: penaltyLedgerID.value,
+                penalty_posting_account_id: penaltyLedgerID.value,
                 member_category: categoryID.value,
                 member_category_id: categoryID.value,
                 charges: chargeRows.value,
@@ -335,6 +374,8 @@ export default defineComponent({
                 credit_reduction: formFields.value[22].value,
                 interest_posting_account: intLedgerValue.value,
                 interest_posting_account_id: intLedgerValue.value,
+                penalty_posting_account: penaltyLedgerValue.value,
+                penalty_posting_account_id: penaltyLedgerValue.value,
                 member_category: categoryValue.value,
                 member_category_id: categoryValue.value,
                 company: companyID.value,

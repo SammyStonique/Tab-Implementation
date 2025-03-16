@@ -16,6 +16,7 @@ const state = {
   chargeName: '',
   selectedProduct: null,
   selectedInterestLedger: null,
+  selectedPenaltyLedger: null,
   selectedCategory: null,
   isEditing: false
 };
@@ -31,6 +32,7 @@ const mutations = {
     state.installments = 0;
     state.selectedProduct = null;
     state.selectedInterestLedger = null;
+    state.selectedPenaltyLedger = null;
     state.selectedCategory = null;
     state.loanCharges = [];
     state.isEditing = false;
@@ -54,6 +56,9 @@ const mutations = {
   },
   SET_SELECTED_INTEREST_LEDGER(state, ledger) {
     state.selectedInterestLedger = ledger;
+  },
+  SET_SELECTED_PENALTY_LEDGER(state, ledger) {
+    state.selectedPenaltyLedger = ledger;
   },
   SET_SELECTED_CATEGORY(state, category) {
     state.selectedCategory = category;
@@ -113,10 +118,12 @@ const actions = {
     .then((response)=>{
         state.selectedProduct = response.data;
         const selectedInterestLedger = response.data.interest_posting_account.ledger_code + " - " + response.data.interest_posting_account.ledger_name;
+        const selectedPenaltyLedger = (response.data.member_category != null) ? (response.data.penalty_posting_account.ledger_code + " - " + response.data.penalty_posting_account.ledger_name) : "";
         const selectedCategory = (response.data.member_category != null) ? (response.data.member_category.category_name) : "";
         commit('SET_SELECTED_PRODUCT',response.data);
         commit('SET_SELECTED_CATEGORY',selectedCategory);
         commit('SET_SELECTED_INTEREST_LEDGER', selectedInterestLedger);
+        commit('SET_SELECTED_PENALTY_LEDGER', selectedPenaltyLedger);
         commit('SET_PRODUCT_CHARGES',(response.data.loan_charges != null) ? (response.data.loan_charges) : []);
     })
     .catch((error)=>{

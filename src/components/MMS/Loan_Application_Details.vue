@@ -56,6 +56,19 @@
                                     </div>                      
                                     <DynamicTable :key="table3Key" :columns="securityColumns" :rows="securityRows" :idField="idFieldCharge" :actions="actionSecurities" @action-click="deleteSecurity" :rightsModule="rightsModule" />
                                 </div>
+                                <div v-show="activeTab == 4">
+                                    <div class="text-left p-2">
+                                        <button @click="addNewDocument" class="rounded bg-green-400 cursor-pointer text-sm mr-2 mb-1.5  text-white px-2 py-1.5"><i class="fa fa-check-circle text-xs mr-1.5" aria-hidden="true"></i>Upload Document</button>                
+                                    </div> 
+                                    <MovableModal v-model:visible="depModalVisible" :title="title" :modal_top="modal_top" :modal_left="modal_left" :modal_width="modal_width"
+                                        :loader="modal_loader" @showLoader="showModalLoader" @hideLoader="hideModalLoader"  @closeModal="closeModal">
+                                        <DynamicForm 
+                                            :fields="additionalFields" :flex_basis="additional_flex_basis" :flex_basis_percentage="additional_flex_basis_percentage" 
+                                            :displayButtons="displayButtons" @handleSubmit="uploadDocument" @handleReset="handleModalReset" @file-changed="handleFileChange"
+                                        />
+                                    </MovableModal>                     
+                                    <DynamicTable :key="table4Key" :columns="documentColumns" :rows="documentRows" :idField="idFieldCharge" :actions="actionDocuments" @action-click="documentActionClick" :rightsModule="rightsModule" />
+                                </div>
                             </div>
                         </div>
                     </template>
@@ -66,24 +79,36 @@
 </template>
 
 <script>
+import axios from "axios";
 import { defineComponent, ref, onBeforeMount, onMounted, computed, watch } from 'vue';
+import MovableModal from '@/components/MovableModal.vue'
 import DynamicForm from '@/components/NewDynamicForm.vue';
 import SearchableDropdown from '@/components/SearchableDropdown.vue';
 import DynamicTable from '@/components/DynamicTable.vue';
 import PageStyleComponent from '@/components/PageStyleComponent.vue';
 import { useStore } from "vuex";
 import { useToast } from "vue-toastification";
+import PrintJS from 'print-js';
 
 export default defineComponent({
     name: 'Loan_Application_Details',
     components:{
-         DynamicForm,PageStyleComponent,SearchableDropdown,DynamicTable
+         DynamicForm,PageStyleComponent,SearchableDropdown,DynamicTable,MovableModal
     },
     setup(){
         const store = useStore();
         const toast = useToast();
         const loader = ref('none');
-        const tabs = ref(['Amortization Schedule','Loan Charges','Guarantors','Security']);
+        const modal_loader = ref('none');
+        const title = ref('Document Details');
+        const modal_top = ref('200px');
+        const modal_left = ref('400px');
+        const modal_width = ref('30vw');
+        const upload_file = ref('');
+        const filePath = ref('');
+        const computedFilePath = ref('');
+        const depModalVisible = ref(false);
+        const tabs = ref(['Amortization Schedule','Loan Charges','Guarantors','Security','Documents']);
         const mainComponentKey = ref(0);
         const intComponentKey = ref(0);
         const catComponentKey = ref(0);
@@ -98,6 +123,7 @@ export default defineComponent({
         const table1Key = ref(0);
         const table2Key = ref(0);
         const table3Key = ref(0);
+        const table4Key = ref(0);
         const errors = ref([]);
         const companyID = computed(()=> store.state.userData.company_id);
         const flex_basis = ref('');
@@ -112,6 +138,7 @@ export default defineComponent({
         const loanSchedules = computed(()=> store.state.Loan_Applications.loanSchedules);
         const loanCharges = computed(()=> store.state.Loan_Applications.loanCharges);
         const loanSecurities = computed(()=> store.state.Loan_Applications.loanSecurities);
+        const loanDocuments = computed(()=> store.state.Loan_Applications.loanDocuments);
         const memberArray = computed(() => store.state.Members.memberArr);
         const productArray = computed(() => store.state.Loan_Products.productArr);
         const productMaxAmount = computed(() => store.state.Loan_Products.productMaxAmount);
@@ -181,6 +208,60 @@ export default defineComponent({
         const actionSecurities = ref([
             {name: 'delete', icon: 'fa fa-minus-circle', title: 'Remove Security', rightName: 'Adding Loan Applications'},
         ])
+        const documentColumns = ref([
+            {label: "Document Type", key:"document_type", type: "text", editable: false},
+            {label: "Document Name", key:"document_name", type: "text", editable: false},
+        ]);
+        const documentRows = computed(() => {
+            return store.state.Loan_Documents.documentArray;
+        });
+        const actionDocuments = ref([
+            {name: 'preview', icon: 'fa fa-paperclip', title: 'Preview Document', rightName: 'Adding Loan Applications'},
+            {name: 'delete', icon: 'fa fa-minus-circle', title: 'Remove Document', rightName: 'Adding Loan Applications'},
+        ]);
+        const previewDocument = (formData) =>{
+            showLoader();
+            axios
+            .post("api/v1/preview-loan-document-pdf/", formData, { responseType: 'blob' })
+                .then((response)=>{
+                    if(response.status == 200){
+                        const blob1 = new Blob([response.data]);
+                        // Convert blob to URL
+                        const url = URL.createObjectURL(blob1);
+                        PrintJS({printable: url, type: 'pdf'});
+                    }
+                })
+            .catch((error)=>{
+                console.log(error.message);
+            })
+            .finally(()=>{
+                hideLoader();
+            })
+        };
+        const documentActionClick = async(rowIndex, action, row) =>{
+            if( action == 'preview'){
+                const docID = row['loan_document_id'];
+                let formData = {
+                    loan_document: docID,
+                    company: companyID.value
+                } 
+                previewDocument(formData);
+                
+            }else if(action == 'delete'){
+                const documentID = [row['loan_document_id']];
+                let formData = {
+                        company: companyID.value,
+                        loan_document: documentID
+                    }
+                    const response = await store.dispatch('Loan_Documents/deleteLoanDocument',formData)
+                    if(response && response.status === 200){
+                        store.dispatch('Loan_Documents/removeLoanDocument', rowIndex);
+                        table4Key.value += 1;
+                    }       
+                table4Key.value += 1;
+            }
+            
+        }
 
         const handleSelectedMember = async(option) =>{
             await store.dispatch('Members/handleSelectedMember', option)
@@ -265,12 +346,21 @@ export default defineComponent({
                 {required: false}
             ];
         };
+        const handleFileChange = (fileData) => {
+            filePath.value = fileData.filePath;
+            upload_file.value = fileData.file;
 
+        };
         const additionalFields = ref();
         const updateAdditionalFormFields = () => {
             additionalFields.value = [
+                { type: 'text', name: 'document_name',label: "Name", value: '', required: true },
+                { type: 'dropdown', name: 'document_type',label: "Type", value: '', placeholder: "", required: true, options: [{ text: 'Personal Identification', value: 'Personal Identification' }, { text: 'Collateral Documents', value: 'Collateral Documents' }, { text: 'Payslip', value: 'Payslip' },{ text: 'Credit Score', value: 'Credit Score' }, { text: 'Application Form', value: 'Application Form' }, { text: 'Financial Statement', value: 'Financial Statement' }, { text: 'Other', value: 'Other' }] },
+                { type: 'file', name: 'file-input',label: "Attachment", value: '', filePath: computedFilePath.value, required: false, placeholder: "", accepted_formats: "*/*", method: handleFileChange}
+            
                 ];
         };
+
 
         watch([productID, memberID], () => {
             if (productID.value != "") {
@@ -282,7 +372,7 @@ export default defineComponent({
             }
         }, { immediate: true });
 
-        watch([selectedApplication, selectedProduct, selectedMember, loanCharges, loanGuarantors, loanSchedules, loanSecurities], () => {
+        watch([selectedApplication, selectedProduct, selectedMember, loanCharges, loanGuarantors, loanSchedules, loanSecurities, loanDocuments], () => {
             if(loanCharges.value){
                 store.dispatch('Loan_Products/updateState',{loanCharges: loanCharges.value})
                 table1Key.value += 1;
@@ -294,6 +384,10 @@ export default defineComponent({
             if(loanSecurities.value){
                 store.dispatch('Security_Types/updateState',{securityArray: loanSecurities.value})
                 table3Key.value += 1; 
+            }
+            if(loanDocuments.value){
+                store.dispatch('Loan_Documents/updateState',{documentArray: loanDocuments.value})
+                table4Key.value += 1; 
             }
             if(selectedApplication.value && loanSchedules.value){
                 store.dispatch('Loan_Products/updateState',{installments: loanSchedules.value.length})
@@ -323,7 +417,7 @@ export default defineComponent({
                 }
             }
             await store.dispatch('Loan_Products/updateState', {loanCharges: [], productMaxAmount: 0, installments:0});
-            await store.dispatch('Loan_Applications/updateState', {selectedApplication: null,selectedMember: null,selectedProduct: null, loanCharges: [], loanGuarantors: [], loanSecurities: [], loanSchedules: [], isEditing:false});
+            await store.dispatch('Loan_Applications/updateState', {selectedApplication: null,selectedMember: null,selectedProduct: null, loanCharges: [], loanGuarantors: [], loanSecurities: [], loanSchedules: [], loanDocuments: [], isEditing:false});
             mainComponentKey.value += 1;
             intComponentKey.value += 1;
             catComponentKey.value += 1;
@@ -381,6 +475,67 @@ export default defineComponent({
                 }
             }
 
+        };
+        const uploadDocument = async() =>{
+            showModalLoader();
+            let formData = new FormData();
+            formData.append('document_name', additionalFields.value[0].value);
+            formData.append('document_type', additionalFields.value[1].value);
+            formData.append('document_file', upload_file.value);
+            formData.append('loan_application', selectedApplication.value.loan_application_id);
+            formData.append('loan_application_id', selectedApplication.value.loan_application_id);
+            formData.append('company', companyID.value);
+
+            errors.value = [];
+            for(let i=0; i < additionalFields.value.length; i++){
+                if(additionalFields.value[i].value =='' && additionalFields.value[i].required == true && additionalFields.value[i].type !='search-dropdown'){
+                    errors.value.push('Error');
+                }
+            }
+            if(errors.value.length){
+                toast.error('Fill In Required Fields');
+                hideModalLoader();
+            }else{
+                try {
+                    const response = await store.dispatch('Loan_Documents/createLoanDocument', formData);
+                    if(response && response.status === 201) {
+                        hideModalLoader();
+                        toast.success('Document created successfully!');
+                        handleModalReset();
+                        store.dispatch('Loan_Documents/attachLoanDocument', response.data)
+                    }else {
+                        toast.error('An error occurred while creating the Document.');
+                    }
+                } catch (error) {
+                    console.error(error.message);
+                    toast.error('Failed to create Document: ' + error.message);
+                } finally {
+                    hideModalLoader();
+                }
+            }
+
+        };
+        const addNewDocument = () =>{
+            depModalVisible.value = true;
+            handleModalReset();
+            additional_flex_basis.value = '1/2';
+            additional_flex_basis_percentage.value = '50';
+        };
+        const handleModalReset = () =>{
+            for(let i=0; i < additionalFields.value.length; i++){
+                additionalFields.value[i].value = '';
+            }
+
+        }
+        const showModalLoader = () =>{
+            modal_loader.value = "block";
+        }
+        const hideModalLoader = () =>{
+            modal_loader.value = "none";
+        };
+        const closeModal = async() =>{
+            depModalVisible.value = false;
+            handleModalReset();
         }
         const createLoanApplication = async() =>{
             showLoader();
@@ -453,6 +608,7 @@ export default defineComponent({
                 company: companyID.value,
                 guarantors: guarantorRows.value,
                 securities: securityRows.value,
+                documents: documentRows.value,
                 charges: chargeRows.value,
             }
             errors.value = [];
@@ -541,9 +697,11 @@ export default defineComponent({
             additional_flex_basis_percentage, mainComponentKey,handleReset, loader, showLoader, hideLoader,
             displayButtons,saveLoanApplication,chargeArr,chargesDropdownWidth,chargesSearchPlaceholder,selectTab,handleSelectedCharge,
             deleteCharge,activeTab,rightsModule,idFieldCharge,chargeRows,chargeColumns,actionCharges,chargeComponentKey,
-            scheduleColumns,scheduleRows,generateSchedules,showActions,showTotals,tableKey,table1Key,table2Key,table2Key,
+            scheduleColumns,scheduleRows,generateSchedules,showActions,showTotals,tableKey,table1Key,table2Key,table3Key,table4Key,
             memberArr,grntComponentKey,grntSearchPlaceholder,actionGuarantors,handleSelectedGuarantor,deleteGuarantor,guarantorColumns,guarantorRows,
             securityArr,secComponentKey,secSearchPlaceholder,actionSecurities,handleSelectedSecurity,deleteSecurity,securityColumns,securityRows,
+            documentColumns,documentRows,actionDocuments,depModalVisible,title,showModalLoader,hideModalLoader,handleModalReset,addNewDocument,
+            handleFileChange,closeModal,modal_left,modal_loader,modal_top,modal_width,uploadDocument,documentActionClick
         }
     }
 })

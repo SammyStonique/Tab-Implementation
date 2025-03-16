@@ -118,9 +118,10 @@ export default{
             {label: "Applied", key: "formatted_applied_amount"},
             {label: "Approved", key: "formatted_approved_amount"},
             {label: "Disbursed", key: "disbursed"},
-            {label: "Status", key:"approval_status"},
+            {label: "Status", key:"approval_status", textColor: "textColor"},
             {label: "Loan Remarks", key:"loan_remarks"},
             {label: "Appr. By", key:"approved_by"},
+            {label: "Exempt", key:"exempt_penalty"},
         ])
         const actions = ref([
             {name: 'edit', icon: 'fa fa-edit', title: 'Edit Application', rightName: 'Editing Loan Applications'},
@@ -138,9 +139,6 @@ export default{
         const approvedAmount = ref(0);
         const loanApprvAmnt = ref(0);
         const computedApprovedAmount = computed(() => {return approvedAmount});
-        const dropdownOptions = ref([
-            
-        ]);
         
         const name_search = ref('');
         const loan_number_search = ref("");
@@ -364,7 +362,7 @@ export default{
             // scrollToTop();
         };
         const calculateDisbursalAmount = async() =>{
-            console.log("HEEEEERE")
+ 
             let formData = {
                 company: companyID.value,
                 loan_application: applicationID.value
@@ -385,13 +383,13 @@ export default{
             await store.dispatch('Loan_Products/updateState', {loanCharges: [], productMaxAmount: 0, installments:0});
             await store.dispatch('Loan_Guarantors/updateState', {memberArray: []});
             store.commit('Loan_Applications/initializeStore');
-            await store.dispatch('Loan_Applications/updateState', {selectedApplication: null,selectedMember: null,selectedProduct: null,loanCharges: [],loanGuarantors: [], loanSecurities: [],loanSchedules: [],isEditing: false});
+            await store.dispatch('Loan_Applications/updateState', {selectedApplication: null,selectedMember: null,selectedProduct: null,loanCharges: [],loanGuarantors: [], loanSecurities: [],loanSchedules: [], loanDocuments: [],isEditing: false});
             store.commit('pageTab/ADD_PAGE', {'MMS':'Loan_Application_Details'});
             store.state.pageTab.mmsActiveTab = 'Loan_Application_Details';          
         }
         const handleActionClick = async(rowIndex, action, row) =>{
             if( action == 'edit'){
-                await store.dispatch('Loan_Applications/updateState', {selectedApplication: null,selectedMember: null,selectedProduct: null,loanCharges: [],loanGuarantors: [], loanSecurities: [],loanSchedules: [],isEditing: false});
+                await store.dispatch('Loan_Applications/updateState', {selectedApplication: null,selectedMember: null,selectedProduct: null,loanCharges: [],loanGuarantors: [], loanSecurities: [],loanSchedules: [], loanDocuments: [],isEditing: false});
                 const applicationID = row[idField];
                 const applicationStatus = row['approval_status']
                 if(applicationStatus == 'Pending'){
@@ -467,9 +465,113 @@ export default{
                 
             }
         };
-
+        const dropdownOptions = ref([
+            {label: 'Exempt Penalty', action: 'exempt-penalty'},
+            {label: 'Unexempt Penalty', action: 'unexempt-penalty'},
+        ]);
         const handleDynamicOption = (option) =>{
-            
+            if( option == 'exempt-penalty'){
+                let formData = {
+                    loan_application: selectedIds.value,
+                    company: companyID.value
+                }
+                Swal.fire({
+                    title: "Are you sure?",
+                    text: `Do you wish to Exempt Penalty?`,
+                    type: 'warning',
+                    showCloseButton: true,
+                    showCancelButton: true,
+                    confirmButtonText: 'Yes, Exempt!',
+                    cancelButtonText: 'Cancel!',
+                    customClass: {
+                        confirmButton: 'swal2-confirm-custom',
+                        cancelButton: 'swal2-cancel-custom',
+                    },
+                    showLoaderOnConfirm: true,
+                    }).then((result) => {
+                    if (result.value) {
+                        axios.post(`api/v1/exempt-loan-penalty/`,formData)
+                        .then((response)=>{
+                        if(response.data.msg == 'Success'){
+                            Swal.fire("Penalty Exempted Succesfully!", {
+                                icon: "success",
+                            });
+                            searchApplications(); 
+                        }else if(response.data.msg == 'Failed'){
+                            Swal.fire("Penalty Already Exempted!", {
+                                icon: "warning",
+                            });
+                        }
+                        else{
+                            Swal.fire({
+                                title: "Error Exempting Penalty",
+                                icon: "warning",
+                            });
+                        }                   
+                        })
+                        .catch((error)=>{
+                            console.log(error.message);
+                            Swal.fire({
+                                title: error.message,
+                                icon: "warning",
+                            });
+                        })
+                    }else{
+                        Swal.fire(`Penalty(s) has not been exempted!`);
+                    }
+                })
+                           
+            }else if( option == 'unexempt-penalty'){
+                let formData = {
+                    loan_application: selectedIds.value,
+                    company: companyID.value
+                }
+                Swal.fire({
+                    title: "Are you sure?",
+                    text: `Do you wish to Unexempt Penalty?`,
+                    type: 'warning',
+                    showCloseButton: true,
+                    showCancelButton: true,
+                    confirmButtonText: 'Yes, Unexempt!',
+                    cancelButtonText: 'Cancel!',
+                    customClass: {
+                        confirmButton: 'swal2-confirm-custom',
+                        cancelButton: 'swal2-cancel-custom',
+                    },
+                    showLoaderOnConfirm: true,
+                    }).then((result) => {
+                    if (result.value) {
+                        axios.post(`api/v1/unexempt-loan-penalty/`,formData)
+                        .then((response)=>{
+                        if(response.data.msg == 'Success'){
+                            Swal.fire("Penalty Unexempted Succesfully!", {
+                                icon: "success",
+                            }); 
+                            searchApplications();
+                        }else if(response.data.msg == 'Failed'){
+                            Swal.fire("Penalty Not Exempted!", {
+                                icon: "warning",
+                            });
+                        }
+                        else{
+                            Swal.fire({
+                                title: "Error Unexempting Penalty",
+                                icon: "warning",
+                            });
+                        }                   
+                        })
+                        .catch((error)=>{
+                            console.log(error.message);
+                            Swal.fire({
+                                title: error.message,
+                                icon: "warning",
+                            });
+                        })
+                    }else{
+                        Swal.fire(`Penalty(s) has not been Unexempted!`);
+                    }
+                })                 
+            }
         };
         
         const printApplicationList = () =>{

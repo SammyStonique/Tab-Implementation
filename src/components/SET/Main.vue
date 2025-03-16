@@ -41,6 +41,7 @@ import System_Users from '@/components/SET/System_Users.vue';
 import Users from '@/components/SET/Users.vue';
 import User_Details from '@/components/SET/User_Details.vue';
 import User_Rights from '@/components/SET/User_Rights.vue';
+import Import_Permissions from '@/components/SET/Import_Permissions.vue';
 import SMS_Integrations from '@/components/SET/SMS_Integrations.vue';
 import Email_Integrations from '@/components/SET/Email_Integrations.vue';
 import Mpesa_Authentication from '@/components/SET/Mpesa_Authentication.vue';
@@ -62,7 +63,7 @@ export default{
         NavBar,
         NavBarSET,
         PagesTab,
-        Dashboard,Companies,Company_Details,Default_Settings,Company_Info,Departments,Branches,Users,System_Users,
+        Dashboard,Companies,Company_Details,Default_Settings,Company_Info,Departments,Branches,Users,System_Users,Import_Permissions,
         User_Details,User_Rights,SMS_Integrations,Email_Integrations,Mpesa_Authentication,Mpesa_Endpoints,Mpesa_Setup_Details,Mpesa_Transactions,
         Import_Departments,Banks,SMS_Templates,Design_SMS_Template,Email_Templates,Design_Email_Template,Sent_SMS,Sent_Emails,
     },

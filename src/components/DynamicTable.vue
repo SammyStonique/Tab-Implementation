@@ -41,7 +41,7 @@
               <div v-else-if="column.editable === true">
                 <input :type="column.type" @change="handleInputChange($event, row)" v-model="row[column.key]" /> 
               </div>
-              <div v-else :class="`text-${column.textColor}-500`">
+              <div v-else :class="`bg-${row[column.textColor]}-500`">
                 {{ getNestedValue(row, column.key) }}
               </div>
             </template>
