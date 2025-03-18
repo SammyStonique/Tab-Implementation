@@ -140,7 +140,7 @@ export default defineComponent({
         const modal_width = ref('30vw');
         const companyID = computed(()=> store.state.userData.company_id);
         const userID = computed(()=> store.state.userData.user_id);
-        const tabs = ref(['Loan Details','Armotization Schedule','Loan Ledger','Loan Repayment','Loan Guarantors','Loan Securities','Loan Documents']);
+        const tabs = ref(['Loan Details','Armotization Schedule','Loan Statement','Loan Repayment','Loan Guarantors','Loan Securities','Loan Documents']);
         const activeTab = ref(0);
         const mainComponentKey = ref(0);
         const tableKey = ref(0);

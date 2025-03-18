@@ -6,24 +6,14 @@
                     <button class="w-full text-left font-semibold" @click="showPMSSettings">PMS Default Settings</button>
                     <div class="w-full mt-4" v-if="pms_settings_options">
                         <div class="flex mb-1.5">
-                            <div class="basis-1/3 flex mr-3">
+                            <div class="basis-1/4 flex mr-3">
                                 <label for="">Current:<em></em></label>
                                 <p class="ml-4 font-bold">{{ rentalIncome }}</p>
                                 <button type="button" class="ml-4 text-red-600" @click="removeDefaultSetting('PMS','Rental Income Posting A/c',rentalIncome)" v-if="rentalIncome"><i class="fa fa-times" aria-hidden="true"></i></button>
                             </div>
-                            <div class="basis-1/3 flex mr-3">
-                                <label for="">Current:<em></em></label>
-                                <p class="ml-4 font-bold">{{ tenantCodePrefix }}</p>
-                                <button type="button" class="ml-4 text-red-600" @click="removeDefaultSetting('PMS','Tenant Code Prefix',tenantCodePrefix)" v-if="tenantCodePrefix"><i class="fa fa-times" aria-hidden="true"></i></button>
-                            </div>
-                            <div class="basis-1/3 flex mr-3">
-                                <label for="">Current:<em></em></label>
-                                <p class="ml-4 font-bold">{{ tenantCodeCounter }}</p>
-                                <button type="button" class="ml-4 text-red-600" @click="removeDefaultSetting('PMS','Tenant Code Zero Padding',tenantCodeCounter)" v-if="tenantCodeCounter"><i class="fa fa-times" aria-hidden="true"></i></button>
-                            </div>
                         </div>
                         <div class="flex mb-3">
-                            <div class="basis-1/3 mr-8 relative">
+                            <div class="basis-1/4 mr-8 relative">
                                 <label for="">Rental Income A/c:<em>*</em></label><br />
                                 <SearchableDropdown
                                     :options="incomeLedgerArr"
@@ -35,26 +25,26 @@
                                 />
                                 <button type="button" class="absolute ml-4 rounded px-2 bg-green-500 text-white" @click="saveDefaultSetting('PMS','Rental Income Posting A/c',ledgerID,ledgerName)"><i class="fa fa-check"></i></button>
                             </div>
-                            <div class="basis-1/3 mr-3 relative">
+                            <div class="basis-1/6 mr-3 relative">
                                 <label for="">Tenant Code Prefix:<em>*</em></label><br />
                                 <input type="text" name="" id="" class="bg-slate-50 rounded pl-3 border border-gray-400 text-base w-3/4" v-model="tenantCodePrefix">
                                 <button type="button" class="absolute ml-4 rounded px-2 bg-green-500 text-white" @click="saveDefaultSetting('PMS','Tenant Code Prefix',tenantCodePrefix,tenantCodePrefix)"><i class="fa fa-check"></i></button>
                             </div>
-                            <div class="basis-1/3 mr-3 relative">
+                            <div class="basis-1/6 mr-3 relative">
                                 <label for="">Tenant Code Zero Padding:<em>*</em></label><br />
                                 <input type="number" name="" id="" class="bg-slate-50 rounded pl-3 border border-gray-400 text-base w-3/4" v-model="tenantCodeCounter">
                                 <button type="button" class="absolute ml-4 rounded px-2 bg-green-500 text-white" @click="saveDefaultSetting('PMS','Tenant Code Zero Padding',tenantCodeCounter,tenantCodeCounter)"><i class="fa fa-check"></i></button>
                             </div>
                         </div>
                         <div class="flex mb-1.5">
-                            <div class="basis-1/2 flex mr-3">
+                            <div class="basis-1/4 flex mr-3">
                                 <label for="">Current:<em></em></label>
                                 <p class="ml-4 font-bold">{{ rentalSecurityDeposit }}</p>
                                 <button type="button" class="ml-4 text-red-600" @click="removeDefaultSetting('PMS','Rental Security Deposits Posting A/c',rentalSecurityDeposit)" v-if="rentalSecurityDeposit"><i class="fa fa-times" aria-hidden="true"></i></button>
                             </div>
                         </div>
                         <div class="flex mb-3">
-                            <div class="basis-1/4 mr-3 relative">
+                            <div class="basis-1/4 mr-8 relative">
                                 <label for="">Security Deposits Payable A/c:<em>*</em></label><br />
                                 <SearchableDropdown
                                     :options="liabilityLedgerArr"
@@ -65,6 +55,19 @@
                                     @fetchData="fetchLiabilityLedgers"   
                                 />
                                 <button type="button" class="absolute ml-4 rounded px-2 bg-green-500 text-white" @click="saveDefaultSetting('PMS','Rental Security Deposits Posting A/c',ledgerID,ledgerName)"><i class="fa fa-check"></i></button>
+                            </div>
+                            <div class="basis-1/6 relative mr-3">
+                                <label for="">Automatic Tenant Invoicing:<em>*</em></label><br />
+                                <select  v-model="pmsAutoInvoiceOption" name="" class="bg-slate-50 rounded border border-gray-400 text-sm pl-2 pt-2 w-3/4">
+                                    <option value="Yes">Yes</option>
+                                    <option value="No">No</option>
+                                </select>
+                                <button type="button" class="absolute ml-2 rounded px-2 bg-green-500 text-white" @click="saveDefaultSetting('PMS','Automatic Tenant Invoicing',pmsAutoInvoiceOption,pmsAutoInvoiceOption)"><i class="fa fa-check"></i></button>
+                            </div>
+                            <div class="basis-1/6 relative mr-3">
+                                <label for="">Tenant Invoicing Day:<em>*</em></label><br />
+                                <input type="text" name="" id="" class="bg-slate-50 rounded pl-3 border border-gray-400 text-base w-3/4" v-model="tenantInvoiceDay">
+                                <button type="button" class="absolute ml-2 rounded px-2 bg-green-500 text-white" @click="saveDefaultSetting('PMS','Tenant Invoicing Day',tenantInvoiceDay,tenantInvoiceDay)"><i class="fa fa-check"></i></button>
                             </div>
                         </div>
                         <div class="flex mb-1.5">
@@ -519,6 +522,8 @@ export default defineComponent({
         const rentalLeaseIncome = ref("");
         const tenantCodePrefix = ref("");
         const tenantCodeCounter = ref(0);
+        const pmsAutoInvoiceOption = ref("");
+        const tenantInvoiceDay = ref(0);
 
         const patientsOption = ref("");
         const duplicatesOption = ref("");
@@ -771,6 +776,10 @@ export default defineComponent({
                         tenantCodePrefix.value = response.data[i].setting_value_name;
                     }else if(response.data[i].setting_name === 'Tenant Code Zero Padding'){
                         tenantCodeCounter.value = response.data[i].setting_value_name;
+                    }else if(response.data[i].setting_name === 'Automatic Tenant Invoicing'){
+                        pmsAutoInvoiceOption.value = response.data[i].setting_value_name;
+                    }else if(response.data[i].setting_name === 'Tenant Invoicing Day'){
+                        tenantInvoiceDay.value = response.data[i].setting_value_name;
                     }
 
 
@@ -899,7 +908,7 @@ export default defineComponent({
             settings_settings_options, showHMSSettings, showPMSSettings, showAccountsSettings, showInventorySettings, showHRSettings, showSettingsSettings,showMembershipSettings,
             dropdownWidth,incomePlaceholder, ledgerArr, incomeLedgerArr, expenseLedgerArr, liabilityLedgerArr, cashbookLedgerArr, fetchIncomeLedgers, fetchExpenseLedgers,
             fetchCashbookLedgers, fetchLiabilityLedgers, rentalIncome, rentalSecurityDeposit, rentalLeaseIncome, rentalPenaltyIncome,fetchLedgers,
-            ledgerID,ledgerName, handleSelectedLedger, clearSelectedLedger, saveDefaultSetting, removeDefaultSetting, tenantCodePrefix, tenantCodeCounter,
+            ledgerID,ledgerName, handleSelectedLedger, clearSelectedLedger, saveDefaultSetting, removeDefaultSetting, tenantCodePrefix, tenantCodeCounter,pmsAutoInvoiceOption,tenantInvoiceDay,
             patientsOption,duplicatesOption, debtorsOption, vendorsOption, tenantsOption, fetchRetailOutlets,handleSelectedOutlet, clearSelectedOutlet, fetchOutletCounters,outletID,outletName,counterID,counterName,
             channelID,channelName,handleSelectedCounter, clearSelectedCounter, fetchCounterChannels,handleSelectedChannel, clearSelectedChannel,outletCounterArr,retailOutletArr,counterChannelArr,
             retailOutlet, outletCounter, counterChannel, salesIncome, invTakeOn, stockControl, stockType,directSaleOrder,defaultTimeout,

@@ -34,7 +34,7 @@ export default{
                 device_id: deviceID.value,
             }
             store.dispatch("userData/logout", formData);
-            store.dispatch('userData/reloadPage');
+            
         }
 
         return idleStatus;

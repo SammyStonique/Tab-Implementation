@@ -87,12 +87,12 @@ export default defineComponent({
     };
 
     const logout = async () => {
-            let formData = {
-                user_id: userID.value,
-                device_id: deviceID.value,
-            }
-            await store.dispatch("userData/logout", formData);
-        };
+        let formData = {
+            user_id: userID.value,
+            device_id: deviceID.value,
+        }
+        await store.dispatch("userData/logout", formData);
+    };
 
     const minimize = () => {
       emit('minimize');
