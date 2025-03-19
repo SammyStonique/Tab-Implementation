@@ -31,12 +31,18 @@
     <div v-show="hmsOpen && selectedModule === 'Settings'">
         <SET />
     </div>
+    <div v-show="hmsOpen && selectedModule === 'My Account'">
+        <ACC />
+    </div>
 
     <div v-if="mainOpen" class="text-black h-screen bg-[url('@/assets/image2.jpg')] bg-cover bg-center px-4 sm:px-12 w-full">
         <div class="border-b border-gray-300 py-2 w-full flex pl-6 sm:pl-8">
-            <p class="text-left basis-1/3 sm:basis-3/6 text-sm sm:text-base">Welcome, <strong class="uppercase">{{ username }}</strong></p>
-            <p class="text-left basis-1/3 sm:basis-2/6 uppercase font-semibold text-sm sm:text-base"><strong>{{ company_name }}</strong></p>
-            <div class="basis-1/2 sm:basis-1/6 flex items-center justify-end space-x-4">
+            <p class="text-left basis-1/4 sm:basis-3/6 text-sm sm:text-base">Welcome, <strong class="uppercase">{{ username }}</strong></p>
+            <p class="text-left basis-1/4 sm:basis-2/6 uppercase font-semibold text-sm sm:text-base"><strong>{{ company_name }}</strong></p>
+            <div class="basis-1/2 sm:basis-1/2 flex items-center justify-end space-x-4">
+                <button type="button" @click="openModule('My Account')" class="text-sm sm:text-base">
+                    My Account
+                </button>
                 <button type="button" @click="showDropdown" class="text-sm sm:text-base">
                     Switch Company <i class="fa fa-caret-down pl-2" aria-hidden="true"></i>
                 </button>
@@ -84,6 +90,7 @@ import FA from '@/components/FA/Main.vue';
 import INV from '@/components/INV/Main.vue';
 import HR from '@/components/HR/Main.vue';
 import SET from '@/components/SET/Main.vue';
+import ACC from '@/components/ACC/Main.vue';
 import HHS from '@/components/HHS/Main.vue';
 import MMS from '@/components/MMS/Main.vue';
 import EPS from '@/components/EPS/Main.vue';
@@ -91,7 +98,7 @@ import Loader from '@/components/Loader.vue';
 
 export default {
     components: {
-        ModulesTab, Loader, HMS, FA, INV, PMS, HR, HHS, MMS, SET, EPS
+        ModulesTab, Loader, HMS, FA, INV, PMS, HR, HHS, MMS, SET, EPS, ACC
     },
     setup() {
         const store = useStore();

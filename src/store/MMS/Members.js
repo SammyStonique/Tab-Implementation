@@ -9,6 +9,7 @@ const state = {
     selectedMemberID: null,
     memberName: '',
     memberNumber: '',
+    memberCategoryID: "",
     name_search: '',
     member_number_search: '',
     phone_number_search: '',
@@ -46,6 +47,7 @@ const mutations = {
     state.isEditing = false;
     state.memberDetails = [];
     state.receiptItems = [];
+    state.memberCategoryID = "";
   },
   SET_SELECTED_MEMBER(state, member) {
     state.selectedMember = member;
@@ -214,7 +216,7 @@ const actions = {
     if (selectedMember) {
         state.memberID = selectedMember.member_id;
         state.memberName = selectedMember.member_name;
-        
+        state.memberCategoryID = (selectedMember.member_category != null) ? (selectedMember.member_category.member_category_id) : "";
         state.memberArray = [...state.memberArray, selectedMember];
     }
 

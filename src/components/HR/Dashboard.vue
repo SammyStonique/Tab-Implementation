@@ -57,7 +57,7 @@
             <div class="w-1/2 rounded-lg h-[300px] py-4 px-2 bg-white flex">
               <div class="basis-1/4"></div>
               <div class="basis-1/2 h-[250px]">
-                <h1 class="font-bold mb-2">Credit Sales vs Purchases</h1>
+                <h1 class="font-bold mb-2">Employee Turn-Over</h1>
                 <Pie id="my-chart-id" :data="chartData" :options="chartOptions" />
               </div>
               <div class="basis-1/4"></div>
@@ -65,35 +65,11 @@
           </div>
   
           <div class="w-full rounded-lg py-3 px-8 bg-white appointments-table">
-              <h1 class="font-bold mb-3">Direct Sales vs Purchases</h1>
+              <h1 class="font-bold mb-3">Earnings vs Deductions</h1>
               <BarChart :data="barChartData" :options="barChartOptions" />
           </div>
         </div>
-        <div class="w-1/4">
-          <div class="rounded-lg bg-blue-900 h-64 p-2 mb-3 text-white">
-            <h1 class="font-bold mb-2">Stock Adjustments</h1>
-            <table class="table-auto border-collapse w-full">
-              <thead class="font-thin text-left text-sm bg-blue-900">
-                <th></th>
-                <th>Name</th>
-                <th>Status</th>
-            </thead>
-            <tbody class="text-sm py-2">
-              <tr class="py-8" v-for="doc,index in popularDoctors" :key="index">
-                <td class="py-2">{{ index + 1 }}</td>
-                <td class="py-2">{{ doc}}</td>
-                <td class="py-2">
-                  <button class="rounded-full w-full bg-white p-1.5 text-green-800">Available</button>
-                </td>
-              </tr>
-              
-            </tbody>
-            </table>
-          </div>
-          <div class="rounded-lg bg-white h-56 p-2 mb-3">
-            <h1 class="font-bold">Stock Transfers</h1>
-          </div>
-        </div>
+
       </div>
     </div>
   </template>

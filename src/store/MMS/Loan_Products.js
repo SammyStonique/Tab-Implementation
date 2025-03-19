@@ -118,7 +118,7 @@ const actions = {
     .then((response)=>{
         state.selectedProduct = response.data;
         const selectedInterestLedger = response.data.interest_posting_account.ledger_code + " - " + response.data.interest_posting_account.ledger_name;
-        const selectedPenaltyLedger = (response.data.member_category != null) ? (response.data.penalty_posting_account.ledger_code + " - " + response.data.penalty_posting_account.ledger_name) : "";
+        const selectedPenaltyLedger = (response.data.penalty_posting_account != null) ? (response.data.penalty_posting_account.ledger_code + " - " + response.data.penalty_posting_account.ledger_name) : "";
         const selectedCategory = (response.data.member_category != null) ? (response.data.member_category.category_name) : "";
         commit('SET_SELECTED_PRODUCT',response.data);
         commit('SET_SELECTED_CATEGORY',selectedCategory);

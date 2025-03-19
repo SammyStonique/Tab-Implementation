@@ -151,6 +151,7 @@ export default defineComponent({
         const grntSearchPlaceholder = ref('Select Guarantor...');
         const secSearchPlaceholder = ref('Select Security...');
         const memberID = ref('');
+        const memCategoryID = ref("");
         const installments = computed(() => store.state.Loan_Products.installments);
         const computedInstlmnts = computed(() => installments);
         const productID = ref('');
@@ -262,14 +263,25 @@ export default defineComponent({
             }
             
         }
+        const fetchLoanProducts = async() =>{
+            if(memCategoryID.value != ""){
+                await store.dispatch('Loan_Products/fetchLoanProducts', {company:companyID.value, member_category: memCategoryID.value})
+            }else{
+                await store.dispatch('Loan_Products/fetchLoanProducts', {company:companyID.value})
+            }
+            
+        };
 
         const handleSelectedMember = async(option) =>{
             await store.dispatch('Members/handleSelectedMember', option)
             memberID.value = store.state.Members.memberID;
+            memCategoryID.value = store.state.Members.memberCategoryID;
             if(selectedApplication.value){
                 selectedApplication.value.member.member_id = memberID.value;
                 memberValue.value = memberID.value
             }
+            fetchLoanProducts();
+
         };
         const clearSelectedMember = async() =>{
             await store.dispatch('Members/updateState', {memberID: ''});
@@ -279,11 +291,6 @@ export default defineComponent({
             await store.dispatch('Loan_Products/handleSelectedProduct', option)
             productID.value = store.state.Loan_Products.productID;
             
-            let formData = {
-                company: companyID.value,
-                loan_product: productID.value
-            }
-            await store.dispatch('Loan_Products/fetchLoanProductCharges', formData);
             if(selectedApplication.value){
                 selectedApplication.value.loan_product.loan_product_id = productID.value;
                 productValue.value = productID.value
@@ -292,6 +299,7 @@ export default defineComponent({
         const clearSelectedProduct = async() =>{
             await store.dispatch('Loan_Products/updateState', {productID: ''});
             productID.value = store.state.Loan_Products.productID;
+            
         };
         const fetchCharges = async() =>{
             await store.dispatch('Loan_Products/fetchLoansCharges', {company:companyID.value})
@@ -335,7 +343,7 @@ export default defineComponent({
                     type:'search-dropdown', label:"Loan Product", value: productValue.value, componentKey: catComponentKey,
                     selectOptions: productArray, optionSelected: handleSelectedProduct, required: true,
                     searchPlaceholder: 'Select Loan Product...', dropdownWidth: '450px', updateValue: selectedProduct.value,
-                    fetchData: store.dispatch('Loan_Products/fetchLoanProducts', {company:companyID.value}), clearSearch: clearSelectedProduct
+                    clearSearch: clearSelectedProduct
                 },
                 { type: 'text', name: 'applied_amount',label: "Applied Amount", value: selectedApplication.value?.applied_amount || '0', required: true , method: checkMemberEligiility},
                 { type: 'date', name: 'application_date',label: "Application Date", value: selectedApplication.value?.application_date || '', required: true, placeholder: '' },

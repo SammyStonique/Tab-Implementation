@@ -10,6 +10,7 @@ const state = {
     hhsArray: new Set(["Dashboard"]),
     epsArray: new Set(["Dashboard"]),
     setArray: new Set(["Dashboard"]),
+    accArray: new Set(["Dashboard"]),
     hmsActiveTab: 'Dashboard',
     pmsActiveTab: 'Dashboard',
     hrActiveTab: 'Dashboard',
@@ -19,6 +20,7 @@ const state = {
     hhsActiveTab: 'Dashboard',
     epsActiveTab: 'Dashboard',
     setActiveTab: 'Dashboard',
+    accActiveTab: 'Dashboard',
   };
   
   const mutations = {
@@ -51,6 +53,9 @@ const state = {
         }else if(key == 'SET'){
           state.setArray.add(value);
           state.setActiveTab = value;
+        }else if(key == 'ACC'){
+          state.accArray.add(value);
+          state.accActiveTab = value;
         }
       } 
     },
@@ -106,6 +111,11 @@ const state = {
           let myArray = Array.from(state.setArray);
           state.setActiveTab = myArray[myArray.length - 1];
         }
+        else if(key == 'ACC'){
+          state.accArray.delete(value);
+          let myArray = Array.from(state.setArray);
+          state.accActiveTab = myArray[myArray.length - 1];
+        }
       } 
     },
     CLEAR_PAGE_TAB(state, module){
@@ -136,6 +146,9 @@ const state = {
       }else if(module == 'Settings'){
         state.setArray = new Set(["Dashboard"]);
         state.setActiveTab = "Dashboard"; 
+      }else if(module == 'My Account'){
+        state.accArray = new Set(["Dashboard"]);
+        state.accActiveTab = "Dashboard"; 
       }
     }
 

@@ -113,7 +113,11 @@ export default defineComponent({
         };
         const clearSelectedCategory = async() =>{
             await store.dispatch('Member_Categories/updateState', {categoryID: ''});
-            categoryID.value = store.state.Member_Categories.categoryID;    
+            categoryID.value = store.state.Member_Categories.categoryID;   
+            if(selectedMember.value && selectedMember.value.member_category != ""){
+                selectedMember.value.member_category.member_category_id = categoryID.value;
+                categoryValue.value = categoryID.value
+            } 
         };
         const fetchMemberSponsors = async() =>{
             await store.dispatch('Member_Sponsors/fetchMemberSponsors', {company:companyID.value});
@@ -125,6 +129,10 @@ export default defineComponent({
         const clearSelectedSponsor = async() =>{
             await store.dispatch('Member_Sponsors/updateState', {sponsorID: ''});
             sponsorID.value = store.state.Member_Sponsors.sponsorID;
+            if(selectedMember.value && selectedMember.value.member_sponsor != ""){
+                selectedMember.value.member_sponsor.member_sponsor_id = sponsorID.value;
+                sponsorValue.value = sponsorID.value
+            } 
         };
         const handleSelectedCurrency = async(option) =>{
             await store.dispatch('Currencies/handleSelectedCurrency', option)

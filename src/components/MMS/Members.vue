@@ -81,6 +81,7 @@ export default{
         const loader = ref('');
         const displayButtons = ref(true);
         const unitComponentKey = ref(0);
+        const catSearchComponentKey = ref(0);
         const trans_modal_loader = ref('none');
         const member_status = ref('');
         const exit_date = ref('');
@@ -110,6 +111,8 @@ export default{
         const flex_basis = ref('');
         const flex_basis_percentage = ref('');
         const showModal = ref(false);
+        const categoryID = ref("");
+        const category_array = computed(()=> store.state.Member_Categories.categoryArr);
         const tableColumns = ref([
             {type: "checkbox"},
             {label: "Member No", key:"member_number"},
@@ -132,6 +135,14 @@ export default{
         const dropdownOptions = ref([
             
         ]);
+        const handleSelectedSearchCategory = async(option) =>{
+            await store.dispatch('Member_Categories/handleSelectedCategory', option)
+            categoryID.value = store.state.Member_Categories.categoryID;
+        };
+        const clearSelectedSearchCategory = async() =>{
+            await store.dispatch('Member_Categories/updateState', {categoryID: ''});
+            categoryID.value = store.state.Member_Categories.categoryID;
+        };
         
         const name_search = ref('');
         const member_number_search = ref("");
@@ -141,15 +152,21 @@ export default{
  
         const searchFilters = ref([
             {type:'text', placeholder:"Name...", value: name_search, width:48,},
-            {type:'text', placeholder:"Member No...", value: member_number_search, width:48,},
-            {type:'text', placeholder:"Phone No...", value: phone_number_search, width:48,},
+            {type:'text', placeholder:"Member No...", value: member_number_search, width:32,},
+            {type:'text', placeholder:"Phone No...", value: phone_number_search, width:36,},
             {
-                type:'dropdown', placeholder:"Gender..", value: gender_search, width:40,
+                type:'dropdown', placeholder:"Gender..", value: gender_search, width:24,
                 options: [{text:'Male',value:'Male'},{text:'Female',value:'Female'},{text:'Others',value:'Others'}]
             },
             {
-                type:'dropdown', placeholder:"Status..", value: active_status_search, width:40,
+                type:'dropdown', placeholder:"Status..", value: active_status_search, width:24,
                 options: [{text:'Active',value:'Active'},{text:'Inactive',value:'Inactive'}]
+            },
+            {
+                type:'search-dropdown', value: category_array, width:48, componentKey: catSearchComponentKey,
+                selectOptions: category_array, optionSelected: handleSelectedSearchCategory,
+                searchPlaceholder: 'Member Category...', dropdownWidth: '200px',
+                fetchData: store.dispatch('Member_Categories/fetchMemberCategories', {company:companyID.value}), clearSearch: clearSelectedSearchCategory
             },
         ]);
         const handleSelectionChange = (ids) => {
@@ -289,6 +306,7 @@ export default{
                 active_status: active_status_search.value,
                 gender: gender_search.value,
                 phone_number: phone_number_search.value,
+                member_category: categoryID.value,
                 company_id: companyID.value,
                 page_size: selectedValue.value
             } 
@@ -320,6 +338,8 @@ export default{
             searchMembers(selectedValue.value);
         };
         const resetFilters = () =>{
+            catSearchComponentKey.value += 1;
+            categoryID.value = "";
             selectedValue.value = 50;
             name_search.value = "";
             gender_search.value = "";

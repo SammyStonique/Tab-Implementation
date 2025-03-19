@@ -9,7 +9,7 @@
                 </button>
             </div>
             <div class="web-links py-0.5 px-2.5 w-32 h-full hover:bg-slate-500 hover:rounded">
-                <button class="flex w-full" @click="openPage({'INV':'Dashboard'})">
+                <button class="flex w-full" @click="openPage({'SET':'Dashboard'})">
                     <i class="fa fa-tachometer pt-2 mr-2" aria-hidden="true"></i>
                     <p class="pt-1.5">Dashboard</p>
                 </button>

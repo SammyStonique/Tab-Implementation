@@ -114,6 +114,9 @@
         }
         
       };
+      onBeforeMount(()=>{ 
+        store.dispatch('userData/reloadPage');
+      });
   
       return {
         email,password,errors,login,loader,showLoader,hideLoader

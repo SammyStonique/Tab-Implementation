@@ -107,14 +107,15 @@ export default defineComponent({
         const handleSelectedCategory = async(option) =>{
             await store.dispatch('Member_Categories/handleSelectedCategory', option)
             categoryID.value = store.state.Member_Categories.categoryID;
-            if(selectedProduct.value){
-                selectedProduct.value.member_category.member_category_id = categoryID.value;
-                categoryValue.value = categoryID.value
-            }
+            
         };
         const clearSelectedCategory = async() =>{
             await store.dispatch('Member_Categories/updateState', {categoryID: ''});
             categoryID.value = store.state.Member_Categories.categoryID;
+            if(selectedProduct.value && selectedProduct.value.member_category != ""){
+                selectedProduct.value.member_category.member_category_id = categoryID.value;
+                categoryValue.value = categoryID.value
+            }
         };
         const fetchAllLedgers = async() =>{
             await store.dispatch('Ledgers/fetchLedgers', {company:companyID.value})
