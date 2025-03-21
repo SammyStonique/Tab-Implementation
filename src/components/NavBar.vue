@@ -41,7 +41,6 @@
 
           <!-- Dropdown Content -->
           <div class="dropdown-content mt-0.5 absolute text-sm text-left rounded bg-white w-32 py-1.5 px-1.5 shadow-md shadow-slate-500 z-50" v-if="dropdown">
-            <button @click=""><strong>My Account</strong></button><br />
             <button @click="logout"><strong>Logout</strong></button>
           </div>
         </div>

@@ -171,6 +171,35 @@
                         </button>
                     </div>
                     <div class="py-2 px-3 pl-4 w-full hover:bg-slate-500 hover:w-full">
+                        <button class="flex text-sm w-full" @click="openPage({'MMS':'Historical_Loans'})">
+                            <i class="fa fa-handshake pt-2 mr-2" aria-hidden="true"></i>
+                            <p class="">Historical Loans</p>
+                        </button>
+                    </div>
+                    
+                </div>
+            </div>
+            <div class="web-links dropdown w-36">
+                <div class="py-0.5 px-2.5 h-full hover:bg-slate-500 hover:rounded">
+                    <button class="flex w-full" @click="showFinancesDropdown">
+                        <i class="fa fa-money pt-2 mr-2" aria-hidden="true"></i>
+                        <p class="pt-1.5">Finances</p>
+                    </button>
+                </div>
+                <div class="dropdown-content w-56 absolute rounded border border-gray-200 bg-white shadow-slate-400 shadow-sm" v-if="finances_dropdown">
+                    <div class="py-2 px-3 pl-4 w-full hover:bg-slate-500 hover:w-full">
+                        <button class="flex text-sm w-full" @click="openPage({'MMS':'Member_Invoices'})">
+                            <i class="fa fa-file-invoice pt-2 mr-2" aria-hidden="true"></i>
+                            <p class="">Invoices</p>
+                        </button>
+                    </div>
+                    <div class="py-2 px-3 pl-4 w-full hover:bg-slate-500 hover:w-full">
+                        <button class="flex text-sm w-full" @click="openPage({'MMS':'Member_Receipts'})">
+                        <i class="fa fa-receipt pt-2 mr-2" aria-hidden="true"></i>
+                        <p class="">Receipts</p>
+                        </button>
+                    </div>
+                    <div class="py-2 px-3 pl-4 w-full hover:bg-slate-500 hover:w-full">
                         <button class="flex text-sm w-full" @click="openPage({'MMS':'Penalty_Batches'})">
                             <i class="fa fa-coins pt-2 mr-2" aria-hidden="true"></i>
                             <p class="">Processed_Penalties</p>
@@ -182,26 +211,10 @@
                             <p class="">Loan Penalties</p>
                         </button>
                     </div>
-                </div>
-            </div>
-            <div class="web-links dropdown w-36">
-                <div class="py-0.5 px-2.5 h-full hover:bg-slate-500 hover:rounded">
-                    <button class="flex w-full" @click="showFinancesDropdown">
-                        <i class="fa fa-money pt-2 mr-2" aria-hidden="true"></i>
-                        <p class="pt-1.5">Finances</p>
-                    </button>
-                </div>
-                <div class="dropdown-content w-48 absolute rounded border border-gray-200 bg-white shadow-slate-400 shadow-sm" v-if="finances_dropdown">
                     <div class="py-2 px-3 pl-4 w-full hover:bg-slate-500 hover:w-full">
-                        <button class="flex text-sm w-full" @click="openPage({'MMS':'Member_Invoices'})">
-                            <i class="fa fa-file-invoice pt-2 mr-2" aria-hidden="true"></i>
-                            <p class="">Invoices</p>
-                        </button>
-                    </div>
-                    <div class="py-2 px-3 pl-4 w-full hover:bg-slate-500 hover:w-full">
-                        <button class="flex text-sm w-full" @click="openPage({'MMS':'Member_Receipts'})">
-                        <i class="fa fa-receipt pt-2 mr-2" aria-hidden="true"></i>
-                        <p class="">Receipts</p>
+                        <button class="flex text-sm w-full" @click="openPage({'MMS':'Application_Fees'})">
+                            <i class="fa fa-money-bill-wave pt-2 mr-2" aria-hidden="true"></i>
+                            <p class="">Loan Application Fees</p>
                         </button>
                     </div>
                 </div>

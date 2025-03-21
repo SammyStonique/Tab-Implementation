@@ -225,17 +225,17 @@ export default defineComponent({
                     fetchData: fetchMembers(), clearSearch: clearSelectedMember()  
                 },
                 { type: 'date', name: 'issue_date',label: "Recording Date", value: formatDate(current_date), required: true, maxDate: formatDate(current_date), method: fetchReceiptItems },
-                { type: 'date', name: 'banking_date',label: "Banking Date", value: '', required: true, maxDate: formatDate(current_date) },
+                { type: 'date', name: 'banking_date',label: "Banking Date", value: formatDate(current_date), required: true, maxDate: formatDate(current_date) },
                 { type: 'dropdown', name: 'payment_method',label: "Payment Method", value: '', placeholder: "", required: true, options: [{ text: 'Cash', value: 'Cash' }, { text: 'Mpesa', value: 'Mpesa' },{ text: 'Bank Deposit', value: 'Bank Deposit' }, { text: 'Cheque', value: 'Cheque' },{ text: 'Check-off', value: 'Check-off' }, { text: 'RTGS', value: 'RTGS' },{ text: 'EFT', value: 'EFT' }, { text: 'Not Applicable', value: 'Not Applicable' }] },
                 { type: 'text', name: 'reference_no',label: "Reference No", value: '', required: true,},
-                { type: 'text', name: 'total_amount',label: "Amount", value: receipt_totals.value || 0, required: true, method: allocateReceivedAmount },
+                { type: 'number', name: 'total_amount',label: "Amount", value: receipt_totals.value || 0, required: true, method: allocateReceivedAmount },
                 {
                     type:'search-dropdown', label:"Cashbook", value: ledgerID.value, componentKey: ledComponentKey,
                     selectOptions: ledgerArray, optionSelected: handleSelectedLedger, required: true,
                     searchPlaceholder: 'Select Cashbook...', dropdownWidth: '450px', updateValue: "",
                     fetchData: fetchLedgers(), clearSearch: clearSelectedLedger()  
                 },
-                {type:'text-area', label:"Memo", value: receipt_memo.value, textarea_rows: '2', textarea_cols: '50', required: true},
+                {type:'text-area', label:"Memo", value: receipt_memo.value, textarea_rows: '3', textarea_cols: '56', required: true},
                 {required: false}
             ]
         };
@@ -257,6 +257,8 @@ export default defineComponent({
                 }
                 
             }
+            formFields.value[1].value = formatDate(current_date);
+            formFields.value[2].value = formatDate(current_date);
             memberID.value = '';
             ledgerID.value = '';
             memComponentKey.value += 1;

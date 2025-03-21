@@ -26,7 +26,7 @@
           <div v-else>
             <label for="">{{ field.label }}:</label><br />
           </div>
-          <input v-model="field.value" @change="handleChange($event, field)" :disabled="field.disabled" :name="field.name" type="number" pattern="[0-9]*" oninput="this.value = this.value.replace(/[^0-9]/g, '')" :class="`bg-slate-50 rounded pl-3 border border-gray-400 text-sm w-full`" :placeholder="field.placeholder"/>
+          <input v-model="field.value" @change="handleChange($event, field)" :disabled="field.disabled" :name="field.name" type="number" pattern="^\d+(\.\d{0,2})?$" oninput="this.value = this.value.replace(/[^0-9.]/g, '').replace(/(\.\d{2})\d+/g, '$1')" :class="`bg-slate-50 rounded pl-3 border border-gray-400 text-sm w-full`" :placeholder="field.placeholder"/>
         </div>
         <div v-if="field.type === 'date'" class="mr-2 text-left text-sm" :hidden="field.hidden">
           <div v-if="field.required">

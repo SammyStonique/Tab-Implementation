@@ -147,7 +147,7 @@ const actions = {
   },
   
   async createLoanApplication({ commit,state }, formData) {
-    return axios.post('api/v1/create-loan-application/', formData)
+    return axios.post('api/v1/create-historical-loan/', formData)
     .then((response)=>{
       return response;
     })
@@ -171,7 +171,7 @@ const actions = {
 
   fetchLoanApplications({ commit,state }, formData) {
     state.applicationArr = [];
-    axios.post(`api/v1/get-loan-applications/`,formData)
+    axios.post(`api/v1/get-historical-loans/`,formData)
     .then((response)=>{
       for(let i=0; i< response.data.length; i++){
         state.applicationArr.push((response.data[i].loan_number + " - " + response.data[i].loan_product.product_name + " - " + response.data[i].member.member_name));
@@ -184,7 +184,7 @@ const actions = {
     
   },
   fetchLoanApplication({ commit,state }, formData) {
-    axios.post(`api/v1/get-loan-applications/`,formData)
+    axios.post(`api/v1/get-historical-loans/`,formData)
     .then((response)=>{
         state.selectedApplication = response.data;
         const selectedMember = response.data.member.member_number + " - " + response.data.member.member_name;
@@ -204,12 +204,12 @@ const actions = {
     
   },
   fetchLoanDetails({ commit,state }, formData) {
-    axios.post(`api/v1/get-loan-applications/`,formData)
+    axios.post(`api/v1/get-historical-loans/`,formData)
     .then((response)=>{
         state.loanDetails = response.data;
         state.loanMember = response.data.member;
         state.loanProduct = response.data.loan_product;
-        state.selectedApplicationID = response.data.loan_application_id;
+        state.selectedApplicationID = response.data.historical_loan_id;
         commit('SET_LOAN_DETAILS',response.data);
         commit('SET_LOAN_CHARGES',(response.data.loan_charges != null) ? (response.data.loan_charges) : []);
         commit('SET_LOAN_GUARANTORS',(response.data.loan_guarantors != null) ? (response.data.loan_guarantors) : []);
@@ -299,7 +299,7 @@ const actions = {
   handleSelectedApplication({ commit, state }, option){
     const selectedApplication = state.applicationsList.find(application => (application.loan_number + " - " +application.loan_product.product_name + " - " + application.member.member_name) === option);
     if (selectedApplication) {
-        state.applicationID = selectedApplication.loan_application_id;
+        state.applicationID = selectedApplication.historical_loan_id;
         state.applicationNumber = selectedApplication.loan_number;
         state.applicationMaxAmount = selectedApplication.loan_product.max_amount;
         state.applicationArray = [...state.applicationArray, selectedApplication];
@@ -309,7 +309,7 @@ const actions = {
   },
 
   async updateLoanApplication({ commit,state }, formData) {
-    return axios.put(`api/v1/update-loan-application/`,formData)
+    return axios.put(`api/v1/update-historical-loan/`,formData)
     .then((response)=>{
       return response;
     })
@@ -322,11 +322,11 @@ const actions = {
   deleteLoanApplication({ commit,state }, formData) {
     Swal.fire({
       title: "Are you sure?",
-      text: `Do you wish to delete Loan Application?`,
+      text: `Do you wish to delete Historical Loan?`,
       type: 'warning',
       showCloseButton: true,
       showCancelButton: true,
-      confirmButtonText: 'Yes Delete Loan Application(s)!',
+      confirmButtonText: 'Yes Delete Historical Loan(s)!',
       cancelButtonText: 'Cancel!',
       customClass: {
           confirmButton: 'swal2-confirm-custom',
@@ -335,15 +335,15 @@ const actions = {
       showLoaderOnConfirm: true,
     }).then((result) => {
       if (result.value) {
-        axios.post(`api/v1/delete-loan-application/`,formData)
+        axios.post(`api/v1/delete-historical-loan/`,formData)
         .then((response)=>{
           if(response.data.msg == "Success"){
-              Swal.fire("Poof! Loan Application(s) removed succesfully!", {
+              Swal.fire("Poof! Historical Loan(s) removed succesfully!", {
                 icon: "success",
               }); 
           }else{
             Swal.fire({
-              title: "Error Deleting Loan Application(s)",
+              title: "Error Deleting Historical Loan(s)",
               icon: "warning",
             });
           }                   
@@ -356,7 +356,7 @@ const actions = {
           });
         })
       }else{
-        Swal.fire(`Loan Application(s) has not been deleted!`);
+        Swal.fire(`Historical Loan(s) has not been deleted!`);
       }
     })
   },

@@ -58,7 +58,7 @@ export default{
         const modal_loader = ref('none');
         const memComponentKey = ref(0);
         const prodComponentKey = ref(0);
-        const title = ref('Saving Account Details');
+        const title = ref('Loan Security Details');
         const addButtonLabel = ref('New Security');
         const addingRight = ref('Adding Loan Securities');
         const rightsModule = ref('MMS');
@@ -139,7 +139,7 @@ export default{
             return (selectedSecurity.value && selectedSecurity.value.security_type && !securityID.value) ? selectedSecurity.value.security_type.security_type_id : securityID.value;
         });
         const applicationValue = computed(() => {
-            return (selectedSecurity.value && selectedSecurity.value.loan_application && !applicationID.value) ? selectedSecurity.value.loan_application.savings_product_id : applicationID.value;
+            return (selectedSecurity.value && selectedSecurity.value.loan_application && !applicationID.value) ? selectedSecurity.value.loan_application.loan_application_id : applicationID.value;
         });
         const updateFormFields = () => {
             formFields.value = [

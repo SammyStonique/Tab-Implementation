@@ -115,7 +115,7 @@ import PrintJS from 'print-js';
 import Swal from 'sweetalert2';
 
 export default defineComponent({
-    name: 'Loan_Ledger',
+    name: 'Historical_Loan_Ledger',
     components:{
         PageStyleComponent, DynamicTable, MovableModal, DynamicForm,FilterBar
     },
@@ -151,16 +151,16 @@ export default defineComponent({
         const idFieldSchedule = ref('armotization_schedule_id');
         const idFieldPayment = ref('utility_id');
         const idFieldStatement = ref('');
-        const applicationID = computed(()=> store.state.Loan_Applications.selectedApplicationID);
-        const computedScheduleRows = computed(()=> store.state.Loan_Applications.selectedSchedules);
-        const computedPaymentRows = computed(()=> store.state.Loan_Applications.selectedRepayments);
-        const computedGuarantorRows = computed(()=> store.state.Loan_Applications.selectedGuarantors);
-        const computedSecurityRows = computed(()=> store.state.Loan_Applications.selectedSecurities);
-        const computedDocumentRows = computed(()=> store.state.Loan_Applications.selectedDocuments);
-        const statementRows = computed(()=> store.state.Loan_Applications.selectedTransactions);
-        const loanDetails = computed(()=> store.state.Loan_Applications.loanDetails);
-        const loanMember = computed(()=> store.state.Loan_Applications.loanMember);
-        const loanProduct = computed(()=> store.state.Loan_Applications.loanProduct);
+        const applicationID = computed(()=> store.state.Historical_Loans.selectedApplicationID);
+        const computedScheduleRows = computed(()=> store.state.Historical_Loans.selectedSchedules);
+        const computedPaymentRows = computed(()=> store.state.Historical_Loans.selectedRepayments);
+        const computedGuarantorRows = computed(()=> store.state.Historical_Loans.selectedGuarantors);
+        const computedSecurityRows = computed(()=> store.state.Historical_Loans.selectedSecurities);
+        const computedDocumentRows = computed(()=> store.state.Historical_Loans.selectedDocuments);
+        const statementRows = computed(()=> store.state.Historical_Loans.selectedTransactions);
+        const loanDetails = computed(()=> store.state.Historical_Loans.loanDetails);
+        const loanMember = computed(()=> store.state.Historical_Loans.loanMember);
+        const loanProduct = computed(()=> store.state.Historical_Loans.loanProduct);
         const scheduleColumns = ref([
             {type: "checkbox"},
             {label: "#", key:"installment", type: "text", editable: false},
@@ -326,45 +326,45 @@ export default defineComponent({
             showLoader();
             let formData = {
                 company: companyID.value,
-                loan_application: applicationID.value
+                historical_loan: applicationID.value
             }
             let formData1 = {
                 company: companyID.value,
                 client: loanDetails.value.loan_ledger_id,
-                application: loanDetails.value.loan_application_id,
-                historical_loan: null,
+                application: null,
+                historical_loan: loanDetails.value.historical_loan_id,
                 page_size: "1000"
             }
             if(index == 2){
                 activeTab.value = index;
-                await store.dispatch('Loan_Applications/fetchLoanTransactions',formData1)
+                await store.dispatch('Historical_Loans/fetchLoanTransactions',formData1)
                 .then(()=>{
                     hideLoader();
                 })
             }else if( index == 1){
                 activeTab.value = index;
-                await store.dispatch('Loan_Applications/fetchLoanDetails',formData)
+                await store.dispatch('Historical_Loans/fetchLoanDetails',formData)
                 .then(()=>{
                     hideLoader();
                 })
             }
             else if( index == 3){
                 activeTab.value = index;
-                await store.dispatch('Loan_Applications/fetchLoanRepayments',formData)
+                await store.dispatch('Historical_Loans/fetchLoanRepayments',formData)
                 .then(()=>{
                     hideLoader();
                 })
             }
             else if( index == 4){
                 activeTab.value = index;
-                await store.dispatch('Loan_Applications/fetchLoanGuarantors',formData)
+                await store.dispatch('Historical_Loans/fetchLoanGuarantors',formData)
                 .then(()=>{
                     hideLoader();
                 })
             }
             else if( index == 5){
                 activeTab.value = index;
-                await store.dispatch('Loan_Applications/fetchLoanSecurities',formData)
+                await store.dispatch('Historical_Loans/fetchLoanSecurities',formData)
                 .then(()=>{
                     hideLoader();
                 })
@@ -653,13 +653,7 @@ export default defineComponent({
             else if(action == 'delete'){
             }
         }
-        const handleSelectedDeposit = async(option) =>{
-            await store.dispatch('Security_Deposits/handleSelectedDeposit', option)
-            depositID.value = store.state.Security_Deposits.depositID;
-        }
-        const fetchDeposits = async() =>{
-            await store.dispatch('Security_Deposits/fetchDeposits', {company:companyID.value})
-        }
+
         const formFields = ref([
             { type: 'date', name: 'date',label: "Date", value: '', required: true },
             { type: 'dropdown', name: 'default_mode',label: "Charge Mode", value: '', placeholder: "", required: true, options: [{ text: 'Fixed Amount', value: 'Fixed Amount' }, { text: 'Rent Percentage', value: 'Rent Percentage' }] },
@@ -705,7 +699,7 @@ export default defineComponent({
             return permission ? !permission.right_status : true;
         };
         onBeforeMount(()=>{
-            loanDetails.value = store.state.Loan_Applications.loanDetails;
+            loanDetails.value = store.state.Historical_Loans.loanDetails;
         });
         onMounted(()=>{
             fetchEnabledRights();
