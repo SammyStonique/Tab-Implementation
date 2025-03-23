@@ -67,7 +67,7 @@
                                 :filters="searchFilters" 
                                 @search="searchLoanTransactions"
                                 @reset="resetFilters"
-                                @printList="printLoanLedger"
+                                @printList="printLoanStatement"
                                 @printExcel="printExcel"
                                 @printCSV="printCSV"
                             />
@@ -265,10 +265,69 @@ export default defineComponent({
                 hideLoader();
             }  
         }
-        const printLoanLedger = () =>{
+        const dropdownOptions = ref([
+            {label: 'SMS Loan Statement', action: 'send-sms'},
+            {label: 'Email Loan Statement', action: 'send-email'},
+        ]);
+        const handleDynamicOption = async(option) =>{           
+            if(option == 'send-sms'){
+                showLoader();
+                let formData = {
+                    client: [loanDetails.value.loan_application_id],
+                    company: companyID.value,
+                    date_from: from_date_search.value,
+                    date_to: to_date_search.value,
+                    company: companyID.value
+                }
+                await axios.post('api/v1/loan-statement-sms/',formData).
+                then((response)=>{
+                    if(response.data.msg == "Success"){
+                        toast.success("SMS Sent!")
+                    }else if(response.data.msg == "Missing Template"){
+                        toast.error("Loan Statement Template Not Set!")
+                    }else{
+                        toast.error(response.data.msg)
+                    }
+                })
+                .catch((error)=>{
+                    toast.error(error.message)
+                })
+                .finally(()=>{
+                    hideLoader();
+                })
+            }else if(option == 'send-email'){
+                showLoader();
+                let formData = {
+                    client: [loanDetails.value.loan_application_id],
+                    company: companyID.value,
+                    date_from: from_date_search.value,
+                    date_to: to_date_search.value,
+                    company: companyID.value
+                }
+                await axios.post('api/v1/loan-statement-email/',formData).
+                then((response)=>{
+                    if(response.data.msg == "Success"){
+                        toast.success("Email Sent!")
+                    }else if(response.data.msg == "Missing Template"){
+                        toast.error("Loan Statement Template Not Set!")
+                    }else{
+                        toast.error(response.data.msg)
+                    }
+                })
+                .catch((error)=>{
+                    toast.error(error.message)
+                })
+                .finally(()=>{
+                    hideLoader();
+                })
+            }
+        };
+        const printLoanStatement = () =>{
             showLoader();
             let formData = {
                 client: loanDetails.value.loan_ledger_id,
+                loan_application: null,
+                historical_loan: loanDetails.value.historical_loan_id,
                 company: companyID.value,
                 date_from: from_date_search.value,
                 date_to: to_date_search.value,
@@ -706,10 +765,10 @@ export default defineComponent({
         });
 
         return{
-            tabs, activeTab, mainComponentKey, scheduleColumns, paymentColumns, selectTab, loader, showLoader, hideLoader, formFields, additionalFields,showTotals,
+            tabs, activeTab, mainComponentKey, scheduleColumns, paymentColumns, selectTab, loader, showLoader, hideLoader, formFields, additionalFields,showTotals,dropdownOptions,handleDynamicOption,
             tableKey,paymentTableKey, idFieldSchedule, idFieldPayment, actionsSchedule, actionsUtility, computedScheduleRows, computedPaymentRows,computedGuarantorRows,computedSecurityRows,
             scheduleTableKey, idFieldSchedule, scheduleColumns, actionsSchedule, statementTableKey, idFieldStatement, statementRows,showActions,searchFilters,resetFilters,
-            statementColumns, actionsStatement, loanDetails,loanProduct,loanMember, scheduleActionClick,showAddButton,searchLoanTransactions,printLoanLedger,
+            statementColumns, actionsStatement, loanDetails,loanProduct,loanMember, scheduleActionClick,showAddButton,searchLoanTransactions,printLoanStatement,
             scheduleActionClick,tnt_modal_loader, dep_modal_loader, util_modal_loader, depModalVisible, displayButtons,guarantorColumns,securityColumns,
             documentActionClick,documentColumns,documentTableKey,actionsDocument,computedDocumentRows,
             modal_top, modal_left, modal_width, showDepModalLoader, hideDepModalLoader, handleDepReset,

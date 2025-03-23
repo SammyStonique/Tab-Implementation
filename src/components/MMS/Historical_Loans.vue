@@ -3,6 +3,7 @@
         <PageComponent 
             :loader="loader" @showLoader="showLoader" @hideLoader="hideLoader"
             :addButtonLabel="addButtonLabel"
+            :showAddButton="showAddButton"
             @handleAddNew="addNewApplication"
             :searchFilters="searchFilters"
             :dropdownOptions="dropdownOptions"
@@ -48,7 +49,7 @@
         :loader="ref_modal_loader" @showLoader="showRefModalLoader" @hideLoader="hideRefModalLoader" @closeModal="closeRefModal">
         <DynamicForm 
             :fields="refFormFields" :flex_basis="flex_basis" :flex_basis_percentage="flex_basis_percentage" 
-            :displayButtons="displayButtons" @handleSubmit="disburseMemberLoan" @handleReset="handleRefReset"
+            :displayButtons="displayButtons" @handleSubmit="postLoanBalance" @handleReset="handleRefReset"
         />
     </MovableModal>
 
@@ -83,6 +84,7 @@ export default{
         const trans_modal_loader = ref('none');
         const ref_modal_loader = ref('none');
         const idField = 'historical_loan_id';
+        const showAddButton = ref(false);
         const addButtonLabel = ref('New Application');
         const addingRight = ref('Adding Loan Applications');
         const rightsModule = ref('MMS');
@@ -100,7 +102,7 @@ export default{
         const showPreviousBtn = ref(false);
         const detailsTitle = ref('Application Documents');
         const transTitle = ref('Approve/Reject Loan');
-        const refTitle = ref('Disburse Loan');
+        const refTitle = ref('Post Loan Balance');
         const transModalVisible = ref(false);
         const refModalVisible = ref(false);
         const dropdownWidth = ref("500px")
@@ -123,6 +125,7 @@ export default{
             {label: "Loan Remarks", key:"loan_remarks"},
             {label: "Appr. By", key:"approved_by"},
             {label: "Exempt", key:"exempt_penalty"},
+            {label: "Posted", key:"posted"},
         ])
         const actions = ref([
             {name: 'view', icon: 'fa fa-file-pdf-o', title: 'View Loan', rightName: 'Viewing Loan Ledger'},
@@ -130,7 +133,7 @@ export default{
         ])
         const companyID = computed(()=> store.state.userData.company_id);
         const userID = computed(()=> store.state.userData.user_id);
-        const cashbookArr = computed(() => store.state.Ledgers.cashbookLedgerArr);
+        const cashbookArr = computed(() => store.state.Ledgers.ledgerArr);
         const applicationID = ref("");
         const cashbookID = ref("");
         const appliedAmount = ref(0);
@@ -281,6 +284,7 @@ export default{
        
         const searchApplications = () =>{
             showLoader();
+            selectedIds.value = [];
             showNextBtn.value = false;
             showPreviousBtn.value = false;
             let formData = {
@@ -451,7 +455,6 @@ export default{
                 }else{
                     if(applicationStatus == 'Approved'){
                         applicationID.value = row[idField];
-                        fetchAllLedgers();
                         calculateDisbursalAmount();
                         refModalVisible.value = true;
                         flex_basis.value = '1/3';
@@ -466,6 +469,8 @@ export default{
         const dropdownOptions = ref([
             {label: 'Exempt Penalty', action: 'exempt-penalty'},
             {label: 'Unexempt Penalty', action: 'unexempt-penalty'},
+            {label: 'Post Loan Balance', action: 'post-balance'},
+            {label: 'Unpost Loan Balance', action: 'unpost-balance'},
         ]);
         const handleDynamicOption = (option) =>{
             if( option == 'exempt-penalty'){
@@ -571,6 +576,59 @@ export default{
                         Swal.fire(`Penalty(s) has not been Unexempted!`);
                     }
                 })                 
+            }else if( option == 'post-balance'){
+                refModalVisible.value = true;
+                handleRefReset();                             
+            }else if( option == 'unpost-balance'){
+                let formData = {
+                    historical_loan: selectedIds.value,
+                    company: companyID.value
+                }
+                Swal.fire({
+                    title: "Are you sure?",
+                    text: `Do you wish to Unpost Balance?`,
+                    type: 'warning',
+                    showCloseButton: true,
+                    showCancelButton: true,
+                    confirmButtonText: 'Yes, Unpost!',
+                    cancelButtonText: 'Cancel!',
+                    customClass: {
+                        confirmButton: 'swal2-confirm-custom',
+                        cancelButton: 'swal2-cancel-custom',
+                    },
+                    showLoaderOnConfirm: true,
+                    }).then((result) => {
+                    if (result.value) {
+                        axios.post(`api/v1/unpost-historical-loan-balance/`,formData)
+                        .then((response)=>{
+                        if(response.data.msg == 'Success'){
+                            Swal.fire("Balance Unposted Succesfully!", {
+                                icon: "success",
+                            }); 
+                            searchApplications();
+                        }else if(response.data.msg == 'Failed'){
+                            Swal.fire("Balance Not Unposted!", {
+                                icon: "warning",
+                            });
+                        }
+                        else{
+                            Swal.fire({
+                                title: "Error Unposting Balance",
+                                icon: "warning",
+                            });
+                        }                   
+                        })
+                        .catch((error)=>{
+                            console.log(error.message);
+                            Swal.fire({
+                                title: error.message,
+                                icon: "warning",
+                            });
+                        })
+                    }else{
+                        Swal.fire(`Balance(s) has not been Unposted!`);
+                    }
+                })                 
             }
         };
         
@@ -604,9 +662,6 @@ export default{
             showDetails.value = false;
         };
         const fetchLedgers = async() =>{
-            await store.dispatch('Ledgers/fetchCashbookLedgers', {company:companyID.value, ledger_type: 'Cashbook'})
-        };
-        const fetchAllLedgers = async() =>{
             await store.dispatch('Ledgers/fetchLedgers', {company:companyID.value})
         };
         const handleSelectedLedger = async(option) =>{
@@ -625,23 +680,16 @@ export default{
         };
         const refFormFields = ref([
             {  
-                type:'search-dropdown', label:"Cashbook", value: cashbookID.value, componentKey: ledComponentKey,
+                type:'search-dropdown', label:"Posting Account", value: cashbookID.value, componentKey: ledComponentKey,
                 selectOptions: cashbookArr, optionSelected: handleSelectedLedger, required: true,
-                searchPlaceholder: 'Select Cashbook...', dropdownWidth: '550px', updateValue: "",
+                searchPlaceholder: 'Select Posting Account...', dropdownWidth: '500px', updateValue: "",
                 fetchData: fetchLedgers(), clearSearch: clearSelectedLedger
             },
-            { type: 'date', name: 'issue_date',label: "Recording Date", value: formatDate(current_date), required: true, maxDate: formatDate(current_date) },
-            { type: 'date', name: 'banking_date',label: "Banking Date", value: formatDate(current_date), required: true, maxDate: formatDate(current_date) },
-            { type: 'dropdown', name: 'payment_method',label: "Payment Method", value: '', placeholder: "", required: true, options: [{ text: 'Cash', value: 'Cash' }, { text: 'Mpesa', value: 'Mpesa' },{ text: 'Bank Deposit', value: 'Bank Deposit' }, { text: 'Cheque', value: 'Cheque' },{ text: 'Check-off', value: 'Check-off' }, { text: 'RTGS', value: 'RTGS' },{ text: 'EFT', value: 'EFT' }, { text: 'Not Applicable', value: 'Not Applicable' }] },
-            { type: 'text', name: 'reference_no',label: "Reference No", value: '', required: true,},
-            { type: 'dropdown', name: 'partial_disbursement',label: "Partial Payment", value: 'No', placeholder: "", required: true, options: [{ text: 'Yes', value: 'Yes' },{ text: 'No', value: 'No' }]},
-            { type: 'number', name: 'total_amount',label: "Amount", value: computedApprovedAmount.value, required: true , method: checkApprovedLimit},
-        ]);
+       ]);
         const handleRefReset = () =>{
             for(let i=0; i < refFormFields.value.length; i++){
                 refFormFields.value[i].value = '';
             }
-            applicationID.value = null;
             cashbookID.value = null;
             ledComponentKey.value +=1;
         }
@@ -651,30 +699,21 @@ export default{
         const hideRefModalLoader = () =>{
             ref_modal_loader.value = "none";
         }
-        const disburseMemberLoan = async() =>{
+        const postLoanBalance = async() =>{
             showRefModalLoader();
             let formData = {
-                cashbook: cashbookID.value,
-                issue_date: refFormFields.value[1].value,
-                historical_loan: applicationID.value,
-                banking_date: refFormFields.value[2].value,
-                partial_disbursement: refFormFields.value[5].value,
-                amount: refFormFields.value[6].value,
-                payment_method: refFormFields.value[3].value,
-                reference_no: refFormFields.value[4].value,
-                user: userID.value,
+                ledger: cashbookID.value,
+                loan_application: selectedIds.value,
                 company: companyID.value
             }
-            axios.post(`api/v1/disburse-member-loan/`,formData)
+            axios.post(`api/v1/post-historical-loan-balance/`,formData)
             .then((response)=>{
                 if(response.data.msg == "Success"){
                     toast.success("Success")
                     closeRefModal();
                     searchApplications();
-                }else if(response.data.msg == "Excess"){
-                    toast.error("Maximum Disbursement Exceeded")
                 }else{
-                    toast.error("Error Disbursing Loan")
+                    toast.error("Error Posting Loan Balance")
                 }                   
             })
             .catch((error)=>{
@@ -697,14 +736,14 @@ export default{
             
         })
         return{
-            searchApplications,resetFilters, addButtonLabel, searchFilters, tableColumns, applicationList,dropdownWidth,displayButtons,importApplications,
+            showAddButton,searchApplications,resetFilters, addButtonLabel, searchFilters, tableColumns, applicationList,dropdownWidth,displayButtons,importApplications,
             currentPage,propResults, propArrLen, propCount, pageCount, showNextBtn, showPreviousBtn,flex_basis,flex_basis_percentage,formFields,handleReset,
             loadPrev, loadNext, firstPage, lastPage, idField, actions, handleActionClick,showDetails,detailsTitle,hideDetails,
             submitButtonLabel, showModal, addNewApplication, showLoader, loader, hideLoader, removeApplication, removeApplications,
             handleSelectionChange,addingRight,rightsModule,printApplicationList,selectSearchQuantity,selectedValue,
             modal_left,modal_top,modal_width,trans_modal_loader,transModalVisible,transTitle,showTransModalLoader,hideTransModalLoader,approveLoan,closeTransModal,
             dropdownOptions,handleDynamicOption,refTitle,refFormFields,refModalVisible,ref_modal_loader,handleRefReset,showRefModalLoader,hideRefModalLoader,closeRefModal,
-            disburseMemberLoan
+            postLoanBalance
         }
     }
 };
