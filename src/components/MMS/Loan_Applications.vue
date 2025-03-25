@@ -468,8 +468,9 @@ export default{
         const dropdownOptions = ref([
             {label: 'Exempt Penalty', action: 'exempt-penalty'},
             {label: 'Unexempt Penalty', action: 'unexempt-penalty'},
+            {label: 'Email Loan Statement', action: 'send-email'},
         ]);
-        const handleDynamicOption = (option) =>{
+        const handleDynamicOption = async(option) =>{
             if( option == 'exempt-penalty'){
                 let formData = {
                     loan_application: selectedIds.value,
@@ -573,6 +574,32 @@ export default{
                         Swal.fire(`Penalty(s) has not been Unexempted!`);
                     }
                 })                 
+            }else if(option == 'send-email'){
+                showLoader();
+                let formData = {
+                    company: companyID.value,
+                    loan_application: selectedIds.value,
+                    historical_loan: null,
+                    date_from: "",
+                    date_to: "",
+                    company: companyID.value
+                }
+                await axios.post('api/v1/member-loan-statement-email/',formData).
+                then((response)=>{
+                    if(response.data.msg == "Success"){
+                        toast.success("Email Sent!")
+                    }else if(response.data.msg == "Missing Template"){
+                        toast.error("Loan Statement Template Not Set!")
+                    }else{
+                        toast.error(response.data.msg)
+                    }
+                })
+                .catch((error)=>{
+                    toast.error(error.message)
+                })
+                .finally(()=>{
+                    hideLoader();
+                })
             }
         };
         

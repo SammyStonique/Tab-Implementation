@@ -27,6 +27,7 @@
                                 <option value="Customer Balance Reminder">Customer Balance Reminder</option>
                                 <option value="Member Receipt">Member Receipt</option>
                                 <option value="Member Loan Balance">Member Loan Balance</option>
+                                <option value="Member Loan Statement">Member Loan Statement</option>
                                 <option value="Member Creation">Member Creation</option>
                                 <option value="Member Portal Invitation">Member Portal Invitation</option>
                             </select>
@@ -205,6 +206,14 @@
                                 <tr>
                                     <td class="font-semibold">Loan Due Date: </td>
                                     <td> &#123;&#123; loan_due_date &#125;&#125;</td>
+                                </tr>
+                                <tr>
+                                    <td class="font-semibold">Loan Number: </td>
+                                    <td> &#123;&#123; loan_number &#125;&#125;</td>
+                                </tr>
+                                <tr>
+                                    <td class="font-semibold">Loan Product: </td>
+                                    <td> &#123;&#123; loan_product &#125;&#125;</td>
                                 </tr>
                                 <tr>
                                     <td class="font-semibold">Member Savings Deposit: </td>

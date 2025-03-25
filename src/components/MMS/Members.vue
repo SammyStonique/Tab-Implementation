@@ -341,6 +341,7 @@ export default{
             catSearchComponentKey.value += 1;
             categoryID.value = "";
             selectedValue.value = 50;
+            currentPage.value = 1;
             name_search.value = "";
             gender_search.value = "";
             phone_number_search.value = "";
@@ -466,7 +467,7 @@ export default{
         })
         return{
             searchMembers,resetFilters, addButtonLabel, searchFilters, tableColumns, membersList,dropdownWidth,displayButtons,
-            propResults, propArrLen, propCount, pageCount, showNextBtn, showPreviousBtn,flex_basis,flex_basis_percentage,
+            currentPage,propResults, propArrLen, propCount, pageCount, showNextBtn, showPreviousBtn,flex_basis,flex_basis_percentage,
             loadPrev, loadNext, firstPage, lastPage, idField, actions, handleActionClick,showDetails,detailsTitle,hideDetails,
             submitButtonLabel, showModal, addNewMember, showLoader, loader, hideLoader, importMembers, removeMember, removeMembers,
             handleSelectionChange,addingRight,rightsModule,printMembersList,selectSearchQuantity,selectedValue,

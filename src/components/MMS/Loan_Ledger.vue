@@ -70,6 +70,8 @@
                                 @printList="printLoanStatement"
                                 @printExcel="printExcel"
                                 @printCSV="printCSV"
+                                :dropdownOptions="dropdownOptions"
+                                @handleDynamicOption="handleDynamicOption"
                             />
                         </div>
                         <div class="table w-[100%] top-[17.1rem] z-30 px-6">
@@ -266,7 +268,6 @@ export default defineComponent({
             }  
         }
         const dropdownOptions = ref([
-            {label: 'SMS Loan Statement', action: 'send-sms'},
             {label: 'Email Loan Statement', action: 'send-email'},
         ]);
         const handleDynamicOption = async(option) =>{           
@@ -298,13 +299,14 @@ export default defineComponent({
             }else if(option == 'send-email'){
                 showLoader();
                 let formData = {
-                    client: [loanDetails.value.loan_application_id],
                     company: companyID.value,
+                    loan_application: [loanDetails.value.loan_application_id],
+                    historical_loan: null,
                     date_from: from_date_search.value,
                     date_to: to_date_search.value,
                     company: companyID.value
                 }
-                await axios.post('api/v1/loan-statement-email/',formData).
+                await axios.post('api/v1/member-loan-statement-email/',formData).
                 then((response)=>{
                     if(response.data.msg == "Success"){
                         toast.success("Email Sent!")

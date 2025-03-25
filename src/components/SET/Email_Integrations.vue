@@ -79,6 +79,7 @@ export default{
             {label: "Email Name", key:"email_name",type: "text", editable: false},
             {label: "SMTP Type", key: "smtp_type", type: "text", editable: false},
             {label: "Username", key:"username",type: "text", editable: false},
+            {label: "Auto CC", key:"auto_cc",type: "text", editable: false},
             {label: "Port", key:"port",type: "text", editable: false},
             {label: "Status", key:"status",type: "text", editable: false},
         ])
@@ -100,6 +101,7 @@ export default{
                 { type: 'text', name: 'username',label: "Username", value: selectedEmail.value?.username || '', required: true },
                 { type: 'password', name: 'password',label: "Password", value: selectedEmail.value?.password || '', required: true },
                 { type: 'text', name: 'port',label: "Port", value: selectedEmail.value?.port || '587', required: true },
+                { type: 'text', name: 'auto_cc',label: "Auto CC", value: selectedEmail.value?.auto_cc || '-', required: false },
                 { type: 'dropdown', name: 'status',label: "Status", value: selectedEmail.value?.status || 'Active', placeholder: "", required: true, options: [{ text: 'Active', value: 'Active' }, { text: 'Inactive', value: 'Inactive' }] },
             ];
         };
@@ -162,7 +164,8 @@ export default{
                 email_name: formFields.value[0].value,
                 password: formFields.value[4].value,
                 port: formFields.value[5].value,
-                status: formFields.value[6].value,
+                auto_cc: formFields.value[6].value,
+                status: formFields.value[7].value,
                 company: companyID.value
             }
             errors.value = [];
@@ -203,7 +206,8 @@ export default{
                 email_name: formFields.value[0].value,
                 password: formFields.value[4].value,
                 port: formFields.value[5].value,
-                status: formFields.value[6].value,
+                auto_cc: formFields.value[6].value,
+                status: formFields.value[7].value,
                 company: companyID.value,
                 email_integration: selectedEmail.value.email_integration_id
             }
