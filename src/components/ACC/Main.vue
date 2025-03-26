@@ -31,14 +31,15 @@ import NavBarACC from '@/components/ACC/NavBarACC.vue';
 import PagesTab from '@/components/ACC/PagesTab.vue';
 import Dashboard from '@/components/ACC/Dashboard.vue';
 import Reset_Password from '@/components/ACC/Reset_Password.vue';
-
+import Sent_Emails from '@/components/ACC/Sent_Emails.vue';
+import Sent_SMS from '@/components/ACC/Sent_SMS.vue';
 
 export default{
     components:{
         NavBar,
         NavBarACC,
         PagesTab,
-        Dashboard,Reset_Password
+        Dashboard,Reset_Password,Sent_Emails,Sent_SMS
     },
     props: {
         title: {

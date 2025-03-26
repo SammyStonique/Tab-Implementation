@@ -223,7 +223,7 @@ export default{
             },
             {
                 type:'dropdown', placeholder:"Profile", value: profile_search, width:48,
-                options: [{text:'Admin',value:'Admin'},{text:'Employee',value:'Employee'},{text:'Doctor',value:'Doctor'},{text:'Accountant',value:'Accountant'},{text:'Human Resource',value:'Human Resource'},{text:'Nurse',value:'Nurse'},{text:'Lab Technician',value:'Lab Technician'},{text:'Office Clerk',value:'Office Clerk'},{text:'Clinical Officer',value:'Clinical Officer'}]
+                options: [{text:'Admin',value:'Admin'},{text:'Property Manager',value:'Property Manager'},{text:'Accountant',value:'Accountant'},{text:'Human Resource',value:'Human Resource'},{text:'Credit Officer',value:'Credit Officer'},{text:'Doctor',value:'Doctor'},{text:'Office Clerk',value:'Office Clerk'},{text:'Clinical Officer',value:'Clinical Officer'}]
             },
             
         ]);

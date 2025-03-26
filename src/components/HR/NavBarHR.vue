@@ -293,12 +293,6 @@
                         </button>
                     </div>
                     <div class="py-2 px-3 pl-4 w-full hover:bg-slate-500 hover:w-full">
-                        <button class="flex text-sm" @click="openPage({'HR':'Default_Settings'})">
-                        <i class="fa fa-link pt-2 mr-2" aria-hidden="true"></i>
-                        <p class="">Posting Acc. Mapping</p>
-                        </button>
-                    </div>
-                    <div class="py-2 px-3 pl-4 w-full hover:bg-slate-500 hover:w-full">
                         <button class="flex text-sm" @click="openPage({'HR':'HR_Templates'})">
                         <i class="fa fa-image pt-2 mr-2" aria-hidden="true"></i>
                         <p class="">User Defined Templates</p>

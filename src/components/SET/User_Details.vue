@@ -80,7 +80,7 @@ export default defineComponent({
                 { type: 'text', name: 'phone_number',label: "Phone Number", value: selectedUser.value?.phone_number || '', required: true },
                 { type: 'date', name: 'birth_date',label: "D.O.B", value: selectedUser.value?.birth_date || '', required: true },
                 { type: 'dropdown', name: 'gender',label: "Gender", value: selectedUser.value?.gender || '', placeholder: "", required: true, options: [{ text: 'Male', value: 'Male' }, { text: 'Female', value: 'Female' }, { text: 'Other', value: 'Other' }] },
-                { type: 'dropdown', name: 'profile',label: "Profile", value: selectedUser.value?.profile || '', placeholder: "", required: true, options: [{text:'Admin',value:'Admin'},{text:'Doctor',value:'Doctor'},{text:'Accountant',value:'Accountant'},{text:'Human Resource',value:'Human Resource'},{text:'Nurse',value:'Nurse'},{text:'Lab Technician',value:'Lab Technician'},{text:'Office Clerk',value:'Office Clerk'},{text:'Clinical Officer',value:'Clinical Officer'}] },
+                { type: 'dropdown', name: 'profile',label: "Profile", value: selectedUser.value?.profile || '', placeholder: "", required: true, options: [{text:'Admin',value:'Admin'},{text:'Property Manager',value:'Property Manager'},{text:'Accountant',value:'Accountant'},{text:'Human Resource',value:'Human Resource'},{text:'Credit Officer',value:'Credit Officer'},{text:'Doctor',value:'Doctor'},{text:'Office Clerk',value:'Office Clerk'},{text:'Clinical Officer',value:'Clinical Officer'}] },
 
                 {  
                     type:'search-dropdown', label:"Department", value: depValue.value, componentKey: depComponentKey,
@@ -186,7 +186,7 @@ export default defineComponent({
                     }
 
                     const response2 = await axios.post("api/v1/users/", formData);
-                    if (response2.status == 200){
+                    if (response2.status == 201){
                         userDetails.value = response2.data;
 
                         let formData1 ={
@@ -194,38 +194,21 @@ export default defineComponent({
                             company: companyID.value
                         }
 
-                        const response3 = await axios.post(`api/v1/user-credentials/${userDetails.value.user_id}/`, formData1);
-            
-                        let formData2 ={
-                            user: userDetails.value.user_id,
-                            company: companyID.value
-                        }
-
-                        const response4 = await axios.post("api/v1/create-user-company/", formData2);
-                        console.log("The response 4 data is ",response4.data);
-
-                        let formData3 = {
-                            phone_number: userDetails.value.phone_number,
-                            birth_date: userDetails.value.birth_date,
-                            user_department: userDetails.value.user_department,
-                        }
-
-                        const response5 = await axios.put("api/v1/users/"+userDetails.value.user_id+"/", formData3);
-                        // const response = await store.dispatch('userData/createUser', formData);
-                        if (response5) {
+                        await axios.post(`api/v1/user-credentials/${userDetails.value.user_id}/`, formData1)
+                        .then(()=>{
                             hideLoader();
                             toast.success('User created successfully!');
                             handleReset();
                             mainComponentKey.value += 1;
                             depComponentKey.value += 1;
-                        } else {
-                            toast.error('An error occurred while creating the User.');
-                            hideLoader();
-                        }
+                        })
+                        
+                    }else {
+                        toast.error('An error occurred while creating the User.');
+                        hideLoader();
                     }
                     
                 } catch (error) {
-                    console.error(error.message);
                     toast.error('Failed to create User: ' + error.message);
                 } finally {
                     hideLoader();

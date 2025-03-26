@@ -12,7 +12,7 @@
                       <i class="fa fa-shopping-cart" aria-hidden="true"></i>
                     </div>
                     <div class="w-3/4 px-2">
-                      <p class="font-bold">{{itemsCount}}</p>
+                      <p class="font-bold">{{membersCount}}</p>
                       <p class="font-light text-sm">Members</p>
                     </div>
                   </div>
@@ -23,8 +23,8 @@
                       <i class="fa fa-store" aria-hidden="true"></i>
                     </div>
                     <div class="w-3/4 px-2">
-                      <p class="font-bold">{{outletsCount}}</p>
-                      <p class="font-light text-sm">Sponsors</p>
+                      <p class="font-bold">{{Number(sharesAmount).toLocaleString()}}</p>
+                      <p class="font-light text-sm">Shares Amount</p>
                     </div>
                   </div>
                 </div>
@@ -36,8 +36,8 @@
                       <i class="fa fa-line-chart" aria-hidden="true"></i>
                     </div>
                     <div class="w-3/4 px-2">
-                      <p class="font-bold">{{salesCount}}</p>
-                      <p class="font-light text-sm">Savings</p>
+                      <p class="font-bold">{{Number(savingsAmount).toLocaleString()}}</p>
+                      <p class="font-light text-sm">Savings Amount</p>
                     </div>
                   </div>
                 </div>
@@ -47,8 +47,8 @@
                       <i class="fa fa-money" aria-hidden="true"></i>
                     </div>
                     <div class="w-3/4 px-2">
-                      <p class="font-bold">{{ purchasesCount }}</p>
-                      <p class="font-light text-sm">Loans</p>
+                      <p class="font-bold">{{ Number(loansAmount).toLocaleString() }}</p>
+                      <p class="font-light text-sm">Loans Amount</p>
                     </div>
                   </div>
                 </div>
@@ -57,7 +57,7 @@
             <div class="w-1/2 rounded-lg h-[300px] py-4 px-2 bg-white flex">
               <div class="basis-1/4"></div>
               <div class="basis-1/2 h-[250px]">
-                <h1 class="font-bold mb-2">Credit Sales vs Purchases</h1>
+                <h1 class="font-bold mb-2">Savings vs Shares</h1>
                 <Pie id="my-chart-id" :data="chartData" :options="chartOptions" />
               </div>
               <div class="basis-1/4"></div>
@@ -65,35 +65,11 @@
           </div>
   
           <div class="w-full rounded-lg py-3 px-8 bg-white appointments-table">
-              <h1 class="font-bold mb-3">Savings vs Loans</h1>
+              <h1 class="font-bold mb-3">Issued Loans vs Repayments</h1>
               <BarChart :data="barChartData" :options="barChartOptions" />
           </div>
         </div>
-        <div class="w-1/4">
-          <div class="rounded-lg bg-blue-900 h-64 p-2 mb-3 text-white">
-            <h1 class="font-bold mb-2">Stock Adjustments</h1>
-            <table class="table-auto border-collapse w-full">
-              <thead class="font-thin text-left text-sm bg-blue-900">
-                <th></th>
-                <th>Name</th>
-                <th>Status</th>
-            </thead>
-            <tbody class="text-sm py-2">
-              <tr class="py-8" v-for="doc,index in popularDoctors" :key="index">
-                <td class="py-2">{{ index + 1 }}</td>
-                <td class="py-2">{{ doc}}</td>
-                <td class="py-2">
-                  <button class="rounded-full w-full bg-white p-1.5 text-green-800">Available</button>
-                </td>
-              </tr>
-              
-            </tbody>
-            </table>
-          </div>
-          <div class="rounded-lg bg-white h-56 p-2 mb-3">
-            <h1 class="font-bold">Stock Transfers</h1>
-          </div>
-        </div>
+
       </div>
     </div>
   </template>
@@ -114,13 +90,13 @@
     },
     setup(){
       const store = useStore();
-      const itemsCount = ref(0);
-      const outletsCount = ref(0);
-      const salesCount = ref(0);
-      const purchasesCount = ref(0);
+      const membersCount = ref(0);
+      const savingsAmount = ref(0);
+      const sharesAmount = ref(0);
+      const loansAmount = ref(0);
       const companyID = computed(()=> store.state.userData.company_id);
       const chartData = ref({
-        labels: ['Credit Sales', 'Credit Purchases'], // Pie chart segments
+        labels: ['Saving Deposits', 'Share Deposits'], // Pie chart segments
         datasets: [
           {
             label: 'Credit',
@@ -134,7 +110,7 @@
         labels: ['January', 'February', 'March', 'April', 'May','June', 'July', 'August', 'September', 'October','November','December'], // X-axis labels
         datasets: [
           {
-            label: 'Sales vs Purchases',
+            label: 'Issued Loans vs Loan Repayments',
             data: [65, 59, 80, 81, 56], // Sales data points for each month
             backgroundColor: '#42A5F5', // Bar color
             borderColor: '#1E88E5', // Border color of bars
@@ -193,19 +169,19 @@
   
       onMounted(()=>{
   
-        axios.get('api/v1/inventory-management-dashboard/')
+        axios.get('api/v1/membership-management-dashboard/')
         .then((response)=>{
-          itemsCount.value = response.data.dashboard[0].itemsCount;
-          outletsCount.value = response.data.dashboard[0].outletsCount;
-          salesCount.value = response.data.dashboard[0].salesCount;
-          purchasesCount.value = response.data.dashboard[0].purchasesCount;
+          membersCount.value = response.data.dashboard[0].membersCount;
+          savingsAmount.value = response.data.dashboard[0].savingsAmount;
+          sharesAmount.value = response.data.dashboard[0].sharesAmount;
+          loansAmount.value = response.data.dashboard[0].loansAmount;
   
           chartData.value = {
-            labels: ['Credit Sales', 'Credit Purchases'], // Pie chart segments
+            labels: ['Saving Deposits', 'Share Deposits'], // Pie chart segments
             datasets: [
               {
                 label: 'Credit',
-                data: [response.data.dashboard[0].creditSalesCount, response.data.dashboard[0].creditPurchasesCount], 
+                data: [response.data.dashboard[0].savingsAmount, response.data.dashboard[0].sharesAmount], 
                 backgroundColor: ['#FFCE56', '#36A2EB'], 
                 hoverOffset: 4, 
               },
@@ -215,15 +191,15 @@
             labels: ['January', 'February', 'March', 'April', 'May','June', 'July', 'August', 'September', 'October','November','December'], // X-axis labels
             datasets: [
               {
-                label: 'Sales',
-                data: response.data.dashboard[0].monthlySales, // Sales data points for each month
+                label: 'Isued Loans',
+                data: response.data.dashboard[0].monthlyIssuedTotals, // Isued Loans data points for each month
                 backgroundColor: '#FFA500', // Bar color
                 borderColor: '#1E88E5', // Border color of bars
                 borderWidth: 1,
               },
               {
-                label: 'Purchases',
-                data: response.data.dashboard[0].monthlyPurchases, // Sales data points for each month
+                label: 'Repayments',
+                data: response.data.dashboard[0].monthlyRepaymentTotals, // Loan Repayments data points for each month
                 backgroundColor: '#42A5F5', // Bar color
                 borderColor: '#1E88E5', // Border color of bars
                 borderWidth: 1,
@@ -237,7 +213,7 @@
       })
   
       return{
-        itemsCount,outletsCount,salesCount,purchasesCount,chartData,chartOptions,
+        membersCount,savingsAmount,sharesAmount,loansAmount,chartData,chartOptions,
         barChartData,barChartOptions
       }
     }
