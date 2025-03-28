@@ -9,6 +9,7 @@
         @removeItem="removeCategory"
         @removeSelectedItems="removeCategories"
         :addingRight="addingRight"
+        :removingRight="removingRight"
         :rightsModule="rightsModule"
         :columns="tableColumns"
         :rows="categoryList"
@@ -57,6 +58,7 @@ export default{
         const title = ref('Category Details');
         const addButtonLabel = ref('New Category');
         const addingRight = ref('Adding Appraisal Categories');
+        const removingRight = ref('Deleting Appraisal Categories');
         const rightsModule = ref('HR');
         const idField = 'appraisal_category_id';
         const depModalVisible = ref(false);
@@ -292,6 +294,7 @@ export default{
         const searchCategories = () =>{
             showLoader();
             showNextBtn.value = false;
+            selectedIds.value = [];
             showPreviousBtn.value = false;
             let formData = {
                 category_name: name_search.value,
@@ -367,7 +370,7 @@ export default{
             loadPrev, loadNext, firstPage, lastPage, actions, formFields, depModalVisible, addNewCategory,
             displayButtons,flex_basis,flex_basis_percentage, handleActionClick, handleReset, saveCategory,
             showLoader, loader, hideLoader, modal_loader, showModalLoader, hideModalLoader, removeCategory, removeCategories,
-            addingRight,rightsModule, closeModal
+            addingRight,removingRight,rightsModule, closeModal
         }
     }
 }

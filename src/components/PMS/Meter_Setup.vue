@@ -11,6 +11,7 @@
             @removeSelectedItems="removeMeterSetups"
             @printList="printList"
             :addingRight="addingRight"
+            :removingRight="removingRight"
             :rightsModule="rightsModule"
             :columns="tableColumns"
             :rows="setupList"
@@ -62,6 +63,7 @@ export default{
         const idField = 'meter_setup_id';
         const addButtonLabel = ref('New Setup');
         const addingRight = ref('Adding Meter Reading Setup');
+        const removingRight = ref('Deleting Meter Reading Setup');
         const rightsModule = ref('PMS');
         const title = ref('Setup Details');
         const submitButtonLabel = ref('Add');
@@ -383,6 +385,7 @@ export default{
         const searchMeterSetups = () =>{
             showLoader();
             showNextBtn.value = false;
+            selectedIds.value = [];
             showPreviousBtn.value = false;
             let formData = {
                 property: propertySearchID.value,
@@ -504,7 +507,7 @@ export default{
             loadPrev, loadNext, firstPage, lastPage, idField, actions, handleActionClick, propModalVisible, closeModal,
             submitButtonLabel, showModal, addNewSetup, showLoader, loader, hideLoader, modal_loader, modal_top, modal_left, modal_width,displayButtons,
             showModalLoader, hideModalLoader, saveMeterSetup, formFields, handleSelectionChange, flex_basis,flex_basis_percentage,
-            removeMeterSetup, removeMeterSetups,addingRight,rightsModule
+            removeMeterSetup, removeMeterSetups,addingRight,removingRight,rightsModule
         }
     }
 };

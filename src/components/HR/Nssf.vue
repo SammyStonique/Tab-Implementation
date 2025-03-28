@@ -10,6 +10,7 @@
             @removeItem="removeNssf"
             @removeSelectedItems="removeNssfs"
             :addingRight="addingRight"
+            :removingRight="removingRight"
             :rightsModule="rightsModule"
             :columns="tableColumns"
             :rows="nssfList"
@@ -63,6 +64,7 @@ export default{
         const idField = 'nssf_id';
         const addButtonLabel = ref('New NSSF');
         const addingRight = ref('Adding Nssf');
+        const removingRight = ref('Deleting Nssf');
         const rightsModule = ref('HR');
         const title = ref('NSSF Details');
         const submitButtonLabel = ref('Add');
@@ -341,6 +343,7 @@ export default{
         const searchNssfs = () =>{
             showLoader();
             showNextBtn.value = false;
+            selectedIds.value = [];
             showPreviousBtn.value = false;
             let formData = {
                 company_id: companyID.value,
@@ -374,6 +377,7 @@ export default{
             searchNssfs(selectedValue.value);
         };
         const resetFilters = () =>{
+            currentPage.value = 1;
             selectedValue.value = 50;
             searchNssfs();
         }
@@ -455,11 +459,11 @@ export default{
         })
         return{
             title, searchNssfs,resetFilters, addButtonLabel, searchFilters, tableColumns, nssfList,
-            propResults, propArrLen, propCount, pageCount, showNextBtn, showPreviousBtn,
+            currentPage,propResults, propArrLen, propCount, pageCount, showNextBtn, showPreviousBtn,
             loadPrev, loadNext, firstPage, lastPage, idField, actions, handleActionClick, propModalVisible, closeModal,
             submitButtonLabel, showModal, addNewNssf, showLoader, loader, hideLoader, modal_loader, modal_top, modal_left, modal_width,displayButtons,
             showModalLoader, hideModalLoader, saveNssf, formFields, handleSelectionChange, flex_basis,flex_basis_percentage,
-            removeNssf, removeNssfs,addingRight,rightsModule,selectSearchQuantity,selectedValue,
+            removeNssf, removeNssfs,addingRight,removingRight,rightsModule,selectSearchQuantity,selectedValue,
         }
     }
 };

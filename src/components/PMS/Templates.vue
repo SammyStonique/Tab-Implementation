@@ -11,6 +11,7 @@
             @removeSelectedItems="removeTemplates"
             @printList="printList"
             :addingRight="addingRight"
+            :removingRight="removingRight"
             :rightsModule="rightsModule"
             :columns="tableColumns"
             :rows="templatesList"
@@ -53,6 +54,7 @@ export default{
         const idField = 'property_template_id';
         const addButtonLabel = ref('New Template');
         const addingRight = ref('Creating Template');
+        const removingRight = ref('Deleting Template');
         const rightsModule = ref('PMS');
         const submitButtonLabel = ref('Add');
         const editorComponentKey = ref(0);
@@ -169,6 +171,7 @@ export default{
         const searchTemplates = () =>{
             showLoader();
             showNextBtn.value = false;
+            selectedIds.value = [];
             showPreviousBtn.value = false;
             let formData = {
                 template_name: name_search.value,
@@ -282,7 +285,7 @@ export default{
             searchTemplates,resetFilters, addButtonLabel, searchFilters, tableColumns, templatesList,
             currentPage,propResults, propArrLen, propCount, pageCount, showNextBtn, showPreviousBtn,selectSearchQuantity,selectedValue,
             loadPrev, loadNext, firstPage, lastPage, idField, actions, handleActionClick,
-            submitButtonLabel, addNewTemplate, showLoader, loader,handleSelectionChange,removeTemplate, removeTemplates,addingRight,rightsModule
+            submitButtonLabel, addNewTemplate, showLoader, loader,handleSelectionChange,removeTemplate, removeTemplates,addingRight,removingRight,rightsModule
         }
     }
 };

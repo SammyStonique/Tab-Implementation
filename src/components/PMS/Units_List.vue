@@ -14,6 +14,7 @@
             @printExcel="downloadUnitsExcel"
             @printCSV="downloadUnitsCSV"
             :addingRight="addingRight"
+            :removingRight="removingRight"
             :rightsModule="rightsModule"
             :columns="tableColumns"
             :rows="unitList"
@@ -70,6 +71,7 @@ export default{
         const idField = 'property_unit_id';
         const addButtonLabel = ref('New Unit');
         const addingRight = ref('Adding Property Unit');
+        const removingRight = ref('Deleting Property Unit');
         const rightsModule = ref('PMS');
         const title = ref('Unit Details');
         const submitButtonLabel = ref('Add');
@@ -440,6 +442,7 @@ export default{
         const searchUnits = () =>{
             showLoader();
             showNextBtn.value = false;
+            selectedIds.value = [];
             showPreviousBtn.value = false;
             let formData = {
                 unit_number: unit_number_search.value,
@@ -660,7 +663,7 @@ export default{
             loadPrev, loadNext, firstPage, lastPage, idField, actions, handleActionClick, propModalVisible, closeModal,
             submitButtonLabel, showModal, addNewUnit, showLoader, loader, hideLoader, modal_loader, modal_top, modal_left, modal_width,displayButtons,
             showModalLoader, hideModalLoader, saveUnit, formFields, handleSelectionChange, flex_basis,flex_basis_percentage,
-            importUnits, removeUnit, removeUnits,addingRight,rightsModule,printUnitsList,selectSearchQuantity,selectedValue,
+            importUnits, removeUnit, removeUnits,addingRight,removingRight,rightsModule,printUnitsList,selectSearchQuantity,selectedValue,
             downloadUnitsCSV,downloadUnitsExcel
         }
     }

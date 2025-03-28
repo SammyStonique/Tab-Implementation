@@ -9,6 +9,7 @@
         @removeItem="removeDisbursement"
         @removeSelectedItems="removeDisbursements"
         :addingRight="addingRight"
+        :removingRight="removingRight"
         :rightsModule="rightsModule"
         :columns="tableColumns"
         :rows="disbursementsList"
@@ -64,6 +65,7 @@ export default{
         const title = ref('Disbursement Details');
         const addButtonLabel = ref('New Disbursement');
         const addingRight = ref('Adding Employee Loan Disbursements');
+        const removingRight = ref('Deleting Employee Loan Disbursements');
         const rightsModule = ref('HR');
         const idField = 'employee_loan_disbursement_id';
         const depModalVisible = ref(false);
@@ -327,6 +329,7 @@ export default{
         const searchDisbursements = () =>{
             showLoader();
             showNextBtn.value = false;
+            selectedIds.value = [];
             showPreviousBtn.value = false;
             let formData = {
                 loan_number: loan_number_search.value,
@@ -413,7 +416,7 @@ export default{
             loadPrev, loadNext, firstPage, lastPage, actions, formFields, depModalVisible, addNewDisbursement,
             displayButtons,flex_basis,flex_basis_percentage, handleActionClick, handleReset, disburseMemberLoan,
             showLoader, loader, hideLoader, modal_loader, showModalLoader, hideModalLoader, removeDisbursement, removeDisbursements,
-            addingRight,rightsModule, closeModal,handleSelectionChange,selectSearchQuantity,selectedValue,
+            addingRight,removingRight,rightsModule, closeModal,handleSelectionChange,selectSearchQuantity,selectedValue,
         }
     }
 }

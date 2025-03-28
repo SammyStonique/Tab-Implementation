@@ -10,6 +10,7 @@
         @removeSelectedItems="removeDeposits"
         @importData="importDeposits"
         :addingRight="addingRight"
+        :removingRight="removingRight"
         :rightsModule="rightsModule"
         :columns="tableColumns"
         :rows="depositsList"
@@ -64,6 +65,7 @@ export default{
         const title = ref('Share Deposit Details');
         const addButtonLabel = ref('New Share Deposit');
         const addingRight = ref('Adding Share Deposits');
+        const removingRight = ref('Deletingg Shares Deposits');
         const rightsModule = ref('MMS');
         const idField = 'share_deposit_id';
         const depModalVisible = ref(false);
@@ -410,7 +412,7 @@ export default{
         })
         return{
             title,idField, searchDeposits, addButtonLabel, searchFilters, resetFilters, tableColumns, depositsList,showTotals,
-            depResults, depArrLen, depCount, pageCount, showNextBtn, showPreviousBtn,modal_top, modal_left, modal_width,
+            depResults, depArrLen, depCount, pageCount, showNextBtn, showPreviousBtn,modal_top, modal_left, modal_width,removingRight,
             loadPrev, loadNext, firstPage, lastPage, actions, formFields, depModalVisible, addNewDeposit,
             displayButtons,flex_basis,flex_basis_percentage, handleActionClick, handleReset, createDeposit,
             showLoader, loader, hideLoader, modal_loader, showModalLoader, hideModalLoader, removeDeposit, removeDeposits,

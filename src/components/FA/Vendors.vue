@@ -12,6 +12,7 @@
             @removeSelectedItems="removeVendors"
             @printList="printVendorsList"
             :addingRight="addingRight"
+            :removingRight="removingRight"
             :rightsModule="rightsModule"
             :columns="tableColumns"
             :rows="vendorList"
@@ -64,6 +65,7 @@ export default{
         const idField = 'vendor_id';
         const addButtonLabel = ref('New Vendor');
         const addingRight = ref('Adding Vendor');
+        const removingRight = ref('Deleting Vendor');
         const rightsModule = ref('Accounts');
         const title = ref('Vendor Details');
         const submitButtonLabel = ref('Add');
@@ -353,6 +355,7 @@ export default{
         const searchVendors = () =>{
             showLoader();
             showNextBtn.value = false;
+            selectedIds.value = [];
             showPreviousBtn.value = false;
             let formData = {
                 vendor_name: vendor_name_search.value,
@@ -389,6 +392,7 @@ export default{
             searchVendors(selectedValue.value);
         };
         const resetFilters = () =>{
+            currentPage.value = 1;
             vendor_code_search.value = "";
             vendor_name_search.value = "";
             catComponentKey.value += 1;
@@ -501,11 +505,11 @@ export default{
         })
         return{
             title, searchVendors,resetFilters, addButtonLabel, searchFilters, tableColumns, vendorList,
-            propResults, propArrLen, propCount, pageCount, showNextBtn, showPreviousBtn,
+            currentPage,propResults, propArrLen, propCount, pageCount, showNextBtn, showPreviousBtn,
             loadPrev, loadNext, firstPage, lastPage, idField, actions, handleActionClick, propModalVisible, closeModal,
             submitButtonLabel, showModal, addNewVendor, showLoader, loader, hideLoader, modal_loader, modal_top, modal_left, modal_width,displayButtons,
             showModalLoader, hideModalLoader, saveVendor, formFields, handleSelectionChange, flex_basis,flex_basis_percentage,
-            importVendors, removeVendor, removeVendors, handleReset,printVendorsList,addingRight,rightsModule,selectSearchQuantity,selectedValue
+            importVendors, removeVendor, removeVendors, handleReset,printVendorsList,addingRight,removingRight,rightsModule,selectSearchQuantity,selectedValue
         }
     }
 };

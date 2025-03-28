@@ -13,6 +13,7 @@
             @printExcel="downloadDeductionsExcel"
             @printCSV="downloadDeductionsCSV"
             :addingRight="addingRight"
+            :removingRight="removingRight"
             :rightsModule="rightsModule"
             :columns="tableColumns"
             :rows="indicatorsList"
@@ -66,6 +67,7 @@ export default{
         const idField = 'deduction_id';
         const addButtonLabel = ref('New Indicator');
         const addingRight = ref('Adding Performance Indicators');
+        const removingRight = ref('Deleting Performance Indicators');
         const rightsModule = ref('HR');
         const title = ref('Performance Indicator Details');
         const submitButtonLabel = ref('Add');
@@ -319,6 +321,7 @@ export default{
         const searchIndicators = () =>{
             showLoader();
             showNextBtn.value = false;
+            selectedIds.value = [];
             showPreviousBtn.value = false;
             let formData = {
                 indicator_name: name_search.value,
@@ -512,7 +515,7 @@ export default{
             loadPrev, loadNext, firstPage, lastPage, idField, actions, handleActionClick, propModalVisible, closeModal,
             submitButtonLabel, showModal, addNewIndicator, showLoader, loader, hideLoader, modal_loader, modal_top, modal_left, modal_width,displayButtons,
             showModalLoader, hideModalLoader, saveIndicator, formFields, handleSelectionChange, flex_basis,flex_basis_percentage,
-            removeIndicator, removeIndicators,addingRight,rightsModule,printindicatorsList,selectSearchQuantity,selectedValue,
+            removeIndicator, removeIndicators,addingRight,removingRight,rightsModule,printindicatorsList,selectSearchQuantity,selectedValue,
             downloadDeductionsCSV,downloadDeductionsExcel
         }
     }

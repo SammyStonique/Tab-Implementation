@@ -10,6 +10,7 @@
             @removeItem="removePaye"
             @removeSelectedItems="removePayes"
             :addingRight="addingRight"
+            :removingRight="removingRight"
             :rightsModule="rightsModule"
             :columns="tableColumns"
             :rows="payeList"
@@ -92,6 +93,7 @@ export default{
         const idField = 'paye_id';
         const addButtonLabel = ref('New Paye');
         const addingRight = ref('Adding Paye');
+        const removingRight = ref('Deleting Paye');
         const rightsModule = ref('HR');
         const title = ref('Paye Details');
         const bandTitle = ref('Paye Band Details');
@@ -478,6 +480,7 @@ export default{
         const searchPayes = () =>{
             showLoader();
             showNextBtn.value = false;
+            selectedIds.value = [];
             showPreviousBtn.value = false;
             let formData = {
                 company_id: companyID.value,
@@ -511,6 +514,7 @@ export default{
             searchPayes(selectedValue.value);
         };
         const resetFilters = () =>{
+            currentPage.value = 1;
             selectedValue.value = 50;
             searchPayes();
         }
@@ -621,11 +625,11 @@ export default{
         })
         return{
             title, searchPayes,resetFilters, addButtonLabel, searchFilters, tableColumns, payeList,
-            propResults, propArrLen, propCount, pageCount, showNextBtn, showPreviousBtn,
+            currentPage,propResults, propArrLen, propCount, pageCount, showNextBtn, showPreviousBtn,
             loadPrev, loadNext, firstPage, lastPage, idField, actions, handleActionClick, propModalVisible, closeModal,handleReset,
             submitButtonLabel, showModal, addNewPaye, showLoader, loader, hideLoader, modal_loader, modal_top, modal_left, modal_width,displayButtons,
             showModalLoader, hideModalLoader, savePaye, formFields, handleSelectionChange, flex_basis,flex_basis_percentage,
-            removePaye, removePayes,addingRight,rightsModule,selectSearchQuantity,selectedValue,band_modal_loader,bandModalVisible,bandTitle,
+            removePaye, removePayes,addingRight,removingRight,rightsModule,selectSearchQuantity,selectedValue,band_modal_loader,bandModalVisible,bandTitle,
             band_modal_width,formFields1,showBandModalLoader,hideBandModalLoader,closeBandModal,handleBandReset,savePayeBand,showDetails,detailsTitle,
             hideDetails,handleShowDetails,taxBands,tabs,selectTab,activeTab
         }

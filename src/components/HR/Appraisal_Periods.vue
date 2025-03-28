@@ -11,6 +11,7 @@
             @removeSelectedItems="removeAppraisalPeriods"
             @printList="printList"
             :addingRight="addingRight"
+            :removingRight="removingRight"
             :rightsModule="rightsModule"
             :columns="tableColumns"
             :rows="periodList"
@@ -61,6 +62,7 @@ export default{
         const idField = 'appraisal_period_id';
         const addButtonLabel = ref('New Appraisal Period');
         const addingRight = ref('Adding Appraisal Periods');
+        const removingRight = ref('Deleting Appraisal Periods');
         const rightsModule = ref('HR');
         const title = ref('Appraisal Period Details');
         const submitButtonLabel = ref('Add');
@@ -248,6 +250,7 @@ export default{
         const searchAppraisalPeriods = () =>{
             showLoader();
             showNextBtn.value = false;
+            selectedIds.value = [];
             showPreviousBtn.value = false;
             let formData = {
                 period_name: name_search.value,
@@ -348,7 +351,7 @@ export default{
             loadPrev, loadNext, firstPage, lastPage, idField, actions, handleActionClick, propModalVisible, closeModal,
             submitButtonLabel, showModal, addNewPeriod, showLoader, loader, hideLoader, modal_loader, modal_top, modal_left, modal_width,displayButtons,
             showModalLoader, hideModalLoader, createAppraisalPeriod, formFields, handleSelectionChange, flex_basis,flex_basis_percentage,
-            removeAppraisalPeriod, removeAppraisalPeriods,addingRight,rightsModule
+            removeAppraisalPeriod, removeAppraisalPeriods,addingRight,removingRight,rightsModule
         }
     }
 };

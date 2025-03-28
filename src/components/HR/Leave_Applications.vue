@@ -13,6 +13,7 @@
             @printExcel="downloadApplicationsExcel"
             @printCSV="downloadApplicationsCSV"
             :addingRight="addingRight"
+            :removingRight="removingRight"
             :rightsModule="rightsModule"
             :columns="tableColumns"
             :rows="applicationsList"
@@ -77,6 +78,7 @@ export default{
         const idField = 'leave_application_id';
         const addButtonLabel = ref('New Leave Application');
         const addingRight = ref('Adding Leave Applications');
+        const removingRight = ref('Deleting Leave Applications');
         const rightsModule = ref('HR');
         const title = ref('Leave Application Details');
         const appTitle = ref('Approve Leave Application');
@@ -556,6 +558,7 @@ export default{
         const searchApplications = () =>{
             showLoader();
             showNextBtn.value = false;
+            selectedIds.value = [];
             showPreviousBtn.value = false;
             let formData = {
                 employee_name: employee_name_search.value,
@@ -781,7 +784,7 @@ export default{
             loadPrev, loadNext, firstPage, lastPage, idField, actions, handleActionClick, propModalVisible, closeModal,
             submitButtonLabel, showModal, addNewApplication, showLoader, loader, hideLoader, modal_loader, modal_top, modal_left, modal_width,displayButtons,
             showModalLoader, hideModalLoader, saveApplication, formFields, handleSelectionChange, flex_basis,flex_basis_percentage,
-            removeApplication, removeApplications,addingRight,rightsModule,printApplicationsList,selectSearchQuantity,selectedValue,
+            removeApplication, removeApplications,addingRight,removingRight,rightsModule,printApplicationsList,selectSearchQuantity,selectedValue,
             downloadApplicationsCSV,downloadApplicationsExcel,app_modal_loader,appTitle,appModalVisible,approveLeaveApplication,showAppModalLoader,hideAppModalLoader,
             formFields1,closeAppModal,handleAppReset
         }

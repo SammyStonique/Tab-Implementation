@@ -13,6 +13,7 @@
             @removeSelectedItems="removeInvoices"
             @printList="printInvoiceList"
             :addingRight="addingRight"
+            :removingRight="removingRight"
             :rightsModule="rightsModule"
             :columns="tableColumns"
             :rows="invoicesList"
@@ -104,6 +105,7 @@ export default{
         const idField = 'journal_id';
         const addButtonLabel = ref('New Booking');
         const addingRight = ref('Book Rental Invoice');
+        const removingRight = ref('Deleting Tenant Invoice');
         const rightsModule = ref('PMS');
         const submitButtonLabel = ref('Add');
         const title = ref('Invoice Booking');
@@ -373,6 +375,7 @@ export default{
         const searchInvoices = () =>{
             showLoader();
             showNextBtn.value = false;
+            selectedIds.value = [];
             showPreviousBtn.value = false;
             let formData = {
                 client_category: "Tenants",
@@ -743,7 +746,7 @@ export default{
             loadPrev, loadNext, firstPage, lastPage, idField, actions, handleActionClick, propModalVisible, closeModal,
             submitButtonLabel, showModal, bookInvoice, showLoader, loader, hideLoader, modal_loader, modal_top, modal_left, modal_width,displayButtons,
             showModalLoader, hideModalLoader, formFields, handleSelectionChange, flex_basis,flex_basis_percentage,
-            removeInvoice, removeInvoices, dropdownOptions, handleDynamicOption, bookRentalInvoice,addingRight,rightsModule,printInvoiceList,
+            removeInvoice, removeInvoices, dropdownOptions, handleDynamicOption, bookRentalInvoice,addingRight,removingRight,rightsModule,printInvoiceList,
             selectSearchQuantity,selectedValue,showDetails,detailsTitle,hideDetails,handleShowDetails,journalEntries,
             invoiceLines,invoicePayments,tabs,selectTab,activeTab
         }

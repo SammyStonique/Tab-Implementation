@@ -11,6 +11,7 @@
             @removeSelectedItems="removePeriods"
             @printList="printList"
             :addingRight="addingRight"
+            :removingRight="removingRight"
             :rightsModule="rightsModule"
             :columns="tableColumns"
             :rows="periodList"
@@ -61,6 +62,7 @@ export default{
         const addButtonLabel = ref('New Variation Period');
         const title = ref('Variation Details');
         const addingRight = ref('Adding Lease Periods');
+        const removingRight = ref('Deleting Lease Periods');
         const rightsModule = ref('PMS');
         const submitButtonLabel = ref('Add');
         const ledComponentKey = ref(0);
@@ -274,6 +276,7 @@ export default{
         const searchPeriods = () =>{
             showLoader();
             showNextBtn.value = false;
+            selectedIds.value = [];
             showPreviousBtn.value = false;
             let formData = {
                 name: name_search.value,
@@ -379,7 +382,7 @@ export default{
         })
         return{
             title, searchPeriods,resetFilters, addButtonLabel, searchFilters, tableColumns, periodList,
-            currentPage,propResults, propArrLen, propCount, pageCount, showNextBtn, showPreviousBtn,addingRight,rightsModule,
+            currentPage,propResults, propArrLen, propCount, pageCount, showNextBtn, showPreviousBtn,addingRight,removingRight,rightsModule,
             loadPrev, loadNext, firstPage, lastPage, idField, actions, handleActionClick, propModalVisible, closeModal,
             submitButtonLabel, showModal, addNewPeriod, showLoader, loader, hideLoader, modal_loader, modal_top, modal_left, modal_width,displayButtons,
             showModalLoader, hideModalLoader, savePeriod, formFields, handleSelectionChange, flex_basis,flex_basis_percentage,

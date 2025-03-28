@@ -1,5 +1,5 @@
 <template>
-    <div class="fixed bottom-0 h-6 bg-gray-200 w-full flex">
+    <div class="fixed bottom-0 h-6 bg-orange-200 w-full flex">
         <div v-for="tab,index in tabArray" :key="index" :class="{'bg-white text-sm pt-1 rounded border border-slate-300 px-2': true,'bg-gray-400': tab === activeModule}">
             <button class="mr-2" @click="openTab(tab)">{{ tab }}</button>
         </div>

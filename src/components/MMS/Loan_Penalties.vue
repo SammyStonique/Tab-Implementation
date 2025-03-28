@@ -13,6 +13,7 @@
             @removeSelectedItems="removePenalties"
             @printList="printPenaltiesList"
             :addingRight="addingRight"
+            :removingRight="removingRight"
             :rightsModule="rightsModule"
             :columns="tableColumns"
             :rows="penaltyList"
@@ -77,6 +78,7 @@ export default{
         const idField = 'loan_penalty_id';
         const addButtonLabel = ref('Process Penalty');
         const addingRight = ref('Processing Loan Penalties');
+        const removingRight = ref('Deleting Loan Penalties');
         const rightsModule = ref('MMS');
         const submitButtonLabel = ref('Add');
         const title = ref('Penalty Processing');
@@ -507,7 +509,7 @@ export default{
             loadPrev, loadNext, firstPage, lastPage, idField, actions, handleActionClick, propModalVisible, closeModal,
             submitButtonLabel, showModal, runPenalty, showLoader, loader, hideLoader, modal_loader, modal_top, modal_left, modal_width,displayButtons,
             showModalLoader, hideModalLoader, formFields, handleSelectionChange, flex_basis,flex_basis_percentage,
-            removePenalty, removePenalties, dropdownOptions, handleDynamicOption, processPenalty,addingRight,rightsModule,printPenaltiesList,
+            removePenalty, removePenalties, dropdownOptions, handleDynamicOption, processPenalty,addingRight,removingRight,rightsModule,printPenaltiesList,
             selectSearchQuantity,selectedValue,
         }
     }

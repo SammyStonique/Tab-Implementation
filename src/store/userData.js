@@ -20,6 +20,7 @@ const state = {
     isAuthenticated: false,
     company_modules: [],
     user_companies: [],
+    permissions: [],
     reloaded: false,
     name_search: '',
     status_search: '',

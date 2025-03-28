@@ -41,8 +41,8 @@
       <div class="text-left text-sm mt-1.5 absolute right-1 rounded bg-white w-44 py-1.5 px-1.5 shadow-md shadow-slate-500" v-if="dropdown">
         <div class="actionsDropdown ">
           <button @click="importData" class="hover:bg-slate-500 hover:w-full">Import</button><br />
-          <button @click="removeItem" class="hover:bg-slate-500 hover:w-full">Remove</button><br />
-          <button @click="removeSelectedItems" class="hover:bg-slate-500 hover:w-full">Remove Multiple</button><br />
+          <button @click="removeItem" class="hover:bg-slate-500 hover:w-full" :class="{ 'disabled': isDisabled(`${removingRight}`) }">Remove</button><br />
+          <button @click="removeSelectedItems" class="hover:bg-slate-500 hover:w-full" :class="{ 'disabled': isDisabled(`${removingRight}`) }">Remove Multiple</button><br />
           <button @click="displaySideDropdown"><i class="fa fa-caret-left pl-2" aria-hidden="true"></i> Print List</button><br />
         </div>
         <div v-for="(option, index) in dropdownOptions" :key="index">
@@ -147,6 +147,10 @@ export default defineComponent({
       type: String,
       default: () => ''
     },
+    removingRight:{
+      type: String,
+      default: () => ''
+    }
   },
   components:{
     SearchableDropdown, MovableModal
@@ -155,7 +159,7 @@ export default defineComponent({
     const store = useStore(); 
     const dropdown = ref(false);
     const hoverDropdown =  ref(false);
-    const allowedRights = ref([]);
+    const allowedRights = computed(()=> store.state.userData.permissions);
     const dropdownHeight = ref('22px');
     const companyID = computed(()=> store.state.userData.company_id);
     const userID = computed(()=> store.state.userData.user_id);
@@ -177,10 +181,14 @@ export default defineComponent({
       emit('importData');
     }
     const removeItem = () =>{
-      emit('removeItem');
+      if(!isDisabled(props.removingRight) ){
+        emit('removeItem');
+      }
     };
     const removeSelectedItems = () =>{
-      emit('removeSelectedItems');
+      if(!isDisabled(props.removingRight) ){
+        emit('removeSelectedItems');
+      }
     };
     const displaySideDropdown = () =>{
       hoverDropdown.value = !hoverDropdown.value;
@@ -209,27 +217,13 @@ export default defineComponent({
     const hideModalLoader = () =>{
       emit('hideModalLoader')
     };
-    const fetchEnabledRights = () =>{
-      allowedRights.value = [];
-      let formData = {
-        user: userID.value,
-        module: props.rightsModule
-      }
-      axios
-      .post("api/v1/user-permissions-search/",formData)
-      .then((response)=>{
-        allowedRights.value = response.data.results;
-      })
-      .catch((error)=>{
-        console.log(error.message);
-      })
-    };
+
     const isDisabled =(permissionName) =>{
-        const permission = allowedRights.value.find(p => p.permission_name === permissionName);
+        const permission = allowedRights.value.find(p => p.rightName === permissionName);
         return permission ? !permission.right_status : true;
     };
     onBeforeMount(() =>{
-      fetchEnabledRights();
+      
     })
 
     return{

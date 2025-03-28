@@ -11,6 +11,7 @@
             @removeSelectedItems="removeCycles"
             @printList="printList"
             :addingRight="addingRight"
+            :removingRight="removingRight"
             :rightsModule="rightsModule"
             :columns="tableColumns"
             :rows="cyclesList"
@@ -63,6 +64,7 @@ export default{
         const addButtonLabel = ref('New Pay Cycle');
         const title = ref('Pay Cycle Details');
         const addingRight = ref('Adding Pay Cycles');
+        const removingRight = ref('Deleting Pay Cycles');
         const rightsModule = ref('HR');
         const submitButtonLabel = ref('Add');
         const ledComponentKey = ref(0);
@@ -277,6 +279,7 @@ export default{
         const searchCycles = () =>{
             showLoader();
             showNextBtn.value = false;
+            selectedIds.value = [];
             showPreviousBtn.value = false;
             let formData = {
                 pay_cycle_name: name_search.value,
@@ -311,6 +314,7 @@ export default{
             searchCycles(selectedValue.value);
         };
         const resetFilters = () =>{
+            currentPage.value = 1;
             store.commit('Pay_Cycles/RESET_SEARCH_FILTERS')
             searchCycles();
         }
@@ -386,7 +390,7 @@ export default{
         })
         return{
             title, searchCycles,resetFilters, addButtonLabel, searchFilters, tableColumns, cyclesList,selectSearchQuantity,selectedValue,
-            propResults, propArrLen, propCount, pageCount, showNextBtn, showPreviousBtn,addingRight,rightsModule,
+            currentPage,propResults, propArrLen, propCount, pageCount, showNextBtn, showPreviousBtn,addingRight,removingRight,rightsModule,
             loadPrev, loadNext, firstPage, lastPage, idField, actions, handleActionClick, propModalVisible, closeModal,
             submitButtonLabel, showModal, addNewCycle, showLoader, loader, hideLoader, modal_loader, modal_top, modal_left, modal_width,displayButtons,
             showModalLoader, hideModalLoader, saveCycle, formFields, handleSelectionChange, flex_basis,flex_basis_percentage,

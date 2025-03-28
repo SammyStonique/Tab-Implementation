@@ -12,6 +12,7 @@
             @removeSelectedItems="removeUtilities"
             @printList="printList"
             :addingRight="addingRight"
+            :removingRight="removingRight"
             :rightsModule="rightsModule"
             :columns="tableColumns"
             :rows="utilityList"
@@ -61,6 +62,7 @@ export default{
         const idField = 'utility_id';
         const addButtonLabel = ref('New Utility');
         const addingRight = ref('Adding Utilities');
+        const removingRight = ref('Deleting Utilities');
         const rightsModule = ref('PMS');
         const title = ref('Utility Details');
         const submitButtonLabel = ref('Add');
@@ -318,6 +320,7 @@ export default{
         const searchUtilities = () =>{
             showLoader();
             showNextBtn.value = false;
+            selectedIds.value = [];
             showPreviousBtn.value = false;
             let formData = {
                 name: name_search.value,
@@ -429,7 +432,7 @@ export default{
             loadPrev, loadNext, firstPage, lastPage, idField, actions, handleActionClick, propModalVisible, closeModal,
             submitButtonLabel, showModal, addNewUtility, showLoader, loader, hideLoader, modal_loader, modal_top, modal_left, modal_width,displayButtons,
             showModalLoader, hideModalLoader, saveUtility, formFields, handleSelectionChange, flex_basis,flex_basis_percentage,
-            importUtilities, removeUtility, removeUtilities,addingRight,rightsModule
+            importUtilities, removeUtility, removeUtilities,addingRight,removingRight,rightsModule
         }
     }
 };

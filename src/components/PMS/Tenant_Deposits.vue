@@ -11,6 +11,7 @@
         @removeSelectedItems="removeDeposits"
         @printList="printDepositsList"
         :addingRight="addingRight"
+        :removingRight="removingRight"
         :rightsModule="rightsModule"
         :columns="tableColumns"
         :rows="depositsList"
@@ -65,6 +66,7 @@ export default{
         const modal_loader = ref('none');
         const addButtonLabel = ref('New Deposit');
         const addingRight = ref('Adding Tenant Deposit');
+        const removingRight = ref('Deleting Tenant Deposit');
         const rightsModule = ref('PMS');
         const pageComponentKey = ref(0);
         const depComponentKey = ref(0);
@@ -348,6 +350,9 @@ export default{
         }
         const searchDeposits = () =>{
             showLoader();
+            showNextBtn.value = false;
+            selectedIds.value = [];
+            showPreviousBtn.value = false;
             let formData = {
                 tenant_code: tenant_code_search.value,
                 tenant_name: tenant_name_search.value,
@@ -468,7 +473,7 @@ export default{
             showNextBtn,showPreviousBtn,addNewDeposit, handleActionClick,createTenantDeposit,displayButtons,handleReset,
             modal_top, modal_left, modal_width, showLoader, loader, hideLoader, modal_loader, showModalLoader, hideModalLoader,
             closeModal, handleSelectionChange, removeDeposit, removeDeposits, pageComponentKey, flex_basis, flex_basis_percentage,
-            addingRight,rightsModule,printDepositsList,selectSearchQuantity,selectedValue
+            addingRight,removingRight,rightsModule,printDepositsList,selectSearchQuantity,selectedValue
         }
     }
 }

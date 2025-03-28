@@ -14,6 +14,7 @@
             @removeSelectedItems="removeStatements"
             @printList="printStatementsList"
             :addingRight="addingRight"
+            :removingRight="removingRight"
             :rightsModule="rightsModule"
             :columns="tableColumns"
             :rows="statementsList"
@@ -60,6 +61,7 @@ export default{
         const idField = 'landlord_statement_id';
         const addButtonLabel = ref('New Statement');
         const addingRight = ref('Process Property Statement');
+        const removingRight = ref('Deleting Property Statement');
         const rightsModule = ref('PMS');
         const submitButtonLabel = ref('Add');
         const title = ref('Property Statement');
@@ -255,6 +257,7 @@ export default{
         const searchStatements = () =>{
             showLoader();
             showNextBtn.value = false;
+            selectedIds.value = [];
             showPreviousBtn.value = false;
             let formData = {
                 month: month_search.value,
@@ -515,7 +518,7 @@ export default{
             loadPrev, loadNext, firstPage, lastPage, idField, actions, handleActionClick, propModalVisible, closeModal,
             submitButtonLabel, showModal, addNewStatement, showLoader, loader, hideLoader, modal_loader, modal_top, modal_left, modal_width,displayButtons,
             showModalLoader, hideModalLoader, handleSelectionChange, flex_basis,flex_basis_percentage,
-            removeStatement, removeStatements, dropdownOptions, handleDynamicOption,addingRight,rightsModule,printStatementsList
+            removeStatement, removeStatements, dropdownOptions, handleDynamicOption,addingRight,removingRight,rightsModule,printStatementsList
         }
     }
 };

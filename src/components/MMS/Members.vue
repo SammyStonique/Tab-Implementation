@@ -14,6 +14,7 @@
             @removeSelectedItems="removeMembers"
             @printList="printMembersList"
             :addingRight="addingRight"
+            :removingRight="removingRight"
             :rightsModule="rightsModule"
             :columns="tableColumns"
             :rows="membersList"
@@ -88,6 +89,7 @@ export default{
         const idField = 'member_id';
         const addButtonLabel = ref('New Member');
         const addingRight = ref('Adding Members');
+        const removingRight = ref('Deleting Members');
         const rightsModule = ref('MMS');
         const submitButtonLabel = ref('Add');
         const selectedIds = ref([]);
@@ -470,7 +472,7 @@ export default{
             currentPage,propResults, propArrLen, propCount, pageCount, showNextBtn, showPreviousBtn,flex_basis,flex_basis_percentage,
             loadPrev, loadNext, firstPage, lastPage, idField, actions, handleActionClick,showDetails,detailsTitle,hideDetails,
             submitButtonLabel, showModal, addNewMember, showLoader, loader, hideLoader, importMembers, removeMember, removeMembers,
-            handleSelectionChange,addingRight,rightsModule,printMembersList,selectSearchQuantity,selectedValue,
+            handleSelectionChange,addingRight,removingRight,rightsModule,printMembersList,selectSearchQuantity,selectedValue,
             modal_left,modal_top,modal_width,trans_modal_loader,transModalVisible,transTitle,showTransModalLoader,hideTransModalLoader,changeMemberStatus,closeTransModal,
             dropdownOptions,handleDynamicOption,member_status,exit_date
         }

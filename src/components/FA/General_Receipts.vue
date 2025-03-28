@@ -13,6 +13,7 @@
             @removeSelectedItems="removeReceipts"
             @printList="printReceiptsList"
             :addingRight="addingRight"
+            :removingRight="removingRight"
             :rightsModule="rightsModule"
             :columns="tableColumns"
             :rows="receiptsList"
@@ -93,6 +94,7 @@ export default{
         const { getYear } = useDateFormatter();
         const { getMonth } = useDateFormatter();
         const addingRight = ref('Adding Receipt');
+        const removingRight = ref('Deleting Receipt');
         const rightsModule = ref('Accounts');
         const loader = ref('none');
         const modal_loader = ref('none');
@@ -261,6 +263,7 @@ export default{
         const searchReceipts = () =>{
             showLoader();
             showNextBtn.value = false;
+            selectedIds.value = [];
             showPreviousBtn.value = false;
             let formData = {
                 client_category: "Customers",
@@ -305,6 +308,7 @@ export default{
             searchReceipts(selectedValue.value);
         };
         const resetFilters = () =>{
+            currentPage.value = 1;
             client_name_search.value = "";
             client_code_search.value = "";
             from_date_search.value = "";
@@ -476,12 +480,12 @@ export default{
         })
         return{
             showTotals,title, searchReceipts,resetFilters, addButtonLabel, searchFilters, tableColumns, receiptsList,
-            propResults, propArrLen, propCount, pageCount, showNextBtn, showPreviousBtn,invModalVisible,
+            currentPage,propResults, propArrLen, propCount, pageCount, showNextBtn, showPreviousBtn,invModalVisible,
             loadPrev, loadNext, firstPage, lastPage, idField, actions, handleActionClick, propModalVisible, closeModal,
             submitButtonLabel, showModal, showLoader, loader, hideLoader, modal_loader, modal_top, modal_left, modal_width,displayButtons,
             showModalLoader, hideModalLoader, handleSelectionChange, flex_basis,flex_basis_percentage,
             removeReceipt, removeReceipts, dropdownOptions, handleDynamicOption, addNewReceipt, printReceiptsList,
-            addingRight,rightsModule,selectSearchQuantity,selectedValue,showDetails,detailsTitle,hideDetails,handleShowDetails,journalEntries,
+            addingRight,removingRight,rightsModule,selectSearchQuantity,selectedValue,showDetails,detailsTitle,hideDetails,handleShowDetails,journalEntries,
             receiptLines,tabs,selectTab,activeTab
         }
     }

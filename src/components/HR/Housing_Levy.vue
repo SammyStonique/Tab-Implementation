@@ -10,6 +10,7 @@
             @removeItem="removeLevy"
             @removeSelectedItems="removeLevies"
             :addingRight="addingRight"
+            :removingRight="removingRight"
             :rightsModule="rightsModule"
             :columns="tableColumns"
             :rows="levyList"
@@ -64,6 +65,7 @@ export default{
         const idField = 'housing_levy_id';
         const addButtonLabel = ref('New AHL');
         const addingRight = ref('Adding Housing Levy');
+        const removingRight = ref('Deleting Housing Levy');
         const rightsModule = ref('HR');
         const title = ref('AHL Details');
         const submitButtonLabel = ref('Add');
@@ -348,6 +350,7 @@ export default{
         const searchLevys = () =>{
             showLoader();
             showNextBtn.value = false;
+            selectedIds.value = [];
             showPreviousBtn.value = false;
             let formData = {
                 company_id: companyID.value,
@@ -381,6 +384,7 @@ export default{
             searchLevys(selectedValue.value);
         };
         const resetFilters = () =>{
+            currentPage.value = 1;
             selectedValue.value = 50;
             searchLevys();
         }
@@ -462,11 +466,11 @@ export default{
         })
         return{
             title, searchLevys,resetFilters, addButtonLabel, searchFilters, tableColumns, levyList,
-            propResults, propArrLen, propCount, pageCount, showNextBtn, showPreviousBtn,
+            currentPage,propResults, propArrLen, propCount, pageCount, showNextBtn, showPreviousBtn,
             loadPrev, loadNext, firstPage, lastPage, idField, actions, handleActionClick, propModalVisible, closeModal,
             submitButtonLabel, showModal, addNewLevy, showLoader, loader, hideLoader, modal_loader, modal_top, modal_left, modal_width,displayButtons,
             showModalLoader, hideModalLoader, saveHousingLevy, formFields, handleSelectionChange, flex_basis,flex_basis_percentage,
-            removeLevy, removeLevies,addingRight,rightsModule,selectSearchQuantity,selectedValue,
+            removeLevy, removeLevies,addingRight,removingRight,rightsModule,selectSearchQuantity,selectedValue,
         }
     }
 };

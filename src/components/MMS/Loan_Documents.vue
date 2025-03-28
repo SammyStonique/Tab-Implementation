@@ -9,6 +9,7 @@
         @removeItem="removeDocument"
         @removeSelectedItems="removeDocuments"
         :addingRight="addingRight"
+        :removingRight="removingRight"
         :rightsModule="rightsModule"
         :columns="tableColumns"
         :rows="documentsList"
@@ -62,6 +63,7 @@ export default{
         const title = ref('Document Details');
         const addButtonLabel = ref('New Document');
         const addingRight = ref('Adding Loan Documents');
+        const removingRight = ref('Deleting Loan Documents');
         const rightsModule = ref('MMS');
         const idField = 'loan_document_id';
         const depModalVisible = ref(false);
@@ -404,7 +406,7 @@ export default{
             loadPrev, loadNext, firstPage, lastPage, actions, formFields, depModalVisible, addNewDocument,
             displayButtons,flex_basis,flex_basis_percentage, handleActionClick, handleReset, createLoanDocument,
             showLoader, loader, hideLoader, modal_loader, showModalLoader, hideModalLoader, removeDocument, removeDocuments,
-            addingRight,rightsModule, closeModal,selectSearchQuantity,selectedValue,handleSelectionChange,
+            addingRight,removingRight,rightsModule, closeModal,selectSearchQuantity,selectedValue,handleSelectionChange,
             handleFileChange
         }
     }

@@ -10,6 +10,7 @@
         @removeSelectedItems="removeDeposits"
         @importData="importDeposits"
         :addingRight="addingRight"
+        :removingRight="removingRight"
         :rightsModule="rightsModule"
         :columns="tableColumns"
         :rows="depositsList"
@@ -64,6 +65,7 @@ export default{
         const title = ref('Saving Deposit Details');
         const addButtonLabel = ref('New Saving Deposit');
         const addingRight = ref('Adding Saving Deposits');
+        const removingRight = ref('Deletingg Saving Deposits');
         const rightsModule = ref('MMS');
         const idField = 'saving_deposit_id';
         const depModalVisible = ref(false);
@@ -414,7 +416,7 @@ export default{
             loadPrev, loadNext, firstPage, lastPage, actions, formFields, depModalVisible, addNewDeposit,showTotals,
             displayButtons,flex_basis,flex_basis_percentage, handleActionClick, handleReset, createDeposit,
             showLoader, loader, hideLoader, modal_loader, showModalLoader, hideModalLoader, removeDeposit, removeDeposits,
-            addingRight,rightsModule, closeModal,selectSearchQuantity,selectedValue,handleSelectionChange,importDeposits
+            addingRight,removingRight,rightsModule, closeModal,selectSearchQuantity,selectedValue,handleSelectionChange,importDeposits
         }
     }
 }

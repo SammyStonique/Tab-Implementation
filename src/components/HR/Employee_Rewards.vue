@@ -13,6 +13,7 @@
             @printExcel="downloadCasesExcel"
             @printCSV="downloadCasesCSV"
             :addingRight="addingRight"
+            :removingRight="removingRight"
             :rightsModule="rightsModule"
             :columns="tableColumns"
             :rows="rewardsList"
@@ -67,6 +68,7 @@ export default{
         const idField = 'employee_reward_id';
         const addButtonLabel = ref('New Employee Reward');
         const addingRight = ref('Adding Employee Rewards');
+        const removingRight = ref('Deleting Employee Rewards');
         const rightsModule = ref('HR');
         const title = ref('Employee Reward Details');
         const submitButtonLabel = ref('Add');
@@ -334,6 +336,7 @@ export default{
         const searchRewards = () =>{
             showLoader();
             showNextBtn.value = false;
+            selectedIds.value = [];
             showPreviousBtn.value = false;
             let formData = {
                 employee_name: employee_name_search.value,
@@ -536,7 +539,7 @@ export default{
             loadPrev, loadNext, firstPage, lastPage, idField, actions, handleActionClick, propModalVisible, closeModal,
             submitButtonLabel, showModal, addNewReward, showLoader, loader, hideLoader, modal_loader, modal_top, modal_left, modal_width,displayButtons,
             showModalLoader, hideModalLoader, saveReward, formFields, handleSelectionChange, flex_basis,flex_basis_percentage,
-            removeReward, removeRewards,addingRight,rightsModule,printrewardsList,selectSearchQuantity,selectedValue,
+            removeReward, removeRewards,addingRight,removingRight,rightsModule,printrewardsList,selectSearchQuantity,selectedValue,
             downloadCasesCSV,downloadCasesExcel
         }
     }

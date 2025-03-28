@@ -13,6 +13,7 @@
             @printExcel="downloadCasesExcel"
             @printCSV="downloadCasesCSV"
             :addingRight="addingRight"
+            :removingRight="removingRight"
             :rightsModule="rightsModule"
             :columns="tableColumns"
             :rows="meetingsList"
@@ -67,6 +68,7 @@ export default{
         const idField = 'disciplinary_meeting_id';
         const addButtonLabel = ref('New Disciplinary Meeting');
         const addingRight = ref('Adding Disciplinary Meetings');
+        const removingRight = ref('Deleting Disciplinary Meetings');
         const rightsModule = ref('HR');
         const title = ref('Disciplinary Meeting Details');
         const submitButtonLabel = ref('Add');
@@ -340,6 +342,7 @@ export default{
         const searchMeetings = () =>{
             showLoader();
             showNextBtn.value = false;
+            selectedIds.value = [];
             showPreviousBtn.value = false;
             let formData = {
                 employee_name: employee_name_search.value,
@@ -544,7 +547,7 @@ export default{
             loadPrev, loadNext, firstPage, lastPage, idField, actions, handleActionClick, propModalVisible, closeModal,
             submitButtonLabel, showModal, addNewMeeting, showLoader, loader, hideLoader, modal_loader, modal_top, modal_left, modal_width,displayButtons,
             showModalLoader, hideModalLoader, saveMeeting, formFields, handleSelectionChange, flex_basis,flex_basis_percentage,
-            removeMeeting, removeMeetings,addingRight,rightsModule,printCasesList,selectSearchQuantity,selectedValue,
+            removeMeeting, removeMeetings,addingRight,removingRight,rightsModule,printCasesList,selectSearchQuantity,selectedValue,
             downloadCasesCSV,downloadCasesExcel
         }
     }

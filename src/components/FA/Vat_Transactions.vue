@@ -242,6 +242,7 @@ export default{
             searchTaxTransactions();
         }
         const resetFilters = () =>{
+            currentPage.value = 1;
             store.commit('Taxes/RESET_SEARCH_FILTERS')
             searchTaxTransactions();
         }
@@ -287,7 +288,7 @@ export default{
         })
         return{
             showAddButton,showTotals,title, searchTaxTransactions, idField, selectedIds, actions, transactionsList, appArrLen,appCount,appResults,appModalVisible,formFields,
-            addButtonLabel, searchFilters,tableColumns,resetFilters,loadPrev,loadNext,firstPage,lastPage,
+            addButtonLabel, searchFilters,tableColumns,resetFilters,loadPrev,loadNext,firstPage,lastPage,currentPage,
             showNextBtn,showPreviousBtn, handleActionClick,displayButtons,handleReset,
             modal_top, modal_left, modal_width, showLoader, loader, hideLoader, modal_loader, showModalLoader, hideModalLoader,
             closeModal, handleSelectionChange, pageComponentKey, flex_basis, flex_basis_percentage,printTransactionsList,selectSearchQuantity,selectedValue

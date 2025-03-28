@@ -13,6 +13,7 @@
             @printExcel="downloadCasesExcel"
             @printCSV="downloadCasesCSV"
             :addingRight="addingRight"
+            :removingRight="removingRight"
             :rightsModule="rightsModule"
             :columns="tableColumns"
             :rows="appealsList"
@@ -67,6 +68,7 @@ export default{
         const idField = 'disciplinary_appeal_id';
         const addButtonLabel = ref('New Disciplinary Appeal');
         const addingRight = ref('Adding Disciplinary Appeals');
+        const removingRight = ref('Deleting Disciplinary Appeals');
         const rightsModule = ref('HR');
         const title = ref('Disciplinary Appeal Details');
         const submitButtonLabel = ref('Add');
@@ -335,6 +337,7 @@ export default{
         const searchAppeals = () =>{
             showLoader();
             showNextBtn.value = false;
+            selectedIds.value = [];
             showPreviousBtn.value = false;
             let formData = {
                 employee_name: employee_name_search.value,
@@ -539,7 +542,7 @@ export default{
             loadPrev, loadNext, firstPage, lastPage, idField, actions, handleActionClick, propModalVisible, closeModal,
             submitButtonLabel, showModal, addNewAppeal, showLoader, loader, hideLoader, modal_loader, modal_top, modal_left, modal_width,displayButtons,
             showModalLoader, hideModalLoader, saveAppeal, formFields, handleSelectionChange, flex_basis,flex_basis_percentage,
-            removeAppeal, removeAppeals,addingRight,rightsModule,printCasesList,selectSearchQuantity,selectedValue,
+            removeAppeal, removeAppeals,addingRight,removingRight,rightsModule,printCasesList,selectSearchQuantity,selectedValue,
             downloadCasesCSV,downloadCasesExcel
         }
     }

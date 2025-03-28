@@ -13,6 +13,7 @@
             @removeSelectedItems="removeJournals"
             @printList="printJournalsList"
             :addingRight="addingRight"
+            :removingRight="removingRight"
             :rightsModule="rightsModule"
             :columns="tableColumns"
             :rows="journalsList"
@@ -87,6 +88,7 @@ export default{
         const { getYear } = useDateFormatter();
         const { getMonth } = useDateFormatter();
         const addingRight = ref('Adding Journal');
+        const removingRight = ref('Deleting Journal');
         const rightsModule = ref('Accounts');
         const loader = ref('none');
         const modal_loader = ref('none');
@@ -259,6 +261,7 @@ export default{
         const searchJournals = () =>{
             showLoader();
             showNextBtn.value = false;
+            selectedIds.value = [];
             showPreviousBtn.value = false;
             let formData = {
                 description: description_search.value,
@@ -305,6 +308,7 @@ export default{
             searchJournals(selectedValue.value);
         };
         const resetFilters = () =>{
+            currentPage.value = 1;
             store.commit('Journals/RESET_SEARCH_FILTERS')
             searchJournals();
         }
@@ -433,11 +437,11 @@ export default{
         })
         return{
             showTotals,title, searchJournals,resetFilters, addButtonLabel, searchFilters, tableColumns, journalsList,
-            propResults, propArrLen, propCount, pageCount, showNextBtn, showPreviousBtn,invModalVisible,
+            currentPage,propResults, propArrLen, propCount, pageCount, showNextBtn, showPreviousBtn,invModalVisible,
             loadPrev, loadNext, firstPage, lastPage, idField, actions, handleActionClick, propModalVisible, closeModal,
             submitButtonLabel, showModal, showLoader, loader, hideLoader, modal_loader, modal_top, modal_left, modal_width,displayButtons,
             showModalLoader, hideModalLoader, formFields, handleSelectionChange, flex_basis,flex_basis_percentage,
-            removeJournal, removeJournals, dropdownOptions, handleDynamicOption, addNewJournal, printJournalsList,addingRight,rightsModule,
+            removeJournal, removeJournals, dropdownOptions, handleDynamicOption, addNewJournal, printJournalsList,addingRight,removingRight,rightsModule,
             selectSearchQuantity,selectedValue,showDetails,detailsTitle,hideDetails,handleShowDetails,journalEntries,tabs,selectTab,activeTab
         }
     }

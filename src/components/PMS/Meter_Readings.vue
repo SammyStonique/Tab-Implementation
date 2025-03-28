@@ -14,6 +14,7 @@
             @removeSelectedItems="removeMeterReadings"
             @printList="printReadingsList"
             :addingRight="addingRight"
+            :removingRight="removingRight"
             :rightsModule="rightsModule"
             :columns="tableColumns"
             :rows="readingsList"
@@ -67,6 +68,7 @@ export default{
         const idField = 'meter_reading_id';
         const addButtonLabel = ref('New Reading');
         const addingRight = ref('Adding Meter Reading');
+        const removingRight = ref('Deleting Meter Reading');
         const rightsModule = ref('PMS');
         const title = ref('Reading Details');
         const submitButtonLabel = ref('Add');
@@ -416,6 +418,7 @@ export default{
         const searchMeterReadings = () =>{
             showLoader();
             showNextBtn.value = false;
+            selectedIds.value = [];
             showPreviousBtn.value = false;
             let formData = {
                 tenant_name: tenant_name_search.value,
@@ -586,7 +589,7 @@ export default{
             loadPrev, loadNext, firstPage, lastPage, idField, actions, handleActionClick, propModalVisible, closeModal,
             submitButtonLabel, showModal, addNewReading, showLoader, loader, hideLoader, modal_loader, modal_top, modal_left, modal_width,displayButtons,
             showModalLoader, hideModalLoader, saveMeterReading, formFields, handleSelectionChange, flex_basis,flex_basis_percentage,
-            removeMeterReading, removeMeterReadings, dropdownOptions, handleDynamicOption,addingRight,rightsModule,printReadingsList,
+            removeMeterReading, removeMeterReadings, dropdownOptions, handleDynamicOption,addingRight,removingRight,rightsModule,printReadingsList,
             selectSearchQuantity,selectedValue
         }
     }

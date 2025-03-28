@@ -13,6 +13,7 @@
             @removeSelectedItems="removeLeaseFees"
             @printList="printLeaseFeesList"
             :addingRight="addingRight"
+            :removingRight="removingRight"
             :rightsModule="rightsModule"
             :columns="tableColumns"
             :rows="leaseFeeList"
@@ -68,6 +69,7 @@ export default{
         const idField = 'lease_fee_id';
         const addButtonLabel = ref('New Lease Fee');
         const addingRight = ref('Adding Lease Fees');
+        const removingRight = ref('Deleting Lease Fees');
         const rightsModule = ref('PMS');
         const submitButtonLabel = ref('Add');
         const title = ref('Lease Fee Details');
@@ -272,6 +274,7 @@ export default{
         const searchLeaseFees = () =>{
             showLoader();
             showNextBtn.value = false;
+            selectedIds.value = [];
             showPreviousBtn.value = false;
             let formData = {
                 tenant_name: tenant_name_search.value,
@@ -440,7 +443,7 @@ export default{
             loadPrev, loadNext, firstPage, lastPage, idField, actions, handleActionClick, propModalVisible, closeModal,
             submitButtonLabel, showModal, addNewLeaseFee, showLoader, loader, hideLoader, modal_loader, modal_top, modal_left, modal_width,displayButtons,
             showModalLoader, hideModalLoader, formFields, handleSelectionChange, flex_basis,flex_basis_percentage,
-            dropdownOptions, handleDynamicOption, createLeaseFee,addingRight,rightsModule,printLeaseFeesList,selectSearchQuantity,selectedValue
+            dropdownOptions, handleDynamicOption, createLeaseFee,addingRight,removingRight,rightsModule,printLeaseFeesList,selectSearchQuantity,selectedValue
         }
     }
 };

@@ -14,6 +14,7 @@
             @removeSelectedItems="removeReceipts"
             @printList="printList"
             :addingRight="addingRight"
+            :removingRight="removingRight"
             :rightsModule="rightsModule"
             :columns="tableColumns"
             :rows="receiptsList"
@@ -85,6 +86,7 @@ export default{
         const idField = 'journal_id';
         const addButtonLabel = ref('New Credit Note');
         const addingRight = ref('Adding Credit Notes');
+        const removingRight = ref('Deleting Tenant Receipt');
         const rightsModule = ref('PMS');
         const submitButtonLabel = ref('Add');
         const title = ref('Receipt Reversal');
@@ -253,6 +255,7 @@ export default{
         const searchReceipts = () =>{
             showLoader();
             showNextBtn.value = false;
+            selectedIds.value = [];
             showPreviousBtn.value = false;
             let formData = {
                 client_category: "Tenants",
@@ -444,7 +447,7 @@ export default{
             loadPrev, loadNext, firstPage, lastPage, idField, actions, handleActionClick, propModalVisible, closeModal,
             submitButtonLabel, showModal, addNewReceipt, showLoader, loader, hideLoader, modal_loader, modal_top, modal_left, modal_width,displayButtons,
             showModalLoader, hideModalLoader, handleSelectionChange, flex_basis,flex_basis_percentage,
-            removeReceipt, removeReceipts, dropdownOptions, handleDynamicOption,addingRight,rightsModule,selectSearchQuantity,selectedValue,
+            removeReceipt, removeReceipts, dropdownOptions, handleDynamicOption,addingRight,removingRight,rightsModule,selectSearchQuantity,selectedValue,
             showDetails,detailsTitle,hideDetails,handleShowDetails,journalEntries,receiptLines,tabs,selectTab,activeTab
         }
     }

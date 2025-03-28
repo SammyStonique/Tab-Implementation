@@ -13,6 +13,7 @@
             @printExcel="downloadGroupsExcel"
             @printCSV="downloadGroupsCSV"
             :addingRight="addingRight"
+            :removingRight="removingRight"
             :rightsModule="rightsModule"
             :columns="tableColumns"
             :rows="groupsList"
@@ -66,6 +67,7 @@ export default{
         const idField = 'pay_group_id';
         const addButtonLabel = ref('New Pay Group');
         const addingRight = ref('Adding Pay Group');
+        const removingRight = ref('Deleting Pay Group');
         const rightsModule = ref('HR');
         const title = ref('Pay Group Details');
         const submitButtonLabel = ref('Add');
@@ -316,6 +318,7 @@ export default{
         const searchGroups = () =>{
             showLoader();
             showNextBtn.value = false;
+            selectedIds.value = [];
             showPreviousBtn.value = false;
             let formData = {
                 pay_group_name: group_name_search.value,
@@ -350,6 +353,7 @@ export default{
             searchGroups(selectedValue.value);
         };
         const resetFilters = () =>{
+            currentPage.value = 1;
             selectedValue.value = 50;
             group_name_search.value = "";
             searchGroups();
@@ -504,11 +508,11 @@ export default{
         })
         return{
             title, searchGroups,resetFilters, addButtonLabel, searchFilters, tableColumns, groupsList,
-            propResults, propArrLen, propCount, pageCount, showNextBtn, showPreviousBtn,
+            currentPage,propResults, propArrLen, propCount, pageCount, showNextBtn, showPreviousBtn,
             loadPrev, loadNext, firstPage, lastPage, idField, actions, handleActionClick, propModalVisible, closeModal,
             submitButtonLabel, showModal, addNewGroup, showLoader, loader, hideLoader, modal_loader, modal_top, modal_left, modal_width,displayButtons,
             showModalLoader, hideModalLoader, saveGroup, formFields, handleSelectionChange, flex_basis,flex_basis_percentage,
-            removeGroup, removeGroups,addingRight,rightsModule,printGroupsList,selectSearchQuantity,selectedValue,
+            removeGroup, removeGroups,addingRight,removingRight,rightsModule,printGroupsList,selectSearchQuantity,selectedValue,
             downloadGroupsCSV,downloadGroupsExcel
         }
     }

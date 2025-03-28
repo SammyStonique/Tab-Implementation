@@ -10,6 +10,7 @@
         @removeItem="removeAllocation"
         @removeSelectedItems="removeAllocations"
         @printList="printList"
+        :removingRight="removingRight"
         :rightsModule="rightsModule"
         :columns="tableColumns"
         :rows="prepaymentsList"
@@ -65,6 +66,7 @@ export default{
         const invComponentKey = ref(0);
         const showAddButton = ref(false);
         const title = ref('Prepayment Allocation');
+        const removingRight = ref('Deleting Prepayment Allocations');
         const rightsModule = ref('PMS');
         const companyID = computed(()=> store.state.userData.company_id);
         const idField = 'tenant_prepayment_alloc_id';
@@ -213,6 +215,9 @@ export default{
         }
         const searchAllocations = () =>{
             showLoader();
+            selectedIds.value = [];
+            showNextBtn.value = false;
+            showPreviousBtn.value = false;
             let formData = {
                 client_code: tenant_code_search.value,
                 client_name: tenant_name_search.value,
@@ -294,7 +299,7 @@ export default{
             addButtonLabel, searchFilters,tableColumns,resetFilters,currentPage,loadPrev,loadNext,firstPage,lastPage,showNextBtn,showPreviousBtn, handleActionClick,displayButtons,
             modal_top, modal_left, modal_width, showLoader, loader, hideLoader, modal_loader, showModalLoader, hideModalLoader,
             closeModal, handleSelectionChange, pageComponentKey, flex_basis, flex_basis_percentage, removeAllocation, removeAllocations,
-            rightsModule,selectSearchQuantity,selectedValue
+            removingRight,rightsModule,selectSearchQuantity,selectedValue
         }
     }
 }

@@ -13,6 +13,7 @@
             @removeSelectedItems="removeProducts"
             @printList="printproductsList"
             :addingRight="addingRight"
+            :removingRight="removingRight"
             :rightsModule="rightsModule"
             :columns="tableColumns"
             :rows="productsList"
@@ -86,6 +87,7 @@ export default{
         const idField = 'savings_product_id';
         const addButtonLabel = ref('New Savings Product');
         const addingRight = ref('Adding Savings Products');
+        const removingRight = ref('Deleting Savings Products');
         const rightsModule = ref('MMS');
         const submitButtonLabel = ref('Add');
         const selectedIds = ref([]);
@@ -418,7 +420,7 @@ export default{
             propResults, propArrLen, propCount, pageCount, showNextBtn, showPreviousBtn,flex_basis,flex_basis_percentage,
             loadPrev, loadNext, firstPage, lastPage, idField, actions, handleActionClick,showDetails,detailsTitle,hideDetails,
             submitButtonLabel, showModal, addNewProduct, showLoader, loader, hideLoader, removeProduct, removeProducts,
-            handleSelectionChange,addingRight,rightsModule,printproductsList,selectSearchQuantity,selectedValue,
+            handleSelectionChange,addingRight,removingRight,rightsModule,printproductsList,selectSearchQuantity,selectedValue,
             modal_left,modal_top,modal_width,trans_modal_loader,transModalVisible,transTitle,showTransModalLoader,hideTransModalLoader,changeProductStatus,closeTransModal,
             dropdownOptions,handleDynamicOption,product_status,exit_date
         }

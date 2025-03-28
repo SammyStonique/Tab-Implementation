@@ -11,6 +11,7 @@
         @removeSelectedItems="removeBalances"
         @printList="printBalancesList"
         :addingRight="addingRight"
+        :removingRight="removingRight"
         :rightsModule="rightsModule"
         :columns="tableColumns"
         :rows="balancesList"
@@ -65,6 +66,7 @@ export default{
         const modal_loader = ref('none');
         const addButtonLabel = ref('New Balance');
         const addingRight = ref('Adding Tenant Take-On Balance');
+        const removingRight = ref('Deleting Tenant Take-On Balance');
         const rightsModule = ref('PMS');
         const pageComponentKey = ref(0);
         const depComponentKey = ref(0);
@@ -333,6 +335,9 @@ export default{
         }
         const searchBalances = () =>{
             showLoader();
+            showNextBtn.value = false;
+            selectedIds.value = [];
+            showPreviousBtn.value = false;
             let formData = {
                 tenant_code: tenant_code_search.value,
                 tenant_name: tenant_name_search.value,
@@ -449,7 +454,7 @@ export default{
             showNextBtn,showPreviousBtn,addNewBalance, handleActionClick,createTenantBalance,displayButtons,handleReset,
             modal_top, modal_left, modal_width, showLoader, loader, hideLoader, modal_loader, showModalLoader, hideModalLoader,
             closeModal, handleSelectionChange, removeBalance, removeBalances, pageComponentKey, flex_basis, flex_basis_percentage,
-            addingRight,rightsModule,printBalancesList,selectSearchQuantity,selectedValue
+            addingRight,removingRight,rightsModule,printBalancesList,selectSearchQuantity,selectedValue
         }
     }
 }

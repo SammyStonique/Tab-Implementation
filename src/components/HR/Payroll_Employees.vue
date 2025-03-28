@@ -178,6 +178,7 @@ export default{
         const searchEmployees = () =>{
             showLoader();
             showNextBtn.value = false;
+            selectedIds.value = [];
             showPreviousBtn.value = false;
             let formData = {
                 staff_number: staff_number_search.value,
@@ -214,6 +215,7 @@ export default{
             searchEmployees(selectedValue.value);
         };
         const resetFilters = () =>{
+            currentPage.value = 1;
             selectedValue.value = 50;
             staff_number_search.value = "";
             employee_name_search.value = "";
@@ -366,7 +368,7 @@ export default{
         })
         return{
             searchEmployees,resetFilters, searchFilters, tableColumns, employeesList,dropdownWidth,showAddButton,
-            propResults, propArrLen, propCount, pageCount, showNextBtn, showPreviousBtn,
+            currentPage,propResults, propArrLen, propCount, pageCount, showNextBtn, showPreviousBtn,
             loadPrev, loadNext, firstPage, lastPage, idField, actions, handleActionClick,
             submitButtonLabel, showModal, showLoader, loader, hideLoader,showTotals,
             handleSelectionChange,rightsModule,printEmployeesList,selectSearchQuantity,selectedValue, dropdownOptions, handleDynamicOption,

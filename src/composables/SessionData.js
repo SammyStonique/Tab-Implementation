@@ -24,8 +24,12 @@ export function useFetchSessionData() {
           const user_companies = {
             "user_companies": response.data.companies
           }
+          const permissions = {
+            "permissions": response.data.permissions
+          }
           store.dispatch('userData/updateState',company_modules)
           store.dispatch('userData/updateState',user_companies)
+          store.dispatch('userData/updateState',permissions)
         }
         
     })

@@ -13,6 +13,7 @@
             @removeSelectedItems="removeBatches"
             @printList="printbatchesList"
             :addingRight="addingRight"
+            :removingRight="removingRight"
             :rightsModule="rightsModule"
             :columns="tableColumns"
             :rows="batchesList"
@@ -78,6 +79,7 @@ export default{
         const idField = 'penalty_batch_id';
         const addButtonLabel = ref('Process Penalty');
         const addingRight = ref('Processing Loan Penalties');
+        const removingRight = ref('Deleting Loan Penalties');
         const rightsModule = ref('MMS');
         const submitButtonLabel = ref('Add');
         const title = ref('Process Penalty');
@@ -429,7 +431,7 @@ export default{
             loadPrev, loadNext, firstPage, lastPage, idField, actions, handleActionClick, propModalVisible, closeModal,
             submitButtonLabel, showModal, processPenalty, showLoader, loader, hideLoader, modal_loader, modal_top, modal_left, modal_width,displayButtons,
             showModalLoader, hideModalLoader, formFields, handleSelectionChange, flex_basis,flex_basis_percentage,
-            removeBatch, removeBatches, dropdownOptions, handleDynamicOption, penaltyProcessing,addingRight,rightsModule,printbatchesList,
+            removeBatch, removeBatches, dropdownOptions, handleDynamicOption, penaltyProcessing,addingRight,removingRight,rightsModule,printbatchesList,
             selectSearchQuantity,selectedValue,
         }
     }

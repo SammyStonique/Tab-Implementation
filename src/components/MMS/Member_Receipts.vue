@@ -13,6 +13,7 @@
             @removeSelectedItems="removeReceipts"
             @printList="printReceiptsList"
             :addingRight="addingRight"
+            :removingRight="removingRight"
             :rightsModule="rightsModule"
             :columns="tableColumns"
             :rows="receiptsList"
@@ -93,6 +94,7 @@ export default{
         const { getYear } = useDateFormatter();
         const { getMonth } = useDateFormatter();
         const addingRight = ref('Adding Member Receipt');
+        const removingRight = ref('Deleting Member Receipt');
         const rightsModule = ref('MMS');
         const loader = ref('none');
         const modal_loader = ref('none');
@@ -478,7 +480,7 @@ export default{
             submitButtonLabel, showModal, showLoader, loader, hideLoader, modal_loader, modal_top, modal_left, modal_width,displayButtons,
             showModalLoader, hideModalLoader, handleSelectionChange, flex_basis,flex_basis_percentage,
             removeReceipt, removeReceipts, dropdownOptions, handleDynamicOption, addNewReceipt, printReceiptsList,
-            addingRight,rightsModule,selectSearchQuantity,selectedValue,showDetails,detailsTitle,hideDetails,handleShowDetails,journalEntries,
+            addingRight,removingRight,rightsModule,selectSearchQuantity,selectedValue,showDetails,detailsTitle,hideDetails,handleShowDetails,journalEntries,
             receiptLines,tabs,selectTab,activeTab
         }
     }

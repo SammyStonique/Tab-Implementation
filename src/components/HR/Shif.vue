@@ -10,6 +10,7 @@
             @removeItem="removeShif"
             @removeSelectedItems="removeShifs"
             :addingRight="addingRight"
+            :removingRight="removingRight"
             :rightsModule="rightsModule"
             :columns="tableColumns"
             :rows="shifList"
@@ -63,6 +64,7 @@ export default{
         const idField = 'shif_id';
         const addButtonLabel = ref('New SHIF');
         const addingRight = ref('Adding Shif');
+        const removingRight = ref('Deleting Shif');
         const rightsModule = ref('HR');
         const title = ref('SHIF Details');
         const submitButtonLabel = ref('Add');
@@ -332,6 +334,7 @@ export default{
         const searchShifs = () =>{
             showLoader();
             showNextBtn.value = false;
+            selectedIds.value = [];
             showPreviousBtn.value = false;
             let formData = {
                 company_id: companyID.value,
@@ -365,6 +368,7 @@ export default{
             searchShifs(selectedValue.value);
         };
         const resetFilters = () =>{
+            currentPage.value = 1;
             selectedValue.value = 50;
             searchShifs();
         }
@@ -446,11 +450,11 @@ export default{
         })
         return{
             title, searchShifs,resetFilters, addButtonLabel, searchFilters, tableColumns, shifList,
-            propResults, propArrLen, propCount, pageCount, showNextBtn, showPreviousBtn,
+            currentPage,propResults, propArrLen, propCount, pageCount, showNextBtn, showPreviousBtn,
             loadPrev, loadNext, firstPage, lastPage, idField, actions, handleActionClick, propModalVisible, closeModal,
             submitButtonLabel, showModal, addNewShif, showLoader, loader, hideLoader, modal_loader, modal_top, modal_left, modal_width,displayButtons,
             showModalLoader, hideModalLoader, saveShif, formFields, handleSelectionChange, flex_basis,flex_basis_percentage,
-            removeShif, removeShifs,addingRight,rightsModule,selectSearchQuantity,selectedValue,
+            removeShif, removeShifs,addingRight,removingRight,rightsModule,selectSearchQuantity,selectedValue,
         }
     }
 };

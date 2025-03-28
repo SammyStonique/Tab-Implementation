@@ -13,6 +13,7 @@
             @removeSelectedItems="removePaymentVouchers"
             @printList="printVouchersList"
             :addingRight="addingRight"
+            :removingRight="removingRight"
             :rightsModule="rightsModule"
             :columns="tableColumns"
             :rows="vouchersList"
@@ -98,6 +99,7 @@ export default{
         const idField = 'journal_id';
         const addButtonLabel = ref('New Payment Voucher');
         const addingRight = ref('Adding Payment Voucher');
+        const removingRight = ref('Deleting Payment Vouchers');
         const rightsModule = ref('Accounts');
         const submitButtonLabel = ref('Add');
         const title = ref('Receipt Booking');
@@ -268,6 +270,7 @@ export default{
         const searchPaymentVouchers = () =>{
             showLoader();
             showNextBtn.value = false;
+            selectedIds.value = [];
             showPreviousBtn.value = false;
             let formData = {
                 client_category: "Customers",
@@ -312,6 +315,7 @@ export default{
             searchPaymentVouchers(selectedValue.value);
         };
         const resetFilters = () =>{
+            currentPage.value = 1;
             client_name_search.value = "";
             client_code_search.value = "";
             from_date_search.value = "";
@@ -483,12 +487,12 @@ export default{
         })
         return{
             showTotals, title, searchPaymentVouchers,resetFilters, addButtonLabel, searchFilters, tableColumns, vouchersList,
-            propResults, propArrLen, propCount, pageCount, showNextBtn, showPreviousBtn,invModalVisible,
+            currentPage,propResults, propArrLen, propCount, pageCount, showNextBtn, showPreviousBtn,invModalVisible,
             loadPrev, loadNext, firstPage, lastPage, idField, actions, handleActionClick, propModalVisible, closeModal,
             submitButtonLabel, showModal, showLoader, loader, hideLoader, modal_loader, modal_top, modal_left, modal_width,displayButtons,
             showModalLoader, hideModalLoader, handleSelectionChange, flex_basis,flex_basis_percentage,
             removePaymentVoucher, removePaymentVouchers, dropdownOptions, handleDynamicOption, addNewPaymentVoucher, printVouchersList,
-            addingRight,rightsModule,selectSearchQuantity,selectedValue,showDetails,detailsTitle,hideDetails,handleShowDetails,journalEntries,
+            addingRight,removingRight,rightsModule,selectSearchQuantity,selectedValue,showDetails,detailsTitle,hideDetails,handleShowDetails,journalEntries,
             receiptLines,tabs,selectTab,activeTab
         }
     }

@@ -12,6 +12,7 @@
         @removeSelectedItems="removeTaxes"
         @printList="printList"
         :addingRight="addingRight"
+        :removingRight="removingRight"
         :rightsModule="rightsModule"
         :columns="tableColumns"
         :rows="taxList"
@@ -62,6 +63,7 @@ export default{
         const { formatDate } = useDateFormatter();
         const addButtonLabel = ref('New Tax Type');
         const addingRight = ref('Adding Taxes');
+        const removingRight = ref('Deleting Taxes');
         const rightsModule = ref('Accounts');
         const pageComponentKey = ref(0);
         const inputComponentKey = ref(0);
@@ -396,6 +398,7 @@ export default{
         }
         const searchTaxes = () =>{
             showLoader();
+            selectedIds.value = [];
             let formData = {
                 tax_name: tax_name_search.value,
                 company: companyID.value
@@ -468,7 +471,7 @@ export default{
             addButtonLabel, searchFilters,tableColumns,resetFilters,loadPrev,loadNext,firstPage,lastPage,flex_basis,flex_basis_percentage,
             showNextBtn,showPreviousBtn,addNewTax, handleActionClick,saveTax,displayButtons,handleReset,
             modal_top, modal_left, modal_width, showLoader, loader, hideLoader, modal_loader, showModalLoader, hideModalLoader,
-            closeModal, handleSelectionChange, removeTax, removeTaxes, pageComponentKey,addingRight,rightsModule
+            closeModal, handleSelectionChange, removeTax, removeTaxes, pageComponentKey,addingRight,removingRight,rightsModule
         }
     }
 }

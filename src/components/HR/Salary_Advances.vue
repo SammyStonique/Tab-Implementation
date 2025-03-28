@@ -13,6 +13,7 @@
             @printExcel="downloadAdvancesExcel"
             @printCSV="downloadAdvancesCSV"
             :addingRight="addingRight"
+            :removingRight="removingRight"
             :rightsModule="rightsModule"
             :columns="tableColumns"
             :rows="advancesList"
@@ -67,6 +68,7 @@ export default{
         const idField = 'salary_advance_id';
         const addButtonLabel = ref('New Salary Advance');
         const addingRight = ref('Adding Salary Advances');
+        const removingRight = ref('Deleting Salary Advances');
         const rightsModule = ref('HR');
         const title = ref('Salary Advance Details');
         const submitButtonLabel = ref('Add');
@@ -343,6 +345,7 @@ export default{
         const searchAdvances = () =>{
             showLoader();
             showNextBtn.value = false;
+            selectedIds.value = [];
             showPreviousBtn.value = false;
             let formData = {
                 employee_name: employee_name_search.value,
@@ -545,7 +548,7 @@ export default{
             loadPrev, loadNext, firstPage, lastPage, idField, actions, handleActionClick, propModalVisible, closeModal,
             submitButtonLabel, showModal, addNewAdvance, showLoader, loader, hideLoader, modal_loader, modal_top, modal_left, modal_width,displayButtons,
             showModalLoader, hideModalLoader, saveAdvance, formFields, handleSelectionChange, flex_basis,flex_basis_percentage,
-            removeAdvance, removeAdvances,addingRight,rightsModule,printAdvancesList,selectSearchQuantity,selectedValue,
+            removeAdvance, removeAdvances,addingRight,removingRight,rightsModule,printAdvancesList,selectSearchQuantity,selectedValue,
             downloadAdvancesCSV,downloadAdvancesExcel
         }
     }

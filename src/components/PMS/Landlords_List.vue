@@ -12,6 +12,7 @@
             @removeSelectedItems="removeLandlords"
             @printList="printLandlordsList"
             :addingRight="addingRight"
+            :removingRight="removingRight"
             :rightsModule="rightsModule"
             :columns="tableColumns"
             :rows="landlordList"
@@ -62,6 +63,7 @@ export default{
         const idField = 'landlord_id';
         const addButtonLabel = ref('New Landlord');
         const addingRight = ref('Adding Landlord');
+        const removingRight = ref('Deleting Landlord');
         const rightsModule = ref('PMS');
         const title = ref('Landlord Details');
         const submitButtonLabel = ref('Add');
@@ -308,6 +310,7 @@ export default{
         const searchLandlords = () =>{
             showLoader();
             showNextBtn.value = false;
+            selectedIds.value = [];
             showPreviousBtn.value = false;
             let formData = {
                 name: name_search.value,
@@ -444,7 +447,7 @@ export default{
             loadPrev, loadNext, firstPage, lastPage, idField, actions, handleActionClick, propModalVisible, closeModal,
             submitButtonLabel, showModal, addNewLandlord, showLoader, loader, hideLoader, modal_loader, modal_top, modal_left, modal_width,displayButtons,
             showModalLoader, hideModalLoader, saveLandlord, formFields, handleSelectionChange, flex_basis,flex_basis_percentage,
-            importLandlords, removeLandlord, removeLandlords,addingRight,rightsModule,printLandlordsList
+            importLandlords, removeLandlord, removeLandlords,addingRight,removingRight,rightsModule,printLandlordsList
         }
     }
 };

@@ -260,6 +260,9 @@ export default{
         }
         const searchTenantArrears = () =>{
             showLoader();
+            showNextBtn.value = false;
+            selectedIds.value = [];
+            showPreviousBtn.value = false;
             let formData = {
                 client_code: tenant_code_search.value,
                 client_name: tenant_name_search.value,

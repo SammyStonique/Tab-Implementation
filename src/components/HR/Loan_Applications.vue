@@ -13,6 +13,7 @@
             @removeSelectedItems="removeApplications"
             @printList="printApplicationList"
             :addingRight="addingRight"
+            :removingRight="removingRight"
             :rightsModule="rightsModule"
             :columns="tableColumns"
             :rows="applicationList"
@@ -102,6 +103,7 @@ export default{
         const idField = 'employee_loan_application_id';
         const addButtonLabel = ref('New Application');
         const addingRight = ref('Adding Employee Loan Applications');
+        const removingRight = ref('Deleting Employee Loan Applications');
         const rightsModule = ref('HR');
         const submitButtonLabel = ref('Add');
         const selectedIds = ref([]);
@@ -307,6 +309,7 @@ export default{
         const searchApplications = () =>{
             showLoader();
             showNextBtn.value = false;
+            selectedIds.value = [];
             showPreviousBtn.value = false;
             let formData = {
                 employee_name: name_search.value,
@@ -636,7 +639,7 @@ export default{
             currentPage,propResults, propArrLen, propCount, pageCount, showNextBtn, showPreviousBtn,flex_basis,flex_basis_percentage,formFields,handleReset,
             loadPrev, loadNext, firstPage, lastPage, idField, actions, handleActionClick,showDetails,detailsTitle,hideDetails,
             submitButtonLabel, showModal, addNewApplication, showLoader, loader, hideLoader, removeApplication, removeApplications,
-            handleSelectionChange,addingRight,rightsModule,printApplicationList,selectSearchQuantity,selectedValue,
+            handleSelectionChange,addingRight,removingRight,rightsModule,printApplicationList,selectSearchQuantity,selectedValue,
             modal_left,modal_top,modal_width,trans_modal_loader,transModalVisible,transTitle,showTransModalLoader,hideTransModalLoader,approveLoan,closeTransModal,
             dropdownOptions,handleDynamicOption,refTitle,refFormFields,refModalVisible,ref_modal_loader,handleRefReset,showRefModalLoader,hideRefModalLoader,closeRefModal,
             disburseMemberLoan,showDetails,detailsTitle,hideDetails,handleShowDetails,loanScheduleRows,tabs,selectTab,activeTab

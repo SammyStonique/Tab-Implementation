@@ -10,6 +10,7 @@
         @removeSelectedItems="removeAccounts"
         @importData="importAccounts"
         :addingRight="addingRight"
+        :removingRight="removingRight"
         :rightsModule="rightsModule"
         :columns="tableColumns"
         :rows="accountsList"
@@ -63,6 +64,7 @@ export default{
         const title = ref('Saving Account Details');
         const addButtonLabel = ref('New Saving Account');
         const addingRight = ref('Adding Saving Accounts');
+        const removingRight = ref('Deleting Saving Accounts');
         const rightsModule = ref('MMS');
         const idField = 'saving_account_id';
         const depModalVisible = ref(false);
@@ -495,7 +497,7 @@ export default{
             loadPrev, loadNext, firstPage, lastPage, actions, formFields, depModalVisible, addNewAccount,
             displayButtons,flex_basis,flex_basis_percentage, handleActionClick, handleReset, saveAccount,
             showLoader, loader, hideLoader, modal_loader, showModalLoader, hideModalLoader, removeAccount, removeAccounts,
-            addingRight,rightsModule, closeModal,handleSelectionChange,selectSearchQuantity,selectedValue,importAccounts
+            addingRight,removingRight,rightsModule, closeModal,handleSelectionChange,selectSearchQuantity,selectedValue,importAccounts
         }
     }
 }

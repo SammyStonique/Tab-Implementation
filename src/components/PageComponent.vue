@@ -4,7 +4,7 @@
             <div class="fixed bg-white w-[93%] z-60" v-if="pageTitle != ''">
                 <p class="font-bold text-lg text-black">{{ pageTitle }}</p>
             </div>
-            <div class="fixed bg-white w-[93%] z-50">
+            <div class="fixed bg-white w-[95%] z-50">
                 <FilterBar 
                     :addButtonLabel="addButtonLabel" 
                     :showAddButton="showAddButton"
@@ -22,6 +22,7 @@
                     @handleDynamicOption="handleDynamicOption"
                     :options="options"
                     :addingRight="addingRight"
+                    :removingRight="removingRight"
                     :rightsModule="rightsModule"
                     :dropdownWidth="dropdownWidth"
                     :selectOptions="selectOptions"
@@ -29,7 +30,7 @@
                     :searchPlaceholder="searchPlaceholder"
                     />
             </div>
-            <div class="fixed table w-[93%] top-[9.9rem] z-20">
+            <div class="fixed table w-[95%] top-[9.9rem] z-20">
                 <DynamicTable 
                     :columns="columns" 
                     :rows="rows"
@@ -43,7 +44,7 @@
                     :rightsModule="rightsModule"
                 />
             </div>
-            <div class="fixed w-[93%] z-30 bottom-5 pb-2 bg-white">
+            <div class="fixed w-[96%] z-30 bottom-5 pb-2 bg-white">
                 <ShowDetails 
                     v-model:visible="showDetails"
                     :detailsTitle="detailsTitle"
@@ -193,6 +194,10 @@ export default defineComponent({
             default: () => ''
         },
         addingRight:{
+            type: String,
+            default: () => ''
+        },
+        removingRight:{
             type: String,
             default: () => ''
         },

@@ -11,6 +11,7 @@
             @removeSelectedItems="removeExitCharges"
             @printList="printList"
             :addingRight="addingRight"
+            :removingRight="removingRight"
             :rightsModule="rightsModule"
             :columns="tableColumns"
             :rows="chargesList"
@@ -60,6 +61,7 @@ export default{
         const idField = 'exit_charge_id';
         const addButtonLabel = ref('New Exit Charge');
         const addingRight = ref('Adding Exit Charges');
+        const removingRight = ref('Deleting Exit Charges');
         const rightsModule = ref('PMS');
         const title = ref('Exit Charge Details');
         const submitButtonLabel = ref('Add');
@@ -309,6 +311,7 @@ export default{
         const searchExitCharges = () =>{
             showLoader();
             showNextBtn.value = false;
+            selectedIds.value = [];
             showPreviousBtn.value = false;
             let formData = {
                 name: name_search.value,
@@ -418,7 +421,7 @@ export default{
             loadPrev, loadNext, firstPage, lastPage, idField, actions, handleActionClick, propModalVisible, closeModal,
             submitButtonLabel, showModal, addNewExitCharge, showLoader, loader, hideLoader, modal_loader, modal_top, modal_left, modal_width,displayButtons,
             showModalLoader, hideModalLoader, saveExitCharge, formFields, handleSelectionChange, flex_basis,flex_basis_percentage,
-            removeExitCharge, removeExitCharges,addingRight,rightsModule
+            removeExitCharge, removeExitCharges,addingRight,removingRight,rightsModule
         }
     }
 };

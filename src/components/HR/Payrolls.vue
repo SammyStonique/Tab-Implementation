@@ -13,6 +13,7 @@
             @removeSelectedItems="removePayrolls"
             @printList="printPayrollList"
             :addingRight="addingRight"
+            :removingRight="removingRight"
             :rightsModule="rightsModule"
             :columns="tableColumns"
             :rows="payrollList"
@@ -113,6 +114,7 @@ export default{
         const idField = 'payroll_id';
         const addButtonLabel = ref('Run Payroll');
         const addingRight = ref('Running Payroll');
+        const removingRight = ref('Deleting Payroll');
         const rightsModule = ref('HR');
         const submitButtonLabel = ref('Add');
         const title = ref('Run Payroll');
@@ -422,6 +424,7 @@ export default{
         const searchPayrolls = () =>{
             showLoader();
             showNextBtn.value = false;
+            selectedIds.value = [];
             showPreviousBtn.value = false;
             let formData = {
                 from_date: from_date_search.value,
@@ -462,6 +465,7 @@ export default{
             searchPayrolls(selectedValue.value);
         };
         const resetFilters = () =>{
+            currentPage.value = 1;
             selectedValue.value = 50;
             month_search.value = "";
             year_search.value = "";
@@ -620,11 +624,11 @@ export default{
         })
         return{
             showTotals,title, searchPayrolls,resetFilters, addButtonLabel, searchFilters, tableColumns, payrollList,
-            propResults, propArrLen, propCount, pageCount, showNextBtn, showPreviousBtn,invModalVisible,
+            currentPage,propResults, propArrLen, propCount, pageCount, showNextBtn, showPreviousBtn,invModalVisible,
             loadPrev, loadNext, firstPage, lastPage, idField, actions, handleActionClick, propModalVisible, closeModal,
             submitButtonLabel, showModal, runPayroll, showLoader, loader, hideLoader, modal_loader, modal_top, modal_left, modal_width,displayButtons,
             showModalLoader, hideModalLoader, formFields, handleSelectionChange, flex_basis,flex_basis_percentage,
-            removePayroll, removePayrolls, dropdownOptions, handleDynamicOption, payrollProcessing,addingRight,rightsModule,printPayrollList,
+            removePayroll, removePayrolls, dropdownOptions, handleDynamicOption, payrollProcessing,addingRight,removingRight,rightsModule,printPayrollList,
             selectSearchQuantity,selectedValue,showDetails,detailsTitle,hideDetails,handleShowDetails,journalEntries,
             invoiceLines,invoicePayments,tabs,selectTab,activeTab,app_modal_loader,appTitle,appModalVisible,approvePayroll,showAppModalLoader,hideAppModalLoader,
             formFields1,closeAppModal

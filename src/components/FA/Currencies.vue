@@ -9,6 +9,7 @@
         @removeItem="removeCurrency"
         @removeSelectedItems="removeCurrencies"
         :addingRight="addingRight"
+        :removingRight="removingRight"
         :rightsModule="rightsModule"
         :columns="tableColumns"
         :rows="currencyList"
@@ -58,9 +59,11 @@ export default{
         const title = ref('Currency Details');
         const addButtonLabel = ref('New Currency');
         const addingRight = ref('Adding Currencies');
+        const removingRight = ref('Deleting Currencies');
         const rightsModule = ref('Accounts');
         const idField = 'currency_id';
         const depModalVisible = ref(false);
+        const selectedIds = ref([]);
         const currencyList = ref([]);
         const depResults = ref([]);
         const depArrLen = ref(0);
@@ -298,6 +301,7 @@ export default{
         const searchCurrencies = () =>{
             showLoader();
             showNextBtn.value = false;
+            selectedIds.value = [];
             showPreviousBtn.value = false;
             let formData = {
                 name: currency_name_search.value,
@@ -360,6 +364,7 @@ export default{
             searchCurrencies();
         }
         const resetFilters = () =>{
+            currentPage.value = 1;
             currency_code_search.value = "";
             currency_name_search.value = "";
             searchCurrencies();
@@ -373,11 +378,11 @@ export default{
         })
         return{
             title,idField, searchCurrencies, addButtonLabel, searchFilters, resetFilters, tableColumns, currencyList,
-            depResults, depArrLen, depCount, pageCount, showNextBtn, showPreviousBtn,modal_top, modal_left, modal_width,
+            currentPage,depResults, depArrLen, depCount, pageCount, showNextBtn, showPreviousBtn,modal_top, modal_left, modal_width,
             loadPrev, loadNext, firstPage, lastPage, actions, formFields, depModalVisible, addNewCurrency,
             displayButtons,flex_basis,flex_basis_percentage, handleActionClick, handleReset, saveCurrency,
             showLoader, loader, hideLoader, modal_loader, showModalLoader, hideModalLoader, removeCurrency, removeCurrencies,
-            addingRight,rightsModule, closeModal,selectSearchQuantity,selectedValue,
+            addingRight,removingRight,rightsModule, closeModal,selectSearchQuantity,selectedValue,selectedIds
         }
     }
 }

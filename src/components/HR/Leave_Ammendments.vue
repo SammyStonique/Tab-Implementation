@@ -13,6 +13,7 @@
             @printExcel="downloadAmmendmentsExcel"
             @printCSV="downloadAmmendmentsCSV"
             :addingRight="addingRight"
+            :removingRight="removingRight"
             :rightsModule="rightsModule"
             :columns="tableColumns"
             :rows="ammendmentsList"
@@ -77,6 +78,7 @@ export default{
         const idField = 'leave_ammendment_id';
         const addButtonLabel = ref('New Leave Ammendment');
         const addingRight = ref('Adding Leave Ammendments');
+        const removingRight = ref('Deleting Leave Ammendments');
         const rightsModule = ref('HR');
         const title = ref('Leave Ammendment Details');
         const appTitle = ref('Approve Leave Ammendment');
@@ -546,6 +548,7 @@ export default{
         const searchAmmendments = () =>{
             showLoader();
             showNextBtn.value = false;
+            selectedIds.value = [];
             showPreviousBtn.value = false;
             let formData = {
                 employee_name: employee_name_search.value,
@@ -771,7 +774,7 @@ export default{
             loadPrev, loadNext, firstPage, lastPage, idField, actions, handleActionClick, propModalVisible, closeModal,
             submitButtonLabel, showModal, addNewAmmendment, showLoader, loader, hideLoader, modal_loader, modal_top, modal_left, modal_width,displayButtons,
             showModalLoader, hideModalLoader, saveAmmendment, formFields, handleSelectionChange, flex_basis,flex_basis_percentage,
-            removeAmmendment, removeAmmendments,addingRight,rightsModule,printAmmendmentsList,selectSearchQuantity,selectedValue,
+            removeAmmendment, removeAmmendments,addingRight,removingRight,rightsModule,printAmmendmentsList,selectSearchQuantity,selectedValue,
             downloadAmmendmentsCSV,downloadAmmendmentsExcel,app_modal_loader,appTitle,appModalVisible,approveLeaveAmmendment,showAppModalLoader,hideAppModalLoader,
             formFields1,closeAppModal,handleAppReset
         }

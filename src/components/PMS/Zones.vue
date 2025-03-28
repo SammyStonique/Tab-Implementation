@@ -12,6 +12,7 @@
             @removeSelectedItems="removeZones"
             @printList="printList"
             :addingRight="addingRight"
+            :removingRight="removingRight"
             :rightsModule="rightsModule"
             :columns="tableColumns"
             :rows="zonesList"
@@ -62,6 +63,7 @@ export default{
         const idField = 'zone_id';
         const addButtonLabel = ref('New Zone');
         const addingRight = ref('Adding Zone');
+        const removingRight = ref('Deleting Zone');
         const rightsModule = ref('PMS');
         const title = ref('Zone Details');
         const submitButtonLabel = ref('Add');
@@ -285,6 +287,7 @@ export default{
         const searchZones = () =>{
             showLoader();
             showNextBtn.value = false;
+            selectedIds.value = [];
             showPreviousBtn.value = false;
             let formData = {
                 name: name_search.value,
@@ -392,7 +395,7 @@ export default{
             loadPrev, loadNext, firstPage, lastPage, idField, actions, handleActionClick, zoneModalVisible, closeModal,
             submitButtonLabel, showModal, addNewZone, showLoader, loader, hideLoader, modal_loader, modal_top, modal_left, modal_width,displayButtons,
             showModalLoader, hideModalLoader, saveZone, formFields, handleSelectionChange, flex_basis,flex_basis_percentage,
-            importZones, removeZone, removeZones,addingRight,rightsModule
+            importZones, removeZone, removeZones,addingRight,removingRight,rightsModule
         }
     }
 };

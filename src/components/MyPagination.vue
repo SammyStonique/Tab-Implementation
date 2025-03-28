@@ -1,5 +1,5 @@
 <template>
-    <div class="flex mt-1.5">
+    <div class="flex mt-1.5 bg-orange-200">
         <div class="basis-1/2 flex text-left">
             <div class="border-2 border-gray-200">
                 <button class=" px-2  border-r-2 border-gray-200 hover:bg-slate-800 hover:text-white" @click="firstPage"><i class="fa fa-angle-double-left" aria-hidden="true"></i></button>

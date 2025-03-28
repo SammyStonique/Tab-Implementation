@@ -9,6 +9,7 @@
         @removeItem="removeSecurity"
         @removeSelectedItems="removeSecurities"
         :addingRight="addingRight"
+        :removingRight="removingRight"
         :rightsModule="rightsModule"
         :columns="tableColumns"
         :rows="securitiesList"
@@ -61,6 +62,7 @@ export default{
         const title = ref('Loan Security Details');
         const addButtonLabel = ref('New Security');
         const addingRight = ref('Adding Loan Securities');
+        const removingRight = ref('Deleting Loan Securities');
         const rightsModule = ref('MMS');
         const idField = 'loan_security_id';
         const depModalVisible = ref(false);
@@ -413,7 +415,7 @@ export default{
             loadPrev, loadNext, firstPage, lastPage, actions, formFields, depModalVisible, addNewSecurity,
             displayButtons,flex_basis,flex_basis_percentage, handleActionClick, handleReset, createLoanSecurity,
             showLoader, loader, hideLoader, modal_loader, showModalLoader, hideModalLoader, removeSecurity, removeSecurities,
-            addingRight,rightsModule, closeModal,selectSearchQuantity,selectedValue,handleSelectionChange
+            addingRight,removingRight,rightsModule, closeModal,selectSearchQuantity,selectedValue,handleSelectionChange
         }
     }
 }

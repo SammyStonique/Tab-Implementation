@@ -11,6 +11,7 @@
             @removeSelectedItems="removeHolidays"
             @printList="printList"
             :addingRight="addingRight"
+            :removingRight="removingRight"
             :rightsModule="rightsModule"
             :columns="tableColumns"
             :rows="holidaysList"
@@ -63,6 +64,7 @@ export default{
         const addButtonLabel = ref('New Holiday');
         const title = ref('Holiday Details');
         const addingRight = ref('Adding Holidays');
+        const removingRight = ref('Deleting Holidays');
         const rightsModule = ref('HR');
         const submitButtonLabel = ref('Add');
         const ledComponentKey = ref(0);
@@ -281,6 +283,7 @@ export default{
         const searchHolidays = () =>{
             showLoader();
             showNextBtn.value = false;
+            selectedIds.value = [];
             showPreviousBtn.value = false;
             let formData = {
                 holiday_name: name_search.value,
@@ -315,6 +318,7 @@ export default{
             searchHolidays(selectedValue.value);
         };
         const resetFilters = () =>{
+            currentPage.value = 1;
             name_search.value = "";
             searchHolidays();
         }
@@ -390,7 +394,7 @@ export default{
         })
         return{
             title, searchHolidays,resetFilters, addButtonLabel, searchFilters, tableColumns, holidaysList,selectSearchQuantity,selectedValue,
-            propResults, propArrLen, propCount, pageCount, showNextBtn, showPreviousBtn,addingRight,rightsModule,
+            currentPage,propResults, propArrLen, propCount, pageCount, showNextBtn, showPreviousBtn,addingRight,removingRight,rightsModule,
             loadPrev, loadNext, firstPage, lastPage, idField, actions, handleActionClick, propModalVisible, closeModal,
             submitButtonLabel, showModal, addNewHoliday, showLoader, loader, hideLoader, modal_loader, modal_top, modal_left, modal_width,displayButtons,
             showModalLoader, hideModalLoader, saveHoliday, formFields, handleSelectionChange, flex_basis,flex_basis_percentage,

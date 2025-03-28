@@ -11,6 +11,7 @@
             @removeSelectedItems="removeFiscalPeriods"
             @printList="printList"
             :addingRight="addingRight"
+            :removingRight="removingRight"
             :rightsModule="rightsModule"
             :columns="tableColumns"
             :rows="periodList"
@@ -61,6 +62,7 @@ export default{
         const idField = 'fiscal_period_id';
         const addButtonLabel = ref('New Fiscal Period');
         const addingRight = ref('Adding Fiscal Periods');
+        const removingRight = ref('Deleting Fiscal Periods');
         const rightsModule = ref('Accounts');
         const title = ref('Fiscal Period Details');
         const submitButtonLabel = ref('Add');
@@ -246,6 +248,7 @@ export default{
         const searchFiscalPeriods = () =>{
             showLoader();
             showNextBtn.value = false;
+            selectedIds.value = [];
             showPreviousBtn.value = false;
             let formData = {
                 name: "",
@@ -275,6 +278,7 @@ export default{
             })
         }
         const resetFilters = () =>{
+            currentPage.value = [];
             store.commit('Fiscal_Periods/RESET_SEARCH_FILTERS')
             searchFiscalPeriods();
         }
@@ -336,11 +340,11 @@ export default{
         })
         return{
             title, searchFiscalPeriods,resetFilters, addButtonLabel, searchFilters, tableColumns, periodList,
-            propResults, propArrLen, propCount, pageCount, showNextBtn, showPreviousBtn,
+            currentPage,propResults, propArrLen, propCount, pageCount, showNextBtn, showPreviousBtn,
             loadPrev, loadNext, firstPage, lastPage, idField, actions, handleActionClick, propModalVisible, closeModal,
             submitButtonLabel, showModal, addNewFiscalPeriod, showLoader, loader, hideLoader, modal_loader, modal_top, modal_left, modal_width,displayButtons,
             showModalLoader, hideModalLoader, createFiscalPeriod, formFields, handleSelectionChange, flex_basis,flex_basis_percentage,
-            removeFiscalPeriod, removeFiscalPeriods,addingRight,rightsModule
+            removeFiscalPeriod, removeFiscalPeriods,addingRight,removingRight,rightsModule
         }
     }
 };

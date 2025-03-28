@@ -116,7 +116,7 @@ export default defineComponent({
     const tableRef = ref(null);
     const selectedIds = ref([]);
     const store = useStore(); 
-    const allowedRights = ref([]);
+    const allowedRights = computed(()=> store.state.userData.permissions);
     const companyID = computed(()=> store.state.userData.company_id);
     const userID = computed(()=> store.state.userData.user_id);
 
@@ -307,25 +307,10 @@ export default defineComponent({
       emit('update-receipt-amount', paymentAllocation)
     };
 
-    const fetchEnabledRights = () =>{
-        allowedRights.value = [];
-        let formData = {
-          user: userID.value,
-          module: props.rightsModule
-        }
-        axios
-        .post("api/v1/user-permissions-search/",formData)
-        .then((response)=>{
-          allowedRights.value = response.data.results;
-        })
-        .catch((error)=>{
-          console.log(error.message);
-        })
-      };
-      const isDisabled =(permissionName) =>{
-          const permission = allowedRights.value.find(p => p.permission_name === permissionName);
-          return permission ? !permission.right_status : true;
-      };
+    const isDisabled =(permissionName) =>{
+        const permission = allowedRights.value.find(p => p.rightName === permissionName);
+        return permission ? !permission.right_status : true;
+    };
 
     onMounted(() => {
       // Optional: Adjust column widths programmatically if needed
@@ -335,7 +320,7 @@ export default defineComponent({
         const tds = table.querySelectorAll('tbody td');
         // Logic to ensure column widths are consistent
       }
-      fetchEnabledRights();
+;
     });
 
     return {

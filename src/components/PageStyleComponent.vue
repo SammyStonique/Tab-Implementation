@@ -1,5 +1,5 @@
 <template>
-    <div class="main-content z-10 bg-gray-100 px-4 py-2 text-sm">
+    <div class="main-content z-10 bg-orange-100 px-4 py-2 text-sm">
         <div class="subsection fixed w-[97%] rounded bg-white">
             <div class="">
                 <Loader 
@@ -10,7 +10,7 @@
                     @hideLoader="hideLoader"
                 />
             </div>
-            <div class="content px-8 w-full">
+            <div class="content px-2 w-full">
                 <slot name="body"></slot>
             </div>
             <slot name="footer"></slot>

@@ -9,6 +9,7 @@
         @removeItem="removeSponsor"
         @removeSelectedItems="removeSponsors"
         :addingRight="addingRight"
+        :removingRight="removingRight"
         :rightsModule="rightsModule"
         :columns="tableColumns"
         :rows="sponsorList"
@@ -56,6 +57,7 @@ export default{
         const title = ref('Sponsor Details');
         const addButtonLabel = ref('New Sponsor');
         const addingRight = ref('Adding Member Sponsors');
+        const removingRight = ref('Deleting Member Sponsors');
         const rightsModule = ref('MMS');
         const idField = 'member_sponsor_id';
         const depModalVisible = ref(false);
@@ -350,7 +352,7 @@ export default{
             loadPrev, loadNext, firstPage, lastPage, actions, formFields, depModalVisible, addNewSponsor,
             displayButtons,flex_basis,flex_basis_percentage, handleActionClick, handleReset, saveSponsor,
             showLoader, loader, hideLoader, modal_loader, showModalLoader, hideModalLoader, removeSponsor, removeSponsors,
-            addingRight,rightsModule, closeModal
+            addingRight,removingRight,rightsModule, closeModal
         }
     }
 }

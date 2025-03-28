@@ -13,6 +13,7 @@
             @removeSelectedItems="removeSchedules"
             @printList="printSchedulesList"
             :addingRight="addingRight"
+            :removingRight="removingRight"
             :rightsModule="rightsModule"
             :columns="tableColumns"
             :rows="schedulesList"
@@ -77,6 +78,7 @@ export default{
         const idField = 'armotization_schedule_id';
         const addButtonLabel = ref('New Booking');
         const addingRight = ref('Processing Schedule Interest');
+        const removingRight = ref('Deletingg Loan Schedules');
         const rightsModule = ref('MMS');
         const submitButtonLabel = ref('Add');
         const title = ref('Interest Processing');
@@ -964,7 +966,7 @@ export default{
             loadPrev, loadNext, firstPage, lastPage, idField, actions, handleActionClick, propModalVisible, closeModal,
             submitButtonLabel, showModal, postInterest, showLoader, loader, hideLoader, modal_loader, modal_top, modal_left, modal_width,displayButtons,
             showModalLoader, hideModalLoader, formFields, handleSelectionChange, flex_basis,flex_basis_percentage,
-            removeSchedule, removeSchedules, dropdownOptions, handleDynamicOption, bookScheduleInterest,addingRight,rightsModule,printSchedulesList,
+            removeSchedule, removeSchedules, dropdownOptions, handleDynamicOption, bookScheduleInterest,addingRight,removingRight,rightsModule,printSchedulesList,
             selectSearchQuantity,selectedValue,
         }
     }

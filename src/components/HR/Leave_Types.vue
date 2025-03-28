@@ -11,6 +11,7 @@
             @removeSelectedItems="removeLeaves"
             @printList="printList"
             :addingRight="addingRight"
+            :removingRight="removingRight"
             :rightsModule="rightsModule"
             :columns="tableColumns"
             :rows="leavesList"
@@ -86,6 +87,7 @@ export default{
         const holTitle = ref('Assign Holidays');
         const holidaysArr = computed(() => store.state.Holidays.holidayArr);
         const addingRight = ref('Adding Leave Types');
+        const removingRight = ref('Deleting Leave Types');
         const rightsModule = ref('HR');
         const submitButtonLabel = ref('Add');
         const holComponentKey = ref(0);
@@ -510,6 +512,7 @@ export default{
         const searchLeaves = () =>{
             showLoader();
             showNextBtn.value = false;
+            selectedIds.value = [];
             showPreviousBtn.value = false;
             let formData = {
                 leave_name: name_search.value,
@@ -544,6 +547,7 @@ export default{
             searchLeaves(selectedValue.value);
         };
         const resetFilters = () =>{
+            currentPage.value = 1;
             name_search.value = "";
             searchLeaves();
         }
@@ -622,7 +626,7 @@ export default{
         })
         return{
             title, searchLeaves,resetFilters, addButtonLabel, searchFilters, tableColumns, leavesList,selectSearchQuantity,selectedValue,
-            propResults, propArrLen, propCount, pageCount, showNextBtn, showPreviousBtn,addingRight,rightsModule,
+            currentPage,propResults, propArrLen, propCount, pageCount, showNextBtn, showPreviousBtn,addingRight,removingRight,rightsModule,
             loadPrev, loadNext, firstPage, lastPage, idField, actions, handleActionClick, propModalVisible, closeModal,
             submitButtonLabel, showModal, addNewLeave, showLoader, loader, hideLoader, modal_loader, modal_top, modal_left, modal_width,displayButtons,
             showModalLoader, hideModalLoader, saveLeave, formFields, handleSelectionChange, flex_basis,flex_basis_percentage,hol_modal_loader,hol_modal_width,holModalVisible,holTitle,

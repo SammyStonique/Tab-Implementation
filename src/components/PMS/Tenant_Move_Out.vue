@@ -450,6 +450,7 @@ export default{
         const searchTenants = () =>{
             showLoader();
             showNextBtn.value = false;
+            selectedIds.value = [];
             showPreviousBtn.value = false;
             let formData = {
                 tenant_name: name_search.value,

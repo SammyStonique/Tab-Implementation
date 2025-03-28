@@ -14,6 +14,7 @@
             @printExcel="downloadPropertiesExcel"
             @printCSV="downloadPropertiesCSV"
             :addingRight="addingRight"
+            :removingRight="removingRight"
             :rightsModule="rightsModule"
             :columns="tableColumns"
             :rows="propertyList"
@@ -56,6 +57,7 @@ export default{
         const idField = 'property_id';
         const addButtonLabel = ref('New Property');
         const addingRight = ref('Adding Property');
+        const removingRight = ref('Deleting Property');
         const rightsModule = ref('PMS');
         const submitButtonLabel = ref('Add');
         const lldSearchComponentKey = ref(0);
@@ -222,6 +224,7 @@ export default{
         const searchProperties = () =>{
             showLoader();
             showNextBtn.value = false;
+            selectedIds.value = [];
             showPreviousBtn.value = false;
             let formData = {
                 name: name_search.value,
@@ -431,7 +434,7 @@ export default{
             currentPage,propResults, propArrLen, propCount, pageCount, showNextBtn, showPreviousBtn,selectSearchQuantity,selectedValue,
             loadPrev, loadNext, firstPage, lastPage, idField, actions, handleActionClick, propModalVisible, closeModal,
             submitButtonLabel, showModal, addNewProperty, showLoader, loader, hideLoader, importProperties, removeProperty, removeProperties,
-            handleSelectionChange,addingRight,rightsModule,printPropertiesList,downloadPropertiesCSV,downloadPropertiesExcel
+            handleSelectionChange,addingRight,removingRight,rightsModule,printPropertiesList,downloadPropertiesCSV,downloadPropertiesExcel
         }
     }
 };

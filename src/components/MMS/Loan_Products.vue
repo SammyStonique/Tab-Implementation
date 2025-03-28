@@ -13,6 +13,7 @@
             @removeSelectedItems="removeProducts"
             @printList="printProductsList"
             :addingRight="addingRight"
+            :removingRight="removingRight"
             :rightsModule="rightsModule"
             :columns="tableColumns"
             :rows="productsList"
@@ -86,6 +87,7 @@ export default{
         const idField = 'loan_product_id';
         const addButtonLabel = ref('New Product');
         const addingRight = ref('Adding Loan Products');
+        const removingRight = ref('Deleting Loan Products');
         const rightsModule = ref('MMS');
         const submitButtonLabel = ref('Add');
         const selectedIds = ref([]);
@@ -420,7 +422,7 @@ export default{
             propResults, propArrLen, propCount, pageCount, showNextBtn, showPreviousBtn,flex_basis,flex_basis_percentage,
             loadPrev, loadNext, firstPage, lastPage, idField, actions, handleActionClick,showDetails,detailsTitle,hideDetails,
             submitButtonLabel, showModal, addNewProduct, showLoader, loader, hideLoader, removeProduct, removeProducts,
-            handleSelectionChange,addingRight,rightsModule,printProductsList,selectSearchQuantity,selectedValue,
+            handleSelectionChange,addingRight,removingRight,rightsModule,printProductsList,selectSearchQuantity,selectedValue,
             modal_left,modal_top,modal_width,trans_modal_loader,transModalVisible,transTitle,showTransModalLoader,hideTransModalLoader,changeProductStatus,closeTransModal,
             dropdownOptions,handleDynamicOption,product_status,exit_date
         }

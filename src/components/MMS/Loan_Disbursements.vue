@@ -9,6 +9,7 @@
         @removeItem="removeDisbursement"
         @removeSelectedItems="removeDisbursements"
         :addingRight="addingRight"
+        :removingRight="removingRight"
         :rightsModule="rightsModule"
         :columns="tableColumns"
         :rows="disbursementsList"
@@ -64,6 +65,7 @@ export default{
         const title = ref('Disbursement Details');
         const addButtonLabel = ref('New Disbursement');
         const addingRight = ref('Adding Loan Disbursements');
+        const removingRight = ref('Deleting Loan Disbursements');
         const rightsModule = ref('MMS');
         const idField = 'loan_disbursement_id';
         const depModalVisible = ref(false);
@@ -409,7 +411,7 @@ export default{
             loadPrev, loadNext, firstPage, lastPage, actions, formFields, depModalVisible, addNewDisbursement,
             displayButtons,flex_basis,flex_basis_percentage, handleActionClick, handleReset, disburseMemberLoan,
             showLoader, loader, hideLoader, modal_loader, showModalLoader, hideModalLoader, removeDisbursement, removeDisbursements,
-            addingRight,rightsModule, closeModal,handleSelectionChange,selectSearchQuantity,selectedValue,
+            addingRight,removingRight,rightsModule, closeModal,handleSelectionChange,selectSearchQuantity,selectedValue,
         }
     }
 }

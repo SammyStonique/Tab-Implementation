@@ -15,6 +15,7 @@
             @printExcel="downloadAllocationsExcel"
             @printCSV="downloadAllocationsCSV"
             :addingRight="addingRight"
+            :removingRight="removingRight"
             :rightsModule="rightsModule"
             :columns="tableColumns"
             :rows="allocationsList"
@@ -82,6 +83,7 @@ export default{
         const idField = 'leave_balance_id';
         const addButtonLabel = ref('New Leave Allocation');
         const addingRight = ref('Adding Leave Allocations');
+        const removingRight = ref('Deleting Leave Allocations');
         const rightsModule = ref('HR');
         const title = ref('Leave Allocation Details');
         const allocTitle = ref('Auto Generate Allocations');
@@ -442,6 +444,7 @@ export default{
         const searchAllocations = () =>{
             showLoader();
             showNextBtn.value = false;
+            selectedIds.value = [];
             showPreviousBtn.value = false;
             let formData = {
                 employee_name: employee_name_search.value,
@@ -683,7 +686,7 @@ export default{
             submitButtonLabel, showModal, addNewAllocation, showLoader, loader, hideLoader, modal_loader, modal_top, modal_left, modal_width,displayButtons,
             showModalLoader, hideModalLoader, saveAllocation, formFields, handleSelectionChange, flex_basis,flex_basis_percentage,
             alloc_modal_loader,allocTitle,formFields1,allocModalVisible,showAllocModalLoader,hideAllocModalLoader,closeAllocModal,autoGenerateAllocations,
-            removeAllocation, removeAllocations,addingRight,rightsModule,printAllocationsList,selectSearchQuantity,selectedValue,
+            removeAllocation, removeAllocations,addingRight,removingRight,rightsModule,printAllocationsList,selectSearchQuantity,selectedValue,
             downloadAllocationsCSV,downloadAllocationsExcel
         }
     }

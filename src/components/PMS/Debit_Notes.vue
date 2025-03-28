@@ -13,6 +13,7 @@
             @removeSelectedItems="removeInvoices"
             @printList="printInvoiceList"
             :addingRight="addingRight"
+            :removingRight="removingRight"
             :rightsModule="rightsModule"
             :columns="tableColumns"
             :rows="invoicesList"
@@ -99,6 +100,7 @@ export default{
         const { getYear } = useDateFormatter();
         const { getMonth } = useDateFormatter();
         const addingRight = ref('Adding Debit Notes');
+        const removingRight = ref('Deleting Debit Notes');
         const rightsModule = ref('PMS');
         const current_date = new Date();
         const loader = ref('none');
@@ -288,6 +290,7 @@ export default{
         const searchInvoices = () =>{
             showLoader();
             showNextBtn.value = false;
+            selectedIds.value = [];
             showPreviousBtn.value = false;
             let formData = {
                 client_category: "Tenants",
@@ -516,7 +519,7 @@ export default{
             submitButtonLabel, showModal, showLoader, loader, hideLoader, modal_loader, modal_top, modal_left, modal_width,displayButtons,
             showModalLoader, hideModalLoader, formFields, handleSelectionChange, flex_basis,flex_basis_percentage,
             removeInvoice, removeInvoices, dropdownOptions, handleDynamicOption, addNewInvoice, printInvoiceList,
-            addingRight,rightsModule,selectSearchQuantity,selectedValue,showDetails,detailsTitle,hideDetails,handleShowDetails,journalEntries,
+            addingRight,removingRight,rightsModule,selectSearchQuantity,selectedValue,showDetails,detailsTitle,hideDetails,handleShowDetails,journalEntries,
             invoiceLines,invoicePayments,tabs,selectTab,activeTab
         }
     }

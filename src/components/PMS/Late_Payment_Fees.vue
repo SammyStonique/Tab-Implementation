@@ -13,6 +13,7 @@
             @removeSelectedItems="removeLeaseFees"
             @printList="printLatePaymentFeesList"
             :addingRight="addingRight"
+            :removingRight="removingRight"
             :rightsModule="rightsModule"
             :columns="tableColumns"
             :rows="penaltyList"
@@ -70,6 +71,7 @@ export default{
         const idField = 'late_payment_fee_id';
         const addButtonLabel = ref('Process Penalty');
         const addingRight = ref('Processing Late Payment Fees');
+        const removingRight = ref('Deleting Tenant Invoice');
         const rightsModule = ref('PMS');
         const submitButtonLabel = ref('Add');
         const title = ref('Late Payment Fee Details');
@@ -273,6 +275,7 @@ export default{
         const searchLatePaymentFees = () =>{
             showLoader();
             showNextBtn.value = false;
+            selectedIds.value = [];
             showPreviousBtn.value = false;
             let formData = {
                 tenant_name: tenant_name_search.value,
@@ -437,7 +440,7 @@ export default{
             loadPrev, loadNext, firstPage, lastPage, idField, actions, handleActionClick, propModalVisible, closeModal,
             submitButtonLabel, showModal, addNewLatePaymentFee, showLoader, loader, hideLoader, modal_loader, modal_top, modal_left, modal_width,displayButtons,
             showModalLoader, hideModalLoader, formFields, handleSelectionChange, flex_basis,flex_basis_percentage,
-            dropdownOptions, handleDynamicOption, createLatePaymentFee,addingRight,rightsModule,printLatePaymentFeesList,selectSearchQuantity,selectedValue
+            dropdownOptions, handleDynamicOption, createLatePaymentFee,addingRight,removingRight,rightsModule,printLatePaymentFeesList,selectSearchQuantity,selectedValue
         }
     }
 };

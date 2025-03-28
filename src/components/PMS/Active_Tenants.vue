@@ -14,6 +14,7 @@
             @removeSelectedItems="removeTenants"
             @printList="printTenantsList"
             :addingRight="addingRight"
+            :removingRight="removingRight"
             :rightsModule="rightsModule"
             :columns="tableColumns"
             :rows="tenantList"
@@ -93,6 +94,7 @@ export default{
         const idField = 'tenant_id';
         const addButtonLabel = ref('New Tenant');
         const addingRight = ref('Adding Tenants');
+        const removingRight = ref('Deleting Tenants');
         const rightsModule = ref('PMS');
         const submitButtonLabel = ref('Add');
         const selectedIds = ref([]);
@@ -427,6 +429,7 @@ export default{
         const searchTenants = () =>{
             showLoader();
             showNextBtn.value = false;
+            selectedIds.value = [];
             showPreviousBtn.value = false;
             let formData = {
                 tenant_name: name_search.value,
@@ -688,7 +691,7 @@ export default{
             currentPage,propResults, propArrLen, propCount, pageCount, showNextBtn, showPreviousBtn,flex_basis,flex_basis_percentage,
             loadPrev, loadNext, firstPage, lastPage, idField, actions, handleActionClick,utilFormFields,showDetails,detailsTitle,hideDetails,
             submitButtonLabel, showModal, addNewTenant, showLoader, loader, hideLoader, importTenants, removeTenant, removeTenants,
-            handleSelectionChange,addingRight,rightsModule,printTenantsList,selectSearchQuantity,selectedValue,
+            handleSelectionChange,addingRight,removingRight,rightsModule,printTenantsList,selectSearchQuantity,selectedValue,
             modal_left,modal_top,modal_width,trans_modal_loader,transModalVisible,transTitle,showTransModalLoader,hideTransModalLoader,transferUnit,closeTransModal,
             fetchTenantUnits, handleSelectedTenantUnit, clearSelectedTenantUnit,tenantUnitsArr,unitComponentKey,dropdownOptions,handleDynamicOption,
             util_modal_loader,utilTitle,utilModalVisible,showUtilModalLoader,hideUtilModalLoader,createTenantUtilities,closeUtilModal,handleUtilReset

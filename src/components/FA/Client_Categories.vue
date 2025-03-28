@@ -9,6 +9,7 @@
         @removeItem="removeCategory"
         @removeSelectedItems="removeCategories"
         :addingRight="addingRight"
+        :removingRight="removingRight"
         :rightsModule="rightsModule"
         :columns="tableColumns"
         :rows="categoryList"
@@ -56,9 +57,11 @@ export default{
         const title = ref('Category Details');
         const addButtonLabel = ref('New Category');
         const addingRight = ref('Adding Client Categories');
+        const removingRight = ref('Deleting Client Categories');
         const rightsModule = ref('Accounts');
         const idField = 'category_id';
         const depModalVisible = ref(false);
+        const selectedIds = ref([]);
         const categoryList = ref([]);
         const depResults = ref([]);
         const depArrLen = ref(0);
@@ -280,6 +283,7 @@ export default{
         const searchCategories = () =>{
             showLoader();
             showNextBtn.value = false;
+            selectedIds.value = [];
             showPreviousBtn.value = false;
             let formData = {
                 category_name: name_search.value,
@@ -336,6 +340,7 @@ export default{
             searchCategories();
         }
         const resetFilters = () =>{
+            currentPage.value = 1;
             store.commit('Client_Categories/RESET_SEARCH_FILTERS')
             searchCategories();
         };
@@ -347,12 +352,12 @@ export default{
             searchCategories();
         })
         return{
-            title,idField, searchCategories, addButtonLabel, searchFilters, resetFilters, tableColumns, categoryList,
-            depResults, depArrLen, depCount, pageCount, showNextBtn, showPreviousBtn,modal_top, modal_left, modal_width,
+            title,idField, searchCategories, addButtonLabel, searchFilters, resetFilters, tableColumns, categoryList,selectedIds,
+            currentPage,depResults, depArrLen, depCount, pageCount, showNextBtn, showPreviousBtn,modal_top, modal_left, modal_width,
             loadPrev, loadNext, firstPage, lastPage, actions, formFields, depModalVisible, addNewCategory,
             displayButtons,flex_basis,flex_basis_percentage, handleActionClick, handleReset, saveCategory,
             showLoader, loader, hideLoader, modal_loader, showModalLoader, hideModalLoader, removeCategory, removeCategories,
-            addingRight,rightsModule, closeModal
+            addingRight,removingRight,rightsModule, closeModal
         }
     }
 }

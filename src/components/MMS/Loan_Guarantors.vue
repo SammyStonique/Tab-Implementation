@@ -9,6 +9,7 @@
         @removeItem="removeGuarantor"
         @removeSelectedItems="removeGuarantors"
         :addingRight="addingRight"
+        :removingRight="removingRight"
         :rightsModule="rightsModule"
         :columns="tableColumns"
         :rows="guarantorsList"
@@ -61,6 +62,7 @@ export default{
         const title = ref('Saving Account Details');
         const addButtonLabel = ref('New Guarantor');
         const addingRight = ref('Adding Loan Guarantors');
+        const removingRight = ref('Deleting Loan Guarantors');
         const rightsModule = ref('MMS');
         const idField = 'loan_guarantor_id';
         const depModalVisible = ref(false);
@@ -408,7 +410,7 @@ export default{
             loadPrev, loadNext, firstPage, lastPage, actions, formFields, depModalVisible, addNewGuarantor,
             displayButtons,flex_basis,flex_basis_percentage, handleActionClick, handleReset, createLoanGuarantor,
             showLoader, loader, hideLoader, modal_loader, showModalLoader, hideModalLoader, removeGuarantor, removeGuarantors,
-            addingRight,rightsModule, closeModal,selectSearchQuantity,selectedValue,handleSelectionChange
+            addingRight,removingRight,rightsModule, closeModal,selectSearchQuantity,selectedValue,handleSelectionChange
         }
     }
 }

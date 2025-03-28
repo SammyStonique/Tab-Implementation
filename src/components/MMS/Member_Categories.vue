@@ -9,6 +9,7 @@
         @removeItem="removeCategory"
         @removeSelectedItems="removeCategories"
         :addingRight="addingRight"
+        :removingRight="removingRight"
         :rightsModule="rightsModule"
         :columns="tableColumns"
         :rows="categoryList"
@@ -56,6 +57,7 @@ export default{
         const title = ref('Category Details');
         const addButtonLabel = ref('New Category');
         const addingRight = ref('Adding Member Categories');
+        const removingRight = ref('Deleting Member Categories');
         const rightsModule = ref('MMS');
         const idField = 'member_category_id';
         const depModalVisible = ref(false);
@@ -350,7 +352,7 @@ export default{
             loadPrev, loadNext, firstPage, lastPage, actions, formFields, depModalVisible, addNewCategory,
             displayButtons,flex_basis,flex_basis_percentage, handleActionClick, handleReset, saveCategory,
             showLoader, loader, hideLoader, modal_loader, showModalLoader, hideModalLoader, removeCategory, removeCategories,
-            addingRight,rightsModule, closeModal
+            addingRight,removingRight,rightsModule, closeModal
         }
     }
 }

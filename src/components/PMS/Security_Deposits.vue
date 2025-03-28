@@ -11,6 +11,7 @@
             @removeSelectedItems="removeDeposits"
             @printList="printList"
             :addingRight="addingRight"
+            :removingRight="removingRight"
             :rightsModule="rightsModule"
             :columns="tableColumns"
             :rows="depositList"
@@ -60,6 +61,7 @@ export default{
         const idField = 'deposit_id';
         const addButtonLabel = ref('New Deposit');
         const addingRight = ref('Adding Security Deposits');
+        const removingRight = ref('Deleting Security Deposits');
         const rightsModule = ref('PMS');
         const title = ref('Deposit Details');
         const submitButtonLabel = ref('Add');
@@ -278,6 +280,7 @@ export default{
         const searchDeposits = () =>{
             showLoader();
             showNextBtn.value = false;
+            selectedIds.value = [];
             showPreviousBtn.value = false;
             let formData = {
                 name: name_search.value,
@@ -387,7 +390,7 @@ export default{
             loadPrev, loadNext, firstPage, lastPage, idField, actions, handleActionClick, propModalVisible, closeModal,
             submitButtonLabel, showModal, addNewDeposit, showLoader, loader, hideLoader, modal_loader, modal_top, modal_left, modal_width,displayButtons,
             showModalLoader, hideModalLoader, saveDeposit, formFields, handleSelectionChange, flex_basis,flex_basis_percentage,
-            removeDeposit, removeDeposits,addingRight,rightsModule
+            removeDeposit, removeDeposits,addingRight,removingRight,rightsModule
         }
     }
 };

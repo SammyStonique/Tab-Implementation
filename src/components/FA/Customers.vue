@@ -12,6 +12,7 @@
             @removeSelectedItems="removeDebtors"
             @printList="printCustomersList"
             :addingRight="addingRight"
+            :removingRight="removingRight"
             :rightsModule="rightsModule"
             :columns="tableColumns"
             :rows="debtorList"
@@ -65,6 +66,7 @@ export default{
         const addButtonLabel = ref('New Debtor');
         const title = ref('Debtor Details');
         const addingRight = ref('Adding Debtor');
+        const removingRight = ref('Deleting Debtor');
         const rightsModule = ref('Accounts');
         const submitButtonLabel = ref('Add');
         const selectedIds = ref([]);
@@ -353,6 +355,7 @@ export default{
         const searchDebtors = () =>{
             showLoader();
             showNextBtn.value = false;
+            selectedIds.value = [];
             showPreviousBtn.value = false;
             let formData = {
                 customer_name: customer_name_search.value,
@@ -389,6 +392,7 @@ export default{
             searchDebtors(selectedValue.value);
         };
         const resetFilters = () =>{
+            currentPage.value = 1;
             customer_code_search.value = "";
             customer_name_search.value = "";
             catComponentKey.value += 1;
@@ -501,11 +505,11 @@ export default{
         })
         return{
             title, searchDebtors,resetFilters, addButtonLabel, searchFilters, tableColumns, debtorList,
-            propResults, propArrLen, propCount, pageCount, showNextBtn, showPreviousBtn,
+            currentPage,propResults, propArrLen, propCount, pageCount, showNextBtn, showPreviousBtn,
             loadPrev, loadNext, firstPage, lastPage, idField, actions, handleActionClick, propModalVisible, closeModal,
             submitButtonLabel, showModal, addNewDebtor, showLoader, loader, hideLoader, modal_loader, modal_top, modal_left, modal_width,displayButtons,
             showModalLoader, hideModalLoader, saveDebtor, formFields, handleSelectionChange, flex_basis,flex_basis_percentage,
-            importDebtors, removeDebtor, removeDebtors, handleReset,printCustomersList,addingRight,rightsModule,selectSearchQuantity,selectedValue
+            importDebtors, removeDebtor, removeDebtors, handleReset,printCustomersList,addingRight,removingRight,rightsModule,selectSearchQuantity,selectedValue
         }
     }
 };

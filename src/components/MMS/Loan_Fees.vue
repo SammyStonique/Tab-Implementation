@@ -11,6 +11,7 @@
             @removeSelectedItems="removeFees"
             @printList="printList"
             :addingRight="addingRight"
+            :removingRight="removingRight"
             :rightsModule="rightsModule"
             :columns="tableColumns"
             :rows="feesList"
@@ -62,6 +63,7 @@ export default{
         const idField = 'loan_fee_id';
         const addButtonLabel = ref('New Loan Fee');
         const addingRight = ref('Adding Loan Fees');
+        const removingRight = ref('Deleting Loan Fees');
         const rightsModule = ref('MMS');
         const title = ref('Loan Fee Details');
         const submitButtonLabel = ref('Add');
@@ -438,7 +440,7 @@ export default{
             loadPrev, loadNext, firstPage, lastPage, idField, actions, handleActionClick, propModalVisible, closeModal,
             submitButtonLabel, showModal, addNewFee, showLoader, loader, hideLoader, modal_loader, modal_top, modal_left, modal_width,displayButtons,
             showModalLoader, hideModalLoader, saveFee, formFields, handleSelectionChange, flex_basis,flex_basis_percentage,
-            removeFee, removeFees,addingRight,rightsModule,
+            removeFee, removeFees,addingRight,removingRight,rightsModule,
         }
     }
 };
