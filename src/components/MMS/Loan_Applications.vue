@@ -79,6 +79,7 @@ export default{
         const current_date = new Date();
         const loader = ref('');
         const ledComponentKey = ref(0);
+        const propComponentKey = ref(0);
         const displayButtons = ref(true);
         const trans_modal_loader = ref('none');
         const ref_modal_loader = ref('none');
@@ -147,18 +148,40 @@ export default{
         const member_number_search = ref("");
         const approval_status_search = ref("");
         const disbursed_status_search = ref("");
- 
+        const from_date_search = ref("");
+        const to_date_search = ref("");
+        const productID = ref('');
+        const products_array = computed({
+            get: () => store.state.Loan_Products.productArr,
+        });
+        const handleSelectedProduct = async(option) =>{
+            await store.dispatch('Loan_Products/handleSelectedProduct', option)
+            productID.value = store.state.Loan_Products.productID;
+        };
+        const clearSelectedProduct = async() =>{
+            await store.dispatch('Loan_Products/updateState', {productID: ''});
+            productID.value = store.state.Loan_Products.productID;
+        };
         const searchFilters = ref([
-            {type:'text', placeholder:"Loan No...", value: loan_number_search, width:48,},
+            {type:'text', placeholder:"Loan No...", value: loan_number_search, width:36,},
             {type:'text', placeholder:"Member Name...", value: name_search, width:48,},
-            {type:'text', placeholder:"Member No...", value: member_number_search, width:48,},
+            {type:'text', placeholder:"Member No...", value: member_number_search, width:36,},
+            {type:'date', placeholder:"From Date...", value: from_date_search, width:32, title: "Date From Search"},
+            {type:'date', placeholder:"To Date...", value: to_date_search, width:32, title: "Date To Search"},
             {
-                type:'dropdown', placeholder:"Status..", value: approval_status_search, width:40,
+                type:'dropdown', placeholder:"Status..", value: approval_status_search, width:32,
                 options: [{text:'Pending',value:'Pending'},{text:'Approved',value:'Approved'},{text:'Rejected',value:'Rejected'}]
             },
             {
-                type:'dropdown', placeholder:"Disbursal Status..", value: disbursed_status_search, width:40,
+                type:'dropdown', placeholder:"Disbursal Status..", value: disbursed_status_search, width:36,
                 options: [{text:'Yes',value:'Yes'},{text:'No',value:'No'}]
+            },
+            {
+                type:'search-dropdown', value: productID.value, width:48, componentKey: propComponentKey,
+                selectOptions: products_array, optionSelected: handleSelectedProduct,
+                searchPlaceholder: 'Loan Product...', dropdownWidth: '350px',
+                fetchData: store.dispatch('Loan_Products/fetchLoanProducts', {company:companyID.value}),
+                clearSearch: clearSelectedProduct
             },
         ]);
         const handleSelectionChange = (ids) => {
@@ -293,6 +316,9 @@ export default{
                 member_number: member_number_search.value,
                 approval_status: approval_status_search.value,
                 disbursed: disbursed_status_search.value,
+                from_date: from_date_search.value,
+                to_date: to_date_search.value,
+                product: productID.value,
                 company_id: companyID.value,
                 page_size: selectedValue.value
             } 
@@ -331,6 +357,10 @@ export default{
             loan_number_search.value = "";
             approval_status_search.value = "";
             disbursed_status_search.value = "";
+            from_date_search.value = "";
+            to_date_search.value = "";
+            productID.value = "";
+            propComponentKey.value += 1;
             searchApplications();
         }
         const loadPrev = () =>{
@@ -608,10 +638,16 @@ export default{
         const printApplicationList = () =>{
             showLoader();
             let formData = {
-                product_name: name_search.value,
-                product_code: loan_number_search.value,
-                active_status: member_number_search.value,
+                member_name: name_search.value,
+                loan_number: loan_number_search.value,
+                member_number: member_number_search.value,
+                approval_status: approval_status_search.value,
+                disbursed: disbursed_status_search.value,
+                from_date: from_date_search.value,
+                to_date: to_date_search.value,
+                product: productID.value,
                 company_id: companyID.value,
+                page_size: selectedValue.value
             } 
 
             axios

@@ -63,6 +63,7 @@ export default defineComponent({
         const intComponentKey = ref(0);
         const penComponentKey = ref(0);
         const catComponentKey = ref(0);
+        const grntCatComponentKey = ref(0);
         const chargeComponentKey = ref(0);
         const activeTab = ref(0);
         const rightsModule = ref('MMS');
@@ -80,6 +81,7 @@ export default defineComponent({
         const selectedInterestLedger = computed(()=> store.state.Loan_Products.selectedInterestLedger);
         const selectedPenaltyLedger = computed(()=> store.state.Loan_Products.selectedPenaltyLedger);
         const selectedCategory = computed(()=> store.state.Loan_Products.selectedCategory);
+        const selectedGuarantorCategory = computed(()=> store.state.Loan_Products.selectedGuarantorCategory);
         const loanCharges = computed(()=> store.state.Loan_Products.loanCharges);
         const categoryArray = computed(() => store.state.Member_Categories.categoryArr);
         const ledgerArray = computed(() => store.state.Ledgers.ledgerArr);
@@ -89,6 +91,7 @@ export default defineComponent({
         const chargesDropdownWidth = ref('400px');
         const chargesSearchPlaceholder = ref('Select Charge...');
         const categoryID = ref('');
+        const grntCategoryID = ref('');
         const chargeColumns = ref([
             {label: "Name", key:"fee_name", type: "text", editable: false},
             {label: "Charge Time", key:"charge_time", type: "text", editable: false},
@@ -115,6 +118,19 @@ export default defineComponent({
             if(selectedProduct.value && selectedProduct.value.member_category != ""){
                 selectedProduct.value.member_category.member_category_id = categoryID.value;
                 categoryValue.value = categoryID.value
+            }
+        };
+        const handleSelectedGuarantorCategory = async(option) =>{
+            await store.dispatch('Member_Categories/handleSelectedCategory', option)
+            grntCategoryID.value = store.state.Member_Categories.categoryID;
+            
+        };
+        const clearSelectedGuarantorCategory = async() =>{
+            await store.dispatch('Member_Categories/updateState', {categoryID: ''});
+            grntCategoryID.value = store.state.Member_Categories.categoryID;
+            if(selectedProduct.value && selectedProduct.value.member_category != ""){
+                selectedProduct.value.guarantor_category.member_category_id = grntCategoryID.value;
+                grntCategoryValue.value = grntCategoryID.value
             }
         };
         const fetchAllLedgers = async() =>{
@@ -152,6 +168,10 @@ export default defineComponent({
            return (selectedProduct.value && selectedProduct.value.member_category && !categoryID.value) ? selectedProduct.value.member_category.member_category_id : categoryID.value;
 
         });
+        const grntCategoryValue = computed(() => {
+           return (selectedProduct.value && selectedProduct.value.guarantor_category && !categoryID.value) ? selectedProduct.value.guarantor_category.member_category_id : grntCategoryID.value;
+
+        });
         const intLedgerValue = computed(() => {
             return (selectedProduct.value && selectedProduct.value.interest_posting_account && !intLedgerID.value) ? selectedProduct.value.interest_posting_account.ledger_id : intLedgerID.value;
         });
@@ -186,6 +206,12 @@ export default defineComponent({
                 { type: 'dropdown', name: 'use_guarantors',label: "Use Guarantors", value: selectedProduct.value?.use_guarantors || 'Yes', placeholder: "", required: true, options: [{ text: 'Yes', value: 'Yes' }, { text: 'No', value: 'No' }] },
                 { type: 'text', name: 'min_guarantors',label: "Minimum Guarantors", value: selectedProduct.value?.min_guarantors || '0', required: false },
                 { type: 'text', name: 'guarantors_percentage',label: "Guarantors Percentage(%)", value: selectedProduct.value?.guarantors_percentage || '0', required: false },
+                {  
+                    type:'search-dropdown', label:"Guarantor Category", value: grntCategoryValue.value, componentKey: grntCatComponentKey,
+                    selectOptions: categoryArray, optionSelected: handleSelectedGuarantorCategory, required: false,
+                    searchPlaceholder: 'Select Category...', dropdownWidth: '450px', updateValue: selectedGuarantorCategory.value,
+                    clearSearch: clearSelectedGuarantorCategory
+                },
                 { type: 'dropdown', name: 'use_security',label: "Use Security", value: selectedProduct.value?.use_security || 'No', placeholder: "", required: true, options: [{ text: 'Yes', value: 'Yes' }, { text: 'No', value: 'No' }] },
                 { type: 'dropdown', name: 'credit_reduction',label: "Credit Reduction", value: selectedProduct.value?.credit_reduction || 'No', placeholder: "", required: true, options: [{ text: 'Yes', value: 'Yes' }, { text: 'No', value: 'No' }] },
                 {  
@@ -200,7 +226,7 @@ export default defineComponent({
                     searchPlaceholder: 'Select Posting Acc...', dropdownWidth: '450px', updateValue: selectedPenaltyLedger.value,
                     fetchData: store.dispatch('Ledgers/fetchLedger', {company:companyID.value}), clearSearch: clearSelectedPenaltyLedger
                 },
-
+                {required: false}
             ];
         };
 
@@ -210,27 +236,31 @@ export default defineComponent({
                 ];
         };
 
-        watch([categoryID, intLedgerID], () => {
+        watch([categoryID, intLedgerID,penaltyLedgerID,grntCategoryID], () => {
             if (categoryID.value != "") {
                 formFields.value[0].value = categoryID.value;
             }
             if(intLedgerID.value != ""){
-                formFields.value[23].value = intLedgerID.value;
+                formFields.value[24].value = intLedgerID.value;
             }
             if(penaltyLedgerID.value != ""){
-                formFields.value[24].value = penaltyLedgerID.value;
+                formFields.value[25].value = penaltyLedgerID.value;
+            }
+            if (grntCategoryID.value != "") {
+                formFields.value[21].value = grntCategoryID.value;
             }
         }, { immediate: true });
 
-        watch([selectedProduct, selectedInterestLedger, selectedPenaltyLedger, selectedCategory, loanCharges], () => {
+        watch([selectedProduct, selectedInterestLedger, selectedPenaltyLedger, selectedCategory, selectedGuarantorCategory, loanCharges], () => {
             if(loanCharges.value){
                 store.dispatch('Loan_Fees/updateState',{feeArray: loanCharges.value})
                 tableKey.value += 1;
             }
-            if (selectedProduct.value && selectedInterestLedger.value && selectedCategory.value && selectedPenaltyLedger.value) {
+            if (selectedProduct.value && selectedInterestLedger.value && selectedCategory.value && selectedGuarantorCategory.value && selectedPenaltyLedger.value) {
                 catComponentKey.value += 1;
                 intComponentKey.value += 1;
                 penComponentKey.value += 1;
+                grntCatComponentKey.value += 1;
                 updateFormFields();
                 updateAdditionalFormFields();
 
@@ -238,6 +268,12 @@ export default defineComponent({
             else if (selectedProduct.value && selectedInterestLedger.value && selectedCategory.value) {
                 catComponentKey.value += 1;
                 intComponentKey.value += 1;
+                updateFormFields();
+                updateAdditionalFormFields();
+
+            }else if (selectedProduct.value && selectedInterestLedger.value&& selectedGuarantorCategory.value) {
+                intComponentKey.value += 1;
+                grntCatComponentKey.value += 1;
                 updateFormFields();
                 updateAdditionalFormFields();
 
@@ -263,14 +299,16 @@ export default defineComponent({
                 additionalFields.value[i].value = '';
             }
             await store.dispatch('Loan_Fees/updateState', {feeArray: []});
-            await store.dispatch('Loan_Products/updateState', {selectedProduct: null, loanCharges: [], selectedInterestLedger: null, selectedPenaltyLedger: null, selectedCategory: null, isEditing:false});
+            await store.dispatch('Loan_Products/updateState', {selectedProduct: null, loanCharges: [], selectedInterestLedger: null, selectedPenaltyLedger: null, selectedCategory: null, selectedGuarantorCategory: null, isEditing:false});
             mainComponentKey.value += 1;
             intComponentKey.value += 1;
             catComponentKey.value += 1;
+            grntCatComponentKey.value += 1;
             penComponentKey.value += 1;
             intLedgerID.value = "";
             penaltyLedgerID.value = "";
             categoryID.value = "";
+            grntCategoryID.value = "";
         }
          
         const showLoader = () =>{
@@ -303,14 +341,16 @@ export default defineComponent({
                 use_guarantors: formFields.value[18].value,
                 min_guarantors: formFields.value[19].value,
                 guarantors_percentage: formFields.value[20].value,
-                use_security: formFields.value[21].value,
-                credit_reduction: formFields.value[22].value,
+                use_security: formFields.value[22].value,
+                credit_reduction: formFields.value[23].value,
                 interest_posting_account: intLedgerID.value,
                 interest_posting_account_id: intLedgerID.value,
                 penalty_posting_account: penaltyLedgerID.value,
                 penalty_posting_account_id: penaltyLedgerID.value,
                 member_category: categoryID.value,
                 member_category_id: categoryID.value,
+                guarantor_category: grntCategoryID.value,
+                guarantor_category_id: grntCategoryID.value,
                 charges: chargeRows.value,
                 company: companyID.value
             }
@@ -371,14 +411,16 @@ export default defineComponent({
                 use_guarantors: formFields.value[18].value,
                 min_guarantors: formFields.value[19].value,
                 guarantors_percentage: formFields.value[20].value,
-                use_security: formFields.value[21].value,
-                credit_reduction: formFields.value[22].value,
+                use_security: formFields.value[22].value,
+                credit_reduction: formFields.value[23].value,
                 interest_posting_account: intLedgerValue.value,
                 interest_posting_account_id: intLedgerValue.value,
                 penalty_posting_account: penaltyLedgerValue.value,
                 penalty_posting_account_id: penaltyLedgerValue.value,
                 member_category: categoryValue.value,
                 member_category_id: categoryValue.value,
+                guarantor_category: grntCategoryValue.value,
+                guarantor_category_id: grntCategoryValue.value,
                 company: companyID.value,
                 charges: chargeRows.value,
             }

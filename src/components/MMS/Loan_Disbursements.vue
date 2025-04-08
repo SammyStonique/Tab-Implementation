@@ -8,12 +8,14 @@
         @resetFilters="resetFilters"
         @removeItem="removeDisbursement"
         @removeSelectedItems="removeDisbursements"
+        @printList="printDisbursementsList"
         :addingRight="addingRight"
         :removingRight="removingRight"
         :rightsModule="rightsModule"
         :columns="tableColumns"
         :rows="disbursementsList"
         :actions="actions"
+        :showTotals="showTotals"
         :idField="idField"
         @handleSelectionChange="handleSelectionChange"
         @handleActionClick="handleActionClick"
@@ -47,6 +49,7 @@ import DynamicForm from '../NewDynamicForm.vue';
 import { useStore } from "vuex";
 import { useToast } from "vue-toastification";
 import { useDateFormatter } from '@/composables/DateFormatter';
+import PrintJS from 'print-js';
 
 export default{
     name: 'Loan_Disbursements',
@@ -86,6 +89,7 @@ export default{
         const modal_top = ref('170px');
         const modal_left = ref('400px');
         const modal_width = ref('30vw');
+        const showTotals = ref(true);
         const isEditing = computed(()=> store.state.Loan_Disbursements.isEditing)
         const selectedDisbursement = computed(()=> store.state.Loan_Disbursements.selectedDisbursement);
         const selectedApplication = computed(()=> store.state.Loan_Disbursements.selectedApplication);
@@ -102,7 +106,7 @@ export default{
             {label: "Loan Product", key: "loan_product", type: "text", editable: false},
             {label: "Member No", key: "member_number", type: "text", editable: false},
             {label: "Member Name", key: "member_name", type: "text", editable: false},
-            {label: "Amount", key: "amount", type: "text", editable: false},
+            {label: "Amount", key: "amount", type: "number", editable: false},
             {label: "P.V#", key: "journal_no", type: "text", editable: false},
         ])
         const actions = ref([
@@ -116,11 +120,15 @@ export default{
         const journal_number_search = ref('');
         const name_search = ref('');
         const member_number_search = ref("");
+        const from_date_search = ref("");
+        const to_date_search = ref("");
         const searchFilters = ref([
-            {type:'text', placeholder:"P.V No...", value: journal_number_search, width:36,},
+            {type:'text', placeholder:"P.V No...", value: journal_number_search, width:32,},
             {type:'text', placeholder:"Loan No...", value: loan_number_search, width:36,},
-            {type:'text', placeholder:"Member No...", value: member_number_search, width:36,},
+            {type:'text', placeholder:"Member No...", value: member_number_search, width:32,},
             {type:'text', placeholder:"Search Name...", value: name_search, width:48,},
+            {type:'date', placeholder:"From Date...", value: from_date_search, width:32, title: "Date From Search"},
+            {type:'date', placeholder:"To Date...", value: to_date_search, width:32, title: "Date To Search"},
         ]);
         const handleSelectionChange = (ids) => {
             selectedIds.value = ids;
@@ -332,6 +340,8 @@ export default{
                 journal_no: journal_number_search.value,
                 member_name: name_search.value,
                 member_number: member_number_search.value,
+                from_date: from_date_search.value,
+                to_date: to_date_search.value,
                 company_id: companyID.value,
                 page_size: selectedValue.value
             }
@@ -396,20 +406,52 @@ export default{
             loan_number_search.value = "";
             member_number_search.value = "";
             journal_number_search.value = "";
+            from_date_search.value = "";
+            to_date_search.value = "";
             searchDisbursements();
         };
         const closeModal = async() =>{
             depModalVisible.value = false;
             handleReset();
         }
+        const printDisbursementsList = () =>{
+            showLoader();
+            let formData = {
+                loan_number: loan_number_search.value,
+                journal_no: journal_number_search.value,
+                member_name: name_search.value,
+                member_number: member_number_search.value,
+                from_date: from_date_search.value,
+                to_date: to_date_search.value,
+                company_id: companyID.value,
+                page_size: selectedValue.value
+            } 
+
+            axios
+            .post("api/v1/export-loan-disbursements-pdf/", formData, { responseType: 'blob' })
+                .then((response)=>{
+                    if(response.status == 200){
+                        const blob1 = new Blob([response.data]);
+                        // Convert blob to URL
+                        const url = URL.createObjectURL(blob1);
+                        PrintJS({printable: url, type: 'pdf'});
+                    }
+                })
+            .catch((error)=>{
+                console.log(error.message);
+            })
+            .finally(()=>{
+                hideLoader();
+            })
+        }
         onMounted(()=>{
             searchDisbursements();
         })
         return{
-            title,idField, searchDisbursements, addButtonLabel, searchFilters, resetFilters, tableColumns, disbursementsList,
+            title,idField, searchDisbursements, addButtonLabel, searchFilters, resetFilters, tableColumns, disbursementsList,showTotals,
             currentPage,depResults, depArrLen, depCount, pageCount, showNextBtn, showPreviousBtn,modal_top, modal_left, modal_width,
             loadPrev, loadNext, firstPage, lastPage, actions, formFields, depModalVisible, addNewDisbursement,
-            displayButtons,flex_basis,flex_basis_percentage, handleActionClick, handleReset, disburseMemberLoan,
+            displayButtons,flex_basis,flex_basis_percentage, handleActionClick, handleReset, disburseMemberLoan,printDisbursementsList,
             showLoader, loader, hideLoader, modal_loader, showModalLoader, hideModalLoader, removeDisbursement, removeDisbursements,
             addingRight,removingRight,rightsModule, closeModal,handleSelectionChange,selectSearchQuantity,selectedValue,
         }

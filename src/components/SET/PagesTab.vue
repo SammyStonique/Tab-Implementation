@@ -1,6 +1,6 @@
 <template>
-    <div class="tab-container h-5 bg-slate-300 w-full flex">
-        <button @click="scrollLeft" class="absolute h-5 left-0 z-20 bg-gray-200 px-1">←</button>
+    <div class="tab-container h-5 bg-orange-200 w-full flex">
+        <button @click="scrollLeft" class="absolute h-5 left-0 z-20 bg-orange-200 px-1">←</button>
         <div ref="tabsWrapper" class="tabs-wrapper flex-1 overflow-x-auto no-scrollbar relative">
             <div class="tabs flex pl-5">
                 <div v-for="page,index in pageArray" :key="index" style="z-index: 10;" :class="{'relative text-left pl-1.5 bg-white rounded text-xs pt-0.5 w-40 border border-slate-300': true,'bg-gray-400 text-gray-400': page === activePage}">
@@ -9,7 +9,7 @@
                 </div>
             </div>
         </div>
-        <button @click="scrollRight" class="absolute right-0 h-5 z-20 bg-gray-200 px-1">→</button>
+        <button @click="scrollRight" class="absolute right-0 h-5 z-20 bg-orange-200 px-1">→</button>
     </div>
     
 </template>

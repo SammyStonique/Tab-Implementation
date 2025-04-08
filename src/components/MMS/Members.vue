@@ -436,11 +436,13 @@ export default{
             showLoader();
             let formData = {
                 member_name: name_search.value,
-                staff_number: member_number_search.value,
+                member_number: member_number_search.value,
                 active_status: active_status_search.value,
                 gender: gender_search.value,
                 phone_number: phone_number_search.value,
+                member_category: categoryID.value,
                 company_id: companyID.value,
+                page_size: selectedValue.value
             } 
 
             axios

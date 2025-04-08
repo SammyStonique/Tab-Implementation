@@ -98,6 +98,8 @@ import Saving_Accounts from './MMS/Saving_Accounts';
 import Share_Accounts from './MMS/Share_Accounts';
 import Saving_Deposits from './MMS/Saving_Deposits';
 import Share_Deposits from './MMS/Share_Deposits';
+import Saving_Transfers from './MMS/Saving_Transfers';
+import Share_Transfers from './MMS/Share_Transfers';
 import Loan_Products from './MMS/Loan_Products';
 import Loan_Fees from './MMS/Loan_Fees';
 import Loan_Applications from './MMS/Loan_Applications';
@@ -111,6 +113,7 @@ import Application_Fees from './MMS/Application_Fees';
 import Penalty_Batches from './MMS/Penalty_Batches';
 import Loan_Penalties from './MMS/Loan_Penalties';
 import Loan_Documents from './MMS/Loan_Documents';
+import Loan_Arrears from './MMS/Loan_Arrears';
 
 
 import Default_Settings from './SET/Default_Settings';
@@ -150,7 +153,7 @@ export default createStore({
 
     Member_Categories,Member_Sponsors,Members,Membership_Fees,Savings_Products,Shares_Products,Saving_Accounts,Share_Accounts,Saving_Deposits,Share_Deposits,
     Loan_Products,Loan_Fees,Loan_Applications,Loan_Guarantors,Loan_Disbursements,Security_Types,Loan_Securities,Application_Fees,Loan_Schedules,Loan_Penalties,
-    Penalty_Batches,Loan_Documents,Historical_Loans,
+    Penalty_Batches,Loan_Documents,Historical_Loans,Loan_Arrears,Saving_Transfers,Share_Transfers,
 
     Default_Settings,Companies,Branches,User_Rights,SMS_Integrations,Email_Integrations,Mpesa_Integrations,Mpesa_Transactions,Banks,SMS_Templates,Email_Templates
   },

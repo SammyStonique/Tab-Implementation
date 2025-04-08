@@ -470,20 +470,19 @@ export default{
         };
         const printPenaltiesList = () =>{
             showLoader();
-
             let formData = {
-                journal_no: "",
-                client_category: "Tenants",
-                txn_type: "INV",
-                client: member_number_search.value,
-                date_from: from_date_search.value,
-                date_to: to_date_search.value,
-                status: "",
-                company_id: companyID.value
+                loan_number: loan_number_search.value,
+                member_number: member_number_search.value,
+                member_name: member_name_search.value,
+                from_date: from_date_search.value,
+                to_date: to_date_search.value,
+                penalty_batch: batchID.value,
+                company: companyID.value,
+                page_size: selectedValue.value
             } 
    
             axios
-            .post("api/v1/export-armotization-schedules-pdf/", formData, { responseType: 'blob' })
+            .post("api/v1/export-loan-penalties-pdf/", formData, { responseType: 'blob' })
                 .then((response)=>{
                     if(response.status == 200){
                         const blob1 = new Blob([response.data]);

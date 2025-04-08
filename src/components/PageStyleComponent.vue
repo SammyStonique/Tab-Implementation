@@ -1,6 +1,6 @@
 <template>
-    <div class="main-content z-10 bg-orange-100 px-4 py-2 text-sm">
-        <div class="subsection fixed w-[97%] rounded bg-white">
+    <div class="main-content z-10 bg-orange-100 px-2 py-2 text-sm">
+        <div class="subsection fixed w-[99%] rounded bg-white">
             <div class="">
                 <Loader 
                     :loader="loader"

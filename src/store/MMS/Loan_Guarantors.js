@@ -141,6 +141,7 @@ const actions = {
         state.guarantorName = selectedGuarantor.member.member_name;
         selectedGuarantor.member_loan_guarantor_id = null;
         state.guarantorArray = [...state.guarantorArray, selectedGuarantor];
+
     }
     commit('GUARANTORS_ARRAY', state.guarantorArray);
       
@@ -152,7 +153,10 @@ const actions = {
         state.memberID = selectedMember.member_id;
         state.memberName = selectedMember.member_name;
         selectedMember.loan_guarantor_id = null;
-        state.memberArray = [...state.memberArray, selectedMember];
+        const exists = state.memberArray.some(member => member.member_id === selectedMember.member_id);
+        if (!exists) {
+            state.memberArray = [...state.memberArray, selectedMember];
+        }
     }
     commit('MEMBERS_ARRAY', state.memberArray);
       

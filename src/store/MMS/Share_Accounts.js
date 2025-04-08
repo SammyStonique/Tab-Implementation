@@ -80,7 +80,7 @@ const actions = {
     axios.post(`api/v1/get-share-accounts/`,formData)
     .then((response)=>{
       for(let i=0; i< response.data.length; i++){
-        state.accountArr.push((response.data[i].account_number + " - " + response.data[i].member.member_name + " - " + response.data[i].share_product.product_name));
+        state.accountArr.push((response.data[i].account_number + " - " + response.data[i].member.member_name + " - " + response.data[i].share_product.product_name + " - " + response.data[i].total_shares));
       }
       commit('LIST_ACCOUNTS', response.data);
     })
@@ -105,7 +105,7 @@ const actions = {
     
   },
   handleSelectedAccount({ commit, state }, option){
-    const selectedAccount = state.accountsList.find(account => (account.account_number + " - " +account.member.member_name+ " - " + account.share_product.product_name) === option);
+    const selectedAccount = state.accountsList.find(account => (account.account_number + " - " +account.member.member_name+ " - " + account.share_product.product_name + " - " + account.total_shares) === option);
     if (selectedAccount) {
         state.accountID = selectedAccount.share_account_id;
         state.accountNumber = selectedAccount.account_number;

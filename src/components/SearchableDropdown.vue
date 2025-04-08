@@ -132,6 +132,8 @@ export default defineComponent({
   padding: 3px;
   cursor: pointer;
   overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis; 
 }
 
 .dropdown-list li:hover {

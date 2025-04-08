@@ -9,6 +9,7 @@ const state = {
   productName: '',
   productMaxAmount: 0,
   installments: 0,
+  grntCategory: null,
   loanCharges: [],
   chargesList: [], 
   chargeArr: [],
@@ -18,6 +19,7 @@ const state = {
   selectedInterestLedger: null,
   selectedPenaltyLedger: null,
   selectedCategory: null,
+  selectedGuarantorCategory: null,
   isEditing: false
 };
   
@@ -30,10 +32,12 @@ const mutations = {
     state.productName = "";
     state.productMaxAmount = 0;
     state.installments = 0;
+    state.grntCategory = null;
     state.selectedProduct = null;
     state.selectedInterestLedger = null;
     state.selectedPenaltyLedger = null;
     state.selectedCategory = null;
+    state.selectedGuarantorCategory = null;
     state.loanCharges = [];
     state.isEditing = false;
     state.chargeID = "";
@@ -62,6 +66,9 @@ const mutations = {
   },
   SET_SELECTED_CATEGORY(state, category) {
     state.selectedCategory = category;
+  },
+  SET_SELECTED_GUARANTOR_CATEGORY(state, category) {
+    state.selectedGuarantorCategory = category;
   },
   SET_PRODUCT_CHARGES(state, charges){
     state.loanCharges = charges
@@ -120,8 +127,10 @@ const actions = {
         const selectedInterestLedger = response.data.interest_posting_account.ledger_code + " - " + response.data.interest_posting_account.ledger_name;
         const selectedPenaltyLedger = (response.data.penalty_posting_account != null) ? (response.data.penalty_posting_account.ledger_code + " - " + response.data.penalty_posting_account.ledger_name) : "";
         const selectedCategory = (response.data.member_category != null) ? (response.data.member_category.category_name) : "";
+        const selectedGuarantorCategory = (response.data.guarantor_category != null) ? (response.data.guarantor_category.category_name) : "";
         commit('SET_SELECTED_PRODUCT',response.data);
         commit('SET_SELECTED_CATEGORY',selectedCategory);
+        commit('SET_SELECTED_GUARANTOR_CATEGORY',selectedGuarantorCategory);
         commit('SET_SELECTED_INTEREST_LEDGER', selectedInterestLedger);
         commit('SET_SELECTED_PENALTY_LEDGER', selectedPenaltyLedger);
         commit('SET_PRODUCT_CHARGES',(response.data.loan_charges != null) ? (response.data.loan_charges) : []);
@@ -163,6 +172,7 @@ const actions = {
         state.productName = selectedProduct.product_name;
         state.productMaxAmount = selectedProduct.max_amount;
         state.installments = selectedProduct.max_repayment;
+        state.grntCategory =  (selectedProduct.guarantor_category != null) ? (selectedProduct.guarantor_category.member_category_id) : null;
         state.productArray = [...state.productArray, selectedProduct];
     }
     commit('PRODUCTS_ARRAY', state.productArray);

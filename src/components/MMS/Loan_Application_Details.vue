@@ -142,6 +142,7 @@ export default defineComponent({
         const memberArray = computed(() => store.state.Members.memberArr);
         const productArray = computed(() => store.state.Loan_Products.productArr);
         const productMaxAmount = computed(() => store.state.Loan_Products.productMaxAmount);
+        const grntCategory = ref(null);
         const computedMaxAmnt = computed(() => productMaxAmount);
         const chargeArr = computed(() => store.state.Loan_Products.chargeArr);
         const memberArr = computed(() => store.state.Loan_Guarantors.memberArr);
@@ -187,7 +188,7 @@ export default defineComponent({
             {label: "Phone No", key:"phone_number", type: "text", editable: false},
             {label: "Savings", key:"total_savings", type: "text", editable: false},
             {label: "Shares", key:"total_shares", type: "text", editable: false},
-            {label: "Amount", key: "amount", type: "number", editable: true},
+            {label: "Amount", key: "guarantee_amount", type: "number", editable: true},
         ]);
         const guarantorRows = computed(() => {
             return store.state.Loan_Guarantors.memberArray;
@@ -290,11 +291,12 @@ export default defineComponent({
         const handleSelectedProduct = async(option) =>{
             await store.dispatch('Loan_Products/handleSelectedProduct', option)
             productID.value = store.state.Loan_Products.productID;
-            
+            grntCategory.value = store.state.Loan_Products.grntCategory;
             if(selectedApplication.value){
                 selectedApplication.value.loan_product.loan_product_id = productID.value;
                 productValue.value = productID.value
             }
+            fetchGuarantors();
         };
         const clearSelectedProduct = async() =>{
             await store.dispatch('Loan_Products/updateState', {productID: ''});
@@ -305,7 +307,7 @@ export default defineComponent({
             await store.dispatch('Loan_Products/fetchLoansCharges', {company:companyID.value})
         };
         const fetchGuarantors = async() =>{
-            await store.dispatch('Loan_Guarantors/fetchMembers', {company:companyID.value})
+            await store.dispatch('Loan_Guarantors/fetchMembers', {company:companyID.value, guarantor_category: grntCategory.value})
         };
         const fetchSecurities = async() =>{
             await store.dispatch('Security_Types/fetchSecurityTypes', {company:companyID.value})
@@ -687,7 +689,6 @@ export default defineComponent({
         
         onBeforeMount(()=>{ 
             fetchCharges();
-            fetchGuarantors();
             fetchSecurities();
             updateFormFields();
             updateAdditionalFormFields();

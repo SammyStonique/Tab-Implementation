@@ -148,13 +148,16 @@ export default{
         const member_number_search = ref("");
         const approval_status_search = ref("");
         const disbursed_status_search = ref("");
- 
+        const from_date_search = ref("");
+        const to_date_search = ref("");
         const searchFilters = ref([
             {type:'text', placeholder:"Loan No...", value: loan_number_search, width:48,},
             {type:'text', placeholder:"Member Name...", value: name_search, width:48,},
-            {type:'text', placeholder:"Member No...", value: member_number_search, width:48,},
+            {type:'text', placeholder:"Member No...", value: member_number_search, width:32,},
+            {type:'date', placeholder:"From Date...", value: from_date_search, width:32, title: "Date From Search"},
+            {type:'date', placeholder:"To Date...", value: to_date_search, width:32, title: "Date To Search"},
             {
-                type:'dropdown', placeholder:"Status..", value: approval_status_search, width:40,
+                type:'dropdown', placeholder:"Status..", value: approval_status_search, width:32,
                 options: [{text:'Active',value:'Active'},{text:'Defaulted',value:'Defaulted'},{text:'Cleared',value:'Cleared'}]
             },
         ]);
@@ -295,6 +298,8 @@ export default{
                 member_number: member_number_search.value,
                 approval_status: approval_status_search.value,
                 disbursed: disbursed_status_search.value,
+                from_date: from_date_search.value,
+                to_date: to_date_search.value,
                 company_id: companyID.value,
                 page_size: selectedValue.value
             } 
@@ -333,6 +338,8 @@ export default{
             loan_number_search.value = "";
             approval_status_search.value = "";
             disbursed_status_search.value = "";
+            from_date_search.value = "";
+            to_date_search.value = "";
             searchApplications();
         }
         const loadPrev = () =>{

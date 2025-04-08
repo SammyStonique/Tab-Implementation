@@ -25,6 +25,7 @@ const state = {
   selectedSecurities: [],
   selectedDocuments: [],
   selectedTransactions: [],
+  selectedStatement: [],
   loanMember: [],
   loanProduct: [],
   selectedApplicationID: null,
@@ -54,6 +55,7 @@ const mutations = {
     state.selectedSecurities = [];
     state.selectedDocuments = [];
     state.selectedTransactions = [];
+    state.selectedStatement = [];
     state.loanMember = [];
     state.loanProduct = [];
     state.selectedApplicationID = null;
@@ -117,6 +119,9 @@ const mutations = {
   },
   SET_LOAN_TRANSACTIONS(state, transactions){
     state.selectedTransactions = transactions;
+  },
+  SET_LOAN_STATEMENT(state, statement){
+    state.selectedStatement = statement;
   },
   SET_SELECTED_MEMBER(state, member) {
     state.selectedMember = member;
@@ -243,6 +248,35 @@ const actions = {
                 state.selectedTransactions.push(txns[i])
             }
         }
+    })
+    .catch((error)=>{
+        console.log(error.message)
+    })
+    .finally(()=>{
+    
+    })
+  },
+  fetchLoanStatement({ commit,state }, formData){
+    let txns = [];
+    axios
+    .post("api/v1/loan-statement-search/", formData)
+    .then((response)=>{
+        state.selectedStatement = response.data.results;
+        let running_balance = 0;
+        txns = response.data.results;
+
+        // for(let i=0; i<txns.length; i++){
+        //     if(txns[i].debit_amount != 0){
+        //         running_balance += txns[i].debit_amount;
+        //         txns[i]['running_balance'] = Number(running_balance).toLocaleString();
+        //         state.selectedStatement.push(txns[i])
+        //     }
+        //     else if(txns[i].credit_amount != 0){
+        //         running_balance -= txns[i].credit_amount;
+        //         txns[i]['running_balance'] = Number(running_balance).toLocaleString();
+        //         state.selectedStatement.push(txns[i])
+        //     }
+        // }
     })
     .catch((error)=>{
         console.log(error.message)

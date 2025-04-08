@@ -127,10 +127,14 @@ export default{
         const posted_status_search = ref('');
         const loan_status_search = ref('');
         const member_number_search = ref("");
+        const from_date_search = ref("");
+        const to_date_search = ref("");
         const searchFilters = ref([
             {type:'text', placeholder:"Loan No...", value: loan_number_search, width:32,},
             {type:'text', placeholder:"Member No...", value: member_number_search, width:32,},
             {type:'text', placeholder:"Search Name...", value: name_search, width:48,},
+            {type:'date', placeholder:"From Date...", value: from_date_search, width:32, title: "Date From Search"},
+            {type:'date', placeholder:"To Date...", value: to_date_search, width:32, title: "Date To Search"},
             {
                 type:'dropdown', placeholder:"Posted..", value: posted_status_search, width:24,
                 options: [{text:'Yes',value:'Yes'},{text:'No',value:'No'}]
@@ -479,6 +483,8 @@ export default{
                 posted: posted_status_search.value,
                 loan_status: loan_status_search.value,
                 fee: feeSearchID.value,
+                from_date: from_date_search.value,
+                to_date: to_date_search.value,
                 company_id: companyID.value,
                 page_size: selectedValue.value
             }
@@ -546,6 +552,8 @@ export default{
             member_number_search.value = "";
             posted_status_search.value = "";
             loan_status_search.value = "";
+            from_date_search.value = "";
+            to_date_search.value = "";
             searchApplicationFees();
         };
         const closeModal = async() =>{
