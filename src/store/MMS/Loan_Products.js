@@ -10,6 +10,7 @@ const state = {
   productMaxAmount: 0,
   installments: 0,
   grntCategory: null,
+  grntOption: "Savings",
   loanCharges: [],
   chargesList: [], 
   chargeArr: [],
@@ -33,6 +34,7 @@ const mutations = {
     state.productMaxAmount = 0;
     state.installments = 0;
     state.grntCategory = null;
+    state.grntOption = "Savings";
     state.selectedProduct = null;
     state.selectedInterestLedger = null;
     state.selectedPenaltyLedger = null;
@@ -173,6 +175,7 @@ const actions = {
         state.productMaxAmount = selectedProduct.max_amount;
         state.installments = selectedProduct.max_repayment;
         state.grntCategory =  (selectedProduct.guarantor_category != null) ? (selectedProduct.guarantor_category.member_category_id) : null;
+        state.grntOption = selectedProduct.guarantee_option;
         state.productArray = [...state.productArray, selectedProduct];
     }
     commit('PRODUCTS_ARRAY', state.productArray);

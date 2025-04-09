@@ -221,7 +221,7 @@ export default defineComponent({
         row.item_sales_income = salesIncome;
       }
     };
-
+    //CALCULATE EMPLOYEE APPRAISAL AVERAGE RATING
     const calculateAverageRating = (row) =>{
 
       const employeeRating = parseFloat(row.employee_rating)|| 0;
@@ -265,6 +265,23 @@ export default defineComponent({
       }
       emit('update-average-rating', row.average_rating)
     };
+    //CHECK MEMBER LOAN FREE SAVINGS OR SHARES
+    const checkFreeSavings = (row) =>{
+      let freeSavings = parseFloat(row.free_savings) || 0;
+      let freeShares = parseFloat(row.free_shares) || 0;
+      let grntOption = row.guarantee_option;
+      let grntAmount = row.guarantee_amount;
+
+      if(grntOption == "Savings"){
+        if(grntAmount > freeSavings){
+          row.guarantee_amount = 0;
+        }
+      }else if(grntOption == "Shares"){
+        if(grntAmount > freeShares){
+          row.guarantee_amount = 0;
+        }
+      }
+    }
 
     const handleChange = (event, row) =>{
       const selectedValue = event.target.value;
@@ -282,6 +299,7 @@ export default defineComponent({
       updateUnits(row);
       receiptAllocation(row);
       journalLineCheck(row);
+      checkFreeSavings(row);
     };
 
 

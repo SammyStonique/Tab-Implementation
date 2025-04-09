@@ -171,7 +171,7 @@ export default{
                     type:'search-dropdown', label:"Share Account From", value: accValue.value, componentKey: memComponentKey,
                     selectOptions: accArray, optionSelected: handleSelectedAccount, required: true,
                     searchPlaceholder: 'Select Account From...', dropdownWidth: '500px',
-                    fetchData: store.dispatch('Share_Accounts/fetchShareAccounts', {company:companyID.value}), clearSearch: clearSelectedAccount
+                    fetchData: store.dispatch('Share_Accounts/fetchShareAccounts', {company:companyID.value, transferrable:"Yes"}), clearSearch: clearSelectedAccount
                 },
                 {  
                     type:'search-dropdown', label:"Share Account To", value: accToValue.value, componentKey: prodComponentKey,

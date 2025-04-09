@@ -1134,28 +1134,12 @@ export default defineComponent({
             depositHeld.value = 0;
         };
 
-        const fetchEnabledRights = () =>{
-            allowedRights.value = [];
-            let formData = {
-                user: userID.value,
-                company: companyID.value,
-                module: rightsModule.value
-            }
-            axios
-            .post("api/v1/user-permissions-search/",formData)
-            .then((response)=>{
-                allowedRights.value = response.data.results;
-            })
-            .catch((error)=>{
-                console.log(error.message);
-            })
-        };
         const isDisabled =(permissionName) =>{
             const permission = allowedRights.value.find(p => p.permission_name === permissionName);
             return permission ? !permission.right_status : true;
         };
         onMounted(()=>{
-            fetchEnabledRights();
+ 
         })
 
         return{

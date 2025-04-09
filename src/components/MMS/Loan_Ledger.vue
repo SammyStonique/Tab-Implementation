@@ -861,22 +861,7 @@ export default defineComponent({
             { type: 'date', name: 'from_date',label: "From Date", value: '', required: true },
         ]);
         
-        const fetchEnabledRights = () =>{
-            allowedRights.value = [];
-            let formData = {
-                user: userID.value,
-                company: companyID.value,
-                module: rightsModule.value
-            }
-            axios
-            .post("api/v1/user-permissions-search/",formData)
-            .then((response)=>{
-                allowedRights.value = response.data.results;
-            })
-            .catch((error)=>{
-                console.log(error.message);
-            })
-        };
+
         const isDisabled =(permissionName) =>{
             const permission = allowedRights.value.find(p => p.permission_name === permissionName);
             return permission ? !permission.right_status : true;
@@ -885,7 +870,7 @@ export default defineComponent({
             loanDetails.value = store.state.Loan_Applications.loanDetails;
         });
         onMounted(()=>{
-            fetchEnabledRights();
+
         });
 
         return{
