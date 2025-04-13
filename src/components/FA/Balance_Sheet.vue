@@ -378,6 +378,10 @@ export default{
                 merge_debtors_setting: merge_debtors_setting.value,
                 merge_vendors_setting: merge_vendors_setting.value,
                 merge_tenants_setting: merge_tenants_setting.value,
+                merge_members_setting: merge_members_setting.value,
+                merge_loans_setting: merge_loans_setting.value,
+                merge_savings_setting: merge_savings_setting.value,
+                merge_shares_setting: merge_shares_setting.value,
                 date_from: from_date_search.value,
                 date_to: to_date_search.value,
                 company_id: companyID.value

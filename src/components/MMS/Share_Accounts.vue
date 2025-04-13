@@ -99,6 +99,8 @@ export default{
             {label: "Member No", key: "member_number", type: "text", editable: false},
             {label: "Member Name", key: "member_name", type: "text", editable: false},
             {label: "Share Product", key: "share_product", type: "text", editable: false},
+            {label: "Price", key: "share_price", type: "text", editable: false},
+            {label: "Quantity", key: "share_quantity", type: "text", editable: false},
             {label: "Amount", key: "amount", type: "text", editable: false},
         ])
         const actions = ref([
@@ -173,23 +175,29 @@ export default{
         const productValue = computed(() => {
             return (selectedAccount.value && selectedAccount.value.share_product && !productID.value) ? selectedAccount.value.share_product.shares_product_id : productID.value;
         });
+        const calculateTotalShares = (value) =>{
+            productAmount.value = parseFloat(value) * parseFloat(formFields.value[4].value)     
+        }
         const updateFormFields = () => {
             formFields.value = [
                 {  
                     type:'search-dropdown', label:"Member", value: memberValue.value, componentKey: memComponentKey,
                     selectOptions: memberArray, optionSelected: handleSelectedMember, required: true,
-                    searchPlaceholder: 'Select Member...', dropdownWidth: '400px', updateValue: selectedMember.value,
+                    searchPlaceholder: 'Select Member...', dropdownWidth: '500px', updateValue: selectedMember.value,
                     fetchData: store.dispatch('Members/fetchMembers', {company:companyID.value}), clearSearch: clearSelectedMember
                 },
                 {  
                     type:'search-dropdown', label:"Share Product", value: productValue.value, componentKey: prodComponentKey,
                     selectOptions: productArray, optionSelected: handleSelectedProduct, required: true,
-                    searchPlaceholder: 'Select Share Product...', dropdownWidth: '400px', updateValue: selectedProduct.value,
+                    searchPlaceholder: 'Select Share Product...', dropdownWidth: '500px', updateValue: selectedProduct.value,
                     fetchData: store.dispatch('Shares_Products/fetchSharesProducts', {company:companyID.value}), clearSearch: clearSelectedProduct
                 },
                 { type: 'text', name: 'account_number',label: "Account Number", value: selectedAccount.value?.account_number || '', required: true },
                 { type: 'date', name: 'date',label: "Date Opened", value: selectedAccount.value?.date || '', required: true },
-                { type: 'text', name: 'amount',label: "Amount", value: selectedAccount.value?.amount || computedProdAmnt.value, required: true },
+                { type: 'text', name: 'share_price',label: "Share Price", value: selectedAccount.value?.share_price || '0', required: true },
+                { type: 'text', name: 'share_quantity',label: "Share Quantity", value: selectedAccount.value?.share_quantity || '0', required:true , method: calculateTotalShares },
+                { type: 'text', name: 'amount',label: "Amount", value: selectedAccount.value?.amount || computedProdAmnt.value, required: false, disabled: true },
+                {required: false}
             ];
         };
         watch([selectedAccount, selectedMember, selectedProduct], () => {
@@ -198,16 +206,15 @@ export default{
                 prodComponentKey.value += 1;
                 updateFormFields();
             }
-            else{
-                updateFormFields();
-            }
+            
         }, { immediate: true });
         const addNewAccount = () =>{
+            updateFormFields();
             depModalVisible.value = true;
             handleReset();
             store.dispatch("Share_Accounts/updateState",{selectedAccount:null, selectedMember:null, selectedProduct:null,isEditing:false})
-            flex_basis.value = '1/2';
-            flex_basis_percentage.value = '50';
+            flex_basis.value = '1/3';
+            flex_basis_percentage.value = '33.333';
         }
         const handleActionClick = async(rowIndex, action, row) =>{
             if( action == 'edit'){
@@ -219,8 +226,8 @@ export default{
                 await store.dispatch('Share_Accounts/fetchShareAccount',formData).
                 then(()=>{
                     depModalVisible.value = true;
-                    flex_basis.value = '1/2';
-                    flex_basis_percentage.value = '50';
+                    flex_basis.value = '1/3';
+                    flex_basis_percentage.value = '33.333';
                 })
                 
             }else if(action == 'delete'){
@@ -238,7 +245,12 @@ export default{
         const handleReset = () =>{
             store.dispatch("Share_Accounts/updateState",{selectedAccount:null, selectedMember:null, selectedProduct:null,isEditing:false})
             for(let i=0; i < formFields.value.length; i++){
-                formFields.value[i].value = '';
+                if(formFields.value[i].name == "share_price" || formFields.value[i].name == "share_quantity" || formFields.value[i].name == "amount"){
+                    formFields.value[i].value = '0';
+                }else{
+                    formFields.value[i].value = '';
+                }
+                
             }
             memberID.value = "";
             productID.value = "";
@@ -257,7 +269,8 @@ export default{
             let formData = {
                 account_number: formFields.value[2].value,
                 date: formFields.value[3].value,
-                amount: formFields.value[4].value,
+                share_price: formFields.value[4].value,
+                share_quantity: formFields.value[5].value,
                 member: memberID.value,
                 member_id: memberID.value,
                 share_product: productID.value,
@@ -304,7 +317,8 @@ export default{
             let formData = {
                 account_number: formFields.value[2].value,
                 date: formFields.value[3].value,
-                amount: formFields.value[4].value,
+                share_price: formFields.value[4].value,
+                share_quantity: formFields.value[5].value,
                 member: memberValue.value,
                 member_id: memberValue.value,
                 share_product: productValue.value,

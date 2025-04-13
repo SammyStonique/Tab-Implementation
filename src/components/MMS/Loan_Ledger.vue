@@ -78,7 +78,8 @@
                             <DynamicTable :key="statementTableKey" :rightsModule="rightsModule" :columns="statementColumns" :rows="statementRows" :idField="idFieldStatement" :showActions="showActions" :actions="actionsStatement"/>
                         </div>
                     </div>          
-                    <div v-if="activeTab == 1">                    
+                    <div v-if="activeTab == 1" class="text-left"> 
+                        <button @click="printSchedule" class="rounded bg-green-400 cursor-pointer text-sm mr-2 mb-1.5  text-white px-2 py-1.5"><i class="fa fa-check-circle text-xs mr-1.5" aria-hidden="true"></i>Print Schedule</button>                                   
                         <DynamicTable :key="tableKey" :rightsModule="rightsModule" :columns="scheduleColumns" :rows="computedScheduleRows" :idField="idFieldSchedule" :showTotals="showTotals" :actions="actionsSchedule" @action-click="scheduleActionClick" />
                     </div>
                     <div v-show="activeTab == 3"> 
@@ -267,6 +268,7 @@ export default defineComponent({
             {label: "Interest", key: "interest", type: "text", editable: false},
             {label: "Penalty", key: "penalty", type: "text", editable: false},
             {label: "Principal", key: "principal", type: "text", editable: false},
+            {label: "Prepayment", key: "prepayment", type: "text", editable: false},
             {label: "Running Balance", key: "running_balance", type: "text", editable: false},
         ]);
 
@@ -790,6 +792,30 @@ export default defineComponent({
  
             }
         }
+        const printSchedule = () =>{
+            showLoader();
+            let formData = {
+                company: companyID.value,
+                loan_application: applicationID.value,
+                historical_loan: null
+            }
+            axios
+            .post("api/v1/export-loan-schedule-pdf/", formData, { responseType: 'blob' })
+                .then((response)=>{
+                    if(response.status == 200){
+                        const blob1 = new Blob([response.data]);
+                        // Convert blob to URL
+                        const url = URL.createObjectURL(blob1);
+                        PrintJS({printable: url, type: 'pdf'});
+                    }
+                })
+            .catch((error)=>{
+                console.log(error.message);
+            })
+            .finally(()=>{
+                hideLoader();
+            })
+        };
         const previewDocument = (formData) =>{
             showLoader();
             axios
@@ -875,7 +901,7 @@ export default defineComponent({
 
         return{
             tabs, activeTab, mainComponentKey, scheduleColumns, paymentColumns, selectTab, loader, showLoader, hideLoader, formFields, additionalFields,showTotals,
-            tableKey,paymentTableKey, idFieldSchedule, idFieldPayment, actionsSchedule, actionsUtility, computedScheduleRows, computedPaymentRows,computedGuarantorRows,computedSecurityRows,
+            tableKey,paymentTableKey, idFieldSchedule, idFieldPayment, actionsSchedule, actionsUtility, computedScheduleRows, computedPaymentRows,computedGuarantorRows,computedSecurityRows,printSchedule,
             scheduleTableKey, idFieldSchedule, scheduleColumns, actionsSchedule, statementTableKey, idFieldStatement, statementRows,statement1Rows,showActions,searchFilters,resetFilters,dropdownOptions,
             statementColumns,statement1Columns, actionsStatement, loanDetails,loanProduct,loanMember, scheduleActionClick,showAddButton,searchLoanTransactions,printLoanTransactions,handleDynamicOption,
             scheduleActionClick,tnt_modal_loader, dep_modal_loader, util_modal_loader, depModalVisible, displayButtons,guarantorColumns,securityColumns, printLoanStatement,handleDynamicOption1,

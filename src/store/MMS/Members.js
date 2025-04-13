@@ -172,9 +172,9 @@ const actions = {
     
   },
 
-  fetchMemberReceiptItems({ commit,state }, formData) {
+  async fetchMemberReceiptItems({ commit,state }, formData) {
     state.outstandingBalance = 0;
-    axios.post(`api/v1/member-receipt-items-search/`,formData)
+    await axios.post(`api/v1/member-receipt-items-search/`,formData)
     .then((response)=>{
       const receiptItems = response.data.items;
       for(let i=0; i<response.data.items.length; i++){

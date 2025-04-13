@@ -68,6 +68,8 @@ import Disciplinary_Actions from '@/components/HR/Disciplinary_Actions.vue';
 import Disciplinary_Appeals from '@/components/HR/Disciplinary_Appeals.vue';
 import Employee_Rewards from '@/components/HR/Employee_Rewards.vue';
 import Employee_Deductions from '@/components/HR/Employee_Deductions.vue';
+import Asset_Categories from '@/components/HR/Asset_Categories.vue';
+import Assets_List from '@/components/HR/Assets_List.vue';
 
 import Default_Settings from '@/components/SET/Default_Settings.vue';
 
@@ -82,7 +84,7 @@ export default{
         HR_Templates,Design_HR_Template,Leave_Applications,Leave_Allocations,Salary_Advances,Loan_Applications,
         Loan_Application_Details,Loan_Disbursements,Leave_Ammendments,Appraisal_Categories,Appraisal_Periods,Performance_Indicators,
         Employee_Appraisals,Appraisal_Details,Skill_Ratings,Disciplinary_Categories,Disciplinary_Cases,Disciplinary_Meetings,
-        Disciplinary_Reviews,Disciplinary_Actions,Disciplinary_Appeals,Employee_Rewards,Employee_Deductions,
+        Disciplinary_Reviews,Disciplinary_Actions,Disciplinary_Appeals,Employee_Rewards,Employee_Deductions,Asset_Categories,Assets_List,
 
         Default_Settings
     },

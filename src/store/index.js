@@ -42,6 +42,8 @@ import Journals from './FA/Journals';
 import Customers from './FA/Customers';
 import Vendors from './FA/Vendors';
 import Fiscal_Periods from './FA/Fiscal_Periods';
+import Asset_Categories from './FA/Asset_Categories';
+import Assets from './FA/Assets';
 
 import Item_Categories from './INV/Item_Categories';
 import Items_Catalog from './INV/Items_Catalog';
@@ -114,6 +116,8 @@ import Penalty_Batches from './MMS/Penalty_Batches';
 import Loan_Penalties from './MMS/Loan_Penalties';
 import Loan_Documents from './MMS/Loan_Documents';
 import Loan_Arrears from './MMS/Loan_Arrears';
+import Loan_Prepayments from './MMS/Loan_Prepayments';
+import Loan_Prepayment_Alloc from './MMS/Loan_Prepayment_Alloc';
 
 
 import Default_Settings from './SET/Default_Settings';
@@ -145,7 +149,7 @@ export default createStore({
     Item_Categories,Items_Catalog,Uom,Retail_Outlets,Item_Location,Outlet_Counters,Direct_Sales,Counter_Channels,Direct_Purchases,
     Stock_Adjustments,Stock_Transfers,
     
-    Ledgers, Currencies, Taxes, Journals, Customers, Vendors,Fiscal_Periods,
+    Ledgers, Currencies, Taxes, Journals, Customers, Vendors,Fiscal_Periods,Asset_Categories,Assets,
 
     Pay_Cycles,Pay_Groups,Deductions,Leave_Types,Holidays,Paye,Nssf,Shif,Housing_Levy,Employees,Payrolls,Leave_Applications,Leave_Allocations,Salary_Advances,
     Employee_Loan_Applications,Employee_Loan_Disbursements,Leave_Ammendments,Appraisals,Performance_Indicators,Skill_Ratings,Appraisal_Periods,Appraisal_Categories,
@@ -153,7 +157,7 @@ export default createStore({
 
     Member_Categories,Member_Sponsors,Members,Membership_Fees,Savings_Products,Shares_Products,Saving_Accounts,Share_Accounts,Saving_Deposits,Share_Deposits,
     Loan_Products,Loan_Fees,Loan_Applications,Loan_Guarantors,Loan_Disbursements,Security_Types,Loan_Securities,Application_Fees,Loan_Schedules,Loan_Penalties,
-    Penalty_Batches,Loan_Documents,Historical_Loans,Loan_Arrears,Saving_Transfers,Share_Transfers,
+    Penalty_Batches,Loan_Documents,Historical_Loans,Loan_Arrears,Saving_Transfers,Share_Transfers,Loan_Prepayments,Loan_Prepayment_Alloc,
 
     Default_Settings,Companies,Branches,User_Rights,SMS_Integrations,Email_Integrations,Mpesa_Integrations,Mpesa_Transactions,Banks,SMS_Templates,Email_Templates
   },

@@ -61,7 +61,8 @@ export default defineComponent({
         const store = useStore();
         const toast = useToast();
         const loader = ref('none');
-        const tabs = ref(['Contact Details','Charge Details']);
+        // const tabs = ref(['Contact Details','Charge Details']);
+        const tabs = ref(['Contact Details']);
         const mainComponentKey = ref(0);
         const depComponentKey = ref(0);
         const userComponentKey = ref(0);

@@ -8,6 +8,7 @@
         @resetFilters="resetFilters"
         @removeItem="removeFee"
         @removeSelectedItems="removeFees"
+        @printList="printFeesList"
         :addingRight="addingRight"
         :removingRight="removingRight"
         :rightsModule="rightsModule"
@@ -48,6 +49,7 @@ import DynamicForm from '../NewDynamicForm.vue';
 import { useStore } from "vuex";
 import { useToast } from "vue-toastification";
 import Swal from 'sweetalert2';
+import PrintJS from 'print-js';
 
 export default{
     name: 'Application_Fees',
@@ -559,6 +561,38 @@ export default{
         const closeModal = async() =>{
             depModalVisible.value = false;
             handleReset();
+        };
+        const printFeesList = () =>{
+            showLoader();
+            let formData = {
+                loan_number: loan_number_search.value,
+                member_name: name_search.value,
+                member_number: member_number_search.value,
+                posted: posted_status_search.value,
+                loan_status: loan_status_search.value,
+                fee: feeSearchID.value,
+                from_date: from_date_search.value,
+                to_date: to_date_search.value,
+                company_id: companyID.value,
+                page_size: selectedValue.value
+            } 
+   
+            axios
+            .post("api/v1/export-loan-application-fees-pdf/", formData, { responseType: 'blob' })
+                .then((response)=>{
+                    if(response.status == 200){
+                        const blob1 = new Blob([response.data]);
+                        // Convert blob to URL
+                        const url = URL.createObjectURL(blob1);
+                        PrintJS({printable: url, type: 'pdf'});
+                    }
+                })
+            .catch((error)=>{
+                console.log(error.message);
+            })
+            .finally(()=>{
+                hideLoader();
+            })
         }
         onMounted(()=>{
             searchApplicationFees();
@@ -568,7 +602,7 @@ export default{
             currentPage,depResults, depArrLen, depCount, pageCount, showNextBtn, showPreviousBtn,modal_top, modal_left, modal_width,
             loadPrev, loadNext, firstPage, lastPage, actions, formFields, depModalVisible, addNewFee,
             displayButtons,flex_basis,flex_basis_percentage, handleActionClick, handleReset, createApplicationFee,
-            showLoader, loader, hideLoader, modal_loader, showModalLoader, hideModalLoader, removeFee, removeFees,
+            showLoader, loader, hideLoader, modal_loader, showModalLoader, hideModalLoader, removeFee, removeFees,printFeesList,
             addingRight,removingRight,rightsModule, closeModal,selectSearchQuantity,selectedValue,handleSelectionChange
         }
     }

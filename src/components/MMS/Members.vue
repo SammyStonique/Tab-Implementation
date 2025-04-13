@@ -122,9 +122,12 @@ export default{
             {label: "Joining Date", key:"joining_date"},
             {label: "Phone No", key: "phone_number"},
             {label: "Email", key:"email"},
-            {label: "Category", key:"member_category"},
-            {label: "Sponsor", key:"member_sponsor"},
             {label: "Gender", key:"gender"},
+            {label: "Category", key:"member_category"},
+            {label: "Savings", key:"total_savings",},
+            {label: "Free Savings", key:"formatted_free_savings", textColor: "savingsColor"},
+            {label: "Shares", key:"total_shares"},
+            {label: "Free Shares", key:"formatted_free_shares", textColor: "sharesColor"},
         ])
         const actions = ref([
             {name: 'edit', icon: 'fa fa-edit', title: 'Edit Member', rightName: 'Editing Members'},

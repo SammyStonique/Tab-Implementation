@@ -9,7 +9,7 @@
                                 <button v-show="hasPrepayment" @click="addPrepayment" class="rounded bg-green-400 text-sm mr-2  text-white px-2 py-1.5"><i class="fa fa-check-circle text-xs mr-1.5" aria-hidden="true"></i>Add Prepayment</button>
                             </div>
                             <div class="basis-1/2 text-red-500 text-left">
-                                <p class="font-bold">DUE BALANCE:  {{ Number(outstanding_balance).toLocaleString() }}</p>
+                                <p class="font-bold">DUE BALANCE:  {{ Number(computedOutstandingBal).toLocaleString() }}</p>
                             </div> 
                             <div class="basis-1/3 text-left">
                                 <button  @click="addReceiptItems" class="rounded bg-green-400 text-sm mr-2  text-white px-2 py-1.5"><i class="fa fa-check-circle text-xs mr-1.5" aria-hidden="true"></i>Add Receipt Items</button>
@@ -85,7 +85,8 @@ export default defineComponent({
         const modal_top = ref('120px');
         const modal_left = ref('400px');
         const modal_width = ref('30vw');
-        const outstanding_balance = computed(()=> store.state.Members.outstandingBalance);
+        const outstanding_balance = ref(0);
+        const computedOutstandingBal = computed(() =>{ return outstanding_balance.value});
         const allotable_prepayment = computed(()=> store.state.Active_Tenants.allotablePrepayment);
         const savingsArray = computed(() => store.state.Saving_Accounts.accountArr);
         const sharesArray = computed(() => store.state.Share_Accounts.accountArr);
@@ -123,6 +124,7 @@ export default defineComponent({
         const removeReceiptItem = (rowIndex, action, row) =>{
             store.dispatch('Members/removeReceiptItem', rowIndex);
             tableKey.value += 1;
+            outstanding_balance.value -= row['due_amount']
         }
 
         const fetchMembers = async() =>{
@@ -131,12 +133,17 @@ export default defineComponent({
         const fetchReceiptItems = async() =>{
             if(memberID.value){
                 await store.dispatch('Members/fetchMemberReceiptItems', {company:companyID.value, member:memberID.value, date: formFields.value[1].value})
+                .then(()=>{
+                    outstanding_balance.value = store.state.Members.outstandingBalance;
+                    console.log("THE OUTSTANDING BAL IS ",outstanding_balance.value)
+                })
+                
             }       
         };
         const handleSelectedMember = async(option) =>{
             await store.dispatch('Members/handleSelectedMember', option)
             memberID.value = store.state.Members.memberID;
-            outstanding_balance.value = store.state.Members.outstandingBalance;
+            
         };
         const clearSelectedMember = async() =>{
             await store.dispatch('Members/updateState', {memberID: ''});
@@ -268,6 +275,7 @@ export default defineComponent({
             prepaymentAmount.value = 0;
             hasPrepayment.value = false;
             allotable_prepayment.value = 0;
+            outstanding_balance.value = 0;
         }
         watch([memberID], () => {
             if(memberID.value){
@@ -478,6 +486,7 @@ export default defineComponent({
                 journal_no : "PREPAID LOAN",
                 type: "loan_prepayment",
                 journal_id : store.state.Loan_Applications.applicationID,
+                loan_application_id : store.state.Loan_Applications.applicationID,
                 description : `${additionalFields.value[1].value} Prepayment - ${store.state.Loan_Applications.applicationNumber}`,
                 total_amount : additionalFields.value[2].value,
                 total_paid : additionalFields.value[2].value,
@@ -767,7 +776,8 @@ export default defineComponent({
             autoPopulatePaymentAlloc, outstanding_balance, hasPrepayment, addPrepayment, handlePrepayment, allocateInputAmount,
             title, modal_loader, modal_left, modal_top, modal_width, prepModalVisible, showModalLoader, hideModalLoader, closeModal,
             additionalFields,flex_basis_additional, flex_basis_percentage_additional, handlePrepaymentReset,allotable_prepayment,addReceiptItems,
-            actionsRcptItems,removeReceiptItem,rightsModule,addModalVisible,additionalFields1,handleReceiptItem,handleReceiptItemReset
+            actionsRcptItems,removeReceiptItem,rightsModule,addModalVisible,additionalFields1,handleReceiptItem,handleReceiptItemReset,
+            computedOutstandingBal
         }
     }
 })
