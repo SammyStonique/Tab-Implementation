@@ -102,6 +102,10 @@ import Saving_Deposits from './MMS/Saving_Deposits';
 import Share_Deposits from './MMS/Share_Deposits';
 import Saving_Transfers from './MMS/Saving_Transfers';
 import Share_Transfers from './MMS/Share_Transfers';
+import Interest_Rates from './MMS/Interest_Rates';
+import Interest_Processing from './MMS/Interest_Processing';
+import Dividend_Rates from './MMS/Dividend_Rates';
+import Dividend_Processing from './MMS/Dividend_Processing';
 import Loan_Products from './MMS/Loan_Products';
 import Loan_Fees from './MMS/Loan_Fees';
 import Loan_Applications from './MMS/Loan_Applications';
@@ -157,7 +161,8 @@ export default createStore({
 
     Member_Categories,Member_Sponsors,Members,Membership_Fees,Savings_Products,Shares_Products,Saving_Accounts,Share_Accounts,Saving_Deposits,Share_Deposits,
     Loan_Products,Loan_Fees,Loan_Applications,Loan_Guarantors,Loan_Disbursements,Security_Types,Loan_Securities,Application_Fees,Loan_Schedules,Loan_Penalties,
-    Penalty_Batches,Loan_Documents,Historical_Loans,Loan_Arrears,Saving_Transfers,Share_Transfers,Loan_Prepayments,Loan_Prepayment_Alloc,
+    Penalty_Batches,Loan_Documents,Historical_Loans,Loan_Arrears,Saving_Transfers,Share_Transfers,Loan_Prepayments,Loan_Prepayment_Alloc,Interest_Rates,Interest_Processing,
+    Dividend_Rates,Dividend_Processing,
 
     Default_Settings,Companies,Branches,User_Rights,SMS_Integrations,Email_Integrations,Mpesa_Integrations,Mpesa_Transactions,Banks,SMS_Templates,Email_Templates
   },

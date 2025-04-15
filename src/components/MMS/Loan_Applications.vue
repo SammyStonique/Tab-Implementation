@@ -151,9 +151,7 @@ export default{
         const from_date_search = ref("");
         const to_date_search = ref("");
         const productID = ref('');
-        const products_array = computed({
-            get: () => store.state.Loan_Products.productArr,
-        });
+        const products_array = computed(() => store.state.Loan_Products.productArr);
         const handleSelectedProduct = async(option) =>{
             await store.dispatch('Loan_Products/handleSelectedProduct', option)
             productID.value = store.state.Loan_Products.productID;

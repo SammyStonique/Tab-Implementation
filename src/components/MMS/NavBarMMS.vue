@@ -83,6 +83,18 @@
                             <p class="">Savings Transfers</p>
                         </button>
                     </div>
+                    <div class="py-2 px-3 pl-4 w-full hover:bg-slate-500 hover:w-full">
+                        <button class="flex text-sm w-full" @click="openPage({'MMS':'Interest_Rates'})">
+                            <i class="fa fa-percent pt-2 mr-2" aria-hidden="true"></i>
+                            <p class="">Interest Rates</p>
+                        </button>
+                    </div>
+                    <div class="py-2 px-3 pl-4 w-full hover:bg-slate-500 hover:w-full">
+                        <button class="flex text-sm w-full" @click="openPage({'MMS':'Interest_Processing'})">
+                            <i class="fa fa-cog pt-2 mr-2" aria-hidden="true"></i>
+                            <p class="">Interest Processing</p>
+                        </button>
+                    </div>
                 </div>
             </div>
             <div class="web-links dropdown w-36">
@@ -115,6 +127,18 @@
                         <button class="flex text-sm w-full" @click="openPage({'MMS':'Share_Transfers'})">
                             <i class="fa fa-exchange pt-2 mr-2" aria-hidden="true"></i>
                             <p class="">Shares Transfers</p>
+                        </button>
+                    </div>
+                    <div class="py-2 px-3 pl-4 w-full hover:bg-slate-500 hover:w-full">
+                        <button class="flex text-sm w-full" @click="openPage({'MMS':'Dividend_Rates'})">
+                            <i class="fa fa-percent pt-2 mr-2" aria-hidden="true"></i>
+                            <p class="">Dividend Rates</p>
+                        </button>
+                    </div>
+                    <div class="py-2 px-3 pl-4 w-full hover:bg-slate-500 hover:w-full">
+                        <button class="flex text-sm w-full" @click="openPage({'MMS':'Dividend_Processing'})">
+                            <i class="fa fa-cog pt-2 mr-2" aria-hidden="true"></i>
+                            <p class="">Dividend Processing</p>
                         </button>
                     </div>
                 </div>

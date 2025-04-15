@@ -44,6 +44,8 @@ import Share_Product_Details from '@/components/MMS/Share_Product_Details.vue';
 import Saving_Accounts from '@/components/MMS/Saving_Accounts.vue';
 import Import_Saving_Accounts from '@/components/MMS/Import_Saving_Accounts.vue';
 import Saving_Transfers from '@/components/MMS/Saving_Transfers.vue';
+import Interest_Rates from '@/components/MMS/Interest_Rates.vue';
+import Interest_Processing from '@/components/MMS/Interest_Processing.vue';
 import Share_Accounts from '@/components/MMS/Share_Accounts.vue';
 import Import_Share_Accounts from '@/components/MMS/Import_Share_Accounts.vue';
 import Saving_Deposits from '@/components/MMS/Saving_Deposits.vue';
@@ -51,6 +53,8 @@ import Import_Saving_Deposits from '@/components/MMS/Import_Saving_Deposits.vue'
 import Share_Deposits from '@/components/MMS/Share_Deposits.vue';
 import Import_Share_Deposits from '@/components/MMS/Import_Share_Deposits.vue';
 import Share_Transfers from '@/components/MMS/Share_Transfers.vue';
+import Dividend_Rates from '@/components/MMS/Dividend_Rates.vue';
+import Dividend_Processing from '@/components/MMS/Dividend_Processing.vue';
 import Loan_Products from '@/components/MMS/Loan_Products.vue';
 import Loan_Product_Details from '@/components/MMS/Loan_Product_Details.vue';
 import Loan_Fees from '@/components/MMS/Loan_Fees.vue';
@@ -87,7 +91,7 @@ export default{
         Saving_Deposits,Share_Deposits,Loan_Products,Loan_Product_Details,Loan_Fees,Loan_Applications,Loan_Application_Details,Loan_Guarantors,Loan_Ledger,
         Loan_Disbursements,Import_Saving_Accounts,Import_Share_Accounts,Import_Saving_Deposits,Import_Share_Deposits,Security_Types,Loan_Securities,
         Loan_Schedules,Loan_Penalties,Penalty_Batches,Loan_Documents,Application_Fees,Historical_Loans,Import_Historical_Loans,Historical_Loan_Ledger,
-        Loan_Arrears,Saving_Transfers,Share_Transfers,Loan_Prepayments,Prepayment_Allocations,
+        Loan_Arrears,Saving_Transfers,Share_Transfers,Loan_Prepayments,Prepayment_Allocations,Interest_Rates,Dividend_Rates,Interest_Processing,Dividend_Processing,
 
         Default_Settings
     },
