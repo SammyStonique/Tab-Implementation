@@ -148,7 +148,10 @@ export default{
         const actions = ref([
             {name: 'print', icon: 'fa fa-print', title: 'Print Receipt', rightName: 'Print Member Receipt'},
             {name: 'download', icon: 'fa fa-download', title: 'Download Receipt', rightName: 'Print Member Receipt'},
+            {name: 'send-sms', icon: 'fas fa-comment', title: 'Send SMS', rightName: 'Sending MMS SMS'},
+            {name: 'send-email', icon: 'fas fa-envelope', title: 'Send Email', rightName: 'Sending MMS Emails'},
             {name: 'delete', icon: 'fa fa-trash', title: 'Delete Receipt', rightName: 'Deleting Member Receipt'},
+            
         ])
         const companyID = computed(()=> store.state.userData.company_id);
         const fetchCustomers = async() =>{
@@ -382,6 +385,79 @@ export default{
                 then(()=>{
                     hideLoader();
                 })
+            }else if(action == 'send-sms'){
+                const reversalStatus = row['reversed'];
+                if(reversalStatus == "No"){
+                    showLoader();
+                    const memberID = [row['member_id']];
+                    const particulars = [row['description']];
+                    const particularsAmnt = [row['total_amount']];
+                    const txnNo = [row['journal_no']];
+                    let formData = {
+                        member: memberID,
+                        particulars: particulars,
+                        transaction_numbers: txnNo,
+                        particulars_amount: particularsAmnt,
+                        journal: null,
+                        company: companyID.value
+                    }
+                    await axios.post('api/v1/member-receipt-sms/',formData).
+                    then((response)=>{
+                        if(response.data.msg == "Success"){
+                            toast.success("SMS Sent!")
+                        }else if(response.data.msg == "Missing Template"){
+                            toast.error("Member Receipt Template Not Set!")
+                        }else{
+                            toast.error(response.data.msg)
+                        }
+                    })
+                    .catch((error)=>{
+                        toast.error(error.message)
+                    })
+                    .finally(()=>{
+                        hideLoader();
+                    })
+                }else{
+                    toast.error("Cannot SMS Reversed Receipt")
+                }
+                
+            }else if(action == 'send-email'){
+                const reversalStatus = row['reversed'];
+                if(reversalStatus == "No"){
+                    showLoader();
+                    const memberID = [row['member_id']];
+                    const receiptID = row['journal_id'];
+                    const particulars = [row['description']];
+                    const particularsAmnt = [row['total_amount']];
+                    const txnNo = [row['journal_no']];
+                    let formData = {
+                        member: memberID,
+                        receipt: receiptID,
+                        particulars: particulars,
+                        transaction_numbers: txnNo,
+                        particulars_amount: particularsAmnt,
+                        journal: null,
+                        company: companyID.value
+                    }
+                    await axios.post('api/v1/member-receipt-email/',formData).
+                    then((response)=>{
+                        if(response.data.msg == "Success"){
+                            toast.success("Email Sent!")
+                        }else if(response.data.msg == "Missing Template"){
+                            toast.error("Member Receipt Template Not Set!")
+                        }else{
+                            toast.error(response.data.msg)
+                        }
+                    })
+                    .catch((error)=>{
+                        toast.error(error.message)
+                    })
+                    .finally(()=>{
+                        hideLoader();
+                    })
+                }else{
+                    toast.error("Cannot Email Reversed Receipt")
+                }
             }
         };
         const handleShowDetails = async(row) =>{
@@ -430,12 +506,74 @@ export default{
         }
 
         const dropdownOptions = ref([
-            {label: 'Withholding Tax', action: 'withholding-tax'},
+            {label: 'SMS Member Receipts', action: 'send-sms'},
+            {label: 'Email Member Receipts', action: 'send-email'},
         ]);
-        const handleDynamicOption = (option) =>{
-            if(option == 'batch-meter-reading'){
-                store.commit('pageTab/ADD_PAGE', {'PMS':'Batch_Readings'})
-                store.state.pageTab.faActiveTab = 'Batch_Readings';
+        const handleDynamicOption = async(option) =>{
+            if(option == 'send-sms'){
+                showLoader();
+                const memberID = [];
+                const particulars = "";
+                const particularsAmnt = "";
+                const txnNo = "";
+                const journalID = selectedIds.value
+                let formData = {
+                    member: memberID,
+                    particulars: particulars,
+                    transaction_numbers: txnNo,
+                    particulars_amount: particularsAmnt,
+                    journal: journalID,
+                    company: companyID.value
+                }
+                await axios.post('api/v1/member-receipt-sms/',formData).
+                then((response)=>{
+                    if(response.data.msg == "Success"){
+                        toast.success("SMS Sent!")
+                    }else if(response.data.msg == "Missing Template"){
+                        toast.error("Member Receipt Template Not Set!")
+                    }else{
+                        toast.error(response.data.msg)
+                    }
+                })
+                .catch((error)=>{
+                    toast.error(error.message)
+                })
+                .finally(()=>{
+                    hideLoader();
+                })
+            }else if(option == 'send-email'){
+                showLoader();
+                const memberID = [];
+                const receiptID = "";
+                const particulars = "";
+                const particularsAmnt = "";
+                const txnNo = "";
+                const journalID = selectedIds.value
+                let formData = {
+                    member: memberID,
+                    receipt: receiptID,
+                    particulars: particulars,
+                    transaction_numbers: txnNo,
+                    particulars_amount: particularsAmnt,
+                    journal: journalID,
+                    company: companyID.value
+                }
+                await axios.post('api/v1/member-receipt-email/',formData).
+                then((response)=>{
+                    if(response.data.msg == "Success"){
+                        toast.success("Email Sent!")
+                    }else if(response.data.msg == "Missing Template"){
+                        toast.error("Member Receipt Template Not Set!")
+                    }else{
+                        toast.error(response.data.msg)
+                    }
+                })
+                .catch((error)=>{
+                    toast.error(error.message)
+                })
+                .finally(()=>{
+                    hideLoader();
+                })
             }
         };
         const printReceiptsList = () =>{

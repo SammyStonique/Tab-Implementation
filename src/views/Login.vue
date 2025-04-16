@@ -98,7 +98,7 @@
             } else {
               toast.error("Invalid Login Credentials");
             }
-            // store.dispatch('userData/reloadPage');
+            store.dispatch('userData/reloadPage');
           })
           .catch((error) => {
             if (error.response && error.response.status === 400) {

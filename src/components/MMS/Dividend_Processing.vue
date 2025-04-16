@@ -93,9 +93,10 @@ export default{
             {label: "Date", key: "date", type: "text", editable: false},
             {label: "Share Product", key: "share_product", type: "text", editable: false},
             {label: "Share Period", key: "fiscal_period", type: "text", editable: false},
-            {label: "Dividend Amount", key: "total_dividends", type: "text", editable: false},
-            {label: "Capitalized Dividends", key: "total_dividends", type: "text", editable: false},
-            {label: "Total Dividends", key: "total_dividends", type: "text", editable: false},
+            {label: "Dividend Earned", key: "total_dividends", type: "text", editable: false},
+            {label: "W.H.T Amount", key: "withholding_tax", type: "text", editable: false},
+            {label: "Capitalized", key: "capitalized_dividends", type: "text", editable: false},
+            {label: "Dividend Payable", key: "net_dividends", type: "text", editable: false},
         ])
         const showTotals = ref(false);
         const actions = ref([
@@ -186,6 +187,7 @@ export default{
                     clearSearch: clearSelectedPeriod
                 },
                 { type: 'date', name: 'date',label: "Processing Date", value: '', required: true },
+                { type: 'number', name: 'withholding_rate',label: "W.H.T Rate(%)", value: '0', required: true },
             ];
         };
 
@@ -203,10 +205,10 @@ export default{
                     company: companyID.value,
                     dividend_processing: rateID
                 }
-                await store.dispatch('Dividend_Processing/deleteInterestProcessing',formData).
-                then(()=>{
+                const response = await store.dispatch('Dividend_Processing/deleteDividendProcessing',formData)
+                if(response){
                     searchProcessedDividends();
-                })
+                }
             }
         } 
         const handleReset = async() =>{
@@ -234,6 +236,7 @@ export default{
             showModalLoader();
             let formData = {
                 date: formFields.value[2].value,
+                withholding_rate: formFields.value[3].value,
                 share_product: productID.value,
                 share_product_id: productID.value,
                 fiscal_period: periodID.value,
@@ -242,7 +245,7 @@ export default{
             };
             errors.value = [];
             for(let i=0; i < formFields.value.length; i++){
-                if(formFields.value[i].value =='' && formFields.value[i].required == true && formFields.value[i].type !='search-dropdown'){
+                if(formFields.value[i].value =='' && formFields.value[i].required == true && formFields.value[i].type !='search-dropdown' && formFields.value[i].type !='number'){
                     errors.value.push('Error');
                 }
             }
