@@ -3,6 +3,7 @@ import Swal from 'sweetalert2';
 
 const state = {
   applicationsList: [], 
+  grntApplicationsList: [],
   applicationArr: [],
   applicationArray: [],
   applicationID: '',
@@ -28,12 +29,14 @@ const state = {
   selectedStatement: [],
   loanMember: [],
   loanProduct: [],
+  grntLoansArr: [],
   selectedApplicationID: null,
 };
   
 const mutations = {
   initializeStore(state){
     state.applicationsList = [];
+    state.grntApplicationsList = [];
     state.applicationArr = [];
     state.applicationArray = [];
     state.applicationID = "";
@@ -79,6 +82,12 @@ const mutations = {
   },
   LIST_APPLICATIONS(state, applications) {
     state.applicationsList = applications;
+  },
+  LIST__GUARANTEED_APPLICATIONS(state, applications) {
+    state.grntApplicationsList = applications;
+  },
+  LIST_GUARANTEED_LOANS(state, applications) {
+    state.grntLoansArr = applications;
   },
   APPLICATIONS_ARRAY(state, applications){
     state.applicationArray = applications;
@@ -188,6 +197,20 @@ const actions = {
     })
     
   },
+  fetchGuaranteedLoans({ commit,state }, formData) {
+    state.grntLoansArr = [];
+    axios.post(`api/v1/get-loan-applications/`,formData)
+    .then((response)=>{
+      for(let i=0; i< response.data.length; i++){
+        state.grntLoansArr.push((response.data[i].loan_number + " - " + response.data[i].loan_product.product_name + " - " + response.data[i].member.member_name));
+      }
+      commit('LIST__GUARANTEED_APPLICATIONS', response.data);
+    })
+    .catch((error)=>{
+      console.log(error.message);
+    })
+    
+  },
   fetchLoanApplication({ commit,state }, formData) {
     axios.post(`api/v1/get-loan-applications/`,formData)
     .then((response)=>{
@@ -265,18 +288,6 @@ const actions = {
         let running_balance = 0;
         txns = response.data.results;
 
-        // for(let i=0; i<txns.length; i++){
-        //     if(txns[i].debit_amount != 0){
-        //         running_balance += txns[i].debit_amount;
-        //         txns[i]['running_balance'] = Number(running_balance).toLocaleString();
-        //         state.selectedStatement.push(txns[i])
-        //     }
-        //     else if(txns[i].credit_amount != 0){
-        //         running_balance -= txns[i].credit_amount;
-        //         txns[i]['running_balance'] = Number(running_balance).toLocaleString();
-        //         state.selectedStatement.push(txns[i])
-        //     }
-        // }
     })
     .catch((error)=>{
         console.log(error.message)
@@ -339,6 +350,25 @@ const actions = {
         state.applicationArray = [...state.applicationArray, selectedApplication];
     }
     commit('APPLICATIONS_ARRAY', state.applicationArray);
+      
+  },
+  async handleSelectedGuaranteedLoan({ commit, state }, option){
+    const selectedApplication = state.grntApplicationsList.find(application => (application.loan_number + " - " +application.loan_product.product_name + " - " + application.member.member_name) === option);
+    if (selectedApplication) {
+      let formData = {
+        loan_application_id: selectedApplication.loan_application_id,
+        historical_loan_id: null,
+      }
+      return axios.post(`api/v1/fetch-guaranteed-loan-schedules/`,formData)
+        .then((response)=>{
+          return response;
+        })
+        .catch((error)=>{
+          console.log(error.message);
+          throw error;
+        })
+    }
+    
       
   },
 

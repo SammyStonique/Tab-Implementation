@@ -227,6 +227,10 @@
                                     <td class="font-semibold">Member Currency: </td>
                                     <td> &#123;&#123; member_currency_code &#125;&#125;</td>
                                 </tr>
+                                <tr>
+                                    <td class="font-semibold">Receipt Allocation: </td>
+                                    <td> &#123;&#123; member_receipt_allocation &#125;&#125;</td>
+                                </tr>
                             </table>
                         </div>
                         <div class="w-full" v-else-if="human_resource">

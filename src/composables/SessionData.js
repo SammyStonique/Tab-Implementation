@@ -27,9 +27,13 @@ export function useFetchSessionData() {
           const permissions = {
             "permissions": response.data.permissions
           }
+          const defaultSettings = {
+            "defaultSettings": response.data.defaultSettings
+          }
           store.dispatch('userData/updateState',company_modules)
           store.dispatch('userData/updateState',user_companies)
           store.dispatch('userData/updateState',permissions)
+          store.dispatch('userData/updateState',defaultSettings)
         }
         
     })

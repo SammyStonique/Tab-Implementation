@@ -393,12 +393,14 @@ export default{
                     const particulars = [row['description']];
                     const particularsAmnt = [row['total_amount']];
                     const txnNo = [row['journal_no']];
+                    const jnlID = row['journal_id'];
                     let formData = {
                         member: memberID,
                         particulars: particulars,
                         transaction_numbers: txnNo,
                         particulars_amount: particularsAmnt,
                         journal: null,
+                        receipt_id: jnlID,
                         company: companyID.value
                     }
                     await axios.post('api/v1/member-receipt-sms/',formData).
@@ -523,6 +525,7 @@ export default{
                     transaction_numbers: txnNo,
                     particulars_amount: particularsAmnt,
                     journal: journalID,
+                    receipt_id: "",
                     company: companyID.value
                 }
                 await axios.post('api/v1/member-receipt-sms/',formData).

@@ -18,7 +18,7 @@
         </tr>
       </thead>
       <tbody class="table-body text-xxs">
-        <tr v-for="(row, rowIndex) in rows" :key="rowIndex" @dblclick="handleRowClick(row)" :style="shouldAddLine(row) ? { textDecoration: 'line-through' } : {}" class="cursor-pointer even:bg-gray-100 text-xxs sm:text-xs uppercase">
+        <tr v-for="(row, rowIndex) in rows" :key="rowIndex" @dblclick="handleRowClick(row)" :style="shouldAddLine(row) ? { textDecoration: 'line-through' } : {}" :class="['cursor-pointer text-xxs sm:text-xs uppercase hover:bg-orange-50',row.selected ? 'bg-orange-50' : (rowIndex % 2 === 0 ? 'bg-gray-100' : 'bg-white')]">
           <td v-for="(column, colIndex) in columns" :key="colIndex" :hidden="column.hidden" 
               :class="[{'ellipsis': column.maxWidth}, { 'max-w-[300px]': column.maxWidth }, { 'min-w-[120px]': column.minWidth }]">
             <template v-if="column.type === 'checkbox'">
@@ -117,6 +117,7 @@ export default defineComponent({
     const selectedIds = ref([]);
     const store = useStore(); 
     const allowedRights = computed(()=> store.state.userData.permissions);
+    const defaultSettings = computed(()=> store.state.userData.defaultSettings);
     const companyID = computed(()=> store.state.userData.company_id);
     const userID = computed(()=> store.state.userData.user_id);
 
@@ -267,20 +268,24 @@ export default defineComponent({
     };
     //CHECK MEMBER LOAN FREE SAVINGS OR SHARES
     const checkFreeSavings = (row) =>{
-      let freeSavings = parseFloat(row.free_savings) || 0;
-      let freeShares = parseFloat(row.free_shares) || 0;
-      let grntOption = row.guarantee_option;
-      let grntAmount = row.guarantee_amount;
+      const strictGrntship = defaultSettings.value.find(p => p.setting_name === "Disable Strict Guarantorship");
+      if(strictGrntship && strictGrntship.setting_value == "No"){
+        let freeSavings = parseFloat(row.free_savings) || 0;
+        let freeShares = parseFloat(row.free_shares) || 0;
+        let grntOption = row.guarantee_option;
+        let grntAmount = row.guarantee_amount;
 
-      if(grntOption == "Savings"){
-        if(grntAmount > freeSavings){
-          row.guarantee_amount = 0;
-        }
-      }else if(grntOption == "Shares"){
-        if(grntAmount > freeShares){
-          row.guarantee_amount = 0;
+        if(grntOption == "Savings"){
+          if(grntAmount > freeSavings){
+            row.guarantee_amount = 0;
+          }
+        }else if(grntOption == "Shares"){
+          if(grntAmount > freeShares){
+            row.guarantee_amount = 0;
+          }
         }
       }
+      
     }
 
     const handleChange = (event, row) =>{
@@ -403,9 +408,9 @@ input {
   background: #3b4252;
 }
 
-.table-body tr:nth-child(even) {
+/* .table-body tr:nth-child(even) {
   background-color: #f2f2f2;
-}
+} */
 .ellipsis {
   max-width: 350px; /* Adjust the max-width as needed */
   overflow: hidden;

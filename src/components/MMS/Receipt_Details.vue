@@ -91,6 +91,7 @@ export default defineComponent({
         const savingsArray = computed(() => store.state.Saving_Accounts.accountArr);
         const sharesArray = computed(() => store.state.Share_Accounts.accountArr);
         const loansArray = computed(() => store.state.Loan_Applications.applicationArr);
+        const grntLoansArr = computed(() => store.state.Loan_Applications.grntLoansArr);
         const loanFeesArray = computed(() => store.state.Application_Fees.feeArr);
         const errors = ref([]);
         const itemObj = ref({});
@@ -562,10 +563,16 @@ export default defineComponent({
                 additionalFields1.value[3].disabled = 'disabled-div';
                 additionalFields1.value[4].disabled = 'disabled-div';
                 additionalFields1.value[5].disabled = 'disabled-div';
+                additionalFields1.value[6].disabled = 'disabled-div';
+                additionalFields1.value[7].disabled = 'disabled-div';
+                additionalFields1.value[8].disabled = 'disabled-div';
                 additionalFields1.value[2].hidden = false;
                 additionalFields1.value[3].hidden = true;
                 additionalFields1.value[4].hidden = true;
                 additionalFields1.value[5].hidden = true;
+                additionalFields1.value[6].hidden = true;
+                additionalFields1.value[7].hidden = true;
+                additionalFields1.value[8].hidden = true;
                 lonComponentKey.value += 1;
                 shaComponentKey.value += 1;
             }else if(value == "Shares"){
@@ -573,10 +580,16 @@ export default defineComponent({
                 additionalFields1.value[2].disabled = 'disabled-div';
                 additionalFields1.value[4].disabled = 'disabled-div';
                 additionalFields1.value[5].disabled = 'disabled-div';
+                additionalFields1.value[6].disabled = 'disabled-div';
+                additionalFields1.value[7].disabled = 'disabled-div';
+                additionalFields1.value[8].disabled = 'disabled-div';
                 additionalFields1.value[3].hidden = false;
                 additionalFields1.value[2].hidden = true;
                 additionalFields1.value[4].hidden = true;
                 additionalFields1.value[5].hidden = true;
+                additionalFields1.value[6].hidden = true;
+                additionalFields1.value[7].hidden = true;
+                additionalFields1.value[8].hidden = true;
                 lonComponentKey.value += 1;
                 savComponentKey.value += 1;
             }else if(value == "Loan"){
@@ -584,10 +597,33 @@ export default defineComponent({
                 additionalFields1.value[3].disabled = 'disabled-div';
                 additionalFields1.value[2].disabled = 'disabled-div';
                 additionalFields1.value[5].disabled = 'disabled-div';
+                additionalFields1.value[6].disabled = 'disabled-div';
+                additionalFields1.value[7].disabled = 'disabled-div';
+                additionalFields1.value[8].disabled = 'disabled-div';
                 additionalFields1.value[2].hidden = true;
                 additionalFields1.value[3].hidden = true;
                 additionalFields1.value[4].hidden = false;
                 additionalFields1.value[5].hidden = true;
+                additionalFields1.value[6].hidden = true;
+                additionalFields1.value[7].hidden = true;
+                additionalFields1.value[8].hidden = true;
+                savComponentKey.value += 1;
+                shaComponentKey.value += 1;
+            }else if(value == "Guaranteed Loan"){
+                additionalFields1.value[5].disabled = '';
+                additionalFields1.value[3].disabled = 'disabled-div';
+                additionalFields1.value[2].disabled = 'disabled-div';
+                additionalFields1.value[4].disabled = 'disabled-div';
+                additionalFields1.value[6].disabled = 'disabled-div';
+                additionalFields1.value[7].disabled = 'disabled-div';
+                additionalFields1.value[8].disabled = 'disabled-div';
+                additionalFields1.value[2].hidden = true;
+                additionalFields1.value[3].hidden = true;
+                additionalFields1.value[4].hidden = true;
+                additionalFields1.value[5].hidden = false;
+                additionalFields1.value[6].hidden = true;
+                additionalFields1.value[7].hidden = true;
+                additionalFields1.value[8].hidden = true;
                 savComponentKey.value += 1;
                 shaComponentKey.value += 1;
             }else if(value == "Loan Fees"){
@@ -595,10 +631,16 @@ export default defineComponent({
                 additionalFields1.value[3].disabled = 'disabled-div';
                 additionalFields1.value[2].disabled = 'disabled-div';
                 additionalFields1.value[4].disabled = 'disabled-div';
+                additionalFields1.value[6].disabled = 'disabled-div';
+                additionalFields1.value[7].disabled = 'disabled-div';
+                additionalFields1.value[8].disabled = 'disabled-div';
                 additionalFields1.value[2].hidden = true;
                 additionalFields1.value[3].hidden = true;
                 additionalFields1.value[5].hidden = false;
                 additionalFields1.value[4].hidden = true;
+                additionalFields1.value[6].hidden = true;
+                additionalFields1.value[7].hidden = true;
+                additionalFields1.value[8].hidden = true;
                 savComponentKey.value += 1;
                 shaComponentKey.value += 1;
             }
@@ -668,6 +710,48 @@ export default defineComponent({
                 cost: additionalFields1.value[1].value
             }
         };
+        const handleGuaranteedLoanItem = async(option) =>{
+            const response = await store.dispatch('Loan_Applications/handleSelectedGuaranteedLoan', option)
+            if(response.data.items){
+                for(let i=0; i < response.data.items.length; i++){
+                    const receiptItems = {
+                        "receiptItems" : [...receiptRows.value, response.data.items[i]]
+                    }
+                    store.dispatch('Members/updateState', receiptItems)
+                }
+            }
+            
+        };
+        const handleHistoricalLoanItem = async(option) =>{
+            await store.dispatch('Historical_Loans/handleSelectedApplication', option)
+            itemObj.value = {
+                journal_no : "LOAN PREPAYMENT",
+                type: "loan_prepayment",
+                journal_id : store.state.Historical_Loans.applicationID,
+                description : `${additionalFields1.value[0].value} Prepayment - ${store.state.Historical_Loans.applicationNumber}`,
+                total_amount : additionalFields1.value[1].value,
+                total_paid : additionalFields1.value[1].value,
+                due_amount : 0,
+                payment_allocation : additionalFields1.value[1].value,
+                bal_after_alloc : 0,
+                cost: additionalFields1.value[1].value
+            }
+        };
+        const handleHistGuaranteedLoanItem = async(option) =>{
+            await store.dispatch('Historical_Loans/handleSelectedApplication', option)
+            itemObj.value = {
+                journal_no : "LOAN PREPAYMENT",
+                type: "loan_prepayment",
+                journal_id : store.state.Historical_Loans.applicationID,
+                description : `${additionalFields1.value[0].value} Prepayment - ${store.state.Historical_Loans.applicationNumber}`,
+                total_amount : additionalFields1.value[1].value,
+                total_paid : additionalFields1.value[1].value,
+                due_amount : 0,
+                payment_allocation : additionalFields1.value[1].value,
+                bal_after_alloc : 0,
+                cost: additionalFields1.value[1].value
+            }
+        };
         const clearLoanApplicationItem = async() =>{
             await store.dispatch('Loan_Applications/updateState', {applicationID: ''});
             itemObj.value = {};
@@ -694,7 +778,7 @@ export default defineComponent({
         const additionalFields1 = ref([]);
         const updateAdditionalFields1 = () =>{
             additionalFields1.value = [
-                { type: 'dropdown', name: 'item',label: "Receipt Item", value: '', placeholder: "", required: true, options: [{ text: 'Savings', value: 'Savings' }, { text: 'Shares', value: 'Shares' }, { text: 'Loan', value: 'Loan' }, { text: 'Loan Fees', value: 'Loan Fees' }, { text: 'Membership Fees', value: 'Membership Fees' }, { text: 'Other Charges', value: 'Other Charges' }], method: selectReceiptItem },
+                { type: 'dropdown', name: 'item',label: "Receipt Item", value: '', placeholder: "", required: true, options: [{ text: 'Savings', value: 'Savings' }, { text: 'Shares', value: 'Shares' }, { text: 'Loan', value: 'Loan' }, { text: 'Guaranteed Loan', value: 'Guaranteed Loan' }, { text: 'Loan Fees', value: 'Loan Fees' }, { text: 'Membership Fees', value: 'Membership Fees' }, { text: 'Other Charges', value: 'Other Charges' }], method: selectReceiptItem },
                 { type: 'text', name: 'amount',label: "Amount", value: '0', required: true },
                 {  
                     type:'search-dropdown', label:"Saving Account", value: '', componentKey: savComponentKey, disabled:'disabled-div',
@@ -713,6 +797,24 @@ export default defineComponent({
                     selectOptions: loansArray, optionSelected: handleLoanApplicationItem, required: false,
                     searchPlaceholder: 'Select Application...', dropdownWidth: '500px', hidden: true,
                     fetchData: store.dispatch('Loan_Applications/fetchLoanApplications', {company:companyID.value,member: memberID.value}), clearSearch: clearLoanApplicationItem
+                },
+                {  
+                    type:'search-dropdown', label:"Loan Applications", value: '', componentKey: lonComponentKey, disabled:'disabled-div',
+                    selectOptions: grntLoansArr, optionSelected: handleGuaranteedLoanItem, required: false,
+                    searchPlaceholder: 'Select Application...', dropdownWidth: '500px', hidden: true,
+                    fetchData: store.dispatch('Loan_Applications/fetchGuaranteedLoans', {company:companyID.value,member: memberID.value, guaranteed_loan: "Yes"}), clearSearch: clearLoanApplicationItem
+                },
+                {  
+                    type:'search-dropdown', label:"Loan Applications", value: '', componentKey: lonComponentKey, disabled:'disabled-div',
+                    selectOptions: loansArray, optionSelected: handleHistoricalLoanItem, required: false,
+                    searchPlaceholder: 'Select Application...', dropdownWidth: '500px', hidden: true,
+                    fetchData: store.dispatch('Historical_Loans/fetchLoanApplications', {company:companyID.value,member: memberID.value}), clearSearch: clearLoanApplicationItem
+                },
+                {  
+                    type:'search-dropdown', label:"Loan Applications", value: '', componentKey: lonComponentKey, disabled:'disabled-div',
+                    selectOptions: grntLoansArr, optionSelected: handleHistGuaranteedLoanItem, required: false,
+                    searchPlaceholder: 'Select Application...', dropdownWidth: '500px', hidden: true,
+                    fetchData: store.dispatch('Historical_Loans/fetchGuaranteedLoans', {company:companyID.value,member: memberID.value, guaranteed_loan: "Yes"}), clearSearch: clearLoanApplicationItem
                 },
                 {  
                     type:'search-dropdown', label:"Loan Fees", value: '', componentKey: lonComponentKey, disabled:'disabled-div',

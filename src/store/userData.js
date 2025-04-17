@@ -21,6 +21,7 @@ const state = {
     company_modules: [],
     user_companies: [],
     permissions: [],
+    defaultSettings: [],
     reloaded: false,
     name_search: '',
     status_search: '',
