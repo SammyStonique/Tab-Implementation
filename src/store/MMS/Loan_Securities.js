@@ -91,8 +91,8 @@ const state = {
       axios.post(`api/v1/get-loan-securities/`,formData)
       .then((response)=>{
         state.selectedSecurity = response.data;
-        const selectedApplication = response.data[i].loan_application.loan_number + " - " + response.data[i].loan_application.loan_product.product_name + " - " + response.data[i].loan_application.member.member_name;
-        const selectedSecurityType = response.data[i].security_name;
+        const selectedApplication = response.data.loan_application.loan_number + " - " + response.data.loan_application.loan_product.product_name + " - " + response.data.loan_application.member.member_name;
+        const selectedSecurityType = response.data.security_name;
         commit('SET_SELECTED_SECURITY',response.data);
         commit('SET_SELECTED_APPLICATION', selectedApplication);
         commit('SET_SELECTED_SECURITY_TYPE', selectedSecurityType);

@@ -56,6 +56,28 @@
             <button @click="changeMemberStatus" class="rounded bg-green-400 text-sm mr-2  text-white px-2 py-1.5"><i class="fa fa-check-circle text-xs mr-1.5" aria-hidden="true"></i>Change Status</button>
         </div>
     </MovableModal>
+    <MovableModal v-model:visible="propModalVisible" :title="title1" :modal_top="modal_top" :modal_left="modal_left" :modal_width="modal_width"
+        :loader="modal_loader1" @showLoader="showModalLoader1" @hideLoader="hideModalLoader1"  @closeModal="closeModal1">
+        <div class="px-3">
+            <div class="text-left mb-4">
+                <label for="">Message:</label><br />
+                <!-- <quill-editor :key="editorComponentKey" v-model:value="messageContent"></quill-editor> -->
+                 <div class="flex">
+                    <div class="basis-1/2 mb-4 mr-3">
+                        <select v-model="selectedPlaceholder" class="bg-slate-50 rounded border border-gray-400 text-sm pl-2 pt-1 w-full">
+                            <option value="" disabled>Select Placeholder</option>
+                            <option v-for="placeholder in placeholders" :key="placeholder.value" :value="placeholder.value">
+                                {{ placeholder.label }}
+                            </option>
+                        </select>
+                    </div>
+                    <button @click="insertPlaceholder" :disabled="!selectedPlaceholder" class="w-24 h-8 rounded bg-green-400 text-sm mr-2  text-white px-2 py-0.5">Insert</button>
+                </div>
+                <textarea v-model="contentModel" ref="textareaRef" rows="8" cols="64" class="bg-slate-50 rounded border border-gray-400 text-sm pl-2 pt-2" placeholder="Type your content here..."></textarea>
+            </div>
+            <button @click="sendMemberSMS" class="rounded bg-green-400 text-sm mr-2  text-white px-2 py-1.5"><i class="fa fa-check-circle text-xs mr-1.5" aria-hidden="true"></i>Send SMS</button>
+        </div>
+    </MovableModal>
 
 </template>
 
@@ -70,13 +92,16 @@ import MovableModal from '@/components/MovableModal.vue';
 import DynamicForm from '@/components/NewDynamicForm.vue';
 import SearchableDropdown from '@/components/SearchableDropdown.vue';
 import Swal from 'sweetalert2';
+import { quillEditor } from 'vue3-quill';
+import { useTextareaEditor } from '@/composables/TextAreaEditor';
 
 export default{
     name: 'Members',
     components:{
-        PageComponent,MovableModal,SearchableDropdown,DynamicForm
+        PageComponent,MovableModal,SearchableDropdown,DynamicForm,quillEditor
     },
     setup(){
+        const { contentModel,textareaRef,placeholders,selectedPlaceholder,insertPlaceholder,} = useTextareaEditor('');
         const store = useStore();
         const toast = useToast();
         const loader = ref('');
@@ -84,7 +109,9 @@ export default{
         const unitComponentKey = ref(0);
         const catSearchComponentKey = ref(0);
         const trans_modal_loader = ref('none');
+        const modal_loader1 = ref('none');
         const member_status = ref('');
+        const messageContent = ref('');
         const exit_date = ref('');
         const idField = 'member_id';
         const addButtonLabel = ref('New Member');
@@ -105,7 +132,9 @@ export default{
         const showPreviousBtn = ref(false);
         const detailsTitle = ref('Member Documents');
         const transTitle = ref('Changing Member Status');
+        const title1 = ref('SMS Member');
         const transModalVisible = ref(false);
+        const propModalVisible = ref(false);
         const dropdownWidth = ref("500px")
         const modal_top = ref('200px');
         const modal_left = ref('400px');
@@ -137,9 +166,7 @@ export default{
         ])
         const companyID = computed(()=> store.state.userData.company_id);
         const memberID = ref("");
-        const dropdownOptions = ref([
-            
-        ]);
+        
         const handleSelectedSearchCategory = async(option) =>{
             await store.dispatch('Member_Categories/handleSelectedCategory', option)
             categoryID.value = store.state.Member_Categories.categoryID;
@@ -180,7 +207,8 @@ export default{
         const importMembers = () =>{
             store.commit('pageTab/ADD_PAGE', {'MMS':'Import_Members'})
             store.state.pageTab.mmsActiveTab = 'Import_Members';
-        }
+        };
+
         const removeMember = async() =>{
             if(selectedIds.value.length == 1){
                 let formData = {
@@ -299,6 +327,46 @@ export default{
         }
         const hideLoader = () =>{
             loader.value = "none";
+        }
+        const showModalLoader1 = () =>{
+            modal_loader1.value = "block";
+        }
+        const hideModalLoader1 = () =>{
+            modal_loader1.value = "none";
+        }
+        const handleReset1 = () =>{
+            contentModel.value = "";
+            memberID.value = "";
+        }
+        const sendMemberSMS = async() =>{
+            if(memberID.value && contentModel.value){
+                showModalLoader1();
+                let formData = {
+                    content: contentModel.value,
+                    member: memberID.value,
+                    company: companyID.value
+                }
+                await axios.post('api/v1/member-general-sms/',formData).
+                then((response)=>{
+                    if(response.data.msg == "Success"){
+                        toast.success("SMS Sent!")
+                        closeModal1();
+                    }else{
+                        toast.error(response.data.msg)
+                    }
+                })
+                .catch((error)=>{
+                    toast.error(error.message)
+                })
+                .finally(()=>{
+                    hideModalLoader1();
+                })
+            }else if(memberID.value == ""){
+                toast.error("No Member Selected!!")
+            }else if(contentModel.value == ""){
+                toast.error("Cannot Send Blank SMS!!")
+            }
+            
         }
        
         const searchMembers = () =>{
@@ -430,9 +498,36 @@ export default{
                 transModalVisible.value = true;
             }
         };
-
-        const handleDynamicOption = (option) =>{
-            
+        const dropdownOptions = ref([
+            {label: 'SMS Selected Member', action: 'send-sms'},
+        ]);
+        const handleDynamicOption = async(option) =>{
+            if(option == 'send-sms'){
+                memberID.value = selectedIds.value;
+                propModalVisible.value = true;
+                
+            }else if(option == 'send-email'){
+                showLoader();
+                const memberID = [];
+                let formData = {
+                    member: memberID,
+                    company: companyID.value
+                }
+                await axios.post('api/v1/member-general-email/',formData).
+                then((response)=>{
+                    if(response.data.msg == "Success"){
+                        toast.success("Email Sent!")
+                    }else{
+                        toast.error(response.data.msg)
+                    }
+                })
+                .catch((error)=>{
+                    toast.error(error.message)
+                })
+                .finally(()=>{
+                    hideLoader();
+                })
+            }
         };
         
         const printMembersList = () =>{
@@ -468,6 +563,10 @@ export default{
         const hideDetails = async() =>{
             showDetails.value = false;
         };
+        const closeModal1 = async() =>{
+            propModalVisible.value = false;
+            handleReset1();
+        }
         onBeforeMount(()=>{
             searchMembers();
             
@@ -479,7 +578,8 @@ export default{
             submitButtonLabel, showModal, addNewMember, showLoader, loader, hideLoader, importMembers, removeMember, removeMembers,
             handleSelectionChange,addingRight,removingRight,rightsModule,printMembersList,selectSearchQuantity,selectedValue,
             modal_left,modal_top,modal_width,trans_modal_loader,transModalVisible,transTitle,showTransModalLoader,hideTransModalLoader,changeMemberStatus,closeTransModal,
-            dropdownOptions,handleDynamicOption,member_status,exit_date
+            dropdownOptions,handleDynamicOption,member_status,exit_date,messageContent,modal_loader1,title1,showModalLoader1,hideModalLoader1,sendMemberSMS,propModalVisible,
+            closeModal1,contentModel,textareaRef,placeholders,selectedPlaceholder,insertPlaceholder,
         }
     }
 };

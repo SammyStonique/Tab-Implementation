@@ -77,6 +77,8 @@ import Application_Fees from '@/components/MMS/Application_Fees.vue';
 import Loan_Arrears from '@/components/MMS/Loan_Arrears.vue';
 import Loan_Prepayments from '@/components/MMS/Loan_Prepayments.vue';
 import Prepayment_Allocations from '@/components/MMS/Prepayment_Allocations.vue';
+import Templates from '@/components/MMS/Templates.vue';
+import Design_Template from '@/components/MMS/Design_Template.vue';
 
 import Default_Settings from '@/components/SET/Default_Settings.vue';
 
@@ -92,6 +94,7 @@ export default{
         Loan_Disbursements,Import_Saving_Accounts,Import_Share_Accounts,Import_Saving_Deposits,Import_Share_Deposits,Security_Types,Loan_Securities,
         Loan_Schedules,Loan_Penalties,Penalty_Batches,Loan_Documents,Application_Fees,Historical_Loans,Import_Historical_Loans,Historical_Loan_Ledger,
         Loan_Arrears,Saving_Transfers,Share_Transfers,Loan_Prepayments,Prepayment_Allocations,Interest_Rates,Dividend_Rates,Interest_Processing,Dividend_Processing,
+        Templates,Design_Template,
 
         Default_Settings
     },
