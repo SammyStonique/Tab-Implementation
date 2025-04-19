@@ -99,12 +99,15 @@ export default{
             {label: "Member No", key: "member_number", type: "text", editable: false},
             {label: "Member Name", key: "member_name", type: "text", editable: false},
             {label: "Share Product", key: "share_product", type: "text", editable: false},
+            {label: "Min Shares", key: "amount", type: "text", editable: false},
             {label: "Price", key: "share_price", type: "text", editable: false},
-            {label: "Quantity", key: "share_quantity", type: "text", editable: false},
-            {label: "Amount", key: "amount", type: "text", editable: false},
+            {label: "Quantity", key: "share_quantity", type: "text", editable: false},          
+            {label: "Share Amount", key: "total_amount", type: "text", editable: false},
+            {label: "Variance", key: "variance", type: "text", editable: false},
         ])
         const actions = ref([
             {name: 'edit', icon: 'fa fa-edit', title: 'Edit Account', rightName: 'Editing Share Accounts'},
+            {name: 'view', icon: 'fa fa-file-pdf-o', title: 'View Account', rightName: 'Viewing Share Account Statement'},
             {name: 'delete', icon: 'fa fa-trash', title: 'Delete Account', rightName: 'Deleting Share Accounts'},
         ])
         const companyID = computed(()=> store.state.userData.company_id);
@@ -230,6 +233,17 @@ export default{
                     flex_basis_percentage.value = '33.333';
                 })
                 
+            }else if(action == 'view'){
+                const accountID = row['ledger_id'];
+                let formData = {
+                    company: companyID.value,
+                    ledger: accountID
+                }
+                await store.dispatch('Ledgers/fetchLedger',formData).
+                then(()=>{
+                    store.commit('pageTab/ADD_PAGE', {'MMS':'Share_Account_Details'});
+                    store.state.pageTab.mmsActiveTab = 'Share_Account_Details'; 
+                })
             }else if(action == 'delete'){
                 const accountID = [row[idField]];
                 let formData = {

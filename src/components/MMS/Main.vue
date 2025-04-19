@@ -42,11 +42,13 @@ import Saving_Product_Details from '@/components/MMS/Saving_Product_Details.vue'
 import Shares_Products from '@/components/MMS/Shares_Products.vue';
 import Share_Product_Details from '@/components/MMS/Share_Product_Details.vue';
 import Saving_Accounts from '@/components/MMS/Saving_Accounts.vue';
+import Saving_Account_Details from '@/components/MMS/Saving_Account_Details.vue';
 import Import_Saving_Accounts from '@/components/MMS/Import_Saving_Accounts.vue';
 import Saving_Transfers from '@/components/MMS/Saving_Transfers.vue';
 import Interest_Rates from '@/components/MMS/Interest_Rates.vue';
 import Interest_Processing from '@/components/MMS/Interest_Processing.vue';
 import Share_Accounts from '@/components/MMS/Share_Accounts.vue';
+import Share_Account_Details from '@/components/MMS/Share_Account_Details.vue';
 import Import_Share_Accounts from '@/components/MMS/Import_Share_Accounts.vue';
 import Saving_Deposits from '@/components/MMS/Saving_Deposits.vue';
 import Import_Saving_Deposits from '@/components/MMS/Import_Saving_Deposits.vue';
@@ -79,6 +81,7 @@ import Loan_Prepayments from '@/components/MMS/Loan_Prepayments.vue';
 import Prepayment_Allocations from '@/components/MMS/Prepayment_Allocations.vue';
 import Templates from '@/components/MMS/Templates.vue';
 import Design_Template from '@/components/MMS/Design_Template.vue';
+import Risk_Classifications from '@/components/MMS/Risk_Classifications.vue';
 
 import Default_Settings from '@/components/SET/Default_Settings.vue';
 
@@ -94,7 +97,7 @@ export default{
         Loan_Disbursements,Import_Saving_Accounts,Import_Share_Accounts,Import_Saving_Deposits,Import_Share_Deposits,Security_Types,Loan_Securities,
         Loan_Schedules,Loan_Penalties,Penalty_Batches,Loan_Documents,Application_Fees,Historical_Loans,Import_Historical_Loans,Historical_Loan_Ledger,
         Loan_Arrears,Saving_Transfers,Share_Transfers,Loan_Prepayments,Prepayment_Allocations,Interest_Rates,Dividend_Rates,Interest_Processing,Dividend_Processing,
-        Templates,Design_Template,
+        Templates,Design_Template,Share_Account_Details,Saving_Account_Details,Risk_Classifications,
 
         Default_Settings
     },

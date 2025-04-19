@@ -65,12 +65,14 @@ export default{
         const modal_loader = ref('none');
         const pageComponentKey = ref(0);
         const propComponentKey = ref(0);
+        const riskComponentKey = ref(0);
         const showAddButton = ref(false);
         const title = ref('');
         const companyID = computed(()=> store.state.userData.company_id);
         const idField = 'tenant_lease_id';
         const rightsModule = ref('MMS');
         const productID = ref('');
+        const riskID = ref('');
         const selectedIds = ref([]);
         const appModalVisible = ref(false);
         const arrearsList = ref([]);
@@ -110,9 +112,8 @@ export default{
         const member_name_search = ref("");
         const member_number_search = ref("");
         const date_search = ref("");
-        const products_array = computed({
-            get: () => store.state.Loan_Products.productArr,
-        });
+        const products_array = computed(()=> store.state.Loan_Products.productArr);
+        const risks_array = computed(()=> store.state.Risk_Classifications.classificationArr);
         const handleSelectedProduct = async(option) =>{
             await store.dispatch('Loan_Products/handleSelectedProduct', option)
             productID.value = store.state.Loan_Products.productID;
@@ -121,17 +122,32 @@ export default{
             await store.dispatch('Loan_Products/updateState', {productID: ''});
             productID.value = store.state.Loan_Products.productID;
         };
+        const handleSelectedClassification = async(option) =>{
+            await store.dispatch('Risk_Classifications/handleSelectedClassification', option)
+            riskID.value = store.state.Risk_Classifications.classificationID;
+        };
+        const clearSelectedClassification = async() =>{
+            await store.dispatch('Risk_Classifications/updateState', {classificationID: ''});
+            riskID.value = store.state.Risk_Classifications.classificationID;
+        };
         const searchFilters = ref([
             {
                 type:'search-dropdown', value: productID.value, width:48, componentKey: propComponentKey,
                 selectOptions: products_array, optionSelected: handleSelectedProduct,
-                searchPlaceholder: 'Loan Product...', dropdownWidth: '350px',
+                searchPlaceholder: 'Loan Product...', dropdownWidth: '300px',
                 fetchData: store.dispatch('Loan_Products/fetchLoanProducts', {company:companyID.value}),
                 clearSearch: clearSelectedProduct
             },
             {type:'text', placeholder:"Member No...", value: member_number_search, width:32},
             {type:'text', placeholder:"Member Name...", value: member_name_search, width:48},
-            {type:'date', placeholder:"Date...", value: date_search, width:36, title: "As At Date Search"},
+            {type:'date', placeholder:"Date...", value: date_search, width:32, title: "As At Date Search"},
+            {
+                type:'search-dropdown', value: riskID.value, width:48, componentKey: riskComponentKey,
+                selectOptions: risks_array, optionSelected: handleSelectedClassification,
+                searchPlaceholder: 'Risk Classifications...', dropdownWidth: '150px',
+                fetchData: store.dispatch('Risk_Classifications/fetchRiskClassifications', {company:companyID.value}),
+                clearSearch: clearSelectedClassification
+            },
             
         ]);
         const handleSelectionChange = (ids) => {
@@ -279,6 +295,7 @@ export default{
                 client_name: member_name_search.value,
                 date: date_search.value,
                 product: productID.value,
+                risk_classification: riskID.value,
                 company: companyID.value,
                 page_size: selectedValue.value
             }

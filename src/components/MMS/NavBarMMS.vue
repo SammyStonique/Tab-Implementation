@@ -282,6 +282,12 @@
                         </button>
                     </div>
                     <div class="py-2 px-3 pl-4 w-full hover:bg-slate-500 hover:w-full">
+                        <button class="flex text-sm" @click="openPage({'MMS':'Risk_Classifications'})">
+                        <i class="fa fa-user-shield pt-2 mr-2" aria-hidden="true"></i>
+                        <p class="">Loan Risk Classifications</p>
+                        </button>
+                    </div>
+                    <div class="py-2 px-3 pl-4 w-full hover:bg-slate-500 hover:w-full">
                         <button class="flex" @click="openPage({'MMS':'Templates'})">
                         <i class="fa fa-image mr-2" aria-hidden="true"></i>
                         <p class="">User Defined Templates</p>

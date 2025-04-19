@@ -123,6 +123,7 @@ import Loan_Arrears from './MMS/Loan_Arrears';
 import Loan_Prepayments from './MMS/Loan_Prepayments';
 import Loan_Prepayment_Alloc from './MMS/Loan_Prepayment_Alloc';
 import Member_Templates from './MMS/Member_Templates';
+import Risk_Classifications from './MMS/Risk_Classifications';
 
 
 import Default_Settings from './SET/Default_Settings';
@@ -163,7 +164,7 @@ export default createStore({
     Member_Categories,Member_Sponsors,Members,Membership_Fees,Savings_Products,Shares_Products,Saving_Accounts,Share_Accounts,Saving_Deposits,Share_Deposits,
     Loan_Products,Loan_Fees,Loan_Applications,Loan_Guarantors,Loan_Disbursements,Security_Types,Loan_Securities,Application_Fees,Loan_Schedules,Loan_Penalties,
     Penalty_Batches,Loan_Documents,Historical_Loans,Loan_Arrears,Saving_Transfers,Share_Transfers,Loan_Prepayments,Loan_Prepayment_Alloc,Interest_Rates,Interest_Processing,
-    Dividend_Rates,Dividend_Processing,Member_Templates,
+    Dividend_Rates,Dividend_Processing,Member_Templates,Risk_Classifications,
 
     Default_Settings,Companies,Branches,User_Rights,SMS_Integrations,Email_Integrations,Mpesa_Integrations,Mpesa_Transactions,Banks,SMS_Templates,Email_Templates
   },

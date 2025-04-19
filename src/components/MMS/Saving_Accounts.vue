@@ -99,10 +99,12 @@ export default{
             {label: "Member No", key: "member_number", type: "text", editable: false},
             {label: "Member Name", key: "member_name", type: "text", editable: false},
             {label: "Saving Product", key: "saving_product", type: "text", editable: false},
-            {label: "Amount", key: "amount", type: "text", editable: false},
+            {label: "Min Amnt", key: "amount", type: "text", editable: false},
+            {label: "Saving Amount", key: "total_amount", type: "text", editable: false},
         ])
         const actions = ref([
             {name: 'edit', icon: 'fa fa-edit', title: 'Edit Account', rightName: 'Editing Saving Accounts'},
+            {name: 'view', icon: 'fa fa-file-pdf-o', title: 'View Account', rightName: 'Viewing Saving Account Statement'},
             {name: 'delete', icon: 'fa fa-trash', title: 'Delete Account', rightName: 'Deleting Saving Accounts'},
         ])
         const companyID = computed(()=> store.state.userData.company_id);
@@ -224,6 +226,17 @@ export default{
                     flex_basis_percentage.value = '50';
                 })
                 
+            }else if(action == 'view'){
+                const accountID = row['ledger_id'];
+                let formData = {
+                    company: companyID.value,
+                    ledger: accountID
+                }
+                await store.dispatch('Ledgers/fetchLedger',formData).
+                then(()=>{
+                    store.commit('pageTab/ADD_PAGE', {'MMS':'Saving_Account_Details'});
+                    store.state.pageTab.mmsActiveTab = 'Saving_Account_Details'; 
+                })
             }else if(action == 'delete'){
                 const accountID = [row[idField]];
                 let formData = {

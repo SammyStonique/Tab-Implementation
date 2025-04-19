@@ -2,7 +2,7 @@
     <PageStyleComponent :key="mainComponentKey" :loader="loader" @showLoader="showLoader" @hideLoader="hideLoader">
         <template v-slot:body>
             <div class="border border-slate-200 rounded relative py-1.5 mt-3 px-2 min-h-[700px]">
-                <h1 class="font-bold absolute top-[-13px] left-5 bg-white">Ledger Details</h1>
+                <h1 class="font-bold absolute top-[-13px] left-5 bg-white">Saving Account Details</h1>
                 <div class="tabs pt-2">
                     <button v-for="(tab, index) in tabs" :key="tab" :class="['tab', { active: activeTab === index }]"@click="selectTab(index)">
                         {{ tab }}
@@ -12,27 +12,19 @@
                     <div v-if="activeTab == 0">
                         <div class="flex">
                             <div class="basis-1/2 border-left border-gray-400">
-                                <h1 class="font-bold mb-10">Ledger Details</h1>
+                                <h1 class="font-bold mb-10">Account Details</h1>
                                 <table class="w-full">
                                     <tr class="text-left">
-                                        <td class="font-bold ">Ledger Code:</td>
+                                        <td class="font-bold ">Account Number:</td>
                                         <td> {{ ledgerDetails.ledger_code }}</td>
                                         <td></td>
                                         <td></td>
-                                        <td class="font-bold">Ledger Name:</td>
+                                        <td class="font-bold">Member Name:</td>
                                         <td class="font-bold text-green-500 uppercase">{{ ledgerDetails.ledger_name }}</td>
                                     </tr>
                                     <tr class="text-left">
-                                        <td class="font-bold pt-3">Ledger Type:</td>
-                                        <td>{{ ledgerDetails.ledger_type }}</td>
-                                        <td></td>
-                                        <td></td>
-                                        <td class="font-bold pt-3">Ledger Category:</td>
+                                        <td class="font-bold pt-3">Category:</td>
                                         <td>{{ ledgerDetails.ledger_category }}</td>
-                                    </tr>
-                                    <tr class="text-left">
-                                        <td class="font-bold pt-3">Financial Statement:</td>
-                                        <td>{{ ledgerDetails.financial_statement }}</td>
                                         <td></td>
                                         <td></td>
                                         <td class="font-bold pt-3">Running Balance:</td>
@@ -85,7 +77,7 @@ import { useToast } from "vue-toastification";
 import PrintJS from 'print-js';
 
 export default{
-    name: 'Ledger_Details',
+    name: 'Saving_Account_Details',
     components:{
         PageStyleComponent,MovableModal,DynamicForm,DynamicTable,FilterBar
     },
@@ -102,7 +94,7 @@ export default{
         const ledgerID = computed(()=> store.state.Ledgers.ledgerID);
         const ledgerDetails = computed(()=> store.state.Ledgers.ledgerDetails);
         const ledgerRunningBalance = computed(()=> store.state.Ledgers.ledgerRunningBalance);
-        const tabs = ref(['Ledger Details','Ledger Statement']);
+        const tabs = ref(['Account Details','Account Statement']);
         const idField = 'journal_id';
         const selectedIds = ref([]);
         const appModalVisible = ref(false);
