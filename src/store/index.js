@@ -3,8 +3,10 @@ import tab1 from './modules/tab1Store';
 import tab2 from './modules/tab2Store';
 import modulesTab from './modules/modulesTab';
 import pageTab from './modules/pageTab';
-import Appointments from './HMS/Appointments';
+import contextMenu from './modules/contextMenu';
 
+
+import Appointments from './HMS/Appointments';
 import Departments from './HMS/Departments';
 import Patients_List from './HMS/Patients_List';
 import Medical_Fees from './HMS/Medical_Fees';
@@ -124,6 +126,7 @@ import Loan_Prepayments from './MMS/Loan_Prepayments';
 import Loan_Prepayment_Alloc from './MMS/Loan_Prepayment_Alloc';
 import Member_Templates from './MMS/Member_Templates';
 import Risk_Classifications from './MMS/Risk_Classifications';
+import Loan_Classifications from './MMS/Loan_Classifications';
 
 
 import Default_Settings from './SET/Default_Settings';
@@ -143,8 +146,7 @@ export default createStore({
   modules: {
     tab1,
     tab2,
-    modulesTab,
-    pageTab,
+    modulesTab,pageTab,contextMenu,
     userData,
     Appointments,Client_Categories,Departments,Patients_List,Medical_Fees,Doctors,
     
@@ -164,7 +166,7 @@ export default createStore({
     Member_Categories,Member_Sponsors,Members,Membership_Fees,Savings_Products,Shares_Products,Saving_Accounts,Share_Accounts,Saving_Deposits,Share_Deposits,
     Loan_Products,Loan_Fees,Loan_Applications,Loan_Guarantors,Loan_Disbursements,Security_Types,Loan_Securities,Application_Fees,Loan_Schedules,Loan_Penalties,
     Penalty_Batches,Loan_Documents,Historical_Loans,Loan_Arrears,Saving_Transfers,Share_Transfers,Loan_Prepayments,Loan_Prepayment_Alloc,Interest_Rates,Interest_Processing,
-    Dividend_Rates,Dividend_Processing,Member_Templates,Risk_Classifications,
+    Dividend_Rates,Dividend_Processing,Member_Templates,Risk_Classifications,Loan_Classifications,
 
     Default_Settings,Companies,Branches,User_Rights,SMS_Integrations,Email_Integrations,Mpesa_Integrations,Mpesa_Transactions,Banks,SMS_Templates,Email_Templates
   },

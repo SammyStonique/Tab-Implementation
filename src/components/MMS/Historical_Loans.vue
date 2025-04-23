@@ -81,10 +81,11 @@ export default{
         const current_date = new Date();
         const loader = ref('');
         const ledComponentKey = ref(0);
+        const propComponentKey = ref(0);
         const displayButtons = ref(true);
         const trans_modal_loader = ref('none');
         const ref_modal_loader = ref('none');
-        const idField = 'historical_loan_id';
+        const idField = 'loan_application_id';
         const showAddButton = ref(false);
         const addButtonLabel = ref('New Application');
         const addingRight = ref('Adding Loan Applications');
@@ -148,8 +149,19 @@ export default{
         const member_number_search = ref("");
         const approval_status_search = ref("");
         const disbursed_status_search = ref("");
+        const repayment_status_search = ref("");
         const from_date_search = ref("");
         const to_date_search = ref("");
+        const productID = ref('');
+        const products_array = computed(() => store.state.Loan_Products.productArr);
+        const handleSelectedProduct = async(option) =>{
+            await store.dispatch('Loan_Products/handleSelectedProduct', option)
+            productID.value = store.state.Loan_Products.productID;
+        };
+        const clearSelectedProduct = async() =>{
+            await store.dispatch('Loan_Products/updateState', {productID: ''});
+            productID.value = store.state.Loan_Products.productID;
+        };
         const searchFilters = ref([
             {type:'text', placeholder:"Loan No...", value: loan_number_search, width:48,},
             {type:'text', placeholder:"Member Name...", value: name_search, width:48,},
@@ -159,6 +171,17 @@ export default{
             {
                 type:'dropdown', placeholder:"Status..", value: approval_status_search, width:32,
                 options: [{text:'Active',value:'Active'},{text:'Defaulted',value:'Defaulted'},{text:'Cleared',value:'Cleared'}]
+            },
+            {
+                type:'search-dropdown', value: productID.value, width:48, componentKey: propComponentKey,
+                selectOptions: products_array, optionSelected: handleSelectedProduct,
+                searchPlaceholder: 'Loan Product...', dropdownWidth: '350px',
+                fetchData: store.dispatch('Loan_Products/fetchLoanProducts', {company:companyID.value}),
+                clearSearch: clearSelectedProduct
+            },
+            {
+                type:'dropdown', placeholder:"Repayment Status..", value: repayment_status_search, width:44,
+                options: [{text:'On-Time Payments',value:'On-Time'},{text:'Prepaid Clients',value:'Prepaid'},{text:'Defaulting',value:'Defaulted'}]
             },
         ]);
         const importApplications = () =>{
@@ -186,10 +209,10 @@ export default{
             if(selectedIds.value.length == 1){
                 let formData = {
                     company: companyID.value,
-                    historical_loan: selectedIds.value
+                    loan_application: selectedIds.value
                 }
                 try{
-                    const response = await store.dispatch('Historical_Loans/deleteLoanApplication',formData)
+                    const response = await store.dispatch('Loan_Applications/deleteLoanApplication',formData)
                     if(response && response.data.msg == "Success"){
                         toast.success("Application(s) Removed Succesfully");
                         searchApplications();
@@ -215,10 +238,10 @@ export default{
             if(selectedIds.value.length){
                 let formData = {
                     company: companyID.value,
-                    historical_loan: selectedIds.value
+                    loan_application: selectedIds.value
                 }
                 try{
-                    const response = await store.dispatch('Historical_Loans/deleteLoanApplication',formData)
+                    const response = await store.dispatch('Loan_Applications/deleteLoanApplication',formData)
                     if(response && response.data.msg == "Success"){
                         toast.success("Application(s) Removed Succesfully");
                         searchApplications();
@@ -248,7 +271,7 @@ export default{
         const approveLoan = async() =>{
             showTransModalLoader();
             let formData = {
-                historical_loan: applicationID.value,
+                loan_application: applicationID.value,
                 approved_by: userID.value,
                 approval_date: formFields.value[0].value,
                 approval_status: formFields.value[1].value,
@@ -298,16 +321,19 @@ export default{
                 member_number: member_number_search.value,
                 approval_status: approval_status_search.value,
                 disbursed: disbursed_status_search.value,
+                repayment_status: repayment_status_search.value,
                 from_date: from_date_search.value,
                 to_date: to_date_search.value,
+                product: productID.value,
                 company_id: companyID.value,
-                page_size: selectedValue.value
+                page_size: selectedValue.value,
+                loan_type: 'Historical'
             } 
             axios
-            .post(`api/v1/historical-loans-search/?page=${currentPage.value}`,formData)
+            .post(`api/v1/loan-applications-search/?page=${currentPage.value}`,formData)
             .then((response)=>{
                 applicationList.value = response.data.results;
-                store.commit('Historical_Loans/LIST_APPLICATIONS', applicationList.value)
+                store.commit('Loan_Applications/LIST_APPLICATIONS', applicationList.value)
                 propResults.value = response.data;
                 propArrLen.value = applicationList.value.length;
                 propCount.value = propResults.value.count;
@@ -338,8 +364,11 @@ export default{
             loan_number_search.value = "";
             approval_status_search.value = "";
             disbursed_status_search.value = "";
+            repayment_status_search.value = "";
             from_date_search.value = "";
             to_date_search.value = "";
+            productID.value = "";
+            propComponentKey.value += 1;
             searchApplications();
         }
         const loadPrev = () =>{
@@ -372,82 +401,30 @@ export default{
             searchApplications();
             // scrollToTop();
         };
-        const calculateDisbursalAmount = async() =>{
- 
-            let formData = {
-                company: companyID.value,
-                historical_loan: applicationID.value
-            }
-           await axios.post('api/v1/check-member-disbursal-amount/', formData).
-            then((response)=>{
-                loanApprvAmnt.value = response.data.disbursal_amount;
-                approvedAmount.value = response.data.disbursal_amount;
-            })
-            .catch((error)=>{
-                toast.error(error.message)
-            })
-            .finally(()=>{
-
-            })
-        };
+  
         const addNewApplication = async() =>{
-            await store.dispatch('Loan_Products/updateState', {loanCharges: [], productMaxAmount: 0, installments:0});
-            await store.dispatch('Loan_Guarantors/updateState', {memberArray: []});
-            store.commit('Historical_Loans/initializeStore');
-            await store.dispatch('Historical_Loans/updateState', {selectedApplication: null,selectedMember: null,selectedProduct: null,loanCharges: [],loanGuarantors: [], loanSecurities: [],loanSchedules: [], loanDocuments: [],isEditing: false});
-            store.commit('pageTab/ADD_PAGE', {'MMS':'historical_loan_Details'});
-            store.state.pageTab.mmsActiveTab = 'historical_loan_Details';          
+         
         }
         const handleActionClick = async(rowIndex, action, row) =>{
-            if( action == 'edit'){
-                await store.dispatch('Historical_Loans/updateState', {selectedApplication: null,selectedMember: null,selectedProduct: null,loanCharges: [],loanGuarantors: [], loanSecurities: [],loanSchedules: [], loanDocuments: [],isEditing: false});
-                const applicationID = row[idField];
-                const applicationStatus = row['approval_status']
-                if(applicationStatus == 'Pending'){
-                    let formData = {
-                        company: companyID.value,
-                        historical_loan: applicationID
-                    }
-                    await store.dispatch('Historical_Loans/fetchLoanApplication',formData).
-                    then(()=>{
-                        store.commit('pageTab/ADD_PAGE', {'MMS':'historical_loan_Details'})
-                        store.state.pageTab.mmsActiveTab = 'historical_loan_Details';
-                    })
-                }else{
-                    toast.error(`Cannot Edit ${applicationStatus} Loan`)
-                }
-                
-            }else if(action == 'delete'){
+            if(action == 'delete'){
                 const applicationID = [row[idField]];
                 let formData = {
                     company: companyID.value,
-                    historical_loan: applicationID
+                    loan_application: applicationID
                 }
-                await store.dispatch('Historical_Loans/deleteLoanApplication',formData).
+                await store.dispatch('Loan_Applications/deleteLoanApplication',formData).
                 then(()=>{
                     searchApplications();
                 })
-            }else if(action == 'approve/reject'){
-                const applicationStatus = row['approval_status']
-                if(applicationStatus == 'Pending'){
-                    updateFormFields();
-                    applicationID.value = row['historical_loan_id'];
-                    appliedAmount.value = row['applied_amount'];
-                    transModalVisible.value = true;
-                    flex_basis.value = '1/2';
-                    flex_basis_percentage.value = '50';
-                }else{
-                    toast.error(`Loan Already ${applicationStatus}`)
-                }
             }else if(action == 'view'){
                 const applicationID = row[idField];
                 const applicationStatus = row['approval_status']
                 if(applicationStatus == 'Approved'){
                     let formData = {
                         company: companyID.value,
-                        historical_loan: applicationID
+                        loan_application: applicationID
                     }
-                    await store.dispatch('Historical_Loans/fetchLoanDetails',formData).
+                    await store.dispatch('Loan_Applications/fetchLoanDetails',formData).
                     then(()=>{
                         store.commit('pageTab/ADD_PAGE', {'MMS':'Historical_Loan_Ledger'});
                         store.state.pageTab.mmsActiveTab = 'Historical_Loan_Ledger'; 
@@ -455,24 +432,6 @@ export default{
                 }else{
                     toast.error(`Cannot View ${applicationStatus} Loan`)
                 }
-            }else if(action == 'disburse'){
-                const applicationStatus = row['approval_status']
-                const disburseStatus = row['disbursed']
-                const partDisburse = row['partial_disbursement']
-                if(disburseStatus == 'Yes' && partDisburse == 'No'){
-                    toast.error(`Loan Already Disbursed`)
-                }else{
-                    if(applicationStatus == 'Approved'){
-                        applicationID.value = row[idField];
-                        calculateDisbursalAmount();
-                        refModalVisible.value = true;
-                        flex_basis.value = '1/3';
-                        flex_basis_percentage.value = '33.333';
-                    }else{
-                        toast.error(`Cannot Disburse ${applicationStatus} Loan`)
-                    }
-                }
-                
             }
         };
         const dropdownOptions = ref([
@@ -644,10 +603,16 @@ export default{
         const printApplicationList = () =>{
             showLoader();
             let formData = {
-                product_name: name_search.value,
-                product_code: loan_number_search.value,
-                active_status: member_number_search.value,
+                member_name: name_search.value,
+                loan_number: loan_number_search.value,
+                member_number: member_number_search.value,
+                approval_status: approval_status_search.value,
+                disbursed: disbursed_status_search.value,
+                from_date: from_date_search.value,
+                to_date: to_date_search.value,
+                product: productID.value,
                 company_id: companyID.value,
+                page_size: selectedValue.value
             } 
 
             axios

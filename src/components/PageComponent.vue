@@ -40,6 +40,7 @@
                     :showActions="showActions"
                     @action-click="handleActionClick"
                     @row-db-click="handleShowDetails"
+                    @right-click="handleRightClick"
                     @selection-changed="handleSelectionChange"
                     :rightsModule="rightsModule"
                 />
@@ -253,6 +254,9 @@ export default defineComponent({
         const handleActionClick = (rowIndex, action, row) =>{
             emit('handleActionClick',rowIndex, action, row)
         };
+        const handleRightClick = (row, rowIndex, event) =>{
+            emit('handleRightClick',row, rowIndex, event)
+        };
         const handleShowDetails = (row) =>{
             emit('handleShowDetails',row)
         };
@@ -274,7 +278,8 @@ export default defineComponent({
         return{
             searchPage, resetFilters, loadPrev, loadNext, firstPage, lastPage, handleActionClick, handleAddNew,
             showLoader, hideLoader, importData, removeItem, removeSelectedItems, printList, handleDynamicOption,
-            handleSelectionChange,selectSearchQuantity,selectedValue,printExcel,printCSV,hideDetails,handleShowDetails
+            handleSelectionChange,selectSearchQuantity,selectedValue,printExcel,printCSV,hideDetails,handleShowDetails,
+            handleRightClick
         }
     }
 })

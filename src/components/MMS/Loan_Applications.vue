@@ -21,6 +21,7 @@
             :idField="idField"
             @handleSelectionChange="handleSelectionChange"
             @handleActionClick="handleActionClick"
+            @handleRightClick="handleRightClick"
             :count="propCount"
             :currentPage="currentPage"
             :result="propArrLen"
@@ -56,7 +57,7 @@
 
 <script>
 import axios from "axios";
-import { ref, computed, onMounted, onBeforeMount} from 'vue';
+import { ref, computed, onMounted, onBeforeMount, watch} from 'vue';
 import PageComponent from '@/components/PageComponent.vue'
 import { useStore } from "vuex";
 import { useToast } from "vue-toastification";
@@ -147,6 +148,7 @@ export default{
         const loan_number_search = ref("");
         const member_number_search = ref("");
         const approval_status_search = ref("");
+        const repayment_status_search = ref("");
         const disbursed_status_search = ref("");
         const from_date_search = ref("");
         const to_date_search = ref("");
@@ -180,6 +182,10 @@ export default{
                 searchPlaceholder: 'Loan Product...', dropdownWidth: '350px',
                 fetchData: store.dispatch('Loan_Products/fetchLoanProducts', {company:companyID.value}),
                 clearSearch: clearSelectedProduct
+            },
+            {
+                type:'dropdown', placeholder:"Repayment Status..", value: repayment_status_search, width:44,
+                options: [{text:'On-Time Payments',value:'On-Time'},{text:'Prepaid Clients',value:'Prepaid'},{text:'Defaulting',value:'Defaulted'}]
             },
         ]);
         const handleSelectionChange = (ids) => {
@@ -314,11 +320,13 @@ export default{
                 member_number: member_number_search.value,
                 approval_status: approval_status_search.value,
                 disbursed: disbursed_status_search.value,
+                repayment_status: repayment_status_search.value,
                 from_date: from_date_search.value,
                 to_date: to_date_search.value,
                 product: productID.value,
                 company_id: companyID.value,
-                page_size: selectedValue.value
+                page_size: selectedValue.value,
+                loan_type: 'New'
             } 
             axios
             .post(`api/v1/loan-applications-search/?page=${currentPage.value}`,formData)
@@ -355,6 +363,7 @@ export default{
             loan_number_search.value = "";
             approval_status_search.value = "";
             disbursed_status_search.value = "";
+            repayment_status_search.value = "";
             from_date_search.value = "";
             to_date_search.value = "";
             productID.value = "";
@@ -494,6 +503,32 @@ export default{
                 }
                 
             }
+        };
+        watch(() => store.state.contextMenu.selectedAction, (actionPayload) => {
+            if (!actionPayload) return;
+
+            const { rowIndex, action, data } = actionPayload;
+
+            handleActionClick(rowIndex, action, data);
+
+            store.commit('contextMenu/CLEAR_SELECTED_ACTION');
+        });
+        const handleRightClick = (row, rowIndex, event) => {
+
+            const menuOptions = [
+                { label: 'Edit', action: 'edit', rowIndex: rowIndex , icon: 'fa fa-edit'},
+                { label: 'View', action: 'view', rowIndex: rowIndex, icon: 'fa fa-file-pdf-o' },
+                { label: 'Approve', action: 'approve', rowIndex: rowIndex, icon: 'fa fa-check-circle' },
+                { label: 'Disburse', action: 'disburse', rowIndex: rowIndex, icon: 'fa fa-credit-card' },
+                { label: 'Delete', action: 'delete', rowIndex: rowIndex, icon: 'fa fa-trash' },
+            ];
+
+            store.commit('contextMenu/SHOW_CONTEXT_MENU', {
+                x: event.clientX,
+                y: event.clientY,
+                options: menuOptions,
+                contextData: row,
+            });
         };
         const dropdownOptions = ref([
             {label: 'Exempt Penalty', action: 'exempt-penalty'},
@@ -764,7 +799,7 @@ export default{
         return{
             searchApplications,resetFilters, addButtonLabel, searchFilters, tableColumns, applicationList,dropdownWidth,displayButtons,
             currentPage,propResults, propArrLen, propCount, pageCount, showNextBtn, showPreviousBtn,flex_basis,flex_basis_percentage,formFields,handleReset,
-            loadPrev, loadNext, firstPage, lastPage, idField, actions, handleActionClick,showDetails,detailsTitle,hideDetails,
+            loadPrev, loadNext, firstPage, lastPage, idField, actions, handleActionClick,handleRightClick,showDetails,detailsTitle,hideDetails,
             submitButtonLabel, showModal, addNewApplication, showLoader, loader, hideLoader, removeApplication, removeApplications,
             handleSelectionChange,addingRight,removingRight,rightsModule,printApplicationList,selectSearchQuantity,selectedValue,
             modal_left,modal_top,modal_width,trans_modal_loader,transModalVisible,transTitle,showTransModalLoader,hideTransModalLoader,approveLoan,closeTransModal,

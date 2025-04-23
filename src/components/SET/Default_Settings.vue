@@ -253,6 +253,16 @@
                                 <button type="button" class="absolute ml-2 rounded px-2 bg-green-500 text-white" @click="saveDefaultSetting('MMS','Disable Strict Guarantorship',mmsStrictGuarantorshipOption,mmsStrictGuarantorshipOption)"><i class="fa fa-check"></i></button>
                             </div>
                         </div>
+                        <div class="flex mb-3">
+                            <div class="basis-1/4 relative mr-12">
+                                <label for="">Loan Balance Reminder Automation:<em>*</em></label><br />
+                                <select  v-model="mmsBalReminderOption" name="" class="bg-slate-50 rounded border border-gray-400 text-sm pl-2 pt-2 w-full">
+                                    <option value="Yes">Yes</option>
+                                    <option value="No">No</option>
+                                </select>
+                                <button type="button" class="absolute ml-2 rounded px-2 bg-green-500 text-white" @click="saveDefaultSetting('MMS','Loan Balance Reminder Automation',mmsBalReminderOption,mmsBalReminderOption)"><i class="fa fa-check"></i></button>
+                            </div>
+                        </div>
                     </div>
                 </div>
                 <div class="border-b-2 border-gray-500 px-3 py-2 text-left">
@@ -543,6 +553,7 @@ export default defineComponent({
 
         const mmsAutoPenalizeOption = ref("");
         const mmsStrictGuarantorshipOption = ref("");
+        const mmsBalReminderOption = ref("");
 
         const retailOutlet = ref("");
         const outletCounter = ref("");
@@ -798,6 +809,8 @@ export default defineComponent({
                         mmsAutoPenalizeOption.value = response.data[i].setting_value_name;
                     }else if(response.data[i].setting_name === 'Disable Strict Guarantorship'){
                         mmsStrictGuarantorshipOption.value = response.data[i].setting_value_name;
+                    }else if(response.data[i].setting_name === 'Loan Balance Reminder Automation'){
+                        mmsBalReminderOption.value = response.data[i].setting_value_name;
                     }
 
                     
@@ -925,7 +938,7 @@ export default defineComponent({
             patientsOption,duplicatesOption, debtorsOption, vendorsOption, tenantsOption, fetchRetailOutlets,handleSelectedOutlet, clearSelectedOutlet, fetchOutletCounters,outletID,outletName,counterID,counterName,
             channelID,channelName,handleSelectedCounter, clearSelectedCounter, fetchCounterChannels,handleSelectedChannel, clearSelectedChannel,outletCounterArr,retailOutletArr,counterChannelArr,
             retailOutlet, outletCounter, counterChannel, salesIncome, invTakeOn, stockControl, stockType,directSaleOrder,defaultTimeout,
-            mmsAutoPenalizeOption,mmsStrictGuarantorshipOption
+            mmsAutoPenalizeOption,mmsStrictGuarantorshipOption,mmsBalReminderOption
         }
     }
 });

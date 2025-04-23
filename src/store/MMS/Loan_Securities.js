@@ -165,6 +165,47 @@ const state = {
         }
       })
     },
+    deleteLoanSecurityAttachment({ commit,state }, formData) {
+      Swal.fire({
+        title: "Are you sure?",
+        text: `Do you wish to delete Attachment?`,
+        type: 'warning',
+        showCloseButton: true,
+        showCancelButton: true,
+        confirmButtonText: 'Yes Delete Attachment!',
+        cancelButtonText: 'Cancel!',
+        customClass: {
+            confirmButton: 'swal2-confirm-custom',
+            cancelButton: 'swal2-cancel-custom',
+        },
+        showLoaderOnConfirm: true,
+      }).then((result) => {
+        if (result.value) {
+          axios.post(`api/v1/delete-loan-security-attachment/`,formData)
+          .then((response)=>{
+            if(response.status == 200){
+                Swal.fire("Poof! Attachment removed succesfully!", {
+                  icon: "success",
+                }); 
+            }else{
+              Swal.fire({
+                title: "Error Deleting Attachment",
+                icon: "warning",
+              });
+            }                   
+          })
+          .catch((error)=>{
+            console.log(error.message);
+            Swal.fire({
+              title: error.message,
+              icon: "warning",
+            });
+          })
+        }else{
+          Swal.fire(`Attachment has not been deleted!`);
+        }
+      })
+    },
   };
   
   const getters = {

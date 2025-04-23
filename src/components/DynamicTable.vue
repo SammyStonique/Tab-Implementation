@@ -3,13 +3,16 @@
     <table ref="tableRef" class="dynamic-table rounded min-w-full">
       <thead class="bg-gray-800 text-white">
         <tr class="rounded bg-slate-800 text-white font-semibold text-xxs sm:text-xs uppercase">
-          <th v-for="(column, index) in columns" :key="index"  :hidden="column.hidden"
+          <th v-for="(column, index) in columns" :key="index"  :hidden="column.hidden" @click="handleSort(column)"
               :class="`min-w-[${column.minWidth}] max-w-[${column.maxWidth}]`">
             <template v-if="column.type === 'checkbox'">
               <input type="checkbox" class="mt-0.5" @change="toggleSelectAll" :checked="allSelected" />
             </template>
             <template v-else>
               {{ column.label }}
+              <span v-if="sortColumn === column.key">
+                {{ sortDirection === 'asc' ? '▲' : '▼' }}
+              </span>
             </template>
           </th>
           <th style="width: 5%" v-if="showActions">
@@ -18,7 +21,7 @@
         </tr>
       </thead>
       <tbody class="table-body text-xxs">
-        <tr v-for="(row, rowIndex) in rows" :key="rowIndex" @dblclick="handleRowClick(row)" :style="shouldAddLine(row) ? { textDecoration: 'line-through' } : {}" :class="['cursor-pointer text-xxs sm:text-xs uppercase hover:bg-orange-50',row.selected ? 'bg-orange-50' : (rowIndex % 2 === 0 ? 'bg-gray-100' : 'bg-white')]">
+        <tr v-for="(row, rowIndex) in sortedRows" :key="rowIndex" @dblclick="handleRowClick(row)" @contextmenu.prevent="handleRightClick(row, rowIndex, $event)" :style="shouldAddLine(row) ? { textDecoration: 'line-through' } : {}" :class="['cursor-pointer text-xxs sm:text-xs uppercase hover:bg-orange-50',row.selected ? 'bg-orange-50' : (rowIndex % 2 === 0 ? 'bg-gray-100' : 'bg-white')]">
           <td v-for="(column, colIndex) in columns" :key="colIndex" :hidden="column.hidden" 
               :class="[{'ellipsis': column.maxWidth}, { 'max-w-[300px]': column.maxWidth }, { 'min-w-[120px]': column.minWidth }]">
             <template v-if="column.type === 'checkbox'">
@@ -120,6 +123,8 @@ export default defineComponent({
     const defaultSettings = computed(()=> store.state.userData.defaultSettings);
     const companyID = computed(()=> store.state.userData.company_id);
     const userID = computed(()=> store.state.userData.user_id);
+    const sortColumn = ref(null);
+    const sortDirection = ref('asc');
 
     // Deep clone the rows to avoid shared references between rows
     // const rows = computed(() => {
@@ -143,6 +148,9 @@ export default defineComponent({
 
     const handleRowClick = (row) => {
       emit('row-db-click', row);
+    };
+    const handleRightClick = (row, rowIndex, event) => {
+      emit('right-click', row, rowIndex, event);
     };
 
     const handleAction = (rowIndex, action, right, row) => {
@@ -180,6 +188,37 @@ export default defineComponent({
     const getNestedValue = (row, key) => {
       return key.split('.').reduce((obj, keyPart) => obj && obj[keyPart], row);
     };
+
+    const sortedRows = computed(() => {
+      if (!sortColumn.value) return props.rows;
+
+      return [...props.rows].sort((a, b) => {
+        const aVal = getNestedValue(a, sortColumn.value);
+        const bVal = getNestedValue(b, sortColumn.value);
+
+        if (aVal == null) return 1;
+        if (bVal == null) return -1;
+
+        if (typeof aVal === 'number' && typeof bVal === 'number') {
+          return sortDirection.value === 'asc' ? aVal - bVal : bVal - aVal;
+        }
+
+        return sortDirection.value === 'asc'
+          ? String(aVal).localeCompare(String(bVal))
+          : String(bVal).localeCompare(String(aVal));
+      });
+    });
+
+    const handleSort = (column) => {
+      if (sortColumn.value === column.key) {
+        // Toggle direction
+        sortDirection.value = sortDirection.value === 'asc' ? 'desc' : 'asc';
+      } else {
+        sortColumn.value = column.key;
+        sortDirection.value = 'asc';
+      }
+    };
+
 
     //JOURNALS
     const journalLineCheck = (row) =>{
@@ -347,9 +386,9 @@ export default defineComponent({
     });
 
     return {
-      handleRowClick, handleAction, handleChange, getNestedValue, handleInputChange,
+      handleRowClick,handleRightClick, handleAction, handleChange, getNestedValue, handleInputChange,
       tableRef, toggleSelectAll, selectedIds, allSelected, updateSelectedIds, calculateColumnTotal,isDisabled,
-      shouldAddLine
+      shouldAddLine,sortedRows,sortColumn,sortDirection,handleSort,
     };
   }
 });

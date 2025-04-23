@@ -52,14 +52,39 @@
                                 @printList="printList"
                                 @printExcel="printExcel"
                                 @printCSV="printCSV"
+                                :dropdownOptions="dropdownOptions"
+                                @handleDynamicOption="handleDynamicOption"
                             />
                         </div>
                         <div class="table w-[99%] top-[17.1rem] z-30">
-                            <DynamicTable :key="statementTableKey" :columns="statementColumns" :rows="statementRows" :idField="idFieldStatement" :showActions="showActions" :actions="actionsStatement"/>
+                            <DynamicTable :key="statementTableKey" :columns="statementColumns" :rows="statementRows" :idField="idField" :showActions="showActions" :actions="actionsStatement" 
+                            @selection-changed="handleSelectionChange" @row-db-click="handleShowDetails" @right-click="handleRightClick"/>
                         </div>
                     </div>             
                 </div>
+                <div class="fixed w-[95%] z-30 bottom-5 pb-2 bg-white">
+                    <ShowDetails v-model:visible="showDetails" :detailsTitle="detailsTitle" @hideDetails="hideDetails">
+                        <template v-slot:detailSlot>
+                            <div>
+                            <div class="tabs pt-2">
+                                <button v-for="(tab, index) in tabs1" :key="tab" :class="['tab', { active: activeTab1 === index }]"@click="selectTab1(index)">
+                                    {{ tab }}
+                                </button>
+                            </div>
+                            <div class="tab-content mt-3">
+                                <div v-if="activeTab1 == 0">
+                                    <JournalEntries 
+                                        :detailRows="journalEntries"
+                                    />
+                                </div>
+                            </div>
+                            
+                        </div>
+                        </template>
+                    </ShowDetails>
+                </div>
             </div>
+
         </template>
     </PageStyleComponent>
     <MovableModal v-model:visible="appModalVisible" :title="title" :modal_top="modal_top" :modal_left="modal_left" :modal_width="modal_width"
@@ -67,7 +92,7 @@
     >
         <DynamicForm 
             :fields="formFields" :flex_basis="flex_basis" :flex_basis_percentage="flex_basis_percentage" 
-            :displayButtons="displayButtons" @handleSubmit="" @handleReset="handleReset"
+            :displayButtons="displayButtons" @handleSubmit="moveTransaction" @handleReset="handleReset"
         />
     </MovableModal>
 </template>
@@ -81,13 +106,15 @@ import MovableModal from '@/components/MovableModal.vue'
 import DynamicForm from '../NewDynamicForm.vue';
 import DynamicTable from '@/components/DynamicTable.vue';
 import FilterBar from "@/components/FilterBar.vue";
+import ShowDetails from '@/components/ShowDetails.vue';
+import JournalEntries from "@/components/JournalEntries.vue";
 import { useToast } from "vue-toastification";
 import PrintJS from 'print-js';
 
 export default{
     name: 'Ledger_Details',
     components:{
-        PageStyleComponent,MovableModal,DynamicForm,DynamicTable,FilterBar
+        PageStyleComponent,MovableModal,DynamicForm,DynamicTable,FilterBar,ShowDetails,JournalEntries
     },
     setup(){
         const store = useStore();
@@ -96,14 +123,23 @@ export default{
         const modal_loader = ref('none');
         const activeTab = ref(0);
         const pageComponentKey = ref(0);
-        const invComponentKey = ref(0);
+        const ledComponentKey = ref(0);
         const title = ref('Move Transaction');
+        const detailsTitle = ref('Item Details');
+        const tabs1 = ref(['Journal Entries']);
+        const activeTab1 = ref(0);
+        const invoiceID = ref(null);
+        const journalEntries = ref([]);
+        const showDetails = ref(false);
         const companyID = computed(()=> store.state.userData.company_id);
         const ledgerID = computed(()=> store.state.Ledgers.ledgerID);
+        const ledgerToID = ref("");
+        const jnlEntryID = ref("");
+        const ledgerArr = computed(() => store.state.Ledgers.ledgerArr);
         const ledgerDetails = computed(()=> store.state.Ledgers.ledgerDetails);
         const ledgerRunningBalance = computed(()=> store.state.Ledgers.ledgerRunningBalance);
         const tabs = ref(['Ledger Details','Ledger Statement']);
-        const idField = 'journal_id';
+        const idField = 'journal_entry_id';
         const selectedIds = ref([]);
         const appModalVisible = ref(false);
         const appResults = ref([]);
@@ -148,6 +184,7 @@ export default{
         ]);
         const handleSelectionChange = (ids) => {
             selectedIds.value = ids;
+            console.log("THE SELECTED IDS ARE ",selectedIds.value)
         };
 
         const selectTab = async(index) => {
@@ -179,13 +216,59 @@ export default{
             }
             
         }, { immediate: true });
-
-        const formFields = ref([]);
+        const fetchLedgers = async() =>{
+            await store.dispatch('Ledgers/fetchLedgers', {company:companyID.value})
+        };
+        const handleSelectedLedger = async(option) =>{
+            await store.dispatch('Ledgers/handleSelectedLedger', option)
+            ledgerToID.value = store.state.Ledgers.ledgerID;
+        };
+        const clearSelectedLedger = async() =>{
+            await store.dispatch('Ledgers/updateState', {ledgerID: ''});
+            ledgerToID.value = ""
+        };
+        const formFields = ref([
+            {  
+                type:'search-dropdown', label:"Ledger", value: ledgerToID.value, componentKey: ledComponentKey,
+                selectOptions: ledgerArr, optionSelected: handleSelectedLedger, required: true,
+                searchPlaceholder: 'Select Ledger...', dropdownWidth: '550px', updateValue: "",
+                fetchData: fetchLedgers(), clearSearch: clearSelectedLedger
+            },
+         ]);
         const handleReset = () =>{
-            for(let i=1; i < formFields.value.length; i++){
-                formFields.value[i].value = '';
-            }
+            ledgerToID.value = "";
+            ledComponentKey.value += 1;
+            jnlEntryID.value = "";
         }
+        const moveTransaction = async() =>{
+            if(ledgerToID.value != ""){
+                showModalLoader();
+                let formData = {
+                    company: companyID.value,
+                    journal_entry: jnlEntryID.value,
+                    ledger: ledgerToID.value
+                }
+                try {
+                    const response = await store.dispatch('Journals/moveJournalEntry',formData)
+                    if (response && response.data.msg === "Success") {
+                        hideModalLoader();
+                        toast.success("Success!");
+                        handleReset();
+                        searchJournalEntries();
+                    } else {
+                        toast.error('An error occurred while moving Transaction.');
+                    }
+                } catch (error) {
+                    console.error(error.message);
+                    toast.error('Failed to move Transaction: ' + error.message);
+                } finally {
+                    hideModalLoader();
+                }              
+            }
+            else{
+                toast.error('No Ledger Selected')
+            }
+        };
         
         const handleActionClick = async(rowIndex, action, row) =>{
             if(action == 'delete'){
@@ -196,8 +279,27 @@ export default{
                 }
                 await store.dispatch('Journals/deleteJournal',formData)
                 searchJournalEntries();     
+            }else if(action == 'move-transaction'){
+                jnlEntryID.value = [row['journal_entry_id']];
+
+                appModalVisible.value = true;
+                flex_basis.value = "1/2";
+                flex_basis_percentage.value = '50';
+                
+                searchJournalEntries();     
             }
         } 
+        const dropdownOptions = ref([
+            {label: 'Move Transactions', action: 'move-transaction'},
+        ]);
+        const handleDynamicOption = async(option) =>{
+            if( option == 'move-transaction'){
+                jnlEntryID.value = selectedIds.value;
+                appModalVisible.value = true;
+                flex_basis.value = "1/2";
+                flex_basis_percentage.value = '50';
+            }
+        };
         const showModalLoader = () =>{
             modal_loader.value = "block";
         }
@@ -213,6 +315,7 @@ export default{
         }
         const searchJournalEntries = async() =>{
             showLoader();
+            selectedIds.value = [];
             let formData = {
                 posting_account: ledgerDetails.value.ledger_id,
                 company: companyID.value,
@@ -268,7 +371,58 @@ export default{
         const closeModal = () =>{
             appModalVisible.value = false;
             store.dispatch('Journals/updateState',{journalID:''})
-        }
+        };
+        const handleShowDetails = async(row) =>{
+            activeTab1.value = 0;
+            invoiceID.value = row['journal_id'];
+            detailsTitle.value = row['journal_no'] + ' Details';
+            showDetails.value = true;
+            let formData = {
+                journal: row['journal_id'],
+                company: companyID.value
+            }
+            axios.post('api/v1/journal-entries-search/',formData)
+            .then((response)=>{
+                journalEntries.value = response.data.journal_entries;
+            })
+            .catch((error)=>{
+                console.log(error.message)
+            })
+        };
+        const selectTab1 = async(index) => {
+            let formData = {
+                company: companyID.value,
+                journal: invoiceID.value,
+            }
+                activeTab1.value = index;
+                hideLoader();
+        };
+        const hideDetails = async() =>{
+            showDetails.value = false;
+        };
+  
+        watch(() => store.state.contextMenu.selectedAction, (actionPayload) => {
+            if (!actionPayload) return;
+
+            const { rowIndex, action, data } = actionPayload;
+
+            handleActionClick(rowIndex, action, data);
+
+            store.commit('contextMenu/CLEAR_SELECTED_ACTION');
+        });
+        const handleRightClick = (row, rowIndex, event) => {
+
+            const menuOptions = [
+                { label: 'Move Transaction', action: 'move-transaction', rowIndex: rowIndex , icon: 'fa fa-arrows-alt'},
+            ];
+
+            store.commit('contextMenu/SHOW_CONTEXT_MENU', {
+                x: event.clientX,
+                y: event.clientY,
+                options: menuOptions,
+                contextData: row,
+            });
+        };
         onMounted(() =>{
             
         })
@@ -278,7 +432,8 @@ export default{
             showNextBtn,showPreviousBtn, handleActionClick,displayButtons,handleReset,
             modal_top, modal_left, modal_width, showLoader, loader, hideLoader, modal_loader, showModalLoader, hideModalLoader,
             closeModal, handleSelectionChange, pageComponentKey, flex_basis, flex_basis_percentage, ledgerDetails,ledgerRunningBalance,
-            selectTab, activeTab,showActions
+            selectTab, activeTab,showActions,showDetails,detailsTitle,hideDetails,handleShowDetails,journalEntries,tabs1,selectTab1,activeTab1,
+            handleRightClick,moveTransaction,dropdownOptions,handleDynamicOption
         }
     }
 }

@@ -60,14 +60,14 @@
                             </div>
                         </div>
                     </div>
-                    <div v-if="activeTab == 2">
+                    <!-- <div v-if="activeTab == 2">
                         <div class="relative w-[100%] bg-white z-50 px-6">
                             <FilterBar 
                                 :showAddButton="showAddButton"
                                 :filters="searchFilters" 
                                 @search="searchLoanTransactions"
                                 @reset="resetFilters"
-                                @printList="printLoanStatement"
+                                @printList="printLoanTransactions"
                                 @printExcel="printExcel"
                                 @printCSV="printCSV"
                                 :dropdownOptions="dropdownOptions"
@@ -77,10 +77,29 @@
                         <div class="table w-[100%] top-[17.1rem] z-30 px-6">
                             <DynamicTable :key="statementTableKey" :rightsModule="rightsModule" :columns="statementColumns" :rows="statementRows" :idField="idFieldStatement" :showActions="showActions" :actions="actionsStatement"/>
                         </div>
-                    </div>          
-                    <div v-if="activeTab == 1">                    
+                    </div>           -->
+                    <div v-if="activeTab == 1" class="text-left"> 
+                        <button @click="printSchedule" class="rounded bg-green-400 cursor-pointer text-sm mr-2 mb-1.5  text-white px-2 py-1.5"><i class="fa fa-check-circle text-xs mr-1.5" aria-hidden="true"></i>Print Schedule</button>                                   
                         <DynamicTable :key="tableKey" :rightsModule="rightsModule" :columns="scheduleColumns" :rows="computedScheduleRows" :idField="idFieldSchedule" :showTotals="showTotals" :actions="actionsSchedule" @action-click="scheduleActionClick" />
                     </div>
+                    <div v-show="activeTab == 2"> 
+                        <div class="relative w-[100%] bg-white z-50 px-6">
+                            <FilterBar 
+                                :showAddButton="showAddButton"
+                                :filters="searchFilters" 
+                                @search="searchLoanStatement"
+                                @reset="resetFilters"
+                                @printList="printLoanStatement"
+                                @printExcel="printExcel"
+                                @printCSV="printCSV"
+                                :dropdownOptions="dropdownOptions"
+                                @handleDynamicOption="handleDynamicOption1"
+                            />
+                        </div>   
+                        <div class="table w-[100%] top-[17.1rem] z-30 px-6">              
+                            <DynamicTable :key="statementTableKey" :rightsModule="rightsModule" :columns="statement1Columns" :rows="statement1Rows" :idField="idFieldStatement" :actions="actionsStatement" :showActions="showActions"/>
+                        </div>
+                    </div> 
                     <div v-show="activeTab == 3">                  
                         <DynamicTable :key="paymentTableKey" :rightsModule="rightsModule" :columns="paymentColumns" :rows="computedPaymentRows" :idField="idFieldPayment" :actions="actionsUtility" @action-click="paymentActionClick" 
                                         :showActions="showActions" :showTotals="showTotals"/>
@@ -117,7 +136,7 @@ import PrintJS from 'print-js';
 import Swal from 'sweetalert2';
 
 export default defineComponent({
-    name: 'Historical_Loan_Ledger',
+    name: 'Loan_Ledger',
     components:{
         PageStyleComponent, DynamicTable, MovableModal, DynamicForm,FilterBar
     },
@@ -143,7 +162,7 @@ export default defineComponent({
         const companyID = computed(()=> store.state.userData.company_id);
         const userID = computed(()=> store.state.userData.user_id);
         // const tabs = ref(['Loan Details','Armotization Schedule','Loan Statement','Statement','Loan Repayment','Loan Guarantors','Loan Securities','Loan Documents']);
-        const tabs = ref(['Loan Details','Armotization Schedule','','Statement','Loan Repayment','Loan Guarantors','Loan Securities','Loan Documents']);
+        const tabs = ref(['Loan Details','Armotization Schedule','Statement','Loan Repayment','Loan Guarantors','Loan Securities','Loan Documents']);
         const activeTab = ref(0);
         const mainComponentKey = ref(0);
         const tableKey = ref(0);
@@ -154,16 +173,17 @@ export default defineComponent({
         const idFieldSchedule = ref('armotization_schedule_id');
         const idFieldPayment = ref('utility_id');
         const idFieldStatement = ref('');
-        const applicationID = computed(()=> store.state.Historical_Loans.selectedApplicationID);
-        const computedScheduleRows = computed(()=> store.state.Historical_Loans.selectedSchedules);
-        const computedPaymentRows = computed(()=> store.state.Historical_Loans.selectedRepayments);
-        const computedGuarantorRows = computed(()=> store.state.Historical_Loans.selectedGuarantors);
-        const computedSecurityRows = computed(()=> store.state.Historical_Loans.selectedSecurities);
-        const computedDocumentRows = computed(()=> store.state.Historical_Loans.selectedDocuments);
-        const statementRows = computed(()=> store.state.Historical_Loans.selectedTransactions);
-        const loanDetails = computed(()=> store.state.Historical_Loans.loanDetails);
-        const loanMember = computed(()=> store.state.Historical_Loans.loanMember);
-        const loanProduct = computed(()=> store.state.Historical_Loans.loanProduct);
+        const applicationID = computed(()=> store.state.Loan_Applications.selectedApplicationID);
+        const computedScheduleRows = computed(()=> store.state.Loan_Applications.selectedSchedules);
+        const computedPaymentRows = computed(()=> store.state.Loan_Applications.selectedRepayments);
+        const computedGuarantorRows = computed(()=> store.state.Loan_Applications.selectedGuarantors);
+        const computedSecurityRows = computed(()=> store.state.Loan_Applications.selectedSecurities);
+        const computedDocumentRows = computed(()=> store.state.Loan_Applications.selectedDocuments);
+        const statementRows = computed(()=> store.state.Loan_Applications.selectedTransactions);
+        const statement1Rows = computed(()=> store.state.Loan_Applications.selectedStatement);
+        const loanDetails = computed(()=> store.state.Loan_Applications.loanDetails);
+        const loanMember = computed(()=> store.state.Loan_Applications.loanMember);
+        const loanProduct = computed(()=> store.state.Loan_Applications.loanProduct);
         const scheduleColumns = ref([
             {type: "checkbox"},
             {label: "#", key:"installment", type: "text", editable: false},
@@ -242,6 +262,16 @@ export default defineComponent({
         const actionsStatement = ref([
             {name: 'delete', icon: 'fa fa-trash', title: 'Delete Transaction'},
         ]);
+        const statement1Columns = ref([
+            {type: "checkbox"},
+            {label: "Date", key:"date", type: "text", editable: false},
+            {label: "Amount Paid", key:"amount_paid", type: "text", editable: false},
+            {label: "Interest", key: "interest", type: "text", editable: false},
+            {label: "Penalty", key: "penalty", type: "text", editable: false},
+            {label: "Principal", key: "principal", type: "text", editable: false},
+            {label: "Prepayment", key: "prepayment", type: "text", editable: false},
+            {label: "Running Balance", key: "running_balance", type: "text", editable: false},
+        ]);
 
         const from_date_search = ref("");
         const to_date_search = ref("");
@@ -300,9 +330,9 @@ export default defineComponent({
             }else if(option == 'send-email'){
                 showLoader();
                 let formData = {
-                    historical_loan: [loanDetails.value.historical_loan_id],
-                    loan_application: null,
                     company: companyID.value,
+                    loan_application: [loanDetails.value.loan_application_id],
+                    historical_loan: null,
                     date_from: from_date_search.value,
                     date_to: to_date_search.value,
                     company: companyID.value
@@ -325,15 +355,97 @@ export default defineComponent({
                 })
             }
         };
-        const printLoanStatement = () =>{
+        const handleDynamicOption1 = async(option) =>{           
+            if(option == 'send-sms'){
+                showLoader();
+                let formData = {
+                    client: [loanDetails.value.loan_application_id],
+                    company: companyID.value,
+                    date_from: from_date_search.value,
+                    date_to: to_date_search.value,
+                    company: companyID.value
+                }
+                await axios.post('api/v1/loan-statement-sms/',formData).
+                then((response)=>{
+                    if(response.data.msg == "Success"){
+                        toast.success("SMS Sent!")
+                    }else if(response.data.msg == "Missing Template"){
+                        toast.error("Loan Statement Template Not Set!")
+                    }else{
+                        toast.error(response.data.msg)
+                    }
+                })
+                .catch((error)=>{
+                    toast.error(error.message)
+                })
+                .finally(()=>{
+                    hideLoader();
+                })
+            }else if(option == 'send-email'){
+                showLoader();
+                let formData = {
+                    company: companyID.value,
+                    loan_application: [loanDetails.value.loan_application_id],
+                    historical_loan: null,
+                    date_from: from_date_search.value,
+                    date_to: to_date_search.value,
+                    company: companyID.value
+                }
+                await axios.post('api/v1/member-loan-statement-email/',formData).
+                then((response)=>{
+                    if(response.data.msg == "Success"){
+                        toast.success("Email Sent!")
+                    }else if(response.data.msg == "Missing Template"){
+                        toast.error("Loan Statement Template Not Set!")
+                    }else{
+                        toast.error(response.data.msg)
+                    }
+                })
+                .catch((error)=>{
+                    toast.error(error.message)
+                })
+                .finally(()=>{
+                    hideLoader();
+                })
+            }
+        };
+        const printLoanTransactions = () =>{
             showLoader();
             let formData = {
                 client: loanDetails.value.loan_ledger_id,
-                loan_application: null,
-                historical_loan: loanDetails.value.historical_loan_id,
+                loan_application: loanDetails.value.loan_application_id,
+                historical_loan: null,
                 company: companyID.value,
                 date_from: from_date_search.value,
                 date_to: to_date_search.value,
+            }
+            axios
+            .post("api/v1/loan-transactions-pdf/", formData, { responseType: 'blob' })
+            .then((response)=>{
+                if(response.status == 200){
+                    const blob1 = new Blob([response.data]);
+                    // Convert blob to URL
+                    const url = URL.createObjectURL(blob1);
+                    PrintJS({printable: url, type: 'pdf'});
+                }
+            })
+            .catch((error)=>{
+                console.log(error.message);
+            })
+            .finally(()=>{
+                hideLoader();
+            })
+        }
+        const printLoanStatement = () =>{
+            showLoader();
+            let formData = {
+                company: companyID.value,
+                client: loanDetails.value.loan_ledger_id,
+                application: loanDetails.value.loan_application_id,
+                historical_loan: null,
+                page_size: "1000"
+                // date_from: from_date_search.value,
+                // date_to: to_date_search.value,
             }
             axios
             .post("api/v1/loan-statement-pdf/", formData, { responseType: 'blob' })
@@ -388,45 +500,52 @@ export default defineComponent({
             showLoader();
             let formData = {
                 company: companyID.value,
-                historical_loan: applicationID.value
+                loan_application: applicationID.value
             }
             let formData1 = {
                 company: companyID.value,
                 client: loanDetails.value.loan_ledger_id,
-                application: null,
-                historical_loan: loanDetails.value.historical_loan_id,
+                application: loanDetails.value.loan_application_id,
+                historical_loan: null,
                 page_size: "1000"
             }
+            // if(index == 2){
+            //     activeTab.value = index;
+            //     await store.dispatch('Loan_Applications/fetchLoanTransactions',formData1)
+            //     .then(()=>{
+            //         hideLoader();
+            //     })
+            // }
             if(index == 2){
                 activeTab.value = index;
-                await store.dispatch('Historical_Loans/fetchLoanTransactions',formData1)
+                await store.dispatch('Loan_Applications/fetchLoanStatement',formData1)
                 .then(()=>{
                     hideLoader();
                 })
             }else if( index == 1){
                 activeTab.value = index;
-                await store.dispatch('Historical_Loans/fetchLoanDetails',formData)
+                await store.dispatch('Loan_Applications/fetchLoanDetails',formData)
                 .then(()=>{
                     hideLoader();
                 })
             }
             else if( index == 3){
                 activeTab.value = index;
-                await store.dispatch('Historical_Loans/fetchLoanRepayments',formData)
+                await store.dispatch('Loan_Applications/fetchLoanRepayments',formData)
                 .then(()=>{
                     hideLoader();
                 })
             }
             else if( index == 4){
                 activeTab.value = index;
-                await store.dispatch('Historical_Loans/fetchLoanGuarantors',formData)
+                await store.dispatch('Loan_Applications/fetchLoanGuarantors',formData)
                 .then(()=>{
                     hideLoader();
                 })
             }
             else if( index == 5){
                 activeTab.value = index;
-                await store.dispatch('Historical_Loans/fetchLoanSecurities',formData)
+                await store.dispatch('Loan_Applications/fetchLoanSecurities',formData)
                 .then(()=>{
                     hideLoader();
                 })
@@ -675,6 +794,30 @@ export default defineComponent({
  
             }
         }
+        const printSchedule = () =>{
+            showLoader();
+            let formData = {
+                company: companyID.value,
+                loan_application: applicationID.value,
+                historical_loan: null
+            }
+            axios
+            .post("api/v1/export-loan-schedule-pdf/", formData, { responseType: 'blob' })
+                .then((response)=>{
+                    if(response.status == 200){
+                        const blob1 = new Blob([response.data]);
+                        // Convert blob to URL
+                        const url = URL.createObjectURL(blob1);
+                        PrintJS({printable: url, type: 'pdf'});
+                    }
+                })
+            .catch((error)=>{
+                console.log(error.message);
+            })
+            .finally(()=>{
+                hideLoader();
+            })
+        };
         const previewDocument = (formData) =>{
             showLoader();
             axios
@@ -715,7 +858,13 @@ export default defineComponent({
             else if(action == 'delete'){
             }
         }
-
+        const handleSelectedDeposit = async(option) =>{
+            await store.dispatch('Security_Deposits/handleSelectedDeposit', option)
+            depositID.value = store.state.Security_Deposits.depositID;
+        }
+        const fetchDeposits = async() =>{
+            await store.dispatch('Security_Deposits/fetchDeposits', {company:companyID.value})
+        }
         const formFields = ref([
             { type: 'date', name: 'date',label: "Date", value: '', required: true },
             { type: 'dropdown', name: 'default_mode',label: "Charge Mode", value: '', placeholder: "", required: true, options: [{ text: 'Fixed Amount', value: 'Fixed Amount' }, { text: 'Rent Percentage', value: 'Rent Percentage' }] },
@@ -740,23 +889,24 @@ export default defineComponent({
             { type: 'date', name: 'from_date',label: "From Date", value: '', required: true },
         ]);
         
+
         const isDisabled =(permissionName) =>{
             const permission = allowedRights.value.find(p => p.permission_name === permissionName);
             return permission ? !permission.right_status : true;
         };
         onBeforeMount(()=>{
-            loanDetails.value = store.state.Historical_Loans.loanDetails;
+            loanDetails.value = store.state.Loan_Applications.loanDetails;
         });
         onMounted(()=>{
 
         });
 
         return{
-            tabs, activeTab, mainComponentKey, scheduleColumns, paymentColumns, selectTab, loader, showLoader, hideLoader, formFields, additionalFields,showTotals,dropdownOptions,handleDynamicOption,
-            tableKey,paymentTableKey, idFieldSchedule, idFieldPayment, actionsSchedule, actionsUtility, computedScheduleRows, computedPaymentRows,computedGuarantorRows,computedSecurityRows,
-            scheduleTableKey, idFieldSchedule, scheduleColumns, actionsSchedule, statementTableKey, idFieldStatement, statementRows,showActions,searchFilters,resetFilters,
-            statementColumns, actionsStatement, loanDetails,loanProduct,loanMember, scheduleActionClick,showAddButton,searchLoanTransactions,printLoanStatement,
-            scheduleActionClick,tnt_modal_loader, dep_modal_loader, util_modal_loader, depModalVisible, displayButtons,guarantorColumns,securityColumns,
+            tabs, activeTab, mainComponentKey, scheduleColumns, paymentColumns, selectTab, loader, showLoader, hideLoader, formFields, additionalFields,showTotals,
+            tableKey,paymentTableKey, idFieldSchedule, idFieldPayment, actionsSchedule, actionsUtility, computedScheduleRows, computedPaymentRows,computedGuarantorRows,computedSecurityRows,printSchedule,
+            scheduleTableKey, idFieldSchedule, scheduleColumns, actionsSchedule, statementTableKey, idFieldStatement, statementRows,statement1Rows,showActions,searchFilters,resetFilters,dropdownOptions,
+            statementColumns,statement1Columns, actionsStatement, loanDetails,loanProduct,loanMember, scheduleActionClick,showAddButton,searchLoanTransactions,printLoanTransactions,handleDynamicOption,
+            scheduleActionClick,tnt_modal_loader, dep_modal_loader, util_modal_loader, depModalVisible, displayButtons,guarantorColumns,securityColumns, printLoanStatement,handleDynamicOption1,
             documentActionClick,documentColumns,documentTableKey,actionsDocument,computedDocumentRows,
             modal_top, modal_left, modal_width, showDepModalLoader, hideDepModalLoader, handleDepReset,
             flex_basis, flex_basis_percentage, paymentActionClick,rightsModule,isDisabled,

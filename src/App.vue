@@ -3,18 +3,20 @@
     <component 
       :is="activeComponent"
     />
+    <ContextMenu />
 </template>
 
 <script>
 import axios from 'axios';
 import Login from './views/Login.vue';
 import Main from './views/Main.vue';
-import { onBeforeMount, computed } from 'vue';
+import { onBeforeMount, onMounted, computed } from 'vue';
 import { useStore } from 'vuex';
+import ContextMenu from './components/ContextMenu.vue';
 
 export default{
   components:{
-    Login, Main
+    Login, Main, ContextMenu
   },
   setup(){
     const store = useStore();
@@ -72,6 +74,11 @@ export default{
         store.dispatch('userData/updateState',{activeComponent:"Login"})
       })
 
+    })
+    onMounted(()=>{
+      window.addEventListener('click', () => {
+        store.commit('contextMenu/HIDE_CONTEXT_MENU');
+      });
     })
     return{
       activeComponent,isIdle

@@ -172,6 +172,10 @@ export default{
             customer_ledger_totals.value = 0;
             tenant_ledger_totals.value = 0;
             vendor_ledger_totals.value = 0;
+            member_ledger_totals.value = 0;
+            loan_ledger_totals.value = 0;
+            saving_ledger_totals.value = 0;
+            share_ledger_totals.value = 0;
             trialBalanceList.value = [];
 
             let formData = {

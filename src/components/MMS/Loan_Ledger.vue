@@ -60,7 +60,7 @@
                             </div>
                         </div>
                     </div>
-                    <div v-if="activeTab == 2">
+                    <!-- <div v-if="activeTab == 2">
                         <div class="relative w-[100%] bg-white z-50 px-6">
                             <FilterBar 
                                 :showAddButton="showAddButton"
@@ -77,12 +77,12 @@
                         <div class="table w-[100%] top-[17.1rem] z-30 px-6">
                             <DynamicTable :key="statementTableKey" :rightsModule="rightsModule" :columns="statementColumns" :rows="statementRows" :idField="idFieldStatement" :showActions="showActions" :actions="actionsStatement"/>
                         </div>
-                    </div>          
+                    </div>           -->
                     <div v-if="activeTab == 1" class="text-left"> 
                         <button @click="printSchedule" class="rounded bg-green-400 cursor-pointer text-sm mr-2 mb-1.5  text-white px-2 py-1.5"><i class="fa fa-check-circle text-xs mr-1.5" aria-hidden="true"></i>Print Schedule</button>                                   
                         <DynamicTable :key="tableKey" :rightsModule="rightsModule" :columns="scheduleColumns" :rows="computedScheduleRows" :idField="idFieldSchedule" :showTotals="showTotals" :actions="actionsSchedule" @action-click="scheduleActionClick" />
                     </div>
-                    <div v-show="activeTab == 3"> 
+                    <div v-show="activeTab == 2"> 
                         <div class="relative w-[100%] bg-white z-50 px-6">
                             <FilterBar 
                                 :showAddButton="showAddButton"
@@ -100,19 +100,19 @@
                             <DynamicTable :key="statementTableKey" :rightsModule="rightsModule" :columns="statement1Columns" :rows="statement1Rows" :idField="idFieldStatement" :actions="actionsStatement" :showActions="showActions"/>
                         </div>
                     </div> 
-                    <div v-show="activeTab == 4">                  
+                    <div v-show="activeTab == 3">                  
                         <DynamicTable :key="paymentTableKey" :rightsModule="rightsModule" :columns="paymentColumns" :rows="computedPaymentRows" :idField="idFieldPayment" :actions="actionsUtility" @action-click="paymentActionClick" 
                                         :showActions="showActions" :showTotals="showTotals"/>
                     </div> 
-                    <div v-show="activeTab == 5">                  
+                    <div v-show="activeTab == 4">                  
                         <DynamicTable :key="guarantorTableKey" :rightsModule="rightsModule" :columns="guarantorColumns" :rows="computedGuarantorRows" :idField="idFieldGuarantor" :actions="actionsUtility" @action-click="guarantorActionClick" 
                                         :showActions="showActions" :showTotals="showTotals"/>
                     </div> 
-                    <div v-show="activeTab == 6">                  
+                    <div v-show="activeTab == 5">                  
                         <DynamicTable :key="securityTableKey" :rightsModule="rightsModule" :columns="securityColumns" :rows="computedSecurityRows" :idField="idFieldSecurity" :actions="actionsUtility" @action-click="securityActionClick" 
                                         :showActions="showActions" :showTotals="showTotals"/>
                     </div>  
-                    <div v-show="activeTab == 7">                  
+                    <div v-show="activeTab == 6">                  
                         <DynamicTable :key="documentTableKey" :rightsModule="rightsModule" :columns="documentColumns" :rows="computedDocumentRows" :idField="idFieldDocument" :actions="actionsDocument" @action-click="documentActionClick"/>
                     </div>  
                 </div>
@@ -162,7 +162,7 @@ export default defineComponent({
         const companyID = computed(()=> store.state.userData.company_id);
         const userID = computed(()=> store.state.userData.user_id);
         // const tabs = ref(['Loan Details','Armotization Schedule','Loan Statement','Statement','Loan Repayment','Loan Guarantors','Loan Securities','Loan Documents']);
-        const tabs = ref(['Loan Details','Armotization Schedule','','Statement','Loan Repayment','Loan Guarantors','Loan Securities','Loan Documents']);
+        const tabs = ref(['Loan Details','Armotization Schedule','Statement','Loan Repayment','Loan Guarantors','Loan Securities','Loan Documents']);
         const activeTab = ref(0);
         const mainComponentKey = ref(0);
         const tableKey = ref(0);
@@ -509,13 +509,14 @@ export default defineComponent({
                 historical_loan: null,
                 page_size: "1000"
             }
+            // if(index == 2){
+            //     activeTab.value = index;
+            //     await store.dispatch('Loan_Applications/fetchLoanTransactions',formData1)
+            //     .then(()=>{
+            //         hideLoader();
+            //     })
+            // }
             if(index == 2){
-                activeTab.value = index;
-                await store.dispatch('Loan_Applications/fetchLoanTransactions',formData1)
-                .then(()=>{
-                    hideLoader();
-                })
-            }else if(index == 3){
                 activeTab.value = index;
                 await store.dispatch('Loan_Applications/fetchLoanStatement',formData1)
                 .then(()=>{
@@ -528,21 +529,21 @@ export default defineComponent({
                     hideLoader();
                 })
             }
-            else if( index == 4){
+            else if( index == 3){
                 activeTab.value = index;
                 await store.dispatch('Loan_Applications/fetchLoanRepayments',formData)
                 .then(()=>{
                     hideLoader();
                 })
             }
-            else if( index == 5){
+            else if( index == 4){
                 activeTab.value = index;
                 await store.dispatch('Loan_Applications/fetchLoanGuarantors',formData)
                 .then(()=>{
                     hideLoader();
                 })
             }
-            else if( index == 6){
+            else if( index == 5){
                 activeTab.value = index;
                 await store.dispatch('Loan_Applications/fetchLoanSecurities',formData)
                 .then(()=>{

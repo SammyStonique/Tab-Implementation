@@ -447,6 +447,17 @@ const actions = {
     })  
   },
 
+  async moveJournalEntry({ commit,state }, formData) {
+    return axios.post(`api/v1/move-journal-entry/`,formData)
+    .then((response)=>{
+      return response;
+    })
+    .catch((error)=>{
+      console.log(error.message);
+      throw error;
+    })  
+  },
+
   deleteInvoice({ commit,state }, formData) {
     Swal.fire({
       title: "Are you sure?",

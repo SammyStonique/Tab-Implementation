@@ -17,6 +17,7 @@
         :idField="idField"
         @handleSelectionChange="handleSelectionChange"
         @handleActionClick="handleActionClick"
+        @handleRightClick="handleRightClick"
         :count="depCount"
         :currentPage="currentPage"
         :result="depArrLen"
@@ -124,6 +125,7 @@ export default{
             {label: "Phone No", key: "phone_number", type: "text", editable: false},
             {label: "Amount", key: "amount", type: "text", editable: false},
             {label: "Status", key: "security_status", type: "text", editable: false},
+            {label: "Attach.?", key: "document_file", type: "text", editable: false},
         ])
         const actions = ref([
             {name: 'edit', icon: 'fa fa-exchange', title: 'Change Status', rightName: 'Changing Security Status'},
@@ -337,8 +339,43 @@ export default{
                 then(()=>{
                     searchSecurities();
                 })
+            }else if(action == 'delete-attachment'){
+                const accountID = [row[idField]];
+                const docFile = row['document_file'];
+                if(docFile == "Yes"){
+                    let formData = {
+                        company: companyID.value,
+                        loan_security: accountID
+                    }
+                    await store.dispatch('Loan_Securities/deleteLoanSecurityAttachment',formData).
+                    then(()=>{
+                        searchSecurities();
+                    })
+                }else{
+                    toast.error("No Attachment Detected")
+                }
+                
             }
-        } 
+        };
+        watch(() => store.state.contextMenu.selectedAction, (actionPayload) => {
+            if (!actionPayload) return;
+            const { rowIndex, action, data } = actionPayload;
+            handleActionClick(rowIndex, action, data);
+            store.commit('contextMenu/CLEAR_SELECTED_ACTION');
+        });
+        const handleRightClick = (row, rowIndex, event) => {
+            store.commit('contextMenu/CLEAR_SELECTED_ACTION');
+            const menuOptions = [
+                { label: 'Delete Attachment', action: 'delete-attachment', rowIndex: rowIndex, icon: 'fa fa-trash' },
+            ];
+
+            store.commit('contextMenu/SHOW_CONTEXT_MENU', {
+                x: event.clientX,
+                y: event.clientY,
+                options: menuOptions,
+                contextData: row,
+            });
+        };
         const handleReset = () =>{
             store.dispatch("Loan_Securities/updateState",{selectedSecurity:null, selectedSecurityType:null, selectedApplication:null,isEditing:false})
             for(let i=0; i < formFields.value.length; i++){
@@ -674,7 +711,7 @@ export default{
             title, title1,title2,idField, searchSecurities, addButtonLabel, searchFilters, resetFilters, tableColumns, securitiesList,
             currentPage,depResults, depArrLen, depCount, pageCount, showNextBtn, showPreviousBtn,modal_top, modal_left, modal_width,
             loadPrev, loadNext, firstPage, lastPage, actions, formFields,formFields1,formFields2, depModalVisible, propModalVisible,docModalVisible, addNewSecurity,
-            displayButtons,flex_basis,flex_basis_percentage, handleActionClick, handleReset, handleReset1,handleReset2, createLoanSecurity, changeSecurityStatus,uploadSecurityDocument,
+            displayButtons,flex_basis,flex_basis_percentage, handleActionClick,handleRightClick, handleReset, handleReset1,handleReset2, createLoanSecurity, changeSecurityStatus,uploadSecurityDocument,
             showLoader, loader, hideLoader, modal_loader,modal_loader1,modal_loader2, showModalLoader, hideModalLoader, removeSecurity, removeSecurities, showModalLoader1, hideModalLoader1,
             addingRight,removingRight,rightsModule, closeModal,closeModal1,selectSearchQuantity,selectedValue,handleSelectionChange, showModalLoader2, hideModalLoader2,
             handleFileChange
