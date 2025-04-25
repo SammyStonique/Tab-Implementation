@@ -97,14 +97,14 @@ export default{
         const searchFilters = ref([
             {
                 type:'dropdown', placeholder:"Module", value: module_search, width:48,
-                options: [{ text: 'HMS', value: 'HMS' }, { text: 'PMS', value: 'PMS' },{ text: 'Accounts', value: 'Accounts' }, { text: 'Inventory', value: 'Inventory' },{ text: 'HR', value: 'HR' }, { text: 'Settings', value: 'Settings' },{ text: 'HHS', value: 'HHS' }, { text: 'MMS', value: 'MMS' }]
+                options: [{ text: 'HMS', value: 'HMS' }, { text: 'PMS', value: 'PMS' },{ text: 'Accounts', value: 'Accounts' }, { text: 'Inventory', value: 'Inventory' },{ text: 'HR', value: 'HR' }, { text: 'Settings', value: 'Settings' },{ text: 'HHS', value: 'HHS' }, { text: 'MMS', value: 'MMS' }, { text: 'PSS', value: 'PSS' }, { text: 'VSS', value: 'VSS' }]
             },
             {type:'text', placeholder:"Search Name...", value: name_search}
         ]);
         const formFields = ref([]);
         const updateFormFields = (right) => {
             formFields.value = [
-            { type: 'dropdown', name: 'module',label: "Module", value: right?.module || '', placeholder: "", required: true, options: [{ text: 'HMS', value: 'HMS' }, { text: 'PMS', value: 'PMS' },{ text: 'Accounts', value: 'Accounts' }, { text: 'Inventory', value: 'Inventory' },{ text: 'HR', value: 'HR' }, { text: 'Settings', value: 'Settings' },{ text: 'HHS', value: 'HHS' }, { text: 'MMS', value: 'MMS' }] },
+            { type: 'dropdown', name: 'module',label: "Module", value: right?.module || '', placeholder: "", required: true, options: [{ text: 'HMS', value: 'HMS' }, { text: 'PMS', value: 'PMS' },{ text: 'Accounts', value: 'Accounts' }, { text: 'Inventory', value: 'Inventory' },{ text: 'HR', value: 'HR' }, { text: 'Settings', value: 'Settings' },{ text: 'HHS', value: 'HHS' }, { text: 'MMS', value: 'MMS' }, { text: 'PSS', value: 'PSS' }, { text: 'VSS', value: 'VSS' }] },
                 { type: 'text', name: 'permission_name',label: "Name", value: right?.permission_name || '', required: true },
             ];
         };

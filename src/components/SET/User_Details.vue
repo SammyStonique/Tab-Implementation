@@ -119,7 +119,10 @@ export default defineComponent({
                 { type: 'dropdown', name: 'settings_module',label: "Settings", value: selectedUser.value?.settings_module || 'Disabled', placeholder: "", required: true, options: [{ text: 'Enabled', value: 'Enabled' }, { text: 'Disabled', value: 'Disabled' }] },
                 { type: 'dropdown', name: 'hhs_module',label: "Hotel Management", value: selectedUser.value?.hhs_module || 'Disabled', placeholder: "", required: true, options: [{ text: 'Enabled', value: 'Enabled' }, { text: 'Disabled', value: 'Disabled' }] },
                 { type: 'dropdown', name: 'mms_module',label: "Membership Management", value: selectedUser.value?.mms_module || 'Disabled', placeholder: "", required: true, options: [{ text: 'Enabled', value: 'Enabled' }, { text: 'Disabled', value: 'Disabled' }] },
-                {required: false}
+                { type: 'dropdown', name: 'pss_module',label: "Property Sales", value: selectedUser.value?.pss_module || 'Disabled', placeholder: "", required: true, options: [{ text: 'Enabled', value: 'Enabled' }, { text: 'Disabled', value: 'Disabled' }] }, 
+                { type: 'dropdown', name: 'vss_module',label: "Vehicle Sales", value: selectedUser.value?.vss_module || 'Disabled', placeholder: "", required: true, options: [{ text: 'Enabled', value: 'Enabled' }, { text: 'Disabled', value: 'Disabled' }] },  
+                {required: false},
+                {required: false},
             ];
         };
         watch([selectedUser, selectedDepartment], () => {
@@ -181,6 +184,8 @@ export default defineComponent({
                         settings_module: additionalFields.value[5].value,
                         hhs_module: additionalFields.value[6].value,
                         mms_module: additionalFields.value[7].value,
+                        pss_module: additionalFields.value[8].value,
+                        vss_module: additionalFields.value[9].value,
                         user_department: depValue.value,
                         password: temporary_password.value
                     }
@@ -257,6 +262,8 @@ export default defineComponent({
                     settings_module: additionalFields.value[5].value,
                     hhs_module: additionalFields.value[6].value,
                     mms_module: additionalFields.value[7].value,
+                    pss_module: additionalFields.value[8].value,
+                    vss_module: additionalFields.value[9].value,
                     user_department: depValue.value,
                 };
 

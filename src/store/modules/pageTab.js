@@ -11,6 +11,8 @@ const state = {
     epsArray: new Set(["Dashboard"]),
     setArray: new Set(["Dashboard"]),
     accArray: new Set(["Dashboard"]),
+    pssArray: new Set(["Dashboard"]),
+    vssArray: new Set(["Dashboard"]),
     hmsActiveTab: 'Dashboard',
     pmsActiveTab: 'Dashboard',
     hrActiveTab: 'Dashboard',
@@ -21,6 +23,8 @@ const state = {
     epsActiveTab: 'Dashboard',
     setActiveTab: 'Dashboard',
     accActiveTab: 'Dashboard',
+    pssActiveTab: 'Dashboard',
+    vssActiveTab: 'Dashboard',
   };
   
   const mutations = {
@@ -56,6 +60,12 @@ const state = {
         }else if(key == 'ACC'){
           state.accArray.add(value);
           state.accActiveTab = value;
+        }else if(key == 'PSS'){
+          state.pssArray.add(value);
+          state.pssActiveTab = value;
+        }else if(key == 'VSS'){
+          state.vssArray.add(value);
+          state.vssActiveTab = value;
         }
       } 
     },
@@ -113,8 +123,16 @@ const state = {
         }
         else if(key == 'ACC'){
           state.accArray.delete(value);
-          let myArray = Array.from(state.setArray);
+          let myArray = Array.from(state.accArray);
           state.accActiveTab = myArray[myArray.length - 1];
+        }else if(key == 'PSS'){
+          state.pssArray.delete(value);
+          let myArray = Array.from(state.pssArray);
+          state.pssActiveTab = myArray[myArray.length - 1];
+        }else if(key == 'VSS'){
+          state.pssArray.delete(value);
+          let myArray = Array.from(state.pssArray);
+          state.pssActiveTab = myArray[myArray.length - 1];
         }
       } 
     },
@@ -149,6 +167,12 @@ const state = {
       }else if(module == 'My Account'){
         state.accArray = new Set(["Dashboard"]);
         state.accActiveTab = "Dashboard"; 
+      }else if(module == 'Property Sales'){
+        state.pssArray = new Set(["Dashboard"]);
+        state.pssActiveTab = "Dashboard"; 
+      }else if(module == 'Vehicle Sales'){
+        state.vssArray = new Set(["Dashboard"]);
+        state.vssActiveTab = "Dashboard"; 
       }
     }
 

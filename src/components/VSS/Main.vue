@@ -34,12 +34,6 @@
     <div v-show="hmsOpen && selectedModule === 'My Account'">
         <ACC />
     </div>
-    <div v-show="hmsOpen && selectedModule === 'Property Sales'">
-        <PSS />
-    </div>
-    <div v-show="hmsOpen && selectedModule === 'Vehicle Sales'">
-        <VSS />
-    </div>
 
     <div v-if="mainOpen" class="text-black h-screen bg-[url('@/assets/image2.jpg')] bg-cover bg-center px-4 sm:px-12 w-full">
         <div class="border-b border-gray-300 py-2 w-full flex pl-6 sm:pl-8">
@@ -100,13 +94,11 @@ import ACC from '@/components/ACC/Main.vue';
 import HHS from '@/components/HHS/Main.vue';
 import MMS from '@/components/MMS/Main.vue';
 import EPS from '@/components/EPS/Main.vue';
-import PSS from '@/components/PSS/Main.vue';
-import VSS from '@/components/VSS/Main.vue';
 import Loader from '@/components/Loader.vue';
 
 export default {
     components: {
-        ModulesTab, Loader, HMS, FA, INV, PMS, HR, HHS, MMS, SET, EPS, ACC,PSS,VSS,
+        ModulesTab, Loader, HMS, FA, INV, PMS, HR, HHS, MMS, SET, EPS, ACC
     },
     setup() {
         const store = useStore();

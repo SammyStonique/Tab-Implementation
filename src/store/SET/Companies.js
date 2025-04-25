@@ -117,6 +117,8 @@ const actions = {
             "Settings": response.data.settings_module,
             "HHS": response.data.hhs_module,
             "MMS": response.data.mms_module,
+            "PSS": response.data.pss_module,
+            "VSS": response.data.vss_module,
           }
           state.companyModulesArray = obj;
       })

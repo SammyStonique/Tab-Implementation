@@ -88,7 +88,10 @@ export default defineComponent({
                 { type: 'dropdown', name: 'settings_module',label: "Settings", value: selectedCompany.value?.settings_module || '', placeholder: "", required: true, options: [{ text: 'Enabled', value: 'Enabled' }, { text: 'Disabled', value: 'Disabled' }] },
                 { type: 'dropdown', name: 'hhs_module',label: "Hotel Management", value: selectedCompany.value?.hhs_module || 'Disabled', placeholder: "", required: true, options: [{ text: 'Enabled', value: 'Enabled' }, { text: 'Disabled', value: 'Disabled' }] },
                 { type: 'dropdown', name: 'mms_module',label: "Membership Management", value: selectedCompany.value?.mms_module || 'Disabled', placeholder: "", required: true, options: [{ text: 'Enabled', value: 'Enabled' }, { text: 'Disabled', value: 'Disabled' }] },
-                {required: false}
+                { type: 'dropdown', name: 'pss_module',label: "Property Sales", value: selectedCompany.value?.pss_module || 'Disabled', placeholder: "", required: true, options: [{ text: 'Enabled', value: 'Enabled' }, { text: 'Disabled', value: 'Disabled' }] }, 
+                { type: 'dropdown', name: 'vss_module',label: "Vehicle Sales", value: selectedCompany.value?.vss_module || 'Disabled', placeholder: "", required: true, options: [{ text: 'Enabled', value: 'Enabled' }, { text: 'Disabled', value: 'Disabled' }] },
+                {required: false},
+                {required: false},
             ];
         };
         watch([selectedCompany], () => {
@@ -142,6 +145,8 @@ export default defineComponent({
                     settings_module: additionalFields.value[5].value,
                     hhs_module: additionalFields.value[6].value,
                     mms_module: additionalFields.value[7].value,
+                    pss_module: additionalFields.value[8].value,
+                    vss_module: additionalFields.value[9].value,
                 };
 
                 try {

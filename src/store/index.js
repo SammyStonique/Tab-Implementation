@@ -129,6 +129,10 @@ import Risk_Classifications from './MMS/Risk_Classifications';
 import Loan_Classifications from './MMS/Loan_Classifications';
 
 
+import Asset_Makes from './PSS/Asset_Makes';
+import Asset_Models from './PSS/Asset_Models';
+
+
 import Default_Settings from './SET/Default_Settings';
 import Companies from './SET/Companies';
 import Branches from './SET/Branches';
@@ -167,6 +171,8 @@ export default createStore({
     Loan_Products,Loan_Fees,Loan_Applications,Loan_Guarantors,Loan_Disbursements,Security_Types,Loan_Securities,Application_Fees,Loan_Schedules,Loan_Penalties,
     Penalty_Batches,Loan_Documents,Historical_Loans,Loan_Arrears,Saving_Transfers,Share_Transfers,Loan_Prepayments,Loan_Prepayment_Alloc,Interest_Rates,Interest_Processing,
     Dividend_Rates,Dividend_Processing,Member_Templates,Risk_Classifications,Loan_Classifications,
+
+    Asset_Makes,Asset_Models,
 
     Default_Settings,Companies,Branches,User_Rights,SMS_Integrations,Email_Integrations,Mpesa_Integrations,Mpesa_Transactions,Banks,SMS_Templates,Email_Templates
   },

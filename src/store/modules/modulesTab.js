@@ -117,6 +117,26 @@ const state = {
             state.modulePage = false;
             state.selectedModule = '';
           }
+        }else if(key == 'PSS'){
+          state.tabArray.delete(value);
+          let myArray = Array.from(state.tabArray);
+          if(myArray.length >= 1){
+            state.selectedModule = myArray[myArray.length - 1];
+          }else if(myArray.length < 1){
+            state.homePage = true;
+            state.modulePage = false;
+            state.selectedModule = '';
+          }
+        }else if(key == 'VSS'){
+          state.tabArray.delete(value);
+          let myArray = Array.from(state.tabArray);
+          if(myArray.length >= 1){
+            state.selectedModule = myArray[myArray.length - 1];
+          }else if(myArray.length < 1){
+            state.homePage = true;
+            state.modulePage = false;
+            state.selectedModule = '';
+          }
         }
         
       }
