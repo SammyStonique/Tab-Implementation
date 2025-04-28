@@ -454,7 +454,7 @@ export default{
         }
         const addNewMember = async() =>{
             store.commit('Members/initializeStore');
-            await store.dispatch('Members/updateState', {selectedEmployee: null,selectedCategory: null,selectedSponsor: null,selectedCurrency: null,isEditing: false});
+            await store.dispatch('Members/updateState', {selectedMember: null,selectedCategory: null,selectedSponsor: null,selectedCurrency: null,isEditing: false});
             await store.dispatch('Membership_Fees/updateState', {feeArray: []})
             store.commit('pageTab/ADD_PAGE', {'MMS':'Member_Details'});
             store.state.pageTab.mmsActiveTab = 'Member_Details';          

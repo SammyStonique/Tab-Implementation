@@ -30,6 +30,12 @@ const state = {
   const mutations = {
     ADD_PAGE(state, page) {
       for(const [key, value] of Object.entries(page)){
+        const pageObject = {
+          moduleName: key,     
+          pageName: value.name,  
+          pageComponent: value.component,
+        };
+        console.log("THE COMPONENT IS ",value.component)
         if(key == 'HMS'){
           state.hmsArray.add(value);
           state.hmsActiveTab = value;

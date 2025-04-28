@@ -3,20 +3,18 @@
         <PageComponent 
             :loader="loader" @showLoader="showLoader" @hideLoader="hideLoader"
             :addButtonLabel="addButtonLabel"
-            @handleAddNew="addNewModel"
+            @handleAddNew="addNewFee"
             :searchFilters="searchFilters"
-            @searchPage="searchAssetModels"
+            @searchPage="searchFees"
             @resetFilters="resetFilters"
-            @removeItem="removeAssetModel"
-            @removeSelectedItems="removeAssetModels"
-            @printList="printmodelsList"
-            @printExcel="downloadGroupsExcel"
-            @printCSV="downloadGroupsCSV"
+            @removeItem="removeFee"
+            @removeSelectedItems="removeFees"
+            @printList="printList"
             :addingRight="addingRight"
             :removingRight="removingRight"
             :rightsModule="rightsModule"
             :columns="tableColumns"
-            :rows="modelsList"
+            :rows="feesList"
             :actions="actions"
             :idField="idField"
             @handleSelectionChange="handleSelectionChange"
@@ -37,7 +35,7 @@
             :loader="modal_loader" @showLoader="showModalLoader" @hideLoader="hideModalLoader" @closeModal="closeModal">
             <DynamicForm 
                 :fields="formFields" :flex_basis="flex_basis" :flex_basis_percentage="flex_basis_percentage" 
-                :displayButtons="displayButtons" @handleSubmit="saveAssetModel" @handleReset="handleReset"
+                :displayButtons="displayButtons" @handleSubmit="saveFee" @handleReset="handleReset"
             />
         </MovableModal>
     </div>
@@ -51,10 +49,9 @@ import MovableModal from '@/components/MovableModal.vue'
 import DynamicForm from '../NewDynamicForm.vue';
 import { useStore } from "vuex";
 import { useToast } from "vue-toastification";
-import PrintJS from 'print-js';
 
 export default{
-    name: 'Asset_Models',
+    name: 'Asset_Fees',
     components:{
         PageComponent, MovableModal,DynamicForm
     },
@@ -63,16 +60,16 @@ export default{
         const toast = useToast();
         const loader = ref('none');
         const modal_loader = ref('none');
-        const propComponentKey = ref(0);
-        const idField = 'asset_model_id';
-        const addButtonLabel = ref('New Asset Model');
-        const addingRight = ref('Adding Asset Models');
-        const removingRight = ref('Deleting Asset Models');
+        const idField = 'asset_fee_id';
+        const addButtonLabel = ref('New Asset Fee');
+        const addingRight = ref('Adding Asset Fees');
+        const removingRight = ref('Deleting Asset Fees');
         const rightsModule = ref('PSS');
-        const title = ref('Asset Model Details');
+        const title = ref('Asset Fee Details');
         const submitButtonLabel = ref('Add');
+        const ledComponentKey = ref(0);
         const selectedIds = ref([]);
-        const modelsList = ref([]);
+        const feesList = ref([]);
         const propResults = ref([]);
         const propArrLen = ref(0);
         const propCount = ref(0);
@@ -86,74 +83,81 @@ export default{
         const flex_basis_percentage = ref('');
         const displayButtons = ref(true);
         const errors = ref([]);
-        const modal_top = ref('300px');
-        const modal_left = ref('500px');
+        const modal_top = ref('200px');
+        const modal_left = ref('400px');
         const modal_width = ref('30vw');
-        const makeID = ref('');
-        const isEditing = computed(()=> store.state.Asset_Models.isEditing);
-        const selectedModel = computed(()=> store.state.Asset_Models.selectedModel);
-        const selectedMake = computed(()=> store.state.Asset_Models.selectedMake);
-        const makesArray = computed(() => store.state.Asset_Makes.makeArr);
+        const ledgerID = ref('');
+        const isEditing = computed(()=> store.state.Asset_Fees.isEditing);
+        const selectedFee = computed(()=> store.state.Asset_Fees.selectedFee);
+        const selectedLedger = computed(()=> store.state.Asset_Fees.selectedLedger);
+        const ledgerArray = computed(() => store.state.Ledgers.ledgerArr);
         const showModal = ref(false);
         const tableColumns = ref([
             {type: "checkbox"},
-            {label: "Model Name", key:"name"},
-            {label: "Asset Make", key: "asset_make"},
+            {label: "Name", key:"fee_name"},
+            {label: "Charge Time", key:"charge_time"},
+            {label: "Charge Mode", key:"charge_mode"},
+            {label: "Charge Type", key:"charge_type"},
+            {label: "Default Amount", key: "default_amount"},
+            {label: "Posting Account", key:"posting_account"},
         ])
         const actions = ref([
-            {name: 'edit', icon: 'fa fa-edit', title: 'Edit Group', rightName: 'Editing Asset Models'},
-            {name: 'delete', icon: 'fa fa-trash', title: 'Delete Group', rightName: 'Deleting Asset Models'},
+            {name: 'edit', icon: 'fa fa-edit', title: 'Edit Fee', rightName: 'Editing Asset Fees'},
+            {name: 'delete', icon: 'fa fa-trash', title: 'Delete Fee', rightName: 'Deleting Asset Fees'},
         ])
         const companyID = computed(()=> store.state.userData.company_id);
         const name_search = ref('');
         const searchFilters = ref([
-            {type:'text', placeholder:"Model Name...", value: name_search, width:56,},
-  
+            {type:'text', placeholder:"Name...", value: name_search, width:60,},
         ]);
         const handleSelectionChange = (ids) => {
             selectedIds.value = ids;
         };
-        const handleSelectedMake = async(option) =>{
-            await store.dispatch('Asset_Makes/handleSelectedMake', option)
-            makeID.value = store.state.Asset_Makes.makeID;
-        };
-        const clearSelectedMake = async() =>{
-            await store.dispatch('Asset_Makes/updateState', {makeID: ''});
-            makeID.value = store.state.Asset_Makes.makeID;
-        };
+        const handleSelectedLedger = async(option) =>{
+            await store.dispatch('Ledgers/handleSelectedLedger', option);
+            ledgerID.value = store.state.Ledgers.ledgerID;
+            if(selectedFee.value){
+                selectedFee.value.posting_account.ledger_id = ledgerID.value;
+                ledgerValue.value = ledgerID.value
+            }
+        }
         const formFields = ref([]);
-        const makeValue = computed(() => {
-           return (selectedModel.value && selectedModel.value.asset_make && !makeID.value) ? selectedModel.value.asset_make.asset_make_id : makeID.value;
+        const ledgerValue = computed(() => {
+           return (selectedFee.value && selectedFee.value.posting_account && !ledgerID.value) ? selectedFee.value.posting_account.ledger_id : ledgerID.value;
 
         });
         const updateFormFields = () => {
             formFields.value = [
+                { type: 'text', name: 'name',label: "Name", value: selectedFee.value?.fee_name || '', required: true },
+                { type: 'dropdown', name: 'charge_time',label: "Charge Time", value: selectedFee.value?.charge_time || '', placeholder: "", required: true, options: [{ text: 'Purchase', value: 'Purchase' }, { text: 'Sale', value: 'Sale' }, { text: 'Purchase & Sale', value: 'Purchase & Sale' }] },
+                { type: 'dropdown', name: 'charge_mode',label: "Charge Mode", value: selectedFee.value?.charge_mode || 'Flat Amount', placeholder: "", required: false, options: [{ text: 'Flat Amount', value: 'Flat Amount' }, { text: '% of Purchase/Sale', value: 'Purchase/Sale' }, { text: '% of Deposit Amount', value: 'Deposit Amount' },{ text: '% of Installment', value: 'Installment' }] },
+                { type: 'dropdown', name: 'charge_type',label: "Charge Type", value: selectedFee.value?.charge_type || '', placeholder: "", required: true, options: [{ text: 'Add To Amount', value: 'Add To Amount' }, { text: 'Deduct From Amount', value: 'Deduct From Amount' }, { text: 'Pay/Receive Cash', value: 'Pay/Receive Cash' }] },
+                { type: 'text', name: 'default_amount',label: "Default Amount", value: selectedFee.value?.default_amount || '0', required: false },
                 {  
-                    type:'search-dropdown', label:"Asset Make", value: makeValue.value, componentKey: propComponentKey,
-                    selectOptions: makesArray, optionSelected: handleSelectedMake, required: true,
-                    searchPlaceholder: 'Select Asset Make...', dropdownWidth: '400px', updateValue: selectedMake.value,
-                    fetchData: store.dispatch('Asset_Makes/fetchAssetMakes', {company:companyID.value}),
-                    clearSearch: clearSelectedMake
+                    type:'search-dropdown', label:"Posting Account", value: ledgerValue.value, componentKey: ledComponentKey,
+                    selectOptions: ledgerArray, optionSelected: handleSelectedLedger, required: true,
+                    searchPlaceholder: 'Select Posting Account...', dropdownWidth: '500px', updateValue: selectedLedger.value,
+                    fetchData: store.dispatch('Ledgers/fetchLedgers', {company:companyID.value})
                 },
-                { type: 'text', name: 'name',label: "Model Name", value: selectedModel.value?.name || '', required: true },
             ];
         };
         const handleReset = () =>{
             for(let i=0; i < formFields.value.length; i++){
                 formFields.value[i].value = '';
             }
-            propComponentKey.value += 1;
-            makeID.value = '';
+            ledgerID.value = '';
+            formFields.value[2].value = '0';
         }
 
-        watch([selectedModel, selectedMake], () => {
-            if (selectedModel.value && selectedMake.value) {
-                propComponentKey.value += 1;
+        watch([selectedFee, selectedLedger], () => {
+            if (selectedFee.value && selectedLedger.value) {
+                ledComponentKey.value += 1;
+                updateFormFields();
+            }else{
                 updateFormFields();
             }
             
         }, { immediate: true });
-        
         
         const showModalLoader = () =>{
             modal_loader.value = "block";
@@ -161,65 +165,72 @@ export default{
         const hideModalLoader = () =>{
             modal_loader.value = "none";
         }
-        const createAssetModel = async() =>{
+        const createFee = async() =>{
             showModalLoader();
             let formData = {
-                name: formFields.value[1].value,
-                asset_make: makeID.value,
-                asset_make_id: makeID.value,
+                fee_name: formFields.value[0].value,
+                charge_mode: formFields.value[2].value,
+                charge_time: formFields.value[1].value,
+                charge_type: formFields.value[3].value,
+                default_amount: formFields.value[4].value || 0,
+                posting_account: ledgerID.value,
+                posting_account_id: ledgerID.value,
                 company: companyID.value
             }
-  
+
             errors.value = [];
-            for(let i=1; i < formFields.value.length; i++){
-                if(formFields.value[i].value =='' && formFields.value[i].type != 'search-dropdown' && formFields.value[i].required == true){
+            for(let i=0; i < (formFields.value.length - 1); i++){
+                if(formFields.value[i].value =='' && formFields.value[i].required == true){
                     errors.value.push(formFields.value[i].label);
                 }
             }
-            if(makeValue.value == ''){
+            if(ledgerValue.value == ''){
                 errors.value.push('error')
             }
-
             if(errors.value.length){
                 toast.error('Fill In Required Fields');
                 hideModalLoader();
             }else{
                 try {
-                    const response = await store.dispatch('Asset_Models/createAssetModel', formData);
+                    const response = await store.dispatch('Asset_Fees/createAssetFee', formData);
                     if (response && response.status === 201) {
                         hideModalLoader();
-                        toast.success('Success!');
+                        toast.success('Fee created successfully!');
                         handleReset();
-                        propComponentKey.value += 1;
+                        ledComponentKey.value += 1;
                     } else {
-                        toast.error('An error occurred while creating the Model.');
+                        toast.error('An error occurred while creating the Fee.');
                     }
                 } catch (error) {
                     console.error(error.message);
-                    toast.error('Failed to create Model: ' + error.message);
+                    toast.error('Failed to create Fee: ' + error.message);
                 } finally {
                     hideModalLoader();
-                    searchAssetModels();
+                    searchFees();
                 }
             }
         }
-        const updateAssetModel = async() =>{
+        const updateFee = async() =>{
             showModalLoader();
             errors.value = [];
             let formData = {
-                asset_model: selectedModel.value.asset_model_id,
-                name: formFields.value[1].value,
-                asset_make: makeValue.value,
-                asset_make_id: makeValue.value,
+                asset_fee: selectedFee.value.asset_fee_id,
+                fee_name: formFields.value[0].value,
+                charge_mode: formFields.value[2].value,
+                charge_time: formFields.value[1].value,
+                charge_type: formFields.value[3].value,
+                default_amount: formFields.value[4].value || 0,
+                posting_account: ledgerValue.value,
+                posting_account_id: ledgerValue.value,
                 company: companyID.value
             }
 
             for(let i=0; i < formFields.value.length; i++){
-                if(formFields.value[i].value =='' && formFields.value[i].type != 'search-dropdown'  && formFields.value[i].required == true){
+                if(formFields.value[i].value ==''){
                     errors.value.push('Error');
                 }
             }
-            if(makeValue.value == ''){
+            if(ledgerValue.value == ''){
                 errors.value.push('error')
             }
             if(errors.value.length){
@@ -227,82 +238,81 @@ export default{
                 hideModalLoader();
             }else{
                 try {
-                    const response = await store.dispatch('Asset_Models/updateAssetModel', formData);
+                    const response = await store.dispatch('Asset_Fees/updateAssetFee', formData);
                     if (response && response.status === 200) {
                         hideModalLoader();
                         handleReset();
-                        propComponentKey.value += 1;
-                        toast.success("Model updated successfully!");              
+                        ledComponentKey.value += 1;
+                        toast.success("Fee updated successfully!");              
                     } else {
-                        toast.error('An error occurred while updating the Model.');
+                        toast.error('An error occurred while updating the Fee.');
                     }
                 } catch (error) {
                     console.error(error.message);
-                    toast.error('Failed to update Model: ' + error.message);
+                    toast.error('Failed to update Fee: ' + error.message);
                 } finally {
                     hideModalLoader();
                     propModalVisible.value = false;
-                    store.dispatch("Asset_Models/updateState",{selectedModel:null})
-                    searchAssetModels();
+                    store.dispatch("Asset_Fees/updateState",{selectedFee:null})
+                    searchFees();
                 }             
             }
         }
-        const saveAssetModel = () =>{
+        const saveFee = () =>{
             if(isEditing.value == true){
-                updateAssetModel();
+                updateFee();
             }else{
-                createAssetModel();
+                createFee();
             }
         }
-        const removeAssetModel = async() =>{
+        const removeFee = async() =>{
             if(selectedIds.value.length == 1){
                 let formData = {
                     company: companyID.value,
-                    asset_model: selectedIds.value
+                    asset_fee: selectedIds.value
                 }
                 try{
-                    const response = await store.dispatch('Asset_Models/deleteAssetModel',formData)
+                    const response = await store.dispatch('Asset_Fees/deleteAssetFee',formData)
                     if(response && response.status == 200){
-                        toast.success("Model Removed Succesfully");
-                        searchAssetModels();
+                        toast.success("Fee Removed Succesfully");
+                        searchFees();
                     }
                 }
                 catch(error){
                     console.error(error.message);
-                    toast.error('Failed to remove Model: ' + error.message);
+                    toast.error('Failed to remove Fee: ' + error.message);
                 }
                 finally{
                     selectedIds.value = [];
                 }
             }else if(selectedIds.value.length > 1){
-                toast.error("You have selected more than 1 Model") 
+                toast.error("You have selected more than 1 Fee") 
             }else{
-                toast.error("Please Select A Model To Remove")
+                toast.error("Please Select A Fee To Remove")
             }
         }
-        const removeAssetModels = async() =>{
+        const removeFees = async() =>{
             if(selectedIds.value.length){
                 let formData = {
                     company: companyID.value,
-                    asset_model: selectedIds.value
+                    asset_fee: selectedIds.value
                 }
                 try{
-                    const response = await store.dispatch('Asset_Models/deleteAssetModel',formData)
+                    const response = await store.dispatch('Asset_Fees/deleteAssetFee',formData)
                     if(response && response.status == 200){
-                        toast.success("Model(s) Removed Succesfully");
-                        searchAssetModels();
+                        toast.success("Fee(s) Removed Succesfully");
+                        searchFees();
                     }
                 }
                 catch(error){
                     console.error(error.message);
-                    toast.error('Failed to remove Model: ' + error.message);
+                    toast.error('Failed to remove Fees: ' + error.message);
                 }
                 finally{
                     selectedIds.value = [];
-
                 }
             }else{
-                toast.error("Please Select A Model To Remove")
+                toast.error("Please Select A Fee To Remove")
             }
         }
         const showLoader = () =>{
@@ -311,23 +321,22 @@ export default{
         const hideLoader = () =>{
             loader.value = "none";
         }
-        const searchAssetModels = () =>{
+        const searchFees = () =>{
             showLoader();
             showNextBtn.value = false;
-            selectedIds.value = [];
             showPreviousBtn.value = false;
             let formData = {
-                name: name_search.value,
+                fee_name: name_search.value,
                 company_id: companyID.value,
                 page_size: selectedValue.value
             } 
             axios
-            .post(`api/v1/asset-models-search/?page=${currentPage.value}`,formData)
+            .post(`api/v1/asset-fees-search/?page=${currentPage.value}`,formData)
             .then((response)=>{
-                modelsList.value = response.data.results;
-                store.commit('Asset_Models/LIST_ASSET_MODELS', modelsList.value)
+                feesList.value = response.data.results;
+                store.commit('Asset_Fees/LIST_FEES', feesList.value)
                 propResults.value = response.data;
-                propArrLen.value = modelsList.value.length;
+                propArrLen.value = feesList.value.length;
                 propCount.value = propResults.value.count;
                 pageCount.value = Math.ceil(propCount.value / selectedValue.value);
                 if(response.data.next){
@@ -346,13 +355,12 @@ export default{
         };
         const selectSearchQuantity = (newValue) =>{
             selectedValue.value = newValue;
-            searchAssetModels(selectedValue.value);
+            searchFees(selectedValue.value);
         };
         const resetFilters = () =>{
-            currentPage.value = 1;
             selectedValue.value = 50;
             name_search.value = "";
-            searchAssetModels();
+            searchFees();
         }
         const loadPrev = () =>{
             if (currentPage.value <= 1){
@@ -361,7 +369,7 @@ export default{
                 currentPage.value -= 1;
             }
             
-            searchAssetModels();
+            searchFees();
             // scrollToTop();
         }
         const loadNext = () =>{
@@ -371,50 +379,48 @@ export default{
                 currentPage.value += 1;
             }
             
-            searchAssetModels();
+            searchFees();
             // scrollToTop(); 
         }
         const firstPage = ()=>{
             currentPage.value = 1;
-            searchAssetModels();
+            searchFees();
             // scrollToTop();
         }
         const lastPage = () =>{
             currentPage.value = pageCount.value;
-            searchAssetModels();
+            searchFees();
             // scrollToTop();
         }
-        const addNewModel = () =>{
-            store.dispatch("Asset_Models/updateState",{selectedMake:null, selectedModel:null});
-            propComponentKey.value += 1;
-            handleReset();
-            updateFormFields();
+        const addNewFee = () =>{
+            store.dispatch("Asset_Fees/updateState",{selectedFee:null, selectedLedger:null, isEditing:false})
+            ledgerID.value = "";
+            ledComponentKey.value += 1;
             propModalVisible.value = true;
-            store.dispatch("Asset_Models/updateState",{isEditing:false})
-            flex_basis.value = '1/3';
-            flex_basis_percentage.value = '33.333';
+            flex_basis.value = '1/2';
+            flex_basis_percentage.value = '50';
         }
         const handleActionClick = async(rowIndex, action, row) =>{
             if( action == 'edit'){
-                const modelID = row['asset_model_id'];
+                const feeID = row[idField];
                 let formData = {
                     company: companyID.value,
-                    asset_model: modelID
+                    asset_fee: feeID
                 }
-                await store.dispatch('Asset_Models/fetchAssetModel',formData)
+                await store.dispatch('Asset_Fees/fetchAssetFee',formData)
                 propModalVisible.value = true;
-                flex_basis.value = '1/3';
-                flex_basis_percentage.value = '33.333';
+                flex_basis.value = '1/2';
+                flex_basis_percentage.value = '50';
 
             }else if(action == 'delete'){
-                const modelID = [row[idField]];
+                const feeID = [row[idField]];
                 let formData = {
                     company: companyID.value,
-                    asset_model: modelID
+                    asset_fee: feeID
                 }
-                await store.dispatch('Asset_Models/deleteAssetModel',formData).
+                await store.dispatch('Asset_Fees/deleteAssetFee',formData).
                 then(()=>{
-                    searchAssetModels();
+                    searchFees();
                 })
             }else if(action == 'view'){
                 console.log("VIEWING TAKING PLACE");
@@ -422,28 +428,19 @@ export default{
         }
         const closeModal = () =>{
             propModalVisible.value = false;
-        };
-        const printmodelsList = () =>{
-
-        };
-        const downloadGroupsExcel = () =>{
-
-        };
-        const downloadGroupsCSV = () =>{
-
-        };
+            handleReset();
+        }
         onBeforeMount(()=>{
-            searchAssetModels();
+            searchFees();
             
         })
         return{
-            title, searchAssetModels,resetFilters, addButtonLabel, searchFilters, tableColumns, modelsList,
-            currentPage,propResults, propArrLen, propCount, pageCount, showNextBtn, showPreviousBtn,
+            title, searchFees,resetFilters, addButtonLabel, searchFilters, tableColumns, feesList,
+            propResults, propArrLen, propCount, pageCount, showNextBtn, showPreviousBtn,selectSearchQuantity,selectedValue,
             loadPrev, loadNext, firstPage, lastPage, idField, actions, handleActionClick, propModalVisible, closeModal,
-            submitButtonLabel, showModal, addNewModel, showLoader, loader, hideLoader, modal_loader, modal_top, modal_left, modal_width,displayButtons,
-            showModalLoader, hideModalLoader, saveAssetModel, formFields, handleSelectionChange, flex_basis,flex_basis_percentage,
-            removeAssetModel, removeAssetModels,addingRight,removingRight,rightsModule,printmodelsList,selectSearchQuantity,selectedValue,
-            downloadGroupsCSV,downloadGroupsExcel
+            submitButtonLabel, showModal, addNewFee, showLoader, loader, hideLoader, modal_loader, modal_top, modal_left, modal_width,displayButtons,
+            showModalLoader, hideModalLoader, saveFee, formFields, handleSelectionChange, flex_basis,flex_basis_percentage,
+            removeFee, removeFees,addingRight,removingRight,rightsModule,
         }
     }
 };

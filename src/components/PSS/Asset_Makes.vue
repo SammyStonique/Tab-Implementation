@@ -75,7 +75,7 @@ export default{
         const errors = ref([]);
         const modal_top = ref('200px');
         const modal_left = ref('400px');
-        const modal_width = ref('30vw');
+        const modal_width = ref('35vw');
         const isEditing = computed(()=> store.state.Asset_Makes.isEditing)
         const selectedMake = computed(()=> store.state.Asset_Makes.selectedMake);
         const tableColumns = ref([

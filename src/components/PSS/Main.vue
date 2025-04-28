@@ -29,13 +29,15 @@ import NavBar from '@/components/NavBar.vue';
 import NavBarPSS from '@/components/PSS/NavBarPSS.vue';
 import PagesTab from '@/components/PSS/PagesTab.vue';
 import Dashboard from '@/components/PSS/Dashboard.vue';
-import Member_Categories from '@/components/MMS/Member_Categories.vue';
-import Member_Sponsors from '@/components/MMS/Member_Sponsors.vue';
-import Members from '@/components/MMS/Members.vue';
-import Import_Members from '@/components/MMS/Import_Members.vue';
-import Member_Details from '@/components/MMS/Member_Details.vue';
 import Asset_Makes from '@/components/PSS/Asset_Makes.vue';
 import Asset_Models from '@/components/PSS/Asset_Models.vue';
+import Payment_Plans from '@/components/PSS/Payment_Plans.vue';
+import Asset_Fees from '@/components/PSS/Asset_Fees.vue';
+import Sale_Assets from '@/components/PSS/Sale_Assets.vue';
+
+import Import_Members from '@/components/MMS/Import_Members.vue';
+import Member_Details from '@/components/MMS/Member_Details.vue';
+
 import Member_Invoices from '@/components/MMS/Member_Invoices.vue';
 import Member_Receipts from '@/components/MMS/Member_Receipts.vue';
 import Savings_Products from '@/components/MMS/Savings_Products.vue';
@@ -70,7 +72,7 @@ import Loan_Ledger from '@/components/MMS/Loan_Ledger.vue';
 import Historical_Loan_Ledger from '@/components/MMS/Historical_Loan_Ledger.vue';
 import Receipt_Details from '@/components/MMS/Receipt_Details.vue';
 import Loan_Disbursements from '@/components/MMS/Loan_Disbursements.vue';
-import Security_Types from '@/components/MMS/Security_Types.vue';
+
 import Loan_Securities from '@/components/MMS/Loan_Securities.vue';
 import Loan_Schedules from '@/components/MMS/Loan_Schedules.vue';
 import Penalty_Batches from '@/components/MMS/Penalty_Batches.vue';
@@ -83,7 +85,7 @@ import Prepayment_Allocations from '@/components/MMS/Prepayment_Allocations.vue'
 import Templates from '@/components/MMS/Templates.vue';
 import Design_Template from '@/components/MMS/Design_Template.vue';
 import Risk_Classifications from '@/components/MMS/Risk_Classifications.vue';
-import Loan_Classifications from '@/components/MMS/Loan_Classifications.vue';
+
 
 import Default_Settings from '@/components/SET/Default_Settings.vue';
 
@@ -93,13 +95,13 @@ export default{
         NavBarPSS,
         PagesTab,
         Dashboard,
-        Member_Categories,Member_Sponsors,Members,Import_Members,Member_Details,Asset_Makes,Receipt_Details,Asset_Models,
+        Sale_Assets,Import_Members,Member_Details,Asset_Makes,Receipt_Details,Asset_Models,
         Member_Invoices,Member_Receipts,Savings_Products,Saving_Product_Details,Shares_Products,Share_Product_Details,Saving_Accounts,Share_Accounts,
         Saving_Deposits,Share_Deposits,Loan_Products,Loan_Product_Details,Loan_Applications,Loan_Application_Details,Loan_Guarantors,Loan_Ledger,
-        Loan_Disbursements,Import_Saving_Accounts,Import_Share_Accounts,Import_Saving_Deposits,Import_Share_Deposits,Security_Types,Loan_Securities,
+        Loan_Disbursements,Import_Saving_Accounts,Import_Share_Accounts,Import_Saving_Deposits,Import_Share_Deposits,Payment_Plans,Loan_Securities,
         Loan_Schedules,Loan_Penalties,Penalty_Batches,Loan_Documents,Application_Fees,Historical_Loans,Import_Historical_Loans,Historical_Loan_Ledger,
         Loan_Arrears,Saving_Transfers,Share_Transfers,Loan_Prepayments,Prepayment_Allocations,Interest_Rates,Dividend_Rates,Interest_Processing,Dividend_Processing,
-        Templates,Design_Template,Share_Account_Details,Saving_Account_Details,Risk_Classifications,Loan_Classifications,
+        Templates,Design_Template,Share_Account_Details,Saving_Account_Details,Risk_Classifications,Asset_Fees,
 
         Default_Settings
     },
@@ -113,9 +115,7 @@ export default{
         const store = useStore();
         const title = ref('Property Sales');
         const cachedComponents = computed(() =>  Array.from(store.state.pageTab.pssArray));
-        const tabs = computed({
-            get: ()=> store.state.pageTab.pssArray,
-        });
+        const tabs = computed(()=> store.state.pageTab.pssArray);
 
         const activeTab = computed(() => store.state.pageTab.pssActiveTab);
     
