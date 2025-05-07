@@ -2,11 +2,11 @@
     <PageStyleComponent :key="mainComponentKey" :loader="loader" @showLoader="showLoader" @hideLoader="hideLoader">
         <template v-slot:body>
             <div class="mt-6">
-                <h2><strong>Member Details</strong></h2>
+                <h2><strong>Asset Details</strong></h2>
                 <DynamicForm  :fields="formFields" :flex_basis="flex_basis" :flex_basis_percentage="flex_basis_percentage" :displayButtons="displayButtons" @handleSubmit="saveMember" @handleReset="handleReset"> 
                     <template v-slot:additional-content>
                         <div class="border border-slate-200 rounded relative py-1.5 mt-3 px-2 min-h-[180px]">
-                            <h1 class="font-bold absolute top-[-13px] left-5 bg-white">Emergency Contact Details</h1>
+                            <h1 class="font-bold absolute top-[-13px] left-5 bg-white">Purchase & Selling Details</h1>
                             <div class="tabs pt-2">
                                 <button v-for="(tab, index) in tabs" :key="tab" :class="['tab', { active: activeTab === index }]"@click="selectTab(index)">
                                     {{ tab }}
@@ -30,9 +30,31 @@
                                     <DynamicTable :key="tableKey" :columns="chargeColumns" :rows="chargeRows" :idField="idFieldCharge" :actions="actionCharges" @action-click="deleteCharge" :rightsModule="rightsModule" />
                                 </div>
                                 <div v-show="activeTab == 2">
+                                    <DynamicForm :fields="additionalFields1" :flex_basis="additional_flex_basis" :flex_basis_percentage="additional_flex_basis_percentage" @handleReset="handleReset"/>
                                     <div class="text-left p-2">
-                        
+                                        <SearchableDropdown 
+                                            :key="planComponentKey"
+                                            :options="planArr"
+                                            :dropdownWidth="chargesDropdownWidth"
+                                            :searchPlaceholder="plansSearchPlaceholder"
+                                            @option-selected="handleSelectedPlan"
+                                            @fetchData="fetchData"
+                                        />
                                     </div>                      
+                                    <DynamicTable :key="tableKey" :columns="planColumns" :rows="planRows" :idField="idFieldPlan" :actions="actionPlans" @action-click="deletePlan" :rightsModule="rightsModule" />
+                                </div>
+                                <div v-show="activeTab == 3">
+                                    <div class="text-left p-2">
+                                        <SearchableDropdown 
+                                            :key="chargeComponentKey"
+                                            :options="chargeArr"
+                                            :dropdownWidth="chargesDropdownWidth"
+                                            :searchPlaceholder="chargesSearchPlaceholder"
+                                            @option-selected="handleSelectedCharge"
+                                            @fetchData="fetchData"
+                                        />
+                                    </div>                      
+                                    <DynamicTable :key="tableKey" :columns="chargeColumns" :rows="chargeRows" :idField="idFieldCharge" :actions="actionCharges" @action-click="deleteCharge" :rightsModule="rightsModule" />
                                 </div>
                             </div>
                         </div>
@@ -53,7 +75,7 @@ import { useStore } from "vuex";
 import { useToast } from "vue-toastification";
 
 export default defineComponent({
-    name: 'Member_Details',
+    name: 'Asset_Details',
     components:{
          DynamicForm,PageStyleComponent,SearchableDropdown,DynamicTable
     },
@@ -61,85 +83,103 @@ export default defineComponent({
         const store = useStore();
         const toast = useToast();
         const loader = ref('none');
-        // const tabs = ref(['Contact Details','Charge Details']);
-        const tabs = ref(['Contact Details']);
+        const tabs = ref(['Purchase Details','Purchase Charges','Selling Details','Selling Charges','Asset Features']);
         const mainComponentKey = ref(0);
         const depComponentKey = ref(0);
         const userComponentKey = ref(0);
         const currComponentKey = ref(0);
         const chargeComponentKey = ref(0);
+        const planComponentKey = ref(0);
         const activeTab = ref(0);
-        const rightsModule = ref('MMS');
+        const rightsModule = ref('PSS');
         const displayButtons = ref(true);
         const componentKey = ref(0);
         const tableKey = ref(0);
         const errors = ref([]);
         const companyID = computed(()=> store.state.userData.company_id);
-        const selectedMember = computed(()=> store.state.Members.selectedMember);
-        const selectedCategory = computed(()=> store.state.Members.selectedCategory);
-        const selectedCurrency = computed(()=> store.state.Members.selectedCurrency);
-        const selectedSponsor = computed(()=> store.state.Members.selectedSponsor);
+        const selectedAsset = computed(()=> store.state.Sale_Assets.selectedAsset);
+        const selectedMake = computed(()=> store.state.Sale_Assets.selectedMake);
+        const selectedCurrency = computed(()=> store.state.Sale_Assets.selectedCurrency);
+        const selectedVendor = computed(()=> store.state.Sale_Assets.selectedVendor);
+        const selectedModel = computed(()=> store.state.Sale_Assets.selectedModel);
         const flex_basis = ref('');
         const flex_basis_percentage = ref('');
         const additional_flex_basis = ref('');
         const additional_flex_basis_percentage = ref('');
-        const isEditing = computed(()=> store.state.Members.isEditing);
-        const catArray = computed(() => store.state.Member_Categories.categoryArr);
-        const sponsorArr = computed(() => store.state.Member_Sponsors.sponsorArr);
+        const isEditing = computed(()=> store.state.Sale_Assets.isEditing);
+        const makeArray = computed(() => store.state.Asset_Makes.makeArr);
+        const modelArr = computed(() => store.state.Asset_Models.modelArr);
         const currencyArray = computed(() => store.state.Currencies.currencyArr);
-        const chargeArr = computed(() => store.state.Membership_Fees.feeArr);
+        const chargeArr = computed(() => store.state.Asset_Fees.feeArr);
+        const planArr = computed(() => store.state.Payment_Plans.planArr);
         const chargesDropdownWidth = ref('400px');
         const chargesSearchPlaceholder = ref('Select Charge...');
-        const categoryID = ref('');
-        const sponsorID = ref('');
+        const plansSearchPlaceholder = ref('Select Plan...');
+        const makeID = ref('');
+        const modelID = ref('');
         const currencyID = ref('');
+        const vendorID = ref('');
         const chargeColumns = ref([
             {label: "Name", key:"fee_name", type: "text", editable: false},
             {label: "Charge Mode", key:"charge_mode", type: "text", editable: false},
             {label: "Amount", key: "default_amount", type: "number", editable: true},
         ]);
         const chargeRows = computed(() => {
-            return store.state.Membership_Fees.feeArray;
+            return store.state.Asset_Fees.feeArray;
         });
-        const idFieldCharge = 'membership_fee_id';
+        const idFieldCharge = 'asset_fee_id';
         const actionCharges = ref([
-            {name: 'delete', icon: 'fa fa-minus-circle', title: 'Remove Charge', rightName: 'Adding Members'},
+            {name: 'delete', icon: 'fa fa-minus-circle', title: 'Remove Charge', rightName: 'Adding Sale Assets'},
         ])
-        const fetchMemberCategories = async() =>{
-            await store.dispatch('Member_Categories/fetchMemberCategories', {company:companyID.value});
+        const planColumns = ref([
+            {label: "Name", key:"name", type: "text", editable: false},
+            {label: "Payment Mode", key:"payment_mode", type: "text", editable: false},
+            {label: "Installments", key:"installments", type: "text", editable: false},
+            {label: "Deposit Mode", key:"deposit_mode", type: "text", editable: false},
+            {label: "Deposit Value", key:"deposit_value", type: "text", editable: false},
+        ]);
+        const planRows = computed(() => {
+            return store.state.Payment_Plans.planArray;
+        });
+        const idFieldPlan = 'payment_plan_id';
+        const actionPlans = ref([
+            {name: 'delete', icon: 'fa fa-minus-circle', title: 'Remove Plan', rightName: 'Adding Sale Assets'},
+        ])
+        const fetchAssetMakes = async() =>{
+            await store.dispatch('Asset_Makes/fetchAssetMakes', {company:companyID.value});
         };
-        const handleSelectedCategory = async(option) =>{
-            await store.dispatch('Member_Categories/handleSelectedCategory', option)
-            categoryID.value = store.state.Member_Categories.categoryID;
+        const handleSelectedMake = async(option) =>{
+            await store.dispatch('Asset_Makes/handleSelectedMake', option)
+            makeID.value = store.state.Asset_Makes.makeID;
         };
-        const clearSelectedCategory = async() =>{
-            await store.dispatch('Member_Categories/updateState', {categoryID: ''});
-            categoryID.value = store.state.Member_Categories.categoryID;   
-            if(selectedMember.value && selectedMember.value.member_category != ""){
-                selectedMember.value.member_category.member_category_id = categoryID.value;
-                categoryValue.value = categoryID.value
+        const clearSelectedMake = async() =>{
+            await store.dispatch('Asset_Makes/updateState', {makeID: ''});
+            makeID.value = store.state.Asset_Makes.makeID;   
+            if(selectedAsset.value && selectedAsset.value.asset_make != ""){
+                selectedAsset.value.asset_make.asset_make_id = makeID.value;
+                makeValue.value = makeID.value
             } 
         };
-        const fetchMemberSponsors = async() =>{
-            await store.dispatch('Member_Sponsors/fetchMemberSponsors', {company:companyID.value});
+        const fetchAssetModels = async() =>{
+            await store.dispatch('Asset_Models/fetchAssetModels', {company:companyID.value});
         };
-        const handleSelectedSponsor = async(option) =>{
-            await store.dispatch('Member_Sponsors/handleSelectedSponsor', option)
-            sponsorID.value = store.state.Member_Sponsors.sponsorID;
+        const handleSelectedModel = async(option) =>{
+            await store.dispatch('Asset_Models/handleSelectedModel', option)
+            modelID.value = store.state.Asset_Models.modelID;
         };
-        const clearSelectedSponsor = async() =>{
-            await store.dispatch('Member_Sponsors/updateState', {sponsorID: ''});
-            sponsorID.value = store.state.Member_Sponsors.sponsorID;
-            if(selectedMember.value && selectedMember.value.member_sponsor != ""){
-                selectedMember.value.member_sponsor.member_sponsor_id = sponsorID.value;
-                sponsorValue.value = sponsorID.value
+        const clearSelectedModel = async() =>{
+            await store.dispatch('Asset_Models/updateState', {modelID: ''});
+            modelID.value = store.state.Asset_Models.modelID;
+            if(selectedAsset.value && selectedAsset.value.asset_model != ""){
+                selectedAsset.value.asset_model.asset_model_id = modelID.value;
+                modelValue.value = modelID.value
             } 
         };
         const handleSelectedCurrency = async(option) =>{
             await store.dispatch('Currencies/handleSelectedCurrency', option)
             currencyID.value = store.state.Currencies.currencyID;
-            if(selectedMember.value){
-                selectedMember.value.member_currency.currency_id = currencyID.value;
+            if(selectedAsset.value){
+                selectedAsset.value.asset_currency.currency_id = currencyID.value;
             }
         }
         const clearSelectedCurrency = async() =>{
@@ -151,35 +191,31 @@ export default defineComponent({
             await store.dispatch('Currencies/fetchCurrencies', {company:companyID.value})
         };
         const fetchCharges = async() =>{
-            await store.dispatch('Membership_Fees/fetchMembershipFees', {company:companyID.value})
+            await store.dispatch('Asset_Fees/fetchAssetFees', {company:companyID.value})
         };
         const formFields = ref();
         const currencyValue = computed(() => {
-           return (selectedMember.value && selectedMember.value.member_currency && !currencyID.value) ? selectedMember.value.member_currency.currency_id : currencyID.value;
+           return (selectedAsset.value && selectedAsset.value.asset_currency && !currencyID.value) ? selectedAsset.value.asset_currency.currency_id : currencyID.value;
         });
-        const categoryValue = computed(() => {
-           return (selectedMember.value && selectedMember.value.member_category && !categoryID.value) ? selectedMember.value.member_category.member_category_id : categoryID.value;
+        const makeValue = computed(() => {
+           return (selectedAsset.value && selectedAsset.value.asset_make && !makeID.value) ? selectedAsset.value.asset_make.asset_make_id : makeID.value;
         });
-        const sponsorValue = computed(() => {
-           return (selectedMember.value && selectedMember.value.member_sponsor && !sponsorID.value) ? selectedMember.value.member_sponsor.member_sponsor_id : sponsorID.value;
+        const modelValue = computed(() => {
+           return (selectedAsset.value && selectedAsset.value.asset_model && !modelID.value) ? selectedAsset.value.asset_model.asset_model_id : modelID.value;
         });
         const updateFormFields = () => {
             formFields.value = [
-                { type: 'text', name: 'member_number',label: "Member Number", value: selectedMember.value?.member_number || '', required: false },
-                { type: 'dropdown', name: 'membership_type',label: "Membership Type", value: selectedMember.value?.membership_type || '', placeholder: "", required: true, options: [{ text: 'Individual', value: 'Individual' }, { text: 'Business', value: 'Business' }, { text: 'Joint', value: 'Joint' }, { text: 'Group', value: 'Group' }] },
-                { type: 'date', name: 'joining_date',label: "Joining Date", value: selectedMember.value?.joining_date || '', required: true, placeholder: '' },
-                { type: 'text', name: 'member_name',label: "Member Name", value: selectedMember.value?.member_name || '', required: true },
-                { type: 'text', name: 'phone_number',label: "Phone Number", value: selectedMember.value?.phone_number || '', required: true, placeholder: '' },
-                { type: 'text', name: 'id_number',label: "ID Number", value: selectedMember.value?.id_number || '', required: true, placeholder: '' },
-                { type: 'date', name: 'dob',label: "D.O.B", value: selectedMember.value?.dob || null, required: false, placeholder: '' },
-                { type: 'dropdown', name: 'gender',label: "Gender", value: selectedMember.value?.gender || '', placeholder: "", required: true, options: [{ text: 'Male', value: 'Male' }, { text: 'Female', value: 'Female' }, { text: 'Others', value: 'Others' }, { text: 'Not Applicable', value: 'Not Applicable' }] },
-                { type: 'text', name: 'email',label: "Email", value: selectedMember.value?.email || '', required: false },
-                { type: 'text', name: 'kra_pin',label: "Tax Pin", value: selectedMember.value?.kra_pin || '', required: false },
-                { type: 'dropdown', name: 'marital_status',label: "Marital Status", value: selectedMember.value?.marital_status || '', placeholder: "", required: true, options: [{ text: 'Single', value: 'Single' }, { text: 'Married', value: 'Married' },{ text: 'Separated', value: 'Separated' }, { text: 'Divorced', value: 'Divorced' },{ text: 'Widowed', value: 'Widowed' },{ text: 'Not Applicable', value: 'Not Applicable' }] },
-                { type: 'text', name: 'country',label: "Country", value: selectedMember.value?.country || 'Kenya', required: true },
-                { type: 'text', name: 'address',label: "Address", value: selectedMember.value?.address || '', required: false },
-                { type: 'text', name: 'shif_number',label: "Shif No", value: selectedMember.value?.shif_number || '', required: false },
-                { type: 'text', name: 'nssf_number',label: "Nssf No", value: selectedMember.value?.nssf_number || '', required: false },
+                { type: 'text', name: 'asset_code',label: "Code", value: selectedAsset.value?.asset_code || '', required: false },
+                { type: 'text', name: 'registration_number',label: "Reg No", value: selectedAsset.value?.registration_number || '', required: false },
+                { type: 'dropdown', name: 'asset_type',label: "Asset Type", value: selectedAsset.value?.asset_type || '', placeholder: "", required: true, options: [{ text: 'Land', value: 'Land' }, { text: 'Building', value: 'Building' }] },
+                { type: 'date', name: 'start_date',label: "Start Date", value: selectedAsset.value?.start_date || '', required: true, placeholder: '' },
+                { type: 'text', name: 'name',label: "Asset Name", value: selectedAsset.value?.name || '', required: true },
+                { type: 'dropdown', name: 'selling_as',label: "Selling As", value: selectedAsset.value?.selling_as || 'Owner', placeholder: "", required: true, options: [{ text: 'Owner', value: 'Owner' }, { text: 'Open Agency', value: 'Open Agency' }, { text: 'Exclusive Agency', value: 'Exclusive Agency' }, { text: 'Not Applicable', value: 'Not Applicable' }] },
+                { type: 'text', name: 'location',label: "Location", value: selectedAsset.value?.location || '', required: false, placeholder: '' },,
+                { type: 'dropdown', name: 'unit_measure',label: "Unit Measure", value: selectedAsset.value?.unit_measure || '', placeholder: "", required: true, options: [{ text: 'Plots', value: 'Plots' }, { text: 'Acres', value: 'Acres' },{ text: 'Units', value: 'Units' }, { text: 'Sqr Ft', value: 'Sqr Ft' },{ text: 'Sqr Mtr', value: 'Sqr Mtr' }] },
+                { type: 'number', name: 'units_quantity',label: "No of Units", value: selectedAsset.value?.units_quantity || 1, required: true },
+                { type: 'text', name: 'size_per_unit',label: "Unit Size", value: selectedAsset.value?.size_per_unit || '', required: false },
+                { type: 'text', name: 'number_of_floors',label: "Floors", value: selectedAsset.value?.number_of_floors || '', required: false },
                 {  
                     type:'search-dropdown', label:"Currency", value: currencyValue.value, componentKey: currComponentKey,
                     selectOptions: currencyArray, optionSelected: handleSelectedCurrency, required: true,
@@ -187,41 +223,70 @@ export default defineComponent({
                     fetchData: fetchCurrencies(), clearSearch: clearSelectedCurrency
                 },
                 {  
-                    type:'search-dropdown', label:"Category", value: categoryValue.value, componentKey: depComponentKey,
-                    selectOptions: catArray, optionSelected: handleSelectedCategory, required: false,
-                    searchPlaceholder: 'Select Category...', dropdownWidth: '500px', updateValue: selectedCategory.value,
-                    fetchData: fetchMemberCategories(), clearSearch: clearSelectedCategory
+                    type:'search-dropdown', label:"Make", value: makeValue.value, componentKey: depComponentKey,
+                    selectOptions: makeArray, optionSelected: handleSelectedMake, required: false,
+                    searchPlaceholder: 'Select Make...', dropdownWidth: '500px', updateValue: selectedMake.value,
+                    fetchData: fetchAssetMakes(), clearSearch: clearSelectedMake
                 },
                 {  
-                    type:'search-dropdown', label:"Sponsor", value: sponsorValue.value, componentKey: userComponentKey,
-                    selectOptions: sponsorArr, optionSelected: handleSelectedSponsor, required: false,
-                    searchPlaceholder: 'Select Sponsor...', dropdownWidth: '500px', updateValue: selectedSponsor.value,
-                    fetchData: fetchMemberSponsors(), clearSearch: clearSelectedSponsor
+                    type:'search-dropdown', label:"Model", value: modelValue.value, componentKey: userComponentKey,
+                    selectOptions: modelArr, optionSelected: handleSelectedModel, required: false,
+                    searchPlaceholder: 'Select Model...', dropdownWidth: '500px', updateValue: selectedModel.value,
+                    fetchData: fetchAssetModels(), clearSearch: clearSelectedModel
                 },
             ];
         };
-
+        const fetchVendors = async() =>{
+            await store.dispatch('Vendors/fetchVendors', {company:companyID.value})
+        };
+        const handleSelectedVendor = async(option) =>{
+            await store.dispatch('Vendors/handleSelectedVendor', option)
+            vendorID.value = store.state.Vendors.vendorID;
+            if(selectedAsset.value){
+                selectedAsset.value.vendor.vendor_id = vendorID.value;
+            }
+        }
+        const clearSelectedVendor = async() =>{
+            await store.dispatch('Vendors/updateState', {vendorID: ''});
+            vendorID.value = store.state.Vendors.vendorID;
+        }
+        const vendorValue = computed(() => {
+           return (selectedAsset.value && selectedAsset.value.vendor && !vendorID.value) ? selectedAsset.value.vendor.vendor_id : vendorID.value;
+        });
         const additionalFields = ref();
+        const additionalFields1 = ref();
         const updateAdditionalFormFields = () => {
             additionalFields.value = [
-                { type: 'text', name: 'contact_names',label: "Name", value: selectedMember.value?.contact_names ||'', required: false },
-                { type: 'text', name: 'contact_phone_number',label: "Phone Number", value: selectedMember.value?.contact_phone_number ||'', required: false },
-                { type: 'text', name: 'contact_email',label: "Email", value: selectedMember.value?.contact_email ||'', required: false },
-                { type: 'text', name: 'contact_relationship',label: "Relationship", value: selectedMember.value?.contact_relationship ||'', required: false },
+                { type: 'date', name: 'purchase_date',label: "Purchase Date", value: selectedAsset.value?.purchase_date || '', required: false, placeholder: '' },
+                {  
+                    type:'search-dropdown', label:"Vendor", value: vendorValue.value, componentKey: currComponentKey,
+                    selectOptions: currencyArray, optionSelected: handleSelectedVendor, required: false,
+                    searchPlaceholder: 'Select Vendor...', dropdownWidth: '500px', updateValue: selectedVendor.value,
+                    fetchData: fetchVendors(), clearSearch: clearSelectedVendor
+                },
+                { type: 'number', name: 'value',label: "Purchase Price", value: selectedAsset.value?.value ||0, required: false },
+            ];
+        };
+        const updateAdditionalFormFields1 = () => {
+            additionalFields1.value = [
+                { type: 'number', name: 'value',label: "Asset Cost", value: 0, required: false },
+                { type: 'number', name: 'value',label: "Unit Cost", value: 0, required: false },
+                { type: 'number', name: 'value',label: "Mark Up(%)", value: 0, required: false },
+                { type: 'number', name: 'value',label: "Unit Selling Price", value: 0, required: false },
             ];
         };
 
-        watch([categoryID, sponsorID], () => {
-            if (categoryID.value != "") {
-                formFields.value[16].value = categoryID.value;
+        watch([makeID, modelID], () => {
+            if (makeID.value != "") {
+                formFields.value[16].value = makeID.value;
             }
-            if(sponsorID.value != ""){
-                formFields.value[17].value = sponsorID.value;
+            if(modelID.value != ""){
+                formFields.value[17].value = modelID.value;
             }
         }, { immediate: true });
 
-        watch([selectedMember, selectedCurrency, selectedCategory, selectedSponsor], () => {
-            if (selectedMember.value && selectedCurrency.value && selectedCategory.value && selectedSponsor.value) {
+        watch([selectedAsset, selectedCurrency, selectedMake, selectedModel], () => {
+            if (selectedAsset.value && selectedCurrency.value && selectedMake.value && selectedModel.value) {
                 depComponentKey.value += 1;
                 userComponentKey.value += 1;
                 currComponentKey.value += 1;
@@ -229,24 +294,24 @@ export default defineComponent({
                 updateAdditionalFormFields();
 
             }
-            else if(selectedMember.value && selectedCurrency.value && selectedCategory.value){
+            else if(selectedAsset.value && selectedCurrency.value && selectedMake.value){
                 currComponentKey.value += 1;
                 depComponentKey.value += 1;
                 updateFormFields();
                 updateAdditionalFormFields();
                 
-            }else if(selectedMember.value && selectedCurrency.value && selectedSponsor.value){
+            }else if(selectedAsset.value && selectedCurrency.value && selectedModel.value){
                 currComponentKey.value += 1;
                 userComponentKey.value += 1;
                 updateFormFields();
                 updateAdditionalFormFields();
                 
-            }else if(selectedMember.value && selectedCurrency.value){
+            }else if(selectedAsset.value && selectedCurrency.value){
                 currComponentKey.value += 1;
                 updateFormFields();
                 updateAdditionalFormFields();
                 
-            }else if(selectedMember.value){
+            }else if(selectedAsset.value){
                 updateFormFields();
                 updateAdditionalFormFields();
             }
@@ -261,15 +326,15 @@ export default defineComponent({
             for(let i=0; i < additionalFields.value.length; i++){
                 additionalFields.value[i].value = '';
             }
-            await store.dispatch('Membership_Fees/updateState', {feeArray: []});
-            await store.dispatch('Members/updateState', {selectedMember: null, selectedSponsor: null, selectedCurrency: null, selectedCategory: null, isEditing:false});
+            await store.dispatch('Asset_Fees/updateState', {feeArray: []});
+            await store.dispatch('Members/updateState', {selectedAsset: null, selectedModel: null, selectedCurrency: null, selectedMake: null, isEditing:false});
             mainComponentKey.value += 1;
             userComponentKey.value += 1;
             currComponentKey.value += 1;
             depComponentKey.value += 1;
             currencyID.value = "";
-            sponsorID.value = "";
-            categoryID.value = "";
+            modelID.value = "";
+            makeID.value = "";
         }
          
         const showLoader = () =>{
@@ -301,12 +366,12 @@ export default defineComponent({
                 joining_date: formFields.value[2].value,
                 shif_number: formFields.value[13].value,
                 nssf_number: formFields.value[14].value,
-                member_currency: currencyID.value,
-                member_currency_id: currencyID.value,
-                member_category: categoryID.value,
-                member_category_id: categoryID.value,
-                member_sponsor: sponsorID.value,
-                member_sponsor_id: sponsorID.value,
+                asset_currency: currencyID.value,
+                asset_currency_id: currencyID.value,
+                asset_make: makeID.value,
+                asset_make_id: makeID.value,
+                asset_model: modelID.value,
+                asset_model_id: modelID.value,
                 charges: chargeRows.value,
                 company: companyID.value
             }
@@ -345,7 +410,7 @@ export default defineComponent({
             showLoader();
             errors.value = [];
             let formData = {
-                member: selectedMember.value.member_id,
+                member: selectedAsset.value.member_id,
                 member_number: formFields.value[0].value,
                 member_name: formFields.value[3].value,
                 gender: formFields.value[7].value,
@@ -360,18 +425,18 @@ export default defineComponent({
                 contact_email: additionalFields.value[2].value,
                 contact_relationship: additionalFields.value[3].value,
                 contact_names: additionalFields.value[0].value,
-                active_status: selectedMember.value.active_status,
+                active_status: selectedAsset.value.active_status,
                 membership_type: formFields.value[1].value,
                 marital_status: formFields.value[10].value,
                 joining_date: formFields.value[2].value,
                 shif_number: formFields.value[13].value,
                 nssf_number: formFields.value[14].value,
-                member_currency: currencyValue.value,
-                member_currency_id: currencyValue.value,
-                member_category: categoryValue.value,
-                member_category_id: categoryValue.value,
-                member_sponsor: sponsorValue.value,
-                member_sponsor_id: sponsorValue.value,
+                asset_currency: currencyValue.value,
+                asset_currency_id: currencyValue.value,
+                asset_make: makeValue.value,
+                asset_make_id: makeValue.value,
+                asset_model: modelValue.value,
+                asset_model_id: modelValue.value,
                 company: companyID.value
             }
             errors.value = [];
@@ -416,11 +481,11 @@ export default defineComponent({
         };
         
         const handleSelectedCharge = async(option) =>{
-            await store.dispatch('Membership_Fees/handleSelectedFee', option);
+            await store.dispatch('Asset_Fees/handleSelectedFee', option);
             chargeComponentKey.value += 1;
         }
         const deleteCharge = (rowIndex, action, row) =>{
-            store.dispatch('Membership_Fees/removeMembershipFee', rowIndex);
+            store.dispatch('Asset_Fees/removeMembershipFee', rowIndex);
             tableKey.value += 1;
         }
         
@@ -441,7 +506,8 @@ export default defineComponent({
             tabs,componentKey, formFields, additionalFields, flex_basis, flex_basis_percentage, additional_flex_basis,
             additional_flex_basis_percentage, mainComponentKey,handleReset, loader, showLoader, hideLoader,
             displayButtons,saveMember,chargeArr,chargesDropdownWidth,chargesSearchPlaceholder,selectTab,handleSelectedCharge,
-            deleteCharge,activeTab,rightsModule,idFieldCharge,chargeRows,chargeColumns,actionCharges,chargeComponentKey
+            deleteCharge,activeTab,rightsModule,idFieldCharge,chargeRows,chargeColumns,actionCharges,chargeComponentKey,
+            planArr,plansSearchPlaceholder,idFieldPlan,planRows,planColumns,actionPlans,planComponentKey,
         }
     }
 })

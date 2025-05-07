@@ -242,6 +242,11 @@
                                 </select>
                                 <button type="button" class="absolute ml-2 rounded px-2 bg-green-500 text-white" @click="saveDefaultSetting('MMS','Loan Penalty Automation',mmsAutoPenalizeOption,mmsAutoPenalizeOption)"><i class="fa fa-check"></i></button>
                             </div>
+                            <div class="basis-1/4 relative mr-12">
+                                <label for="">Loan Penalty Automation Time( 0 or 12 ):<em>*</em></label><br />
+                                <input v-model="penaltyAutoTime" type="number" pattern="[0-9]*" oninput="this.value = this.value.replace(/[^0-9]/g, '')" :class="`bg-slate-50 rounded pl-3 border border-gray-400 text-base w-full`"/>
+                                <button type="button" class="absolute ml-2 rounded px-2 bg-green-500 text-white" @click="saveDefaultSetting('MMS','Loan Penalty Automation Time',penaltyAutoTime,penaltyAutoTime)"><i class="fa fa-check"></i></button>
+                            </div>
                         </div>
                         <div class="flex mb-3">
                             <div class="basis-1/4 relative mr-12">
@@ -268,66 +273,6 @@
                 <div class="border-b-2 border-gray-500 px-3 py-2 text-left">
                     <button class="w-full text-left font-semibold" @click="showHRSettings">HR Default Settings</button>
                     <div class="w-full mt-4" v-if="hr_settings_options">
-                        <div class="flex mb-3">
-                            <div class="basis-1/2 flex mr-3">
-                                <label for="">Current:<em></em></label>
-                                <p class="ml-4 font-bold">{{ stock_control }}</p>
-                            </div>
-                        </div>
-                        <div class="flex mb-6">
-                            <div class="basis-1/4 mr-3">
-                                <label for="">Stock Control A/c:<em>*</em></label><br />
-                                <SearchableDropdown
-                                    :options="stockControlArr"
-                                    :updateValue="selectedStockControl"
-                                    :dropdownWidth="ledgerDropdownWidth"
-                                    :searchPlaceholder="stockPlaceholder"
-                                    @option-selected="handleSelectedStockControl"
-                                    @clearSearch="handleClearStockControl"
-                                />
-                                <button type="button" class="absolute ml-4 rounded px-2 bg-green-500 text-white" @click="saveStockControlMapping"><i class="fa fa-check"></i></button>
-                            </div>
-                        </div>
-                        <div class="flex mb-3">
-                            <div class="basis-1/2 flex mr-3">
-                                <label for="">Current:<em></em></label>
-                                <p class="ml-4 font-bold">{{ sales_income }}</p>
-                            </div>
-                        </div>
-                        <div class="flex mb-6">
-                            <div class="basis-1/4 mr-3">
-                                <label for="">Sales Income A/c:<em>*</em></label><br />
-                                <SearchableDropdown
-                                    :options="salesIncomeArr"
-                                    :updateValue="selectedSalesIncome"
-                                    :dropdownWidth="ledgerDropdownWidth"
-                                    :searchPlaceholder="salesPlaceholder"
-                                    @option-selected="handleSelectedSalesIncome"
-                                    @clearSearch="handleClearSalesIncome"
-                                />
-                                <button type="button" class="absolute ml-4 rounded px-2 bg-green-500 text-white" @click="saveSalesIncomeMapping"><i class="fa fa-check"></i></button>
-                            </div>
-                        </div>
-                        <div class="flex mb-3">
-                            <div class="basis-1/2 flex mr-3">
-                                <label for="">Current:<em></em></label>
-                                <p class="ml-4 font-bold">{{ inventory_take_on }}</p>
-                            </div>
-                        </div>
-                        <div class="flex mb-6">
-                            <div class="basis-1/4 mr-3">
-                                <label for="">Inventory Take On Balancing A/c:<em>*</em></label><br />
-                                <SearchableDropdown
-                                    :options="balancingAccountArr"
-                                    :updateValue="selectedBalancingAccount"
-                                    :dropdownWidth="ledgerDropdownWidth"
-                                    :searchPlaceholder="balancePlaceholder"
-                                    @option-selected="handleSelectedBalancingAccount"
-                                    @clearSearch="handleClearBalancingAccount"
-                                />
-                                <button type="button" class="absolute ml-4 rounded px-2 bg-green-500 text-white" @click="saveBalancingAccountMapping"><i class="fa fa-check"></i></button>
-                            </div>
-                        </div>
                     </div>
                 </div>
                 <div class="border-b-2 border-gray-500 px-3 py-2 text-left">
@@ -554,6 +499,7 @@ export default defineComponent({
         const mmsAutoPenalizeOption = ref("");
         const mmsStrictGuarantorshipOption = ref("");
         const mmsBalReminderOption = ref("");
+        const penaltyAutoTime = ref(0);
 
         const retailOutlet = ref("");
         const outletCounter = ref("");
@@ -811,6 +757,8 @@ export default defineComponent({
                         mmsStrictGuarantorshipOption.value = response.data[i].setting_value_name;
                     }else if(response.data[i].setting_name === 'Loan Balance Reminder Automation'){
                         mmsBalReminderOption.value = response.data[i].setting_value_name;
+                    }else if(response.data[i].setting_name === 'Loan Penalty Automation Time'){
+                        penaltyAutoTime.value = response.data[i].setting_value_name;
                     }
 
                     
@@ -938,7 +886,7 @@ export default defineComponent({
             patientsOption,duplicatesOption, debtorsOption, vendorsOption, tenantsOption, fetchRetailOutlets,handleSelectedOutlet, clearSelectedOutlet, fetchOutletCounters,outletID,outletName,counterID,counterName,
             channelID,channelName,handleSelectedCounter, clearSelectedCounter, fetchCounterChannels,handleSelectedChannel, clearSelectedChannel,outletCounterArr,retailOutletArr,counterChannelArr,
             retailOutlet, outletCounter, counterChannel, salesIncome, invTakeOn, stockControl, stockType,directSaleOrder,defaultTimeout,
-            mmsAutoPenalizeOption,mmsStrictGuarantorshipOption,mmsBalReminderOption
+            mmsAutoPenalizeOption,mmsStrictGuarantorshipOption,mmsBalReminderOption,penaltyAutoTime
         }
     }
 });

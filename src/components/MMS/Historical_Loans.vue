@@ -443,8 +443,7 @@ export default{
         const handleDynamicOption = (option) =>{
             if( option == 'exempt-penalty'){
                 let formData = {
-                    historical_loan: selectedIds.value,
-                    loan_application: [],
+                    loan_application: selectedIds.value,
                     company: companyID.value
                 }
                 Swal.fire({
@@ -495,8 +494,7 @@ export default{
                            
             }else if( option == 'unexempt-penalty'){
                 let formData = {
-                    historical_loan: selectedIds.value,
-                    loan_application: [],
+                    loan_application: selectedIds.value,
                     company: companyID.value
                 }
                 Swal.fire({

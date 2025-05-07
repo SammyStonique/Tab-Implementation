@@ -70,16 +70,14 @@ import MovableModal from '@/components/MovableModal.vue';
 import DynamicForm from '@/components/NewDynamicForm.vue';
 import SearchableDropdown from '@/components/SearchableDropdown.vue';
 import Swal from 'sweetalert2';
-import { quillEditor } from 'vue3-quill';
-import { useTextareaEditor } from '@/composables/TextAreaEditor';
 
 export default{
     name: 'Sale_Assets',
     components:{
-        PageComponent,MovableModal,SearchableDropdown,DynamicForm,quillEditor
+        PageComponent,MovableModal,SearchableDropdown,DynamicForm
     },
     setup(){
-        const { contentModel,textareaRef,placeholders,selectedPlaceholder,insertPlaceholder,} = useTextareaEditor('');
+
         const store = useStore();
         const toast = useToast();
         const loader = ref('');
@@ -88,7 +86,6 @@ export default{
         const catSearchComponentKey = ref(0);
         const trans_modal_loader = ref('none');
         const member_status = ref('');
-        const messageContent = ref('');
         const exit_date = ref('');
         const idField = 'sale_asset_id';
         const addButtonLabel = ref('New Asset');
@@ -139,7 +136,6 @@ export default{
         const name_search = ref('');
         const asset_code_search = ref("");
         const registration_number_search = ref("");
-        const phone_number_search = ref("");
         const asset_type_search = ref("");
  
         const searchFilters = ref([

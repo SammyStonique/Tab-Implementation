@@ -18,6 +18,7 @@ const state = {
     selectedMake: null,
     selectedModel: null,
     selectedCurrency: null,
+    selectedVendor: null,
     isEditing: false,
     assetDetails: [],
     outstandingBalance: 0,
@@ -38,6 +39,7 @@ const mutations = {
     state.gender_search = '';
     state.selectedAsset = null;
     state.selectedCurrency = null;
+    state.selectedVendor = null;
     state.selectedMake = null;
     state.selectedModel = null;
     state.isEditing = false;
@@ -57,6 +59,9 @@ const mutations = {
   },
   SET_SELECTED_CURRENCY(state, currency) {
     state.selectedCurrency = currency;
+  },
+  SET_SELECTED_VENDOR(state, vendor) {
+    state.selectedVendor = vendor;
   },
   SET_ASSET_DETAILS(state, details){
     state.assetDetails = details;
@@ -135,6 +140,7 @@ const actions = {
         commit('SET_SELECTED_ASSET',response.data);
         commit('SET_SELECTED_MODEL',(response.data.asset_model != null) ? (response.data.asset_model.name) : "");
         commit('SET_SELECTED_MAKE',(response.data.asset_make != null) ? (response.data.asset_make.name) : "");
+        commit('SET_SELECTED_VENDOR',(response.data.vendor != null) ? (response.data.vendor.vendor_code + " - "+ response.data.vendor.vendor_name) : "");
         commit('SET_SELECTED_CURRENCY',response.data.asset_currency.code + " - " + response.data.asset_currency.name);
     })   
     .catch((error)=>{

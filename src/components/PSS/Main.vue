@@ -34,9 +34,10 @@ import Asset_Models from '@/components/PSS/Asset_Models.vue';
 import Payment_Plans from '@/components/PSS/Payment_Plans.vue';
 import Asset_Fees from '@/components/PSS/Asset_Fees.vue';
 import Sale_Assets from '@/components/PSS/Sale_Assets.vue';
+import Asset_Details from '@/components/PSS/Asset_Details.vue';
 
 import Import_Members from '@/components/MMS/Import_Members.vue';
-import Member_Details from '@/components/MMS/Member_Details.vue';
+
 
 import Member_Invoices from '@/components/MMS/Member_Invoices.vue';
 import Member_Receipts from '@/components/MMS/Member_Receipts.vue';
@@ -95,7 +96,7 @@ export default{
         NavBarPSS,
         PagesTab,
         Dashboard,
-        Sale_Assets,Import_Members,Member_Details,Asset_Makes,Receipt_Details,Asset_Models,
+        Sale_Assets,Import_Members,Asset_Details,Asset_Makes,Receipt_Details,Asset_Models,
         Member_Invoices,Member_Receipts,Savings_Products,Saving_Product_Details,Shares_Products,Share_Product_Details,Saving_Accounts,Share_Accounts,
         Saving_Deposits,Share_Deposits,Loan_Products,Loan_Product_Details,Loan_Applications,Loan_Application_Details,Loan_Guarantors,Loan_Ledger,
         Loan_Disbursements,Import_Saving_Accounts,Import_Share_Accounts,Import_Saving_Deposits,Import_Share_Deposits,Payment_Plans,Loan_Securities,

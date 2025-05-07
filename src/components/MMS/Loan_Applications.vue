@@ -539,7 +539,6 @@ export default{
             if( option == 'exempt-penalty'){
                 let formData = {
                     loan_application: selectedIds.value,
-                    historical_loan: [],
                     company: companyID.value
                 }
                 Swal.fire({
@@ -591,7 +590,6 @@ export default{
             }else if( option == 'unexempt-penalty'){
                 let formData = {
                     loan_application: selectedIds.value,
-                    historical_loan: [],
                     company: companyID.value
                 }
                 Swal.fire({
