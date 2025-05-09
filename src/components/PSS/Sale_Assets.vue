@@ -119,7 +119,7 @@ export default{
             {label: "Code", key:"asset_code"},
             {label: "Name", key:"name"},
             {label: "Start Date", key:"start_date"},
-            {label: "Reg No", key: "registration_number"},,
+            {label: "Reg No", key: "registration_number"},
             {label: "Type", key:"asset_type"},
             {label: "Selling As", key:"selling_as"},
             {label: "Location", key:"location"},

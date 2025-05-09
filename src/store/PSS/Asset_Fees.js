@@ -4,7 +4,11 @@ import Swal from 'sweetalert2';
 const state = {
   feesList: [], 
   feeArr: [],
+  saleFeeArr: [],
+  purchaseFeeArr: [],
   feeArray: [],
+  saleFeeArray: [],
+  purchaseFeeArray: [],
   feeID: '',
   feeName: '',
   selectedFee: null,
@@ -32,6 +36,12 @@ const mutations = {
   },
   FEES_ARRAY(state, fees){
     state.feeArray = fees;
+  },
+  SALE_FEES_ARRAY(state, fees){
+    state.saleFeeArray = fees;
+  },
+  PURCHASE_FEES_ARRAY(state, fees){
+    state.purchaseFeeArray = fees;
   },
   SET_SELECTED_LEDGER(state, ledger) {
     state.selectedLedger = ledger;
@@ -83,6 +93,32 @@ const actions = {
     })
     
   },
+  fetchAssetSaleFees({ commit,state }, formData) {
+    state.saleFeeArr = [];
+    axios.post(`api/v1/get-asset-fees/`,formData)
+    .then((response)=>{
+      for(let i=0; i< response.data.length; i++){
+        state.saleFeeArr.push((response.data[i].fee_name));
+      }
+    })
+    .catch((error)=>{
+      console.log(error.message);
+    })
+    
+  },
+  fetchAssetPurchaseFees({ commit,state }, formData) {
+    state.purchaseFeeArr = [];
+    axios.post(`api/v1/get-asset-fees/`,formData)
+    .then((response)=>{
+      for(let i=0; i< response.data.length; i++){
+        state.purchaseFeeArr.push((response.data[i].fee_name));
+      }
+    })
+    .catch((error)=>{
+      console.log(error.message);
+    })
+    
+  },
   fetchAssetFee({ commit,state }, formData) {
     axios.post(`api/v1/get-asset-fees/`,formData)
     .then((response)=>{
@@ -106,6 +142,28 @@ const actions = {
         state.feeArray = [...state.feeArray, selectedFee];
     }
     commit('FEES_ARRAY', state.feeArray);
+      
+  },
+  handleSelectedSaleFee({ commit, state }, option){
+    const selectedFee = state.feesList.find(fee => (fee.fee_name) === option);
+    if (selectedFee) {
+        state.feeID = selectedFee.asset_fee_id;
+        state.feeName = selectedFee.fee_name;
+        selectedFee.asset_asset_fee_id = null;
+        state.saleFeeArray = [...state.saleFeeArray, selectedFee];
+    }
+    commit('SALE_FEES_ARRAY', state.saleFeeArray);
+      
+  },
+  handleSelectedPurchaseFee({ commit, state }, option){
+    const selectedFee = state.feesList.find(fee => (fee.fee_name) === option);
+    if (selectedFee) {
+        state.feeID = selectedFee.asset_fee_id;
+        state.feeName = selectedFee.fee_name;
+        selectedFee.asset_asset_fee_id = null;
+        state.purchaseFeeArray = [...state.purchaseFeeArray, selectedFee];
+    }
+    commit('PURCHASE_FEES_ARRAY', state.purchaseFeeArray);
       
   },
 
@@ -164,6 +222,14 @@ const actions = {
   removeAssetFee({commit, state}, index){
     state.feeArray.splice(index, 1); 
     commit('FEES_ARRAY', state.feeArray);
+  },
+  removeAssetSaleFee({commit, state}, index){
+    state.saleFeeArray.splice(index, 1); 
+    commit('SALE_FEES_ARRAY', state.saleFeeArray);
+  },
+  removeAssetPurchaseFee({commit, state}, index){
+    state.purchaseFeeArray.splice(index, 1); 
+    commit('PURCHASE_FEES_ARRAY', state.purchaseFeeArray);
   },
 };
   

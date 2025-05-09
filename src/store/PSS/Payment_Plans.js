@@ -4,7 +4,11 @@ import Swal from 'sweetalert2';
 const state = {
   plansList: [], 
   planArr: [],
+  purchasePlanArr: [],
+  salePlanArr: [],
   planArray: [],
+  purchasePlanArray: [],
+  salePlanArray: [],
   planID: '',
   planName: '',
   selectedPlan: null,
@@ -28,6 +32,12 @@ const mutations = {
   },
   PLANS_ARRAY(state, Plans){
     state.planArray = Plans;
+  },
+  PURCHASE_PLANS_ARRAY(state, Plans){
+    state.purchasePlanArray = Plans;
+  },
+  SALE_PLANS_ARRAY(state, Plans){
+    state.salePlanArray = Plans;
   },
   SET_STATE(state, payload) {
     for (const key in payload) {
@@ -76,6 +86,32 @@ const actions = {
     })
     
   },
+  async fetchSalePlans({ commit,state }, formData) {
+    state.salePlanArr = [];
+    await axios.post(`api/v1/get-payment-plans/`,formData)
+    .then((response)=>{
+      for(let i=0; i< response.data.length; i++){
+        state.salePlanArr.push((response.data[i].name))
+      }
+    })
+    .catch((error)=>{
+      console.log(error.message);
+    })
+    
+  },
+  async fetchPurchasePlans({ commit,state }, formData) {
+    state.purchasePlanArr = [];
+    await axios.post(`api/v1/get-payment-plans/`,formData)
+    .then((response)=>{
+      for(let i=0; i< response.data.length; i++){
+        state.purchasePlanArr.push((response.data[i].name))
+      }
+    })
+    .catch((error)=>{
+      console.log(error.message);
+    })
+    
+  },
   fetchPaymentPlan({ commit,state }, formData) {
     axios.post(`api/v1/get-payment-plans/`,formData)
     .then((response)=>{
@@ -93,9 +129,34 @@ const actions = {
     if (selectedPlan) {
         state.planID = selectedPlan.payment_plan_id;
         state.planName = selectedPlan.name;
+        selectedPlan.options = [{ text: 'Percentage', value: 'Percentage' },{ text: 'Fixed Amount', value: 'Fixed Amount' }, { text: 'None', value: 'None' }];
         state.planArray = [...state.planArray, selectedPlan];
     }
     commit('PLANS_ARRAY', state.planArray);
+      
+  },
+  handleSelectedPurchasePlan({ commit, state }, option){
+    state.purchasePlanArray = [];
+    const selectedPlan = state.plansList.find(plan => (plan.name) === option);
+    if (selectedPlan) {
+        state.planID = selectedPlan.payment_plan_id;
+        state.planName = selectedPlan.name;
+        selectedPlan.options = [{ text: 'Percentage', value: 'Percentage' },{ text: 'Fixed Amount', value: 'Fixed Amount' }, { text: 'None', value: 'None' }];
+        state.purchasePlanArray = [...state.purchasePlanArray, selectedPlan];
+    }
+    commit('PURCHASE_PLANS_ARRAY', state.purchasePlanArray);
+      
+  },
+  handleSelectedSalePlan({ commit, state }, option){
+    state.salePlanArray = [];
+    const selectedPlan = state.plansList.find(plan => (plan.name) === option);
+    if (selectedPlan) {
+        state.planID = selectedPlan.payment_plan_id;
+        state.planName = selectedPlan.name;
+        selectedPlan.options = [{ text: 'Percentage', value: 'Percentage' },{ text: 'Fixed Amount', value: 'Fixed Amount' }, { text: 'None', value: 'None' }];
+        state.salePlanArray = [...state.salePlanArray, selectedPlan];
+    }
+    commit('SALE_PLANS_ARRAY', state.salePlanArray);
       
   },
 
@@ -150,6 +211,18 @@ const actions = {
         Swal.fire(`Payment Plan has not been deleted!`);
       }
     })
+  },
+  removePlan({commit, state}, index){
+    state.planArray.splice(index, 1); 
+    commit('PLANS_ARRAY', state.planArray);
+  },
+  removeSalePlan({commit, state}, index){
+    state.salePlanArray.splice(index, 1); 
+    commit('SALE_PLANS_ARRAY', state.salePlanArray);
+  },
+  removePurchasePlan({commit, state}, index){
+    state.purchasePlanArray.splice(index, 1); 
+    commit('PURCHASE_PLANS_ARRAY', state.purchasePlanArray);
   },
 };
   
