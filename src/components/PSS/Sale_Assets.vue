@@ -40,21 +40,10 @@
     </div>
     <MovableModal v-model:visible="transModalVisible" :title="transTitle" :modal_top="modal_top" :modal_left="modal_left" :modal_width="modal_width"
         :loader="trans_modal_loader" @showLoader="showTransModalLoader" @hideLoader="hideTransModalLoader" @closeModal="closeTransModal">
-        <div class="mt-4 mb-8 w-full">       
-            <label for="">Date:</label><br />
-            <input v-model="exit_date"  type="date" class="`bg-slate-50 rounded pl-3 border border-gray-400 text-base w-full`"/>
-        </div>
-        <div class="mb-8 w-full">         
-            <label for="">Select Member Status:</label><br />
-            <select v-model="member_status" class="bg-slate-50 rounded border border-gray-400 text-sm pl-2 pt-2 w-full">
-                <option value="" selected disabled>Select Status</option>
-                <option value="Active">Active</option>
-                <option value="Inactive">Inactive</option>
-          </select>
-        </div>
-        <div class="flex-1 basis-full px-2">
-            <button @click="changeMemberStatus" class="rounded bg-green-400 text-sm mr-2  text-white px-2 py-1.5"><i class="fa fa-check-circle text-xs mr-1.5" aria-hidden="true"></i>Change Status</button>
-        </div>
+        <DynamicForm 
+            :fields="formFields" :flex_basis="flex_basis" :flex_basis_percentage="flex_basis_percentage" 
+            :displayButtons="displayButtons" @handleSubmit="approveAsset" @handleReset="handleReset"
+        />
     </MovableModal>
 
 </template>
@@ -105,7 +94,7 @@ export default{
         const showNextBtn = ref(false);
         const showPreviousBtn = ref(false);
         const detailsTitle = ref('Asset Documents');
-        const transTitle = ref('Changing Asset Status');
+        const transTitle = ref('Approve/Reject Asset');
         const transModalVisible = ref(false);
         const dropdownWidth = ref("500px")
         const modal_top = ref('200px');
@@ -124,10 +113,12 @@ export default{
             {label: "Selling As", key:"selling_as"},
             {label: "Location", key:"location"},
             {label: "Units", key:"units_quantity"},
+            {label: "Status", key:"approval_status", textColor: "textColor"},
         ])
         const actions = ref([
             {name: 'edit', icon: 'fa fa-edit', title: 'Edit Asset', rightName: 'Editing Sale Assets'},
             {name: 'view', icon: 'fa fa-file-pdf-o', title: 'View Profile', rightName: 'Viewing Sale Assets'},
+            {name: 'approve/reject', icon: 'fa fa-check-circle', title: 'Approve/Reject Asset', rightName: 'Approving Sale Assets'},
             {name: 'delete', icon: 'fa fa-trash', title: 'Delete Asset', rightName: 'Deleting Sale Assets'},
         ])
         const companyID = computed(()=> store.state.userData.company_id);
@@ -153,6 +144,17 @@ export default{
         const importMembers = () =>{
             
         };
+        const formFields = ref([]);
+        const updateFormFields = () => {
+            formFields.value = [
+                { type: 'dropdown', name: 'approval_status',label: "Status", value: '', placeholder: "", required: true, options: [{ text: 'Approve', value: 'Approved' }, { text: 'Reject', value: 'Rejected' }] },
+            ]
+        };
+        const handleReset = () =>{
+            for(let i=0; i < formFields.value.length; i++){
+                formFields.value[i].value = '';
+            }
+        }
 
         const removeSaleAsset = async() =>{
             if(selectedIds.value.length == 1){
@@ -211,56 +213,31 @@ export default{
         const hideTransModalLoader = () =>{
             trans_modal_loader.value = "none";
         }
-        const changeMemberStatus = async() =>{
+        const approveAsset = async() =>{
             showTransModalLoader();
             let formData = {
                 sale_asset: assetID.value,
+                approval_status: formFields.value[0].value,
                 company: companyID.value
             }
-            Swal.fire({
-            title: "Are you sure?",
-            text: `Do you wish to Change Status?`,
-            type: 'warning',
-            showCloseButton: true,
-            showCancelButton: true,
-            confirmButtonText: 'Yes, Change Status!',
-            cancelButtonText: 'Cancel!',
-            customClass: {
-                confirmButton: 'swal2-confirm-custom',
-                cancelButton: 'swal2-cancel-custom',
-            },
-            showLoaderOnConfirm: true,
-            }).then((result) => {
-            if (result.value) {
-                axios.post(`api/v1/change-sale-asset-status/`,formData)
-                .then((response)=>{
-                if(response.data.msg == "Success"){
-                    Swal.fire("Status changed succesfully!", {
-                        icon: "success",
-                    }); 
-                    unitComponentKey.value += 1;
-                    closeTransModal();
-                    searchSaleAssets();
-                }else{
-                    Swal.fire({
-                    title: "Error Changing Asset Status",
-                    icon: "warning",
-                    });
-                }                   
-                })
-                .catch((error)=>{
-                    console.log(error.message);
-                    Swal.fire({
-                        title: error.message,
-                        icon: "warning",
-                    });
-                    hideTransModalLoader();
-                })
-            }else{
-                Swal.fire(`Asset Status has not been changed!`);
+
+            axios.post(`api/v1/approve-sale-asset/`,formData)
+            .then((response)=>{
+            if(response.data.msg == "Success"){
                 hideTransModalLoader();
-            }
-            })     
+                closeTransModal();
+                toast.success("Success")
+                searchSaleAssets();
+            }else{
+                toast.error("Error");
+                hideTransModalLoader();
+            }                   
+            })
+            .catch((error)=>{
+                console.log(error.message);
+                toast.error(error.message);
+                hideTransModalLoader();
+            })
         };
         const closeTransModal = () =>{
             transModalVisible.value = false;
@@ -372,7 +349,19 @@ export default{
                 then(()=>{
                     store.commit('pageTab/ADD_PAGE', {'PSS':'Asset_Details'})
                     store.state.pageTab.pssActiveTab = 'Asset_Details';
+                    
                 })
+            }else if(action == 'approve/reject'){
+                const assetStatus = row['approval_status']
+                if(assetStatus == 'Pending'){
+                    updateFormFields();
+                    assetID.value = row['sale_asset_id'];
+                    transModalVisible.value = true;
+                    flex_basis.value = '1/2';
+                    flex_basis_percentage.value = '50';
+                }else{
+                    toast.error(`Asset Already ${assetStatus}`)
+                }
             }else if(action == 'delete'){
                 const assetID = [row[idField]];
                 let formData = {
@@ -451,8 +440,8 @@ export default{
             loadPrev, loadNext, firstPage, lastPage, idField, actions, handleActionClick,showDetails,detailsTitle,hideDetails,
             submitButtonLabel, showModal, addNewAsset, showLoader, loader, hideLoader, importMembers, removeSaleAsset, removeSaleAssets,
             handleSelectionChange,addingRight,removingRight,rightsModule,printAssetsList,selectSearchQuantity,selectedValue,
-            modal_left,modal_top,modal_width,trans_modal_loader,transModalVisible,transTitle,showTransModalLoader,hideTransModalLoader,changeMemberStatus,closeTransModal,
-            dropdownOptions,handleDynamicOption,member_status,exit_date,
+            modal_left,modal_top,modal_width,trans_modal_loader,formFields,transModalVisible,transTitle,showTransModalLoader,hideTransModalLoader,approveAsset,closeTransModal,
+            handleReset,dropdownOptions,handleDynamicOption,member_status,exit_date,
         }
     }
 };

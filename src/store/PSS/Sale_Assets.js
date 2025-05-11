@@ -21,8 +21,9 @@ const state = {
     selectedVendor: null,
     isEditing: false,
     assetDetails: [],
-    outstandingBalance: 0,
-    receiptItems: [],
+    saleCharges: [],
+    purchaseCharges: [],
+    salePlans: [],
 };
   
 const mutations = {
@@ -44,7 +45,9 @@ const mutations = {
     state.selectedModel = null;
     state.isEditing = false;
     state.assetDetails = [];
-    state.receiptItems = [];
+    state.saleCharges = [];
+    state.purchaseCharges = [];
+    state.salePlans = [];
     state.assetCategoryID = "";
   },
   SET_SELECTED_ASSET(state, Asset) {
@@ -65,6 +68,15 @@ const mutations = {
   },
   SET_ASSET_DETAILS(state, details){
     state.assetDetails = details;
+  },
+  SET_SALE_CHARGES(state, charges){
+    state.saleCharges = charges;
+  },
+  SET_PURCHASE_CHARGES(state, charges){
+    state.purchaseCharges = charges;
+  },
+  SET_SALE_PLANS(state, plans){
+    state.salePlans = plans;
   },
 
   LIST_ASSETS(state, Assets) {
@@ -108,7 +120,7 @@ const actions = {
   },
 
   async updateSaleAsset({ commit,state }, formData) {
-    return axios.post('api/v1/update-sale-asset/', formData)
+    return axios.put('api/v1/update-sale-asset/', formData)
     .then((response)=>{
       return response;
     })
@@ -132,7 +144,7 @@ const actions = {
     })
     
   },
-  fetchAsset({ commit,state }, formData) {
+  fetchSaleAsset({ commit,state }, formData) {
     axios.post(`api/v1/get-sale-assets/`,formData)
     .then((response)=>{
         state.selectedAsset = response.data;
@@ -142,6 +154,9 @@ const actions = {
         commit('SET_SELECTED_MAKE',(response.data.asset_make != null) ? (response.data.asset_make.name) : "");
         commit('SET_SELECTED_VENDOR',(response.data.vendor != null) ? (response.data.vendor.vendor_code + " - "+ response.data.vendor.vendor_name) : "");
         commit('SET_SELECTED_CURRENCY',response.data.asset_currency.code + " - " + response.data.asset_currency.name);
+        commit('SET_SALE_CHARGES',response.data.sale_charges);
+        commit('SET_PURCHASE_CHARGES',response.data.purchase_charges);
+        commit('SET_SALE_PLANS',response.data.sale_plans);
     })   
     .catch((error)=>{
       console.log(error.message);
@@ -162,7 +177,7 @@ const actions = {
       
   },
 
-  deleteAsset({ commit,state }, formData) {
+  deleteSaleAsset({ commit,state }, formData) {
     Swal.fire({
       title: "Are you sure?",
       text: `Do you wish to delete Asset?`,

@@ -150,7 +150,10 @@ const actions = {
         state.feeID = selectedFee.asset_fee_id;
         state.feeName = selectedFee.fee_name;
         selectedFee.asset_asset_fee_id = null;
-        state.saleFeeArray = [...state.saleFeeArray, selectedFee];
+        const exists = state.saleFeeArray.some(asset_fee => asset_fee.asset_fee_id === selectedFee.asset_fee_id);
+        if (!exists) {
+            state.saleFeeArray = [...state.saleFeeArray, selectedFee];
+        }
     }
     commit('SALE_FEES_ARRAY', state.saleFeeArray);
       
@@ -161,7 +164,10 @@ const actions = {
         state.feeID = selectedFee.asset_fee_id;
         state.feeName = selectedFee.fee_name;
         selectedFee.asset_asset_fee_id = null;
-        state.purchaseFeeArray = [...state.purchaseFeeArray, selectedFee];
+        const exists = state.purchaseFeeArray.some(asset_fee => asset_fee.asset_fee_id === selectedFee.asset_fee_id);
+        if (!exists) {
+            state.purchaseFeeArray = [...state.purchaseFeeArray, selectedFee];
+        }
     }
     commit('PURCHASE_FEES_ARRAY', state.purchaseFeeArray);
       

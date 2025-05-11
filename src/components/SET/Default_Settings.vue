@@ -315,8 +315,7 @@
                                     :updateValue="selectedLedger"
                                     :dropdownWidth="dropdownWidth"
                                     @option-selected="handleSelectedLedger"
-                                    @clearSearch="clearSelectedLedger"   
-                                    @fetchData="fetchLedgers"                              
+                                    @clearSearch="clearSelectedLedger"                              
                                 />
                                 <button type="button" class="absolute ml-4 rounded px-2 bg-green-500 text-white" @click="saveDefaultSetting('Inventory','Inventory Stock Control A/c',ledgerID,ledgerName)"><i class="fa fa-check"></i></button>
                             </div>
@@ -328,7 +327,7 @@
                                     :dropdownWidth="dropdownWidth"
                                     @option-selected="handleSelectedLedger"
                                     @clearSearch="clearSelectedLedger"
-                                    @fetchData="fetchIncomeLedgers"   
+    
                                 />
                                 <button type="button" class="absolute ml-4 rounded px-2 bg-green-500 text-white" @click="saveDefaultSetting('Inventory','Inventory Sales Income A/c',ledgerID,ledgerName)"><i class="fa fa-check"></i></button>
                             </div>
@@ -420,6 +419,103 @@
                     </div>
                 </div>
                 <div class="border-b-2 border-gray-500 px-3 py-2 text-left">
+                    <button class="w-full text-left font-semibold" @click="showPSSSettings">Asset Sale Default Settings</button>
+                    <div class="w-full mt-4" v-if="pss_settings_options">
+                        <div class="flex mb-1.5">
+                            <div class="basis-1/4 flex mr-3">
+                                <label for="">Current:<em></em></label>
+                                <p class="ml-4 font-bold">{{ saleAssetAccount }}</p>
+                                <button type="button" class="ml-4 text-red-600" @click="removeDefaultSetting('PSS','Sale Asset Control A/c',saleAssetAccount)" v-if="saleAssetAccount"><i class="fa fa-times" aria-hidden="true"></i></button>
+                            </div>
+                        </div>
+                        <div class="flex mb-3">
+                            <div class="basis-1/4 mr-8 relative">
+                                <label for="">Sale Asset Control A/c:<em>*</em></label><br />
+                                <SearchableDropdown
+                                    :options="ledgerArr"
+                                    :updateValue="selectedRentalIncome"
+                                    :dropdownWidth="dropdownWidth"
+                                    @option-selected="handleSelectedLedger"
+                                    @clearSearch="clearSelectedLedger"   
+                                  
+                                />
+                                <button type="button" class="absolute ml-4 rounded px-2 bg-green-500 text-white" @click="saveDefaultSetting('PSS','Sale Asset Control A/c',ledgerID,ledgerName)"><i class="fa fa-check"></i></button>
+                            </div>
+                            <div class="basis-1/6 mr-3 relative">
+                            </div>
+                            <div class="basis-1/6 mr-3 relative">
+                            </div>
+                        </div>
+                        <div class="flex mb-1.5">
+                            <div class="basis-1/4 flex mr-3">
+                                <label for="">Current:<em></em></label>
+                                <p class="ml-4 font-bold">{{ saleAssetCommission }}</p>
+                                <button type="button" class="ml-4 text-red-600" @click="removeDefaultSetting('PSS','Sale Asset Commission Income A/c',saleAssetCommission)" v-if="saleAssetCommission"><i class="fa fa-times" aria-hidden="true"></i></button>
+                            </div>
+                        </div>
+                        <div class="flex mb-3">
+                            <div class="basis-1/4 mr-8 relative">
+                                <label for="">Sale Asset Commission Income A/c:<em>*</em></label><br />
+                                <SearchableDropdown
+                                    :options="incomeLedgerArr"
+                                    :updateValue="selectedSalesIncome"
+                                    :dropdownWidth="dropdownWidth"
+                                    @option-selected="handleSelectedLedger"
+                                    @clearSearch="clearSelectedLedger"
+                                    @fetchData="fetchIncomeLedgers"   
+                                />
+                                <button type="button" class="absolute ml-4 rounded px-2 bg-green-500 text-white" @click="saveDefaultSetting('PSS','Sale Asset Commission Income A/c',ledgerID,ledgerName)"><i class="fa fa-check"></i></button>
+                            </div>
+                            <div class="basis-1/6 relative mr-3">
+                            </div>
+                            <div class="basis-1/6 relative mr-3">
+                            </div>
+                        </div>
+                        <div class="flex mb-1.5">
+                            <div class="basis-1/2 flex mr-3">
+                                <label for="">Current:<em></em></label>
+                                <p class="ml-4 font-bold">{{ assetSaleIncome }}</p>
+                                <button type="button" class="ml-4 text-red-600" @click="removeDefaultSetting('PSS','Asset Sale Income A/c',assetSaleIncome)" v-if="assetSaleIncome"><i class="fa fa-times" aria-hidden="true"></i></button>
+                            </div>
+                        </div>
+                        <div class="flex mb-3">
+                            <div class="basis-1/4 mr-3 relative">
+                                <label for="">Asset Sale Income A/c:<em>*</em></label><br />
+                                <SearchableDropdown
+                                    :options="incomeLedgerArr"
+                                    :updateValue="selectedBalancingAccount"
+                                    :dropdownWidth="dropdownWidth"
+                                    @option-selected="handleSelectedLedger"
+                                    @clearSearch="clearSelectedLedger"
+    
+                                />
+                                <button type="button" class="absolute ml-4 rounded px-2 bg-green-500 text-white" @click="saveDefaultSetting('PSS','Asset Sale Income A/c',ledgerID,ledgerName)"><i class="fa fa-check"></i></button>
+                            </div>
+                        </div>
+                        <div class="flex mb-1.5">
+                            <div class="basis-1/2 flex mr-3">
+                                <label for="">Current:<em></em></label>
+                                <p class="ml-4 font-bold">{{ saleInterestIncome }}</p>
+                                <button type="button" class="ml-4 text-red-600" @click="removeDefaultSetting('PSS','Sale Interest Posting A/c',saleInterestIncome)" v-if="saleInterestIncome"><i class="fa fa-times" aria-hidden="true"></i></button>
+                            </div>
+                        </div>
+                        <div class="flex mb-3">
+                            <div class="basis-1/4 mr-3 relative">
+                                <label for="">Sale Interest Posting A/c:<em>*</em></label><br />
+                                <SearchableDropdown
+                                    :options="incomeLedgerArr"
+                                    :updateValue="selectedBalancingAccount"
+                                    :dropdownWidth="dropdownWidth"
+                                    @option-selected="handleSelectedLedger"
+                                    @clearSearch="clearSelectedLedger"
+                                    
+                                />
+                                <button type="button" class="absolute ml-4 rounded px-2 bg-green-500 text-white" @click="saveDefaultSetting('PSS','Sale Interest Posting A/c',ledgerID,ledgerName)"><i class="fa fa-check"></i></button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="border-b-2 border-gray-500 px-3 py-2 text-left">
                     <button class="w-full text-left font-semibold" @click="showSettingsSettings">Settings Default Settings</button>
                     <div class="w-full mt-4" v-if="settings_settings_options">
                         <div class="flex mb-3">
@@ -480,6 +576,7 @@ export default defineComponent({
         const settings_settings_options = ref(false);
         const accounts_settings_options = ref(false);
         const membership_settings_options = ref(false);
+        const pss_settings_options = ref(false);
 
         const rentalIncome = ref("");
         const rentalSecurityDeposit = ref("");
@@ -524,6 +621,11 @@ export default defineComponent({
         const channelID = ref("");
         const channelName = ref("");
 
+        const saleAssetAccount = ref("");
+        const assetSaleIncome = ref("");
+        const saleAssetCommission = ref("");
+        const saleInterestIncome = ref("");
+
         const showHMSSettings = () =>{
             fetchDefaultSetting('HMS');
             inventory_settings_options.value = false;
@@ -532,6 +634,7 @@ export default defineComponent({
             hr_settings_options.value  = false;
             settings_settings_options.value = false;
             membership_settings_options.value  = false;
+            pss_settings_options.value  = false;
             hms_settings_options.value  = !hms_settings_options.value ;
         }
 
@@ -543,6 +646,7 @@ export default defineComponent({
             hr_settings_options.value  = false;
             settings_settings_options.value = false;
             membership_settings_options.value  = false;
+            pss_settings_options.value  = false;
             pms_settings_options.value  = !pms_settings_options.value ;
         }
         const showMembershipSettings = () =>{
@@ -553,6 +657,7 @@ export default defineComponent({
             hr_settings_options.value  = false;
             settings_settings_options.value = false;
             hms_settings_options.value = false;
+            pss_settings_options.value  = false;
             membership_settings_options.value  = !membership_settings_options.value ;
         }
         const showAccountsSettings = () =>{
@@ -563,6 +668,7 @@ export default defineComponent({
             hr_settings_options.value  = false;
             settings_settings_options.value = false;
             membership_settings_options.value  = false;
+            pss_settings_options.value  = false;
             accounts_settings_options.value  = !accounts_settings_options.value ;
         }
         const showInventorySettings = () =>{
@@ -574,6 +680,7 @@ export default defineComponent({
             hr_settings_options.value  = false;
             settings_settings_options.value = false;
             membership_settings_options.value  = false;
+            pss_settings_options.value  = false;
             inventory_settings_options.value  = !inventory_settings_options.value ;
         }
         const showHRSettings = () =>{
@@ -584,8 +691,20 @@ export default defineComponent({
             inventory_settings_options.value  = false;
             settings_settings_options.value = false;
             membership_settings_options.value  = false;
+            pss_settings_options.value  = false;
             hr_settings_options.value  = !hr_settings_options.value ;
-        }    
+        } 
+        const showPSSSettings = () =>{
+            fetchDefaultSetting('PSS');
+            hms_settings_options.value = false;
+            accounts_settings_options.value = false;
+            pms_settings_options.value = false;
+            inventory_settings_options.value  = false;
+            inventory_settings_options.value = false;
+            membership_settings_options.value  = false;
+            settings_settings_options.value  = false;
+            pss_settings_options.value  = !pss_settings_options.value ;
+        }   
         const showSettingsSettings = () =>{
             fetchDefaultSetting('Settings');
             hms_settings_options.value = false;
@@ -594,6 +713,7 @@ export default defineComponent({
             inventory_settings_options.value  = false;
             inventory_settings_options.value = false;
             membership_settings_options.value  = false;
+            pss_settings_options.value  = false;
             settings_settings_options.value  = !settings_settings_options.value ;
         }
 
@@ -793,6 +913,16 @@ export default defineComponent({
                         directSaleOrder.value = response.data[i].setting_value_name;
                     }
 
+                    else if(response.data[i].setting_name === 'Sale Asset Control A/c'){
+                        saleAssetAccount.value = response.data[i].setting_value_name;
+                    }else if(response.data[i].setting_name === 'Sale Asset Commission Income A/c'){
+                        saleAssetCommission.value = response.data[i].setting_value_name;
+                    }else if(response.data[i].setting_name === 'Asset Sale Income A/c'){
+                        assetSaleIncome.value = response.data[i].setting_value_name;
+                    }else if(response.data[i].setting_name === 'Sale Interest Posting A/c'){
+                        saleInterestIncome.value = response.data[i].setting_value_name;
+                    }
+
                     else if(response.data[i].setting_name === 'Default System Timeout'){
                         defaultTimeout.value = response.data[i].setting_value_name;
                     }
@@ -874,19 +1004,21 @@ export default defineComponent({
         }
     
         onMounted(()=>{ 
-            store.dispatch("Ledgers/fetchLedgers", {company:companyID.value})
+            // store.dispatch("Ledgers/fetchLedgers", {company:companyID.value})
+            fetchLedgers();
         })
 
         return{
-            loader,showLoader,hideLoader,hms_settings_options,inventory_settings_options,pms_settings_options,hr_settings_options,accounts_settings_options,membership_settings_options,
-            settings_settings_options, showHMSSettings, showPMSSettings, showAccountsSettings, showInventorySettings, showHRSettings, showSettingsSettings,showMembershipSettings,
+            loader,showLoader,hideLoader,hms_settings_options,inventory_settings_options,pms_settings_options,hr_settings_options,accounts_settings_options,membership_settings_options,pss_settings_options,
+            settings_settings_options, showHMSSettings, showPMSSettings, showAccountsSettings, showInventorySettings, showHRSettings, showSettingsSettings,showMembershipSettings,showPSSSettings,
             dropdownWidth,incomePlaceholder, ledgerArr, incomeLedgerArr, expenseLedgerArr, liabilityLedgerArr, cashbookLedgerArr, fetchIncomeLedgers, fetchExpenseLedgers,
             fetchCashbookLedgers, fetchLiabilityLedgers, rentalIncome, rentalSecurityDeposit, rentalLeaseIncome, rentalPenaltyIncome,fetchLedgers,
             ledgerID,ledgerName, handleSelectedLedger, clearSelectedLedger, saveDefaultSetting, removeDefaultSetting, tenantCodePrefix, tenantCodeCounter,pmsAutoInvoiceOption,tenantInvoiceDay,
             patientsOption,duplicatesOption, debtorsOption, vendorsOption, tenantsOption, fetchRetailOutlets,handleSelectedOutlet, clearSelectedOutlet, fetchOutletCounters,outletID,outletName,counterID,counterName,
             channelID,channelName,handleSelectedCounter, clearSelectedCounter, fetchCounterChannels,handleSelectedChannel, clearSelectedChannel,outletCounterArr,retailOutletArr,counterChannelArr,
             retailOutlet, outletCounter, counterChannel, salesIncome, invTakeOn, stockControl, stockType,directSaleOrder,defaultTimeout,
-            mmsAutoPenalizeOption,mmsStrictGuarantorshipOption,mmsBalReminderOption,penaltyAutoTime
+            mmsAutoPenalizeOption,mmsStrictGuarantorshipOption,mmsBalReminderOption,penaltyAutoTime,
+            saleAssetAccount,saleAssetCommission,assetSaleIncome,saleInterestIncome
         }
     }
 });

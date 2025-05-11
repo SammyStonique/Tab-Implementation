@@ -106,6 +106,9 @@ export default defineComponent({
         const selectedCurrency = computed(()=> store.state.Sale_Assets.selectedCurrency);
         const selectedVendor = computed(()=> store.state.Sale_Assets.selectedVendor);
         const selectedModel = computed(()=> store.state.Sale_Assets.selectedModel);
+        const saleCharges = computed(()=> store.state.Sale_Assets.saleCharges);
+        const purchaseCharges = computed(()=> store.state.Sale_Assets.purchaseCharges);
+        const salePlans = computed(()=> store.state.Sale_Assets.salePlans);
         const flex_basis = ref('');
         const flex_basis_percentage = ref('');
         const additional_flex_basis = ref('');
@@ -246,7 +249,7 @@ export default defineComponent({
                 { type: 'dropdown', name: 'unit_measure',label: "Unit Measure", value: selectedAsset.value?.unit_measure || '', placeholder: "", required: true, options: [{ text: 'Plots', value: 'Plots' }, { text: 'Acres', value: 'Acres' },{ text: 'Units', value: 'Units' }, { text: 'Sqr Ft', value: 'Sqr Ft' },{ text: 'Sqr Mtr', value: 'Sqr Mtr' }] },
                 { type: 'number', name: 'units_quantity',label: "No of Units", value: selectedAsset.value?.units_quantity || 1, required: true },
                 { type: 'text', name: 'size_per_unit',label: "Unit Size", value: selectedAsset.value?.size_per_unit || '', required: false },
-                { type: 'text', name: 'number_of_floors',label: "Floors", value: selectedAsset.value?.number_of_floors || '', required: false },
+                { type: 'number', name: 'number_of_floors',label: "Floors", value: selectedAsset.value?.number_of_floors || 0, required: false },
                 {  
                     type:'search-dropdown', label:"Currency", value: currencyValue.value, componentKey: currComponentKey,
                     selectOptions: currencyArray, optionSelected: handleSelectedCurrency, required: true,
@@ -311,10 +314,10 @@ export default defineComponent({
         }
         const updateAdditionalFormFields1 = () => {
             additionalFields1.value = [
-                { type: 'number', name: 'value',label: "Asset Cost", value: 0, required: false },
-                { type: 'number', name: 'value',label: "Unit Cost", value: 0, required: false },
-                { type: 'number', name: 'value',label: "Mark Up(%)", value: 0, required: false , method: calculateSellingPrice},
-                { type: 'number', name: 'value',label: "Unit Selling Price", value: 0, required: false },
+                { type: 'number', name: 'value',label: "Asset Cost", value: selectedAsset.value?.value || 0, required: false, disabled: true },
+                { type: 'number', name: 'value',label: "Unit Cost", value: selectedAsset.value?.asset_unit_cost || 0, required: false, disabled: true },
+                { type: 'number', name: 'value',label: "Mark Up(%)", value: selectedAsset.value?.selling_markup || 0, required: false , method: calculateSellingPrice},
+                { type: 'number', name: 'value',label: "Unit Selling Price", value: selectedAsset.value?.unit_selling_price || 0, required: false },
             ];
         };
 
@@ -326,12 +329,16 @@ export default defineComponent({
             ];
         };
 
-        watch([makeID, modelID], () => {
+        watch([makeID, modelID, selectedAsset], () => {
             if (makeID.value != "") {
                 formFields.value[12].value = makeID.value;
             }
             if(modelID.value != ""){
                 formFields.value[13].value = modelID.value;
+            }
+            if(selectedAsset.value){
+                store.dispatch('Asset_Fees/updateState', { saleFeeArray: saleCharges.value, purchaseFeeArray: purchaseCharges.value})
+                store.dispatch('Payment_Plans/updateState', { salePlanArray: salePlans.value})
             }
         }, { immediate: true });
 
@@ -343,6 +350,7 @@ export default defineComponent({
                 vendComponentKey.value += 1;
                 updateFormFields();
                 updateAdditionalFormFields();
+                updateAdditionalFormFields1();
                 updateAdditionalFormFields2();
             }
             else if(selectedAsset.value && selectedCurrency.value && selectedMake.value){
@@ -350,23 +358,27 @@ export default defineComponent({
                 depComponentKey.value += 1;
                 updateFormFields();
                 updateAdditionalFormFields();
+                updateAdditionalFormFields1();
                 updateAdditionalFormFields2();
             }else if(selectedAsset.value && selectedCurrency.value && selectedModel.value){
                 currComponentKey.value += 1;
                 userComponentKey.value += 1;
                 updateFormFields();
                 updateAdditionalFormFields();
+                updateAdditionalFormFields1();
                 updateAdditionalFormFields2();
             }else if(selectedAsset.value && selectedCurrency.value && selectedVendor.value){
                 currComponentKey.value += 1;
                 vendComponentKey.value += 1;
                 updateFormFields();
                 updateAdditionalFormFields();
+                updateAdditionalFormFields1();
                 updateAdditionalFormFields2();
             }else if(selectedAsset.value && selectedCurrency.value){
                 currComponentKey.value += 1;
                 updateFormFields();
                 updateAdditionalFormFields();
+                updateAdditionalFormFields1();
                 updateAdditionalFormFields2();
             }else if(selectedAsset.value){
                 updateFormFields();
@@ -385,8 +397,15 @@ export default defineComponent({
             for(let i=0; i < additionalFields.value.length; i++){
                 additionalFields.value[i].value = '';
             }
-            await store.dispatch('Asset_Fees/updateState', {feeArray: []});
-            await store.dispatch('Members/updateState', {selectedAsset: null, selectedModel: null, selectedCurrency: null, selectedMake: null, isEditing:false});
+            for(let i=0; i < additionalFields1.value.length; i++){
+                additionalFields1.value[i].value = '';
+            }
+            for(let i=0; i < additionalFields2.value.length; i++){
+                additionalFields2.value[i].value = '';
+            }
+            await store.dispatch('Payment_Plans/updateState', {purchasePlanArray: [], salePlanArray: []});
+            await store.dispatch('Asset_Fees/updateState', {saleFeeArray: [], purchaseFeeArray: []});
+            await store.dispatch('Sale_Assets/updateState', {selectedAsset: null, selectedVendor: null, selectedModel: null, selectedCurrency: null, selectedMake: null,saleCharges:[],purchaseCharges:[],salePlans:[], isEditing:false});
             mainComponentKey.value += 1;
             userComponentKey.value += 1;
             currComponentKey.value += 1;
@@ -419,10 +438,11 @@ export default defineComponent({
                 size_per_unit: formFields.value[9].value,
                 units_quantity: formFields.value[8].value,
                 unit_cost: additionalFields1.value[1].value,
+                selling_markup: additionalFields1.value[2].value,
                 unit_selling_price: additionalFields1.value[3].value,
                 registration_number: formFields.value[1].value,
                 approval_status: 'Pending',
-                number_of_floors: formFields.value[10].value,
+                number_of_floors: formFields.value[10].value || 0,
                 notes: formFields.value[14].value,
                 asset_currency: currencyID.value,
                 asset_currency_id: currencyID.value,
@@ -468,11 +488,11 @@ export default defineComponent({
             }
 
         }
-        const updateSaleASset = async() =>{
+        const updateSaleAsset = async() =>{
             showLoader();
             errors.value = [];
             let formData = {
-                sale_asset_id: selectedAsset.value.sale_asset_id,
+                sale_asset: selectedAsset.value.sale_asset_id,
                 asset_code: formFields.value[0].value || '-',
                 asset_type: formFields.value[2].value,
                 name: formFields.value[4].value,
@@ -487,13 +507,14 @@ export default defineComponent({
                 size_per_unit: formFields.value[9].value,
                 units_quantity: formFields.value[8].value,
                 unit_cost: additionalFields1.value[1].value,
+                selling_markup: additionalFields1.value[2].value,
                 unit_selling_price: additionalFields1.value[3].value,
                 registration_number: formFields.value[1].value,
                 approval_status: selectedAsset.value.approval_status,
-                number_of_floors: formFields.value[10].value,
+                number_of_floors: formFields.value[10].value || 0,
                 notes: formFields.value[14].value,
-                asset_currency: currencyID.value,
-                asset_currency_id: currencyID.value,
+                asset_currency: currencyValue.value,
+                asset_currency_id: currencyValue.value,
                 vendor: vendorValue.value,
                 vendor_id: vendorValue.value,
                 asset_make: makeValue.value,
@@ -518,11 +539,14 @@ export default defineComponent({
                     toast.error('Fill In Required Fields');
             }else{
                 try {
-                    const response = await store.dispatch('Sale_Assets/updateSaleASset', formData);
+                    const response = await store.dispatch('Sale_Assets/updateSaleAsset', formData);
                     if (response && response.status === 200) {
                         hideLoader();
                         toast.success("Asset updated successfully!");
                         handleReset();
+                        store.commit('pageTab/REMOVE_PAGE', {'PSS':'Asset_Details'})
+                        store.commit('pageTab/ADD_PAGE', {'PSS':'Sale_Assets'})
+                        store.state.pageTab.pssActiveTab = 'Sale_Assets';
                     } else {
                         toast.error('An error occurred while updating the Asset.');
                     }
@@ -536,7 +560,7 @@ export default defineComponent({
         }
         const saveSaleAsset = () =>{
             if(isEditing.value == true){
-                updateSaleASset();
+                updateSaleAsset();
             }else{
                 createSaleAsset();
             }

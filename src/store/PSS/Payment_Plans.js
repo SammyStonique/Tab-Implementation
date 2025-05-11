@@ -130,7 +130,12 @@ const actions = {
         state.planID = selectedPlan.payment_plan_id;
         state.planName = selectedPlan.name;
         selectedPlan.options = [{ text: 'Percentage', value: 'Percentage' },{ text: 'Fixed Amount', value: 'Fixed Amount' }, { text: 'None', value: 'None' }];
+        selectedPlan.asset_sale_plan_id = null;
         state.planArray = [...state.planArray, selectedPlan];
+        const exists = state.planArray.some(plan => plan.payment_plan_id === selectedPlan.payment_plan_id);
+        if (!exists) {
+            state.planArray = [...state.planArray, selectedPlan];
+        }
     }
     commit('PLANS_ARRAY', state.planArray);
       
@@ -142,7 +147,11 @@ const actions = {
         state.planID = selectedPlan.payment_plan_id;
         state.planName = selectedPlan.name;
         selectedPlan.options = [{ text: 'Percentage', value: 'Percentage' },{ text: 'Fixed Amount', value: 'Fixed Amount' }, { text: 'None', value: 'None' }];
-        state.purchasePlanArray = [...state.purchasePlanArray, selectedPlan];
+        selectedPlan.asset_sale_plan_id = null;
+        const exists = state.purchasePlanArray.some(plan => plan.payment_plan_id === selectedPlan.payment_plan_id);
+        if (!exists) {
+            state.purchasePlanArray = [...state.purchasePlanArray, selectedPlan];
+        }
     }
     commit('PURCHASE_PLANS_ARRAY', state.purchasePlanArray);
       
@@ -154,7 +163,11 @@ const actions = {
         state.planID = selectedPlan.payment_plan_id;
         state.planName = selectedPlan.name;
         selectedPlan.options = [{ text: 'Percentage', value: 'Percentage' },{ text: 'Fixed Amount', value: 'Fixed Amount' }, { text: 'None', value: 'None' }];
-        state.salePlanArray = [...state.salePlanArray, selectedPlan];
+        selectedPlan.asset_sale_plan_id = null;
+        const exists = state.salePlanArray.some(plan => plan.payment_plan_id === selectedPlan.payment_plan_id);
+        if (!exists) {
+            state.salePlanArray = [...state.salePlanArray, selectedPlan];
+        }
     }
     commit('SALE_PLANS_ARRAY', state.salePlanArray);
       
