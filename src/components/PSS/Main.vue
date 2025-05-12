@@ -35,32 +35,17 @@ import Payment_Plans from '@/components/PSS/Payment_Plans.vue';
 import Asset_Fees from '@/components/PSS/Asset_Fees.vue';
 import Sale_Assets from '@/components/PSS/Sale_Assets.vue';
 import Asset_Details from '@/components/PSS/Asset_Details.vue';
-
-import Import_Members from '@/components/MMS/Import_Members.vue';
+import Asset_Units from '@/components/PSS/Asset_Units.vue';
+import Unit_Categories from '@/components/PSS/Unit_Categories.vue';
+import Clients from '@/components/PSS/Clients.vue';
+import Vendors from '@/components/PSS/Vendors.vue';
+import Sales_Agents from '@/components/PSS/Sales_Agents.vue';
+import Unit_Reservations from '@/components/PSS/Unit_Reservations.vue';
+import Reservation_Details from '@/components/PSS/Reservation_Details.vue';
 
 
 import Member_Invoices from '@/components/MMS/Member_Invoices.vue';
 import Member_Receipts from '@/components/MMS/Member_Receipts.vue';
-import Savings_Products from '@/components/MMS/Savings_Products.vue';
-import Saving_Product_Details from '@/components/MMS/Saving_Product_Details.vue';
-import Shares_Products from '@/components/MMS/Shares_Products.vue';
-import Share_Product_Details from '@/components/MMS/Share_Product_Details.vue';
-import Saving_Accounts from '@/components/MMS/Saving_Accounts.vue';
-import Saving_Account_Details from '@/components/MMS/Saving_Account_Details.vue';
-import Import_Saving_Accounts from '@/components/MMS/Import_Saving_Accounts.vue';
-import Saving_Transfers from '@/components/MMS/Saving_Transfers.vue';
-import Interest_Rates from '@/components/MMS/Interest_Rates.vue';
-import Interest_Processing from '@/components/MMS/Interest_Processing.vue';
-import Share_Accounts from '@/components/MMS/Share_Accounts.vue';
-import Share_Account_Details from '@/components/MMS/Share_Account_Details.vue';
-import Import_Share_Accounts from '@/components/MMS/Import_Share_Accounts.vue';
-import Saving_Deposits from '@/components/MMS/Saving_Deposits.vue';
-import Import_Saving_Deposits from '@/components/MMS/Import_Saving_Deposits.vue';
-import Share_Deposits from '@/components/MMS/Share_Deposits.vue';
-import Import_Share_Deposits from '@/components/MMS/Import_Share_Deposits.vue';
-import Share_Transfers from '@/components/MMS/Share_Transfers.vue';
-import Dividend_Rates from '@/components/MMS/Dividend_Rates.vue';
-import Dividend_Processing from '@/components/MMS/Dividend_Processing.vue';
 import Loan_Products from '@/components/MMS/Loan_Products.vue';
 import Loan_Product_Details from '@/components/MMS/Loan_Product_Details.vue';
 
@@ -96,13 +81,10 @@ export default{
         NavBarPSS,
         PagesTab,
         Dashboard,
-        Sale_Assets,Import_Members,Asset_Details,Asset_Makes,Receipt_Details,Asset_Models,
-        Member_Invoices,Member_Receipts,Savings_Products,Saving_Product_Details,Shares_Products,Share_Product_Details,Saving_Accounts,Share_Accounts,
-        Saving_Deposits,Share_Deposits,Loan_Products,Loan_Product_Details,Loan_Applications,Loan_Application_Details,Loan_Guarantors,Loan_Ledger,
-        Loan_Disbursements,Import_Saving_Accounts,Import_Share_Accounts,Import_Saving_Deposits,Import_Share_Deposits,Payment_Plans,Loan_Securities,
-        Loan_Schedules,Loan_Penalties,Penalty_Batches,Loan_Documents,Application_Fees,Historical_Loans,Import_Historical_Loans,Historical_Loan_Ledger,
-        Loan_Arrears,Saving_Transfers,Share_Transfers,Loan_Prepayments,Prepayment_Allocations,Interest_Rates,Dividend_Rates,Interest_Processing,Dividend_Processing,
-        Templates,Design_Template,Share_Account_Details,Saving_Account_Details,Risk_Classifications,Asset_Fees,
+        Sale_Assets,Asset_Details,Asset_Makes,Receipt_Details,Asset_Models,Asset_Units,Unit_Categories,Clients,Vendors,Sales_Agents,Unit_Reservations,Reservation_Details,
+        Member_Invoices,Member_Receipts,Loan_Products,Loan_Product_Details,Loan_Applications,Loan_Application_Details,Loan_Guarantors,Loan_Ledger,
+        Loan_Disbursements,Payment_Plans,Loan_Securities,Loan_Schedules,Loan_Penalties,Penalty_Batches,Loan_Documents,Application_Fees,Historical_Loans,Import_Historical_Loans,Historical_Loan_Ledger,
+        Loan_Arrears,Loan_Prepayments,Prepayment_Allocations,Templates,Design_Template,Risk_Classifications,Asset_Fees,
 
         Default_Settings
     },

@@ -53,7 +53,6 @@
                             <i class="fa fa-user pt-2 mr-2" aria-hidden="true"></i>
                             <p class="">Customers</p>
                         </button>
-
                     </div>
                 </div>
             </div>
@@ -84,7 +83,6 @@
                             <i class="fa fa-truck pt-2 mr-2" aria-hidden="true"></i>
                             <p class="">Vendors</p>
                         </button>
-
                     </div>
                 </div>
             </div>

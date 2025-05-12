@@ -134,6 +134,11 @@ import Asset_Models from './PSS/Asset_Models';
 import Payment_Plans from './PSS/Payment_Plans';
 import Asset_Fees from './PSS/Asset_Fees';
 import Sale_Assets from './PSS/Sale_Assets';
+import Asset_Units from './PSS/Asset_Units';
+import Unit_Categories from './PSS/Unit_Categories';
+import Asset_Clients from './PSS/Asset_Clients';
+import Sales_Agents from './PSS/Sales_Agents';
+import Unit_Reservations from './PSS/Unit_Reservations';
 
 
 import Default_Settings from './SET/Default_Settings';
@@ -175,7 +180,7 @@ export default createStore({
     Penalty_Batches,Loan_Documents,Historical_Loans,Loan_Arrears,Saving_Transfers,Share_Transfers,Loan_Prepayments,Loan_Prepayment_Alloc,Interest_Rates,Interest_Processing,
     Dividend_Rates,Dividend_Processing,Member_Templates,Risk_Classifications,Loan_Classifications,
 
-    Asset_Makes,Asset_Models,Payment_Plans,Asset_Fees,Sale_Assets,
+    Asset_Makes,Asset_Models,Payment_Plans,Asset_Fees,Sale_Assets,Asset_Units,Unit_Categories,Asset_Clients,Sales_Agents,Unit_Reservations,
 
     Default_Settings,Companies,Branches,User_Rights,SMS_Integrations,Email_Integrations,Mpesa_Integrations,Mpesa_Transactions,Banks,SMS_Templates,Email_Templates
   },

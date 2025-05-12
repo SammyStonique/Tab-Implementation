@@ -271,6 +271,7 @@ export default{
         const searchProducts = () =>{
             showLoader();
             showNextBtn.value = false;
+            selectedIds.value = [];
             showPreviousBtn.value = false;
             let formData = {
                 product_name: name_search.value,
@@ -307,6 +308,7 @@ export default{
             searchProducts(selectedValue.value);
         };
         const resetFilters = () =>{
+            currentPage.value = 1;
             selectedValue.value = 50;
             name_search.value = "";
             active_status_search.value = "";
@@ -418,7 +420,7 @@ export default{
         })
         return{
             searchProducts,resetFilters, addButtonLabel, searchFilters, tableColumns, productsList,dropdownWidth,displayButtons,
-            propResults, propArrLen, propCount, pageCount, showNextBtn, showPreviousBtn,flex_basis,flex_basis_percentage,
+            currentPage, propResults, propArrLen, propCount, pageCount, showNextBtn, showPreviousBtn,flex_basis,flex_basis_percentage,
             loadPrev, loadNext, firstPage, lastPage, idField, actions, handleActionClick,showDetails,detailsTitle,hideDetails,
             submitButtonLabel, showModal, addNewProduct, showLoader, loader, hideLoader, removeProduct, removeProducts,
             handleSelectionChange,addingRight,removingRight,rightsModule,printproductsList,selectSearchQuantity,selectedValue,
