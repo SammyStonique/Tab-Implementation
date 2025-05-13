@@ -104,7 +104,7 @@ const actions = {
     state.customerArray = [];
     const selectedCustomer = state.customersList.find(customer => (customer.client_code + " - " +customer.client_name) === option);
     if (selectedCustomer) {
-        state.customerID = selectedCustomer.client_id;
+        state.customerID = selectedCustomer.asset_sale_client_id;
         state.customerName = selectedCustomer.client_name;
         state.customerEmail = selectedCustomer.email;
         state.customerPhoneNo = selectedCustomer.phone_number;

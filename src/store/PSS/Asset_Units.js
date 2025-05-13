@@ -104,13 +104,16 @@ const actions = {
     
   },
   handleSelectedUnit({ commit, state }, option){
-    state.unitArray = [];
     const selectedUnit = state.unitsList.find(unit => (unit.unit_number) === option);
     if (selectedUnit) {
         state.unitID = selectedUnit.asset_unit_id;
         state.unitNumber = selectedUnit.unit_number;
         state.unitPrice = selectedUnit.unit_selling_price;
-        state.unitArray = [...state.unitArray, selectedUnit];
+        selectedUnit.reserved_unit_id = null;
+        const exists = state.unitArray.some(unit => unit.asset_unit_id === selectedUnit.asset_unit_id);
+        if (!exists) {
+            state.unitArray = [...state.unitArray, selectedUnit];
+        }
     }
     commit('UNITS_ARRAY', state.unitArray);
       
@@ -167,6 +170,10 @@ const actions = {
         Swal.fire(`Unit has not been deleted!`);
       }
     })
+  },
+  removeAssetUnit({commit, state}, index){
+    state.unitArray.splice(index, 1); 
+    commit('UNITS_ARRAY', state.unitArray);
   },
 };
   

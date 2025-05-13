@@ -103,7 +103,7 @@ export default{
             {label: "ID No", key:"client_id_number"},
             {label: "Units", key:"reserved_units"},
             {label: "Days", key:"days_reserved"},
-            {label: "Status", key:"status"},
+            {label: "Status", key:"status", textColor: "textColor"},
         ])
         const actions = ref([
             {name: 'edit', icon: 'fa fa-edit', title: 'Edit Reservation', rightName: 'Editing Unit Reservations'},
@@ -285,6 +285,7 @@ export default{
         const addNewReservation = async() =>{
             store.commit('Unit_Reservations/initializeStore');
             await store.dispatch('Unit_Reservations/updateState', {selectedReservation: null,selectedAsset: null,selectedClient: null,isEditing: false});
+            await store.dispatch('Asset_Units/updateState', {unitArray: []});
             store.commit('pageTab/ADD_PAGE', {'PSS':'Reservation_Details'});
             store.state.pageTab.pssActiveTab = 'Reservation_Details';          
         }

@@ -10,6 +10,7 @@ const state = {
   selectedReservation: null,
   selectedAsset: null,
   selectedClient: null,
+  reservedUnits: [],
   isEditing: false
 };
   
@@ -21,6 +22,9 @@ const mutations = {
     state.reservationDetails = [];
     state.reservationID = '';
     state.selectedReservation = null;
+    state.selectedAsset = null;
+    state.selectedClient = null;
+    state.reservedUnits = [];
     state.isEditing = false;
   },
   SET_SELECTED_RESERVATION(state, reservation) {
@@ -32,6 +36,9 @@ const mutations = {
   },
   SET_SELECTED_CLIENT(state, client) {
     state.selectedClient = client;
+  },
+  SET_SELECTED_UNITS(state, units) {
+    state.reservedUnits = units;
   },
   LIST_RESERVATIONS(state, reservations) {
     state.reservationsList = reservations;
@@ -92,7 +99,9 @@ const actions = {
     axios.post(`api/v1/get-unit-reservations/`,formData)
     .then((response)=>{
       state.selectedReservation = response.data;
+      state.reservedUnits = response.data.reserved_units;
       commit('SET_SELECTED_RESERVATION',response.data);
+      commit('SET_SELECTED_UNITS',response.data.reserved_units);
       commit('SET_SELECTED_ASSET',response.data.asset.asset_code + " - " + response.data.asset.name);
       commit('SET_SELECTED_CLIENT',(response.data.customer != null) ? (response.data.customer.client_code + " - "+ response.data.customer.client_name) : "");
       commit('SET_RESERVATION_DETAILS',response.data);

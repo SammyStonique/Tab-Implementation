@@ -103,76 +103,16 @@
 
             <div class="web-links dropdown w-36">
                 <div class="py-0.5 px-2.5 h-full hover:bg-slate-500 hover:rounded">
-                    <button class="flex w-full" @click="showLoansDropdown">
+                    <button class="flex w-full" @click="showSalesDropdown">
                         <i class="fa fa-file-contract pt-2 mr-2" aria-hidden="true"></i>
-                        <p class="pt-1.5">Loans</p>
+                        <p class="pt-1.5">Sales</p>
                     </button>
                 </div>
-                <div class="dropdown-content w-56 absolute rounded border border-gray-200 bg-white shadow-slate-400 shadow-sm" v-if="loans_dropdowns">
+                <div class="dropdown-content w-56 absolute rounded border border-gray-200 bg-white shadow-slate-400 shadow-sm" v-if="sales_dropdown">
                     <div class="py-2 px-3 pl-4 w-full hover:bg-slate-500 hover:w-full">
-                        <button class="flex text-sm w-full" @click="openPage({'PSS':'Loan_Products'})">
+                        <button class="flex text-sm w-full" @click="openPage({'PSS':'Asset_Sales'})">
                             <i class="fa fa-file-contract pt-2 mr-2" aria-hidden="true"></i>
-                            <p class="">Loan Products</p>
-                        </button>
-                    </div>
-                    <div class="py-2 px-3 pl-4 w-full hover:bg-slate-500 hover:w-full">
-                        <button class="flex text-sm w-full" @click="openPage({'PSS':'Loan_Applications'})">
-                            <i class="fa fa-handshake pt-2 mr-2" aria-hidden="true"></i>
-                            <p class="">Loan Applications</p>
-                        </button>
-                    </div>
-                    <div class="py-2 px-3 pl-4 w-full hover:bg-slate-500 hover:w-full">
-                        <button class="flex text-sm w-full" @click="openPage({'PSS':'Loan_Guarantors'})">
-                            <i class="fa fa-users pt-2 mr-2" aria-hidden="true"></i>
-                            <p class="">Loan Guarantors</p>
-                        </button>
-                    </div>
-                    <div class="py-2 px-3 pl-4 w-full hover:bg-slate-500 hover:w-full">
-                        <button class="flex text-sm w-full" @click="openPage({'PSS':'Loan_Securities'})">
-                            <i class="fa fa-user-shield pt-2 mr-2" aria-hidden="true"></i>
-                            <p class="">Loan Securities</p>
-                        </button>
-                    </div>
-                    <div class="py-2 px-3 pl-4 w-full hover:bg-slate-500 hover:w-full">
-                        <button class="flex text-sm w-full" @click="openPage({'PSS':'Loan_Documents'})">
-                            <i class="fa fa-file-image pt-2 mr-2" aria-hidden="true"></i>
-                            <p class="">Loan Documents</p>
-                        </button>
-                    </div>
-                    <div class="py-2 px-3 pl-4 w-full hover:bg-slate-500 hover:w-full">
-                        <button class="flex text-sm w-full" @click="openPage({'PSS':'Loan_Disbursements'})">
-                            <i class="fa fa-credit-card pt-2 mr-2" aria-hidden="true"></i>
-                            <p class="">Loan Disbursements</p>
-                        </button>
-                    </div>
-                    <div class="py-2 px-3 pl-4 w-full hover:bg-slate-500 hover:w-full">
-                        <button class="flex text-sm w-full" @click="openPage({'PSS':'Loan_Arrears'})">
-                            <i class="fa fa-coins pt-2 mr-2" aria-hidden="true"></i>
-                            <p class="">Loan Arrears</p>
-                        </button>
-                    </div>
-                    <div class="py-2 px-3 pl-4 w-full hover:bg-slate-500 hover:w-full">
-                        <button class="flex text-sm w-full" @click="openPage({'PSS':'Loan_Schedules'})">
-                            <i class="fa fa-calendar-check pt-2 mr-2" aria-hidden="true"></i>
-                            <p class="">Loan Schedules</p>
-                        </button>
-                    </div>
-                    <div class="py-2 px-3 pl-4 w-full hover:bg-slate-500 hover:w-full">
-                        <button class="flex text-sm w-full" @click="openPage({'PSS':'Historical_Loans'})">
-                            <i class="fa fa-handshake pt-2 mr-2" aria-hidden="true"></i>
-                            <p class="">Historical Loans</p>
-                        </button>
-                    </div>
-                    <div class="py-2 px-3 pl-4 w-full hover:bg-slate-500 hover:w-full">
-                        <button class="flex text-sm w-full" @click="openPage({'PSS':'Loan_Prepayments'})">
-                            <i class="fa fa-list-ul pt-2 mr-2" aria-hidden="true"></i>
-                            <p class="">Loan Prepayments</p>
-                        </button>
-                    </div>
-                    <div class="py-2 px-3 pl-4 w-full hover:bg-slate-500 hover:w-full">
-                        <button class="flex text-sm" @click="openPage({'PSS':'Loan_Classifications'})">
-                        <i class="fa fa-user-shield pt-2 mr-2" aria-hidden="true"></i>
-                        <p class="">Loan Risk Classifications</p>
+                            <p class="">Sales</p>
                         </button>
                     </div>
                     
@@ -275,7 +215,7 @@ export default defineComponent({
         const units_dropdown = ref(false);
         const clients_dropdown = ref(false);
         const projects_dropdown = ref(false);
-        const loans_dropdowns = ref(false);
+        const sales_dropdown = ref(false);
         const finances_dropdown = ref(false);
         const userDetails = ref([]);
         const dropdown = ref(false);
@@ -284,7 +224,7 @@ export default defineComponent({
             clients_dropdown.value = false;
             settings_dropdown.value = false;
             projects_dropdown.value  = false;
-            loans_dropdowns.value = false;
+            sales_dropdown.value = false;
             dropdown.value = true;
             finances_dropdown.value  = false;
             units_dropdown.value  = !units_dropdown.value ;
@@ -293,7 +233,7 @@ export default defineComponent({
             clients_dropdown.value = false;
             settings_dropdown.value = false;
             units_dropdown.value  = false;
-            loans_dropdowns.value = false;
+            sales_dropdown.value = false;
             finances_dropdown.value  = false;
             dropdown.value = true;
             projects_dropdown.value  = !projects_dropdown.value ;
@@ -302,7 +242,7 @@ export default defineComponent({
             settings_dropdown.value = false;
             units_dropdown.value  = false;
             projects_dropdown.value = false;
-            loans_dropdowns.value = false;
+            sales_dropdown.value = false;
             finances_dropdown.value  = false;
             dropdown.value = true;
             clients_dropdown.value  = !clients_dropdown.value ;
@@ -311,26 +251,26 @@ export default defineComponent({
             clients_dropdown.value = false;
             units_dropdown.value  = false;
             projects_dropdown.value  = false;
-            loans_dropdowns.value = false;
+            sales_dropdown.value = false;
             finances_dropdown.value  = false;
             dropdown.value = true;
             settings_dropdown.value  = !settings_dropdown.value ;
         }
-        const showLoansDropdown = () =>{
+        const showSalesDropdown = () =>{
             clients_dropdown.value = false;
             units_dropdown.value  = false;
             projects_dropdown.value  = false;
             settings_dropdown.value = false;
             finances_dropdown.value  = false;
             dropdown.value = true;
-            loans_dropdowns.value  = !loans_dropdowns.value ;
+            sales_dropdown.value  = !sales_dropdown.value ;
         }
         const showFinancesDropdown = () =>{
             clients_dropdown.value = false;
             units_dropdown.value  = false;
             projects_dropdown.value  = false;
             settings_dropdown.value = false;
-            loans_dropdowns.value = false;
+            sales_dropdown.value = false;
             dropdown.value = true;
             finances_dropdown.value  = !finances_dropdown.value ;
         }
@@ -339,7 +279,7 @@ export default defineComponent({
             units_dropdown.value  = false;
             projects_dropdown.value  = false;
             settings_dropdown.value = false;
-            loans_dropdowns.value = false;
+            sales_dropdown.value = false;
             finances_dropdown.value  = false;
             dropdown.value = false;
         }
@@ -352,8 +292,8 @@ export default defineComponent({
             store.commit('modulesTab/MINIMIZE_TAB')
         };
         return{
-            dropdown, settings_dropdown, clients_dropdown, units_dropdown, loans_dropdowns,projects_dropdown, finances_dropdown,
-            user_profile,userDetails, closeDropdown,showUnitsDropdown, showClientsDropdown,showProjectsDropdown, showLoansDropdown,
+            dropdown, settings_dropdown, clients_dropdown, units_dropdown, sales_dropdown,projects_dropdown, finances_dropdown,
+            user_profile,userDetails, closeDropdown,showUnitsDropdown, showClientsDropdown,showProjectsDropdown, showSalesDropdown,
             showSettingsDropdown, showFinancesDropdown,openPage,showHomePage
         }
     },
