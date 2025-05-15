@@ -15,7 +15,7 @@ const state = {
     isEditing: false,
     saleDetails: [],
     saleCharges: [],
-    purchaseCharges: [],
+    saleUnits: [],
 };
   
 const mutations = {
@@ -33,6 +33,7 @@ const mutations = {
     state.isEditing = false;
     state.saleDetails = [];
     state.saleCharges = [];
+    state.saleUnits = [];
   },
   SET_SELECTED_SALE(state, Sale) {
     state.selectedSale = Sale;
@@ -127,10 +128,11 @@ const actions = {
     .then((response)=>{
         state.selectedSale = response.data;
         state.selectedSaleID = response.data.asset_sale_id;
+        state.saleUnits = response.data.sale_units;
         commit('SET_SELECTED_SALE',response.data);
         commit('SET_SELECTED_ASSET',response.data.asset.asset_code + " - " + response.data.asset.name);
         commit('SET_SELECTED_CLIENT',response.data.customer.client_code + " - " + response.data.customer.client_name);
-        commit('SET_SELECTED_PLAN',response.data.payment_plan.name);
+        commit('SET_SELECTED_PLAN',response.data.payment_plan.payment_plan.name + " - Pay. Mode: " + response.data.payment_plan.payment_plan.payment_mode + ", Instlmnts: "+ response.data.payment_plan.installments);
         commit('SET_SELECTED_AGENT',(response.data.sales_agent != null) ? (response.data.sales_agent.name) : "");
         commit('SET_SALE_CHARGES',response.data.sale_charges);
     })   

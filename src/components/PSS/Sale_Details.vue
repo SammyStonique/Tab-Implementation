@@ -6,7 +6,7 @@
                 <DynamicForm  :fields="formFields" :flex_basis="flex_basis" :flex_basis_percentage="flex_basis_percentage" :displayButtons="displayButtons" @handleSubmit="saveAssetSale" @handleReset="handleReset"> 
                     <template v-slot:additional-content>
                         <div class="border border-slate-200 rounded relative py-1.5 mt-3 px-2 min-h-[180px]">
-                            <h1 class="font-bold absolute top-[-13px] left-5 bg-white">Sales Plan & Charges</h1>
+                            <h1 class="font-bold absolute top-[-13px] left-5 bg-white">Sales Units & Charges</h1>
                             <div class="tabs pt-2">
                                 <button v-for="(tab, index) in tabs" :key="tab" :class="['tab', { active: activeTab === index }]"@click="selectTab(index)">
                                     {{ tab }}
@@ -14,18 +14,9 @@
                             </div>
                             <div class="tab-content">
                                 <div v-show="activeTab == 0">
-                                    <DynamicForm :fields="additionalFields1" :flex_basis="additional_flex_basis" :flex_basis_percentage="additional_flex_basis_percentage" @handleReset="handleReset"/>
-                                    <div class="text-left p-2">
-                                        <SearchableDropdown 
-                                            :key="planComponentKey"
-                                            :options="planArr"
-                                            :dropdownWidth="chargesDropdownWidth"
-                                            :searchPlaceholder="plansSearchPlaceholder"
-                                            @option-selected="handleSelectedPlan"
-                                            @fetchData="fetchData"
-                                        />
-                                    </div>                      
-                                    <DynamicTable :key="tableKey" :columns="planColumns" :rows="planRows" :idField="idFieldPlan" :actions="actionPlans" @action-click="deletePlan" :rightsModule="rightsModule" />
+                                    <div class="border border-slate-200 rounded relative py-4 w-[75%] mt-3 px-2 min-h-[180px]">
+                                        <DynamicTable :key="tableKey" :columns="unitColumns" :rows="unitRows" :actions="actionUnits" @action-click="deleteUnit" :rightsModule="rightsModule" />
+                                    </div>
                                 </div>
                                 <div v-show="activeTab == 1">
                                     <div class="text-left p-2">
@@ -37,8 +28,13 @@
                                             @option-selected="handleSelectedSaleCharge"
                                             @fetchData="fetchData"
                                         />
-                                    </div>                      
-                                    <DynamicTable :key="tableKey" :columns="chargeColumns" :rows="saleChargeRows" :idField="idFieldCharge" :actions="actionCharges" @action-click="deleteSaleCharge" :rightsModule="rightsModule" />
+                                    </div>  
+                                    <div class="border border-slate-200 rounded relative py-4 w-[50%] mt-3 px-2 min-h-[180px]">                    
+                                        <DynamicTable :key="tableKey" :columns="chargeColumns" :rows="saleChargeRows" :idField="idFieldCharge" :actions="actionCharges" @action-click="deleteSaleCharge" :rightsModule="rightsModule" />
+                                    </div>
+                                </div>
+                                <div v-show="activeTab == 2">
+                                    <DynamicForm :fields="additionalFields" :flex_basis="additional_flex_basis" :flex_basis_percentage="additional_flex_basis_percentage" @handleReset="handleReset"/>
                                 </div>
                             </div>
                         </div>
@@ -67,14 +63,14 @@ export default defineComponent({
         const store = useStore();
         const toast = useToast();
         const loader = ref('none');
-        const tabs = ref(['Selling Details','Selling Charges']);
+        const tabs = ref(['Asset Units','Selling Charges','Sale Commission']);
         const mainComponentKey = ref(0);
-        const depComponentKey = ref(0);
-        const userComponentKey = ref(0);
-        const currComponentKey = ref(0);
-        const vendComponentKey = ref(0);
-        const chargeComponentKey = ref(0);
+        const clientComponetKey = ref(0);
         const planComponentKey = ref(0);
+        const assetComponentKey = ref(0);
+        const agentComponentKey = ref(0);
+        const unitComponentKey = ref(0);
+        const chargeComponentKey = ref(0);
         const activeTab = ref(0);
         const rightsModule = ref('PSS');
         const displayButtons = ref(true);
@@ -82,33 +78,67 @@ export default defineComponent({
         const tableKey = ref(0);
         const errors = ref([]);
         const companyID = computed(()=> store.state.userData.company_id);
+        const userID = computed(()=> store.state.userData.user_id);
+        const selectedSale = computed(()=> store.state.Asset_Sales.selectedSale);
+        const selectedClient = computed(()=> store.state.Asset_Sales.selectedClient);
         const selectedAsset = computed(()=> store.state.Asset_Sales.selectedAsset);
-        const selectedMake = computed(()=> store.state.Asset_Sales.selectedMake);
-        const selectedCurrency = computed(()=> store.state.Asset_Sales.selectedCurrency);
-        const selectedVendor = computed(()=> store.state.Asset_Sales.selectedVendor);
-        const selectedModel = computed(()=> store.state.Asset_Sales.selectedModel);
+        const selectedAgent = computed(()=> store.state.Asset_Sales.selectedAgent);
+        const selectedPlan = computed(()=> store.state.Asset_Sales.selectedPlan);
         const saleCharges = computed(()=> store.state.Asset_Sales.saleCharges);
-        const purchaseCharges = computed(()=> store.state.Asset_Sales.purchaseCharges);
-        const salePlans = computed(()=> store.state.Asset_Sales.salePlans);
+        const saleUnits = computed(()=> store.state.Asset_Sales.saleUnits);
+        const defSaleCharges = computed(()=> store.state.Sale_Assets.saleCharges);
         const flex_basis = ref('');
         const flex_basis_percentage = ref('');
         const additional_flex_basis = ref('');
         const additional_flex_basis_percentage = ref('');
         const isEditing = computed(()=> store.state.Asset_Sales.isEditing);
-        const vendorArray = computed(() => store.state.Vendors.vendorArr);
-        const makeArray = computed(() => store.state.Asset_Makes.makeArr);
-        const modelArr = computed(() => store.state.Asset_Models.modelArr);
-        const currencyArray = computed(() => store.state.Currencies.currencyArr);
+        const agentArray = computed(() => store.state.Sales_Agents.agentArr);
+        const clientArray = computed(() => store.state.Asset_Clients.customerArr);
+        const assetArray = computed(() => store.state.Sale_Assets.assetArr);
         const saleChargeArr = computed(() => store.state.Asset_Fees.saleFeeArr);
-        const purchaseChargeArr = computed(() => store.state.Asset_Fees.purchaseFeeArr);
-        const planArr = computed(() => store.state.Payment_Plans.salePlanArr);
+        const planArray = computed(() => store.state.Payment_Plans.salePlanArr);
+        const units_array = computed(() => store.state.Asset_Units.unitArr);
         const chargesDropdownWidth = ref('400px');
         const chargesSearchPlaceholder = ref('Select Charge...');
-        const plansSearchPlaceholder = ref('Select Plan...');
-        const makeID = ref('');
-        const modelID = ref('');
-        const currencyID = ref('');
-        const vendorID = ref('');
+        const clientID = ref('');
+        const assetID = ref('');
+        const planID = ref('');
+        const salePlanTermsArr = ref([]);
+        const payMode = ref("");
+        const depositMode = ref("");
+        const depositValue = ref(0);
+        const installments = ref("");
+        const interestMethod = ref("");
+        const interestValue = ref(0);
+        const interestMode = ref("");
+        const balanceMode = ref("");
+        const actualDeposit = ref(0);
+        const computedDepositMode = computed(() => depositMode);
+        const computedDepositValue = computed(() => depositValue);
+        const computedInstallments = computed(() => installments);
+        const computedInterestMethod = computed(() => interestMethod);
+        const computedInterestValue = computed(() => interestValue);
+        const computedInterestMode = computed(() => interestMode);
+        const computedBalanceMode = computed(() => balanceMode);
+        const computedActualDepositValue = computed(() => actualDeposit);
+        const agentID = ref('');
+        const actionUnits = ref([
+            {name: 'delete', icon: 'fa fa-minus-circle', title: 'Remove Unit', rightName: 'Adding Asset Sales'},
+        ])
+        const unitColumns = ref([
+            {label: "Unit Number", key:"unit_number", type: "text", editable: false},
+            {label: "Selling Price", key:"unit_selling_price", type: "number", editable: true},
+            {label: "Discount", key:"discount", type: "number", editable: true},
+            {label: "Charges", key:"charges_amount", type: "number", editable: true},
+            {label: "Total", key:"sale_total_amount", type: "number", editable: false},
+        ]);
+        const unitRows = computed(() => {
+            return store.state.Asset_Units.unitArray;
+        });
+        const deleteUnit = (rowIndex, action, row) =>{
+            store.dispatch('Asset_Units/removeAssetUnit', rowIndex);
+            tableKey.value += 1;
+        };
         const chargeColumns = ref([
             {label: "Name", key:"fee_name", type: "text", editable: false},
             {label: "Charge Mode", key:"charge_mode", type: "text", editable: false},
@@ -117,78 +147,99 @@ export default defineComponent({
         const saleChargeRows = computed(() => {
             return store.state.Asset_Fees.saleFeeArray;
         });
-        const purchaseChargeRows = computed(() => {
-            return store.state.Asset_Fees.purchaseFeeArray;
-        });
         const idFieldCharge = 'asset_fee_id';
         const actionCharges = ref([
             {name: 'delete', icon: 'fa fa-minus-circle', title: 'Remove Charge', rightName: 'Adding Sale Assets'},
-        ])
-        const planColumns = ref([
-            {label: "Name", key:"name", type: "text", editable: false},
-            {label: "Payment Mode", key:"payment_mode", type: "text", editable: false},
-            {label: "Installments", key:"installments", type: "text", editable: true},
-            {label: "Deposit Mode", key:"deposit_mode", type: "dropdown", editable: false},
-            {label: "Deposit Value", key:"deposit_value", type: "text", editable: true},
         ]);
-        const planRows = computed(() => {
-            return store.state.Payment_Plans.salePlanArray;
-        });
-        const idFieldPlan = 'payment_plan_id';
-        const actionPlans = ref([
-            {name: 'delete', icon: 'fa fa-minus-circle', title: 'Remove Plan', rightName: 'Adding Sale Assets'},
-        ])
-        const fetchAssetMakes = async() =>{
-            await store.dispatch('Asset_Makes/fetchAssetMakes', {company:companyID.value});
+        const fetchAssetClients = async() =>{
+            await store.dispatch('Asset_Clients/fetchAssetClients', {company:companyID.value});
         };
-        const handleSelectedMake = async(option) =>{
-            await store.dispatch('Asset_Makes/handleSelectedMake', option)
-            makeID.value = store.state.Asset_Makes.makeID;
-            fetchAssetModels(makeID.value)
+        const handleSelectedClient = async(option) =>{
+            await store.dispatch('Asset_Clients/handleSelectedCustomer', option)
+            clientID.value = store.state.Asset_Clients.customerID;
         };
-        const clearSelectedMake = async() =>{
-            await store.dispatch('Asset_Makes/updateState', {makeID: ''});
-            makeID.value = store.state.Asset_Makes.makeID;   
-            if(selectedAsset.value && selectedAsset.value.asset_make != ""){
-                selectedAsset.value.asset_make.asset_make_id = makeID.value;
-                makeValue.value = makeID.value
+        const clearSelectedClient = async() =>{
+            await store.dispatch('Asset_Clients/updateState', {customerID: ''});
+            clientID.value = store.state.Asset_Clients.customerID;   
+            if(selectedSale.value && selectedSale.value.customer != ""){
+                selectedSale.value.customer.asset_sale_client_id = clientID.value;
+                clientValue.value = clientID.value
             } 
         };
-        const fetchAssetModels = async(makeID) =>{
-            await store.dispatch('Asset_Models/fetchAssetModels', {company:companyID.value, asset_make:makeID});
+        const handleSelectedPlan = async(option) =>{
+            await store.dispatch('Payment_Plans/handleSelectedAssetSalePlan', option)
+            planID.value = store.state.Payment_Plans.planID;
+            payMode.value = store.state.Payment_Plans.payMode;
+            depositMode.value = store.state.Payment_Plans.depositMode;
+            depositValue.value = store.state.Payment_Plans.depositValue;
+            installments.value = store.state.Payment_Plans.installments;
+            interestMethod.value = store.state.Payment_Plans.interestMethod;
+            interestValue.value = store.state.Payment_Plans.interestValue;
+            interestMode.value = store.state.Payment_Plans.interestMode;
+            balanceMode.value = store.state.Payment_Plans.balanceMode;
+
+            if(payMode.value == "Hire Purchase"){
+                formFields.value[5].hidden = false;
+                formFields.value[6].hidden = false;
+                formFields.value[7].hidden = false;
+                formFields.value[8].hidden = false;
+                formFields.value[9].hidden = false;
+                formFields.value[10].hidden = false;
+                formFields.value[11].hidden = false;
+                formFields.value[12].hidden = false;
+                formFields.value[13].hidden = false;
+            }else{
+                formFields.value[5].hidden = true;
+                formFields.value[6].hidden = true;
+                formFields.value[7].hidden = true;
+                formFields.value[8].hidden = true;
+                formFields.value[9].hidden = true;
+                formFields.value[10].hidden = true;
+                formFields.value[11].hidden = true;
+                formFields.value[12].hidden = true;
+                formFields.value[13].hidden = true;
+            }
         };
-        const handleSelectedModel = async(option) =>{
-            await store.dispatch('Asset_Models/handleSelectedModel', option)
-            modelID.value = store.state.Asset_Models.modelID;
-        };
-        const clearSelectedModel = async() =>{
-            await store.dispatch('Asset_Models/updateState', {modelID: ''});
-            modelID.value = store.state.Asset_Models.modelID;
-            if(selectedAsset.value && selectedAsset.value.asset_model != ""){
-                selectedAsset.value.asset_model.asset_model_id = modelID.value;
-                modelValue.value = modelID.value
+        const clearSelectedPlan = async() =>{
+            await store.dispatch('Payment_Plans/updateState', {planID: ''});
+            planID.value = store.state.Payment_Plans.planID;   
+            if(selectedSale.value && selectedSale.value.payment_plan != ""){
+                selectedSale.value.payment_plan.payment_plan_id = planID.value;
+                planValue.value = planID.value
             } 
         };
-        const handleSelectedCurrency = async(option) =>{
-            await store.dispatch('Currencies/handleSelectedCurrency', option)
-            currencyID.value = store.state.Currencies.currencyID;
-            if(selectedAsset.value){
-                selectedAsset.value.asset_currency.currency_id = currencyID.value;
+        const fetchAssetUnits = async(assetID) =>{
+            await store.dispatch('Asset_Units/fetchAssetUnits', {company:companyID.value, asset: assetID, status: ["Available"]});
+        };
+        const handleSelectedUnit = async(option) =>{
+            await store.dispatch('Asset_Units/handleSelectedUnit', option)
+            unitComponentKey.value += 1;
+        };
+        const handleSelectedAsset = async(option) =>{
+            await store.dispatch('Sale_Assets/handleSelectedAsset', option)
+            assetID.value = store.state.Sale_Assets.assetID;
+            fetchAssetUnits(assetID.value)
+            fetchSalePlans(assetID.value)
+            store.dispatch('Asset_Fees/updateState', {saleFeeArray: defSaleCharges.value});
+            if(selectedSale.value){
+                selectedSale.value.asset.sale_asset_id = assetID.value;
+                fetchAssetUnits(assetID.value)
+                fetchSalePlans(assetID.value)
             }
         }
-        const clearSelectedCurrency = async() =>{
-            await store.dispatch('Currencies/updateState', {currencyID: ''});
-            currencyID.value = store.state.Currencies.currencyID;
+        const clearSelectedAsset = async() =>{
+            await store.dispatch('Sale_Assets/updateState', {assetID: ''});
+            assetID.value = store.state.Sale_Assets.assetID;
         }
 
-        const fetchCurrencies = async() =>{
-            await store.dispatch('Currencies/fetchCurrencies', {company:companyID.value})
+        const fetchSaleAssets = async() =>{
+            await store.dispatch('Sale_Assets/fetchSaleAssets', {company:companyID.value})
         };
         const fetchPlans = async() =>{
             await store.dispatch('Payment_Plans/fetchPaymentPlans', {company:companyID.value})
         };
-        const fetchSalePlans = async() =>{
-            await store.dispatch('Payment_Plans/fetchSalePlans', {company:companyID.value, category: 'Sale'})
+        const fetchSalePlans = async(assetID) =>{
+            await store.dispatch('Payment_Plans/fetchAssetSalePlans', {company:companyID.value, asset: assetID})
         };
         const fetchCharges = async() =>{
             await store.dispatch('Asset_Fees/fetchAssetFees', {company:companyID.value})
@@ -196,204 +247,217 @@ export default defineComponent({
         const fetchSaleCharges = async() =>{
             await store.dispatch('Asset_Fees/fetchAssetSaleFees', {company:companyID.value, charge_time:['Sale','Purchase & Sale']})
         };
-        const fetchPurchaseCharges = async() =>{
-            await store.dispatch('Asset_Fees/fetchAssetPurchaseFees', {company:companyID.value, charge_time:['Purchase','Purchase & Sale']})
-        };
         const formFields = ref();
-        const currencyValue = computed(() => {
-           return (selectedAsset.value && selectedAsset.value.asset_currency && !currencyID.value) ? selectedAsset.value.asset_currency.currency_id : currencyID.value;
+        const assetValue = computed(() => {
+           return (selectedSale.value && selectedSale.value.asset && !assetID.value) ? selectedSale.value.asset.sale_asset_id : assetID.value;
         });
-        const makeValue = computed(() => {
-           return (selectedAsset.value && selectedAsset.value.asset_make && !makeID.value) ? selectedAsset.value.asset_make.asset_make_id : makeID.value;
+        const clientValue = computed(() => {
+           return (selectedSale.value && selectedSale.value.customer && !clientID.value) ? selectedSale.value.customer.asset_sale_client_id : clientID.value;
         });
-        const modelValue = computed(() => {
-           return (selectedAsset.value && selectedAsset.value.asset_model && !modelID.value) ? selectedAsset.value.asset_model.asset_model_id : modelID.value;
+        const planValue = computed(() => {
+           return (selectedSale.value && selectedSale.value.payment_plan && !planID.value) ? selectedSale.value.payment_plan.payment_plan_id : planID.value;
         });
-        const enableCommissionSetup = (value) =>{
-            if(value != 'Owner'){
-                additionalFields2.value[0].disabled = false;
-                additionalFields2.value[1].disabled = false;
+        const displayDepositValue = (value) =>{
+            if(value == "None"){
+                formFields.value[6].hidden = true;
+                formFields.value[7].hidden = true;
             }else{
-                additionalFields2.value[0].disabled = true;
-                additionalFields2.value[1].disabled = true;
+                formFields.value[6].hidden = false;
+                formFields.value[7].hidden = false;
+            }
+        };
+        const calculateDepositAmount= (value) =>{
+            if(formFields.value[5].hidden == false && formFields.value[5].value == "Percentage"){
+                let depAmount = (formFields.value[6].value / 100) * value;
+                formFields.value[7].value = depAmount;
             }
         }
         const updateFormFields = () => {
             formFields.value = [
-                { type: 'text', name: 'asset_code',label: "Code", value: selectedAsset.value?.asset_code || '', required: false },
-                { type: 'text', name: 'registration_number',label: "Reg No", value: selectedAsset.value?.registration_number || '', required: false },
-                { type: 'dropdown', name: 'asset_type',label: "Asset Type", value: selectedAsset.value?.asset_type || '', placeholder: "", required: true, options: [{ text: 'Land', value: 'Land' }, { text: 'Building', value: 'Building' }] },
-                { type: 'date', name: 'start_date',label: "Start Date", value: selectedAsset.value?.start_date || '', required: true, placeholder: '' },
-                { type: 'text', name: 'name',label: "Asset Name", value: selectedAsset.value?.name || '', required: true },
-                { type: 'dropdown', name: 'selling_as',label: "Selling As", value: selectedAsset.value?.selling_as || 'Owner', placeholder: "", required: true, options: [{ text: 'Owner', value: 'Owner' }, { text: 'Open Agency', value: 'Open Agency' }, { text: 'Exclusive Agency', value: 'Exclusive Agency' }], method: enableCommissionSetup },
-                { type: 'text', name: 'location',label: "Location", value: selectedAsset.value?.location || '', required: false, placeholder: '' },
-                { type: 'dropdown', name: 'unit_measure',label: "Unit Measure", value: selectedAsset.value?.unit_measure || '', placeholder: "", required: true, options: [{ text: 'Plots', value: 'Plots' }, { text: 'Acres', value: 'Acres' },{ text: 'Units', value: 'Units' }, { text: 'Sqr Ft', value: 'Sqr Ft' },{ text: 'Sqr Mtr', value: 'Sqr Mtr' }] },
-                { type: 'number', name: 'units_quantity',label: "No of Units", value: selectedAsset.value?.units_quantity || 1, required: true },
-                { type: 'text', name: 'size_per_unit',label: "Unit Size", value: selectedAsset.value?.size_per_unit || '', required: false },
-                { type: 'number', name: 'number_of_floors',label: "Floors", value: selectedAsset.value?.number_of_floors || 0, required: false },
+                { type: 'date', name: 'date',label: "Date", value: selectedSale.value?.date || '', required: true, placeholder: '' },
                 {  
-                    type:'search-dropdown', label:"Currency", value: currencyValue.value, componentKey: currComponentKey,
-                    selectOptions: currencyArray, optionSelected: handleSelectedCurrency, required: true,
-                    searchPlaceholder: 'Select Currency...', dropdownWidth: '500px', updateValue: selectedCurrency.value,
-                    fetchData: fetchCurrencies(), clearSearch: clearSelectedCurrency
+                    type:'search-dropdown', label:"Client", value: clientValue.value, componentKey: clientComponetKey,
+                    selectOptions: clientArray, optionSelected: handleSelectedClient, required: true,
+                    searchPlaceholder: 'Select Client...', dropdownWidth: '450px', updateValue: selectedClient.value,
+                    fetchData: fetchAssetClients(), clearSearch: clearSelectedClient
                 },
                 {  
-                    type:'search-dropdown', label:"Make", value: makeValue.value, componentKey: depComponentKey,
-                    selectOptions: makeArray, optionSelected: handleSelectedMake, required: false,
-                    searchPlaceholder: 'Select Make...', dropdownWidth: '500px', updateValue: selectedMake.value,
-                    fetchData: fetchAssetMakes(), clearSearch: clearSelectedMake
+                    type:'search-dropdown', label:"Asset", value: assetValue.value, componentKey: assetComponentKey,
+                    selectOptions: assetArray, optionSelected: handleSelectedAsset, required: true,
+                    searchPlaceholder: 'Select Asset...', dropdownWidth: '450px', updateValue: selectedAsset.value,
+                    fetchData: fetchSaleAssets(), clearSearch: clearSelectedAsset
                 },
                 {  
-                    type:'search-dropdown', label:"Model", value: modelValue.value, componentKey: userComponentKey,
-                    selectOptions: modelArr, optionSelected: handleSelectedModel, required: false,
-                    searchPlaceholder: 'Select Model...', dropdownWidth: '500px', updateValue: selectedModel.value,
-                    clearSearch: clearSelectedModel
+                    type:'search-dropdown', label:"Sales Plan", value: planValue.value, componentKey: planComponentKey,
+                    selectOptions: planArray, optionSelected: handleSelectedPlan, required: false,
+                    searchPlaceholder: 'Select Plan...', dropdownWidth: '450px', updateValue: selectedPlan.value,
+                    clearSearch: clearSelectedPlan
                 },
-                {required: false}
+                { type: 'dropdown', name: 'discount_mode',label: "Discount Mode", value: selectedSale.value?.discount_mode || 'Percentage', placeholder: "", required: true, options: [{ text: 'Percentage', value: 'Percentage' }, { text: 'Fixed Amount', value: 'Fixed Amount' }, { text: 'None', value: 'None' }] },
+                { type: 'dropdown', name: 'deposit_mode',label: "Deposit Mode", value: selectedSale.value?.deposit_mode || computedDepositMode.value, placeholder: "", required: true, hidden:true, options: [{ text: 'Percentage', value: 'Percentage' }, { text: 'Fixed Amount', value: 'Fixed Amount' }, { text: 'None', value: 'None' }] , method: displayDepositValue},
+                { type: 'number', name: 'deposit_value',label: "Deposit Value", value: selectedSale.value?.deposit_value || computedDepositValue.value, placeholder: "", required: false, hidden:true },
+                { type: 'number', name: 'actual_deposit',label: "Actual Deposit", value: selectedSale.value?.actual_deposit || computedActualDepositValue.value, placeholder: "", required: false, hidden:true },
+                { type: 'number', name: 'installments',label: "Installments", value: selectedSale.value?.installments || computedInstallments.value, placeholder: "", required: false, hidden:true },
+                { type: 'dropdown', name: 'interest_method',label: "Interest Method", value: selectedSale.value?.interest_method || computedInterestMethod.value, placeholder: "", required: true, hidden:true, options: [{ text: 'Simple Interest', value: 'Simple Interest' },{ text: 'Compound Interest', value: 'Compound Interest' },{ text: 'Reducing Interest EMI', value: 'Reducing Interest EMI' }, { text: 'Reducing Interest Fixed Principal', value: 'Reducing Interest Principal Payments' },{ text: 'Flat Interest EMI', value: 'Flat Interest EMI' }, { text: 'Flat Interest Principal Payments', value: 'Flat Interest Principal Payments' }] },
+                { type: 'number', name: 'interest_value',label: "Interest Value", value: selectedSale.value?.interest_value || computedInterestValue.value, placeholder: "", required: false, hidden:true },
+                { type: 'dropdown', name: 'interest_mode',label: "Interest Mode", value: selectedSale.value?.interest_mode || computedInterestMode.value, placeholder: "", required: true, hidden:true, options: [{ text: 'Deposit Inclusive', value: 'Deposit Inclusive' }, { text: 'Deposit Exclusive', value: 'Deposit Exclusive' }] },
+                { type: 'dropdown', name: 'balance_mode',label: "Balance Mode", value: selectedSale.value?.balance_mode || computedBalanceMode.value, placeholder: "", required: true, hidden:true, options: [{ text: 'Equal Distribution', value: 'Equal Distribution' }, { text: 'One-Off', value: 'One-Off' }, { text: 'Any Amount', value: 'Any Amount' }] },
+                { type: 'date', name: 'repayment_date',label: "Repayment Start Date", value: selectedSale.value?.repayment_date || '', required: true, placeholder: '', hidden: true },
+                { required: false},
+                { type: 'number', name: 'discount',label: "Discount", value: selectedSale.value?.discount || 0, required: false },
+                { type: 'number', name: 'total_amount',label: "Total Amount", value: selectedSale.value?.total_amount || 0, required: true, method: calculateDepositAmount },
+                {  
+                    type:'search-dropdown', label:"Unit(s)", value: "", componentKey: unitComponentKey,
+                    selectOptions: units_array, optionSelected: handleSelectedUnit, required: true,
+                    searchPlaceholder: 'Select Unit...', dropdownWidth: '450px', updateValue: "",
+                    
+                },
             ];
         };
-        const fetchVendors = async() =>{
-            await store.dispatch('Vendors/fetchVendors', {company:companyID.value})
+        const fetchSalesAgents = async() =>{
+            await store.dispatch('Sales_Agents/fetchSalesAgents', {company:companyID.value})
         };
-        const handleSelectedVendor = async(option) =>{
-            await store.dispatch('Vendors/handleSelectedVendor', option)
-            vendorID.value = store.state.Vendors.vendorID;
-            if(selectedAsset.value){
-                selectedAsset.value.vendor.vendor_id = vendorID.value;
+        const handleSelectedAgent = async(option) =>{
+            await store.dispatch('Sales_Agents/handleSelectedAgent', option)
+            agentID.value = store.state.Sales_Agents.agentID;
+            if(selectedSale.value && selectedAgent.value){
+                selectedSale.value.sales_agent.sales_agent_id = agentID.value;
             }
         }
-        const clearSelectedVendor = async() =>{
-            await store.dispatch('Vendors/updateState', {vendorID: ''});
-            vendorID.value = store.state.Vendors.vendorID;
+        const clearSelectedAgent = async() =>{
+            await store.dispatch('Sales_Agents/updateState', {agentID: ''});
+            agentID.value = store.state.Sales_Agents.agentID;
         }
-        const vendorValue = computed(() => {
-           return (selectedAsset.value && selectedAsset.value.vendor && !vendorID.value) ? selectedAsset.value.vendor.vendor_id : vendorID.value;
+        const agentValue = computed(() => {
+           return (selectedSale.value && selectedSale.value.sales_agent && !agentID.value) ? selectedSale.value.sales_agent.sales_agent_id : agentID.value;
         });
         const additionalFields = ref();
-        const additionalFields1 = ref();
-        const additionalFields2 = ref();
-        const calculateUnitCost= (value) =>{
-            let unitCost = (additionalFields.value[2].value / formFields.value[8].value)
-            additionalFields1.value[0].value = additionalFields.value[2].value;
-            additionalFields1.value[1].value = Number(unitCost).toFixed(2);
+        const hideCommissionOptions= (value) =>{
+            if(value != "None"){
+                additionalFields.value[2].hidden = false;
+                additionalFields.value[3].hidden = false;
+            }else{
+                additionalFields.value[2].hidden = true;
+                additionalFields.value[3].hidden = true;
+            }
         }
         const updateAdditionalFormFields = () => {
             additionalFields.value = [
-                { type: 'date', name: 'purchase_date',label: "Purchase Date", value: selectedAsset.value?.purchase_date || '', required: false, placeholder: '' },
                 {  
-                    type:'search-dropdown', label:"Vendor", value: vendorValue.value, componentKey: vendComponentKey,
-                    selectOptions: vendorArray, optionSelected: handleSelectedVendor, required: false,
-                    searchPlaceholder: 'Select Vendor...', dropdownWidth: '500px', updateValue: selectedVendor.value,
-                    fetchData: fetchVendors(), clearSearch: clearSelectedVendor
+                    type:'search-dropdown', label:"Sales Agent", value: agentValue.value, componentKey: agentComponentKey,
+                    selectOptions: agentArray, optionSelected: handleSelectedAgent, required: false,
+                    searchPlaceholder: 'Select Agent...', dropdownWidth: '500px', updateValue: selectedAgent.value,
+                    clearSearch: clearSelectedAgent
                 },
-                { type: 'number', name: 'value',label: "Purchase Price", value: selectedAsset.value?.value || 0, required: false, method: calculateUnitCost },
-            ];
-        };
-        const calculateSellingPrice = (value) =>{
-            let sellingPrice = parseFloat(additionalFields1.value[1].value) + parseFloat(additionalFields1.value[1].value * (parseFloat(value)/100))
-            additionalFields1.value[3].value = sellingPrice
-        }
-        const updateAdditionalFormFields1 = () => {
-            additionalFields1.value = [
-                { type: 'number', name: 'value',label: "Asset Cost", value: selectedAsset.value?.value || 0, required: false, disabled: true },
-                { type: 'number', name: 'value',label: "Unit Cost", value: selectedAsset.value?.asset_unit_cost || 0, required: false, disabled: true },
-                { type: 'number', name: 'value',label: "Mark Up(%)", value: selectedAsset.value?.selling_markup || 0, required: false , method: calculateSellingPrice},
-                { type: 'number', name: 'value',label: "Unit Selling Price", value: selectedAsset.value?.unit_selling_price || 0, required: false },
+                { type: 'dropdown', name: 'commission_mode',label: "Commission Mode", value: selectedSale.value?.commission_mode || 'None', placeholder: "", required: false, options: [{ text: 'Percentage', value: 'Percentage' }, { text: 'Fixed Amount', value: 'Fixed Amount' }, { text: 'None', value: 'None' }], method: hideCommissionOptions },
+                { type: 'number', name: 'commission_amount',label: "Commission Value", value: selectedSale.value?.commission_amount || 0, required: false, hidden: true },
+                { type: 'dropdown', name: 'commission_method',label: "Commission Method", value: selectedSale.value?.commission_method || 'Discount Exclusive', placeholder: "", required: false, hidden: true, options: [{ text: 'Discount Exclusive', value: 'Discount Exclusive' }, { text: 'Discount Inclusive', value: 'Discount Inclusive' }] },
+
             ];
         };
 
-        const updateAdditionalFormFields2 = () => {
-            additionalFields2.value = [
-                { type: 'dropdown', name: 'commision_mode',label: "Commission Mode", value: selectedAsset.value?.commision_mode || 'Percentage', placeholder: "", required: false, disabled: true , options: [{ text: 'Percentage', value: 'Percentage' }, { text: 'Fixed Amount', value: 'Fixed Amount' }] },
-                { type: 'number', name: 'commision_value',label: "Commission Value", value: selectedAsset.value?.commision_value || 0, required: false, disabled: true },
-                {required: false}
-            ];
-        };
+        watch([clientID, planID,assetID, selectedSale], () => {
+            if (clientID.value != "") {
+                formFields.value[1].value = clientID.value;
+            }
+            if (planID.value != "") {
+                formFields.value[3].value = planID.value;
+            }
+            if (assetID.value != "") {
+                formFields.value[2].value = assetID.value;
+            }
 
-        watch([makeID, modelID, selectedAsset], () => {
-            if (makeID.value != "") {
-                formFields.value[12].value = makeID.value;
+            if(selectedSale.value){
+                store.dispatch('Asset_Fees/updateState', { saleFeeArray: saleCharges.value,})
+                store.dispatch('Asset_Units/updateState', { unitArray: saleUnits.value})
             }
-            if(modelID.value != ""){
-                formFields.value[13].value = modelID.value;
-            }
-            if(selectedAsset.value){
-                store.dispatch('Asset_Fees/updateState', { saleFeeArray: saleCharges.value, purchaseFeeArray: purchaseCharges.value})
-                store.dispatch('Payment_Plans/updateState', { salePlanArray: salePlans.value})
-            }
+            
         }, { immediate: true });
 
-        watch([selectedAsset, selectedCurrency, selectedMake, selectedModel, selectedVendor], () => {
-            if (selectedAsset.value && selectedCurrency.value && selectedMake.value && selectedModel.value && selectedVendor.value) {
-                depComponentKey.value += 1;
-                userComponentKey.value += 1;
-                currComponentKey.value += 1;
-                vendComponentKey.value += 1;
+        watch([selectedSale, selectedAsset, selectedClient, selectedPlan, selectedAgent], () => {
+            if (selectedSale.value && selectedAsset.value && selectedClient.value && selectedPlan.value && selectedAgent.value) {
+                clientComponetKey.value += 1;
+                planComponentKey.value += 1;
+                assetComponentKey.value += 1;
+                agentComponentKey.value += 1;
                 updateFormFields();
                 updateAdditionalFormFields();
-                updateAdditionalFormFields1();
-                updateAdditionalFormFields2();
-            }
-            else if(selectedAsset.value && selectedCurrency.value && selectedMake.value){
-                currComponentKey.value += 1;
-                depComponentKey.value += 1;
+                if(selectedSale.value.sale_plan_terms && selectedSale.value.sale_plan_terms.length){
+                    formFields.value[5].hidden = false;
+                    formFields.value[6].hidden = false;
+                    formFields.value[7].hidden = false;
+                    formFields.value[8].hidden = false;
+                    formFields.value[9].hidden = false;
+                    formFields.value[10].hidden = false;
+                    formFields.value[11].hidden = false;
+                    formFields.value[12].hidden = false;
+                    formFields.value[13].hidden = false;
+                }
+            }else if(selectedSale.value && selectedAsset.value && selectedClient.value && selectedPlan.value){
+                assetComponentKey.value += 1;
+                clientComponetKey.value += 1;
+                planComponentKey.value += 1;
                 updateFormFields();
                 updateAdditionalFormFields();
-                updateAdditionalFormFields1();
-                updateAdditionalFormFields2();
-            }else if(selectedAsset.value && selectedCurrency.value && selectedModel.value){
-                currComponentKey.value += 1;
-                userComponentKey.value += 1;
+                if(selectedSale.value.sale_plan_terms && selectedSale.value.sale_plan_terms.length){
+                    formFields.value[5].hidden = false;
+                    formFields.value[6].hidden = false;
+                    formFields.value[7].hidden = false;
+                    formFields.value[8].hidden = false;
+                    formFields.value[9].hidden = false;
+                    formFields.value[10].hidden = false;
+                    formFields.value[11].hidden = false;
+                    formFields.value[12].hidden = false;
+                    formFields.value[13].hidden = false;
+                }
+            }else if(selectedSale.value && selectedAsset.value){
+                assetComponentKey.value += 1;
                 updateFormFields();
                 updateAdditionalFormFields();
-                updateAdditionalFormFields1();
-                updateAdditionalFormFields2();
-            }else if(selectedAsset.value && selectedCurrency.value && selectedVendor.value){
-                currComponentKey.value += 1;
-                vendComponentKey.value += 1;
-                updateFormFields();
-                updateAdditionalFormFields();
-                updateAdditionalFormFields1();
-                updateAdditionalFormFields2();
-            }else if(selectedAsset.value && selectedCurrency.value){
-                currComponentKey.value += 1;
-                updateFormFields();
-                updateAdditionalFormFields();
-                updateAdditionalFormFields1();
-                updateAdditionalFormFields2();
-            }else if(selectedAsset.value){
-                updateFormFields();
-                updateAdditionalFormFields();
-                updateAdditionalFormFields1();
-                updateAdditionalFormFields2();
             }
         }, { immediate: true });
 
         const handleReset = async() =>{
             for(let i=0; i < formFields.value.length; i++){
-                if(formFields.value[i].label != 'Country'){
+                if(formFields.value[i].name == 'discount_mode'){
+                    formFields.value[i].value = 'Percentage';
+                }else if(formFields.value[i].name == 'discount' || formFields.value[i].name == 'total_amount'){
+                    formFields.value[i].value = 0;
+                }else{
                     formFields.value[i].value = '';
                 }
             }
+            formFields.value[5].hidden = true;
+            formFields.value[6].hidden = true;
+            formFields.value[7].hidden = true;
+            formFields.value[8].hidden = true;
+            formFields.value[9].hidden = true;
+            formFields.value[10].hidden = true;
+            formFields.value[11].hidden = true;
+            formFields.value[12].hidden = true;
+            formFields.value[13].hidden = true;
+
             for(let i=0; i < additionalFields.value.length; i++){
-                additionalFields.value[i].value = '';
+                if(additionalFields.value[i].name == 'commission_mode'){
+                    additionalFields.value[i].value = 'None';
+                }else if(additionalFields.value[i].name == 'commission_method'){
+                    additionalFields.value[i].value = 'Discount Exclusive';
+                }else if(additionalFields.value[i].name == 'commission_amount'){
+                    additionalFields.value[i].value = 0;
+                }else{
+                    additionalFields.value[i].value = '';
+                }
             }
-            for(let i=0; i < additionalFields1.value.length; i++){
-                additionalFields1.value[i].value = '';
-            }
-            for(let i=0; i < additionalFields2.value.length; i++){
-                additionalFields2.value[i].value = '';
-            }
-            await store.dispatch('Payment_Plans/updateState', {purchasePlanArray: [], salePlanArray: []});
-            await store.dispatch('Asset_Fees/updateState', {saleFeeArray: [], purchaseFeeArray: []});
-            await store.dispatch('Asset_Sales/updateState', {selectedAsset: null, selectedVendor: null, selectedModel: null, selectedCurrency: null, selectedMake: null,saleCharges:[],purchaseCharges:[],salePlans:[], isEditing:false});
+            await store.dispatch('Payment_Plans/updateState', { salePlanArray: []});
+            await store.dispatch("Asset_Units/updateState", {unitArray: []})
+            await store.dispatch('Asset_Fees/updateState', {saleFeeArray: []});
+            await store.dispatch('Asset_Sales/updateState', {selectedSale: null, selectedAgent: null, selectedPlan: null, selectedAsset: null, selectedClient: null,saleCharges:[],saleUnits:[], isEditing:false});
             mainComponentKey.value += 1;
-            userComponentKey.value += 1;
-            currComponentKey.value += 1;
-            depComponentKey.value += 1;
-            currencyID.value = "";
-            modelID.value = "";
-            makeID.value = "";
+            planComponentKey.value += 1;
+            assetComponentKey.value += 1;
+            clientComponetKey.value += 1;
+            assetID.value = "";
+            clientID.value = "";
         }
          
         const showLoader = () =>{
@@ -404,38 +468,43 @@ export default defineComponent({
         } 
         const createAssetSale = async() =>{
             showLoader();
+            salePlanTermsArr.value = [];
+            if(formFields.value[5].hidden == false){
+                let obj = {
+                    'deposit_mode': formFields.value[5].value,
+                    'deposit_value': formFields.value[6].value,
+                    'installments': formFields.value[8].value,
+                    'interest_method': formFields.value[9].value,
+                    'interest_value': formFields.value[10].value,
+                    'interest_mode': formFields.value[11].value,
+                    'balance_mode': formFields.value[12].value,
+                    'repayment_date': formFields.value[13].value,
+                }
+                salePlanTermsArr.value.push(obj)
+            }
             let formData = {
-                asset_code: formFields.value[0].value || '-',
-                asset_type: formFields.value[2].value,
-                name: formFields.value[4].value,
-                value: additionalFields.value[2].value,
-                start_date: formFields.value[3].value,
-                purchase_date: additionalFields.value[0].value,
-                selling_as: formFields.value[5].value,
-                commision_mode: additionalFields2.value[0].value,
-                commision_value: additionalFields2.value[1].value,
-                location: formFields.value[6].value,
-                unit_measure: formFields.value[7].value,
-                size_per_unit: formFields.value[9].value,
-                units_quantity: formFields.value[8].value,
-                unit_cost: additionalFields1.value[1].value,
-                selling_markup: additionalFields1.value[2].value,
-                unit_selling_price: additionalFields1.value[3].value,
-                registration_number: formFields.value[1].value,
+                sale_code: '-',
+                date: formFields.value[0].value,
+                total_amount: formFields.value[16].value,
+                discount_mode: formFields.value[4].value,
+                discount: formFields.value[15].value,
+                userID: userID.value,
+                notes: formFields.value[5].value,
+                commission_mode: additionalFields.value[1].value,
+                commission_amount: additionalFields.value[2].value || 0,
+                commission_method: additionalFields.value[3].value || 'Discount Exclusive',
+                sale_plan_terms: salePlanTermsArr.value,
                 approval_status: 'Pending',
-                number_of_floors: formFields.value[10].value || 0,
-                notes: formFields.value[14].value,
-                asset_currency: currencyID.value,
-                asset_currency_id: currencyID.value,
-                vendor: vendorID.value,
-                vendor_id: vendorID.value,
-                asset_make: makeID.value,
-                asset_make_id: makeID.value,
-                asset_model: modelID.value,
-                asset_model_id: modelID.value,
-                sale_plans: planRows.value,
+                asset: assetID.value,
+                asset_id: assetID.value,
+                sales_agent: agentID.value,
+                sales_agent_id: agentID.value,
+                customer: clientID.value,
+                customer_id: clientID.value,
+                payment_plan: planID.value,
+                payment_plan_id: planID.value,
+                sale_units: unitRows.value,
                 sale_charges: saleChargeRows.value,
-                purchase_charges: purchaseChargeRows.value,
                 company: companyID.value
             }
             errors.value = [];
@@ -444,25 +513,29 @@ export default defineComponent({
                     errors.value.push('Error');
                 }
             }
-            if(currencyValue.value == ''){
+            if(assetValue.value == '' || clientValue.value == '' || planValue.value == ''){
                 errors.value.push('Error');
             }
             if(errors.value.length){
                 toast.error('Fill In Required Fields');
                 hideLoader();
-            }else{
+            }else if(unitRows.value.length == 0){
+                toast.error('Please Select Units');
+                hideLoader();
+            }
+            else{
                 try {
                     const response = await store.dispatch('Asset_Sales/createAssetSale', formData);
                     if(response && response.status === 201) {
                         hideLoader();
-                        toast.success('Asset created successfully!');
+                        toast.success('Sale created successfully!');
                         handleReset();
                     }else {
-                        toast.error('An error occurred while creating the Asset.');
+                        toast.error('An error occurred while creating the Sale.');
                     }
                 } catch (error) {
                     console.error(error.message);
-                    toast.error('Failed to create Asset: ' + error.message);
+                    toast.error('Failed to create Sale: ' + error.message);
                 } finally {
                     hideLoader();
                 }
@@ -471,40 +544,45 @@ export default defineComponent({
         }
         const updateAssetSale = async() =>{
             showLoader();
+            salePlanTermsArr.value = [];
+            if(formFields.value[5].hidden == false){
+                let obj = {
+                    'deposit_mode': formFields.value[5].value,
+                    'deposit_value': formFields.value[6].value,
+                    'installments': formFields.value[8].value,
+                    'interest_method': formFields.value[9].value,
+                    'interest_value': formFields.value[10].value,
+                    'interest_mode': formFields.value[11].value,
+                    'balance_mode': formFields.value[12].value,
+                    'repayment_date': formFields.value[13].value,
+                }
+                salePlanTermsArr.value.push(obj)
+            }
             errors.value = [];
             let formData = {
-                sale_asset: selectedAsset.value.sale_asset_id,
-                asset_code: formFields.value[0].value || '-',
-                asset_type: formFields.value[2].value,
-                name: formFields.value[4].value,
-                value: additionalFields.value[2].value,
-                start_date: formFields.value[3].value,
-                purchase_date: additionalFields.value[0].value,
-                selling_as: formFields.value[5].value,
-                commision_mode: additionalFields2.value[0].value,
-                commision_value: additionalFields2.value[1].value,
-                location: formFields.value[6].value,
-                unit_measure: formFields.value[7].value,
-                size_per_unit: formFields.value[9].value,
-                units_quantity: formFields.value[8].value,
-                unit_cost: additionalFields1.value[1].value,
-                selling_markup: additionalFields1.value[2].value,
-                unit_selling_price: additionalFields1.value[3].value,
-                registration_number: formFields.value[1].value,
-                approval_status: selectedAsset.value.approval_status,
-                number_of_floors: formFields.value[10].value || 0,
-                notes: formFields.value[14].value,
-                asset_currency: currencyValue.value,
-                asset_currency_id: currencyValue.value,
-                vendor: vendorValue.value,
-                vendor_id: vendorValue.value,
-                asset_make: makeValue.value,
-                asset_make_id: makeValue.value,
-                asset_model: modelValue.value,
-                asset_model_id: modelValue.value,
-                sale_plans: planRows.value,
+                asset_sale: selectedSale.value.asset_sale_id,
+                sale_code: selectedSale.value.sale_code,
+                date: formFields.value[0].value,
+                total_amount: formFields.value[16].value,
+                discount_mode: formFields.value[4].value,
+                discount: formFields.value[15].value,
+                userID: userID.value,
+                notes: formFields.value[5].value,
+                commission_mode: additionalFields.value[1].value,
+                commission_amount: additionalFields.value[2].value,
+                commission_method: additionalFields.value[3].value,
+                sale_plan_terms: salePlanTermsArr.value,
+                approval_status: selectedSale.value.approval_status,
+                asset: assetValue.value,
+                asset_id: assetValue.value,
+                sales_agent: agentValue.value,
+                sales_agent_id: agentValue.value,
+                customer: clientValue.value,
+                customer_id: clientValue.value,
+                payment_plan: planValue.value,
+                payment_plan_id: planValue.value,
+                sale_units: unitRows.value,
                 sale_charges: saleChargeRows.value,
-                purchase_charges: purchaseChargeRows.value,
                 company: companyID.value
             }
             errors.value = [];
@@ -513,27 +591,32 @@ export default defineComponent({
                     errors.value.push('Error');
                 }
             }
-            if(currencyValue.value == ''){
+            if(assetValue.value == ''|| clientValue.value == '' || planValue.value == ''){
                 errors.value.push('Error');
             }
             if(errors.value.length){
                     toast.error('Fill In Required Fields');
-            }else{
+                    hideLoader();
+            }else if(unitRows.value.length == 0){
+                toast.error('Please Select Units');
+                hideLoader();
+            }
+            else{
                 try {
                     const response = await store.dispatch('Asset_Sales/updateAssetSale', formData);
                     if (response && response.status === 200) {
                         hideLoader();
-                        toast.success("Asset updated successfully!");
+                        toast.success("Sale updated successfully!");
                         handleReset();
                         store.commit('pageTab/REMOVE_PAGE', {'PSS':'Sale_Details'})
                         store.commit('pageTab/ADD_PAGE', {'PSS':'Asset_Sales'})
                         store.state.pageTab.pssActiveTab = 'Asset_Sales';
                     } else {
-                        toast.error('An error occurred while updating the Asset.');
+                        toast.error('An error occurred while updating the Sale.');
                     }
                 } catch (error) {
                     console.error(error.message);
-                    toast.error('Failed to update Asset: ' + error.message);
+                    toast.error('Failed to update Sale: ' + error.message);
                 } finally {
                     hideLoader();
                 }
@@ -555,37 +638,18 @@ export default defineComponent({
             await store.dispatch('Asset_Fees/handleSelectedSaleFee', option);
             chargeComponentKey.value += 1;
         }
-        const handleSelectedPurchaseCharge = async(option) =>{
-            await store.dispatch('Asset_Fees/handleSelectedPurchaseFee', option);
-            chargeComponentKey.value += 1;
-        }
         const deleteSaleCharge = (rowIndex, action, row) =>{
             store.dispatch('Asset_Fees/removeAssetSaleFee', rowIndex);
-            tableKey.value += 1;
-        }
-        const deletePurchaseCharge = (rowIndex, action, row) =>{
-            store.dispatch('Asset_Fees/removeAssetPurchaseFee', rowIndex);
-            tableKey.value += 1;
-        };
-        const handleSelectedPlan = async(option) =>{
-            await store.dispatch('Payment_Plans/handleSelectedSalePlan', option);
-            planComponentKey.value += 1;
-        }
-        const deletePlan = (rowIndex, action, row) =>{
-            store.dispatch('Payment_Plans/removeSalePlan', rowIndex);
             tableKey.value += 1;
         }
         
         onBeforeMount(()=>{ 
             fetchPlans();
-            fetchSalePlans();
             fetchCharges();
+            fetchSalesAgents();
             fetchSaleCharges();
-            fetchPurchaseCharges();
             updateFormFields();
             updateAdditionalFormFields();
-            updateAdditionalFormFields1();
-            updateAdditionalFormFields2();
             flex_basis.value = '1/4';
             flex_basis_percentage.value = '20';
             additional_flex_basis.value = '1/5';
@@ -596,11 +660,11 @@ export default defineComponent({
         })
 
         return{
-            tabs,componentKey, formFields, additionalFields,additionalFields1,additionalFields2, flex_basis, flex_basis_percentage, additional_flex_basis,
-            additional_flex_basis_percentage, mainComponentKey,handleReset, loader, showLoader, hideLoader,handleSelectedPurchaseCharge,
-            displayButtons,saveAssetSale,saleChargeArr,purchaseChargeArr,chargesDropdownWidth,chargesSearchPlaceholder,selectTab,handleSelectedSaleCharge,
-            deleteSaleCharge,deletePurchaseCharge,activeTab,rightsModule,idFieldCharge,saleChargeRows,purchaseChargeRows,chargeColumns,actionCharges,chargeComponentKey,
-            planArr,plansSearchPlaceholder,idFieldPlan,planRows,planColumns,actionPlans,planComponentKey,handleSelectedPlan,deletePlan
+            tabs,componentKey, formFields, additionalFields, flex_basis, flex_basis_percentage, additional_flex_basis,
+            additional_flex_basis_percentage, mainComponentKey,handleReset, loader, showLoader, hideLoader,
+            displayButtons,saveAssetSale,saleChargeArr,chargesDropdownWidth,chargesSearchPlaceholder,selectTab,handleSelectedSaleCharge,
+            deleteSaleCharge,activeTab,rightsModule,idFieldCharge,saleChargeRows,chargeColumns,actionCharges,chargeComponentKey,
+            tableKey,actionUnits,unitColumns,unitRows,deleteUnit
         }
     }
 })

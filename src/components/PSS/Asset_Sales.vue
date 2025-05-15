@@ -165,7 +165,7 @@ export default{
                     asset_sale: selectedIds.value
                 }
                 try{
-                    const response = await store.dispatch('Asset_Sales/deleteSaleAsset',formData)
+                    const response = await store.dispatch('Asset_Sales/deleteAssetSale',formData)
                     if(response && response.status == 200){
                         toast.success("Sale Removed Succesfully");
                         searchAssetSales();
@@ -191,7 +191,7 @@ export default{
                     asset_sale: selectedIds.value
                 }
                 try{
-                    const response = await store.dispatch('Asset_Sales/deleteSaleAsset',formData)
+                    const response = await store.dispatch('Asset_Sales/deleteAssetSale',formData)
                     if(response && response.status == 200){
                         toast.success("Sale(s) Removed Succesfully");
                         searchPropertys();
@@ -340,7 +340,9 @@ export default{
         const addNewSale = async() =>{
             store.commit('Asset_Sales/initializeStore');
             await store.dispatch('Asset_Sales/updateState', {selectedSale: null,selectedAsset: null,selectedPlan: null,selectedClient: null, selectedAgent: null,isEditing: false});
-            await store.dispatch('Asset_Fees/updateState', {feeArray: []})
+            await store.dispatch('Asset_Fees/updateState', {saleFeeArray: []})
+            await store.dispatch("Asset_Units/updateState", {unitArray: []})
+            await store.dispatch("Payment_Plans/updateState", {salePlanArray: []})
             store.commit('pageTab/ADD_PAGE', {'PSS':'Sale_Details'});
             store.state.pageTab.pssActiveTab = 'Sale_Details';          
         }
@@ -352,7 +354,7 @@ export default{
                     company: companyID.value,
                     asset_sale: saleID
                 }
-                await store.dispatch('Asset_Sales/fetchSaleAsset',formData).
+                await store.dispatch('Asset_Sales/fetchAssetSale',formData).
                 then(()=>{
                     store.commit('pageTab/ADD_PAGE', {'PSS':'Sale_Details'})
                     store.state.pageTab.pssActiveTab = 'Sale_Details';
@@ -375,7 +377,7 @@ export default{
                     company: companyID.value,
                     asset_sale: saleID
                 }
-                await store.dispatch('Asset_Sales/deleteSaleAsset',formData).
+                await store.dispatch('Asset_Sales/deleteAssetSale',formData).
                 then(()=>{
                     searchAssetSales();
                 })
@@ -386,7 +388,7 @@ export default{
                     company: companyID.value,
                     asset_sale: saleID
                 }
-                await store.dispatch('Asset_Sales/fetchSaleAsset',formData)
+                await store.dispatch('Asset_Sales/fetchAssetSale',formData)
                 store.commit('pageTab/ADD_PAGE', {'PSS':'Asset_Profile'})
                 store.state.pageTab.pssActiveTab = 'Asset_Profile';
             }else if(action == 'transfer'){

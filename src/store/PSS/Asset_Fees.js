@@ -145,7 +145,9 @@ const actions = {
       
   },
   handleSelectedSaleFee({ commit, state }, option){
+    console.log("THE SELECTED OPTION IS ",option);
     const selectedFee = state.feesList.find(fee => (fee.fee_name) === option);
+    console.log("THE SELECTED FEE IS ",selectedFee);
     if (selectedFee) {
         state.feeID = selectedFee.asset_fee_id;
         state.feeName = selectedFee.fee_name;

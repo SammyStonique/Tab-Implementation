@@ -110,6 +110,10 @@ const actions = {
         state.unitNumber = selectedUnit.unit_number;
         state.unitPrice = selectedUnit.unit_selling_price;
         selectedUnit.reserved_unit_id = null;
+        selectedUnit.asset_sale_item_id = null;
+        selectedUnit.discount = 0;
+        selectedUnit.charges_amount = 0;
+        selectedUnit.sale_total_amount = selectedUnit.unit_selling_price;
         const exists = state.unitArray.some(unit => unit.asset_unit_id === selectedUnit.asset_unit_id);
         if (!exists) {
             state.unitArray = [...state.unitArray, selectedUnit];

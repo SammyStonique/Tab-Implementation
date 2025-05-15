@@ -11,6 +11,14 @@ const state = {
   salePlanArray: [],
   planID: '',
   planName: '',
+  payMode: '',
+  depositMode : '',
+  depositValue : 0,
+  installments : 1,
+  interestMethod : '',
+  interestValue : 0,
+  interestMode : '',
+  balanceMode : '',
   selectedPlan: null,
   isEditing: false
 };
@@ -77,7 +85,7 @@ const actions = {
     await axios.post(`api/v1/get-payment-plans/`,formData)
     .then((response)=>{
       for(let i=0; i< response.data.length; i++){
-        state.planArr.push((response.data[i].name))
+        state.planArr.push((response.data[i].name + " - Pay. Mode: " + response.data[i].payment_mode + ", Instlmnts: "+ response.data[i].installments))
       }
       commit('LIST_PLANS', response.data);
     })
@@ -91,8 +99,22 @@ const actions = {
     await axios.post(`api/v1/get-payment-plans/`,formData)
     .then((response)=>{
       for(let i=0; i< response.data.length; i++){
-        state.salePlanArr.push((response.data[i].name))
+        state.salePlanArr.push((response.data[i].name + " - Pay. Mode: " + response.data[i].payment_mode + ", Instlmnts: "+ response.data[i].installments))
       }
+    })
+    .catch((error)=>{
+      console.log(error.message);
+    })
+    
+  },
+  async fetchAssetSalePlans({ commit,state }, formData) {
+    state.salePlanArr = [];
+    await axios.post(`api/v1/get-asset-sale-plans/`,formData)
+    .then((response)=>{
+      for(let i=0; i< response.data.length; i++){
+        state.salePlanArr.push((response.data[i].payment_plan.name + " - Pay. Mode: " + response.data[i].payment_plan.payment_mode + ", Instlmnts: "+ response.data[i].installments))
+      }
+      commit('LIST_PLANS', response.data);
     })
     .catch((error)=>{
       console.log(error.message);
@@ -104,7 +126,7 @@ const actions = {
     await axios.post(`api/v1/get-payment-plans/`,formData)
     .then((response)=>{
       for(let i=0; i< response.data.length; i++){
-        state.purchasePlanArr.push((response.data[i].name))
+        state.purchasePlanArr.push((response.data[i].name + " - Pay. Mode: " + response.data[i].payment_mode + ", Instlmnts: "+ response.data[i].installments))
       }
     })
     .catch((error)=>{
@@ -125,7 +147,7 @@ const actions = {
   },
   handleSelectedPaymentPlan({ commit, state }, option){
     state.planArray = [];
-    const selectedPlan = state.plansList.find(plan => (plan.name) === option);
+    const selectedPlan = state.plansList.find(plan => (plan.name + " - Pay. Mode: " + plan.payment_mode + ", Instlmnts: "+ plan.installments) === option);
     if (selectedPlan) {
         state.planID = selectedPlan.payment_plan_id;
         state.planName = selectedPlan.name;
@@ -142,7 +164,7 @@ const actions = {
   },
   handleSelectedPurchasePlan({ commit, state }, option){
     state.purchasePlanArray = [];
-    const selectedPlan = state.plansList.find(plan => (plan.name) === option);
+    const selectedPlan = state.plansList.find(plan => (plan.name + " - Pay. Mode: " + plan.payment_mode + ", Instlmnts: "+ plan.installments) === option);
     if (selectedPlan) {
         state.planID = selectedPlan.payment_plan_id;
         state.planName = selectedPlan.name;
@@ -158,7 +180,7 @@ const actions = {
   },
   handleSelectedSalePlan({ commit, state }, option){
     state.salePlanArray = [];
-    const selectedPlan = state.plansList.find(plan => (plan.name) === option);
+    const selectedPlan = state.plansList.find(plan => (plan.name + " - Pay. Mode: " + plan.payment_mode + ", Instlmnts: "+ plan.installments) === option);
     if (selectedPlan) {
         state.planID = selectedPlan.payment_plan_id;
         state.planName = selectedPlan.name;
@@ -170,6 +192,23 @@ const actions = {
         }
     }
     commit('SALE_PLANS_ARRAY', state.salePlanArray);
+      
+  },
+  handleSelectedAssetSalePlan({ commit, state }, option){
+
+    const selectedPlan = state.plansList.find(plan => (plan.payment_plan.name + " - Pay. Mode: " + plan.payment_plan.payment_mode + ", Instlmnts: "+ plan.installments) === option);
+    if (selectedPlan) {
+        state.planID = selectedPlan.asset_sale_plan_id;
+        state.planName = selectedPlan.payment_plan.name;
+        state.payMode = selectedPlan.payment_plan.payment_mode;
+        state.depositMode = selectedPlan.deposit_mode;
+        state.depositValue = selectedPlan.deposit_value;
+        state.installments = selectedPlan.installments;
+        state.interestMethod = selectedPlan.payment_plan.interest_method;
+        state.interestValue = selectedPlan.payment_plan.interest_value;
+        state.interestMode = selectedPlan.payment_plan.interest_mode;
+        state.balanceMode = selectedPlan.payment_plan.balance_mode;
+    }
       
   },
 

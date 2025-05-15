@@ -71,7 +71,7 @@ const actions = {
     axios.post(`api/v1/get-sales-agents/`,formData)
     .then((response)=>{
       for(let i=0; i< response.data.length; i++){
-        state.agentArr.push((response.data[i].name));
+        state.agentArr.push((response.data[i].name + " - Email: " + response.data[i].email));
       }
       commit('LIST_AGENTS', response.data);
     })
@@ -94,7 +94,7 @@ const actions = {
   },
   handleSelectedAgent({ commit, state }, option){
     state.agentArray = [];
-    const selectedAgent = state.agentsList.find(agent => (agent.name) === option);
+    const selectedAgent = state.agentsList.find(agent => (agent.name + " - Email: " + agent.email) === option);
     if (selectedAgent) {
         state.agentID = selectedAgent.sales_agent_id;
         state.agentName = selectedAgent.name;

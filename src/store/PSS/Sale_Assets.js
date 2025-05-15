@@ -170,6 +170,7 @@ const actions = {
     if (selectedAsset) {
         state.assetID = selectedAsset.sale_asset_id;
         state.assetName = selectedAsset.name;
+        commit('SET_SALE_CHARGES',selectedAsset.sale_charges);
         state.assetArray = [...state.assetArray, selectedAsset];
     }
 

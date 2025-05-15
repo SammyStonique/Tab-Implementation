@@ -325,7 +325,16 @@ export default defineComponent({
         }
       }
       
-    }
+    };
+    //CALCULATE ASSET SALE UNIT TOTAL AMOUNT
+    const calculateAssetUnitAmount = (row) =>{
+      let totalAmount = parseFloat(row.sale_total_amount) || 0;
+      let discount = parseFloat(row.discount) || 0;
+      let charges_amount = parseFloat(row.charges_amount) || 0;
+      totalAmount = (totalAmount - (discount + charges_amount)).toFixed(2);
+      row.sale_total_amount = Number(totalAmount).toLocaleString();
+      
+    };
 
     const handleChange = (event, row) =>{
       const selectedValue = event.target.value;
@@ -338,12 +347,14 @@ export default defineComponent({
     }
 
     const handleInputChange = (event, row) =>{
+      
       calculateAverageRating(row);
       calculateTaxAmount(row);
       updateUnits(row);
       receiptAllocation(row);
       journalLineCheck(row);
       checkFreeSavings(row);
+      calculateAssetUnitAmount(row);
     };
 
 
