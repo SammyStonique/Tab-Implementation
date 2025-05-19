@@ -114,6 +114,7 @@ const actions = {
         selectedUnit.discount = 0;
         selectedUnit.charges_amount = 0;
         selectedUnit.sale_total_amount = selectedUnit.unit_selling_price;
+        selectedUnit.formatted_sale_total_amount = selectedUnit.unit_selling_price;
         const exists = state.unitArray.some(unit => unit.asset_unit_id === selectedUnit.asset_unit_id);
         if (!exists) {
             state.unitArray = [...state.unitArray, selectedUnit];

@@ -101,6 +101,8 @@ export default{
             {label: "Deposit Mode", key:"deposit_mode"},
             {label: "Dep. Value", key:"deposit_value"},
             {label: "Interest", key:"interest_value"},
+            {label: "Repay. Freq.", key:"repayment_frequency"},
+            {label: "Penalize", key:"penalize"},
         ])
         const actions = ref([
             {name: 'edit', icon: 'fa fa-edit', title: 'Edit Plan', rightName: 'Editing Payment Plans'},
@@ -126,6 +128,11 @@ export default{
                 formFields.value[8].hidden = true;
                 formFields.value[9].hidden = true;
                 formFields.value[10].hidden = true;
+                formFields.value[11].hidden = true;
+                formFields.value[12].hidden = true;
+                formFields.value[13].hidden = true;
+                formFields.value[14].hidden = true;
+                formFields.value[15].hidden = true;
             }else{
                 formFields.value[3].hidden = false;
                 formFields.value[4].hidden = false;
@@ -135,6 +142,11 @@ export default{
                 formFields.value[8].hidden = false;
                 formFields.value[9].hidden = false;
                 formFields.value[10].hidden = false;
+                formFields.value[11].hidden = false;
+                formFields.value[12].hidden = false;
+                formFields.value[13].hidden = false;
+                formFields.value[14].hidden = false;
+                formFields.value[15].hidden = false;
             }
         }
         const displayDepositValue = (value) =>{
@@ -142,6 +154,17 @@ export default{
                 formFields.value[4].hidden = true;
             }else{
                 formFields.value[4].hidden = false;
+            }
+        }
+        const displayPenaltyOptions = (value) =>{
+            if(value == "No"){
+                formFields.value[13].hidden = true;
+                formFields.value[14].hidden = true;
+                formFields.value[15].hidden = true;
+            }else{
+                formFields.value[13].hidden = false;
+                formFields.value[14].hidden = false;
+                formFields.value[15].hidden = false;
             }
         }
         const formFields = ref([]);
@@ -158,7 +181,12 @@ export default{
                 { type: 'dropdown', name: 'interest_mode',label: "Interest Mode", value: selectedPlan.value?.interest_mode || 'Deposit Exclusive', placeholder: "", required: true, hidden:false, options: [{ text: 'Deposit Inclusive', value: 'Deposit Inclusive' }, { text: 'Deposit Exclusive', value: 'Deposit Exclusive' }] },
                 { type: 'dropdown', name: 'balance_mode',label: "Balance Mode", value: selectedPlan.value?.balance_mode || 'Equal Distribution', placeholder: "", required: true, hidden:false, options: [{ text: 'Equal Distribution', value: 'Equal Distribution' }, { text: 'One-Off', value: 'One-Off' }, { text: 'Any Amount', value: 'Any Amount' }] },
                 { type: 'dropdown', name: 'hp_posting_mode',label: "Hire Purchase Mode", value: selectedPlan.value?.hp_posting_mode || 'Interest Suspense', placeholder: "", required: true, hidden:false, options: [{ text: 'Interest Suspense', value: 'Interest Suspense' }, { text: 'Asset Accrual', value: 'Asset Accrual' }, { text: 'Cash Price', value: 'Cash Price' }, { text: 'Trading', value: 'Trading' }] },
-                {required: false}
+                { type: 'dropdown', name: 'repayment_frequency',label: "Repayment Frequency", value: selectedPlan.value?.repayment_frequency || 'Monthly', placeholder: "", required: true, options: [{ text: 'Daily', value: 'Daily' }, { text: 'Weekly', value: 'Weekly' },{ text: 'Monthly', value: 'Monthly' }, { text: 'Annually', value: 'Annually' }] },
+                { type: 'dropdown', name: 'penalize',label: "Penalize", value: selectedPlan.value?.penalize || 'No', placeholder: "", required: false, options: [{ text: 'Yes', value: 'Yes' }, { text: 'No', value: 'No' }] , method: displayPenaltyOptions},
+                { type: 'dropdown', name: 'penalty_frequency',label: "Penalty Frequency", value: selectedPlan.value?.penalty_frequency || 'Monthly', placeholder: "", required: true, options: [{ text: 'Daily', value: 'Daily' }, { text: 'Weekly', value: 'Weekly' },{ text: 'Monthly', value: 'Monthly' }, { text: 'Annually', value: 'Annually' }, { text: 'One-Off', value: 'One-Off' }] },
+                { type: 'dropdown', name: 'penalty_mode',label: "Penalty Mode", value: selectedPlan.value?.penalty_mode || 'Flat Amount', placeholder: "", required: false, options: [{ text: 'Flat Amount', value: 'Flat Amount' }, { text: '% of Installment Principal', value: 'Installment Principal' },{ text: '% of Installment Interest', value: 'Installment Interest' }, { text: '% of Installment Principal + Interest', value: 'Installment Principal + Interest' }, { text: '% of Installment (Principal + Interest) Balance', value: 'Installment Principal + Interest Balance' },{ text: '% of Principal Balance', value: 'Principal Balance' }, { text: '% of Total Balance', value: 'Loan Balance' }] },
+                { type: 'number', name: 'penalty_value',label: "Penalty Value", value: selectedPlan.value?.penalty_value || 0, required: false },
+                
             ];  
         };
         const handleReset = () =>{
@@ -170,7 +198,7 @@ export default{
                     formFields.value[i].value = 'Hire Purchase';
                 }else if(formFields.value[i].label == "Deposit Mode" ){
                     formFields.value[i].value = 'Percentage';
-                }else if(formFields.value[i].label == "Deposit Value" || formFields.value[i].label == "Installments"){
+                }else if(formFields.value[i].label == "Deposit Value" || formFields.value[i].label == "Installments" || formFields.value[i].name == "penalty_value"){
                     formFields.value[i].value = 0;
                 }
                 else if(formFields.value[i].label == "Interest Method" ){
@@ -181,6 +209,12 @@ export default{
                     formFields.value[i].value = 'Equal Distribution';
                 }else if(formFields.value[i].label == "Hire Purchase Mode" ){
                     formFields.value[i].value = 'Interest Suspense';
+                }else if(formFields.value[i].name == "penalty_frequency" || formFields.value[i].name == "repayment_frequency"){
+                    formFields.value[i].value = 'Monthly';
+                }else if(formFields.value[i].name == "penalty_mode" ){
+                    formFields.value[i].value = 'Flat Amount';
+                }else if(formFields.value[i].name == "penalty_value" ){
+                    formFields.value[i].value = 'No';
                 }else{
                     formFields.value[i].value = '';
                 }
@@ -211,12 +245,17 @@ export default{
                 name: formFields.value[1].value,
                 installments: formFields.value[5].value,
                 deposit_mode: formFields.value[3].value,
-                deposit_value: formFields.value[4].value,
+                deposit_value: formFields.value[4].value || 0,
                 interest_method: formFields.value[6].value,
                 interest_value: formFields.value[7].value || 0,
                 interest_mode: formFields.value[8].value,
                 balance_mode: formFields.value[9].value,
                 hp_posting_mode: formFields.value[10].value,
+                repayment_frequency: formFields.value[11].value,
+                penalize: formFields.value[12].value || 'No',
+                penalty_frequency: formFields.value[13].value || 'Monthly',
+                penalty_value: formFields.value[15].value || 0,
+                penalty_mode: formFields.value[14].value || 'Flat Amount',
                 company: companyID.value
             }
 
@@ -264,11 +303,16 @@ export default{
                 interest_mode: formFields.value[8].value,
                 balance_mode: formFields.value[9].value,
                 hp_posting_mode: formFields.value[10].value,
+                repayment_frequency: formFields.value[11].value,
+                penalize: formFields.value[12].value || 'No',
+                penalty_frequency: formFields.value[13].value || 'Monthly',
+                penalty_value: formFields.value[15].value || 0,
+                penalty_mode: formFields.value[14].value || 'Flat Amount',
                 company: companyID.value
             }
 
             for(let i=0; i < formFields.value.length; i++){
-                if(formFields.value[i].value =='' && formFields.value[i].type !='number'){
+                if(formFields.value[i].value =='' && formFields.value[i].type !='number' && formFields.value[i].required == true){
                     errors.value.push('Error');
                 }
             }

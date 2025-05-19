@@ -12,7 +12,9 @@ const state = {
   customerEmail: '',
   customerIdNo: '',
   selectedCustomer: null,
-  isEditing: false
+  isEditing: false,
+  outstandingBalance: 0,
+  receiptItems: [],
 };
   
 const mutations = {
@@ -28,6 +30,7 @@ const mutations = {
     state.customerIdNo = '';
     state.selectedCustomer = null;
     state.isEditing = false;
+    state.receiptItems = [];
   },
   SET_SELECTED_CUSTOMER(state, customer) {
     state.selectedCustomer = customer;
@@ -41,6 +44,9 @@ const mutations = {
   },
   SET_CUSTOMER_DETAILS(state, details){
     state.customerDetails = details;
+  },
+  LIST_RECEIPT_ITEMS(state, items) {
+    state.receiptItems = items;
   },
   SET_STATE(state, payload) {
     for (const key in payload) {
@@ -73,6 +79,16 @@ const actions = {
       throw error;
     })
   },
+  async createClientReceipt({ commit,state }, formData) {
+      return axios.post('api/v1/receipt-asset-sale-client/', formData)
+      .then((response)=>{
+        return response;
+      })
+      .catch((error)=>{
+        console.log(error.message);
+        throw error;
+      })
+    },
 
   fetchAssetClients({ commit,state }, formData) {
     state.customerArr = [];
@@ -114,6 +130,32 @@ const actions = {
     commit('CUSTOMERS_ARRAY', state.customerArray);
       
   },
+  async fetchClientReceiptItems({ commit,state }, formData) {
+      state.outstandingBalance = 0;
+      await axios.post(`api/v1/client-receipt-items-search/`,formData)
+      .then((response)=>{
+        const receiptItems = response.data.items;
+        for(let i=0; i<response.data.items.length; i++){
+          state.outstandingBalance += Number(response.data.items[i].due_amount);
+        }
+        const transformedInvoiceArray = receiptItems.map(receiptItem =>({
+            ...receiptItem,
+            payment_allocation: 0,
+            bal_after_alloc: "",
+            quantity: 1,
+            allocation_status: false
+        }));
+        commit('LIST_RECEIPT_ITEMS', transformedInvoiceArray);
+      })
+      .catch((error)=>{
+        console.log(error.message);
+      })
+      
+    },
+    handleClientPrepayment({commit,state}, formData){
+      state.receiptItems.push(formData);
+      commit('LIST_RECEIPT_ITEMS', state.receiptItems);
+    },
 
   async updateAssetClient({ commit,state }, formData) {
     return axios.put(`api/v1/update-asset-sale-client/`,formData)
@@ -166,6 +208,10 @@ const actions = {
         Swal.fire(`Client has not been deleted!`);
       }
     })
+  },
+  removeReceiptItem({commit, state}, index){
+    state.receiptItems.splice(index, 1); 
+    commit('LIST_RECEIPT_ITEMS', state.receiptItems);
   },
 
 };

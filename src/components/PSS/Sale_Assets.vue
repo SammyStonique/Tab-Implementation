@@ -340,18 +340,23 @@ export default{
         }
         const handleActionClick = async(rowIndex, action, row) =>{
             if( action == 'edit'){
-                await store.dispatch('Sale_Assets/updateState', {selectedAsset: null,selectedMake: null,selectedModel: null,selectedCurrency: null,isEditing: false});
-                const assetID = row[idField];
-                let formData = {
-                    company: companyID.value,
-                    sale_asset: assetID
+                const assetStatus = row['approval_status']
+                if(assetStatus == 'Pending'){
+                    await store.dispatch('Sale_Assets/updateState', {selectedAsset: null,selectedMake: null,selectedModel: null,selectedCurrency: null,isEditing: false});
+                    const assetID = row[idField];
+                    let formData = {
+                        company: companyID.value,
+                        sale_asset: assetID
+                    }
+                    await store.dispatch('Sale_Assets/fetchSaleAsset',formData).
+                    then(()=>{
+                        store.commit('pageTab/ADD_PAGE', {'PSS':'Asset_Details'})
+                        store.state.pageTab.pssActiveTab = 'Asset_Details';
+                        
+                    })
+                }else{
+                    toast.error(`Cannot Edit ${assetStatus} Asset`)
                 }
-                await store.dispatch('Sale_Assets/fetchSaleAsset',formData).
-                then(()=>{
-                    store.commit('pageTab/ADD_PAGE', {'PSS':'Asset_Details'})
-                    store.state.pageTab.pssActiveTab = 'Asset_Details';
-                    
-                })
             }else if(action == 'approve/reject'){
                 const assetStatus = row['approval_status']
                 if(assetStatus == 'Pending'){

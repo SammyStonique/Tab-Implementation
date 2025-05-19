@@ -15,7 +15,7 @@
                             <div class="tab-content">
                                 <div v-show="activeTab == 0">
                                     <div class="border border-slate-200 rounded relative py-4 w-[75%] mt-3 px-2 min-h-[180px]">
-                                        <DynamicTable :key="tableKey" :columns="unitColumns" :rows="unitRows" :actions="actionUnits" @action-click="deleteUnit" :rightsModule="rightsModule" />
+                                        <DynamicTable :key="tableKey" :columns="unitColumns" :rows="unitRows" :actions="actionUnits" @action-click="deleteUnit" :rightsModule="rightsModule" :showTotals="showTotals" />
                                     </div>
                                 </div>
                                 <div v-show="activeTab == 1">
@@ -36,6 +36,13 @@
                                 <div v-show="activeTab == 2">
                                     <DynamicForm :fields="additionalFields" :flex_basis="additional_flex_basis" :flex_basis_percentage="additional_flex_basis_percentage" @handleReset="handleReset"/>
                                 </div>
+                                <div v-show="activeTab == 3" class="text-left">  
+                                    <button @click="generateSchedules" class="rounded bg-green-400 cursor-pointer text-sm mr-2 mb-1.5  text-white px-2 py-1.5"><i class="fa fa-check-circle text-xs mr-1.5" aria-hidden="true"></i>Generate Schedules</button>                
+                                    <DynamicTable :key="tableKey" :columns="scheduleColumns" :rows="scheduleRows" :idField="idFieldCharge" :showActions="showActions" :showTotals="showTotals"/>
+                                </div>
+                                <div v-show="activeTab == 4">
+                                    <DynamicForm :fields="additionalFields1" :flex_basis="additional_flex_basis" :flex_basis_percentage="additional_flex_basis_percentage" @handleReset="handleReset"/>
+                                </div>
                             </div>
                         </div>
                     </template>
@@ -53,6 +60,7 @@ import DynamicTable from '@/components/DynamicTable.vue';
 import PageStyleComponent from '@/components/PageStyleComponent.vue';
 import { useStore } from "vuex";
 import { useToast } from "vue-toastification";
+import { useDateFormatter } from '@/composables/DateFormatter';
 
 export default defineComponent({
     name: 'Sale_Details',
@@ -62,8 +70,10 @@ export default defineComponent({
     setup(){
         const store = useStore();
         const toast = useToast();
+        const { formatDate } = useDateFormatter();
+        const current_date = new Date();
         const loader = ref('none');
-        const tabs = ref(['Asset Units','Selling Charges','Sale Commission']);
+        const tabs = ref(['Asset Units','Selling Charges','Sale Commission','Repayment Schedules','Notes']);
         const mainComponentKey = ref(0);
         const clientComponetKey = ref(0);
         const planComponentKey = ref(0);
@@ -113,6 +123,7 @@ export default defineComponent({
         const interestMode = ref("");
         const balanceMode = ref("");
         const actualDeposit = ref(0);
+        const repayFrequency = ref("");
         const computedDepositMode = computed(() => depositMode);
         const computedDepositValue = computed(() => depositValue);
         const computedInstallments = computed(() => installments);
@@ -121,6 +132,7 @@ export default defineComponent({
         const computedInterestMode = computed(() => interestMode);
         const computedBalanceMode = computed(() => balanceMode);
         const computedActualDepositValue = computed(() => actualDeposit);
+        const computedRepayFrequency= computed(() => repayFrequency);
         const agentID = ref('');
         const actionUnits = ref([
             {name: 'delete', icon: 'fa fa-minus-circle', title: 'Remove Unit', rightName: 'Adding Asset Sales'},
@@ -130,7 +142,7 @@ export default defineComponent({
             {label: "Selling Price", key:"unit_selling_price", type: "number", editable: true},
             {label: "Discount", key:"discount", type: "number", editable: true},
             {label: "Charges", key:"charges_amount", type: "number", editable: true},
-            {label: "Total", key:"sale_total_amount", type: "number", editable: false},
+            {label: "Total", key:"formatted_sale_total_amount", type: "number", editable: false},
         ]);
         const unitRows = computed(() => {
             return store.state.Asset_Units.unitArray;
@@ -151,6 +163,19 @@ export default defineComponent({
         const actionCharges = ref([
             {name: 'delete', icon: 'fa fa-minus-circle', title: 'Remove Charge', rightName: 'Adding Sale Assets'},
         ]);
+        const showActions = ref(false);
+        const showTotals = ref(true);
+        const scheduleColumns = ref([
+            {label: "Instlmnt", key:"installment", type: "text", editable: false},
+            {label: "Due Date", key:"due_date", type: "text", editable: false},
+            {label: "Asset Balance", key:"formatted_asset_balance", type: "text", editable: false},
+            {label: "Instl Principal", key:"formatted_principal_amount", type: "number", editable: false},
+            {label: "Instl Interest", key:"formatted_interest_amount", type: "number", editable: false},
+            {label: "Schedule Payment", key:"formatted_schedule_repayment", type: "number", editable: false},
+        ]);
+        const scheduleRows = computed(() => {
+            return store.state.Asset_Sales.assetSchedules;
+        });
         const fetchAssetClients = async() =>{
             await store.dispatch('Asset_Clients/fetchAssetClients', {company:companyID.value});
         };
@@ -177,6 +202,7 @@ export default defineComponent({
             interestValue.value = store.state.Payment_Plans.interestValue;
             interestMode.value = store.state.Payment_Plans.interestMode;
             balanceMode.value = store.state.Payment_Plans.balanceMode;
+            repayFrequency.value = store.state.Payment_Plans.repayFrequency;
 
             if(payMode.value == "Hire Purchase"){
                 formFields.value[5].hidden = false;
@@ -188,6 +214,7 @@ export default defineComponent({
                 formFields.value[11].hidden = false;
                 formFields.value[12].hidden = false;
                 formFields.value[13].hidden = false;
+                formFields.value[14].hidden = false;
             }else{
                 formFields.value[5].hidden = true;
                 formFields.value[6].hidden = true;
@@ -198,6 +225,7 @@ export default defineComponent({
                 formFields.value[11].hidden = true;
                 formFields.value[12].hidden = true;
                 formFields.value[13].hidden = true;
+                formFields.value[14].hidden = true;
             }
         };
         const clearSelectedPlan = async() =>{
@@ -255,7 +283,7 @@ export default defineComponent({
            return (selectedSale.value && selectedSale.value.customer && !clientID.value) ? selectedSale.value.customer.asset_sale_client_id : clientID.value;
         });
         const planValue = computed(() => {
-           return (selectedSale.value && selectedSale.value.payment_plan && !planID.value) ? selectedSale.value.payment_plan.payment_plan_id : planID.value;
+           return (selectedSale.value && selectedSale.value.payment_plan && !planID.value) ? selectedSale.value.payment_plan.asset_sale_plan_id : planID.value;
         });
         const displayDepositValue = (value) =>{
             if(value == "None"){
@@ -270,11 +298,13 @@ export default defineComponent({
             if(formFields.value[5].hidden == false && formFields.value[5].value == "Percentage"){
                 let depAmount = (formFields.value[6].value / 100) * value;
                 formFields.value[7].value = depAmount;
+            }else if(formFields.value[5].hidden == false && formFields.value[5].value == "Fixed Amount"){
+                formFields.value[7].value = formFields.value[6].value;
             }
         }
         const updateFormFields = () => {
             formFields.value = [
-                { type: 'date', name: 'date',label: "Date", value: selectedSale.value?.date || '', required: true, placeholder: '' },
+                { type: 'date', name: 'date',label: "Date", value: selectedSale.value?.date || formatDate(current_date), required: true,maxDate: formatDate(current_date), placeholder: '' },
                 {  
                     type:'search-dropdown', label:"Client", value: clientValue.value, componentKey: clientComponetKey,
                     selectOptions: clientArray, optionSelected: handleSelectedClient, required: true,
@@ -293,7 +323,7 @@ export default defineComponent({
                     searchPlaceholder: 'Select Plan...', dropdownWidth: '450px', updateValue: selectedPlan.value,
                     clearSearch: clearSelectedPlan
                 },
-                { type: 'dropdown', name: 'discount_mode',label: "Discount Mode", value: selectedSale.value?.discount_mode || 'Percentage', placeholder: "", required: true, options: [{ text: 'Percentage', value: 'Percentage' }, { text: 'Fixed Amount', value: 'Fixed Amount' }, { text: 'None', value: 'None' }] },
+                { type: 'dropdown', name: 'discount_mode',label: "Discount Mode", value: selectedSale.value?.discount_mode || 'Fixed Amount', placeholder: "", required: true, options: [{ text: 'Percentage', value: 'Percentage' }, { text: 'Fixed Amount', value: 'Fixed Amount' }, { text: 'None', value: 'None' }] },
                 { type: 'dropdown', name: 'deposit_mode',label: "Deposit Mode", value: selectedSale.value?.deposit_mode || computedDepositMode.value, placeholder: "", required: true, hidden:true, options: [{ text: 'Percentage', value: 'Percentage' }, { text: 'Fixed Amount', value: 'Fixed Amount' }, { text: 'None', value: 'None' }] , method: displayDepositValue},
                 { type: 'number', name: 'deposit_value',label: "Deposit Value", value: selectedSale.value?.deposit_value || computedDepositValue.value, placeholder: "", required: false, hidden:true },
                 { type: 'number', name: 'actual_deposit',label: "Actual Deposit", value: selectedSale.value?.actual_deposit || computedActualDepositValue.value, placeholder: "", required: false, hidden:true },
@@ -303,8 +333,8 @@ export default defineComponent({
                 { type: 'dropdown', name: 'interest_mode',label: "Interest Mode", value: selectedSale.value?.interest_mode || computedInterestMode.value, placeholder: "", required: true, hidden:true, options: [{ text: 'Deposit Inclusive', value: 'Deposit Inclusive' }, { text: 'Deposit Exclusive', value: 'Deposit Exclusive' }] },
                 { type: 'dropdown', name: 'balance_mode',label: "Balance Mode", value: selectedSale.value?.balance_mode || computedBalanceMode.value, placeholder: "", required: true, hidden:true, options: [{ text: 'Equal Distribution', value: 'Equal Distribution' }, { text: 'One-Off', value: 'One-Off' }, { text: 'Any Amount', value: 'Any Amount' }] },
                 { type: 'date', name: 'repayment_date',label: "Repayment Start Date", value: selectedSale.value?.repayment_date || '', required: true, placeholder: '', hidden: true },
-                { required: false},
-                { type: 'number', name: 'discount',label: "Discount", value: selectedSale.value?.discount || 0, required: false },
+                { type: 'dropdown', name: 'repayment_frequency',label: "Repayment Frequency", value: selectedSale.value?.repayment_frequency || computedRepayFrequency.value, placeholder: "", required: true, hidden: true, options: [{ text: 'Daily', value: 'Daily' }, { text: 'Weekly', value: 'Weekly' },{ text: 'Monthly', value: 'Monthly' }, { text: 'Annually', value: 'Annually' }] },
+                { type: 'number', name: 'discount',label: "Discount", value: selectedSale.value?.discount || 0, required: false},
                 { type: 'number', name: 'total_amount',label: "Total Amount", value: selectedSale.value?.total_amount || 0, required: true, method: calculateDepositAmount },
                 {  
                     type:'search-dropdown', label:"Unit(s)", value: "", componentKey: unitComponentKey,
@@ -332,6 +362,7 @@ export default defineComponent({
            return (selectedSale.value && selectedSale.value.sales_agent && !agentID.value) ? selectedSale.value.sales_agent.sales_agent_id : agentID.value;
         });
         const additionalFields = ref();
+        const additionalFields1 = ref();
         const hideCommissionOptions= (value) =>{
             if(value != "None"){
                 additionalFields.value[2].hidden = false;
@@ -355,8 +386,14 @@ export default defineComponent({
 
             ];
         };
+        const updateAdditionalFormFields1 = () => {
+            additionalFields1.value = [
+                { type: 'text-area', name: 'notes',label: "Notes", value: selectedSale.value?.notes || '', textarea_rows: '9', textarea_cols: '112', required: false },
 
-        watch([clientID, planID,assetID, selectedSale], () => {
+            ];
+        };
+
+        watch([clientID, planID,assetID, selectedSale, unitRows], () => {
             if (clientID.value != "") {
                 formFields.value[1].value = clientID.value;
             }
@@ -370,6 +407,8 @@ export default defineComponent({
             if(selectedSale.value){
                 store.dispatch('Asset_Fees/updateState', { saleFeeArray: saleCharges.value,})
                 store.dispatch('Asset_Units/updateState', { unitArray: saleUnits.value})
+                fetchAssetUnits(selectedSale.value.asset.sale_asset_id)
+                fetchSalePlans(selectedSale.value.asset.sale_asset_id)
             }
             
         }, { immediate: true });
@@ -382,6 +421,7 @@ export default defineComponent({
                 agentComponentKey.value += 1;
                 updateFormFields();
                 updateAdditionalFormFields();
+                updateAdditionalFormFields1();
                 if(selectedSale.value.sale_plan_terms && selectedSale.value.sale_plan_terms.length){
                     formFields.value[5].hidden = false;
                     formFields.value[6].hidden = false;
@@ -392,6 +432,7 @@ export default defineComponent({
                     formFields.value[11].hidden = false;
                     formFields.value[12].hidden = false;
                     formFields.value[13].hidden = false;
+                    formFields.value[14].hidden = false;
                 }
             }else if(selectedSale.value && selectedAsset.value && selectedClient.value && selectedPlan.value){
                 assetComponentKey.value += 1;
@@ -399,6 +440,7 @@ export default defineComponent({
                 planComponentKey.value += 1;
                 updateFormFields();
                 updateAdditionalFormFields();
+                updateAdditionalFormFields1();
                 if(selectedSale.value.sale_plan_terms && selectedSale.value.sale_plan_terms.length){
                     formFields.value[5].hidden = false;
                     formFields.value[6].hidden = false;
@@ -409,24 +451,28 @@ export default defineComponent({
                     formFields.value[11].hidden = false;
                     formFields.value[12].hidden = false;
                     formFields.value[13].hidden = false;
+                    formFields.value[14].hidden = false;
                 }
             }else if(selectedSale.value && selectedAsset.value){
                 assetComponentKey.value += 1;
                 updateFormFields();
                 updateAdditionalFormFields();
+                updateAdditionalFormFields1();
             }
         }, { immediate: true });
 
         const handleReset = async() =>{
             for(let i=0; i < formFields.value.length; i++){
                 if(formFields.value[i].name == 'discount_mode'){
-                    formFields.value[i].value = 'Percentage';
+                    formFields.value[i].value = 'Fixed Amount';
                 }else if(formFields.value[i].name == 'discount' || formFields.value[i].name == 'total_amount'){
                     formFields.value[i].value = 0;
                 }else{
                     formFields.value[i].value = '';
                 }
             }
+            formFields.value[0].value = formatDate(current_date);
+            
             formFields.value[5].hidden = true;
             formFields.value[6].hidden = true;
             formFields.value[7].hidden = true;
@@ -436,6 +482,7 @@ export default defineComponent({
             formFields.value[11].hidden = true;
             formFields.value[12].hidden = true;
             formFields.value[13].hidden = true;
+            formFields.value[14].hidden = true;
 
             for(let i=0; i < additionalFields.value.length; i++){
                 if(additionalFields.value[i].name == 'commission_mode'){
@@ -451,11 +498,11 @@ export default defineComponent({
             await store.dispatch('Payment_Plans/updateState', { salePlanArray: []});
             await store.dispatch("Asset_Units/updateState", {unitArray: []})
             await store.dispatch('Asset_Fees/updateState', {saleFeeArray: []});
-            await store.dispatch('Asset_Sales/updateState', {selectedSale: null, selectedAgent: null, selectedPlan: null, selectedAsset: null, selectedClient: null,saleCharges:[],saleUnits:[], isEditing:false});
-            mainComponentKey.value += 1;
+            await store.dispatch('Asset_Sales/updateState', {selectedSale: null, selectedAgent: null, selectedPlan: null, selectedAsset: null, selectedClient: null,saleCharges:[],saleUnits:[],assetSchedules:[], isEditing:false});
             planComponentKey.value += 1;
             assetComponentKey.value += 1;
             clientComponetKey.value += 1;
+            mainComponentKey.value += 1;
             assetID.value = "";
             clientID.value = "";
         }
@@ -473,12 +520,14 @@ export default defineComponent({
                 let obj = {
                     'deposit_mode': formFields.value[5].value,
                     'deposit_value': formFields.value[6].value,
+                    'actual_deposit': formFields.value[7].value,
                     'installments': formFields.value[8].value,
                     'interest_method': formFields.value[9].value,
                     'interest_value': formFields.value[10].value,
                     'interest_mode': formFields.value[11].value,
                     'balance_mode': formFields.value[12].value,
                     'repayment_date': formFields.value[13].value,
+                    'repayment_frequency': formFields.value[14].value,
                 }
                 salePlanTermsArr.value.push(obj)
             }
@@ -488,8 +537,7 @@ export default defineComponent({
                 total_amount: formFields.value[16].value,
                 discount_mode: formFields.value[4].value,
                 discount: formFields.value[15].value,
-                userID: userID.value,
-                notes: formFields.value[5].value,
+                notes: additionalFields1.value[0].value,
                 commission_mode: additionalFields.value[1].value,
                 commission_amount: additionalFields.value[2].value || 0,
                 commission_method: additionalFields.value[3].value || 'Discount Exclusive',
@@ -505,13 +553,18 @@ export default defineComponent({
                 payment_plan_id: planID.value,
                 sale_units: unitRows.value,
                 sale_charges: saleChargeRows.value,
-                company: companyID.value
+                company: companyID.value,
+                user: userID.value,
             }
             errors.value = [];
             for(let i=0; i < formFields.value.length; i++){
                 if(formFields.value[i].value =='' && formFields.value[i].required == true && formFields.value[i].type != 'search-dropdown'){
                     errors.value.push('Error');
                 }
+            }
+            let unitSum = 0;
+            for(let i=0; i < unitRows.value.length; i++){
+                unitSum += parseFloat(unitRows.value[i].sale_total_amount);
             }
             if(assetValue.value == '' || clientValue.value == '' || planValue.value == ''){
                 errors.value.push('Error');
@@ -521,6 +574,12 @@ export default defineComponent({
                 hideLoader();
             }else if(unitRows.value.length == 0){
                 toast.error('Please Select Units');
+                hideLoader();
+            }else if(unitSum != formFields.value[16].value){
+                toast.error('Invalid Amount');
+                hideLoader();
+            }else if(formFields.value[16].value <= 0){
+                toast.error('Invalid Sale Amount');
                 hideLoader();
             }
             else{
@@ -549,12 +608,14 @@ export default defineComponent({
                 let obj = {
                     'deposit_mode': formFields.value[5].value,
                     'deposit_value': formFields.value[6].value,
+                    'actual_deposit': formFields.value[7].value,
                     'installments': formFields.value[8].value,
                     'interest_method': formFields.value[9].value,
                     'interest_value': formFields.value[10].value,
                     'interest_mode': formFields.value[11].value,
                     'balance_mode': formFields.value[12].value,
                     'repayment_date': formFields.value[13].value,
+                    'repayment_frequency': formFields.value[14].value,
                 }
                 salePlanTermsArr.value.push(obj)
             }
@@ -566,8 +627,7 @@ export default defineComponent({
                 total_amount: formFields.value[16].value,
                 discount_mode: formFields.value[4].value,
                 discount: formFields.value[15].value,
-                userID: userID.value,
-                notes: formFields.value[5].value,
+                notes: additionalFields1.value[0].value,
                 commission_mode: additionalFields.value[1].value,
                 commission_amount: additionalFields.value[2].value,
                 commission_method: additionalFields.value[3].value,
@@ -583,13 +643,17 @@ export default defineComponent({
                 payment_plan_id: planValue.value,
                 sale_units: unitRows.value,
                 sale_charges: saleChargeRows.value,
-                company: companyID.value
+                company: companyID.value,
             }
             errors.value = [];
             for(let i=0; i < formFields.value.length; i++){
                 if(formFields.value[i].value =='' && formFields.value[i].required == true && formFields.value[i].type != 'search-dropdown'){
                     errors.value.push('Error');
                 }
+            }
+            let unitSum = 0;
+            for(let i=0; i < unitRows.value.length; i++){
+                unitSum += unitRows.value[i].sale_total_amount;
             }
             if(assetValue.value == ''|| clientValue.value == '' || planValue.value == ''){
                 errors.value.push('Error');
@@ -599,6 +663,12 @@ export default defineComponent({
                     hideLoader();
             }else if(unitRows.value.length == 0){
                 toast.error('Please Select Units');
+                hideLoader();
+            }else if(unitSum != formFields.value[16].value){
+                toast.error('Invalid Amount');
+                hideLoader();
+            }else if(formFields.value[16].value <= 0){
+                toast.error('Invalid Sale Amount');
                 hideLoader();
             }
             else{
@@ -641,7 +711,61 @@ export default defineComponent({
         const deleteSaleCharge = (rowIndex, action, row) =>{
             store.dispatch('Asset_Fees/removeAssetSaleFee', rowIndex);
             tableKey.value += 1;
-        }
+        };
+        const generateSchedules = async() =>{
+            showLoader();
+            salePlanTermsArr.value = [];
+            if(formFields.value[5].hidden == false){
+                let obj = {
+                    'deposit_mode': formFields.value[5].value,
+                    'deposit_value': formFields.value[6].value,
+                    'actual_deposit': formFields.value[7].value,
+                    'installments': formFields.value[8].value,
+                    'interest_method': formFields.value[9].value,
+                    'interest_value': formFields.value[10].value,
+                    'interest_mode': formFields.value[11].value,
+                    'balance_mode': formFields.value[12].value,
+                    'repayment_date': formFields.value[13].value,
+                    'repayment_frequency': formFields.value[14].value,
+                }
+                salePlanTermsArr.value.push(obj)
+            }
+            let formData = {
+                sale_plan_terms: salePlanTermsArr.value,
+                repayment_start_date: formFields.value[13].value,
+                start_date: formFields.value[0].value,
+                total_amount: formFields.value[16].value,
+                installments: parseFloat(formFields.value[8].value),
+                company: companyID.value
+            }
+            errors.value = [];
+            for(let i=0; i < formFields.value.length; i++){
+                if(formFields.value[i].value =='' && formFields.value[i].required == true && formFields.value[i].type != 'search-dropdown'){
+                    errors.value.push('Error');
+                }
+            }
+            if(clientValue.value == '' || assetValue.value == '' || planValue.value == ''){
+                errors.value.push('Error');
+            }
+            if(errors.value.length){
+                toast.error('Fill In Required Fields');
+                hideLoader();
+            }else if(parseFloat(formFields.value[16].value) <= 0){
+                toast.error('Invalid Amount');
+                hideLoader();
+            }
+            else{
+                try {
+                    const response = await store.dispatch('Asset_Sales/generateArmotizationSchedules', formData);
+                } catch (error) {
+                    console.error(error.message);
+                    toast.error('Failed to generate schedules: ' + error.message);
+                } finally {
+                    hideLoader();
+                }
+            }
+
+        };
         
         onBeforeMount(()=>{ 
             fetchPlans();
@@ -650,6 +774,7 @@ export default defineComponent({
             fetchSaleCharges();
             updateFormFields();
             updateAdditionalFormFields();
+            updateAdditionalFormFields1();
             flex_basis.value = '1/4';
             flex_basis_percentage.value = '20';
             additional_flex_basis.value = '1/5';
@@ -660,11 +785,11 @@ export default defineComponent({
         })
 
         return{
-            tabs,componentKey, formFields, additionalFields, flex_basis, flex_basis_percentage, additional_flex_basis,
+            tabs,componentKey, formFields, additionalFields,additionalFields1, flex_basis, flex_basis_percentage, additional_flex_basis,
             additional_flex_basis_percentage, mainComponentKey,handleReset, loader, showLoader, hideLoader,
             displayButtons,saveAssetSale,saleChargeArr,chargesDropdownWidth,chargesSearchPlaceholder,selectTab,handleSelectedSaleCharge,
             deleteSaleCharge,activeTab,rightsModule,idFieldCharge,saleChargeRows,chargeColumns,actionCharges,chargeComponentKey,
-            tableKey,actionUnits,unitColumns,unitRows,deleteUnit
+            tableKey,actionUnits,unitColumns,unitRows,deleteUnit,scheduleColumns,scheduleRows,generateSchedules,showActions,showTotals
         }
     }
 })

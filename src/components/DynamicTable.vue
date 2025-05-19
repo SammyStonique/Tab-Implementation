@@ -328,11 +328,12 @@ export default defineComponent({
     };
     //CALCULATE ASSET SALE UNIT TOTAL AMOUNT
     const calculateAssetUnitAmount = (row) =>{
-      let totalAmount = parseFloat(row.sale_total_amount) || 0;
+      let totalAmount = parseFloat(row.unit_selling_price) || 0;
       let discount = parseFloat(row.discount) || 0;
       let charges_amount = parseFloat(row.charges_amount) || 0;
-      totalAmount = (totalAmount - (discount + charges_amount)).toFixed(2);
-      row.sale_total_amount = Number(totalAmount).toLocaleString();
+      totalAmount = (totalAmount + charges_amount - discount).toFixed(2);
+      row.sale_total_amount = totalAmount;
+      row.formatted_sale_total_amount = Number(totalAmount).toLocaleString();
       
     };
 

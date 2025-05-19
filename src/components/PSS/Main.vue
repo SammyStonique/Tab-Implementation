@@ -44,8 +44,8 @@ import Unit_Reservations from '@/components/PSS/Unit_Reservations.vue';
 import Reservation_Details from '@/components/PSS/Reservation_Details.vue';
 
 
-import Member_Invoices from '@/components/MMS/Member_Invoices.vue';
-import Member_Receipts from '@/components/MMS/Member_Receipts.vue';
+import Client_Invoices from '@/components/PSS/Client_Invoices.vue';
+import Client_Receipts from '@/components/PSS/Client_Receipts.vue';
 import Loan_Products from '@/components/MMS/Loan_Products.vue';
 import Loan_Product_Details from '@/components/MMS/Loan_Product_Details.vue';
 
@@ -54,20 +54,18 @@ import Sale_Details from '@/components/PSS/Sale_Details.vue';
 import Historical_Loans from '@/components/MMS/Historical_Loans.vue';
 import Import_Historical_Loans from '@/components/MMS/Import_Historical_Loans.vue';
 import Loan_Guarantors from '@/components/MMS/Loan_Guarantors.vue';
-import Loan_Ledger from '@/components/MMS/Loan_Ledger.vue';
+import Sale_Profile from '@/components/PSS/Sale_Profile.vue';
 import Historical_Loan_Ledger from '@/components/MMS/Historical_Loan_Ledger.vue';
-import Receipt_Details from '@/components/MMS/Receipt_Details.vue';
-import Loan_Disbursements from '@/components/MMS/Loan_Disbursements.vue';
+import Receipt_Details from '@/components/PSS/Receipt_Details.vue';
 
-import Loan_Securities from '@/components/MMS/Loan_Securities.vue';
 import Loan_Schedules from '@/components/MMS/Loan_Schedules.vue';
 import Penalty_Batches from '@/components/MMS/Penalty_Batches.vue';
 import Loan_Penalties from '@/components/MMS/Loan_Penalties.vue';
 import Loan_Documents from '@/components/MMS/Loan_Documents.vue';
 import Application_Fees from '@/components/MMS/Application_Fees.vue';
 import Loan_Arrears from '@/components/MMS/Loan_Arrears.vue';
-import Loan_Prepayments from '@/components/MMS/Loan_Prepayments.vue';
-import Prepayment_Allocations from '@/components/MMS/Prepayment_Allocations.vue';
+import Sale_Prepayments from '@/components/PSS/Sale_Prepayments.vue';
+import Prepayment_Allocations from '@/components/PSS/Prepayment_Allocations.vue';
 import Templates from '@/components/MMS/Templates.vue';
 import Design_Template from '@/components/MMS/Design_Template.vue';
 import Risk_Classifications from '@/components/MMS/Risk_Classifications.vue';
@@ -82,9 +80,9 @@ export default{
         PagesTab,
         Dashboard,
         Sale_Assets,Asset_Details,Asset_Makes,Receipt_Details,Asset_Models,Asset_Units,Unit_Categories,Clients,Vendors,Sales_Agents,Unit_Reservations,Reservation_Details,
-        Member_Invoices,Member_Receipts,Loan_Products,Loan_Product_Details,Asset_Sales,Sale_Details,Loan_Guarantors,Loan_Ledger,
-        Loan_Disbursements,Payment_Plans,Loan_Securities,Loan_Schedules,Loan_Penalties,Penalty_Batches,Loan_Documents,Application_Fees,Historical_Loans,Import_Historical_Loans,Historical_Loan_Ledger,
-        Loan_Arrears,Loan_Prepayments,Prepayment_Allocations,Templates,Design_Template,Risk_Classifications,Asset_Fees,
+        Client_Invoices,Client_Receipts,Loan_Products,Loan_Product_Details,Asset_Sales,Sale_Details,Loan_Guarantors,Sale_Profile,
+        Payment_Plans,Loan_Schedules,Loan_Penalties,Penalty_Batches,Loan_Documents,Application_Fees,Historical_Loans,Import_Historical_Loans,Historical_Loan_Ledger,
+        Loan_Arrears,Sale_Prepayments,Prepayment_Allocations,Templates,Design_Template,Risk_Classifications,Asset_Fees,
 
         Default_Settings
     },

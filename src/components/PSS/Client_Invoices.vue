@@ -90,7 +90,7 @@ import InvoicePayments from "@/components/InvoicePayments.vue";
 import PrintJS from 'print-js';
 
 export default{
-    name: 'Member_Invoices',
+    name: 'Client_Invoices',
     components:{
         PageComponent, MovableModal,DynamicForm,JournalEntries,InvoiceLines,InvoicePayments
     },
@@ -99,9 +99,9 @@ export default{
         const toast = useToast();
         const { getYear } = useDateFormatter();
         const { getMonth } = useDateFormatter();
-        const addingRight = ref('Adding Invoice');
-        const removingRight = ref('Deleting Invoice');
-        const rightsModule = ref('Accounts');
+        const addingRight = ref('Adding Client Invoice');
+        const removingRight = ref('Deleting Client Invoice');
+        const rightsModule = ref('PSS');
         const current_date = new Date();
         const loader = ref('none');
         const modal_loader = ref('none');
@@ -144,8 +144,8 @@ export default{
             {type: "checkbox"},
             {label: "Invoice#", key:"journal_no"},
             {label: "Date", key: "date"},
-            {label: "Member No", key:"member_number"},
-            {label: "Member Name", key:"member_name"},
+            {label: "Client Code", key:"code"},
+            {label: "Client Name", key:"customer_name"},
             {label: "Description", key:"description"},
             {label: "Amount", key:"total_amount", type:"number"},
             {label: "Paid", key:"total_paid", type:"number"},
@@ -154,9 +154,9 @@ export default{
         ])
         const showTotals = ref(true);
         const actions = ref([
-            {name: 'print', icon: 'fa fa-print', title: 'Print Invoice', rightName: 'Print Invoice'},
-            {name: 'download', icon: 'fa fa-download', title: 'Download Invoice', rightName: 'Print Invoice'},
-            {name: 'delete', icon: 'fa fa-trash', title: 'Delete Invoice',rightName: 'Deleting Invoice'},
+            {name: 'print', icon: 'fa fa-print', title: 'Print Invoice', rightName: 'Print Client Invoice'},
+            {name: 'download', icon: 'fa fa-download', title: 'Download Invoice', rightName: 'Print Client Invoice'},
+            {name: 'delete', icon: 'fa fa-trash', title: 'Delete Invoice',rightName: 'Deleting Client Invoice'},
         ])
         const companyID = computed(()=> store.state.userData.company_id);
         const fetchCustomers = async() =>{
@@ -178,8 +178,8 @@ export default{
         const status_search = ref("");
         const searchFilters = ref([
             {type:'text', placeholder:"Invoice#...", value: journal_no_search, width:36},
-            {type:'text', placeholder:"Member No...", value: client_code_search, width:36},
-            {type:'text', placeholder:"Member Name...", value: client_name_search, width:64},
+            {type:'text', placeholder:"Client No...", value: client_code_search, width:36},
+            {type:'text', placeholder:"Client Name...", value: client_name_search, width:64},
             {
                 type:'dropdown', placeholder:"Status..", value: status_search, width:32,
                 options: [{text:'Open',value:'Open'},{text:'Closed',value:'Closed'}]
@@ -282,7 +282,7 @@ export default{
             showNextBtn.value = false;
             showPreviousBtn.value = false;
             let formData = {
-                client_category: "Members",
+                client_category: "Customers",
                 txn_type: "INV",
                 client_name: client_name_search.value,
                 client_code: client_code_search.value,
@@ -470,7 +470,7 @@ export default{
 
             let formData = {
                 journal_no: "",
-                client_category: "Members",
+                client_category: "Customers",
                 txn_type: "INV",
                 client: client_name_search.value,
                 date_from: from_date_search.value,

@@ -156,9 +156,9 @@ export default{
             formFields.value = [
                 {  
                     type:'search-dropdown', label:"Category", value: categoryValue.value, componentKey: catComponentKey,
-                    selectOptions: categoryArray, optionSelected: handleSelectedCategory, required: true,
+                    selectOptions: categoryArray, optionSelected: handleSelectedCategory, required: false,
                     searchPlaceholder: 'Select Category...', dropdownWidth: '500px', updateValue: selectedCategory.value,
-                    fetchData: fetchCategories(), clearSearch: clearSelectedCategory()
+                    clearSearch: clearSelectedCategory()
                 },
                 { type: 'text', name: 'customer_name',label: "Name", value: selectedCustomer.value?.customer_name || '', required: true },
                 { type: 'text', name: 'phone_number',label: "Phone Number", value: selectedCustomer.value?.phone_number || '', required: true },
@@ -180,6 +180,8 @@ export default{
             if (selectedCustomer.value && selectedCategory.value) {
                 updateFormFields();
                 catComponentKey.value += 1;
+            }else if(selectedCustomer.value){
+                updateFormFields();
             }
             
         }, { immediate: true });
@@ -194,6 +196,7 @@ export default{
             showModalLoader();
             let formData = {
                 customer_name: formFields.value[1].value,
+                customer_code: "-",
                 contact_person: formFields.value[5].value,
                 email: formFields.value[3].value,
                 phone_number: formFields.value[2].value,
@@ -209,9 +212,6 @@ export default{
                 if(formFields.value[i].value =='' && formFields.value[i].required == true){
                     errors.value.push(formFields.value[i].label);
                 }
-            }
-            if(categoryID.value == ""){
-                errors.value.push('Error');
             }
 
             if(errors.value.length){
@@ -241,6 +241,7 @@ export default{
             errors.value = [];
             let formData = {
                 customer: selectedCustomer.value.customer_id,
+                customer_code: selectedCustomer.value.customer_code,
                 customer_name: formFields.value[1].value,
                 contact_person: formFields.value[5].value,
                 email: formFields.value[3].value,
@@ -256,9 +257,6 @@ export default{
                 if(formFields.value[i].value ==''){
                     errors.value.push('Error');
                 }
-            }
-            if(categoryValue.value == ""){
-                errors.value.push('Error');
             }
             if(errors.value.length){
                 toast.error('Fill In Required Fields');

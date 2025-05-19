@@ -19,6 +19,7 @@ const state = {
   interestValue : 0,
   interestMode : '',
   balanceMode : '',
+  repayFrequency : '',
   selectedPlan: null,
   isEditing: false
 };
@@ -208,6 +209,7 @@ const actions = {
         state.interestValue = selectedPlan.payment_plan.interest_value;
         state.interestMode = selectedPlan.payment_plan.interest_mode;
         state.balanceMode = selectedPlan.payment_plan.balance_mode;
+        state.repayFrequency = selectedPlan.payment_plan.repayment_frequency;
     }
       
   },

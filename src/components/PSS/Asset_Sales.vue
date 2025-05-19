@@ -22,6 +22,7 @@
             :idField="idField"
             @handleSelectionChange="handleSelectionChange"
             @handleActionClick="handleActionClick"
+            @handleShowDetails="handleShowDetails"
             :count="propCount"
             :currentPage="currentPage"
             :result="propArrLen"
@@ -36,8 +37,30 @@
             :showDetails="showDetails"
             :detailsTitle="detailsTitle"
             @hideDetails="hideDetails"
-        />
+            >
+            <div>
+                <div class="tabs pt-2">
+                    <button v-for="(tab, index) in tabs" :key="tab" :class="['tab', { active: activeTab === index }]"@click="selectTab(index)">
+                        {{ tab }}
+                    </button>
+                </div>
+                <div class="tab-content mt-3">
+                    <div v-show="activeTab == 0">
+                        <LoanSchedules 
+                            :loanSchedulesRows="loanScheduleRows"
+                        />
+                    </div>
+                    <div v-show="activeTab == 1">
+                        <div class="border border-slate-200 rounded relative py-2 w-[75%] mt-3 px-2 min-h-[50px]">                    
+                            <DynamicTable :key="tableKey" :columns="itemColumns" :rows="saleItemsRows" :idField="idFieldCharge" :actions="actionCharges" :showActions="showActions" :rightsModule="rightsModule" />
+                        </div>
+                    </div>
+                </div>
+                
+            </div>
+        </PageComponent>
     </div>
+    
     <MovableModal v-model:visible="transModalVisible" :title="transTitle" :modal_top="modal_top" :modal_left="modal_left" :modal_width="modal_width"
         :loader="trans_modal_loader" @showLoader="showTransModalLoader" @hideLoader="hideTransModalLoader" @closeModal="closeTransModal">
         <DynamicForm 
@@ -57,13 +80,15 @@ import { useToast } from "vue-toastification";
 import PrintJS from 'print-js';
 import MovableModal from '@/components/MovableModal.vue';
 import DynamicForm from '@/components/NewDynamicForm.vue';
+import DynamicTable from '@/components/DynamicTable.vue';
 import SearchableDropdown from '@/components/SearchableDropdown.vue';
+import LoanSchedules from "@/components/LoanSchedules.vue";
 import Swal from 'sweetalert2';
 
 export default{
     name: 'Asset_Sales',
     components:{
-        PageComponent,MovableModal,SearchableDropdown,DynamicForm
+        PageComponent,MovableModal,SearchableDropdown,DynamicForm,LoanSchedules,DynamicTable
     },
     setup(){
 
@@ -95,6 +120,12 @@ export default{
         const showPreviousBtn = ref(false);
         const detailsTitle = ref('Sale Documents');
         const transTitle = ref('Approve/Reject Sale');
+        const loanScheduleRows = ref([]);
+        const saleItemsRows = ref([]);
+        const showActions = ref(false);
+        const tabs = ref(['Repayment Schedule','Sold Units']);
+        const activeTab = ref(0);
+        const appID = ref(null);
         const transModalVisible = ref(false);
         const dropdownWidth = ref("500px")
         const modal_top = ref('200px');
@@ -116,11 +147,18 @@ export default{
             {label: "Status", key:"approval_status", textColor: "textColor"},
         ])
         const actions = ref([
-            {name: 'edit', icon: 'fa fa-edit', title: 'Edit Asset', rightName: 'Editing Asset Sales'},
-            {name: 'view', icon: 'fa fa-file-pdf-o', title: 'View Profile', rightName: 'Viewing Asset Sales'},
-            {name: 'approve/reject', icon: 'fa fa-check-circle', title: 'Approve/Reject Asset', rightName: 'Approving Asset Sales'},
-            {name: 'delete', icon: 'fa fa-trash', title: 'Delete Asset', rightName: 'Deleting Asset Sales'},
-        ])
+            {name: 'edit', icon: 'fa fa-edit', title: 'Edit Sale', rightName: 'Editing Asset Sales'},
+            {name: 'view', icon: 'fa fa-file-pdf-o', title: 'View Sale', rightName: 'Viewing Asset Sales'},
+            {name: 'approve/reject', icon: 'fa fa-check-circle', title: 'Approve/Reject Sale', rightName: 'Approving Asset Sales'},
+            {name: 'delete', icon: 'fa fa-trash', title: 'Delete Sale', rightName: 'Deleting Asset Sales'},
+        ]);
+        const itemColumns = ref([
+            {label: "Unit Number", key:"unit_number", type: "text", editable: false},
+            {label: "Selling Price", key:"unit_selling_price", type: "number", editable: false},
+            {label: "Discount", key:"discount", type: "number", editable: false},
+            {label: "Charges", key:"charges_amount", type: "number", editable: false},
+            {label: "Total", key:"sale_total_amount", type: "number", editable: false},
+        ]);
         const companyID = computed(()=> store.state.userData.company_id);
         const saleID = ref("");
         
@@ -348,18 +386,23 @@ export default{
         }
         const handleActionClick = async(rowIndex, action, row) =>{
             if( action == 'edit'){
-                await store.dispatch('Asset_Sales/updateState', {selectedSale: null,selectedAsset: null,selectedPlan: null,selectedClient: null, selectedAgent: null,isEditing: false});
-                const saleID = row[idField];
-                let formData = {
-                    company: companyID.value,
-                    asset_sale: saleID
+                const assetStatus = row['approval_status']
+                if(assetStatus == 'Pending'){
+                    await store.dispatch('Asset_Sales/updateState', {selectedSale: null,selectedAsset: null,selectedPlan: null,selectedClient: null, selectedAgent: null,isEditing: false});
+                    const saleID = row[idField];
+                    let formData = {
+                        company: companyID.value,
+                        asset_sale: saleID
+                    }
+                    await store.dispatch('Asset_Sales/fetchAssetSale',formData).
+                    then(()=>{
+                        store.commit('pageTab/ADD_PAGE', {'PSS':'Sale_Details'})
+                        store.state.pageTab.pssActiveTab = 'Sale_Details';
+                        
+                    })
+                }else{
+                    toast.error(`Cannot Edit ${assetStatus} Sale`)
                 }
-                await store.dispatch('Asset_Sales/fetchAssetSale',formData).
-                then(()=>{
-                    store.commit('pageTab/ADD_PAGE', {'PSS':'Sale_Details'})
-                    store.state.pageTab.pssActiveTab = 'Sale_Details';
-                    
-                })
             }else if(action == 'approve/reject'){
                 const assetStatus = row['approval_status']
                 if(assetStatus == 'Pending'){
@@ -389,8 +432,8 @@ export default{
                     asset_sale: saleID
                 }
                 await store.dispatch('Asset_Sales/fetchAssetSale',formData)
-                store.commit('pageTab/ADD_PAGE', {'PSS':'Asset_Profile'})
-                store.state.pageTab.pssActiveTab = 'Asset_Profile';
+                store.commit('pageTab/ADD_PAGE', {'PSS':'Sale_Profile'})
+                store.state.pageTab.pssActiveTab = 'Sale_Profile';
             }else if(action == 'transfer'){
                 hideTransModalLoader();
                 saleID.value = row['member_id'];
@@ -402,6 +445,46 @@ export default{
         ]);
         const handleDynamicOption = async(option) =>{
    
+        };
+        const handleShowDetails = async(row) =>{
+            activeTab.value = 0;
+            appID.value = row['asset_sale_id'];
+            detailsTitle.value = row['sale_code'] + ' Schedules';
+            showDetails.value = true;
+            let formData = {
+                asset_sale: row['asset_sale_id'],
+                company: companyID.value
+            }
+            axios.post('api/v1/asset-sale-schedules-search/',formData)
+            .then((response)=>{
+                loanScheduleRows.value = response.data.armotization_schedules;
+            })
+            .catch((error)=>{
+                console.log(error.message)
+            })
+        };
+        const selectTab = async(index) => {
+            let formData = {
+                company: companyID.value,
+                asset_sale: appID.value,
+            }
+            if(index == 1){
+                axios.post('api/v1/get-asset-sale-items/',formData)
+                .then((response)=>{
+                    saleItemsRows.value = response.data;
+                })
+                .catch((error)=>{
+                    console.log(error.message)
+                })
+                activeTab.value = index;
+            }else{
+                activeTab.value = index;
+                hideLoader();
+            }
+
+        };
+        const hideDetails = async() =>{
+            showDetails.value = false;
         };
         
         const printSalesList = () =>{
@@ -434,9 +517,6 @@ export default{
                 hideLoader();
             })
         };
-        const hideDetails = async() =>{
-            showDetails.value = false;
-        };
         const closeModal1 = async() =>{
             propModalVisible.value = false;
             handleReset1();
@@ -452,8 +532,26 @@ export default{
             submitButtonLabel, showModal, addNewSale, showLoader, loader, hideLoader, importMembers, removeAssetSale, removeAssetSales,
             handleSelectionChange,addingRight,removingRight,rightsModule,printSalesList,selectSearchQuantity,selectedValue,
             modal_left,modal_top,modal_width,trans_modal_loader,formFields,transModalVisible,transTitle,showTransModalLoader,hideTransModalLoader,approveSale,closeTransModal,
-            handleReset,dropdownOptions,handleDynamicOption,member_status,exit_date,
+            handleReset,dropdownOptions,handleDynamicOption,member_status,exit_date,handleShowDetails,loanScheduleRows,saleItemsRows,itemColumns,showActions,tabs,selectTab,activeTab
         }
     }
 };
 </script>
+
+<style scoped>
+.tabs {
+    display: flex;
+    border-bottom: 1px solid #ccc;
+}
+.tab {
+    padding: 2px 20px 2px 20px;
+    cursor: pointer;
+}
+
+.tab.active {
+    border-bottom: 2px solid #000;
+}
+
+.tab-content {
+    padding: 1px;
+}</style>

@@ -103,7 +103,7 @@ const actions = {
     axios.post(`api/v1/fetch-customers/`,formData)
     .then((response)=>{
       state.selectedCustomer = response.data;
-      const selectedCategory = response.data.category.name;
+      const selectedCategory = (response.data.category != null) ? (response.data.category.name) : "";
       commit('SET_SELECTED_CATEGORY',selectedCategory);
       commit('SET_SELECTED_CUSTOMER',response.data);
       commit('SET_CUSTOMER_DETAILS',response.data);
