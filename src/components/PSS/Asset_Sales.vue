@@ -425,15 +425,21 @@ export default{
                     searchAssetSales();
                 })
             }else if(action == 'view'){
-                await store.dispatch('Asset_Sales/updateState', {selectedSale: null,selectedAsset: null,selectedPlan: null,selectedClient: null, selectedAgent: null,isEditing: false});
                 const saleID = row[idField];
-                let formData = {
-                    company: companyID.value,
-                    asset_sale: saleID
+                const applicationStatus = row['approval_status']
+                if(applicationStatus == 'Approved'){
+                    let formData = {
+                        company: companyID.value,
+                        asset_sale: saleID
+                    }
+                    await store.dispatch('Asset_Sales/fetchSaleDetails',formData).
+                    then(()=>{
+                        store.commit('pageTab/ADD_PAGE', {'PSS':'Sale_Profile'})
+                        store.state.pageTab.pssActiveTab = 'Sale_Profile';
+                    })
+                }else{
+                    toast.error(`Cannot View ${applicationStatus} Sale`)
                 }
-                await store.dispatch('Asset_Sales/fetchAssetSale',formData)
-                store.commit('pageTab/ADD_PAGE', {'PSS':'Sale_Profile'})
-                store.state.pageTab.pssActiveTab = 'Sale_Profile';
             }else if(action == 'transfer'){
                 hideTransModalLoader();
                 saleID.value = row['member_id'];

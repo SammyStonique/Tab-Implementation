@@ -66,6 +66,9 @@ const mutations = {
   SET_SELECTED_REPAYMENTS(state, repayment) {
     state.selectedRepayments = repayment;
   },
+  SET_SELECTED_SCHEDULES(state, schedules) {
+    state.selectedSchedules = schedules;
+  },
   SET_SELECTED_DOCUMENTS(state, documents) {
     state.selectedDocuments = documents;
   },
@@ -188,13 +191,31 @@ const actions = {
         state.selectedSaleID = response.data.asset_sale_id;
         commit('SET_SALE_DETAILS',response.data);
         commit('SET_SALE_CHARGES',(response.data.sale_charges != null) ? (response.data.sale_charges) : []);
-        commit('SET_SALE_SCHEDULES',(response.data.sale_schedules != null) ? (response.data.sale_schedules) : []);
+        commit('SET_SELECTED_SCHEDULES',(response.data.sale_schedules != null) ? (response.data.sale_schedules) : []);
+        commit('SET_SELECTED_REPAYMENTS',(response.data.sale_repayments != null) ? (response.data.sale_repayments) : []);
         commit('SET_SALE_DOCUMENTS',(response.data.sale_documents != null) ? (response.data.sale_documents) : []);
     })
     .catch((error)=>{
       console.log(error.message);
     })
     
+  },
+  fetchSaleStatement({ commit,state }, formData){
+    let txns = [];
+    axios
+    .post("api/v1/asset-sale-statement-search/", formData)
+    .then((response)=>{
+        state.selectedStatement = response.data.results;
+        let running_balance = 0;
+        txns = response.data.results;
+
+    })
+    .catch((error)=>{
+        console.log(error.message)
+    })
+    .finally(()=>{
+    
+    })
   },
   fetchSaleRepayments({ commit,state }, formData) {
     axios.post(`api/v1/get-sale-repayments/`,formData)

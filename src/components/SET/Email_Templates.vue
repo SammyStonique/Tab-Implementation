@@ -94,7 +94,7 @@ export default{
                 type:'dropdown', placeholder:"Template Type..", value: type_search, width:56,
                 options: [{text:'Customized',value:'Customized'},{text:'Tenant Invoice',value:'Tenant Invoice'},{text:'Tenant Receipt',value:'Tenant Receipt'},{text:'Tenant Balance Reminder',value:'Tenant Balance Reminder'},{text:'Tenant Creation',value:'Tenant Creation'},{text:'Tenant Portal Invitation',value:'Tenant Portal Invitation'},{text:'Tenant Meter Reading',value:'Tenant Meter Reading'},
                             {text:'Tenant Statement',value:'Tenant Statement'},{text:'Employee Payslip',value:'Employee Payslip'},{text:'Customer Invoice',value:'Customer Invoice'},{text:'Customer Receipt',value:'Customer Receipt'},{text:'Member Receipt',value:'Member Receipt'},{text:'Customer Balance Reminder',value:'Customer Balance Reminder'},{text:'Member Creation',value:'Member Creation'},{text:'Member Portal Invitation',value:'Member Portal Invitation'},
-                            {text:'Member Loan Balance',value:'Member Loan Balance'},{text:'Member Loan Statement',value:'Member Loan Statement'}
+                            {text:'Member Loan Balance',value:'Member Loan Balance'},{text:'Member Loan Statement',value:'Member Loan Statement'},{text:'Sale Client Statement',value:'Sale Client Statement'}
                 ]
             },
         ]);

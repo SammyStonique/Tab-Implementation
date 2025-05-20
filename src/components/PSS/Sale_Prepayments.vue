@@ -79,7 +79,7 @@ export default{
         const itemType = ref('');
         const scheduleInstallment = ref('');
         const schedulesArray = computed(() => store.state.Sale_Prepayments.loanItems);
-        const idField = 'loan_prepayment_id';
+        const idField = 'sale_prepayment_id';
         const selectedIds = ref([]);
         const appModalVisible = ref(false);
         const prepaymentsList = ref([]);
@@ -101,9 +101,9 @@ export default{
         const tableColumns = ref([
             {type: "checkbox"},
             {label: "Date", key:"date",type: "text", editable: false},
-            {label: "Member#", key:"member_number",type: "text", editable: false},
-            {label: "Member Name", key:"member_name",type: "text", editable: false},
-            {label: "Loan#", key:"loan_number",type: "text", editable: false},
+            {label: "Client#", key:"client_code",type: "text", editable: false},
+            {label: "Client Name", key:"client_name",type: "text", editable: false},
+            {label: "Sale#", key:"sale_code",type: "text", editable: false},
             {label: "Receipt", key:"receipt_no",type: "text", editable: false},
             {label: "Amount", key: "total_amount", type: "number", editable: false},
             {label: "Allocated", key: "allocated_amount", type: "number", editable: false},
@@ -118,11 +118,11 @@ export default{
         const posted_search = ref("");
         const from_date_search = ref("");
         const to_date_search = ref("");
-        const fetchLoanItems = async(applicationID) =>{
-            await store.dispatch('Sale_Prepayments/fetchLoanItems', {company:companyID.value, loan_application: applicationID, historical_loan: null, date: ""})
+        const fetchLoanItems = async(saleID) =>{
+            await store.dispatch('Sale_Prepayments/fetchSaleItems', {company:companyID.value, asset_sale: saleID,date: ""})
         };
         const handleSelectedItem = async(option) =>{
-            await store.dispatch('Sale_Prepayments/handleSelectedLoanItem', option)
+            await store.dispatch('Sale_Prepayments/handleSelectedSaleItem', option)
             scheduleID.value = store.state.Sale_Prepayments.scheduleID;
             scheduleDescription.value = store.state.Sale_Prepayments.scheduleDescription;
             scheduleDueAmount.value = store.state.Sale_Prepayments.itemAmount;
@@ -134,8 +134,8 @@ export default{
             scheduleID.value = ""
         }
         const searchFilters = ref([
-            {type:'text', placeholder:"Member No...", value: member_number_search, width:36},
-            {type:'text', placeholder:"Member Name...", value: member_name_search, width:64},
+            {type:'text', placeholder:"Client Code...", value: member_number_search, width:36},
+            {type:'text', placeholder:"Client Name...", value: member_name_search, width:64},
             {type:'date', placeholder:"From Date...", value: from_date_search, width:36, title: "Date From Search"},
             {type:'date', placeholder:"To Date...", value: to_date_search, width:36, title: "Date To Search"},
             
@@ -201,8 +201,8 @@ export default{
             }
         } 
         const prepaymentAllocations = async() =>{
-            store.commit('pageTab/ADD_PAGE', {'MMS':'Prepayment_Allocations'});
-            store.state.pageTab.mmsActiveTab = 'Prepayment_Allocations'; 
+            store.commit('pageTab/ADD_PAGE', {'PSS':'Prepayment_Allocations'});
+            store.state.pageTab.pssActiveTab = 'Prepayment_Allocations'; 
         }
         const showModalLoader = () =>{
             modal_loader.value = "block";
@@ -219,8 +219,8 @@ export default{
                 installment: scheduleInstallment.value,
                 schedule_item: itemType.value,
                 armotization_schedule: scheduleID.value,
-                loan_prepayment: prepaymentID.value,
-                loan_prepayment_id: prepaymentID.value,
+                sale_prepayment: prepaymentID.value,
+                sale_prepayment_id: prepaymentID.value,
                 company: companyID.value
             }
             errors.value = [];
@@ -282,10 +282,10 @@ export default{
             }
  
             axios
-            .post(`api/v1/loan-prepayments-search/?page=${currentPage.value}`,formData)
+            .post(`api/v1/asset-sale-prepayments-search/?page=${currentPage.value}`,formData)
             .then((response)=>{
                 prepaymentsList.value = response.data.results;
-                store.commit('Sale_Prepayments/LIST_Sale_Prepayments', prepaymentsList.value)
+                store.commit('Sale_Prepayments/LIST_SALE_PREPAYMENTS', prepaymentsList.value)
                 appResults.value = response.data;
                 appArrLen.value = prepaymentsList.value.length;
                 appCount.value = appResults.value.count;

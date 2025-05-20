@@ -216,7 +216,7 @@ export default{
             }
  
             axios
-            .post(`api/v1/sale-prepayment-allocations-search/?page=${currentPage.value}`,formData)
+            .post(`api/v1/asset-sale-prepayment-allocations-search/?page=${currentPage.value}`,formData)
             .then((response)=>{
                 prepaymentsList.value = response.data.results;
                 store.commit('Sale_Prepayment_Alloc/LIST_PREPAYMENT_ALLOCATIONS', prepaymentsList.value)

@@ -156,9 +156,9 @@
                         </button>
                     </div>
                     <div class="py-2 px-3 pl-4 w-full hover:bg-slate-500 hover:w-full">
-                        <button class="flex text-sm w-full" @click="openPage({'PSS':'Application_Fees'})">
+                        <button class="flex text-sm w-full" @click="openPage({'PSS':'Sale_Fees'})">
                             <i class="fa fa-money-bill-wave pt-2 mr-2" aria-hidden="true"></i>
-                            <p class="">Loan Application Fees</p>
+                            <p class="">Sale Fees</p>
                         </button>
                     </div>
                 </div>

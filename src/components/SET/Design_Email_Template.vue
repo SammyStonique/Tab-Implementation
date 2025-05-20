@@ -30,6 +30,7 @@
                                 <option value="Member Loan Statement">Member Loan Statement</option>
                                 <option value="Member Creation">Member Creation</option>
                                 <option value="Member Portal Invitation">Member Portal Invitation</option>
+                                <option value="Sale Client Statement">Sale Client Statement</option>
                             </select>
                         </div>
                         <div class="basis-1/3">

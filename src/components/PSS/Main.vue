@@ -62,7 +62,7 @@ import Loan_Schedules from '@/components/MMS/Loan_Schedules.vue';
 import Penalty_Batches from '@/components/MMS/Penalty_Batches.vue';
 import Loan_Penalties from '@/components/MMS/Loan_Penalties.vue';
 import Loan_Documents from '@/components/MMS/Loan_Documents.vue';
-import Application_Fees from '@/components/MMS/Application_Fees.vue';
+import Sale_Fees from '@/components/PSS/Sale_Fees.vue';
 import Loan_Arrears from '@/components/MMS/Loan_Arrears.vue';
 import Sale_Prepayments from '@/components/PSS/Sale_Prepayments.vue';
 import Prepayment_Allocations from '@/components/PSS/Prepayment_Allocations.vue';
@@ -81,7 +81,7 @@ export default{
         Dashboard,
         Sale_Assets,Asset_Details,Asset_Makes,Receipt_Details,Asset_Models,Asset_Units,Unit_Categories,Clients,Vendors,Sales_Agents,Unit_Reservations,Reservation_Details,
         Client_Invoices,Client_Receipts,Loan_Products,Loan_Product_Details,Asset_Sales,Sale_Details,Loan_Guarantors,Sale_Profile,
-        Payment_Plans,Loan_Schedules,Loan_Penalties,Penalty_Batches,Loan_Documents,Application_Fees,Historical_Loans,Import_Historical_Loans,Historical_Loan_Ledger,
+        Payment_Plans,Loan_Schedules,Loan_Penalties,Penalty_Batches,Loan_Documents,Sale_Fees,Historical_Loans,Import_Historical_Loans,Historical_Loan_Ledger,
         Loan_Arrears,Sale_Prepayments,Prepayment_Allocations,Templates,Design_Template,Risk_Classifications,Asset_Fees,
 
         Default_Settings

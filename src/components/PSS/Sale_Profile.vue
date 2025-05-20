@@ -60,24 +60,6 @@
                             </div>
                         </div>
                     </div>
-                    <!-- <div v-if="activeTab == 2">
-                        <div class="relative w-[100%] bg-white z-50 px-6">
-                            <FilterBar 
-                                :showAddButton="showAddButton"
-                                :filters="searchFilters" 
-                                @search="searchLoanTransactions"
-                                @reset="resetFilters"
-                                @printList="printLoanTransactions"
-                                @printExcel="printExcel"
-                                @printCSV="printCSV"
-                                :dropdownOptions="dropdownOptions"
-                                @handleDynamicOption="handleDynamicOption"
-                            />
-                        </div>
-                        <div class="table w-[100%] top-[17.1rem] z-30 px-6">
-                            <DynamicTable :key="statementTableKey" :rightsModule="rightsModule" :columns="statementColumns" :rows="statementRows" :idField="idFieldStatement" :showActions="showActions" :actions="actionsStatement"/>
-                        </div>
-                    </div>           -->
                     <div v-if="activeTab == 1" class="text-left"> 
                         <button @click="printSchedule" class="rounded bg-green-400 cursor-pointer text-sm mr-2 mb-1.5  text-white px-2 py-1.5"><i class="fa fa-check-circle text-xs mr-1.5" aria-hidden="true"></i>Print Schedule</button>                                   
                         <DynamicTable :key="tableKey" :rightsModule="rightsModule" :columns="scheduleColumns" :rows="computedScheduleRows" :idField="idFieldSchedule" :showTotals="showTotals" :actions="actionsSchedule" @action-click="scheduleActionClick" />
@@ -89,7 +71,7 @@
                                 :filters="searchFilters" 
                                 @search="searchLoanStatement"
                                 @reset="resetFilters"
-                                @printList="printLoanStatement"
+                                @printList="printSaleStatement"
                                 @printExcel="printExcel"
                                 @printCSV="printCSV"
                                 :dropdownOptions="dropdownOptions"
@@ -177,12 +159,12 @@ export default defineComponent({
             {type: "checkbox"},
             {label: "#", key:"installment", type: "text", editable: false},
             {label: "Due", key:"due_date", type: "text", editable: false},
-            {label: "Balance", key:"formatted_loan_balance", type: "text", editable: false},
+            {label: "Balance", key:"formatted_asset_balance", type: "text", editable: false},
             {label: "Principal", key:"formatted_principal_amount", type: "number", editable: false},
             {label: "Interest", key:"formatted_interest_amount", type: "number", editable: false},
             {label: "Penalty", key:"penalty", type: "number", editable: false},
             {label: "Sch. Total", key:"formatted_schedule_repayment", type: "number", editable: false},
-            {label: "Prepay.", key:"formatted_loan_prepayment", type: "number", editable: false},
+            {label: "Prepay.", key:"formatted_asset_prepayment", type: "number", editable: false},
             {label: "Paid Princ.", key:"formatted_repaid_principal_amount", type: "number", editable: false},
             {label: "Paid Int.", key:"formatted_repaid_interest_amount", type: "number", editable: false},
             {label: "Paid Pen.", key:"formatted_repaid_penalty", type: "number", editable: false},
@@ -203,8 +185,8 @@ export default defineComponent({
 
         const paymentColumns = ref([
             {type: "checkbox"},
-            {label: "Date", key:"journal.issue_date", type: "text", editable: false},
-            {label: "Txn No", key:"journal.journal_no", type: "text", editable: false},
+            {label: "Date", key:"issue_date", type: "text", editable: false},
+            {label: "Txn No", key:"journal_no", type: "text", editable: false},
             {label: "Description", key: "description", type: "text", editable: false},
             {label: "Amount", key: "amount", type: "number", editable: false},
         ]);
@@ -239,9 +221,10 @@ export default defineComponent({
             {type: "checkbox"},
             {label: "Date", key:"date", type: "text", editable: false},
             {label: "Amount Paid", key:"amount_paid", type: "text", editable: false},
+            {label: "Down Payment", key: "down_payment", type: "text", editable: false},
+            {label: "Principal", key: "principal", type: "text", editable: false},
             {label: "Interest", key: "interest", type: "text", editable: false},
             {label: "Penalty", key: "penalty", type: "text", editable: false},
-            {label: "Principal", key: "principal", type: "text", editable: false},
             {label: "Prepayment", key: "prepayment", type: "text", editable: false},
             {label: "Running Balance", key: "running_balance", type: "text", editable: false},
         ]);
@@ -272,78 +255,25 @@ export default defineComponent({
             }  
         }
         const dropdownOptions = ref([
-            {label: 'Email Loan Statement', action: 'send-email'},
+            {label: 'Email Sale Statement', action: 'send-email'},
         ]);
-        const handleDynamicOption = async(option) =>{           
-            if(option == 'send-sms'){
-                showLoader();
-                let formData = {
-                    client: [saleDetails.value.loan_application_id],
-                    company: companyID.value,
-                    date_from: from_date_search.value,
-                    date_to: to_date_search.value,
-                    company: companyID.value
-                }
-                await axios.post('api/v1/loan-statement-sms/',formData).
-                then((response)=>{
-                    if(response.data.msg == "Success"){
-                        toast.success("SMS Sent!")
-                    }else if(response.data.msg == "Missing Template"){
-                        toast.error("Loan Statement Template Not Set!")
-                    }else{
-                        toast.error(response.data.msg)
-                    }
-                })
-                .catch((error)=>{
-                    toast.error(error.message)
-                })
-                .finally(()=>{
-                    hideLoader();
-                })
-            }else if(option == 'send-email'){
-                showLoader();
-                let formData = {
-                    company: companyID.value,
-                    loan_application: [saleDetails.value.loan_application_id],
-                    historical_loan: null,
-                    date_from: from_date_search.value,
-                    date_to: to_date_search.value,
-                    company: companyID.value
-                }
-                await axios.post('api/v1/member-loan-statement-email/',formData).
-                then((response)=>{
-                    if(response.data.msg == "Success"){
-                        toast.success("Email Sent!")
-                    }else if(response.data.msg == "Missing Template"){
-                        toast.error("Loan Statement Template Not Set!")
-                    }else{
-                        toast.error(response.data.msg)
-                    }
-                })
-                .catch((error)=>{
-                    toast.error(error.message)
-                })
-                .finally(()=>{
-                    hideLoader();
-                })
-            }
-        };
+        
         const handleDynamicOption1 = async(option) =>{           
             if(option == 'send-sms'){
                 showLoader();
                 let formData = {
-                    client: [saleDetails.value.loan_application_id],
+                    client: [saleDetails.value.asset_sale_id],
                     company: companyID.value,
                     date_from: from_date_search.value,
                     date_to: to_date_search.value,
                     company: companyID.value
                 }
-                await axios.post('api/v1/loan-statement-sms/',formData).
+                await axios.post('api/v1/asset-sale-statement-sms/',formData).
                 then((response)=>{
                     if(response.data.msg == "Success"){
                         toast.success("SMS Sent!")
                     }else if(response.data.msg == "Missing Template"){
-                        toast.error("Loan Statement Template Not Set!")
+                        toast.error("Sale Statement Template Not Set!")
                     }else{
                         toast.error(response.data.msg)
                     }
@@ -358,18 +288,17 @@ export default defineComponent({
                 showLoader();
                 let formData = {
                     company: companyID.value,
-                    loan_application: [saleDetails.value.loan_application_id],
-                    historical_loan: null,
+                    asset_sale: [saleDetails.value.asset_sale_id],
                     date_from: from_date_search.value,
                     date_to: to_date_search.value,
                     company: companyID.value
                 }
-                await axios.post('api/v1/member-loan-statement-email/',formData).
+                await axios.post('api/v1/asset-sale-statement-email/',formData).
                 then((response)=>{
                     if(response.data.msg == "Success"){
                         toast.success("Email Sent!")
                     }else if(response.data.msg == "Missing Template"){
-                        toast.error("Loan Statement Template Not Set!")
+                        toast.error("Sale Statement Template Not Set!")
                     }else{
                         toast.error(response.data.msg)
                     }
@@ -382,46 +311,18 @@ export default defineComponent({
                 })
             }
         };
-        const printLoanTransactions = () =>{
-            showLoader();
-            let formData = {
-                client: saleDetails.value.loan_ledger_id,
-                loan_application: saleDetails.value.loan_application_id,
-                historical_loan: null,
-                company: companyID.value,
-                date_from: from_date_search.value,
-                date_to: to_date_search.value,
-            }
-            axios
-            .post("api/v1/loan-transactions-pdf/", formData, { responseType: 'blob' })
-            .then((response)=>{
-                if(response.status == 200){
-                    const blob1 = new Blob([response.data]);
-                    // Convert blob to URL
-                    const url = URL.createObjectURL(blob1);
-                    PrintJS({printable: url, type: 'pdf'});
-                }
-            })
-            .catch((error)=>{
-                console.log(error.message);
-            })
-            .finally(()=>{
-                hideLoader();
-            })
-        }
-        const printLoanStatement = () =>{
+        
+        const printSaleStatement = () =>{
             showLoader();
             let formData = {
                 company: companyID.value,
-                client: saleDetails.value.loan_ledger_id,
-                application: saleDetails.value.loan_application_id,
-                historical_loan: null,
+                asset_sale: saleDetails.value.asset_sale_id,
                 page_size: "1000"
                 // date_from: from_date_search.value,
                 // date_to: to_date_search.value,
             }
             axios
-            .post("api/v1/loan-statement-pdf/", formData, { responseType: 'blob' })
+            .post("api/v1/asset-sale-statement-pdf/", formData, { responseType: 'blob' })
             .then((response)=>{
                 if(response.status == 200){
                     const blob1 = new Blob([response.data]);
@@ -477,20 +378,12 @@ export default defineComponent({
             }
             let formData1 = {
                 company: companyID.value,
-                client: saleDetails.value.loan_ledger_id,
                 asset_sale: saleDetails.value.asset_sale_id,
                 page_size: "1000"
             }
-            // if(index == 2){
-            //     activeTab.value = index;
-            //     await store.dispatch('Asset_Sales/fetchLoanTransactions',formData1)
-            //     .then(()=>{
-            //         hideLoader();
-            //     })
-            // }
             if(index == 2){
                 activeTab.value = index;
-                await store.dispatch('Asset_Sales/fetchLoanStatement',formData1)
+                await store.dispatch('Asset_Sales/fetchSaleStatement',formData1)
                 .then(()=>{
                     hideLoader();
                 })
@@ -503,10 +396,7 @@ export default defineComponent({
             }
             else if( index == 3){
                 activeTab.value = index;
-                await store.dispatch('Asset_Sales/fetchSaleRepayments',formData)
-                .then(()=>{
-                    hideLoader();
-                })
+                hideLoader();
             }else{
                 activeTab.value = index;
                 hideLoader();
@@ -856,8 +746,8 @@ export default defineComponent({
             tabs, activeTab, mainComponentKey, scheduleColumns, paymentColumns, selectTab, loader, showLoader, hideLoader, formFields, additionalFields,showTotals,
             tableKey,paymentTableKey, idFieldSchedule, idFieldPayment, actionsSchedule, actionsUtility, computedScheduleRows, computedPaymentRows,printSchedule,
             scheduleTableKey, idFieldSchedule, scheduleColumns, actionsSchedule, statementTableKey, idFieldStatement, statementRows,statement1Rows,showActions,searchFilters,resetFilters,dropdownOptions,
-            statementColumns,statement1Columns, actionsStatement, saleDetails,saleAsset,saleClient, scheduleActionClick,showAddButton,searchLoanTransactions,printLoanTransactions,handleDynamicOption,
-            scheduleActionClick,tnt_modal_loader, dep_modal_loader, util_modal_loader, depModalVisible, displayButtons, printLoanStatement,handleDynamicOption1,
+            statementColumns,statement1Columns, actionsStatement, saleDetails,saleAsset,saleClient, scheduleActionClick,showAddButton,searchLoanTransactions,
+            scheduleActionClick,tnt_modal_loader, dep_modal_loader, util_modal_loader, depModalVisible, displayButtons, printSaleStatement,handleDynamicOption1,
             documentActionClick,documentColumns,documentTableKey,actionsDocument,computedDocumentRows,
             modal_top, modal_left, modal_width, showDepModalLoader, hideDepModalLoader, handleDepReset,
             flex_basis, flex_basis_percentage, paymentActionClick,rightsModule,isDisabled,
