@@ -333,16 +333,18 @@ export default{
         }
         const addNewAsset = async() =>{
             store.commit('Sale_Assets/initializeStore');
-            await store.dispatch('Sale_Assets/updateState', {selectedAsset: null,selectedMake: null,selectedModel: null,selectedCurrency: null,isEditing: false});
-            await store.dispatch('Asset_Fees/updateState', {feeArray: []})
-            store.commit('pageTab/ADD_PAGE', {'PSS':'Asset_Details'});
-            store.state.pageTab.pssActiveTab = 'Asset_Details';          
+            await store.dispatch('Sale_Assets/updateState', {selectedAsset: null, selectedVendor: null,selectedMake: null,selectedModel: null,selectedCurrency: null,saleCharges:[],purchaseCharges:[],salePlans:[],isEditing: false});
+            await store.dispatch('Asset_Fees/updateState', {feeArray: [], saleFeeArray: [],purchaseFeeArray: []})
+            await store.dispatch('Payment_Plans/updateState', {salePlanArray: [],purchasePlanArray: []})
+            store.commit('pageTab/ADD_PAGE', {'PSS':'Asset_Details'})
+            store.state.pageTab.pssActiveTab = 'Asset_Details';
+                         
         }
         const handleActionClick = async(rowIndex, action, row) =>{
             if( action == 'edit'){
                 const assetStatus = row['approval_status']
                 if(assetStatus == 'Pending'){
-                    await store.dispatch('Sale_Assets/updateState', {selectedAsset: null,selectedMake: null,selectedModel: null,selectedCurrency: null,isEditing: false});
+                    await store.dispatch('Sale_Assets/updateState', {selectedAsset: null, selectedVendor: null,selectedMake: null,selectedModel: null,selectedCurrency: null,saleCharges:[],purchaseCharges:[],salePlans:[],isEditing: false});
                     const assetID = row[idField];
                     let formData = {
                         company: companyID.value,
@@ -379,15 +381,23 @@ export default{
                     searchSaleAssets();
                 })
             }else if(action == 'view'){
-                await store.dispatch('Sale_Assets/updateState', {selectedAsset: null,selectedMake: null,selectedModel: null,selectedCurrency: null,isEditing: false});
-                const assetID = row[idField];
-                let formData = {
-                    company: companyID.value,
-                    sale_asset: assetID
+                const assetStatus = row['approval_status']
+                if(assetStatus != 'Pending'){
+                    await store.dispatch('Sale_Assets/updateState', {selectedAsset: null, selectedVendor: null,selectedMake: null,selectedModel: null,selectedCurrency: null,saleCharges:[],purchaseCharges:[],salePlans:[],isEditing: false});
+                    const assetID = row[idField];
+                    let formData = {
+                        company: companyID.value,
+                        sale_asset: assetID
+                    }
+                    await store.dispatch('Sale_Assets/fetchSaleAsset',formData).
+                    then(()=>{
+                        store.commit('pageTab/ADD_PAGE', {'PSS':'Asset_Profile'})
+                        store.state.pageTab.pssActiveTab = 'Asset_Profile';
+                        
+                    })
+                }else{
+                    toast.error(`Cannot View ${assetStatus} Asset`)
                 }
-                await store.dispatch('Sale_Assets/fetchSaleAsset',formData)
-                store.commit('pageTab/ADD_PAGE', {'PSS':'Asset_Profile'})
-                store.state.pageTab.pssActiveTab = 'Asset_Profile';
             }else if(action == 'transfer'){
                 hideTransModalLoader();
                 assetID.value = row['member_id'];

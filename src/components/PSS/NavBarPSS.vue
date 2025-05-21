@@ -132,13 +132,13 @@
                 </div>
                 <div class="dropdown-content w-56 absolute rounded border border-gray-200 bg-white shadow-slate-400 shadow-sm" v-if="finances_dropdown">
                     <div class="py-2 px-3 pl-4 w-full hover:bg-slate-500 hover:w-full">
-                        <button class="flex text-sm w-full" @click="openPage({'PSS':'Client_Invoices'})">
+                        <button class="flex text-sm w-full" @click="openPage({'PSS':'Sale_Invoices'})">
                             <i class="fa fa-file-invoice pt-2 mr-2" aria-hidden="true"></i>
                             <p class="">Invoices</p>
                         </button>
                     </div>
                     <div class="py-2 px-3 pl-4 w-full hover:bg-slate-500 hover:w-full">
-                        <button class="flex text-sm w-full" @click="openPage({'PSS':'Client_Receipts'})">
+                        <button class="flex text-sm w-full" @click="openPage({'PSS':'Sale_Receipts'})">
                         <i class="fa fa-receipt pt-2 mr-2" aria-hidden="true"></i>
                         <p class="">Receipts</p>
                         </button>

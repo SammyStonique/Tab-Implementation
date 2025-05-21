@@ -35,6 +35,7 @@ import Payment_Plans from '@/components/PSS/Payment_Plans.vue';
 import Asset_Fees from '@/components/PSS/Asset_Fees.vue';
 import Sale_Assets from '@/components/PSS/Sale_Assets.vue';
 import Asset_Details from '@/components/PSS/Asset_Details.vue';
+import Asset_Profile from '@/components/PSS/Asset_Profile.vue';
 import Asset_Units from '@/components/PSS/Asset_Units.vue';
 import Unit_Categories from '@/components/PSS/Unit_Categories.vue';
 import Clients from '@/components/PSS/Clients.vue';
@@ -44,8 +45,8 @@ import Unit_Reservations from '@/components/PSS/Unit_Reservations.vue';
 import Reservation_Details from '@/components/PSS/Reservation_Details.vue';
 
 
-import Client_Invoices from '@/components/PSS/Client_Invoices.vue';
-import Client_Receipts from '@/components/PSS/Client_Receipts.vue';
+import Sale_Invoices from '@/components/PSS/Sale_Invoices.vue';
+import Sale_Receipts from '@/components/PSS/Sale_Receipts.vue';
 import Loan_Products from '@/components/MMS/Loan_Products.vue';
 import Loan_Product_Details from '@/components/MMS/Loan_Product_Details.vue';
 
@@ -79,8 +80,8 @@ export default{
         NavBarPSS,
         PagesTab,
         Dashboard,
-        Sale_Assets,Asset_Details,Asset_Makes,Receipt_Details,Asset_Models,Asset_Units,Unit_Categories,Clients,Vendors,Sales_Agents,Unit_Reservations,Reservation_Details,
-        Client_Invoices,Client_Receipts,Loan_Products,Loan_Product_Details,Asset_Sales,Sale_Details,Loan_Guarantors,Sale_Profile,
+        Sale_Assets,Asset_Details,Asset_Profile,Asset_Makes,Receipt_Details,Asset_Models,Asset_Units,Unit_Categories,Clients,Vendors,Sales_Agents,Unit_Reservations,Reservation_Details,
+        Sale_Invoices,Sale_Receipts,Loan_Products,Loan_Product_Details,Asset_Sales,Sale_Details,Loan_Guarantors,Sale_Profile,
         Payment_Plans,Loan_Schedules,Loan_Penalties,Penalty_Batches,Loan_Documents,Sale_Fees,Historical_Loans,Import_Historical_Loans,Historical_Loan_Ledger,
         Loan_Arrears,Sale_Prepayments,Prepayment_Allocations,Templates,Design_Template,Risk_Classifications,Asset_Fees,
 

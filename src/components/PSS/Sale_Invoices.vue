@@ -3,20 +3,20 @@
         <PageComponent 
             :loader="loader" @showLoader="showLoader" @hideLoader="hideLoader"
             :addButtonLabel="addButtonLabel"
-            @handleAddNew="addNewReceipt"
+            @handleAddNew="addNewInvoice"
             :searchFilters="searchFilters"
             :dropdownOptions="dropdownOptions"
             @handleDynamicOption="handleDynamicOption"
-            @searchPage="searchReceipts"
+            @searchPage="searchInvoices"
             @resetFilters="resetFilters"
-            @removeItem="removeReceipt"
-            @removeSelectedItems="removeReceipts"
-            @printList="printReceiptsList"
+            @removeItem="removeInvoice"
+            @removeSelectedItems="removeInvoices"
+            @printList="printInvoiceList"
             :addingRight="addingRight"
             :removingRight="removingRight"
             :rightsModule="rightsModule"
             :columns="tableColumns"
-            :rows="receiptsList"
+            :rows="invoicesList"
             :actions="actions"
             :showTotals="showTotals"
             :idField="idField"
@@ -37,7 +37,7 @@
             :showDetails="showDetails"
             :detailsTitle="detailsTitle"
             @hideDetails="hideDetails"
-            >
+        >
             <div>
                 <div class="tabs pt-2">
                     <button v-for="(tab, index) in tabs" :key="tab" :class="['tab', { active: activeTab === index }]"@click="selectTab(index)">
@@ -51,8 +51,13 @@
                         />
                     </div>
                     <div v-if="activeTab == 1">
-                        <ReceiptLines 
-                            :rcptLinesRows="receiptLines"
+                        <InvoiceLines 
+                            :invLinesRows="invoiceLines"
+                        />
+                    </div>
+                    <div v-if="activeTab == 2">
+                        <InvoicePayments 
+                            :invPayRows="invoicePayments"
                         />
                     </div>
                 </div>
@@ -64,7 +69,7 @@
         >
             <DynamicForm 
                 :fields="formFields" :flex_basis="flex_basis" :flex_basis_percentage="flex_basis_percentage" 
-                :displayButtons="displayButtons" @handleSubmit="saveReceipt" @handleReset="handleReset"
+                :displayButtons="displayButtons" @handleSubmit="saveInvoice" @handleReset="handleReset"
             />
         </MovableModal>
     </div>
@@ -80,30 +85,32 @@ import { useStore } from "vuex";
 import { useToast } from "vue-toastification";
 import { useDateFormatter } from '@/composables/DateFormatter';
 import JournalEntries from "@/components/JournalEntries.vue";
-import ReceiptLines from "@/components/ReceiptLines.vue";
+import InvoiceLines from "@/components/InvoiceLines.vue";
+import InvoicePayments from "@/components/InvoicePayments.vue";
 import PrintJS from 'print-js';
 
 export default{
-    name: 'Client_Receipts',
+    name: 'Sale_Invoices',
     components:{
-        PageComponent, MovableModal,DynamicForm,JournalEntries,ReceiptLines,
+        PageComponent, MovableModal,DynamicForm,JournalEntries,InvoiceLines,InvoicePayments
     },
     setup(){
         const store = useStore();     
         const toast = useToast();
         const { getYear } = useDateFormatter();
         const { getMonth } = useDateFormatter();
-        const addingRight = ref('Adding Client Receipt');
-        const removingRight = ref('Deleting Client Receipt');
+        const addingRight = ref('Adding Client Invoice');
+        const removingRight = ref('Deleting Client Invoice');
         const rightsModule = ref('PSS');
+        const current_date = new Date();
         const loader = ref('none');
         const modal_loader = ref('none');
         const idField = 'journal_id';
-        const addButtonLabel = ref('New Receipt');
+        const addButtonLabel = ref('New Invoice');
         const submitButtonLabel = ref('Add');
-        const title = ref('Receipt Booking');
+        const title = ref('Invoice Booking');
         const detailsTitle = ref('Item Details');
-        const tabs = ref(['Journal Entries','Receipt Lines']);
+        const tabs = ref(['Journal Entries','Invoice Lines','Invoice Payments']);
         const activeTab = ref(0);
         const invoiceID = ref(null);
         const custComponentKey = ref(0);
@@ -112,7 +119,7 @@ export default{
         const modal_left = ref('400px');
         const modal_width = ref('32vw');
         const selectedIds = ref([]);
-        const receiptsList = ref([]);
+        const invoicesList = ref([]);
         const propResults = ref([]);
         const propArrLen = ref(0);
         const propCount = ref(0);
@@ -120,7 +127,8 @@ export default{
         const selectedValue = ref(50);
         const showDetails = ref(false);
         const journalEntries = ref([]);
-        const receiptLines = ref([]);
+        const invoiceLines = ref([]);
+        const invoicePayments = ref([]);
         const currentPage = ref(1);
         const showNextBtn = ref(false);
         const showPreviousBtn = ref(false);
@@ -134,24 +142,21 @@ export default{
         const showModal = ref(false);
         const tableColumns = ref([
             {type: "checkbox"},
-            {label: "Receipt#", key:"journal_no"},
+            {label: "Invoice#", key:"journal_no"},
             {label: "Date", key: "date"},
-            {label: "Bank. Date", key: "banking_date"},
+            {label: "Client Code", key:"code"},
             {label: "Client Name", key:"customer_name"},
-            {label: "Cashbook", key:"cashbook"},
-            {label: "Pay. Method", key:"payment_method"},
-            {label: "Ref No", key:"reference_no"},
+            {label: "Description", key:"description"},
             {label: "Amount", key:"total_amount", type:"number"},
-            {label: "Done By", key:"done_by"},
+            {label: "Paid", key:"total_paid", type:"number"},
+            {label: "Balance", key:"due_amount", type:"number"},
+            {label: "Status", key:"status"},
         ])
         const showTotals = ref(true);
         const actions = ref([
-            {name: 'print', icon: 'fa fa-print', title: 'Print Receipt', rightName: 'Print Client Receipt'},
-            {name: 'download', icon: 'fa fa-download', title: 'Download Receipt', rightName: 'Print Client Receipt'},
-            {name: 'send-sms', icon: 'fas fa-comment', title: 'Send SMS', rightName: 'Sending PSS SMS'},
-            {name: 'send-email', icon: 'fas fa-envelope', title: 'Send Email', rightName: 'Sending PSS Emails'},
-            {name: 'delete', icon: 'fa fa-trash', title: 'Delete Receipt', rightName: 'Deleting Client Receipt'},
-            
+            {name: 'print', icon: 'fa fa-print', title: 'Print Invoice', rightName: 'Print Client Invoice'},
+            {name: 'download', icon: 'fa fa-download', title: 'Download Invoice', rightName: 'Print Client Invoice'},
+            {name: 'delete', icon: 'fa fa-trash', title: 'Delete Invoice',rightName: 'Deleting Client Invoice'},
         ])
         const companyID = computed(()=> store.state.userData.company_id);
         const fetchCustomers = async() =>{
@@ -164,27 +169,42 @@ export default{
         const clearSearchCustomer = async() =>{
             await store.dispatch('Customers/updateState', {customerID: ''});
             customerID.value = ""
-        };
+        }
         const journal_no_search = ref("");
         const client_name_search = ref("");
         const client_code_search = ref("");
         const from_date_search = ref("");
         const to_date_search = ref("");
-        const reversal_status_search = ref("");
+        const status_search = ref("");
         const searchFilters = ref([
-            {type:'text', placeholder:"Receipt#...", value: journal_no_search, width:24},
-            {type:'text', placeholder:"Member No...", value: client_code_search, width:36},
-            {type:'text', placeholder:"Member Name...", value: client_name_search, width:64},
+            {type:'text', placeholder:"Invoice#...", value: journal_no_search, width:36},
+            {type:'text', placeholder:"Client No...", value: client_code_search, width:36},
+            {type:'text', placeholder:"Client Name...", value: client_name_search, width:64},
+            {
+                type:'dropdown', placeholder:"Status..", value: status_search, width:32,
+                options: [{text:'Open',value:'Open'},{text:'Closed',value:'Closed'}]
+            },
             {type:'date', placeholder:"From Date...", value: from_date_search, width:36, title: "Date From Search"},
             {type:'date', placeholder:"To Date...", value: to_date_search, width:36, title: "Date To Search"},
-            {
-                type:'dropdown', placeholder:"Reversed..", value: reversal_status_search, width:32,
-                options: [{text:'Yes',value:'Yes'},{text:'No',value:'No'}]
-            },
         ]);
         const handleSelectionChange = (ids) => {
             selectedIds.value = ids;
         };
+        
+        const formFields = ref([]);
+        const updateFormFields = () =>{
+            formFields.value = [
+
+            ]
+        };
+
+        const handleReset = async() =>{
+            for(let i=0; i < formFields.value.length; i++){
+                formFields.value[i].value = '';
+            }
+            custComponentKey.value += 1;
+            customerID.value = '';
+        }
         
         const showModalLoader = () =>{
             modal_loader.value = "block";
@@ -192,64 +212,63 @@ export default{
         const hideModalLoader = () =>{
             modal_loader.value = "none";
         }
-        const addNewReceipt = () =>{
-            store.dispatch('Asset_Clients/updateState', {receiptItems: [], outstandingBalance: 0})
-            store.commit('pageTab/ADD_PAGE', {'PSS':'Receipt_Details'});
-            store.state.pageTab.pssActiveTab = 'Receipt_Details'; 
+        const addNewInvoice = () =>{
+            store.commit('pageTab/ADD_PAGE', {'PSS':'Invoice_Details'});
+            store.state.pageTab.pssActiveTab = 'Invoice_Details'; 
         }
-        const removeReceipt = async() =>{
+        const removeInvoice = async() =>{
             if(selectedIds.value.length == 1){
                 let formData = {
                     company: companyID.value,
                     journal: selectedIds.value,
-                    txn_type: "RCPT"
+                    txn_type: "INV"
                 }
                 try{
-                    const response = await store.dispatch('Journals/deleteReceipt',formData)
+                    const response = await store.dispatch('Journals/deleteInvoice',formData)
                     if(response && response.status == 200){
-                        toast.success("Receipt Removed Succesfully");
-                        searchReceipts();
+                        toast.success("Invoice Removed Succesfully");
+                        searchInvoices();
                     }
                 }
                 catch(error){
                     console.error(error.message);
-                    toast.error('Failed to remove receipt: ' + error.message);
+                    toast.error('Failed to remove invoice: ' + error.message);
                 }
                 finally{
                     selectedIds.value = [];
-                    searchReceipts();
+                    searchInvoices();
                 }
             }else if(selectedIds.value.length > 1){
-                toast.error("You have selected more than 1 Receipt") 
+                toast.error("You have selected more than 1 Invoice") 
             }else{
-                toast.error("Please Select A Receipt To Remove")
+                toast.error("Please Select An Invoice To Remove")
             }
         }
-        const removeReceipts = async() =>{
+        const removeInvoices = async() =>{
             if(selectedIds.value.length){
                 let formData = {
                     company: companyID.value,
                     journal: selectedIds.value,
-                    txn_type: "RCPT"
+                    txn_type: "INV"
                 }
 
                 try{
-                    const response = await store.dispatch('Journals/deleteReceipt',formData)
+                    const response = await store.dispatch('Journals/deleteInvoice',formData)
                     if(response && response.msg == "Success"){
-                        toast.success("Receipt(s) Removed Succesfully");
-                        searchReceipts();
+                        toast.success("Invoice(s) Removed Succesfully");
+                        searchInvoices();
                     }
                 }
                 catch(error){
                     console.error(error.message);
-                    toast.error('Failed to remove receipts: ' + error.message);
+                    toast.error('Failed to remove invoices: ' + error.message);
                 }
                 finally{
                     selectedIds.value = [];
-                    searchReceipts();
+                    searchInvoices();
                 }
             }else{
-                toast.error("Please Select A Receipt To Remove")
+                toast.error("Please Select An Invoice To Remove")
             }
         }
         const showLoader = () =>{
@@ -258,20 +277,20 @@ export default{
         const hideLoader = () =>{
             loader.value = "none";
         }
-        const searchReceipts = () =>{
+        const searchInvoices = () =>{
             showLoader();
             showNextBtn.value = false;
             showPreviousBtn.value = false;
             let formData = {
                 client_category: "Customers",
-                txn_type: "RCPT",
+                txn_type: "INV",
                 client_name: client_name_search.value,
                 client_code: client_code_search.value,
                 from_date: from_date_search.value,
                 to_date: to_date_search.value,
                 journal_no: journal_no_search.value,
-                status: "",
-                reversed: reversal_status_search.value,
+                status: status_search.value,
+                reversed: "No",
                 property: customerID.value,
                 company: companyID.value,
                 page_size: selectedValue.value
@@ -280,10 +299,10 @@ export default{
             axios
             .post(`api/v1/clients-journals-search/?page=${currentPage.value}`,formData)
             .then((response)=>{
-                receiptsList.value = response.data.results;
-                store.commit('Journals/LIST_RECEIPTS', receiptsList.value)
+                invoicesList.value = response.data.results;
+                store.commit('Journals/LIST_INVOICES', invoicesList.value)
                 propResults.value = response.data;
-                propArrLen.value = receiptsList.value.length;
+                propArrLen.value = invoicesList.value.length;
                 propCount.value = propResults.value.count;
                 pageCount.value = Math.ceil(propCount.value / selectedValue.value);
                 if(response.data.next){
@@ -302,18 +321,18 @@ export default{
         };
         const selectSearchQuantity = (newValue) =>{
             selectedValue.value = newValue;
-            searchReceipts(selectedValue.value);
+            searchInvoices(selectedValue.value);
         };
         const resetFilters = () =>{
             client_name_search.value = "";
             client_code_search.value = "";
             from_date_search.value = "";
             to_date_search.value = "";
-            reversal_status_search.value = "";
             journal_no_search.value= "";
+            status_search.value = "";
             custComponentKey.value += 1;
             customerID.value = "";
-            searchReceipts();
+            searchInvoices();
         }
         const loadPrev = () =>{
             if (currentPage.value <= 1){
@@ -322,7 +341,7 @@ export default{
                 currentPage.value -= 1;
             }
             
-            searchReceipts();
+            searchInvoices();
             // scrollToTop();
         }
         const loadNext = () =>{
@@ -332,17 +351,17 @@ export default{
                 currentPage.value += 1;
             }
             
-            searchReceipts();
+            searchInvoices();
             // scrollToTop(); 
         }
         const firstPage = ()=>{
             currentPage.value = 1;
-            searchReceipts();
+            searchInvoices();
             // scrollToTop();
         }
         const lastPage = () =>{
             currentPage.value = pageCount.value;
-            searchReceipts();
+            searchInvoices();
             // scrollToTop();
         }
         const handleActionClick = async(rowIndex, action, row) =>{
@@ -351,23 +370,20 @@ export default{
                 let formData = {
                     company: companyID.value,
                     journal: journalID,
-                    txn_type: "RCPT"
+                    txn_type: "INV"
                 }
-                await store.dispatch('Journals/deleteReceipt',formData).
+                await store.dispatch('Journals/deleteInvoice',formData).
                 then(()=>{
-                    searchReceipts();
+                    searchInvoices();
                 })
             }else if(action == 'print'){
                 showLoader();
                 const journalID = row['journal_id'];
                 let formData = {
-                    receipt: journalID,
-                    client: row['member_id'],
-                    type: 'RCPT',
-                    client_type: "Member",
+                    invoice: journalID,
                     company: companyID.value
                 }
-                await store.dispatch('Journals/previewClientReceipt',formData).
+                await store.dispatch('Journals/previewClientInvoice',formData).
                 then(()=>{
                     hideLoader();
                 })
@@ -375,93 +391,15 @@ export default{
                 showLoader();
                 const journalID = row['journal_id'];
                 let formData = {
-                    receipt: journalID,
-                    client: row['member_id'],
-                    type: 'RCPT',
-                    client_type: "Member",
+                    invoice: journalID,
                     company: companyID.value
                 }
-                await store.dispatch('Journals/downloadClientReceipt',formData).
+                await store.dispatch('Journals/downloadClientInvoice',formData).
                 then(()=>{
                     hideLoader();
                 })
-            }else if(action == 'send-sms'){
-                const reversalStatus = row['reversed'];
-                if(reversalStatus == "No"){
-                    showLoader();
-                    const memberID = [row['member_id']];
-                    const particulars = [row['description']];
-                    const particularsAmnt = [row['total_amount']];
-                    const txnNo = [row['journal_no']];
-                    const jnlID = row['journal_id'];
-                    let formData = {
-                        member: memberID,
-                        particulars: particulars,
-                        transaction_numbers: txnNo,
-                        particulars_amount: particularsAmnt,
-                        journal: null,
-                        receipt_id: jnlID,
-                        company: companyID.value
-                    }
-                    await axios.post('api/v1/member-receipt-sms/',formData).
-                    then((response)=>{
-                        if(response.data.msg == "Success"){
-                            toast.success("SMS Sent!")
-                        }else if(response.data.msg == "Missing Template"){
-                            toast.error("Member Receipt Template Not Set!")
-                        }else{
-                            toast.error(response.data.msg)
-                        }
-                    })
-                    .catch((error)=>{
-                        toast.error(error.message)
-                    })
-                    .finally(()=>{
-                        hideLoader();
-                    })
-                }else{
-                    toast.error("Cannot SMS Reversed Receipt")
-                }
-                
-            }else if(action == 'send-email'){
-                const reversalStatus = row['reversed'];
-                if(reversalStatus == "No"){
-                    showLoader();
-                    const memberID = [row['member_id']];
-                    const receiptID = row['journal_id'];
-                    const particulars = [row['description']];
-                    const particularsAmnt = [row['total_amount']];
-                    const txnNo = [row['journal_no']];
-                    let formData = {
-                        member: memberID,
-                        receipt: receiptID,
-                        particulars: particulars,
-                        transaction_numbers: txnNo,
-                        particulars_amount: particularsAmnt,
-                        journal: null,
-                        company: companyID.value
-                    }
-                    await axios.post('api/v1/member-receipt-email/',formData).
-                    then((response)=>{
-                        if(response.data.msg == "Success"){
-                            toast.success("Email Sent!")
-                        }else if(response.data.msg == "Missing Template"){
-                            toast.error("Member Receipt Template Not Set!")
-                        }else{
-                            toast.error(response.data.msg)
-                        }
-                    })
-                    .catch((error)=>{
-                        toast.error(error.message)
-                    })
-                    .finally(()=>{
-                        hideLoader();
-                    })
-                }else{
-                    toast.error("Cannot Email Reversed Receipt")
-                }
             }
-        };
+        }
         const handleShowDetails = async(row) =>{
             activeTab.value = 0;
             invoiceID.value = row['journal_id'];
@@ -486,13 +424,23 @@ export default{
             }
             if(index == 1){
                 activeTab.value = index;
-                await axios.post('api/v1/receipt-lines-search/',formData)
+                await axios.post('api/v1/invoice-lines-search/',formData)
                 .then((response)=>{
-                    receiptLines.value = response.data.receipt_lines;
+                    invoiceLines.value = response.data.invoice_lines;
                 })
                 .catch((error)=>{
                     console.log(error.message)
                 })
+            }else if( index == 2){
+                activeTab.value = index;
+                await axios.post('api/v1/invoice-payments-search/',formData)
+                .then((response)=>{
+                    invoicePayments.value = response.data.invoice_payments;
+                })
+                .catch((error)=>{
+                    console.log(error.message)
+                })
+                
             }else{
                 activeTab.value = index;
                 hideLoader();
@@ -505,104 +453,42 @@ export default{
         const closeModal = async() =>{
             invModalVisible.value = false;
             handleReset();
-        }
+        };
+        
 
         const dropdownOptions = ref([
-            {label: 'SMS Member Receipts', action: 'send-sms'},
-            {label: 'Email Member Receipts', action: 'send-email'},
+            {label: 'Withholding Tax', action: 'withholding-tax'},
         ]);
-        const handleDynamicOption = async(option) =>{
-            if(option == 'send-sms'){
-                showLoader();
-                const memberID = [];
-                const particulars = "";
-                const particularsAmnt = "";
-                const txnNo = "";
-                const journalID = selectedIds.value
-                let formData = {
-                    member: memberID,
-                    particulars: particulars,
-                    transaction_numbers: txnNo,
-                    particulars_amount: particularsAmnt,
-                    journal: journalID,
-                    receipt_id: "",
-                    company: companyID.value
-                }
-                await axios.post('api/v1/member-receipt-sms/',formData).
-                then((response)=>{
-                    if(response.data.msg == "Success"){
-                        toast.success("SMS Sent!")
-                    }else if(response.data.msg == "Missing Template"){
-                        toast.error("Member Receipt Template Not Set!")
-                    }else{
-                        toast.error(response.data.msg)
-                    }
-                })
-                .catch((error)=>{
-                    toast.error(error.message)
-                })
-                .finally(()=>{
-                    hideLoader();
-                })
-            }else if(option == 'send-email'){
-                showLoader();
-                const memberID = [];
-                const receiptID = "";
-                const particulars = "";
-                const particularsAmnt = "";
-                const txnNo = "";
-                const journalID = selectedIds.value
-                let formData = {
-                    member: memberID,
-                    receipt: receiptID,
-                    particulars: particulars,
-                    transaction_numbers: txnNo,
-                    particulars_amount: particularsAmnt,
-                    journal: journalID,
-                    company: companyID.value
-                }
-                await axios.post('api/v1/member-receipt-email/',formData).
-                then((response)=>{
-                    if(response.data.msg == "Success"){
-                        toast.success("Email Sent!")
-                    }else if(response.data.msg == "Missing Template"){
-                        toast.error("Member Receipt Template Not Set!")
-                    }else{
-                        toast.error(response.data.msg)
-                    }
-                })
-                .catch((error)=>{
-                    toast.error(error.message)
-                })
-                .finally(()=>{
-                    hideLoader();
-                })
+        const handleDynamicOption = (option) =>{
+            if(option == 'batch-meter-reading'){
+                store.commit('pageTab/ADD_PAGE', {'PMS':'Batch_Readings'})
+                store.state.pageTab.faActiveTab = 'Batch_Readings';
             }
         };
-        const printReceiptsList = () =>{
+        const printInvoiceList = () =>{
             showLoader();
 
             let formData = {
                 journal_no: "",
-                reference_no: "",
-                client: "",
-                client_category: "Members",
-                payment_method: "",
-                txn_type: "RCPT",
+                client_category: "Customers",
+                txn_type: "INV",
+                client: client_name_search.value,
                 date_from: from_date_search.value,
                 date_to: to_date_search.value,
-                company_id: companyID.value,
-            }
+                status: "",
+                company_id: companyID.value
+            } 
+   
             axios
-            .post("api/v1/export-clients-receipts-pdf/", formData, { responseType: 'blob' })
-            .then((response)=>{
-                if(response.status == 200){
-                    const blob1 = new Blob([response.data]);
-                    // Convert blob to URL
-                    const url = URL.createObjectURL(blob1);
-                    PrintJS({printable: url, type: 'pdf'});
-                }
-            })
+            .post("api/v1/export-clients-invoices-pdf/", formData, { responseType: 'blob' })
+                .then((response)=>{
+                    if(response.status == 200){
+                        const blob1 = new Blob([response.data]);
+                        // Convert blob to URL
+                        const url = URL.createObjectURL(blob1);
+                        PrintJS({printable: url, type: 'pdf'});
+                    }
+                })
             .catch((error)=>{
                 console.log(error.message);
             })
@@ -611,18 +497,18 @@ export default{
             })
         }
         onBeforeMount(()=>{
-            searchReceipts();
+            searchInvoices();
             
         })
         return{
-            showTotals,title, searchReceipts,resetFilters, addButtonLabel, searchFilters, tableColumns, receiptsList,
+            showTotals,title, searchInvoices,resetFilters, addButtonLabel, searchFilters, tableColumns, invoicesList,
             propResults, propArrLen, propCount, pageCount, showNextBtn, showPreviousBtn,invModalVisible,
             loadPrev, loadNext, firstPage, lastPage, idField, actions, handleActionClick, propModalVisible, closeModal,
             submitButtonLabel, showModal, showLoader, loader, hideLoader, modal_loader, modal_top, modal_left, modal_width,displayButtons,
-            showModalLoader, hideModalLoader, handleSelectionChange, flex_basis,flex_basis_percentage,
-            removeReceipt, removeReceipts, dropdownOptions, handleDynamicOption, addNewReceipt, printReceiptsList,
+            showModalLoader, hideModalLoader, formFields, handleSelectionChange, flex_basis,flex_basis_percentage,
+            removeInvoice, removeInvoices, dropdownOptions, handleDynamicOption, addNewInvoice, printInvoiceList,
             addingRight,removingRight,rightsModule,selectSearchQuantity,selectedValue,showDetails,detailsTitle,hideDetails,handleShowDetails,journalEntries,
-            receiptLines,tabs,selectTab,activeTab
+            invoiceLines,invoicePayments,tabs,selectTab,activeTab
         }
     }
 };

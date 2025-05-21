@@ -78,7 +78,7 @@ import { useStore } from "vuex";
 import { useToast } from "vue-toastification";
 
 export default defineComponent({
-    name: 'Asset_Details',
+    name: 'Asset_Profile',
     components:{
          DynamicForm,PageStyleComponent,SearchableDropdown,DynamicTable
     },
@@ -96,7 +96,7 @@ export default defineComponent({
         const planComponentKey = ref(0);
         const activeTab = ref(0);
         const rightsModule = ref('PSS');
-        const displayButtons = ref(true);
+        const displayButtons = ref(false);
         const componentKey = ref(0);
         const tableKey = ref(0);
         const errors = ref([]);
@@ -298,7 +298,7 @@ export default defineComponent({
         }
         const updateAdditionalFormFields = () => {
             additionalFields.value = [
-                { type: 'date', name: 'purchase_date',label: "Purchase Date", value: selectedAsset.value?.purchase_date || '', required: true, placeholder: '' },
+                { type: 'date', name: 'purchase_date',label: "Purchase Date", value: selectedAsset.value?.purchase_date || '', required: false, placeholder: '' },
                 {  
                     type:'search-dropdown', label:"Vendor", value: vendorValue.value, componentKey: vendComponentKey,
                     selectOptions: vendorArray, optionSelected: handleSelectedVendor, required: false,

@@ -31,6 +31,7 @@
                                 <option value="Member Creation">Member Creation</option>
                                 <option value="Member Portal Invitation">Member Portal Invitation</option>
                                 <option value="Sale Client Statement">Sale Client Statement</option>
+                                <option value="Sale Client Receipt">Sale Client Receipt</option>
                             </select>
                         </div>
                         <div class="basis-1/3">
@@ -182,7 +183,7 @@
                                 </tr>
                                 <tr>
                                     <td class="font-semibold">Member Number: </td>
-                                    <td> &#123;&#123; member_code &#125;&#125;</td>
+                                    <td> &#123;&#123; member_number &#125;&#125;</td>
                                 </tr>
                                 <tr>
                                     <td class="font-semibold">Member ID No: </td>
@@ -284,6 +285,47 @@
                                 <tr>
                                     <td class="font-semibold">Basic Pay: </td>
                                     <td> &#123;&#123; basic_pay &#125;&#125;</td>
+                                </tr>
+                            </table>
+                        </div>
+                        <div class="w-full" v-else-if="sale_client_management">
+                            <table class="text-left">  
+                                <h2 class="text-center font-bold uppercase mb-4 mt-4">Sale Client</h2>
+                                <tr>
+                                    <td class="font-semibold">Client Name: </td>
+                                    <td> &#123;&#123; client_name &#125;&#125;</td>
+                                </tr>
+                                <tr>
+                                    <td class="font-semibold">Client Phone No: </td>
+                                    <td> &#123;&#123; client_phone_number &#125;&#125;</td>
+                                </tr>
+                                <tr>
+                                    <td class="font-semibold">Client Code: </td>
+                                    <td> &#123;&#123; client_code &#125;&#125;</td>
+                                </tr>
+                                <tr>
+                                    <td class="font-semibold">Client ID No: </td>
+                                    <td> &#123;&#123; client_id_number &#125;&#125;</td>
+                                </tr>
+                                <tr>
+                                    <td class="font-semibold">Client Email: </td>
+                                    <td> &#123;&#123;client_email &#125;&#125;</td>
+                                </tr>
+                                <tr>
+                                    <td class="font-semibold">Client Address: </td>
+                                    <td> &#123;&#123; client_address &#125;&#125;</td>
+                                </tr>
+                                <tr>
+                                    <td class="font-semibold">Client Sale Balance: </td>
+                                    <td> &#123;&#123; client_sale_balance &#125;&#125;</td>
+                                </tr>
+                                <tr>
+                                    <td class="font-semibold">Sale Due Date: </td>
+                                    <td> &#123;&#123; sale_due_date &#125;&#125;</td>
+                                </tr>
+                                <tr>
+                                    <td class="font-semibold">Receipt Allocation: </td>
+                                    <td> &#123;&#123; client_receipt_allocation &#125;&#125;</td>
                                 </tr>
                             </table>
                         </div>
@@ -391,6 +433,7 @@ export default defineComponent({
         const property_management = ref(false);
         const member_management = ref(false);
         const human_resource = ref(false);
+        const sale_client_management = ref(false);
         const errors = ref([]);
         const companyID = computed(()=> store.state.userData.company_id);
         const idField = ref('');
@@ -428,14 +471,22 @@ export default defineComponent({
                 property_management.value = true;
                 member_management.value = false;
                 human_resource.value = false;
+                sale_client_management.value = false;
             }else if(selectedValue.includes("Member")){
                 member_management.value = true;
                 property_management.value = false;
                 human_resource.value = false;
+                sale_client_management.value = false;
             }else if(selectedValue.includes("Employee")){
                 human_resource.value = true;
                 member_management.value = false;
                 property_management.value = false;
+                sale_client_management.value = false;
+            }else if(selectedValue.includes("Sale Client")){
+                sale_client_management.value = true;
+                property_management.value = false;
+                member_management.value = false;
+                human_resource.value = false;
             }
         }
         const createTemplate = async() =>{
@@ -525,7 +576,8 @@ export default defineComponent({
 
         return{
             saveTemplate, mainComponentKey,handleReset, loader, showLoader, hideLoader, idField,handleChange,
-            templateContent, templateName, templateType, editorComponentKey,property_management,member_management,human_resource
+            templateContent, templateName, templateType, editorComponentKey,property_management,member_management,human_resource,
+            sale_client_management
         }
     }
 })
