@@ -54,7 +54,7 @@ import { useToast } from "vue-toastification";
 import PrintJS from 'print-js';
 
 export default{
-    name: 'Asset_Models',
+    name: 'Asset_Designs',
     components:{
         PageComponent, MovableModal,DynamicForm
     },
@@ -65,11 +65,11 @@ export default{
         const modal_loader = ref('none');
         const propComponentKey = ref(0);
         const idField = 'asset_model_id';
-        const addButtonLabel = ref('New Asset Model');
+        const addButtonLabel = ref('New Asset Design');
         const addingRight = ref('Adding Asset Models');
         const removingRight = ref('Deleting Asset Models');
         const rightsModule = ref('PSS');
-        const title = ref('Asset Model Details');
+        const title = ref('Asset Design Details');
         const submitButtonLabel = ref('Add');
         const selectedIds = ref([]);
         const modelsList = ref([]);
@@ -97,17 +97,17 @@ export default{
         const showModal = ref(false);
         const tableColumns = ref([
             {type: "checkbox"},
-            {label: "Model Name", key:"name"},
-            {label: "Asset Make", key: "asset_make"},
+            {label: "Design Name", key:"name"},
+            {label: "Asset Type", key: "asset_make"},
         ])
         const actions = ref([
-            {name: 'edit', icon: 'fa fa-edit', title: 'Edit Group', rightName: 'Editing Asset Models'},
-            {name: 'delete', icon: 'fa fa-trash', title: 'Delete Group', rightName: 'Deleting Asset Models'},
+            {name: 'edit', icon: 'fa fa-edit', title: 'Edit Design', rightName: 'Editing Asset Models'},
+            {name: 'delete', icon: 'fa fa-trash', title: 'Delete Design', rightName: 'Deleting Asset Models'},
         ])
         const companyID = computed(()=> store.state.userData.company_id);
         const name_search = ref('');
         const searchFilters = ref([
-            {type:'text', placeholder:"Model Name...", value: name_search, width:56,},
+            {type:'text', placeholder:"Design Name...", value: name_search, width:56,},
   
         ]);
         const handleSelectionChange = (ids) => {
@@ -129,13 +129,13 @@ export default{
         const updateFormFields = () => {
             formFields.value = [
                 {  
-                    type:'search-dropdown', label:"Asset Make", value: makeValue.value, componentKey: propComponentKey,
+                    type:'search-dropdown', label:"Asset Type", value: makeValue.value, componentKey: propComponentKey,
                     selectOptions: makesArray, optionSelected: handleSelectedMake, required: true,
-                    searchPlaceholder: 'Select Asset Make...', dropdownWidth: '400px', updateValue: selectedMake.value,
+                    searchPlaceholder: 'Select Asset Type...', dropdownWidth: '400px', updateValue: selectedMake.value,
                     fetchData: store.dispatch('Asset_Makes/fetchAssetMakes', {company:companyID.value}),
                     clearSearch: clearSelectedMake
                 },
-                { type: 'text', name: 'name',label: "Model Name", value: selectedModel.value?.name || '', required: true },
+                { type: 'text', name: 'name',label: "Design Name", value: selectedModel.value?.name || '', required: true },
             ];
         };
         const handleReset = () =>{
@@ -192,11 +192,11 @@ export default{
                         handleReset();
                         propComponentKey.value += 1;
                     } else {
-                        toast.error('An error occurred while creating the Model.');
+                        toast.error('An error occurred while creating the Asset Design.');
                     }
                 } catch (error) {
                     console.error(error.message);
-                    toast.error('Failed to create Model: ' + error.message);
+                    toast.error('Failed to create Asset Design: ' + error.message);
                 } finally {
                     hideModalLoader();
                     searchAssetModels();
@@ -232,13 +232,13 @@ export default{
                         hideModalLoader();
                         handleReset();
                         propComponentKey.value += 1;
-                        toast.success("Model updated successfully!");              
+                        toast.success("Asset Design updated successfully!");              
                     } else {
-                        toast.error('An error occurred while updating the Model.');
+                        toast.error('An error occurred while updating the Asset Design.');
                     }
                 } catch (error) {
                     console.error(error.message);
-                    toast.error('Failed to update Model: ' + error.message);
+                    toast.error('Failed to update Asset Design: ' + error.message);
                 } finally {
                     hideModalLoader();
                     propModalVisible.value = false;
@@ -263,21 +263,21 @@ export default{
                 try{
                     const response = await store.dispatch('Asset_Models/deleteAssetModel',formData)
                     if(response && response.status == 200){
-                        toast.success("Model Removed Succesfully");
+                        toast.success("Asset Design Removed Succesfully");
                         searchAssetModels();
                     }
                 }
                 catch(error){
                     console.error(error.message);
-                    toast.error('Failed to remove Model: ' + error.message);
+                    toast.error('Failed to remove Asset Design: ' + error.message);
                 }
                 finally{
                     selectedIds.value = [];
                 }
             }else if(selectedIds.value.length > 1){
-                toast.error("You have selected more than 1 Model") 
+                toast.error("You have selected more than 1 Asset Design") 
             }else{
-                toast.error("Please Select A Model To Remove")
+                toast.error("Please Select An Asset Design To Remove")
             }
         }
         const removeAssetModels = async() =>{
@@ -289,20 +289,20 @@ export default{
                 try{
                     const response = await store.dispatch('Asset_Models/deleteAssetModel',formData)
                     if(response && response.status == 200){
-                        toast.success("Model(s) Removed Succesfully");
+                        toast.success("Asset Design(s) Removed Succesfully");
                         searchAssetModels();
                     }
                 }
                 catch(error){
                     console.error(error.message);
-                    toast.error('Failed to remove Model: ' + error.message);
+                    toast.error('Failed to remove Asset Design: ' + error.message);
                 }
                 finally{
                     selectedIds.value = [];
 
                 }
             }else{
-                toast.error("Please Select A Model To Remove")
+                toast.error("Please Select An Asset Design To Remove")
             }
         }
         const showLoader = () =>{

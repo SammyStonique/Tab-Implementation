@@ -427,6 +427,12 @@
                                 <p class="ml-4 font-bold">{{ saleAssetAccount }}</p>
                                 <button type="button" class="ml-4 text-red-600" @click="removeDefaultSetting('PSS','Sale Asset Control A/c',saleAssetAccount)" v-if="saleAssetAccount"><i class="fa fa-times" aria-hidden="true"></i></button>
                             </div>
+                            <div class="basis-1/4 flex mr-3">
+                                <label for="">Current:<em></em></label>
+                                <p class="ml-4 font-bold">{{ salesAgentAccount }}</p>
+                                <button type="button" class="ml-4 text-red-600" @click="removeDefaultSetting('PSS','Sales Agents Payable A/c',salesAgentAccount)" v-if="salesAgentAccount"><i class="fa fa-times" aria-hidden="true"></i></button>
+                            </div>
+                            
                         </div>
                         <div class="flex mb-3">
                             <div class="basis-1/4 mr-8 relative">
@@ -441,7 +447,17 @@
                                 />
                                 <button type="button" class="absolute ml-4 rounded px-2 bg-green-500 text-white" @click="saveDefaultSetting('PSS','Sale Asset Control A/c',ledgerID,ledgerName)"><i class="fa fa-check"></i></button>
                             </div>
-                            <div class="basis-1/6 mr-3 relative">
+                            <div class="basis-1/4 mr-8 relative">
+                                <label for="">Sales Agents Commission Payable A/c:<em>*</em></label><br />
+                                <SearchableDropdown
+                                    :options="ledgerArr"
+                                    :updateValue="selectedRentalIncome"
+                                    :dropdownWidth="dropdownWidth"
+                                    @option-selected="handleSelectedLedger"
+                                    @clearSearch="clearSelectedLedger"   
+                                  
+                                />
+                                <button type="button" class="absolute ml-4 rounded px-2 bg-green-500 text-white" @click="saveDefaultSetting('PSS','Sales Agents Commission Payable A/c',ledgerID,ledgerName)"><i class="fa fa-check"></i></button>
                             </div>
                             <div class="basis-1/6 mr-3 relative">
                             </div>
@@ -451,6 +467,11 @@
                                 <label for="">Current:<em></em></label>
                                 <p class="ml-4 font-bold">{{ saleAssetCommission }}</p>
                                 <button type="button" class="ml-4 text-red-600" @click="removeDefaultSetting('PSS','Sale Asset Commission Income A/c',saleAssetCommission)" v-if="saleAssetCommission"><i class="fa fa-times" aria-hidden="true"></i></button>
+                            </div>
+                            <div class="basis-1/4 flex mr-3">
+                                <label for="">Current:<em></em></label>
+                                <p class="ml-4 font-bold">{{ salesAgentExpenseAccount }}</p>
+                                <button type="button" class="ml-4 text-red-600" @click="removeDefaultSetting('PSS','Sales Agents Commission Expense A/c',salesAgentExpenseAccount)" v-if="salesAgentExpenseAccount"><i class="fa fa-times" aria-hidden="true"></i></button>
                             </div>
                         </div>
                         <div class="flex mb-3">
@@ -466,7 +487,17 @@
                                 />
                                 <button type="button" class="absolute ml-4 rounded px-2 bg-green-500 text-white" @click="saveDefaultSetting('PSS','Sale Asset Commission Income A/c',ledgerID,ledgerName)"><i class="fa fa-check"></i></button>
                             </div>
-                            <div class="basis-1/6 relative mr-3">
+                            <div class="basis-1/4 mr-8 relative">
+                                <label for="">Sales Agents Commission Expense A/c:<em>*</em></label><br />
+                                <SearchableDropdown
+                                    :options="expenseLedgerArr"
+                                    :updateValue="selectedSalesIncome"
+                                    :dropdownWidth="dropdownWidth"
+                                    @option-selected="handleSelectedLedger"
+                                    @clearSearch="clearSelectedLedger"
+                                    @fetchData="fetchExpenseLedgers"   
+                                />
+                                <button type="button" class="absolute ml-4 rounded px-2 bg-green-500 text-white" @click="saveDefaultSetting('PSS','Sales Agents Commission Expense A/c',ledgerID,ledgerName)"><i class="fa fa-check"></i></button>
                             </div>
                             <div class="basis-1/6 relative mr-3">
                             </div>
@@ -625,6 +656,9 @@ export default defineComponent({
         const assetSaleIncome = ref("");
         const saleAssetCommission = ref("");
         const saleInterestIncome = ref("");
+        const salesAgentAccount = ref("");
+        const salesAgentExpenseAccount = ref("");
+
 
         const showHMSSettings = () =>{
             fetchDefaultSetting('HMS');
@@ -737,7 +771,7 @@ export default defineComponent({
         const fetchExpenseLedgers = async() =>{
             let formData = {
                 company: companyID.value,
-                ledger_type: "Expense",
+                ledger_type: "Expenses",
                 ledger_category: "General Ledger"
             }
             await store.dispatch("Ledgers/fetchExpenseLedgers", formData)
@@ -921,6 +955,10 @@ export default defineComponent({
                         assetSaleIncome.value = response.data[i].setting_value_name;
                     }else if(response.data[i].setting_name === 'Sale Interest Posting A/c'){
                         saleInterestIncome.value = response.data[i].setting_value_name;
+                    }else if(response.data[i].setting_name === 'Sales Agents Commission Payable A/c'){
+                        salesAgentAccount.value = response.data[i].setting_value_name;
+                    }else if(response.data[i].setting_name === 'Sales Agents Commission Expense A/c'){
+                        salesAgentExpenseAccount.value = response.data[i].setting_value_name;
                     }
 
                     else if(response.data[i].setting_name === 'Default System Timeout'){
@@ -1018,7 +1056,7 @@ export default defineComponent({
             channelID,channelName,handleSelectedCounter, clearSelectedCounter, fetchCounterChannels,handleSelectedChannel, clearSelectedChannel,outletCounterArr,retailOutletArr,counterChannelArr,
             retailOutlet, outletCounter, counterChannel, salesIncome, invTakeOn, stockControl, stockType,directSaleOrder,defaultTimeout,
             mmsAutoPenalizeOption,mmsStrictGuarantorshipOption,mmsBalReminderOption,penaltyAutoTime,
-            saleAssetAccount,saleAssetCommission,assetSaleIncome,saleInterestIncome
+            saleAssetAccount,saleAssetCommission,assetSaleIncome,saleInterestIncome,salesAgentAccount,salesAgentExpenseAccount
         }
     }
 });

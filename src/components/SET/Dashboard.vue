@@ -65,20 +65,6 @@
             <h1 class="font-bold">Income vs Expenses</h1>
           </div>
         </div>
-        <div class="w-1/4">
-          <div class="rounded-lg bg-blue-900 h-64 p-2 mb-3 text-white">
-            <!-- <h1 class="font-bold mb-2">Popular Doctors List</h1> -->
-            <div class="flex text-xs">
-              
-            </div>
-          </div>
-          <div class="rounded-lg bg-white h-56 p-2 mb-3">
-            <h1 class="font-bold">Average Monthly Income</h1>
-          </div>
-          <div class="rounded-lg bg-white h-56 p-2">
-            <h1 class="font-bold">Average Monthly Spend</h1>
-          </div>
-        </div>
       </div>
     </div>
   </template>

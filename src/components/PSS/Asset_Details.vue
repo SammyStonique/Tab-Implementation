@@ -168,7 +168,7 @@ export default defineComponent({
         const clearSelectedMake = async() =>{
             await store.dispatch('Asset_Makes/updateState', {makeID: ''});
             makeID.value = store.state.Asset_Makes.makeID;   
-            if(selectedAsset.value && selectedAsset.value.asset_make != ""){
+            if(selectedAsset.value && selectedAsset.value.asset_make){
                 selectedAsset.value.asset_make.asset_make_id = makeID.value;
                 makeValue.value = makeID.value
             } 
@@ -183,7 +183,7 @@ export default defineComponent({
         const clearSelectedModel = async() =>{
             await store.dispatch('Asset_Models/updateState', {modelID: ''});
             modelID.value = store.state.Asset_Models.modelID;
-            if(selectedAsset.value && selectedAsset.value.asset_model != ""){
+            if(selectedAsset.value && selectedAsset.value.asset_model){
                 selectedAsset.value.asset_model.asset_model_id = modelID.value;
                 modelValue.value = modelID.value
             } 
@@ -257,15 +257,15 @@ export default defineComponent({
                     fetchData: fetchCurrencies(), clearSearch: clearSelectedCurrency
                 },
                 {  
-                    type:'search-dropdown', label:"Make", value: makeValue.value, componentKey: depComponentKey,
+                    type:'search-dropdown', label:"Type", value: makeValue.value, componentKey: depComponentKey,
                     selectOptions: makeArray, optionSelected: handleSelectedMake, required: false,
-                    searchPlaceholder: 'Select Make...', dropdownWidth: '500px', updateValue: selectedMake.value,
+                    searchPlaceholder: 'Select Type...', dropdownWidth: '500px', updateValue: selectedMake.value,
                     fetchData: fetchAssetMakes(), clearSearch: clearSelectedMake
                 },
                 {  
-                    type:'search-dropdown', label:"Model", value: modelValue.value, componentKey: userComponentKey,
+                    type:'search-dropdown', label:"Design", value: modelValue.value, componentKey: userComponentKey,
                     selectOptions: modelArr, optionSelected: handleSelectedModel, required: false,
-                    searchPlaceholder: 'Select Model...', dropdownWidth: '500px', updateValue: selectedModel.value,
+                    searchPlaceholder: 'Select Design...', dropdownWidth: '500px', updateValue: selectedModel.value,
                     clearSearch: clearSelectedModel
                 },
                 {required: false}
@@ -277,7 +277,7 @@ export default defineComponent({
         const handleSelectedVendor = async(option) =>{
             await store.dispatch('Vendors/handleSelectedVendor', option)
             vendorID.value = store.state.Vendors.vendorID;
-            if(selectedAsset.value){
+            if(selectedAsset.value && selectedAsset.value.vendor){
                 selectedAsset.value.vendor.vendor_id = vendorID.value;
             }
         }
@@ -303,7 +303,7 @@ export default defineComponent({
                     type:'search-dropdown', label:"Vendor", value: vendorValue.value, componentKey: vendComponentKey,
                     selectOptions: vendorArray, optionSelected: handleSelectedVendor, required: false,
                     searchPlaceholder: 'Select Vendor...', dropdownWidth: '500px', updateValue: selectedVendor.value,
-                    fetchData: fetchVendors(), clearSearch: clearSelectedVendor
+                    clearSearch: clearSelectedVendor
                 },
                 { type: 'number', name: 'value',label: "Purchase Price", value: selectedAsset.value?.value || 0, required: false, method: calculateUnitCost },
             ];
@@ -444,6 +444,7 @@ export default defineComponent({
                 approval_status: 'Pending',
                 number_of_floors: formFields.value[10].value || 0,
                 notes: formFields.value[14].value,
+                customer_ids: null,
                 asset_currency: currencyID.value,
                 asset_currency_id: currencyID.value,
                 vendor: vendorID.value,
@@ -513,6 +514,7 @@ export default defineComponent({
                 approval_status: selectedAsset.value.approval_status,
                 number_of_floors: formFields.value[10].value || 0,
                 notes: formFields.value[14].value,
+                customer_ids: selectedAsset.value.customer_ids,
                 asset_currency: currencyValue.value,
                 asset_currency_id: currencyValue.value,
                 vendor: vendorValue.value,
@@ -597,6 +599,7 @@ export default defineComponent({
         
         onBeforeMount(()=>{ 
             fetchPlans();
+            fetchVendors();
             fetchSalePlans();
             fetchCharges();
             fetchSaleCharges();

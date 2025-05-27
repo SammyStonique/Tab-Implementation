@@ -21,6 +21,7 @@ const state = {
   balanceMode : '',
   repayFrequency : '',
   selectedPlan: null,
+  selectedPenaltyLedger: null,
   isEditing: false
 };
   
@@ -31,6 +32,7 @@ const mutations = {
     state.planArray = [];
     state.isEditing = false;
     state.selectedPlan = null;
+    state.selectedPenaltyLedger = null;
   },
   SET_SELECTED_PLAN(state, Plan) {
     state.selectedPlan = Plan;
@@ -47,6 +49,9 @@ const mutations = {
   },
   SALE_PLANS_ARRAY(state, Plans){
     state.salePlanArray = Plans;
+  },
+  SET_SELECTED_PENALTY_LEDGER(state, ledger) {
+    state.selectedPenaltyLedger = ledger;
   },
   SET_STATE(state, payload) {
     for (const key in payload) {
@@ -139,7 +144,9 @@ const actions = {
     axios.post(`api/v1/get-payment-plans/`,formData)
     .then((response)=>{
       state.selectedPlan = response.data;
+      const selectedPenaltyLedger = (response.data.penalty_posting_account != null) ? (response.data.penalty_posting_account.ledger_code + " - " + response.data.penalty_posting_account.ledger_name) : "";
       commit('SET_SELECTED_PLAN',response.data);
+      commit('SET_SELECTED_PENALTY_LEDGER', selectedPenaltyLedger);
     })
     .catch((error)=>{
       console.log(error.message);

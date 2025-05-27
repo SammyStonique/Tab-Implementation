@@ -257,15 +257,15 @@ export default defineComponent({
                     fetchData: fetchCurrencies(), clearSearch: clearSelectedCurrency
                 },
                 {  
-                    type:'search-dropdown', label:"Make", value: makeValue.value, componentKey: depComponentKey,
+                    type:'search-dropdown', label:"Type", value: makeValue.value, componentKey: depComponentKey,
                     selectOptions: makeArray, optionSelected: handleSelectedMake, required: false,
-                    searchPlaceholder: 'Select Make...', dropdownWidth: '500px', updateValue: selectedMake.value,
+                    searchPlaceholder: 'Select Type...', dropdownWidth: '500px', updateValue: selectedMake.value,
                     fetchData: fetchAssetMakes(), clearSearch: clearSelectedMake
                 },
                 {  
-                    type:'search-dropdown', label:"Model", value: modelValue.value, componentKey: userComponentKey,
+                    type:'search-dropdown', label:"Design", value: modelValue.value, componentKey: userComponentKey,
                     selectOptions: modelArr, optionSelected: handleSelectedModel, required: false,
-                    searchPlaceholder: 'Select Model...', dropdownWidth: '500px', updateValue: selectedModel.value,
+                    searchPlaceholder: 'Select Design...', dropdownWidth: '500px', updateValue: selectedModel.value,
                     clearSearch: clearSelectedModel
                 },
                 {required: false}

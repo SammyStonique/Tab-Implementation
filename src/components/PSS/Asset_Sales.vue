@@ -141,10 +141,11 @@ export default{
             {label: "Asset Name", key:"asset"},
             {label: "Client Name", key: "customer"},
             {label: "Sales Plan", key:"payment_plan"},
-            {label: "Amount", key:"total_amount"},
+            {label: "Amount", key:"formatted_total_amount"},
             {label: "Comm.", key:"commission_amount"},
             {label: "Done By", key:"done_by"},
             {label: "Status", key:"approval_status", textColor: "textColor"},
+            {label: "Exempt", key:"exempt_penalty"},
         ])
         const actions = ref([
             {name: 'edit', icon: 'fa fa-edit', title: 'Edit Sale', rightName: 'Editing Asset Sales'},
@@ -161,7 +162,7 @@ export default{
         ]);
         const companyID = computed(()=> store.state.userData.company_id);
         const saleID = ref("");
-        
+        const saleAmount = ref(0);
         const client_name_search = ref('');
         const client_code_search = ref("");
         const asset_name_search = ref('');
@@ -257,6 +258,7 @@ export default{
             showTransModalLoader();
             let formData = {
                 asset_sale: saleID.value,
+                sale_amount: saleAmount.value,
                 approval_status: formFields.value[0].value,
                 company: companyID.value
             }
@@ -274,7 +276,6 @@ export default{
             }                   
             })
             .catch((error)=>{
-                console.log(error.message);
                 toast.error(error.message);
                 hideTransModalLoader();
             })
@@ -282,6 +283,7 @@ export default{
         const closeTransModal = () =>{
             transModalVisible.value = false;
             saleID.value = null;
+            saleAmount.value = 0;
             hideTransModalLoader();
         };
         const showLoader = () =>{
@@ -408,6 +410,7 @@ export default{
                 if(assetStatus == 'Pending'){
                     updateFormFields();
                     saleID.value = row['asset_sale_id'];
+                    saleAmount.value = row['total_amount'];
                     transModalVisible.value = true;
                     flex_basis.value = '1/2';
                     flex_basis_percentage.value = '50';
@@ -447,10 +450,138 @@ export default{
             }
         };
         const dropdownOptions = ref([
-            
+            {label: 'Exempt Penalty', action: 'exempt-penalty'},
+            {label: 'Unexempt Penalty', action: 'unexempt-penalty'},
+            {label: 'Email Sale Statement', action: 'send-email'},
         ]);
         const handleDynamicOption = async(option) =>{
-   
+            if( option == 'exempt-penalty'){
+                let formData = {
+                    asset_sale: selectedIds.value,
+                    company: companyID.value
+                }
+                Swal.fire({
+                    title: "Are you sure?",
+                    text: `Do you wish to Exempt Penalty?`,
+                    type: 'warning',
+                    showCloseButton: true,
+                    showCancelButton: true,
+                    confirmButtonText: 'Yes, Exempt!',
+                    cancelButtonText: 'Cancel!',
+                    customClass: {
+                        confirmButton: 'swal2-confirm-custom',
+                        cancelButton: 'swal2-cancel-custom',
+                    },
+                    showLoaderOnConfirm: true,
+                    }).then((result) => {
+                    if (result.value) {
+                        axios.post(`api/v1/exempt-asset-sale-penalty/`,formData)
+                        .then((response)=>{
+                        if(response.data.msg == 'Success'){
+                            Swal.fire("Penalty Exempted Succesfully!", {
+                                icon: "success",
+                            });
+                            searchAssetSales(); 
+                        }else if(response.data.msg == 'Failed'){
+                            Swal.fire("Penalty Already Exempted!", {
+                                icon: "warning",
+                            });
+                        }
+                        else{
+                            Swal.fire({
+                                title: "Error Exempting Penalty",
+                                icon: "warning",
+                            });
+                        }                   
+                        })
+                        .catch((error)=>{
+                            console.log(error.message);
+                            Swal.fire({
+                                title: error.message,
+                                icon: "warning",
+                            });
+                        })
+                    }else{
+                        Swal.fire(`Penalty(s) has not been exempted!`);
+                    }
+                })
+                            
+            }else if( option == 'unexempt-penalty'){
+                let formData = {
+                    asset_sale: selectedIds.value,
+                    company: companyID.value
+                }
+                Swal.fire({
+                    title: "Are you sure?",
+                    text: `Do you wish to Unexempt Penalty?`,
+                    type: 'warning',
+                    showCloseButton: true,
+                    showCancelButton: true,
+                    confirmButtonText: 'Yes, Unexempt!',
+                    cancelButtonText: 'Cancel!',
+                    customClass: {
+                        confirmButton: 'swal2-confirm-custom',
+                        cancelButton: 'swal2-cancel-custom',
+                    },
+                    showLoaderOnConfirm: true,
+                    }).then((result) => {
+                    if (result.value) {
+                        axios.post(`api/v1/unexempt-asset-sale-penalty/`,formData)
+                        .then((response)=>{
+                        if(response.data.msg == 'Success'){
+                            Swal.fire("Penalty Unexempted Succesfully!", {
+                                icon: "success",
+                            }); 
+                            searchAssetSales();
+                        }else if(response.data.msg == 'Failed'){
+                            Swal.fire("Penalty Not Exempted!", {
+                                icon: "warning",
+                            });
+                        }
+                        else{
+                            Swal.fire({
+                                title: "Error Unexempting Penalty",
+                                icon: "warning",
+                            });
+                        }                   
+                        })
+                        .catch((error)=>{
+                            console.log(error.message);
+                            Swal.fire({
+                                title: error.message,
+                                icon: "warning",
+                            });
+                        })
+                    }else{
+                        Swal.fire(`Penalty(s) has not been Unexempted!`);
+                    }
+                })                 
+            }else if(option == 'send-email'){
+                showLoader();
+                let formData = {
+                    company: companyID.value,
+                    asset_sale: selectedIds.value,
+                    date_from: from_date_search.value,
+                    date_to: to_date_search.value,
+                    company: companyID.value
+                }
+                await axios.post('api/v1/asset-sale-statement-email/',formData).
+                then((response)=>{
+                    if(response.data.msg == "Success"){
+                        toast.success("Email Sent!")
+                    }else if(response.data.msg == "Missing Template"){
+                        toast.error("Sale Statement Template Not Set!")
+                    }else{
+                        toast.error(response.data.msg)
+                    }
+                })
+                .catch((error)=>{
+                    toast.error(error.message)
+                })
+                .finally(()=>{
+                    hideLoader();
+                })
+            }
         };
         const handleShowDetails = async(row) =>{
             activeTab.value = 0;

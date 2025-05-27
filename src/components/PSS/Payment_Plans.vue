@@ -63,6 +63,7 @@ export default{
         const toast = useToast();
         const loader = ref('none');
         const modal_loader = ref('none');
+        const penComponentKey = ref(0);
         const idField = 'payment_plan_id';
         const addButtonLabel = ref('New Payment Plan');
         const title = ref('Payment Plan Details');
@@ -91,6 +92,8 @@ export default{
         const modal_width = ref('60vw');
         const isEditing = computed(()=> store.state.Payment_Plans.isEditing);
         const selectedPlan = computed(()=> store.state.Payment_Plans.selectedPlan);
+        const selectedPenaltyLedger = computed(()=> store.state.Payment_Plans.selectedPenaltyLedger);
+        const ledgerArray = computed(() => store.state.Ledgers.ledgerArr);
         const showModal = ref(false);
         const tableColumns = ref([
             {type: "checkbox"},
@@ -110,12 +113,32 @@ export default{
         ]);
         const companyID = computed(()=> store.state.userData.company_id);
         const planID = ref(null);
+        const penaltyLedgerID = ref("");
         const name_search = ref('');
         const searchFilters = ref([
             {type:'text', placeholder:"Name...", value: name_search, width:60,},
         ]);
         const handleSelectionChange = (ids) => {
             selectedIds.value = ids;
+        };
+        const fetchAllLedgers = async() =>{
+            await store.dispatch('Ledgers/fetchLedgers', {company:companyID.value})
+        };
+        const handleSelectedPenaltyLedger = async(option) =>{
+            await store.dispatch('Ledgers/handleSelectedLedger', option)
+            penaltyLedgerID.value = store.state.Ledgers.ledgerID;
+            if(selectedPlan.value && selectedPlan.value.penalty_posting_account){
+                selectedPlan.value.penalty_posting_account.ledger_id = penaltyLedgerID.value;
+                penaltyLedgerValue.value = penaltyLedgerID.value
+            }
+        };
+        const clearSelectedPenaltyLedger = async() =>{
+            await store.dispatch('Ledgers/updateState', {ledgerID: ''});
+            penaltyLedgerID.value = store.state.Ledgers.ledgerID;
+            if(selectedPlan.value && selectedPlan.value.penalty_posting_account != ""){
+                selectedPlan.value.penalty_posting_account.ledger_id = penaltyLedgerID.value;
+                penaltyLedgerValue.value = penaltyLedgerID.value
+            }
         };
         
         const displayHirePurchaseOptions = (value) =>{
@@ -133,6 +156,7 @@ export default{
                 formFields.value[13].hidden = true;
                 formFields.value[14].hidden = true;
                 formFields.value[15].hidden = true;
+                formFields.value[16].hidden = true;
             }else{
                 formFields.value[3].hidden = false;
                 formFields.value[4].hidden = false;
@@ -147,6 +171,7 @@ export default{
                 formFields.value[13].hidden = false;
                 formFields.value[14].hidden = false;
                 formFields.value[15].hidden = false;
+                formFields.value[16].hidden = false;
             }
         }
         const displayDepositValue = (value) =>{
@@ -161,13 +186,18 @@ export default{
                 formFields.value[13].hidden = true;
                 formFields.value[14].hidden = true;
                 formFields.value[15].hidden = true;
+                formFields.value[16].hidden = true;
             }else{
                 formFields.value[13].hidden = false;
                 formFields.value[14].hidden = false;
                 formFields.value[15].hidden = false;
+                formFields.value[16].hidden = false;
             }
         }
         const formFields = ref([]);
+        const penaltyLedgerValue = computed(() => {
+            return (selectedPlan.value && selectedPlan.value.penalty_posting_account && !penaltyLedgerID.value) ? selectedPlan.value.penalty_posting_account.ledger_id : penaltyLedgerID.value;
+        });
         const updateFormFields = () => {
             formFields.value = [
                 { type: 'dropdown', name: 'category',label: "Category", value: selectedPlan.value?.category || 'Sale', placeholder: "", required: true, options: [{ text: 'Sale', value: 'Sale' }, { text: 'Purchase', value: 'Purchase' }]},
@@ -183,14 +213,21 @@ export default{
                 { type: 'dropdown', name: 'hp_posting_mode',label: "Hire Purchase Mode", value: selectedPlan.value?.hp_posting_mode || 'Interest Suspense', placeholder: "", required: true, hidden:false, options: [{ text: 'Interest Suspense', value: 'Interest Suspense' }, { text: 'Asset Accrual', value: 'Asset Accrual' }, { text: 'Cash Price', value: 'Cash Price' }, { text: 'Trading', value: 'Trading' }] },
                 { type: 'dropdown', name: 'repayment_frequency',label: "Repayment Frequency", value: selectedPlan.value?.repayment_frequency || 'Monthly', placeholder: "", required: true, options: [{ text: 'Daily', value: 'Daily' }, { text: 'Weekly', value: 'Weekly' },{ text: 'Monthly', value: 'Monthly' }, { text: 'Annually', value: 'Annually' }] },
                 { type: 'dropdown', name: 'penalize',label: "Penalize", value: selectedPlan.value?.penalize || 'No', placeholder: "", required: false, options: [{ text: 'Yes', value: 'Yes' }, { text: 'No', value: 'No' }] , method: displayPenaltyOptions},
-                { type: 'dropdown', name: 'penalty_frequency',label: "Penalty Frequency", value: selectedPlan.value?.penalty_frequency || 'Monthly', placeholder: "", required: true, options: [{ text: 'Daily', value: 'Daily' }, { text: 'Weekly', value: 'Weekly' },{ text: 'Monthly', value: 'Monthly' }, { text: 'Annually', value: 'Annually' }, { text: 'One-Off', value: 'One-Off' }] },
-                { type: 'dropdown', name: 'penalty_mode',label: "Penalty Mode", value: selectedPlan.value?.penalty_mode || 'Flat Amount', placeholder: "", required: false, options: [{ text: 'Flat Amount', value: 'Flat Amount' }, { text: '% of Installment Principal', value: 'Installment Principal' },{ text: '% of Installment Interest', value: 'Installment Interest' }, { text: '% of Installment Principal + Interest', value: 'Installment Principal + Interest' }, { text: '% of Installment (Principal + Interest) Balance', value: 'Installment Principal + Interest Balance' },{ text: '% of Principal Balance', value: 'Principal Balance' }, { text: '% of Total Balance', value: 'Loan Balance' }] },
-                { type: 'number', name: 'penalty_value',label: "Penalty Value", value: selectedPlan.value?.penalty_value || 0, required: false },
-                
+                { type: 'dropdown', name: 'penalty_frequency',label: "Penalty Frequency", value: selectedPlan.value?.penalty_frequency || 'Monthly', placeholder: "", required: true, hidden: true, options: [{ text: 'Daily', value: 'Daily' }, { text: 'Weekly', value: 'Weekly' },{ text: 'Monthly', value: 'Monthly' }, { text: 'Annually', value: 'Annually' }, { text: 'One-Off', value: 'One-Off' }] },
+                { type: 'dropdown', name: 'penalty_mode',label: "Penalty Mode", value: selectedPlan.value?.penalty_mode || 'Flat Amount', placeholder: "", required: false, hidden: true, options: [{ text: 'Flat Amount', value: 'Flat Amount' }, { text: '% of Installment Principal', value: 'Installment Principal' },{ text: '% of Installment Interest', value: 'Installment Interest' }, { text: '% of Installment Principal + Interest', value: 'Installment Principal + Interest' }, { text: '% of Installment (Principal + Interest) Balance', value: 'Installment Principal + Interest Balance' },{ text: '% of Principal Balance', value: 'Principal Balance' }, { text: '% of Total Balance', value: 'Sale Balance' }] },
+                { type: 'number', name: 'penalty_value',label: "Penalty Value", value: selectedPlan.value?.penalty_value || 0, required: false, hidden: true },
+                {  
+                    type:'search-dropdown', label:"Penalty Income Posting Account", value: penaltyLedgerValue.value, componentKey: penComponentKey,
+                    selectOptions: ledgerArray, optionSelected: handleSelectedPenaltyLedger, required: false, hidden: true,
+                    searchPlaceholder: 'Select Posting Acc...', dropdownWidth: '320px', updateValue: selectedPenaltyLedger.value,
+                    clearSearch: clearSelectedPenaltyLedger
+                },
+                {required: false}
             ];  
         };
         const handleReset = () =>{
-
+            penComponentKey.value += 1;
+            penaltyLedgerID.value = "";
             for(let i=0; i < formFields.value.length; i++){
                 if(formFields.value[i].label == "Category"){
                     formFields.value[i].value = 'Sale';
@@ -213,18 +250,46 @@ export default{
                     formFields.value[i].value = 'Monthly';
                 }else if(formFields.value[i].name == "penalty_mode" ){
                     formFields.value[i].value = 'Flat Amount';
-                }else if(formFields.value[i].name == "penalty_value" ){
+                }else if(formFields.value[i].name == "penalize" ){
                     formFields.value[i].value = 'No';
                 }else{
                     formFields.value[i].value = '';
-                }
-                
+                }     
             }
+            formFields.value[13].hidden = true;
+            formFields.value[14].hidden = true;
+            formFields.value[15].hidden = true;
+            formFields.value[16].hidden = true;
         }
 
-        watch([selectedPlan], () => {
-            if (selectedPlan.value) {
+        watch([selectedPlan,selectedPenaltyLedger], () => {
+            if (selectedPlan.value && selectedPenaltyLedger.value) {
+                penComponentKey.value += 1;
                 updateFormFields();
+                if(selectedPlan.value.penalize == "No"){
+                    formFields.value[13].hidden = true;
+                    formFields.value[14].hidden = true;
+                    formFields.value[15].hidden = true;
+                    formFields.value[16].hidden = true;
+                }else{
+                    formFields.value[13].hidden = false;
+                    formFields.value[14].hidden = false;
+                    formFields.value[15].hidden = false;
+                    formFields.value[16].hidden = false;
+                }
+            }else if(selectedPlan.value){
+                updateFormFields();
+                if(selectedPlan.value.penalize == "No"){
+                    formFields.value[13].hidden = true;
+                    formFields.value[14].hidden = true;
+                    formFields.value[15].hidden = true;
+                    formFields.value[16].hidden = true;
+                }else{
+                    formFields.value[13].hidden = false;
+                    formFields.value[14].hidden = false;
+                    formFields.value[15].hidden = false;
+                    formFields.value[16].hidden = false;
+                }
             }else{
                 updateFormFields();
             }
@@ -256,6 +321,8 @@ export default{
                 penalty_frequency: formFields.value[13].value || 'Monthly',
                 penalty_value: formFields.value[15].value || 0,
                 penalty_mode: formFields.value[14].value || 'Flat Amount',
+                penalty_posting_account: penaltyLedgerID.value,
+                penalty_posting_account_id: penaltyLedgerID.value,
                 company: companyID.value
             }
 
@@ -308,6 +375,8 @@ export default{
                 penalty_frequency: formFields.value[13].value || 'Monthly',
                 penalty_value: formFields.value[15].value || 0,
                 penalty_mode: formFields.value[14].value || 'Flat Amount',
+                penalty_posting_account: penaltyLedgerValue.value,
+                penalty_posting_account_id: penaltyLedgerValue.value,
                 company: companyID.value
             }
 
@@ -476,10 +545,10 @@ export default{
             // scrollToTop();
         }
         const addNewPlan = () =>{
-            store.dispatch("Payment_Plans/updateState",{selectedPlan:null,isEditing:false})
+            store.dispatch("Payment_Plans/updateState",{selectedPlan:null,selectedPenaltyLedger: null,isEditing:false})
             propModalVisible.value = true;
-            flex_basis.value = '1/3';
-            flex_basis_percentage.value = '33.333';
+            flex_basis.value = '1/4';
+            flex_basis_percentage.value = '25';
         }
         const handleActionClick = async(rowIndex, action, row) =>{
             if( action == 'edit'){
@@ -490,8 +559,8 @@ export default{
                 }
                 await store.dispatch('Payment_Plans/fetchPaymentPlan',formData)
                 propModalVisible.value = true;
-                flex_basis.value = '1/3';
-                flex_basis_percentage.value = '33.333';
+                flex_basis.value = '1/4';
+                flex_basis_percentage.value = '25';
 
             }else if(action == 'delete'){
                 const planID = [row[idField]];
@@ -511,7 +580,7 @@ export default{
         }
         onBeforeMount(()=>{
             searchPlans();
-            
+            fetchAllLedgers();
         })
         return{
             title, searchPlans,resetFilters, addButtonLabel, searchFilters, tableColumns, plansList,selectSearchQuantity,selectedValue,

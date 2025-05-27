@@ -45,7 +45,7 @@ import { useStore } from "vuex";
 import { useToast } from "vue-toastification";
 
 export default{
-    name: 'Asset_Makes',
+    name: 'Asset_Types',
     components:{
         PageComponent,MovableModal,DynamicForm
     },
@@ -54,8 +54,8 @@ export default{
         const toast = useToast();
         const loader = ref('');
         const modal_loader = ref('none');
-        const title = ref('Asset Make Details');
-        const addButtonLabel = ref('New Asset Make');
+        const title = ref('Asset Type Details');
+        const addButtonLabel = ref('New Asset Type');
         const addingRight = ref('Adding Asset Makes');
         const removingRight = ref('Deleting Asset Makes');
         const rightsModule = ref('PSS');
@@ -83,8 +83,8 @@ export default{
             {label: "Name", key: "name", type: "text", editable: false},
         ])
         const actions = ref([
-            {name: 'edit', icon: 'fa fa-edit', title: 'Edit Make', rightName: 'Editing Asset Makes'},
-            {name: 'delete', icon: 'fa fa-trash', title: 'Delete Make', rightName: 'Deleting Asset Makes'},
+            {name: 'edit', icon: 'fa fa-edit', title: 'Edit Type', rightName: 'Editing Asset Makes'},
+            {name: 'delete', icon: 'fa fa-trash', title: 'Delete Type', rightName: 'Deleting Asset Makes'},
         ])
         const companyID = computed(()=> store.state.userData.company_id);
         const name_search = ref('');
@@ -168,11 +168,11 @@ export default{
                         toast.success('Success!');
                         handleReset();
                     }else {
-                        toast.error('An error occurred while creating the Make.');
+                        toast.error('An error occurred while creating the Asset Type.');
                     }
                 } catch (error) {
                     console.error(error.message);
-                    toast.error('Failed to create Make: ' + error.message);
+                    toast.error('Failed to create Asset Type: ' + error.message);
                 } finally {
                     hideModalLoader();
                     searchAssetMakes();
@@ -204,11 +204,11 @@ export default{
                         toast.success("Success!");
                         handleReset();
                     } else {
-                        toast.error('An error occurred while updating the Make.');
+                        toast.error('An error occurred while updating the Asset Type.');
                     }
                 } catch (error) {
                     console.error(error.message);
-                    toast.error('Failed to update Make: ' + error.message);
+                    toast.error('Failed to update Asset Type: ' + error.message);
                 } finally {
                     hideModalLoader();
                     searchAssetMakes();
@@ -231,21 +231,21 @@ export default{
                 try{
                     const response = await store.dispatch('Asset_Makes/deleteAssetMake',formData)
                     if(response && response.status == 200){
-                        toast.success("Make Removed Succesfully");
+                        toast.success("Asset Type Removed Succesfully");
                         searchAssetMakes();
                     }
                 }
                 catch(error){
                     console.error(error.message);
-                    toast.error('Failed to remove Make: ' + error.message);
+                    toast.error('Failed to remove Asset Type: ' + error.message);
                 }
                 finally{
                     selectedIds.value = [];
                 }
             }else if(selectedIds.value.length > 1){
-                toast.error("You have selected more than 1 Make") 
+                toast.error("You have selected more than 1 Asset Type") 
             }else{
-                toast.error("Please Select A Make To Remove")
+                toast.error("Please Select An Asset Type To Remove")
             }
         }
         const removeAssetMakes = async() =>{
@@ -257,19 +257,19 @@ export default{
                 try{
                     const response = await store.dispatch('Asset_Makes/deleteAssetMake',formData)
                     if(response && response.status == 200){
-                        toast.success("Make(s) Removed Succesfully");
+                        toast.success("Asset Type(s) Removed Succesfully");
                         searchAssetMakes();
                     }
                 }
                 catch(error){
                     console.error(error.message);
-                    toast.error('Failed to remove Make(s): ' + error.message);
+                    toast.error('Failed to remove Asset Type(s): ' + error.message);
                 }
                 finally{
                     selectedIds.value = [];
                 }
             }else{
-                toast.error("Please Select A Make To Remove")
+                toast.error("Please Select An Asset Type To Remove")
             }
         }
         const showLoader = () =>{

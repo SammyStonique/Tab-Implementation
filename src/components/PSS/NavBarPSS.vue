@@ -31,15 +31,15 @@
                     </div>
                     
                     <div class="py-2 px-3 pl-4 w-full hover:bg-slate-500 hover:w-full">
-                        <button class="flex text-sm" @click="openPage({'PSS':'Asset_Makes'})">
+                        <button class="flex text-sm" @click="openPage({'PSS':'Asset_Types'})">
                             <i class="fa fa-box pt-2 mr-2" aria-hidden="true"></i>
-                            <p class="">Asset Makes</p>
+                            <p class="">Asset Types</p>
                         </button>
                     </div>
                     <div class="py-2 px-3 pl-4 w-full hover:bg-slate-500 hover:w-full">
-                        <button class="flex text-sm" @click="openPage({'PSS':'Asset_Models'})">
+                        <button class="flex text-sm" @click="openPage({'PSS':'Asset_Designs'})">
                         <i class="fa fa-cogs pt-2 mr-2" aria-hidden="true"></i>
-                        <p class="">Asset Models</p>
+                        <p class="">Asset Designs</p>
                         </button>
                     </div>
                 </div>
@@ -150,9 +150,9 @@
                         </button>
                     </div>
                     <div class="py-2 px-3 pl-4 w-full hover:bg-slate-500 hover:w-full">
-                        <button class="flex text-sm w-full" @click="openPage({'PSS':'Loan_Penalties'})">
+                        <button class="flex text-sm w-full" @click="openPage({'PSS':'Sale_Penalties'})">
                             <i class="fa fa-coins pt-2 mr-2" aria-hidden="true"></i>
-                            <p class="">Loan Penalties</p>
+                            <p class="">Sale Penalties</p>
                         </button>
                     </div>
                     <div class="py-2 px-3 pl-4 w-full hover:bg-slate-500 hover:w-full">

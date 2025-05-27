@@ -152,8 +152,8 @@ export default defineComponent({
             await store.dispatch('Ledgers/handleSelectedLedger', option)
             penaltyLedgerID.value = store.state.Ledgers.ledgerID;
             if(selectedProduct.value){
-                selectedProduct.value.interest_posting_account.ledger_id = penaltyLedgerID.value;
-                intLedgerValue.value = penaltyLedgerID.value
+                selectedProduct.value.penalty_posting_account.ledger_id = penaltyLedgerID.value;
+                penaltyLedgerValue.value = penaltyLedgerID.value
             }
         };
         const clearSelectedPenaltyLedger = async() =>{

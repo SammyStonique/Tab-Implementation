@@ -7,6 +7,7 @@ const state = {
   agentArray: [],
   agentDetails: [],
   agentID: '',
+  agentCommission: 0,
   selectedAgent: null,
   isEditing: false
 };
@@ -18,6 +19,7 @@ const mutations = {
     state.agentArray = [];
     state.agentDetails = [];
     state.agentID = '';
+    state.agentCommission = 0;
     state.selectedAgent = null;
     state.isEditing = false;
   },
@@ -98,6 +100,7 @@ const actions = {
     if (selectedAgent) {
         state.agentID = selectedAgent.sales_agent_id;
         state.agentName = selectedAgent.name;
+        state.agentCommission = selectedAgent.commission_rate;
         state.agentArray = [...state.agentArray, selectedAgent];
     }
     commit('AGENTS_ARRAY', state.agentArray);

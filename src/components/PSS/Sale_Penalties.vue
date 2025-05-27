@@ -63,7 +63,7 @@ import PrintJS from 'print-js';
 import Swal from 'sweetalert2';
 
 export default{
-    name: 'Loan_Penalties',
+    name: 'Sale_Penalties',
     components:{
         PageComponent, MovableModal,DynamicForm
     },
@@ -72,14 +72,15 @@ export default{
         const toast = useToast();
         const { getYear } = useDateFormatter();
         const { getMonth } = useDateFormatter();
+        const { formatDate } = useDateFormatter();
         const current_date = new Date();
         const loader = ref('none');
         const modal_loader = ref('none');
-        const idField = 'loan_penalty_id';
+        const idField = 'asset_sale_penalty_id';
         const addButtonLabel = ref('Process Penalty');
-        const addingRight = ref('Processing Loan Penalties');
-        const removingRight = ref('Deleting Loan Penalties');
-        const rightsModule = ref('MMS');
+        const addingRight = ref('Processing Sale Penalties');
+        const removingRight = ref('Deleting Sale Penalties');
+        const rightsModule = ref('PSS');
         const submitButtonLabel = ref('Add');
         const title = ref('Penalty Processing');
         const propComponentKey = ref(0);
@@ -107,30 +108,30 @@ export default{
             {type: "checkbox"},
             {label: "From Date", key:"from_date"},
             {label: "To Date", key:"to_date"},
-            {label: "Loan Product", key:"loan_product"},
-            {label: "Loan#", key:"loan_number"},
+            {label: "Sale Plan", key:"sale_plan"},
+            {label: "Sale#", key:"sale_code"},
             {label: "Inst#", key:"installment"},
             {label: "Due Date", key:"due_date"},
-            {label: "Member No", key:"member_number"},
-            {label: "Member Name", key:"member_name"},
+            {label: "Client Code", key:"client_code"},
+            {label: "Client Name", key:"client_name"},
             {label: "Amount", key:"amount", type:"number"},
             
         ])
         const showTotals = ref(true);
         const actions = ref([
-            {name: 'delete', icon: 'fas fa-trash', title: 'Delete Penalty', rightName: 'Deleting Loan Penalties'},
+            {name: 'delete', icon: 'fas fa-trash', title: 'Delete Penalty', rightName: 'Deleting Sale Penalties'},
         ])
         const companyID = computed(()=> store.state.userData.company_id);
-        const batchID = computed(()=> store.state.Penalty_Batches.batchID);
-        const member_number_search = ref("");
-        const member_name_search = ref("");
-        const loan_number_search = ref("");
+        const batchID = computed(()=> store.state.Sale_Penalty_Batches.batchID);
+        const client_code_search = ref("");
+        const client_name_search = ref("");
+        const sale_code_search = ref("");
         const from_date_search = ref("");
         const to_date_search = ref("");
         const searchFilters = ref([
-            {type:'text', placeholder:"Loan No...", value: loan_number_search, width:40},
-            {type:'text', placeholder:"Member No...", value: member_number_search, width:40},
-            {type:'text', placeholder:"Member Name...", value: member_name_search, width:64},
+            {type:'text', placeholder:"Sale Code...", value: sale_code_search, width:40},
+            {type:'text', placeholder:"Client Code...", value: client_code_search, width:40},
+            {type:'text', placeholder:"Client Name...", value: client_name_search, width:64},
             {type:'date', placeholder:"From Date...", value: from_date_search, width:32, title: "Date From Search"},
             {type:'date', placeholder:"To Date...", value: to_date_search, width:32, title: "Date To Search"},
 
@@ -143,8 +144,8 @@ export default{
         const updateFormFields = () =>{
             formFields.value = [
 
-                { type: 'date', name: 'period_year',label: "Date From", value: "", required: true },
-                { type: 'date', name: 'period_year',label: "Date To", value: "", required: true },
+                { type: 'date', name: 'period_year',label: "Date From", value: "", maxDate: formatDate(current_date), required: true },
+                { type: 'date', name: 'period_year',label: "Date To", value: "", maxDate: formatDate(current_date), required: true },
             ]
         };
 
@@ -181,7 +182,7 @@ export default{
                 hideModalLoader();
             }else{
                 try {
-                    axios.post(`api/v1/process-loan-penalty/`,formData).
+                    axios.post(`api/v1/process-asset-sale-penalty/`,formData).
                     then((response)=>{
                         if (response.data.msg === "Success"){
                             hideModalLoader();
@@ -210,7 +211,7 @@ export default{
         const removePenalties = async() =>{
             let formData = {
                 company: companyID.value,
-                loan_penalty: selectedIds.value
+                asset_sale_penalty: selectedIds.value
             }
             Swal.fire({
                 title: "Are you sure?",
@@ -227,7 +228,7 @@ export default{
                 showLoaderOnConfirm: true,
                 }).then((result) => {
                 if (result.value) {
-                    axios.post(`api/v1/delete-loan-penalty/`,formData)
+                    axios.post(`api/v1/delete-asset-sale-penalty/`,formData)
                     .then((response)=>{
                     if(response.data.msg == 'Success'){
                         Swal.fire("Penalty Deleted Succesfully!", {
@@ -258,7 +259,7 @@ export default{
             if(selectedIds.value.length == 1){
                 let formData = {
                     company: companyID.value,
-                    loan_penalty: selectedIds.value
+                    asset_sale_penalty: selectedIds.value
                 }
                 Swal.fire({
                     title: "Are you sure?",
@@ -275,7 +276,7 @@ export default{
                     showLoaderOnConfirm: true,
                     }).then((result) => {
                     if (result.value) {
-                        axios.post(`api/v1/delete-loan-penalty/`,formData)
+                        axios.post(`api/v1/delete-asset-sale-penalty/`,formData)
                         .then((response)=>{
                         if(response.data.msg == 'Success'){
                             Swal.fire("Penalty Deleted Succesfully!", {
@@ -321,9 +322,9 @@ export default{
             showNextBtn.value = false;
             showPreviousBtn.value = false;
             let formData = {
-                loan_number: loan_number_search.value,
-                member_number: member_number_search.value,
-                member_name: member_name_search.value,
+                sale_code: sale_code_search.value,
+                client_code: client_code_search.value,
+                client_name: client_name_search.value,
                 from_date: from_date_search.value,
                 to_date: to_date_search.value,
                 penalty_batch: batchID.value,
@@ -332,10 +333,10 @@ export default{
             } 
    
             axios
-            .post(`api/v1/loan-penalties-search/?page=${currentPage.value}`,formData)
+            .post(`api/v1/asset-sale-penalties-search/?page=${currentPage.value}`,formData)
             .then((response)=>{
                 penaltyList.value = response.data.results;
-                store.commit('Loan_Penalties/LIST_Loan_PENALTIES', penaltyList.value)
+                store.commit('Sale_Penalties/LIST_SALE_PENALTIES', penaltyList.value)
                 propResults.value = response.data;
                 propArrLen.value = penaltyList.value.length;
                 propCount.value = propResults.value.count;
@@ -359,12 +360,12 @@ export default{
             searchPenalties(selectedValue.value);
         };
         const resetFilters = () =>{
-            store.dispatch('Penalty_Batches/updateState',{batchID: ""})
+            store.dispatch('Sale_Penalty_Batches/updateState',{batchID: ""})
             currentPage.value = 1;
             selectedValue.value = 50;
-            loan_number_search.value = "";
-            member_number_search.value = "";
-            member_name_search.value = "";
+            sale_code_search.value = "";
+            client_code_search.value = "";
+            client_name_search.value = "";
             from_date_search.value= "";
             to_date_search.value = "";
             searchPenalties();
@@ -408,10 +409,10 @@ export default{
         }
         const handleActionClick = async(rowIndex, action, row) =>{
             if(action == 'delete'){
-                const penaltyID = [row['loan_penalty_id']];
+                const penaltyID = [row['asset_sale_penalty_id']];
                 let formData = {
                     company: companyID.value,
-                    loan_penalty: penaltyID
+                    asset_sale_penalty: penaltyID
                 }
                 Swal.fire({
                     title: "Are you sure?",
@@ -428,7 +429,7 @@ export default{
                     showLoaderOnConfirm: true,
                     }).then((result) => {
                     if (result.value) {
-                        axios.post(`api/v1/delete-loan-penalty/`,formData)
+                        axios.post(`api/v1/delete-asset-sale-penalty/`,formData)
                         .then((response)=>{
                         if(response.data.msg == 'Success'){
                             Swal.fire("Penalty Deleted Succesfully!", {
@@ -471,9 +472,9 @@ export default{
         const printPenaltiesList = () =>{
             showLoader();
             let formData = {
-                loan_number: loan_number_search.value,
-                member_number: member_number_search.value,
-                member_name: member_name_search.value,
+                sale_code: sale_code_search.value,
+                client_code: client_code_search.value,
+                client_name: client_name_search.value,
                 from_date: from_date_search.value,
                 to_date: to_date_search.value,
                 penalty_batch: batchID.value,
@@ -482,7 +483,7 @@ export default{
             } 
    
             axios
-            .post("api/v1/export-loan-penalties-pdf/", formData, { responseType: 'blob' })
+            .post("api/v1/export-asset-sale-penalties-pdf/", formData, { responseType: 'blob' })
                 .then((response)=>{
                     if(response.status == 200){
                         const blob1 = new Blob([response.data]);

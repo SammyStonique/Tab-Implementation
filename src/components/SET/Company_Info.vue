@@ -4,10 +4,23 @@
             <div class="mt-6">
                 <DynamicForm  :fields="formFields" :flex_basis="flex_basis" :flex_basis_percentage="flex_basis_percentage" :displayButtons="displayButtons" @handleSubmit="saveCompany" @handleReset="handleReset"> 
                     <template v-slot:additional-content>
-                        <div class="border border-slate-200 rounded relative py-3 mt-3 px-2 flex">
+                        <div class="border border-slate-200 rounded relative py-3 mt-3 px-2 min-h-[200px]">
                             <h1 class="font-bold absolute top-[-13px] left-5 bg-white">Company Modules</h1>
-                            <div class="px-3">
+                            <div class="px-3 flex">
                                 <DynamicForm :fields="additionalFields" :flex_basis="additional_flex_basis" :flex_basis_percentage="additional_flex_basis_percentage" @handleReset="handleReset"/>
+                            </div>
+                        </div>
+                        <div class="border border-slate-200 rounded relative py-3 mt-3 px-2 min-h-[300px]">
+                            <h1 class="font-bold absolute top-[-13px] left-5 bg-white">Payment Details</h1>
+                            <div class="px-3 flex">
+                                <div class="basis-1/2 text-left">
+                                    <label for="">Payment Info:</label><br />
+                                    <quill-editor :key="editorComponentKey" v-model:value="paymentInfo"></quill-editor>
+                                </div>
+                                <div class="basis-1/2 text-left">
+                                    <label for="" class="text-left">Payment Terms:</label><br />
+                                    <quill-editor :key="editorComponentKey" v-model:value="paymentTerms"></quill-editor>
+                                </div>
                             </div>
                         </div>
                     </template>
@@ -24,17 +37,21 @@ import PageStyleComponent from '@/components/PageStyleComponent.vue';
 import { useStore } from "vuex";
 import { useDateFormatter } from '@/composables/DateFormatter';
 import { useToast } from "vue-toastification";
+import { quillEditor } from 'vue3-quill'
 
 export default defineComponent({
     name: 'Company_Info',
     components:{
-        PageStyleComponent, DynamicForm
+        PageStyleComponent, DynamicForm, quillEditor
     },
     setup(){
         const store = useStore();
         const toast = useToast();
         const loader = ref('none');
         const mainComponentKey = ref(0);
+        const editorComponentKey = ref(0);
+        const paymentInfo = ref('');
+        const paymentTerms = ref('');
         const componentKey = ref(0);
         const errors = ref([]);
         const companyName = computed(()=> store.state.userData.company_name);
@@ -69,10 +86,14 @@ export default defineComponent({
             for(let i=0; i < additionalFields.value.length; i++){
                 additionalFields.value[i].value = '';
             }
+            paymentInfo.value = "";
+            paymentTerms.value = "";
         }
 
         watch([selectedCompany], () => {
             if (selectedCompany.value) {
+                paymentInfo.value = selectedCompany.value.payment_info;
+                paymentTerms.value = selectedCompany.value.payment_terms;
                 updateFormFields();
             }
         }, { immediate: true });
@@ -137,6 +158,8 @@ export default defineComponent({
                     country: formFields.value[7].value,
                     regime: formFields.value[8].value,
                     status: selectedCompany.value.status,
+                    payment_terms: paymentTerms.value,
+                    payment_info: paymentInfo.value,
                     pms_module: additionalFields.value[0].value,
                     accounts_module: additionalFields.value[1].value,
                     hr_module: additionalFields.value[4].value,
@@ -187,14 +210,14 @@ export default defineComponent({
             updateAdditionalFormFields();
             flex_basis.value = '1/4';
             flex_basis_percentage.value = '25';
-            additional_flex_basis.value = '1/4';
-            additional_flex_basis_percentage.value = '25';
+            additional_flex_basis.value = '1/6';
+            additional_flex_basis_percentage.value = '20';
         })
 
         return{
             componentKey, formFields, additionalFields, flex_basis, flex_basis_percentage, additional_flex_basis,
-            additional_flex_basis_percentage, displayButtons, saveCompany, mainComponentKey,
-            handleReset, isEditing, loader, showLoader, hideLoader
+            additional_flex_basis_percentage, displayButtons, saveCompany, mainComponentKey,editorComponentKey,
+            handleReset, isEditing, loader, showLoader, hideLoader,paymentInfo,paymentTerms
         }
     }
 })

@@ -80,7 +80,7 @@ export default defineComponent({
           isOpen.value = false;
           searchQuery.value = "";
           dropdown_active.value = false;
-          emit('clearSearch');
+          emit('clearSearch');  
       }
       const fetchData = () =>{
         emit('fetchData');

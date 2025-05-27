@@ -308,13 +308,13 @@ export default defineComponent({
                 {  
                     type:'search-dropdown', label:"Client", value: clientValue.value, componentKey: clientComponetKey,
                     selectOptions: clientArray, optionSelected: handleSelectedClient, required: true,
-                    searchPlaceholder: 'Select Client...', dropdownWidth: '450px', updateValue: selectedClient.value,
+                    searchPlaceholder: 'Select Client...', dropdownWidth: '300px', updateValue: selectedClient.value,
                     fetchData: fetchAssetClients(), clearSearch: clearSelectedClient
                 },
                 {  
                     type:'search-dropdown', label:"Asset", value: assetValue.value, componentKey: assetComponentKey,
                     selectOptions: assetArray, optionSelected: handleSelectedAsset, required: true,
-                    searchPlaceholder: 'Select Asset...', dropdownWidth: '450px', updateValue: selectedAsset.value,
+                    searchPlaceholder: 'Select Asset...', dropdownWidth: '300px', updateValue: selectedAsset.value,
                     fetchData: fetchSaleAssets(), clearSearch: clearSelectedAsset
                 },
                 {  
@@ -336,6 +336,8 @@ export default defineComponent({
                 { type: 'dropdown', name: 'repayment_frequency',label: "Repayment Frequency", value: selectedSale.value?.repayment_frequency || computedRepayFrequency.value, placeholder: "", required: true, hidden: true, options: [{ text: 'Daily', value: 'Daily' }, { text: 'Weekly', value: 'Weekly' },{ text: 'Monthly', value: 'Monthly' }, { text: 'Annually', value: 'Annually' }] },
                 { type: 'number', name: 'discount',label: "Discount", value: selectedSale.value?.discount || 0, required: false},
                 { type: 'number', name: 'total_amount',label: "Total Amount", value: selectedSale.value?.total_amount || 0, required: true, method: calculateDepositAmount },
+                {required: false},
+                {required: false},
                 {  
                     type:'search-dropdown', label:"Unit(s)", value: "", componentKey: unitComponentKey,
                     selectOptions: units_array, optionSelected: handleSelectedUnit, required: true,
@@ -350,6 +352,7 @@ export default defineComponent({
         const handleSelectedAgent = async(option) =>{
             await store.dispatch('Sales_Agents/handleSelectedAgent', option)
             agentID.value = store.state.Sales_Agents.agentID;
+            additionalFields.value[2].value = store.state.Sales_Agents.agentCommission;
             if(selectedSale.value && selectedAgent.value){
                 selectedSale.value.sales_agent.sales_agent_id = agentID.value;
             }
@@ -377,7 +380,7 @@ export default defineComponent({
                 {  
                     type:'search-dropdown', label:"Sales Agent", value: agentValue.value, componentKey: agentComponentKey,
                     selectOptions: agentArray, optionSelected: handleSelectedAgent, required: false,
-                    searchPlaceholder: 'Select Agent...', dropdownWidth: '500px', updateValue: selectedAgent.value,
+                    searchPlaceholder: 'Select Agent...', dropdownWidth: '350px', updateValue: selectedAgent.value,
                     clearSearch: clearSelectedAgent
                 },
                 { type: 'dropdown', name: 'commission_mode',label: "Commission Mode", value: selectedSale.value?.commission_mode || 'None', placeholder: "", required: false, options: [{ text: 'Percentage', value: 'Percentage' }, { text: 'Fixed Amount', value: 'Fixed Amount' }, { text: 'None', value: 'None' }], method: hideCommissionOptions },
@@ -434,6 +437,10 @@ export default defineComponent({
                     formFields.value[13].hidden = false;
                     formFields.value[14].hidden = false;
                 }
+                if(selectedSale.value.commission_mode != "None"){
+                    additionalFields.value[2].hidden = false;
+                    additionalFields.value[3].hidden = false;
+                }
             }else if(selectedSale.value && selectedAsset.value && selectedClient.value && selectedPlan.value){
                 assetComponentKey.value += 1;
                 clientComponetKey.value += 1;
@@ -453,6 +460,7 @@ export default defineComponent({
                     formFields.value[13].hidden = false;
                     formFields.value[14].hidden = false;
                 }
+                
             }else if(selectedSale.value && selectedAsset.value){
                 assetComponentKey.value += 1;
                 updateFormFields();
@@ -543,6 +551,10 @@ export default defineComponent({
                 commission_method: additionalFields.value[3].value || 'Discount Exclusive',
                 sale_plan_terms: salePlanTermsArr.value,
                 approval_status: 'Pending',
+                sale_status: 'Active',
+                sale_type: 'New',
+                sale_balance: 0,
+                posted: 'No',
                 asset: assetID.value,
                 asset_id: assetID.value,
                 sales_agent: agentID.value,
@@ -633,6 +645,10 @@ export default defineComponent({
                 commission_method: additionalFields.value[3].value,
                 sale_plan_terms: salePlanTermsArr.value,
                 approval_status: selectedSale.value.approval_status,
+                sale_status: selectedSale.value.sale_status,
+                sale_type: selectedSale.value.sale_type,
+                sale_balance: selectedSale.value.sale_balance,
+                posted: selectedSale.value.posted,
                 asset: assetValue.value,
                 asset_id: assetValue.value,
                 sales_agent: agentValue.value,
@@ -775,9 +791,9 @@ export default defineComponent({
             updateFormFields();
             updateAdditionalFormFields();
             updateAdditionalFormFields1();
-            flex_basis.value = '1/4';
+            flex_basis.value = '1/6';
             flex_basis_percentage.value = '20';
-            additional_flex_basis.value = '1/5';
+            additional_flex_basis.value = '1/6';
             additional_flex_basis_percentage.value = '20';
         })
         onMounted(()=>{

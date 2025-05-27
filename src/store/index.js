@@ -143,6 +143,8 @@ import Asset_Sales from './PSS/Asset_Sales';
 import Sale_Fees from './PSS/Sale_Fees';
 import Sale_Prepayments from './PSS/Sale_Prepayments';
 import Sale_Prepayment_Alloc from './PSS/Sale_Prepayment_Alloc';
+import Sale_Penalty_Batches from './PSS/Penalty_Batches';
+import Sale_Penalties from './PSS/Sale_Penalties';
 
 
 import Default_Settings from './SET/Default_Settings';
@@ -185,7 +187,7 @@ export default createStore({
     Dividend_Rates,Dividend_Processing,Member_Templates,Risk_Classifications,Loan_Classifications,
 
     Asset_Makes,Asset_Models,Payment_Plans,Asset_Fees,Sale_Assets,Asset_Units,Unit_Categories,Asset_Clients,Sales_Agents,Unit_Reservations,Asset_Sales,Sale_Fees,
-    Sale_Prepayments,Sale_Prepayment_Alloc,
+    Sale_Prepayments,Sale_Prepayment_Alloc,Sale_Penalty_Batches,Sale_Penalties,
 
     Default_Settings,Companies,Branches,User_Rights,SMS_Integrations,Email_Integrations,Mpesa_Integrations,Mpesa_Transactions,Banks,SMS_Templates,Email_Templates
   },

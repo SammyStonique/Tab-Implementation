@@ -70,7 +70,6 @@ export default{
         }
       })
       .catch((error)=>{
-        console.log(error.message)
         store.dispatch('userData/updateState',{activeComponent:"Login"})
       })
 

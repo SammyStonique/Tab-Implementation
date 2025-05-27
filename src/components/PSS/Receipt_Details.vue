@@ -619,7 +619,7 @@ export default defineComponent({
             outstanding_balance.value = 0;
             ledComponentKey.value += 1;
             memComponentKey.value += 1;
-            flex_basis.value = '1/4';
+            flex_basis.value = '1/6';
             flex_basis_percentage.value = '25';
         })
         onMounted(()=>{

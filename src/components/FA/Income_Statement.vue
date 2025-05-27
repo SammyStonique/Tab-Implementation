@@ -2,7 +2,7 @@
     <div class="z-10">
         <PageStyleComponent :loader="loader" @showLoader="showLoader" @hideLoader="hideLoader">
         <template v-slot:body>
-            <div class="fixed bg-white w-[93%] z-50">
+            <div class="fixed bg-white w-[97%] z-50">
                 <FilterBar 
                     :addButtonLabel="addButtonLabel" 
                     :showAddButton="showAddButton"
