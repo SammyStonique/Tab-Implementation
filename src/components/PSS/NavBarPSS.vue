@@ -116,6 +116,36 @@
                         </button>
                     </div>
                     <div class="py-2 px-3 pl-4 w-full hover:bg-slate-500 hover:w-full">
+                        <button class="flex text-sm w-full" @click="openPage({'PSS':'Sales_Commissions'})">
+                            <i class="fa fa-coins pt-2 mr-2" aria-hidden="true"></i>
+                            <p class="">Sales Commissions</p>
+                        </button>
+                    </div>
+                    <div class="py-2 px-3 pl-4 w-full hover:bg-slate-500 hover:w-full">
+                        <button class="flex text-sm w-full" @click="openPage({'PSS':'Agents_Commissions'})">
+                            <i class="fa fa-coins pt-2 mr-2" aria-hidden="true"></i>
+                            <p class="">Sales Agents Commissions</p>
+                        </button>
+                    </div>
+                    <div class="py-2 px-3 pl-4 w-full hover:bg-slate-500 hover:w-full">
+                        <button class="flex text-sm w-full" @click="openPage({'PSS':'Sale_Documents'})">
+                            <i class="fa fa-file-image pt-2 mr-2" aria-hidden="true"></i>
+                            <p class="">Sale Documents</p>
+                        </button>
+                    </div>
+                    <div class="py-2 px-3 pl-4 w-full hover:bg-slate-500 hover:w-full">
+                        <button class="flex text-sm w-full" @click="openPage({'PSS':'Historical_Sales'})">
+                            <i class="fa fa-handshake pt-2 mr-2" aria-hidden="true"></i>
+                            <p class="">Historical Sales</p>
+                        </button>
+                    </div>
+                    <div class="py-2 px-3 pl-4 w-full hover:bg-slate-500 hover:w-full">
+                        <button class="flex text-sm w-full" @click="openPage({'PSS':'Sale_Arrears'})">
+                            <i class="fa fa-coins pt-2 mr-2" aria-hidden="true"></i>
+                            <p class="">Sale Arrears</p>
+                        </button>
+                    </div>
+                    <div class="py-2 px-3 pl-4 w-full hover:bg-slate-500 hover:w-full">
                         <button class="flex text-sm w-full" @click="openPage({'PSS':'Sale_Prepayments'})">
                             <i class="fa fa-list-ul pt-2 mr-2" aria-hidden="true"></i>
                             <p class="">Sale Prepayments</p>

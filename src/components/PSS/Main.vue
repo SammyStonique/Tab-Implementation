@@ -50,18 +50,18 @@ import Sale_Receipts from '@/components/PSS/Sale_Receipts.vue';
 
 import Asset_Sales from '@/components/PSS/Asset_Sales.vue';
 import Sale_Details from '@/components/PSS/Sale_Details.vue';
-import Historical_Loans from '@/components/MMS/Historical_Loans.vue';
-import Import_Historical_Loans from '@/components/MMS/Import_Historical_Loans.vue';
+import Historical_Sales from '@/components/PSS/Historical_Sales.vue';
+import Import_Historical_Sales from '@/components/PSS/Import_Historical_Sales.vue';
 import Sale_Profile from '@/components/PSS/Sale_Profile.vue';
-import Historical_Loan_Ledger from '@/components/MMS/Historical_Loan_Ledger.vue';
 import Receipt_Details from '@/components/PSS/Receipt_Details.vue';
 
-import Loan_Schedules from '@/components/MMS/Loan_Schedules.vue';
+import Sales_Commissions from '@/components/PSS/Sales_Commissions.vue';
+import Agents_Commissions from '@/components/PSS/Agents_Commissions.vue';
 import Penalty_Batches from '@/components/PSS/Penalty_Batches.vue';
 import Sale_Penalties from '@/components/PSS/Sale_Penalties.vue';
-import Loan_Documents from '@/components/MMS/Loan_Documents.vue';
+import Sale_Documents from '@/components/PSS/Sale_Documents.vue';
 import Sale_Fees from '@/components/PSS/Sale_Fees.vue';
-import Loan_Arrears from '@/components/MMS/Loan_Arrears.vue';
+import Sale_Arrears from '@/components/PSS/Sale_Arrears.vue';
 import Sale_Prepayments from '@/components/PSS/Sale_Prepayments.vue';
 import Prepayment_Allocations from '@/components/PSS/Prepayment_Allocations.vue';
 import Templates from '@/components/MMS/Templates.vue';
@@ -78,8 +78,8 @@ export default{
         PagesTab,
         Dashboard,
         Sale_Assets,Asset_Details,Asset_Profile,Asset_Types,Receipt_Details,Asset_Designs,Asset_Units,Unit_Categories,Clients,Vendors,Sales_Agents,Unit_Reservations,Reservation_Details,
-        Sale_Invoices,Sale_Receipts,Asset_Sales,Sale_Details,Sale_Profile,Payment_Plans,Loan_Schedules,Sale_Penalties,Penalty_Batches,Loan_Documents,Sale_Fees,Historical_Loans,Import_Historical_Loans,
-        Historical_Loan_Ledger,Loan_Arrears,Sale_Prepayments,Prepayment_Allocations,Templates,Design_Template,Risk_Classifications,Asset_Fees,
+        Sale_Invoices,Sale_Receipts,Asset_Sales,Sale_Details,Sale_Profile,Payment_Plans,Sales_Commissions,Agents_Commissions,Sale_Penalties,Penalty_Batches,Sale_Documents,Sale_Fees,Historical_Sales,Import_Historical_Sales,
+        Sale_Arrears,Sale_Prepayments,Prepayment_Allocations,Templates,Design_Template,Risk_Classifications,Asset_Fees,
 
         Default_Settings
     },

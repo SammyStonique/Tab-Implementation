@@ -3,15 +3,15 @@
         <PageComponent 
             :loader="loader" @showLoader="showLoader" @hideLoader="hideLoader"
             :addButtonLabel="addButtonLabel"
-            @handleAddNew="addNewSale"
+            :showAddButton="showAddButton"
             :searchFilters="searchFilters"
             :dropdownOptions="dropdownOptions"
             @handleDynamicOption="handleDynamicOption"
             @searchPage="searchAssetSales"
             @resetFilters="resetFilters"
-            @importData="importMembers"
             @removeItem="removeAssetSale"
             @removeSelectedItems="removeAssetSales"
+            @importData="importSales"
             @printList="printSalesList"
             :addingRight="addingRight"
             :removingRight="removingRight"
@@ -60,12 +60,11 @@
             </div>
         </PageComponent>
     </div>
-    
-    <MovableModal v-model:visible="transModalVisible" :title="transTitle" :modal_top="modal_top" :modal_left="modal_left" :modal_width="modal_width"
-        :loader="trans_modal_loader" @showLoader="showTransModalLoader" @hideLoader="hideTransModalLoader" @closeModal="closeTransModal">
+    <MovableModal v-model:visible="refModalVisible" :title="refTitle" :modal_top="modal_top" :modal_left="modal_left" :modal_width="modal_width"
+        :loader="ref_modal_loader" @showLoader="showRefModalLoader" @hideLoader="hideRefModalLoader" @closeModal="closeRefModal">
         <DynamicForm 
-            :fields="formFields" :flex_basis="flex_basis" :flex_basis_percentage="flex_basis_percentage" 
-            :displayButtons="displayButtons" @handleSubmit="approveSale" @handleReset="handleReset"
+            :fields="refFormFields" :flex_basis="flex_basis" :flex_basis_percentage="flex_basis_percentage" 
+            :displayButtons="displayButtons" @handleSubmit="postSaleBalance" @handleReset="handleRefReset"
         />
     </MovableModal>
 
@@ -77,6 +76,7 @@ import { ref, computed, onMounted, onBeforeMount} from 'vue';
 import PageComponent from '@/components/PageComponent.vue'
 import { useStore } from "vuex";
 import { useToast } from "vue-toastification";
+import { useDateFormatter } from '@/composables/DateFormatter';
 import PrintJS from 'print-js';
 import MovableModal from '@/components/MovableModal.vue';
 import DynamicForm from '@/components/NewDynamicForm.vue';
@@ -86,22 +86,23 @@ import LoanSchedules from "@/components/LoanSchedules.vue";
 import Swal from 'sweetalert2';
 
 export default{
-    name: 'Asset_Sales',
+    name: 'Historical_Sales',
     components:{
-        PageComponent,MovableModal,SearchableDropdown,DynamicForm,LoanSchedules,DynamicTable
+        PageComponent,MovableModal,SearchableDropdown,DynamicForm,DynamicTable,LoanSchedules
     },
     setup(){
-
         const store = useStore();
         const toast = useToast();
+        const { formatDate } = useDateFormatter();
+        const current_date = new Date();
         const loader = ref('');
+        const ledComponentKey = ref(0);
+        const propComponentKey = ref(0);
         const displayButtons = ref(true);
-        const unitComponentKey = ref(0);
-        const catSearchComponentKey = ref(0);
         const trans_modal_loader = ref('none');
-        const member_status = ref('');
-        const exit_date = ref('');
+        const ref_modal_loader = ref('none');
         const idField = 'asset_sale_id';
+        const showAddButton = ref(false);
         const addButtonLabel = ref('New Sale');
         const addingRight = ref('Adding Asset Sales');
         const removingRight = ref('Deleting Asset Sales');
@@ -118,22 +119,23 @@ export default{
         const currentPage = ref(1);
         const showNextBtn = ref(false);
         const showPreviousBtn = ref(false);
-        const detailsTitle = ref('Sale Documents');
+        const detailsTitle = ref('Application Documents');
         const transTitle = ref('Approve/Reject Sale');
-        const loanScheduleRows = ref([]);
-        const saleItemsRows = ref([]);
-        const showActions = ref(false);
-        const tabs = ref(['Repayment Schedule','Sold Units']);
-        const activeTab = ref(0);
-        const appID = ref(null);
+        const refTitle = ref('Post Sale Balance');
         const transModalVisible = ref(false);
+        const refModalVisible = ref(false);
         const dropdownWidth = ref("500px")
         const modal_top = ref('200px');
         const modal_left = ref('400px');
-        const modal_width = ref('45vw');
+        const modal_width = ref('30vw');
         const flex_basis = ref('');
         const flex_basis_percentage = ref('');
         const showModal = ref(false);
+        const tabs = ref(['Repayment Schedule','Sold Units']);
+        const activeTab = ref(0);
+        const appID = ref(null);
+        const loanScheduleRows = ref([]);
+        const saleItemsRows = ref([]);
         const tableColumns = ref([
             {type: "checkbox"},
             {label: "Date", key:"date"},
@@ -147,9 +149,7 @@ export default{
             {label: "Exempt", key:"exempt_penalty"},
         ])
         const actions = ref([
-            {name: 'edit', icon: 'fa fa-edit', title: 'Edit Sale', rightName: 'Editing Asset Sales'},
             {name: 'view', icon: 'fa fa-file-pdf-o', title: 'View Sale', rightName: 'Viewing Asset Sales'},
-            {name: 'approve/reject', icon: 'fa fa-check-circle', title: 'Approve/Reject Sale', rightName: 'Approving Asset Sales'},
             {name: 'delete', icon: 'fa fa-trash', title: 'Delete Sale', rightName: 'Deleting Asset Sales'},
         ]);
         const itemColumns = ref([
@@ -160,8 +160,9 @@ export default{
             {label: "Total", key:"sale_total_amount", type: "number", editable: false},
         ]);
         const companyID = computed(()=> store.state.userData.company_id);
-        const saleID = ref("");
-        const saleAmount = ref(0);
+        const userID = computed(()=> store.state.userData.user_id);
+        const cashbookArr = computed(() => store.state.Ledgers.ledgerArr);
+        const cashbookID = ref("");
         const client_name_search = ref('');
         const client_code_search = ref("");
         const asset_name_search = ref('');
@@ -169,7 +170,7 @@ export default{
         const sale_code_search = ref("");
         const from_date_search = ref("");
         const to_date_search = ref("");
- 
+        const approval_status_search = ref("");
         const searchFilters = ref([
             {type:'text', placeholder:"Sale Code...", value: sale_code_search, width:32,},
             {type:'text', placeholder:"Asset Code...", value: asset_code_search, width:32,},
@@ -178,18 +179,23 @@ export default{
             {type:'text', placeholder:"Client Name...", value: client_name_search, width:48,},
             {type:'date', title: "From Date", placeholder:"From Date...", value: from_date_search, width:32,},
             {type:'date', title: "To Date",placeholder:"To Date...", value: to_date_search, width:32,},
+            {
+                type:'dropdown', placeholder:"Status..", value: approval_status_search, width:32,
+                options: [{text:'Active',value:'Active'},{text:'Defaulted',value:'Defaulted'},{text:'Cleared',value:'Cleared'}]
+            },
 
         ]);
+
+        const importSales = () =>{
+            store.commit('pageTab/ADD_PAGE', {'PSS':'Import_Historical_Sales'})
+            store.state.pageTab.pssActiveTab = 'Import_Historical_Sales';
+        }
         const handleSelectionChange = (ids) => {
             selectedIds.value = ids;
-        };
-        const importMembers = () =>{
-            
         };
         const formFields = ref([]);
         const updateFormFields = () => {
             formFields.value = [
-                { type: 'dropdown', name: 'approval_status',label: "Status", value: '', placeholder: "", required: true, options: [{ text: 'Approve', value: 'Approved' }, { text: 'Reject', value: 'Rejected' }] },
             ]
         };
         const handleReset = () =>{
@@ -197,7 +203,6 @@ export default{
                 formFields.value[i].value = '';
             }
         }
-
         const removeAssetSale = async() =>{
             if(selectedIds.value.length == 1){
                 let formData = {
@@ -255,36 +260,10 @@ export default{
         const hideTransModalLoader = () =>{
             trans_modal_loader.value = "none";
         }
-        const approveSale = async() =>{
-            showTransModalLoader();
-            let formData = {
-                asset_sale: saleID.value,
-                sale_amount: saleAmount.value,
-                approval_status: formFields.value[0].value,
-                company: companyID.value
-            }
 
-            axios.post(`api/v1/approve-asset-sale/`,formData)
-            .then((response)=>{
-            if(response.data.msg == "Success"){
-                hideTransModalLoader();
-                closeTransModal();
-                toast.success("Success")
-                searchAssetSales();
-            }else{
-                toast.error("Error");
-                hideTransModalLoader();
-            }                   
-            })
-            .catch((error)=>{
-                toast.error(error.message);
-                hideTransModalLoader();
-            })
-        };
         const closeTransModal = () =>{
             transModalVisible.value = false;
             saleID.value = null;
-            saleAmount.value = 0;
             hideTransModalLoader();
         };
         const showLoader = () =>{
@@ -293,7 +272,7 @@ export default{
         const hideLoader = () =>{
             loader.value = "none";
         }
-
+       
         const searchAssetSales = () =>{
             showLoader();
             showNextBtn.value = false;
@@ -307,7 +286,7 @@ export default{
                 client_code: client_code_search.value,
                 from_date: from_date_search.value,
                 to_date: to_date_search.value,
-                sale_type: "New",
+                sale_type: "Historical",
                 company_id: companyID.value,
                 page_size: selectedValue.value
             } 
@@ -339,9 +318,8 @@ export default{
             searchAssetSales(selectedValue.value);
         };
         const resetFilters = () =>{
-            catSearchComponentKey.value += 1;;
-            selectedValue.value = 50;
             currentPage.value = 1;
+            selectedValue.value = 50;
             client_name_search.value = "";
             asset_name_search.value = "";
             from_date_search.value = "";
@@ -349,6 +327,7 @@ export default{
             asset_code_search.value = "";
             sale_code_search.value = "";
             client_code_search.value = "";
+            propComponentKey.value += 1;
             searchAssetSales();
         }
         const loadPrev = () =>{
@@ -380,48 +359,13 @@ export default{
             currentPage.value = pageCount.value;
             searchAssetSales();
             // scrollToTop();
-        }
+        };
+  
         const addNewSale = async() =>{
-            store.commit('Asset_Sales/initializeStore');
-            await store.dispatch('Asset_Sales/updateState', {selectedSale: null, selectedAgent: null, selectedPlan: null, selectedAsset: null, selectedClient: null,saleCharges:[],saleUnits:[],assetSchedules:[], isEditing:false});
-            await store.dispatch('Asset_Fees/updateState', {saleFeeArray: []})
-            await store.dispatch("Asset_Units/updateState", {unitArray: []})
-            await store.dispatch("Payment_Plans/updateState", {salePlanArray: []})
-            store.commit('pageTab/ADD_PAGE', {'PSS':'Sale_Details'});
-            store.state.pageTab.pssActiveTab = 'Sale_Details';          
+         
         }
         const handleActionClick = async(rowIndex, action, row) =>{
-            if( action == 'edit'){
-                const assetStatus = row['approval_status']
-                if(assetStatus == 'Pending'){
-                    await store.dispatch('Asset_Sales/updateState', {selectedSale: null, selectedAgent: null, selectedPlan: null, selectedAsset: null, selectedClient: null,saleCharges:[],saleUnits:[],assetSchedules:[], isEditing:false});
-                    const saleID = row[idField];
-                    let formData = {
-                        company: companyID.value,
-                        asset_sale: saleID
-                    }
-                    await store.dispatch('Asset_Sales/fetchAssetSale',formData).
-                    then(()=>{
-                        store.commit('pageTab/ADD_PAGE', {'PSS':'Sale_Details'})
-                        store.state.pageTab.pssActiveTab = 'Sale_Details';
-                        
-                    })
-                }else{
-                    toast.error(`Cannot Edit ${assetStatus} Sale`)
-                }
-            }else if(action == 'approve/reject'){
-                const assetStatus = row['approval_status']
-                if(assetStatus == 'Pending'){
-                    updateFormFields();
-                    saleID.value = row['asset_sale_id'];
-                    saleAmount.value = row['total_amount'];
-                    transModalVisible.value = true;
-                    flex_basis.value = '1/2';
-                    flex_basis_percentage.value = '50';
-                }else{
-                    toast.error(`Sale Already ${assetStatus}`)
-                }
-            }else if(action == 'delete'){
+            if(action == 'delete'){
                 const saleID = [row[idField]];
                 let formData = {
                     company: companyID.value,
@@ -447,18 +391,16 @@ export default{
                 }else{
                     toast.error(`Cannot View ${applicationStatus} Sale`)
                 }
-            }else if(action == 'transfer'){
-                hideTransModalLoader();
-                saleID.value = row['member_id'];
-                transModalVisible.value = true;
             }
         };
         const dropdownOptions = ref([
             {label: 'Exempt Penalty', action: 'exempt-penalty'},
             {label: 'Unexempt Penalty', action: 'unexempt-penalty'},
             {label: 'Email Sale Statement', action: 'send-email'},
+            {label: 'Post Sale Balance', action: 'post-balance'},
+            {label: 'Unpost Sale Balance', action: 'unpost-balance'},
         ]);
-        const handleDynamicOption = async(option) =>{
+        const handleDynamicOption = (option) =>{
             if( option == 'exempt-penalty'){
                 let formData = {
                     asset_sale: selectedIds.value,
@@ -569,7 +511,7 @@ export default{
                     date_to: to_date_search.value,
                     company: companyID.value
                 }
-                await axios.post('api/v1/asset-sale-statement-email/',formData).
+                axios.post('api/v1/asset-sale-statement-email/',formData).
                 then((response)=>{
                     if(response.data.msg == "Success"){
                         toast.success("Email Sent!")
@@ -585,6 +527,59 @@ export default{
                 .finally(()=>{
                     hideLoader();
                 })
+            }else if( option == 'post-balance'){
+                refModalVisible.value = true;
+                handleRefReset();                             
+            }else if( option == 'unpost-balance'){
+                let formData = {
+                    asset_sale: selectedIds.value,
+                    company: companyID.value
+                }
+                Swal.fire({
+                    title: "Are you sure?",
+                    text: `Do you wish to Unpost Balance?`,
+                    type: 'warning',
+                    showCloseButton: true,
+                    showCancelButton: true,
+                    confirmButtonText: 'Yes, Unpost!',
+                    cancelButtonText: 'Cancel!',
+                    customClass: {
+                        confirmButton: 'swal2-confirm-custom',
+                        cancelButton: 'swal2-cancel-custom',
+                    },
+                    showLoaderOnConfirm: true,
+                    }).then((result) => {
+                    if (result.value) {
+                        axios.post(`api/v1/unpost-historical-asset-sale-balance/`,formData)
+                        .then((response)=>{
+                        if(response.data.msg == 'Success'){
+                            Swal.fire("Balance Unposted Succesfully!", {
+                                icon: "success",
+                            }); 
+                            searchAssetSales();
+                        }else if(response.data.msg == 'Failed'){
+                            Swal.fire("Balance Not Unposted!", {
+                                icon: "warning",
+                            });
+                        }
+                        else{
+                            Swal.fire({
+                                title: "Error Unposting Balance",
+                                icon: "warning",
+                            });
+                        }                   
+                        })
+                        .catch((error)=>{
+                            console.log(error.message);
+                            Swal.fire({
+                                title: error.message,
+                                icon: "warning",
+                            });
+                        })
+                    }else{
+                        Swal.fire(`Balance(s) has not been Unposted!`);
+                    }
+                })                 
             }
         };
         const handleShowDetails = async(row) =>{
@@ -631,13 +626,14 @@ export default{
         const printSalesList = () =>{
             showLoader();
             let formData = {
-                sale_code: sale_code_search.value,
                 asset_name: asset_name_search.value,
                 asset_code: asset_code_search.value,
+                sale_code: sale_code_search.value,
                 client_name: client_name_search.value,
                 client_code: client_code_search.value,
                 from_date: from_date_search.value,
                 to_date: to_date_search.value,
+                sale_type: "Historical",
                 company_id: companyID.value,
                 page_size: selectedValue.value
             } 
@@ -659,22 +655,83 @@ export default{
                 hideLoader();
             })
         };
-        const closeModal1 = async() =>{
-            propModalVisible.value = false;
-            handleReset1();
+        const fetchLedgers = async() =>{
+            await store.dispatch('Ledgers/fetchLedgers', {company:companyID.value})
+        };
+        const handleSelectedLedger = async(option) =>{
+            await store.dispatch('Ledgers/handleSelectedLedger', option)
+            cashbookID.value = store.state.Ledgers.ledgerID;
+        };
+        const clearSelectedLedger = async() =>{
+            await store.dispatch('Ledgers/updateState', {ledgerID: ''});
+            cashbookID.value = ""
+        };
+        const refFormFields = ref([
+            {  
+                type:'search-dropdown', label:"Posting Account", value: cashbookID.value, componentKey: ledComponentKey,
+                selectOptions: cashbookArr, optionSelected: handleSelectedLedger, required: true,
+                searchPlaceholder: 'Select Posting Account...', dropdownWidth: '500px', updateValue: "",
+                fetchData: fetchLedgers(), clearSearch: clearSelectedLedger
+            },
+       ]);
+        const handleRefReset = () =>{
+            for(let i=0; i < refFormFields.value.length; i++){
+                refFormFields.value[i].value = '';
+            }
+            cashbookID.value = null;
+            ledComponentKey.value +=1;
         }
+        const showRefModalLoader = () =>{
+            ref_modal_loader.value = "block";
+        }
+        const hideRefModalLoader = () =>{
+            ref_modal_loader.value = "none";
+        }
+        const postSaleBalance = async() =>{
+            showRefModalLoader();
+            let formData = {
+                ledger: cashbookID.value,
+                asset_sale: selectedIds.value,
+                company: companyID.value
+            }
+            axios.post(`api/v1/post-historical-asset-sale-balance/`,formData)
+            .then((response)=>{
+                if(response.data.msg == "Success"){
+                    toast.success("Success")
+                    closeRefModal();
+                    searchAssetSales();
+                }else{
+                    toast.error("Error Posting Sale Balance")
+                }                   
+            })
+            .catch((error)=>{
+                console.log(error.message);
+                toast.error(error.message)
+                hideRefModalLoader();
+            })
+            .finally(()=>{
+                hideRefModalLoader();
+            })
+        
+        };
+        const closeRefModal = () =>{
+            refModalVisible.value = false;
+            handleRefReset();
+            hideRefModalLoader();
+        };
         onBeforeMount(()=>{
             searchAssetSales();
             
         })
         return{
-            searchAssetSales,resetFilters, addButtonLabel, searchFilters, tableColumns, salesList,dropdownWidth,displayButtons,
-            currentPage,propResults, propArrLen, propCount, pageCount, showNextBtn, showPreviousBtn,flex_basis,flex_basis_percentage,
-            loadPrev, loadNext, firstPage, lastPage, idField, actions, handleActionClick,showDetails,detailsTitle,hideDetails,
-            submitButtonLabel, showModal, addNewSale, showLoader, loader, hideLoader, importMembers, removeAssetSale, removeAssetSales,
+            showAddButton,searchAssetSales,resetFilters, addButtonLabel, searchFilters, tableColumns, salesList,dropdownWidth,displayButtons,importSales,
+            currentPage,propResults, propArrLen, propCount, pageCount, showNextBtn, showPreviousBtn,flex_basis,flex_basis_percentage,formFields,handleReset,
+            loadPrev, loadNext, firstPage, lastPage, idField, actions, handleActionClick,showDetails,handleShowDetails,detailsTitle,hideDetails,
+            submitButtonLabel, showModal, showLoader, loader, hideLoader, removeAssetSale, removeAssetSales,
             handleSelectionChange,addingRight,removingRight,rightsModule,printSalesList,selectSearchQuantity,selectedValue,
-            modal_left,modal_top,modal_width,trans_modal_loader,formFields,transModalVisible,transTitle,showTransModalLoader,hideTransModalLoader,approveSale,closeTransModal,
-            handleReset,dropdownOptions,handleDynamicOption,member_status,exit_date,handleShowDetails,loanScheduleRows,saleItemsRows,itemColumns,showActions,tabs,selectTab,activeTab
+            modal_left,modal_top,modal_width,trans_modal_loader,transModalVisible,transTitle,showTransModalLoader,hideTransModalLoader,closeTransModal,
+            dropdownOptions,handleDynamicOption,refTitle,refFormFields,refModalVisible,ref_modal_loader,handleRefReset,showRefModalLoader,hideRefModalLoader,closeRefModal,
+            postSaleBalance,tabs,activeTab,loanScheduleRows,itemColumns,saleItemsRows,selectTab
         }
     }
 };
