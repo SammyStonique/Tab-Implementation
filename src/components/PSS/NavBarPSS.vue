@@ -146,11 +146,24 @@
                         </button>
                     </div>
                     <div class="py-2 px-3 pl-4 w-full hover:bg-slate-500 hover:w-full">
+                        <button class="flex text-sm w-full" @click="openPage({'PSS':'Sale_Transfers'})">
+                            <i class="fa fa-exchange-alt pt-2 mr-2" aria-hidden="true"></i>
+                            <p class="">Sale Transfers</p>
+                        </button>
+                    </div>
+                    <div class="py-2 px-3 pl-4 w-full hover:bg-slate-500 hover:w-full">
+                        <button class="flex text-sm w-full" @click="openPage({'PSS':'Sale_Refunds'})">
+                            <i class="fa fa-undo-alt pt-2 mr-2" aria-hidden="true"></i>
+                            <p class="">Sale Refunds</p>
+                        </button>
+                    </div>
+                    <div class="py-2 px-3 pl-4 w-full hover:bg-slate-500 hover:w-full">
                         <button class="flex text-sm w-full" @click="openPage({'PSS':'Sale_Prepayments'})">
                             <i class="fa fa-list-ul pt-2 mr-2" aria-hidden="true"></i>
                             <p class="">Sale Prepayments</p>
                         </button>
                     </div>
+
                 </div>
             </div>
             <div class="web-links dropdown w-36">

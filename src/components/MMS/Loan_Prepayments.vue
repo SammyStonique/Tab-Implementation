@@ -160,7 +160,7 @@ export default{
                 type:'search-dropdown', label:"Schedule Item", value: scheduleID.value, componentKey: invComponentKey,
                 selectOptions: schedulesArray, optionSelected: handleSelectedItem, required: true,
                 searchPlaceholder: 'Select Item...', dropdownWidth: '450px', updateValue: "",
-                fetchData: fetchLoanItems(), clearSearch: clearSelectedItem() 
+                clearSearch: clearSelectedItem() 
             },
             { type: 'date', name: 'date',label: "Date", value: formatDate(current_date), required: true },
             { type: 'number', name: 'allocated_amount',label: "Amount", value: 0, required: true, method: checkPrepaymentLimit },

@@ -66,7 +66,8 @@ import Sale_Prepayments from '@/components/PSS/Sale_Prepayments.vue';
 import Prepayment_Allocations from '@/components/PSS/Prepayment_Allocations.vue';
 import Templates from '@/components/MMS/Templates.vue';
 import Design_Template from '@/components/MMS/Design_Template.vue';
-import Risk_Classifications from '@/components/MMS/Risk_Classifications.vue';
+import Sale_Transfers from '@/components/PSS/Sale_Transfers.vue';
+import Sale_Refunds from '@/components/PSS/Sale_Refunds.vue';
 
 
 import Default_Settings from '@/components/SET/Default_Settings.vue';
@@ -79,7 +80,7 @@ export default{
         Dashboard,
         Sale_Assets,Asset_Details,Asset_Profile,Asset_Types,Receipt_Details,Asset_Designs,Asset_Units,Unit_Categories,Clients,Vendors,Sales_Agents,Unit_Reservations,Reservation_Details,
         Sale_Invoices,Sale_Receipts,Asset_Sales,Sale_Details,Sale_Profile,Payment_Plans,Sales_Commissions,Agents_Commissions,Sale_Penalties,Penalty_Batches,Sale_Documents,Sale_Fees,Historical_Sales,Import_Historical_Sales,
-        Sale_Arrears,Sale_Prepayments,Prepayment_Allocations,Templates,Design_Template,Risk_Classifications,Asset_Fees,
+        Sale_Arrears,Sale_Prepayments,Prepayment_Allocations,Templates,Design_Template,Sale_Transfers,Asset_Fees,Sale_Refunds,
 
         Default_Settings
     },

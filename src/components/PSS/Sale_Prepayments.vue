@@ -69,7 +69,7 @@ export default{
         const invComponentKey = ref(0);
         const title = ref('Prepayment Allocation');
         const companyID = computed(()=> store.state.userData.company_id);
-        const applicationID = ref("");
+        const saleID = ref("");
         const prepaymentID = ref("");
         const prepaymentAmount = ref(0);
         const prepaymentAllocError = ref(false);
@@ -78,7 +78,7 @@ export default{
         const scheduleDueAmount = ref(0);
         const itemType = ref('');
         const scheduleInstallment = ref('');
-        const schedulesArray = computed(() => store.state.Sale_Prepayments.loanItems);
+        const schedulesArray = computed(() => store.state.Sale_Prepayments.saleItems);
         const idField = 'sale_prepayment_id';
         const selectedIds = ref([]);
         const appModalVisible = ref(false);
@@ -104,6 +104,7 @@ export default{
             {label: "Client#", key:"client_code",type: "text", editable: false},
             {label: "Client Name", key:"client_name",type: "text", editable: false},
             {label: "Sale#", key:"sale_code",type: "text", editable: false},
+            {label: "Asset Name", key:"asset_name",type: "text", editable: false},
             {label: "Receipt", key:"receipt_no",type: "text", editable: false},
             {label: "Amount", key: "total_amount", type: "number", editable: false},
             {label: "Allocated", key: "allocated_amount", type: "number", editable: false},
@@ -118,7 +119,7 @@ export default{
         const posted_search = ref("");
         const from_date_search = ref("");
         const to_date_search = ref("");
-        const fetchLoanItems = async(saleID) =>{
+        const fetchSaleItems = async(saleID) =>{
             await store.dispatch('Sale_Prepayments/fetchSaleItems', {company:companyID.value, asset_sale: saleID,date: ""})
         };
         const handleSelectedItem = async(option) =>{
@@ -160,7 +161,7 @@ export default{
                 type:'search-dropdown', label:"Schedule Item", value: scheduleID.value, componentKey: invComponentKey,
                 selectOptions: schedulesArray, optionSelected: handleSelectedItem, required: true,
                 searchPlaceholder: 'Select Item...', dropdownWidth: '450px', updateValue: "",
-                fetchData: fetchLoanItems(), clearSearch: clearSelectedItem() 
+                clearSearch: clearSelectedItem() 
             },
             { type: 'date', name: 'date',label: "Date", value: formatDate(current_date), required: true },
             { type: 'number', name: 'allocated_amount',label: "Amount", value: 0, required: true, method: checkPrepaymentLimit },
@@ -188,9 +189,9 @@ export default{
                         handleReset();
                         flex_basis.value = '1/3';
                         flex_basis_percentage.value = '33.333';
-                        applicationID.value = row['loan_application'];
-                        prepaymentID.value = row["loan_prepayment_id"]
-                        fetchLoanItems(applicationID.value);
+                        saleID.value = row['asset_sale_id'];
+                        prepaymentID.value = row["sale_prepayment_id"]
+                        fetchSaleItems(saleID.value);
                         prepaymentAmount.value = dueAmount;
                     }else{
                         toast.error("Prepayment Is Fully Allocated")

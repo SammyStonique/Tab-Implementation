@@ -91,9 +91,9 @@ export default{
         const tableColumns = ref([
             {type: "checkbox"},
             {label: "Date", key:"date",type: "text", editable: false},
-            {label: "Member#", key:"member_number",type: "text", editable: false},
-            {label: "Member Name", key:"member_name",type: "text", editable: false},
-            {label: "Loan#", key:"loan_number",type: "text", editable: false},
+            {label: "Client#", key:"client_code",type: "text", editable: false},
+            {label: "Client Name", key:"client_name",type: "text", editable: false},
+            {label: "Sale#", key:"sale_code",type: "text", editable: false},
             {label: "Description", key:"description",type: "text", editable: false},
             {label: "Allocated", key: "allocated_amount", type: "number", editable: false},
             {label: "Receipt", key:"receipt_no",type: "text", editable: false},
@@ -103,14 +103,14 @@ export default{
         const actions = ref([
             {name: 'delete', icon: 'fa fa-trash', title: 'Delete Allocation', rightName: 'Deleting Prepayment Allocations'},
         ])
-        const member_name_search = ref("");
-        const member_number_search = ref("");
+        const client_name_search = ref("");
+        const client_code_search = ref("");
         const from_date_search = ref("");
         const to_date_search = ref("");
 
         const searchFilters = ref([
-            {type:'text', placeholder:"Client Code...", value: member_number_search, width:36},
-            {type:'text', placeholder:"Client Name...", value: member_name_search, width:64},
+            {type:'text', placeholder:"Client Code...", value: client_code_search, width:36},
+            {type:'text', placeholder:"Client Name...", value: client_name_search, width:64},
             {type:'date', placeholder:"From Date...", value: from_date_search, width:36, title: "Date From Search"},
             {type:'date', placeholder:"To Date...", value: to_date_search, width:36, title: "Date To Search"},
             
@@ -207,8 +207,8 @@ export default{
             showNextBtn.value = false;
             showPreviousBtn.value = false;
             let formData = {
-                client_code: member_number_search.value,
-                client_name: member_name_search.value,
+                client_code: client_code_search.value,
+                client_name: client_name_search.value,
                 from_date: from_date_search.value,
                 to_date: to_date_search.value,
                 company: companyID.value,

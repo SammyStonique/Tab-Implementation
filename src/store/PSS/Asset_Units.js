@@ -6,6 +6,10 @@ const state = {
   unitArr: [],
   unitArray: [],
   unitID: '',
+  itemsList: [],
+  itemArr: [],
+  itemArray: [],
+  itemID: '',
   unitNumber: '',
   unitPrice: 0,
   selectedUnit: null,
@@ -20,6 +24,10 @@ const mutations = {
     state.unitArr = [];
     state.unitArray = [];
     state.unitID = "";
+    state.itemsList = [];
+    state.itemArr = [];
+    state.itemArray = [];
+    state.itemID = "";
     state.unitNumber = "";
     state.unitPrice = 0;
     state.selectedAsset = null;
@@ -32,6 +40,9 @@ const mutations = {
   },
   LIST_UNITS(state, units) {
     state.unitsList = units;
+  },
+  LIST_SALE_ITEMS(state, units) {
+    state.itemsList = units;
   },
   UNITS_ARRAY(state, units){
     state.unitArray = units;
@@ -89,6 +100,20 @@ const actions = {
     })
     
   },
+  fetchSaleItems({ commit,state }, formData) {
+    state.itemArr = [];
+    axios.post(`api/v1/get-asset-sale-items/`,formData)
+    .then((response)=>{
+      for(let i=0; i< response.data.length; i++){
+        state.itemArr.push((response.data[i].unit_number + " - " + response.data[i].asset_sale.asset.name + " (" + response.data[i].sale_total_amount+ ")"));
+      }
+      commit('LIST_SALE_ITEMS', response.data);
+    })
+    .catch((error)=>{
+      console.log(error.message);
+    })
+    
+  },
   fetchAssetUnit({ commit,state }, formData) {
     axios.post(`api/v1/get-asset-units/`,formData)
     .then((response)=>{
@@ -121,6 +146,15 @@ const actions = {
         }
     }
     commit('UNITS_ARRAY', state.unitArray);
+      
+  },
+
+  handleSelectedItem({ commit, state }, option){
+    state.itemArray = []
+    const selectedItem = state.itemsList.find(unit => (unit.unit_number + " - " + unit.asset_sale.asset.name + " (" + unit.sale_total_amount+ ")") === option);
+    if (selectedItem) {
+        state.itemID = selectedItem.asset_sale_item_id;
+    }
       
   },
 

@@ -410,33 +410,10 @@ export default defineComponent({
             }
         };
         const selectPrepaymentItem = (value) =>{
-            if(value == "Savings"){
+            if(value == "Sale"){
                 additionalFields.value[3].disabled = '';
-                additionalFields.value[4].disabled = 'disabled-div';
-                additionalFields.value[5].disabled = 'disabled-div';
                 additionalFields.value[3].hidden = false;
-                additionalFields.value[4].hidden = true;
-                additionalFields.value[5].hidden = true;
                 lonComponentKey.value += 1;
-                shaComponentKey.value += 1;
-            }else if(value == "Shares"){
-                additionalFields.value[4].disabled = '';
-                additionalFields.value[3].disabled = 'disabled-div';
-                additionalFields.value[5].disabled = 'disabled-div';
-                additionalFields.value[4].hidden = false;
-                additionalFields.value[3].hidden = true;
-                additionalFields.value[5].hidden = true;
-                lonComponentKey.value += 1;
-                savComponentKey.value += 1;
-            }else if(value == "Loan"){
-                additionalFields.value[5].disabled = '';
-                additionalFields.value[4].disabled = 'disabled-div';
-                additionalFields.value[3].disabled = 'disabled-div';
-                additionalFields.value[4].hidden = true;
-                additionalFields.value[3].hidden = true;
-                additionalFields.value[5].hidden = false;
-                savComponentKey.value += 1;
-                shaComponentKey.value += 1;
             }
         };
 
@@ -464,13 +441,13 @@ export default defineComponent({
         const updateAdditionalFields = () =>{
             additionalFields.value = [
                 { type: 'number', name: 'prepayment_amount',label: "Prepayment Amount", value: prepaymentAmount.value, disabled: true },
-                { type: 'dropdown', name: 'item',label: "Prepay To", value: '', placeholder: "", required: true, options: [{ text: 'Savings', value: 'Savings' }, { text: 'Shares', value: 'Shares' }, { text: 'Loan', value: 'Loan' }], method: selectPrepaymentItem },
+                { type: 'dropdown', name: 'item',label: "Prepay To", value: '', placeholder: "", required: true, options: [{ text: 'Sale', value: 'Sale' }], method: selectPrepaymentItem },
                 { type: 'text', name: 'prepayment_amount',label: "Allocated Amount", value: '0', required: true, method: checkPrepaymentLimit },
                 {  
                     type:'search-dropdown', label:"Asset Sales", value: '', componentKey: lonComponentKey, disabled:'disabled-div',
                     selectOptions: salesArray, optionSelected: handleAssetSale, required: false,
                     searchPlaceholder: 'Select Sale...', dropdownWidth: '500px', hidden: true,
-                    fetchData: store.dispatch('Asset_Sales/fetchAssetSales', {company:companyID.value,customer: clientID.value}), clearSearch: clearAssetSale
+                    fetchData: store.dispatch('Asset_Sales/fetchAssetSales', {company:companyID.value, client: clientID.value}), clearSearch: clearAssetSale
                 },
             ]
         };
