@@ -107,6 +107,7 @@ export default{
         ])
         const actions = ref([
             {name: 'edit', icon: 'fa fa-edit', title: 'Edit Reservation', rightName: 'Editing Unit Reservations'},
+            {name: 'convert', icon: 'fa fa-sign-in', title: 'Convert To Sale', rightName: 'Converting Unit Reservations'},
             {name: 'delete', icon: 'fa fa-trash', title: 'Delete Reservation', rightName: 'Deleting Unit Reservations'},
         ])
         const companyID = computed(()=> store.state.userData.company_id);
@@ -304,18 +305,37 @@ export default{
                 })
             }else if(action == 'delete'){
                 const reservationID = [row[idField]];
-                let formData = {
-                    company: companyID.value,
-                    unit_reservation: reservationID
+                const reservationStatus = row['status']
+                if(reservationStatus != 'Sold'){
+                    let formData = {
+                        company: companyID.value,
+                        unit_reservation: reservationID
+                    }
+                    await store.dispatch('Unit_Reservations/deleteUnitReservation',formData).
+                    then(()=>{
+                        searchReservations();
+                    })
+                }else{
+                    toast.error(`Cannot Delete ${reservationStatus} Reservation`);
                 }
-                await store.dispatch('Unit_Reservations/deleteUnitReservation',formData).
-                then(()=>{
-                    searchReservations();
-                })
-            }else if(action == 'transfer'){
-                hideTransModalLoader();
-                reservationID.value = row['unit_reservation_id'];
-                transModalVisible.value = true;
+            }else if( action == 'convert'){
+                const reservationStatus = row['status']
+                if(reservationStatus == 'Active'){
+                    await store.dispatch('Asset_Sales/updateState', {selectedSale: null, selectedAgent: null, selectedPlan: null, selectedAsset: null, selectedClient: null,saleCharges:[],saleUnits:[],assetSchedules:[], isEditing:false});
+                    const reservationID = row[idField];
+                    let formData = {
+                        company: companyID.value,
+                        unit_reservation: reservationID
+                    }
+                    await store.dispatch('Asset_Sales/fetchUnitReservation',formData).
+                    then(()=>{
+                        store.commit('pageTab/ADD_PAGE', {'PSS':'Sale_Details'})
+                        store.state.pageTab.pssActiveTab = 'Sale_Details';
+                        
+                    })
+                }else{
+                    toast.error(`Cannot Convert ${reservationStatus} Reservation To Sale`);
+                }
             }
         };
 

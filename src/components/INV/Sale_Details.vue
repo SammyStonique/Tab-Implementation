@@ -222,7 +222,11 @@ export default defineComponent({
                 { type: 'text', name: 'customer',label: "Customer", value: 'Walk-In Customer', required: true,},
                 { type: 'text', name: 'phone_number',label: "Phone No", value: '0', required: true,},
                 { type: 'text', name: 'reference_no',label: "Reference No", value: '', required: true,},
-                { type: 'number', name: 'total_amount',label: "Amount", value: receipt_totals.value || 0, required: true, method: calculateBalance },                
+                { type: 'number', name: 'total_amount',label: "Amount", value: receipt_totals.value || 0, required: true, method: calculateBalance },
+                {required: false},  
+                {required: false},     
+                {required: false},              
+                {required: false},                       
             ]
         };
 
@@ -452,7 +456,7 @@ export default defineComponent({
         onBeforeMount(()=>{ 
             store.dispatch('Items_Catalog/updateState', { lineItemsArray: []})
             updateFormFields();
-            flex_basis.value = '1/5';
+            flex_basis.value = '1/6';
             flex_basis_percentage.value = '20';
         })
         // onMounted(async()=>{

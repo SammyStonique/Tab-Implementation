@@ -55,6 +55,7 @@ import MovableModal from '@/components/MovableModal.vue'
 import DynamicForm from '../NewDynamicForm.vue';
 import { useStore } from "vuex";
 import { useToast } from "vue-toastification";
+import { parse } from "postcss";
 
 export default{
     name: 'Sale_Refunds',
@@ -94,7 +95,7 @@ export default{
         const transModalVisible = ref(false);
         const errors = ref([]);
         const modal_top = ref('200px');
-        const modal_left = ref('400px');
+        const modal_left = ref('500px');
         const modal_width = ref('30vw');
         const saleArray = computed(() => store.state.Asset_Sales.saleArr);
         const tableColumns = ref([
@@ -153,19 +154,39 @@ export default{
         const saleValue = computed(() => {
             return saleID.value;
         });
+        const calculateTotalAmount= (value) =>{
+            let totalAmount = 0;
+            if(value && value.length > 0){
+               totalAmount = parseFloat(value) - formFields.value[3].value;
+               formFields.value[4].value = totalAmount.toFixed(2);
+            }else{
+                formFields.value[4].value = 0;
+            }
+           
+        }
+        const calculateTotalAmount1= (value) =>{
+            let totalAmount = 0;
+            if(value && value.length > 0){
+               totalAmount = formFields.value[2].value - parseFloat(value);
+               formFields.value[4].value = totalAmount.toFixed(2);
+            }else{
+                formFields.value[4].value = 0;
+            }
+           
+        }
 
         const updateFormFields = () => {
             formFields.value = [
-                { type: 'date', name: 'date',label: "Transfer Date", value: '', required: true },
+                { type: 'date', name: 'date',label: "Refund Date", value: '', required: true },
                 {  
-                    type:'search-dropdown', label:"Sale", value: accValue.value, componentKey: memComponentKey,
+                    type:'search-dropdown', label:"Sale", value: saleValue.value, componentKey: memComponentKey,
                     selectOptions: saleArray, optionSelected: handleSelectedSale, required: true,
                     searchPlaceholder: 'Select Sale...', dropdownWidth: '500px',
                     fetchData: store.dispatch('Asset_Sales/fetchAssetSales', {company:companyID.value}), clearSearch: clearSelectedSale
                 },               
-                { type: 'amount', name: 'due_amount',label: "Due Amount", value: 0, required: false },
-                { type: 'amount', name: 'refund_fee',label: "Refund Fee", value: 0, required: false },
-                { type: 'amount', name: 'total_amount',label: "Total Amount", value: 0, required: true },            
+                { type: 'number', name: 'due_amount',label: "Due Amount", value: 0, required: false, method: calculateTotalAmount},
+                { type: 'number', name: 'refund_fee',label: "Refund Fee", value: 0, required: false, method: calculateTotalAmount1 },
+                { type: 'number', name: 'total_amount',label: "Total Amount", value: 0, required: true },            
             ];
         };
 
@@ -208,9 +229,12 @@ export default{
             }
         } 
         const handleReset = async() =>{
-            await store.dispatch('Asset_Units/updateState',{itemID: "", itemArr: [],})
             for(let i=0; i < formFields.value.length; i++){
-                formFields.value[i].value = '';
+                if(formFields.value[i].name == 'refund_fee' || formFields.value[i].name == 'total_amount' || formFields.value[i].name == 'due_amount'){
+                    formFields.value[i].value = 0;
+                }else{
+                    formFields.value[i].value = '';
+                }
             }
             saleID.value = "";
             prodComponentKey.value += 1;

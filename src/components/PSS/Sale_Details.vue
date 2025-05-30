@@ -89,6 +89,7 @@ export default defineComponent({
         const errors = ref([]);
         const companyID = computed(()=> store.state.userData.company_id);
         const userID = computed(()=> store.state.userData.user_id);
+        const selectedReservation = computed(()=> store.state.Asset_Sales.selectedReservation);
         const selectedSale = computed(()=> store.state.Asset_Sales.selectedSale);
         const selectedClient = computed(()=> store.state.Asset_Sales.selectedClient);
         const selectedAsset = computed(()=> store.state.Asset_Sales.selectedAsset);
@@ -251,8 +252,8 @@ export default defineComponent({
             store.dispatch('Asset_Fees/updateState', {saleFeeArray: defSaleCharges.value});
             if(selectedSale.value){
                 selectedSale.value.asset.sale_asset_id = assetID.value;
-                fetchAssetUnits(assetID.value)
-                fetchSalePlans(assetID.value)
+                // fetchAssetUnits(assetID.value)
+                // fetchSalePlans(assetID.value)
             }
         }
         const clearSelectedAsset = async() =>{
@@ -319,7 +320,7 @@ export default defineComponent({
                 },
                 {  
                     type:'search-dropdown', label:"Sales Plan", value: planValue.value, componentKey: planComponentKey,
-                    selectOptions: planArray, optionSelected: handleSelectedPlan, required: false,
+                    selectOptions: planArray, optionSelected: handleSelectedPlan, required: true,
                     searchPlaceholder: 'Select Plan...', dropdownWidth: '450px', updateValue: selectedPlan.value,
                     clearSearch: clearSelectedPlan
                 },
@@ -416,6 +417,29 @@ export default defineComponent({
             
         }, { immediate: true });
 
+        watch([selectedReservation, selectedClient], () => {
+            if(selectedReservation.value && selectedClient.value){
+                clientComponetKey.value += 1;
+                planComponentKey.value += 1;
+                assetComponentKey.value += 1;
+                store.dispatch('Asset_Units/updateState', { unitArray: saleUnits.value})
+                fetchAssetUnits(selectedReservation.value.asset.sale_asset_id)
+                fetchSalePlans(selectedReservation.value.asset.sale_asset_id)
+                updateFormFields();
+                clientID.value = selectedReservation.value.customer.asset_sale_client_id;
+                assetID.value = selectedReservation.value.asset.sale_asset_id;
+            }else if(selectedReservation.value && !selectedClient.value){
+                assetComponentKey.value += 1;
+                planComponentKey.value += 1;
+                store.dispatch('Asset_Units/updateState', { unitArray: saleUnits.value})
+                fetchAssetUnits(selectedReservation.value.asset.sale_asset_id)
+                fetchSalePlans(selectedReservation.value.asset.sale_asset_id)
+                updateFormFields();
+                assetID.value = selectedReservation.value.asset.sale_asset_id;
+            }
+            
+        }, { immediate: true });
+
         watch([selectedSale, selectedAsset, selectedClient, selectedPlan, selectedAgent], () => {
             if (selectedSale.value && selectedAsset.value && selectedClient.value && selectedPlan.value && selectedAgent.value) {
                 clientComponetKey.value += 1;
@@ -503,10 +527,10 @@ export default defineComponent({
                     additionalFields.value[i].value = '';
                 }
             }
-            await store.dispatch('Payment_Plans/updateState', { salePlanArray: []});
+            await store.dispatch('Payment_Plans/updateState', { salePlanArr: []});
             await store.dispatch("Asset_Units/updateState", {unitArray: []})
             await store.dispatch('Asset_Fees/updateState', {saleFeeArray: []});
-            await store.dispatch('Asset_Sales/updateState', {selectedSale: null, selectedAgent: null, selectedPlan: null, selectedAsset: null, selectedClient: null,saleCharges:[],saleUnits:[],assetSchedules:[], isEditing:false});
+            await store.dispatch('Asset_Sales/updateState', {selectedSale: null, selectedReservation: null, selectedAgent: null, selectedPlan: null, selectedAsset: null, selectedClient: null,saleCharges:[],saleUnits:[],assetSchedules:[], isEditing:false});
             planComponentKey.value += 1;
             assetComponentKey.value += 1;
             clientComponetKey.value += 1;
@@ -580,6 +604,9 @@ export default defineComponent({
             }
             if(assetValue.value == '' || clientValue.value == '' || planValue.value == ''){
                 errors.value.push('Error');
+                console.log("ASSET VALUE IS: ", assetValue.value);
+                console.log("CLIENT VALUE IS: ", clientValue.value);
+                console.log("PLAN VALUE IS: ", planValue.value);
             }
             if(errors.value.length){
                 toast.error('Fill In Required Fields');

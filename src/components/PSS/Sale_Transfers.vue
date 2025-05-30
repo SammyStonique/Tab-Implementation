@@ -94,7 +94,7 @@ export default{
         const transModalVisible = ref(false);
         const errors = ref([]);
         const modal_top = ref('200px');
-        const modal_left = ref('400px');
+        const modal_left = ref('500px');
         const modal_width = ref('30vw');
         const accArray = computed(() => store.state.Asset_Clients.customerArr);
         const itemArray = computed(() => store.state.Asset_Units.itemArr);

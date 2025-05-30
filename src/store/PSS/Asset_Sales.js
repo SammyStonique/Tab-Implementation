@@ -9,6 +9,7 @@ const state = {
     saleCode: null,
     selectedSaleID: null,
     selectedSale: null,
+    selectedReservation: null,
     selectedAsset: null,
     selectedClient: null,
     selectedPlan: null,
@@ -36,6 +37,7 @@ const mutations = {
     state.saleCode = "";
     state.selectedSaleID = null;
     state.selectedSale = null;
+    state.selectedReservation = null;
     state.selectedPlan = null;
     state.selectedAgent = null;
     state.selectedAsset = null;
@@ -182,6 +184,19 @@ const actions = {
     })
     
   },
+  fetchUnitReservation({ commit,state }, formData) {
+      axios.post(`api/v1/get-unit-reservations/`,formData)
+      .then((response)=>{
+        state.selectedReservation = response.data;
+        state.saleUnits  = response.data.reserved_units;
+        commit('SET_SELECTED_ASSET',response.data.asset.asset_code + " - " + response.data.asset.name);
+        commit('SET_SELECTED_CLIENT',(response.data.customer != null) ? (response.data.customer.client_code + " - "+ response.data.customer.client_name) : "");
+      })
+      .catch((error)=>{
+        console.log(error.message);
+      })
+      
+    },
   fetchSaleDetails({ commit,state }, formData) {
     axios.post(`api/v1/get-asset-sales/`,formData)
     .then((response)=>{

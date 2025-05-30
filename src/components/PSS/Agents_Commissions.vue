@@ -239,6 +239,7 @@ export default{
             sale_code_search.value = "";
             from_date_search.value = "";
             to_date_search.value = "";
+            agent_name_search.value = "";
             searchSaleCommissions();
         };
         const printCommissionsList = () =>{
