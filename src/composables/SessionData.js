@@ -30,10 +30,19 @@ export function useFetchSessionData() {
           const defaultSettings = {
             "defaultSettings": response.data.defaultSettings
           }
+          const agentAssets = {
+            "agentAssets": response.data.agentAssets
+          }
+          const salesAgentID = {
+            "salesAgentID": response.data.sales_agent_id
+          }
+          
           store.dispatch('userData/updateState',company_modules)
           store.dispatch('userData/updateState',user_companies)
           store.dispatch('userData/updateState',permissions)
           store.dispatch('userData/updateState',defaultSettings)
+          store.dispatch('userData/updateState',agentAssets)
+          store.dispatch('userData/updateState',salesAgentID)
         }
         
     })

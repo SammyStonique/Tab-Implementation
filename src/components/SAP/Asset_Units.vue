@@ -3,7 +3,7 @@
         <PageComponent 
             :loader="loader" @showLoader="showLoader" @hideLoader="hideLoader"
             :addButtonLabel="addButtonLabel"
-            @handleAddNew="addNewUnit"
+            :showAddButton="showAddButton"
             :searchFilters="searchFilters"
             @searchPage="searchUnits"
             @resetFilters="resetFilters"
@@ -19,6 +19,7 @@
             :columns="tableColumns"
             :rows="unitList"
             :actions="actions"
+            :showActions="showActions"
             :idField="idField"
             @handleSelectionChange="handleSelectionChange"
             @handleActionClick="handleActionClick"
@@ -69,9 +70,9 @@ export default{
         const propSearchComponentKey = ref(0);
         const catSearchComponentKey = ref(0);
         const idField = 'asset_unit_id';
-        const addButtonLabel = ref('New Unit');
+        const showAddButton = ref(false);
         const addingRight = ref('Adding Asset Unit');
-        const removingRight = ref('Deleting Asset Unit');
+        const removingRight = ref('');
         const rightsModule = ref('PSS');
         const title = ref('Unit Details');
         const submitButtonLabel = ref('Add');
@@ -120,9 +121,10 @@ export default{
         const actions = ref([
             {name: 'edit', icon: 'fa fa-edit', title: 'Edit Unit', rightName: 'Editing Asset Unit'},
             {name: 'view', icon: 'fa fa-file-pdf-o', title: 'View Unit'},
-            {name: 'delete', icon: 'fa fa-trash', title: 'Delete Unit', rightName: 'Deleting Asset Unit'},
-        ])
+        ]);
+        const showActions = ref(false);
         const companyID = computed(()=> store.state.userData.company_id);
+        const agentAssets = computed(()=> store.state.userData.agentAssets);
         const unit_number_search = ref("");
         const category_array = computed(() => store.state.Unit_Categories.categoryArr);
         const assets_array = computed(() => store.state.Sale_Assets.assetArr);
@@ -150,7 +152,7 @@ export default{
                 type:'search-dropdown', value: assets_array, width:48,
                 selectOptions: assets_array, optionSelected: handleSearchAsset,
                 searchPlaceholder: 'Asset...', dropdownWidth: '250px',
-                fetchData: store.dispatch('Sale_Assets/fetchSaleAssets', {company:companyID.value}),
+                fetchData: store.dispatch('Sale_Assets/fetchSaleAssets', {company:companyID.value, agent_asset_ids :agentAssets.value}),
                 clearSearch: clearSearchAsset, componentKey: propSearchComponentKey
             },
             {
@@ -438,7 +440,7 @@ export default{
                 asset_code: asset_code_search.value,
                 asset: assetSearchID.value,
                 category: catSearchID.value,
-                agent_asset_ids: [],
+                agent_asset_ids: agentAssets.value,
                 company_id: companyID.value,
                 page_size: selectedValue.value
             } 
@@ -640,13 +642,13 @@ export default{
             
         })
         return{
-            title, searchUnits,resetFilters, addButtonLabel, searchFilters, tableColumns, unitList,
+            title, searchUnits,resetFilters, searchFilters, tableColumns, unitList,
             currentPage,propResults, propArrLen, propCount, pageCount, showNextBtn, showPreviousBtn,
             loadPrev, loadNext, firstPage, lastPage, idField, actions, handleActionClick, propModalVisible, closeModal,
             submitButtonLabel, showModal, addNewUnit, showLoader, loader, hideLoader, modal_loader, modal_top, modal_left, modal_width,displayButtons,
             showModalLoader, hideModalLoader, saveUnit, formFields, handleSelectionChange, flex_basis,flex_basis_percentage,
             importUnits, removeUnit, removeUnits,addingRight,removingRight,rightsModule,printUnitsList,selectSearchQuantity,selectedValue,
-            downloadUnitsCSV,downloadUnitsExcel
+            downloadUnitsCSV,downloadUnitsExcel,showAddButton,showActions
         }
     }
 };

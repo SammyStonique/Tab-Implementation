@@ -28,6 +28,9 @@
     <div v-show="hmsOpen && selectedModule === 'Employee Portal'">
         <EPS />
     </div>
+    <div v-show="hmsOpen && selectedModule === 'Sales Agent Portal'">
+        <SAP />
+    </div>
     <div v-show="hmsOpen && selectedModule === 'Settings'">
         <SET />
     </div>
@@ -102,11 +105,12 @@ import MMS from '@/components/MMS/Main.vue';
 import EPS from '@/components/EPS/Main.vue';
 import PSS from '@/components/PSS/Main.vue';
 import VSS from '@/components/VSS/Main.vue';
+import SAP from '@/components/SAP/Main.vue';
 import Loader from '@/components/Loader.vue';
 
 export default {
     components: {
-        ModulesTab, Loader, HMS, FA, INV, PMS, HR, HHS, MMS, SET, EPS, ACC,PSS,VSS,
+        ModulesTab, Loader, HMS, FA, INV, PMS, HR, HHS, MMS, SET, EPS, ACC,PSS,VSS,SAP
     },
     setup() {
         const store = useStore();

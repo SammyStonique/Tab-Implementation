@@ -22,6 +22,8 @@ const state = {
     user_companies: [],
     permissions: [],
     defaultSettings: [],
+    agentAssets: [],
+    salesAgentID: '',
     reloaded: false,
     name_search: '',
     status_search: '',

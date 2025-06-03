@@ -13,6 +13,7 @@ const state = {
     accArray: new Set(["Dashboard"]),
     pssArray: new Set(["Dashboard"]),
     vssArray: new Set(["Dashboard"]),
+    sapArray: new Set(["Dashboard"]),
     hmsActiveTab: 'Dashboard',
     pmsActiveTab: 'Dashboard',
     hrActiveTab: 'Dashboard',
@@ -25,6 +26,7 @@ const state = {
     accActiveTab: 'Dashboard',
     pssActiveTab: 'Dashboard',
     vssActiveTab: 'Dashboard',
+    sapActiveTab: 'Dashboard',
   };
   
   const mutations = {
@@ -35,7 +37,6 @@ const state = {
           pageName: value.name,  
           pageComponent: value.component,
         };
-        console.log("THE COMPONENT IS ",value.component)
         if(key == 'HMS'){
           state.hmsArray.add(value);
           state.hmsActiveTab = value;
@@ -72,6 +73,9 @@ const state = {
         }else if(key == 'VSS'){
           state.vssArray.add(value);
           state.vssActiveTab = value;
+        }else if(key == 'SAP'){
+          state.sapArray.add(value);
+          state.sapActiveTab = value;
         }
       } 
     },
@@ -139,6 +143,10 @@ const state = {
           state.pssArray.delete(value);
           let myArray = Array.from(state.pssArray);
           state.pssActiveTab = myArray[myArray.length - 1];
+        }else if(key == 'SAP'){
+          state.sapArray.delete(value);
+          let myArray = Array.from(state.sapArray);
+          state.sapActiveTab = myArray[myArray.length - 1];
         }
       } 
     },
@@ -179,6 +187,9 @@ const state = {
       }else if(module == 'Vehicle Sales'){
         state.vssArray = new Set(["Dashboard"]);
         state.vssActiveTab = "Dashboard"; 
+      }else if(module == 'Sales Agent Portal'){
+        state.sapArray = new Set(["Dashboard"]);
+        state.sapActiveTab = "Dashboard"; 
       }
     }
 

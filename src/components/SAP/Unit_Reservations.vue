@@ -69,7 +69,7 @@ export default{
         const idField = 'unit_reservation_id';
         const addButtonLabel = ref('New Reservation');
         const addingRight = ref('Adding Unit Reservations');
-        const removingRight = ref('Deleting Unit Reservations');
+        const removingRight = ref('');
         const rightsModule = ref('PSS');
         const submitButtonLabel = ref('Add');
         const selectedIds = ref([]);
@@ -108,7 +108,6 @@ export default{
         const actions = ref([
             {name: 'edit', icon: 'fa fa-edit', title: 'Edit Reservation', rightName: 'Editing Unit Reservations'},
             {name: 'convert', icon: 'fa fa-sign-in', title: 'Convert To Sale', rightName: 'Converting Unit Reservations'},
-            {name: 'delete', icon: 'fa fa-trash', title: 'Delete Reservation', rightName: 'Deleting Unit Reservations'},
         ])
         const companyID = computed(()=> store.state.userData.company_id);
         const reservationID = ref("");
@@ -287,8 +286,8 @@ export default{
             store.commit('Unit_Reservations/initializeStore');
             await store.dispatch('Unit_Reservations/updateState', {selectedReservation: null,selectedAsset: null,selectedClient: null,isEditing: false});
             await store.dispatch('Asset_Units/updateState', {unitArray: []});
-            store.commit('pageTab/ADD_PAGE', {'PSS':'Reservation_Details'});
-            store.state.pageTab.pssActiveTab = 'Reservation_Details';          
+            store.commit('pageTab/ADD_PAGE', {'SAP':'Reservation_Details'});
+            store.state.pageTab.sapActiveTab = 'Reservation_Details';          
         }
         const handleActionClick = async(rowIndex, action, row) =>{
             if( action == 'edit'){
@@ -302,8 +301,8 @@ export default{
                     }
                     await store.dispatch('Unit_Reservations/fetchUnitReservation',formData).
                     then(()=>{
-                        store.commit('pageTab/ADD_PAGE', {'PSS':'Reservation_Details'})
-                        store.state.pageTab.pssActiveTab = 'Reservation_Details';
+                        store.commit('pageTab/ADD_PAGE', {'SAP':'Reservation_Details'})
+                        store.state.pageTab.sapActiveTab = 'Reservation_Details';
                     })
                 }else{
                     toast.error(`Cannot Edit ${reservationStatus} Reservation`);
@@ -334,8 +333,8 @@ export default{
                     }
                     await store.dispatch('Asset_Sales/fetchUnitReservation',formData).
                     then(()=>{
-                        store.commit('pageTab/ADD_PAGE', {'PSS':'Sale_Details'})
-                        store.state.pageTab.pssActiveTab = 'Sale_Details';
+                        store.commit('pageTab/ADD_PAGE', {'SAP':'Sale_Details'})
+                        store.state.pageTab.sapActiveTab = 'Sale_Details';
                         
                     })
                 }else{

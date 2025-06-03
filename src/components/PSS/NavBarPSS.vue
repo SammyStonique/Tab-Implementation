@@ -81,7 +81,7 @@
                 </div>
                 <div class="dropdown-content w-44 absolute rounded border border-gray-200 bg-white shadow-slate-400 shadow-sm pt-2" v-if="clients_dropdown">
                     <div class="py-2 px-3 pl-4 w-full hover:bg-slate-500 hover:w-full">
-                        <button class="flex text-sm" @click="openPage({'PSS':'Clients'})">
+                        <button :class="{ 'disabled': isDisabled('Viewing Sale Clients') }" class="flex text-sm" @click="openPage({'PSS':'Clients'},'Viewing Sale Clients')">
                             <i class="fa fa-user pt-2 mr-2" aria-hidden="true"></i>
                             <p class="">Clients</p>
                         </button>
@@ -110,7 +110,7 @@
                 </div>
                 <div class="dropdown-content w-56 absolute rounded border border-gray-200 bg-white shadow-slate-400 shadow-sm" v-if="sales_dropdown">
                     <div class="py-2 px-3 pl-4 w-full hover:bg-slate-500 hover:w-full">
-                        <button class="flex text-sm w-full" @click="openPage({'PSS':'Asset_Sales'})">
+                        <button :class="{ 'disabled': isDisabled('Viewing Asset Sales') }" class="flex text-sm w-full" @click="openPage({'PSS':'Asset_Sales'},'Viewing Asset Sales')">
                             <i class="fa fa-file-contract pt-2 mr-2" aria-hidden="true"></i>
                             <p class="">Sales</p>
                         </button>
@@ -259,6 +259,7 @@ export default defineComponent({
     setup(_, { emit }){
         const store = useStore();
         const user_profile = computed(()=> store.state.userData.user_profile);
+        const allowedRights = computed(()=> store.state.userData.permissions);
         const settings_dropdown = ref(false);
         const units_dropdown = ref(false);
         const clients_dropdown = ref(false);
@@ -331,18 +332,33 @@ export default defineComponent({
             finances_dropdown.value  = false;
             dropdown.value = false;
         }
-        const openPage = (pageName) =>{
-            closeDropdown();
-            store.commit('pageTab/ADD_PAGE', pageName);
-            emit('openPage', pageName)
+        const isDisabled =(permissionName) =>{
+            const permission = allowedRights.value.find(p => p.rightName === permissionName);
+            return permission ? !permission.right_status : true;
+        };
+        const openPage = (pageName,rightName) =>{
+            if(rightName !== undefined){
+                if(!isDisabled(rightName) ){  
+                    closeDropdown();
+                    store.commit('pageTab/ADD_PAGE', pageName);             
+                    emit('openPage', pageName)
+                }
+            }
+            else{
+                closeDropdown();
+                store.commit('pageTab/ADD_PAGE', pageName);
+                emit('openPage', pageName)
+            }
+            
         };
         const showHomePage = () =>{
             store.commit('modulesTab/MINIMIZE_TAB')
         };
+        
         return{
             dropdown, settings_dropdown, clients_dropdown, units_dropdown, sales_dropdown,projects_dropdown, finances_dropdown,
             user_profile,userDetails, closeDropdown,showUnitsDropdown, showClientsDropdown,showProjectsDropdown, showSalesDropdown,
-            showSettingsDropdown, showFinancesDropdown,openPage,showHomePage
+            showSettingsDropdown, showFinancesDropdown,openPage,showHomePage,isDisabled
         }
     },
 
@@ -350,6 +366,10 @@ export default defineComponent({
 </script>
 
 <style scoped>
+.disabled {
+  opacity: 0.5;
+  pointer-events: none;
+}
 .navbar{
   z-index: 1000;
 }

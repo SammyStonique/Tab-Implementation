@@ -3,7 +3,7 @@
         <PageComponent 
             :loader="loader" @showLoader="showLoader" @hideLoader="hideLoader"
             :addButtonLabel="addButtonLabel"
-            @handleAddNew="addNewAsset"
+            :showAddButton="showAddButton"
             :searchFilters="searchFilters"
             :dropdownOptions="dropdownOptions"
             @handleDynamicOption="handleDynamicOption"
@@ -19,6 +19,7 @@
             :columns="tableColumns"
             :rows="assetsList"
             :actions="actions"
+            :showActions="showActions"
             :idField="idField"
             @handleSelectionChange="handleSelectionChange"
             @handleActionClick="handleActionClick"
@@ -77,9 +78,9 @@ export default{
         const member_status = ref('');
         const exit_date = ref('');
         const idField = 'sale_asset_id';
-        const addButtonLabel = ref('New Asset');
+        const showAddButton = ref(false);
         const addingRight = ref('Adding Sale Assets');
-        const removingRight = ref('Deleting Sale Assets');
+        const removingRight = ref('');
         const rightsModule = ref('PSS');
         const submitButtonLabel = ref('Add');
         const selectedIds = ref([]);
@@ -121,7 +122,9 @@ export default{
             {name: 'approve/reject', icon: 'fa fa-check-circle', title: 'Approve/Reject Asset', rightName: 'Approving Sale Assets'},
             {name: 'delete', icon: 'fa fa-trash', title: 'Delete Asset', rightName: 'Deleting Sale Assets'},
         ])
+        const showActions = ref(false);
         const companyID = computed(()=> store.state.userData.company_id);
+        const agentAssets = computed(()=> store.state.userData.agentAssets);
         const assetID = ref("");
         
         const name_search = ref('');
@@ -261,7 +264,7 @@ export default{
                 asset_code: asset_code_search.value,
                 registration_number: registration_number_search.value,
                 asset_type: asset_type_search.value,
-                agent_asset_ids: [],    
+                agent_asset_ids: agentAssets.value,    
                 company_id: companyID.value,
                 page_size: selectedValue.value
             } 
@@ -452,13 +455,13 @@ export default{
             
         })
         return{
-            searchSaleAssets,resetFilters, addButtonLabel, searchFilters, tableColumns, assetsList,dropdownWidth,displayButtons,
+            searchSaleAssets,resetFilters, searchFilters, tableColumns, assetsList,dropdownWidth,displayButtons,
             currentPage,propResults, propArrLen, propCount, pageCount, showNextBtn, showPreviousBtn,flex_basis,flex_basis_percentage,
             loadPrev, loadNext, firstPage, lastPage, idField, actions, handleActionClick,showDetails,detailsTitle,hideDetails,
             submitButtonLabel, showModal, addNewAsset, showLoader, loader, hideLoader, importMembers, removeSaleAsset, removeSaleAssets,
             handleSelectionChange,addingRight,removingRight,rightsModule,printAssetsList,selectSearchQuantity,selectedValue,
             modal_left,modal_top,modal_width,trans_modal_loader,formFields,transModalVisible,transTitle,showTransModalLoader,hideTransModalLoader,approveAsset,closeTransModal,
-            handleReset,dropdownOptions,handleDynamicOption,member_status,exit_date,
+            handleReset,dropdownOptions,handleDynamicOption,member_status,exit_date,showAddButton,showActions
         }
     }
 };

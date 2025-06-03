@@ -63,7 +63,7 @@ export default{
         const title = ref('Document Details');
         const addButtonLabel = ref('New Document');
         const addingRight = ref('Adding Sale Documents');
-        const removingRight = ref('Deleting Sale Documents');
+        const removingRight = ref('');
         const rightsModule = ref('PSS');
         const idField = 'sale_document_id';
         const depModalVisible = ref(false);
@@ -101,9 +101,10 @@ export default{
         ])
         const actions = ref([
             {name: 'preview', icon: 'fa fa-paperclip', title: 'View Document', rightName: 'Adding Sale Documents'},
-            {name: 'delete', icon: 'fa fa-trash', title: 'Delete Document', rightName: 'Deleting Sale Documents'},
         ])
         const companyID = computed(()=> store.state.userData.company_id);
+        const agentAssets = computed(()=> store.state.userData.agentAssets);
+        const salesAgentID = computed(()=> store.state.userData.salesAgentID);
         const saleID = ref('');
         const sale_code_search = ref('');
         const name_search = ref('');
@@ -140,7 +141,7 @@ export default{
                     type:'search-dropdown', label:"Sale", value: saleValue.value, componentKey: prodComponentKey,
                     selectOptions: saleArray, optionSelected: handleSelectedSale, required: true,
                     searchPlaceholder: 'Select Sale...', dropdownWidth: '500px', updateValue: selectedSale.value,
-                    fetchData: store.dispatch('Asset_Sales/fetchAssetSales', {company:companyID.value}), clearSearch: clearSelectedSale
+                    fetchData: store.dispatch('Asset_Sales/fetchAssetSales', {company:companyID.value, sales_agent :salesAgentID.value}), clearSearch: clearSelectedSale
                 },
                 { type: 'text', name: 'document_name',label: "Name", value: selectedDocument.value?.document_name || '', required: true },
                 { type: 'file', name: 'file-input',label: "Attachment", value: '', filePath: computedFilePath.value, required: false, placeholder: "", accepted_formats: "*/*", method: handleFileChange}
@@ -327,7 +328,7 @@ export default{
                 client_name: name_search.value,
                 client_code: client_code_search.value,
                 company_id: companyID.value,
-                sales_agent: '',
+                sales_agent: salesAgentID.value,
                 page_size: selectedValue.value
             }
             axios

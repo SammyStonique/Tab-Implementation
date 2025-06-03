@@ -104,7 +104,7 @@ export default{
         const idField = 'asset_sale_id';
         const addButtonLabel = ref('New Sale');
         const addingRight = ref('Adding Asset Sales');
-        const removingRight = ref('Deleting Asset Sales');
+        const removingRight = ref('');
         const rightsModule = ref('PSS');
         const submitButtonLabel = ref('Add');
         const selectedIds = ref([]);
@@ -149,8 +149,6 @@ export default{
         const actions = ref([
             {name: 'edit', icon: 'fa fa-edit', title: 'Edit Sale', rightName: 'Editing Asset Sales'},
             {name: 'view', icon: 'fa fa-file-pdf-o', title: 'View Sale', rightName: 'Viewing Asset Sales'},
-            {name: 'approve/reject', icon: 'fa fa-check-circle', title: 'Approve/Reject Sale', rightName: 'Approving Asset Sales'},
-            {name: 'delete', icon: 'fa fa-trash', title: 'Delete Sale', rightName: 'Deleting Asset Sales'},
         ]);
         const itemColumns = ref([
             {label: "Unit Number", key:"unit_number", type: "text", editable: false},
@@ -160,6 +158,8 @@ export default{
             {label: "Total", key:"sale_total_amount", type: "number", editable: false},
         ]);
         const companyID = computed(()=> store.state.userData.company_id);
+        const agentAssets = computed(()=> store.state.userData.agentAssets);
+        const salesAgentID = computed(()=> store.state.userData.salesAgentID);
         const saleID = ref("");
         const saleAmount = ref(0);
         const client_name_search = ref('');
@@ -308,7 +308,7 @@ export default{
                 from_date: from_date_search.value,
                 to_date: to_date_search.value,
                 sale_type: "New",
-                sales_agent: '',
+                sales_agent: salesAgentID.value,
                 company_id: companyID.value,
                 page_size: selectedValue.value
             } 
@@ -388,8 +388,8 @@ export default{
             await store.dispatch('Asset_Fees/updateState', {saleFeeArray: []})
             await store.dispatch("Asset_Units/updateState", {unitArray: []})
             await store.dispatch("Payment_Plans/updateState", {salePlanArray: []})
-            store.commit('pageTab/ADD_PAGE', {'PSS':'Sale_Details'});
-            store.state.pageTab.pssActiveTab = 'Sale_Details';          
+            store.commit('pageTab/ADD_PAGE', {'SAP':'Sale_Details'});
+            store.state.pageTab.sapActiveTab = 'Sale_Details';          
         }
         const handleActionClick = async(rowIndex, action, row) =>{
             if( action == 'edit'){
@@ -403,8 +403,8 @@ export default{
                     }
                     await store.dispatch('Asset_Sales/fetchAssetSale',formData).
                     then(()=>{
-                        store.commit('pageTab/ADD_PAGE', {'PSS':'Sale_Details'})
-                        store.state.pageTab.pssActiveTab = 'Sale_Details';
+                        store.commit('pageTab/ADD_PAGE', {'SAP':'Sale_Details'})
+                        store.state.pageTab.sapActiveTab = 'Sale_Details';
                         
                     })
                 }else{
@@ -442,8 +442,8 @@ export default{
                     }
                     await store.dispatch('Asset_Sales/fetchSaleDetails',formData).
                     then(()=>{
-                        store.commit('pageTab/ADD_PAGE', {'PSS':'Sale_Profile'})
-                        store.state.pageTab.pssActiveTab = 'Sale_Profile';
+                        store.commit('pageTab/ADD_PAGE', {'SAP':'Sale_Profile'})
+                        store.state.pageTab.sapActiveTab = 'Sale_Profile';
                     })
                 }else{
                     toast.error(`Cannot View ${applicationStatus} Sale`)

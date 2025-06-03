@@ -69,6 +69,7 @@ export default{
         const showAddButton = ref(false);
         const title = ref('');
         const companyID = computed(()=> store.state.userData.company_id);
+        const salesAgentID = computed(()=> store.state.userData.salesAgentID);
         const idField = 'sales_agent_commission_id';
         const rightsModule = ref('PSS');
         const assetID = ref('');
@@ -171,7 +172,7 @@ export default{
                 from_date: from_date_search.value,
                 to_date: to_date_search.value,
                 asset: assetID.value,
-                sales_agent: '',
+                sales_agent: salesAgentID.value,
                 company: companyID.value,
                 page_size: selectedValue.value
             }
