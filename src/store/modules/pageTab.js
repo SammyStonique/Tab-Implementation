@@ -140,9 +140,9 @@ const state = {
           let myArray = Array.from(state.pssArray);
           state.pssActiveTab = myArray[myArray.length - 1];
         }else if(key == 'VSS'){
-          state.pssArray.delete(value);
-          let myArray = Array.from(state.pssArray);
-          state.pssActiveTab = myArray[myArray.length - 1];
+          state.vssArray.delete(value);
+          let myArray = Array.from(state.vssArray);
+          state.vssActiveTab = myArray[myArray.length - 1];
         }else if(key == 'SAP'){
           state.sapArray.delete(value);
           let myArray = Array.from(state.sapArray);

@@ -1,191 +1,151 @@
 <template>
-    <Loader 
-        :loader="loader"
-        @showLoader="showLoader"
-        @hideLoader="hideLoader"
-    />
-    <div v-show="hmsOpen && selectedModule === 'Hospital Management'">
-        <HMS />
-    </div>
-    <div v-show="hmsOpen && selectedModule === 'Property Management'">
-        <PMS />
-    </div>
-    <div v-show="hmsOpen && selectedModule === 'Financial Accounts'">
-        <FA />
-    </div>
-    <div v-show="hmsOpen && selectedModule === 'Inventory Management'">
-        <INV />
-    </div>
-    <div v-show="hmsOpen && selectedModule === 'Human Resource'">
-        <HR />
-    </div>
-    <div v-show="hmsOpen && selectedModule === 'Membership Management'">
-        <MMS />
-    </div>
-    <div v-show="hmsOpen && selectedModule === 'Hotel Management'">
-        <HHS />
-    </div>
-    <div v-show="hmsOpen && selectedModule === 'Employee Portal'">
-        <EPS />
-    </div>
-    <div v-show="hmsOpen && selectedModule === 'Settings'">
-        <SET />
-    </div>
-    <div v-show="hmsOpen && selectedModule === 'My Account'">
-        <ACC />
-    </div>
-
-    <div v-if="mainOpen" class="text-black h-screen bg-[url('@/assets/image2.jpg')] bg-cover bg-center px-4 sm:px-12 w-full">
-        <div class="border-b border-gray-300 py-2 w-full flex pl-6 sm:pl-8">
-            <p class="text-left basis-1/4 sm:basis-3/6 text-sm sm:text-base">Welcome, <strong class="uppercase">{{ username }}</strong></p>
-            <p class="text-left basis-1/4 sm:basis-2/6 uppercase font-semibold text-sm sm:text-base"><strong>{{ company_name }}</strong></p>
-            <div class="basis-1/2 sm:basis-1/2 flex items-center justify-end space-x-4">
-                <button type="button" @click="openModule('My Account')" class="text-sm sm:text-base">
-                    My Account
-                </button>
-                <button type="button" @click="showDropdown" class="text-sm sm:text-base">
-                    Switch Company <i class="fa fa-caret-down pl-2" aria-hidden="true"></i>
-                </button>
-                <button class="ml-6 text-sm sm:text-base" title="Logout" @click="logout">
-                    <strong><i class="fa fa-power-off"></i></strong>
-                </button>
-                <div class="relative">
-                    <button class="fixed inset-0 bg-gray-50 opacity-25 cursor-default w-full" v-if="showOptions" @click="showOptions = !showOptions"></button>
-                    <div class="text-left options-container absolute right-0 mt-3 pt-2 pb-2 w-80 rounded border border-gray-200 bg-white shadow-slate-400 shadow-lg" v-if="showOptions">
-                        <ul v-for="(company, index) in companyList" :key="index">
-                            <li><button class="pl-3 hover:bg-slate-500 hover:rounded hover:w-full" @click="switchCompany(index)">{{ company.company_name.split(' ').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' ') }}
-                            </button></li>
-                        </ul>
-                    </div>
-                </div>
+    <div class="main-container w-full min-h-[90vh] bottom-8">
+        <div class="fixed top-0 w-full z-50">
+            <div class="z-50 relative">
+                <NavBar :title="title" @minimize="minimize" @close="close"/>
+            </div> 
+            <div class="z-40 relative">
+                <NavBarVSS @openPage="selectTab"/>
+            </div>
+            <div class="z-30">
+                <PagesTab @openPage="selectedTab" @closePage="closeTab"/>
             </div>
         </div>
-
-        <div class="w-full grid grid-cols-2 sm:grid-cols-4 gap-4 pt-8">
-            <div class="text-left" v-for="(mod, index) in company_modules" :key="index">
-                <button @click="openModule(mod.module_name)" class="w-full text-center">
-                    <div class="text-center rounded-full w-24 h-24 overflow-hidden mb-2 mx-auto">
-                        <img :src="getImagePath(mod.module_logo)" alt="Module Icon" class="w-full h-full object-cover">
-                    </div>
-                    <div class="text-center">
-                        <button class="underline text-sm sm:text-base"> {{ mod.module_name }} </button>
-                    </div>
-                </button>          
-            </div>
+        <div class="tab-content z-20 overflow-y-hidden">
+            <keep-alive :include="cachedComponents">
+                <component 
+                    :is="activeComponent"
+                 />
+            </keep-alive>
         </div>
+        
     </div>
-
-    <modules-tab />
 </template>
 
 <script>
-import axios from 'axios';
-import { useFetchSessionData } from '@/composables/SessionData';
-import ModulesTab from '@/components/ModulesTab.vue';
 import { useStore } from 'vuex';
-import { ref, computed, onBeforeMount, onMounted, watch } from 'vue';
-import HMS from '@/components/HMS/Main.vue';
-import PMS from '@/components/PMS/Main.vue';
-import FA from '@/components/FA/Main.vue';
-import INV from '@/components/INV/Main.vue';
-import HR from '@/components/HR/Main.vue';
-import SET from '@/components/SET/Main.vue';
-import ACC from '@/components/ACC/Main.vue';
-import HHS from '@/components/HHS/Main.vue';
-import MMS from '@/components/MMS/Main.vue';
-import EPS from '@/components/EPS/Main.vue';
-import Loader from '@/components/Loader.vue';
+import { ref, computed, watch } from 'vue';
+import NavBar from '@/components/NavBar.vue';
+import NavBarVSS from '@/components/VSS/NavBarVSS.vue';
+import PagesTab from '@/components/VSS/PagesTab.vue';
+import Dashboard from '@/components/VSS/Dashboard.vue';
+import Vehicle_Makes from '@/components/VSS/Vehicle_Makes.vue';
+import Vehicle_Models from '@/components/VSS/Vehicle_Models.vue';
+import Payment_Plans from '@/components/VSS/Payment_Plans.vue';
+import Asset_Fees from '@/components/VSS/Asset_Fees.vue';
+import Sale_Assets from '@/components/VSS/Sale_Assets.vue';
+import Asset_Details from '@/components/VSS/Asset_Details.vue';
+import Asset_Profile from '@/components/VSS/Asset_Profile.vue';
+import Asset_Units from '@/components/VSS/Asset_Units.vue';
+import Unit_Categories from '@/components/VSS/Unit_Categories.vue';
+import Clients from '@/components/VSS/Clients.vue';
+import Vendors from '@/components/VSS/Vendors.vue';
+import Sales_Agents from '@/components/VSS/Sales_Agents.vue';
+import Unit_Reservations from '@/components/VSS/Unit_Reservations.vue';
+import Reservation_Details from '@/components/VSS/Reservation_Details.vue';
 
-export default {
-    components: {
-        ModulesTab, Loader, HMS, FA, INV, PMS, HR, HHS, MMS, SET, EPS, ACC
+
+import Sale_Invoices from '@/components/VSS/Sale_Invoices.vue';
+import Sale_Receipts from '@/components/VSS/Sale_Receipts.vue';
+
+import Asset_Sales from '@/components/VSS/Asset_Sales.vue';
+import Sale_Details from '@/components/VSS/Sale_Details.vue';
+import Historical_Sales from '@/components/VSS/Historical_Sales.vue';
+import Import_Historical_Sales from '@/components/VSS/Import_Historical_Sales.vue';
+import Sale_Profile from '@/components/VSS/Sale_Profile.vue';
+import Receipt_Details from '@/components/VSS/Receipt_Details.vue';
+
+import Sales_Commissions from '@/components/VSS/Sales_Commissions.vue';
+import Agents_Commissions from '@/components/VSS/Agents_Commissions.vue';
+import Penalty_Batches from '@/components/VSS/Penalty_Batches.vue';
+import Sale_Penalties from '@/components/VSS/Sale_Penalties.vue';
+import Sale_Documents from '@/components/VSS/Sale_Documents.vue';
+import Sale_Fees from '@/components/VSS/Sale_Fees.vue';
+import Sale_Arrears from '@/components/VSS/Sale_Arrears.vue';
+import Sale_Prepayments from '@/components/VSS/Sale_Prepayments.vue';
+import Prepayment_Allocations from '@/components/VSS/Prepayment_Allocations.vue';
+import Templates from '@/components/MMS/Templates.vue';
+import Design_Template from '@/components/MMS/Design_Template.vue';
+import Sale_Transfers from '@/components/VSS/Sale_Transfers.vue';
+import Sale_Refunds from '@/components/VSS/Sale_Refunds.vue';
+
+
+import Default_Settings from '@/components/SET/Default_Settings.vue';
+
+export default{
+    components:{
+        NavBar,
+        NavBarVSS,
+        PagesTab,
+        Dashboard,
+        Sale_Assets,Asset_Details,Asset_Profile,Vehicle_Makes,Receipt_Details,Vehicle_Models,Asset_Units,Unit_Categories,Clients,Vendors,Sales_Agents,Unit_Reservations,Reservation_Details,
+        Sale_Invoices,Sale_Receipts,Asset_Sales,Sale_Details,Sale_Profile,Payment_Plans,Sales_Commissions,Agents_Commissions,Sale_Penalties,Penalty_Batches,Sale_Documents,Sale_Fees,Historical_Sales,Import_Historical_Sales,
+        Sale_Arrears,Sale_Prepayments,Prepayment_Allocations,Templates,Design_Template,Sale_Transfers,Asset_Fees,Sale_Refunds,
+
+        Default_Settings
     },
-    setup() {
+    props: {
+        title: {
+            type: String,
+            required: true,
+        },
+    },
+    setup(){
         const store = useStore();
-        const loader = ref('none');
-        const username = computed(() => store.state.userData.user_names);
-        const companyID = computed(() => store.state.userData.company_id);
-        const deviceID = computed(() => store.state.userData.device_id);
-        const userID = computed(() => store.state.userData.user_id);
-        const company_name = computed(() => store.state.userData.company_name);
-        const companyList = computed(() => store.state.userData.user_companies);
-        const hmsOpen = computed(() => store.state.modulesTab.modulePage);
-        const mainOpen = computed(() => store.state.modulesTab.homePage);
-        const showOptions = ref(false);
-        const company_modules = computed(() => store.state.userData.company_modules);
+        const title = ref('Vehicle Sales');
+        const cachedComponents = computed(() =>  Array.from(store.state.pageTab.vssArray));
+        const tabs = computed(()=> store.state.pageTab.vssArray);
 
-        const selectedModule = computed(() => store.state.modulesTab.selectedModule);
-
-
-        const getImagePath = (imageName) => {
-            try {
-                return require(`@/assets/${imageName}`);
-            } catch (error) {
-                console.error(`Image not found: ${imageName}`);
-                return '';
+        const activeTab = computed(() => store.state.pageTab.vssActiveTab);
+    
+        const activeComponent = computed(() => activeTab.value);
+    
+        const selectTab = (pageName) => {
+            for(const [key, value] of Object.entries(pageName)){
+                store.state.pageTab.vssActiveTab = value;
             }
         };
-
-        const showDropdown = () => {
-            showOptions.value = !showOptions.value;
+        const selectedTab = (pageName) => {
+            store.state.pageTab.vssActiveTab = pageName;
         };
-
-        const openModule = (mod) => {
-            store.commit('modulesTab/ADD_TAB', mod);
-            hmsOpen.value = true;
-            selectedModule.value = mod;
-            mainOpen.value = false;
-        };
-
-        const showLoader = () => {
-            loader.value = 'block';
-        };
-
-        const hideLoader = () => {
-            loader.value = 'none';
-        };
-
-        const switchCompany = async (selectedCompany) => {
-            showLoader();
-            const company_data = {
-                "company_id": companyList.value[selectedCompany].company_id,
-                "company_name": companyList.value[selectedCompany].company_name
-            };
-            try {
-                await axios.post("api/v1/update-session-data/", company_data).
-                then(()=>{
-                    store.dispatch('userData/reloadPage');
-                })
-            } catch (error) {
-                console.log(error);
-            } finally {
-                hideLoader();
-                
+        const closeTab = (pageName) =>{
+            let page = {"VSS":pageName};
+            store.commit('pageTab/REMOVE_PAGE', page)
+            store.commit(`${pageName}/RESET_SEARCH_FILTERS`)
+            activeTab.value = store.state.pageTab.vssActiveTab;
+            store.commit(`${pageName}/initializeStore`);
+        }
+        const minimize = () =>{
+            store.commit('modulesTab/MINIMIZE_TAB')
+        }
+        const close = () =>{
+            let myArray = Array.from(tabs.value);
+            for(let i=0; i<myArray.length; i++){
+                store.commit(`${myArray[i]}/RESET_SEARCH_FILTERS`)
+                store.commit(`${myArray[i]}/initializeStore`)
             }
-        };
-
-        const logout = async () => {
-            let formData = {
-                user_id: userID.value,
-                device_id: deviceID.value,
-            }
-            await store.dispatch("userData/logout", formData);
-        };
-
-        onBeforeMount(() => {
-            store.state.idleVue.isIdle = false;
-            const { fetchSessionData } = useFetchSessionData();
-            fetchSessionData();
-        });
-
-        onMounted(() => {
-            // store.dispatch('userData/reloadPage');
-        });
-
-        return {
-            openModule, hmsOpen, mainOpen, selectedModule, company_modules, getImagePath, username, company_name, logout,
-            showOptions, showDropdown, companyList, switchCompany, loader, showLoader, hideLoader
-        };
+            store.commit('modulesTab/REMOVE_TAB', {'VSS':'Vehicle Sales'}),
+            store.commit('pageTab/CLEAR_PAGE_TAB', 'Vehicle Sales');
+            activeTab.value = store.state.pageTab.vssActiveTab;
+        }
+        return{
+            close,minimize,title,activeComponent,selectTab, selectedTab, closeTab,activeTab, cachedComponents
+        }
+    },
+    mounted(){
+        const store = useStore();
+        this.activeTab = store.state.pageTab.vssActiveTab;
     }
-};
+}
 </script>
+
+<style>
+.tab-content{
+    margin-top: 35px;
+}
+.main-container{
+    max-height: 100vh;
+    overflow: hidden;
+}
+
+</style>

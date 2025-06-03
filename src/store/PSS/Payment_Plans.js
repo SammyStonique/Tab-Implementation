@@ -187,7 +187,6 @@ const actions = {
       
   },
   handleSelectedSalePlan({ commit, state }, option){
-    state.salePlanArray = [];
     const selectedPlan = state.plansList.find(plan => (plan.name + " - Pay. Mode: " + plan.payment_mode + ", Instlmnts: "+ plan.installments) === option);
     if (selectedPlan) {
         state.planID = selectedPlan.payment_plan_id;

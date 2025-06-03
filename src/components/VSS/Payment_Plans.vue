@@ -239,8 +239,7 @@ export default{
                     formFields.value[i].value = 0;
                 }else if(formFields.value[i].label == "Installments" ){
                     formFields.value[i].value = 1;
-                }
-                else if(formFields.value[i].label == "Interest Method" ){
+                }else if(formFields.value[i].label == "Interest Method" ){
                     formFields.value[i].value = 'Simple Interest';
                 }else if(formFields.value[i].label == "Interest Mode" ){
                     formFields.value[i].value = 'Deposit Exclusive';

@@ -37,11 +37,11 @@ export default defineComponent({
         };
         
         const pageArray = computed({
-            get: () => store.state.pageTab.mmsArray,
+            get: () => store.state.pageTab.vssArray,
             set: (value) => store.commit('pageTab/ADD_PAGE', value),
         });
 
-        const activePage = computed(() => store.state.pageTab.mmsActiveTab);
+        const activePage = computed(() => store.state.pageTab.vssActiveTab);
         // const activePage = ref('Dashboard');
         
         const openPage = (page) =>{
@@ -49,7 +49,7 @@ export default defineComponent({
             emit('openPage', page)
         }
         const closePage = (page) =>{
-            activePage.value = computed(() => store.state.pageTab.mmsActiveTab);
+            activePage.value = computed(() => store.state.pageTab.vssActiveTab);
             emit('closePage', page)
         }
 

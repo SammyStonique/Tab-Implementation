@@ -188,8 +188,8 @@ export default{
         ]);
 
         const importSales = () =>{
-            store.commit('pageTab/ADD_PAGE', {'PSS':'Import_Historical_Sales'})
-            store.state.pageTab.pssActiveTab = 'Import_Historical_Sales';
+            store.commit('pageTab/ADD_PAGE', {'VSS':'Import_Historical_Sales'})
+            store.state.pageTab.vssActiveTab = 'Import_Historical_Sales';
         }
         const handleSelectionChange = (ids) => {
             selectedIds.value = ids;
