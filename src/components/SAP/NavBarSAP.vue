@@ -29,6 +29,12 @@
                         </button>
                     </div>
                     <div class="py-2 px-3 pl-4 w-full hover:bg-slate-500 hover:w-full">
+                        <button class="flex text-sm w-full" @click="openPage({'SAP':'Asset_Documents'})">
+                            <i class="fa fa-file-image pt-2 mr-2" aria-hidden="true"></i>
+                            <p class="">Asset Documents</p>
+                        </button>
+                    </div>
+                    <div class="py-2 px-3 pl-4 w-full hover:bg-slate-500 hover:w-full">
                         <button class="flex text-sm" @click="openPage({'SAP':'Payment_Plans'})">
                         <i class="fa fa-user-shield pt-2 mr-2" aria-hidden="true"></i>
                         <p class="">Payment Plans</p>

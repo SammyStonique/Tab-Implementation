@@ -28,8 +28,7 @@
                             <p class="">Assets List</p>
                         </button>
     
-                    </div>
-                    
+                    </div>                  
                     <div class="py-2 px-3 pl-4 w-full hover:bg-slate-500 hover:w-full">
                         <button class="flex text-sm" @click="openPage({'VSS':'Vehicle_Makes'})">
                             <i class="fa fa-box pt-2 mr-2" aria-hidden="true"></i>
@@ -40,6 +39,12 @@
                         <button class="flex text-sm" @click="openPage({'VSS':'Vehicle_Models'})">
                         <i class="fa fa-cogs pt-2 mr-2" aria-hidden="true"></i>
                         <p class="">Vehicle Models</p>
+                        </button>
+                    </div>
+                    <div class="py-2 px-3 pl-4 w-full hover:bg-slate-500 hover:w-full">
+                        <button class="flex text-sm w-full" @click="openPage({'VSS':'Asset_Documents'})">
+                            <i class="fa fa-file-image pt-2 mr-2" aria-hidden="true"></i>
+                            <p class="">Asset Documents</p>
                         </button>
                     </div>
                 </div>

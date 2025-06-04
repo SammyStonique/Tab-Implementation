@@ -43,6 +43,7 @@ import Sale_Profile from '@/components/SAP/Sale_Profile.vue';
 
 import Agents_Commissions from '@/components/SAP/Agents_Commissions.vue';
 import Sale_Documents from '@/components/SAP/Sale_Documents.vue';
+import Asset_Documents from '@/components/SAP/Asset_Documents.vue';
 
 export default{
     components:{
@@ -51,7 +52,7 @@ export default{
         PagesTab,
         Dashboard,
         Sale_Assets,Asset_Units,Unit_Categories,Clients,Unit_Reservations,Reservation_Details,Asset_Sales,Sale_Details,Sale_Profile,
-        Payment_Plans,Agents_Commissions,Sale_Documents,
+        Payment_Plans,Agents_Commissions,Sale_Documents,Asset_Documents,
 
     },
     props: {

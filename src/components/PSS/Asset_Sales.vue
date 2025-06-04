@@ -384,7 +384,7 @@ export default{
         }
         const addNewSale = async() =>{
             store.commit('Asset_Sales/initializeStore');
-            await store.dispatch('Asset_Sales/updateState', {selectedSale: null, selectedAgent: null, selectedPlan: null, selectedAsset: null, selectedClient: null,saleCharges:[],saleUnits:[],assetSchedules:[], isEditing:false});
+            await store.dispatch('Asset_Sales/updateState', {selectedSale: null,selectedReservation: null, selectedTransfer: null, selectedAgent: null, selectedPlan: null, selectedAsset: null, selectedClient: null,saleCharges:[],saleUnits:[],assetSchedules:[], isEditing:false});
             await store.dispatch('Asset_Fees/updateState', {saleFeeArray: []})
             await store.dispatch("Asset_Units/updateState", {unitArray: []})
             await store.dispatch("Payment_Plans/updateState", {salePlanArray: []})
@@ -395,7 +395,7 @@ export default{
             if( action == 'edit'){
                 const assetStatus = row['approval_status']
                 if(assetStatus == 'Pending'){
-                    await store.dispatch('Asset_Sales/updateState', {selectedSale: null, selectedAgent: null, selectedPlan: null, selectedAsset: null, selectedClient: null,saleCharges:[],saleUnits:[],assetSchedules:[], isEditing:false});
+                    await store.dispatch('Asset_Sales/updateState', {selectedSale: null, selectedReservation: null, selectedTransfer: null, selectedAgent: null, selectedPlan: null, selectedAsset: null, selectedClient: null,saleCharges:[],saleUnits:[],assetSchedules:[], isEditing:false});
                     const saleID = row[idField];
                     let formData = {
                         company: companyID.value,

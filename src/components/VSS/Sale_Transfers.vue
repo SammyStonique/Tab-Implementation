@@ -467,7 +467,7 @@ export default{
             showTransModalLoader();
             let formData = {
                 unit_sale_transfer: transferID.value,
-                approval_status: formFields.value[0].value,
+                approval_status: formFields1.value[0].value,
                 company: companyID.value
             }
 
@@ -477,7 +477,7 @@ export default{
                 hideTransModalLoader();
                 closeTransModal();
                 toast.success("Success")
-                searchAssetSales();
+                searchTransfers();
             }else{
                 toast.error("Error");
                 hideTransModalLoader();

@@ -450,8 +450,8 @@ export default{
         const approveRefund = async() =>{
             showTransModalLoader();
             let formData = {
-                unit_sale_refund: refundID.value,
-                approval_status: formFields.value[0].value,
+                sale_refund: refundID.value,
+                approval_status: formFields1.value[0].value,
                 company: companyID.value
             }
 
@@ -461,7 +461,7 @@ export default{
                 hideTransModalLoader();
                 closeTransModal();
                 toast.success("Success")
-                searchAssetSales();
+                searchRefunds();
             }else{
                 toast.error("Error");
                 hideTransModalLoader();

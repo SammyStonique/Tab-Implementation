@@ -111,6 +111,7 @@ export default{
         const showTotals = ref(false);
         const actions = ref([
             {name: 'approve/reject', icon: 'fa fa-check-circle', title: 'Approve/Reject Transfer', rightName: 'Approving Sale Transfers'},
+            {name: 'convert', icon: 'fa fa-sign-in', title: 'Create Sale', rightName: 'Adding Asset Sales'},
             {name: 'delete', icon: 'fa fa-trash', title: 'Delete Transfer', rightName: 'Deleting Sale Transfers'},
         ])
         const companyID = computed(()=> store.state.userData.company_id);
@@ -242,6 +243,24 @@ export default{
                     flex_basis_percentage.value = '50';
                 }else{
                     toast.error(`Transfer Already ${transferStatus}`)
+                }
+            }else if( action == 'convert'){
+                const approvalStatus = row['approval_status']
+                if(approvalStatus == 'Approved'){
+                    await store.dispatch('Asset_Sales/updateState', {selectedSale: null,selectedReservation: null, selectedTransfer: null, selectedAgent: null, selectedPlan: null, selectedAsset: null, selectedClient: null,saleCharges:[],saleUnits:[],assetSchedules:[], isEditing:false});
+                    const transferID = row[idField];
+                    let formData = {
+                        company: companyID.value,
+                        unit_sale_transfer: transferID
+                    }
+                    await store.dispatch('Asset_Sales/fetchUnitTransfer',formData).
+                    then(()=>{
+                        store.commit('pageTab/ADD_PAGE', {'PSS':'Sale_Details'})
+                        store.state.pageTab.pssActiveTab = 'Sale_Details';
+                        
+                    })
+                }else{
+                    toast.error(`Cannot Create Sale From ${approvalStatus} Transfer`);
                 }
             }
         } 
@@ -466,8 +485,8 @@ export default{
         const approveTransfer = async() =>{
             showTransModalLoader();
             let formData = {
-                unit_sale_transfer: transferID.value,
-                approval_status: formFields.value[0].value,
+                sale_transfer: transferID.value,
+                approval_status: formFields1.value[0].value,
                 company: companyID.value
             }
 
@@ -477,7 +496,7 @@ export default{
                 hideTransModalLoader();
                 closeTransModal();
                 toast.success("Success")
-                searchAssetSales();
+                searchTransfers();
             }else{
                 toast.error("Error");
                 hideTransModalLoader();

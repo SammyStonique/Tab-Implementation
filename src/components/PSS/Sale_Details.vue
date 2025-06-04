@@ -90,6 +90,7 @@ export default defineComponent({
         const companyID = computed(()=> store.state.userData.company_id);
         const userID = computed(()=> store.state.userData.user_id);
         const selectedReservation = computed(()=> store.state.Asset_Sales.selectedReservation);
+        const selectedTransfer = computed(()=> store.state.Asset_Sales.selectedTransfer);
         const selectedSale = computed(()=> store.state.Asset_Sales.selectedSale);
         const selectedClient = computed(()=> store.state.Asset_Sales.selectedClient);
         const selectedAsset = computed(()=> store.state.Asset_Sales.selectedAsset);
@@ -440,6 +441,21 @@ export default defineComponent({
             
         }, { immediate: true });
 
+        watch([selectedTransfer], () => {
+            if(selectedTransfer.value){
+                clientComponetKey.value += 1;
+                planComponentKey.value += 1;
+                assetComponentKey.value += 1;
+                store.dispatch('Asset_Units/updateState', { unitArray: saleUnits.value})
+                fetchAssetUnits(selectedTransfer.value.sale_item.asset_sale.asset.sale_asset_id)
+                fetchSalePlans(selectedTransfer.value.sale_item.asset_sale.asset.sale_asset_id)
+                updateFormFields();
+                clientID.value = selectedTransfer.value.customer_to.asset_sale_client_id;
+                assetID.value = selectedTransfer.value.sale_item.asset_sale.asset.sale_asset_id;
+            }
+            
+        }, { immediate: true });
+
         watch([selectedSale, selectedAsset, selectedClient, selectedPlan, selectedAgent], () => {
             if (selectedSale.value && selectedAsset.value && selectedClient.value && selectedPlan.value && selectedAgent.value) {
                 clientComponetKey.value += 1;
@@ -530,7 +546,7 @@ export default defineComponent({
             await store.dispatch('Payment_Plans/updateState', { salePlanArr: []});
             await store.dispatch("Asset_Units/updateState", {unitArray: []})
             await store.dispatch('Asset_Fees/updateState', {saleFeeArray: []});
-            await store.dispatch('Asset_Sales/updateState', {selectedSale: null, selectedReservation: null, selectedAgent: null, selectedPlan: null, selectedAsset: null, selectedClient: null,saleCharges:[],saleUnits:[],assetSchedules:[], isEditing:false});
+            await store.dispatch('Asset_Sales/updateState', {selectedSale: null, selectedReservation: null, selectedTransfer: null, selectedAgent: null, selectedPlan: null, selectedAsset: null, selectedClient: null,saleCharges:[],saleUnits:[],assetSchedules:[], isEditing:false});
             planComponentKey.value += 1;
             assetComponentKey.value += 1;
             clientComponetKey.value += 1;

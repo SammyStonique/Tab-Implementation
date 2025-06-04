@@ -166,13 +166,13 @@ export default {
             try {
                 await axios.post("api/v1/update-session-data/", company_data).
                 then(()=>{
-                    store.dispatch('userData/reloadPage');
+                    // store.dispatch('userData/reloadPage');
                 })
             } catch (error) {
                 console.log(error);
             } finally {
                 hideLoader();
-                
+                store.dispatch('userData/reloadPage');
             }
         };
 

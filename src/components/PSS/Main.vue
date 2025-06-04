@@ -59,6 +59,7 @@ import Sales_Commissions from '@/components/PSS/Sales_Commissions.vue';
 import Agents_Commissions from '@/components/PSS/Agents_Commissions.vue';
 import Penalty_Batches from '@/components/PSS/Penalty_Batches.vue';
 import Sale_Penalties from '@/components/PSS/Sale_Penalties.vue';
+import Asset_Documents from '@/components/PSS/Asset_Documents.vue';
 import Sale_Documents from '@/components/PSS/Sale_Documents.vue';
 import Sale_Fees from '@/components/PSS/Sale_Fees.vue';
 import Sale_Arrears from '@/components/PSS/Sale_Arrears.vue';
@@ -80,7 +81,7 @@ export default{
         Dashboard,
         Sale_Assets,Asset_Details,Asset_Profile,Asset_Types,Receipt_Details,Asset_Designs,Asset_Units,Unit_Categories,Clients,Vendors,Sales_Agents,Unit_Reservations,Reservation_Details,
         Sale_Invoices,Sale_Receipts,Asset_Sales,Sale_Details,Sale_Profile,Payment_Plans,Sales_Commissions,Agents_Commissions,Sale_Penalties,Penalty_Batches,Sale_Documents,Sale_Fees,Historical_Sales,Import_Historical_Sales,
-        Sale_Arrears,Sale_Prepayments,Prepayment_Allocations,Templates,Design_Template,Sale_Transfers,Asset_Fees,Sale_Refunds,
+        Sale_Arrears,Sale_Prepayments,Prepayment_Allocations,Templates,Design_Template,Sale_Transfers,Asset_Fees,Sale_Refunds,Asset_Documents,
 
         Default_Settings
     },

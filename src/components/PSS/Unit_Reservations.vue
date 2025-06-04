@@ -326,7 +326,7 @@ export default{
             }else if( action == 'convert'){
                 const reservationStatus = row['status']
                 if(reservationStatus == 'Active'){
-                    await store.dispatch('Asset_Sales/updateState', {selectedSale: null, selectedAgent: null, selectedPlan: null, selectedAsset: null, selectedClient: null,saleCharges:[],saleUnits:[],assetSchedules:[], isEditing:false});
+                    await store.dispatch('Asset_Sales/updateState', {selectedSale: null,selectedReservation: null, selectedTransfer: null, selectedAgent: null, selectedPlan: null, selectedAsset: null, selectedClient: null,saleCharges:[],saleUnits:[],assetSchedules:[], isEditing:false});
                     const reservationID = row[idField];
                     let formData = {
                         company: companyID.value,

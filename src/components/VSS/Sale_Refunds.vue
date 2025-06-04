@@ -451,7 +451,7 @@ export default{
             showTransModalLoader();
             let formData = {
                 unit_sale_refund: refundID.value,
-                approval_status: formFields.value[0].value,
+                approval_status: formFields1.value[0].value,
                 company: companyID.value
             }
 
