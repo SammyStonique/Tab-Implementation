@@ -442,12 +442,12 @@ export default{
         }
 
         const dropdownOptions = ref([
-            {label: 'Withholding Tax', action: 'withholding-tax'},
+            {label: 'Direct Voucher', action: 'direct-voucher'},
         ]);
         const handleDynamicOption = (option) =>{
-            if(option == 'batch-meter-reading'){
-                store.commit('pageTab/ADD_PAGE', {'PMS':'Batch_Readings'})
-                store.state.pageTab.faActiveTab = 'Batch_Readings';
+            if(option == 'direct-voucher'){
+                store.commit('pageTab/ADD_PAGE', {'FA':'Direct_Voucher'});
+                store.state.pageTab.faActiveTab = 'Direct_Voucher';
             }
         };
         const printVouchersList = () =>{

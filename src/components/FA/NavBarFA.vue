@@ -63,7 +63,7 @@
                         <p class="pt-1.5">Bills</p>
                     </button>
                 </div>
-                <div class="dropdown-content w-40 absolute rounded border border-gray-200 bg-white shadow-slate-400 shadow-sm pt-2" v-if="bills_dropdown">       
+                <div class="dropdown-content w-44 absolute rounded border border-gray-200 bg-white shadow-slate-400 shadow-sm pt-2" v-if="bills_dropdown">       
                     <div class="py-2 px-3 pl-4 w-full hover:bg-slate-500 hover:w-full">
                         <button class="flex text-sm" @click="openPage({'FA':'General_Bills'})">
                             <i class="fa fa-credit-card pt-2 mr-2" aria-hidden="true"></i>

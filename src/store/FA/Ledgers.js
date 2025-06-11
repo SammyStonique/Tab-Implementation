@@ -26,6 +26,7 @@ const state = {
   jnlArray: [],
   invoiceItemsArray: [],
   billItemsArray: [],
+  paymentItemsArray: [],
   journalItemsArray: [],
 };
   
@@ -304,6 +305,27 @@ const actions = {
     state.billItemsArray.push(selectedLedger);
       
   },
+  handleSelectedLedgerVoucher({ commit, state }, option){
+    state.ledgerArray = [];
+    const selectedLedger = state.ledgersList.find(ledger => (ledger.ledger_code + " - " +ledger.ledger_name) === option);
+    if (selectedLedger) {
+        state.ledgerID = selectedLedger.ledger_id;
+        state.ledgerName = selectedLedger.ledger_code + " - " + selectedLedger.ledger_name;
+        selectedLedger.posting_account = selectedLedger.ledger_code + " - " + selectedLedger.ledger_name;
+        selectedLedger.charge_type = "";
+        selectedLedger.description = "";
+        selectedLedger.cost = 0;
+        selectedLedger.quantity = 1;
+        selectedLedger.vat_rate = null;
+        selectedLedger.vat_inclusivity = "Inclusive";
+        selectedLedger.vat_amount = 0;
+        selectedLedger.sub_total = 0;
+        selectedLedger.total_amount = 0;
+        state.ledgerArray = [...state.ledgerArray, selectedLedger];
+    }
+    state.paymentItemsArray.push(selectedLedger);
+      
+  },
 
   handleJournalLedger({ commit, state }, option){
     state.ledgerArray = [];
@@ -378,6 +400,9 @@ const actions = {
   },
   removeBillLine({commit, state}, index){
     state.billItemsArray.splice(index, 1); 
+  },
+  removeVoucherLine({commit, state}, index){
+    state.paymentItemsArray.splice(index, 1); 
   },
   removeJournalLine({commit, state}, index){
     state.journalItemsArray.splice(index, 1); 

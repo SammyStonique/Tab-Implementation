@@ -5,7 +5,7 @@
                 <DynamicForm  :fields="formFields" :flex_basis="flex_basis" :flex_basis_percentage="flex_basis_percentage" :displayButtons="displayButtons" @handleSubmit="createJournal" @handleReset="handleReset"> 
                     <template v-slot:additional-content>                    
                         <div class="px-3 min-h-[280px]">
-                            <DynamicTable :key="tableKey" :showTotals="showTotals" :columns="invoiceColumns" :rows="invoiceRows" :showActions="showActions" :idField="idField" :actions="actions" @action-click="deleteJournalLine"/>
+                            <DynamicTable :key="tableKey" :showTotals="showTotals" :columns="invoiceColumns" :rows="invoiceRows" :showActions="showActions" :idField="idField" :actions="actions" :rightsModule="rightsModule" @action-click="deleteJournalLine"/>
                         </div>
                     </template>
                 </DynamicForm>
@@ -44,6 +44,7 @@ export default defineComponent({
         const creditTotals = ref(0);
         const journalEntryArr = ref([]);
         const title = ref('Add Prepayment');
+        const rightsModule = ref('Accounts');
         const modal_top = ref('150px');
         const modal_left = ref('400px');
         const modal_width = ref('32vw');
@@ -69,7 +70,7 @@ export default defineComponent({
         ]);
         const showTotals = ref(true);
         const actions = ref([
-            {name: 'delete', icon: 'fa fa-minus-circle', title: 'Remove Journal Line'},
+            {name: 'delete', icon: 'fa fa-minus-circle', title: 'Remove Journal Line', rightName: "Adding Journal"},
         ])
 
         const deleteJournalLine = (rowIndex, action, row) =>{
@@ -219,7 +220,7 @@ export default defineComponent({
         return{
             formFields, flex_basis, flex_basis_percentage, displayButtons, createJournal, mainComponentKey,showTotals,
             handleReset, loader, showLoader, hideLoader, tableKey, invoiceColumns, invoiceRows, showActions, actions, deleteJournalLine, idField,
-            title, modal_loader, modal_left, modal_top, modal_width, showModalLoader, hideModalLoader,
+            title, modal_loader, modal_left, modal_top, modal_width, showModalLoader, hideModalLoader,rightsModule
         }
     }
 })

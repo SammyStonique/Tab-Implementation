@@ -383,7 +383,7 @@ export default{
         const idField = 'ledger_id';
         const depModalVisible = ref(false);
         const chartOfAccountsList = ref([]);
-        const allowedRights = ref([]);
+        const allowedRights = computed(()=> store.state.userData.permissions);
         const patient_ledger_totals = ref(0);
         const patientLedger = ref(false);
         const vendor_ledger_totals = ref(0);
@@ -434,7 +434,7 @@ export default{
         ])
         const companyID = computed(()=> store.state.userData.company_id);
         const userID = computed(()=> store.state.userData.user_id);
-        const defaultSettings = computed(()=> store.state.Default_Settings.settingsList);
+        const defaultSettings = computed(()=> store.state.userData.defaultSettings);
         const ledger_code_search = computed({
             get: () => store.state.Ledgers.ledger_code_search,
             set: (value) => store.commit('Ledgers/SET_SEARCH_FILTERS', {"ledger_code_search":value}),
@@ -456,7 +456,6 @@ export default{
             },
         ]);
         const fetchDefaultSettings = async() =>{
-            await store.dispatch('Default_Settings/fetchDefaultSettings', {company:companyID.value})
             for(let i=0; i < defaultSettings.value.length; i++){
                 if(defaultSettings.value[i].setting_name === 'Merge Patients Ledgers in Reports'){
                     merge_patients_setting.value = defaultSettings.value[i].setting_value_name;
@@ -485,24 +484,8 @@ export default{
             }        
         }, { immediate: true });
 
-        const fetchEnabledRights = () =>{
-            allowedRights.value = [];
-            let formData = {
-                user: userID.value,
-                company: companyID.value,
-                module: rightsModule.value
-            }
-            axios
-            .post("api/v1/user-permissions-search/",formData)
-            .then((response)=>{
-                allowedRights.value = response.data.results;
-            })
-            .catch((error)=>{
-                console.log(error.message);
-            })
-        };
         const isDisabled =(permissionName) =>{
-            const permission = allowedRights.value.find(p => p.permission_name === permissionName);
+            const permission = allowedRights.value.find(p => p.rightName === permissionName);
             return permission ? !permission.right_status : true;
         };
 
@@ -714,7 +697,12 @@ export default{
             showLoader();
             patient_ledger_totals.value = 0;
             vendor_ledger_totals.value = 0;
+            customer_ledger_totals.value = 0;
             tenant_ledger_totals.value = 0;
+            saving_ledger_totals.value = 0;
+            share_ledger_totals.value = 0;
+            loan_ledger_totals.value = 0;
+            member_ledger_totals.value = 0;
 
             let formData = {
                 ledger_code: ledger_code_search.value,
@@ -900,8 +888,8 @@ export default{
         };
 
         onBeforeMount(()=>{
-            fetchDefaultSettings();  
-            fetchEnabledRights();         
+            fetchDefaultSettings(); 
+            allowedRights.value = store.state.userData.permissions;     
         });
         onMounted(()=>{
             searchChartOfAccounts();
@@ -912,7 +900,7 @@ export default{
             loadPrev, loadNext, firstPage, lastPage, actions, formFields, depModalVisible, addNewLedger,
             displayButtons,flex_basis,flex_basis_percentage, handleReset, saveLedger,
             showLoader, loader, hideLoader, modal_loader, showModalLoader, hideModalLoader, removeLedger,
-            fetchEnabledRights, isDisabled, editLedger, blockLedger, unblockLedger, viewLedger,addingRight,rightsModule
+            isDisabled, editLedger, blockLedger, unblockLedger, viewLedger,addingRight,rightsModule
         }
     }
 }
