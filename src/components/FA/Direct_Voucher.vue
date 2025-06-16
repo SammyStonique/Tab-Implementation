@@ -262,7 +262,7 @@ export default defineComponent({
                 company: companyID.value,
                 client: formFields.value[0].value,
                 client_id: ledgerID.value,
-                customer_id: "",
+                customer_id: "Direct Payment",
                 client_category: "Customers",
                 description: formFields.value[8].value,
                 txn_type: "PMT",

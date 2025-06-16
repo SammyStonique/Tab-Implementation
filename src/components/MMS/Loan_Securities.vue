@@ -205,15 +205,13 @@ export default{
         };
         const updateFormFields1 = () => {
             formFields1.value = [
-                { type: 'dropdown', name: 'security_status',label: "Status", value: selectedSecurity.value?.security_status || '', placeholder: "", required: true, options: [{ text: 'Borrower Possession', value: 'Borrower Possession' }, { text: 'Company Possession', value: 'Company Possession' }, { text: 'Auctioned', value: 'Auctioned' },{ text: 'Reclaimed', value: 'Reclaimed' }, { text: 'Under Litigation', value: 'Under Litigation' },{ text: 'Writen-off', value: 'Writen-off' },{ text: 'Settled', value: 'Settled' }] },
+                { type: 'dropdown', name: 'security_status',label: "Status", value: selectedSecurity.value?.security_status || '', placeholder: "", required: true, options: [{ text: 'Borrower Possession', value: 'Borrower Possession' }, { text: 'Company Possession', value: 'Company Possession' }, { text: 'Joint Possession', value: 'Joint Possession' }, { text: 'Auctioned', value: 'Auctioned' },{ text: 'Reclaimed', value: 'Reclaimed' }, { text: 'Under Litigation', value: 'Under Litigation' },{ text: 'Writen-off', value: 'Writen-off' },{ text: 'Settled', value: 'Settled' }] },
             ];
             
         };
         const handleFileChange = (fileData) => {
             filePath.value = fileData.filePath;
             upload_file.value = fileData.file;
-            console.log("THE FILE PATH IS ",filePath.value)
-            console.log("THE UPLOAD FILE IS ",upload_file.value)
         };
         const updateFormFields2 = () => {
             formFields2.value = [

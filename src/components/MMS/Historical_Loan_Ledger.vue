@@ -218,6 +218,7 @@ export default defineComponent({
             {label: "Txn No", key:"journal.journal_no", type: "text", editable: false},
             {label: "Description", key: "description", type: "text", editable: false},
             {label: "Amount", key: "amount", type: "number", editable: false},
+            {label: "Paid By", key: "journal.client", type: "text", editable: false},
         ]);
         const guarantorColumns = ref([
             {type: "checkbox"},

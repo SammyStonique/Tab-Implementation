@@ -67,7 +67,7 @@ export default{
         const title = ref('Loan Fees Details');
         const addButtonLabel = ref('New Fee');
         const addingRight = ref('Adding Loan Fees');
-        const removingRight = ref('Deleting Loan Feess');
+        const removingRight = ref('Deleting Loan Fees');
         const rightsModule = ref('MMS');
         const idField = 'loan_application_fee_id';
         const depModalVisible = ref(false);
@@ -110,7 +110,7 @@ export default{
         const actions = ref([
             {name: 'mark-posted', icon: 'fa fa-spinner', title: 'Mark As Posted', rightName: 'Adding Loan Fees'},
             {name: 'unmark-posted', icon: 'fa fa-minus-circle', title: 'Unmark As Posted', rightName: 'Adding Loan Fees'},
-            {name: 'delete', icon: 'fa fa-trash', title: 'Delete Fee', rightName: 'Deleting Loan Feess'},
+            {name: 'delete', icon: 'fa fa-trash', title: 'Delete Fee', rightName: 'Deleting Loan Fees'},
         ])
         const companyID = computed(()=> store.state.userData.company_id);
         const loanFeeID = ref('');

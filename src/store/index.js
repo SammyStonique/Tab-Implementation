@@ -127,6 +127,7 @@ import Loan_Prepayment_Alloc from './MMS/Loan_Prepayment_Alloc';
 import Member_Templates from './MMS/Member_Templates';
 import Risk_Classifications from './MMS/Risk_Classifications';
 import Loan_Classifications from './MMS/Loan_Classifications';
+import Loan_Recovery from './MMS/Loan_Recovery';
 
 
 import Asset_Makes from './PSS/Asset_Makes';
@@ -188,7 +189,7 @@ export default createStore({
     Member_Categories,Member_Sponsors,Members,Membership_Fees,Savings_Products,Shares_Products,Saving_Accounts,Share_Accounts,Saving_Deposits,Share_Deposits,
     Loan_Products,Loan_Fees,Loan_Applications,Loan_Guarantors,Loan_Disbursements,Security_Types,Loan_Securities,Application_Fees,Loan_Schedules,Loan_Penalties,
     Penalty_Batches,Loan_Documents,Historical_Loans,Loan_Arrears,Saving_Transfers,Share_Transfers,Loan_Prepayments,Loan_Prepayment_Alloc,Interest_Rates,Interest_Processing,
-    Dividend_Rates,Dividend_Processing,Member_Templates,Risk_Classifications,Loan_Classifications,
+    Dividend_Rates,Dividend_Processing,Member_Templates,Risk_Classifications,Loan_Classifications,Loan_Recovery,
 
     Asset_Makes,Asset_Models,Payment_Plans,Asset_Fees,Sale_Assets,Asset_Units,Unit_Categories,Asset_Clients,Sales_Agents,Unit_Reservations,Asset_Sales,Sale_Fees,
     Sale_Prepayments,Sale_Prepayment_Alloc,Sale_Penalty_Batches,Sale_Penalties,Sale_Documents,Sale_Transfers,Sale_Refunds,Asset_Documents,

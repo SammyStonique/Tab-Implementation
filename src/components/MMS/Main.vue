@@ -83,6 +83,7 @@ import Templates from '@/components/MMS/Templates.vue';
 import Design_Template from '@/components/MMS/Design_Template.vue';
 import Risk_Classifications from '@/components/MMS/Risk_Classifications.vue';
 import Loan_Classifications from '@/components/MMS/Loan_Classifications.vue';
+import Loan_Recovery from '@/components/MMS/Loan_Recovery.vue';
 
 import Default_Settings from '@/components/SET/Default_Settings.vue';
 
@@ -98,7 +99,7 @@ export default{
         Loan_Disbursements,Import_Saving_Accounts,Import_Share_Accounts,Import_Saving_Deposits,Import_Share_Deposits,Security_Types,Loan_Securities,
         Loan_Schedules,Loan_Penalties,Penalty_Batches,Loan_Documents,Application_Fees,Historical_Loans,Import_Historical_Loans,Historical_Loan_Ledger,
         Loan_Arrears,Saving_Transfers,Share_Transfers,Loan_Prepayments,Prepayment_Allocations,Interest_Rates,Dividend_Rates,Interest_Processing,Dividend_Processing,
-        Templates,Design_Template,Share_Account_Details,Saving_Account_Details,Risk_Classifications,Loan_Classifications,
+        Templates,Design_Template,Share_Account_Details,Saving_Account_Details,Risk_Classifications,Loan_Classifications,Loan_Recovery,
 
         Default_Settings
     },

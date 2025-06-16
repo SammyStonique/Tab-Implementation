@@ -10,7 +10,7 @@
 import axios from 'axios';
 import Login from './views/Login.vue';
 import Main from './views/Main.vue';
-import { onBeforeMount, onMounted, computed } from 'vue';
+import { onBeforeMount, onMounted, computed, watch } from 'vue';
 import { useStore } from 'vuex';
 import ContextMenu from './components/ContextMenu.vue';
 
@@ -24,22 +24,32 @@ export default{
     const deviceID = computed(() => store.state.userData.device_id);
     const userID = computed(() => store.state.userData.user_id);
 
-    const isIdle = computed(() => {
-        // Check if the user is idle
-        const idleStatus = store.state.idleVue.isIdle;
-        const companyID = store.state.userData.company_id;
+    // const isIdle = computed(() => {
+    //     const idleStatus = store.state.idleVue.isIdle;
+    //     const companyID = store.state.userData.company_id;
 
-        // Commit mutation if the user is idle
-        if (idleStatus == true && companyID != "" && activeComponent != 'Login') {
-          let formData = {
-                user_id: userID.value,
-                device_id: deviceID.value,
-            }
-            store.dispatch("userData/logout", formData);
+    //     if (idleStatus == true && companyID != "" && activeComponent != 'Login') {
+    //       let formData = {
+    //             user_id: userID.value,
+    //             device_id: deviceID.value,
+    //         }
+    //         store.dispatch("userData/logout", formData);
             
-        }
+    //     }
 
-        return idleStatus;
+    //     return idleStatus;
+    // });
+
+    const isIdle = computed(() => store.state.idleVue.isIdle);
+    watch(isIdle, (newVal) => {
+      const companyID = store.state.userData.company_id;
+      if (newVal === true && companyID && activeComponent.value === "Main") {
+        const formData = {
+          user_id: userID.value,
+          device_id: deviceID.value,
+        };
+        store.dispatch("userData/logout", formData);
+      }
     });
 
     onBeforeMount(()=>{

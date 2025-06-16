@@ -7,6 +7,7 @@ const state = {
   guarantorArray: [],
   guarantorID: '',
   guarantorName: '',
+  applicationNumber: '',
   loanGuarantors: [],
   membersList: [], 
   memberArr: [],
@@ -26,6 +27,7 @@ const mutations = {
     state.guarantorArray = [];
     state.guarantorID = "";
     state.guarantorName = "";
+    sate.applicationNumber = "";
     state.selectedGuarantor = null;
     state.selectedApplication = null;
     state.selectedMember = null;
@@ -139,6 +141,7 @@ const actions = {
     if (selectedGuarantor) {
         state.guarantorID = selectedGuarantor.loan_guarantor_id;
         state.guarantorName = selectedGuarantor.member.member_name;
+        state.applicationNumber = selectedGuarantor.loan_application.loan_number;
         selectedGuarantor.member_loan_guarantor_id = null;
         state.guarantorArray = [...state.guarantorArray, selectedGuarantor];
 

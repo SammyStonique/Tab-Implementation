@@ -73,6 +73,7 @@ export default defineComponent({
         const shaComponentKey = ref(0);
         const lonComponentKey = ref(0);
         const ledComponentKey = ref(0);
+        const grntComponentKey = ref(0);
         const receipt_totals = ref(0);
         const receiptTotals = ref(0);
         const receipt_memo = ref('');
@@ -93,6 +94,7 @@ export default defineComponent({
         const loansArray = computed(() => store.state.Loan_Applications.applicationArr);
         const grntLoansArr = computed(() => store.state.Loan_Applications.grntLoansArr);
         const loanFeesArray = computed(() => store.state.Application_Fees.feeArr);
+        const guarantorsArray = computed(() => store.state.Loan_Guarantors.guarantorArr);
         const errors = ref([]);
         const itemObj = ref({});
         const companyID = computed(()=> store.state.userData.company_id);
@@ -563,11 +565,13 @@ export default defineComponent({
                 additionalFields1.value[4].disabled = 'disabled-div';
                 additionalFields1.value[5].disabled = 'disabled-div';
                 additionalFields1.value[6].disabled = 'disabled-div';
+                additionalFields1.value[7].disabled = 'disabled-div';
                 additionalFields1.value[2].hidden = false;
                 additionalFields1.value[3].hidden = true;
                 additionalFields1.value[4].hidden = true;
                 additionalFields1.value[5].hidden = true;
                 additionalFields1.value[6].hidden = true;
+                additionalFields1.value[7].hidden = true;
                 lonComponentKey.value += 1;
                 shaComponentKey.value += 1;
             }else if(value == "Shares"){
@@ -576,11 +580,13 @@ export default defineComponent({
                 additionalFields1.value[4].disabled = 'disabled-div';
                 additionalFields1.value[5].disabled = 'disabled-div';
                 additionalFields1.value[6].disabled = 'disabled-div';
+                additionalFields1.value[7].disabled = 'disabled-div';
                 additionalFields1.value[3].hidden = false;
                 additionalFields1.value[2].hidden = true;
                 additionalFields1.value[4].hidden = true;
                 additionalFields1.value[5].hidden = true;
                 additionalFields1.value[6].hidden = true;
+                additionalFields1.value[7].hidden = true;
                 lonComponentKey.value += 1;
                 savComponentKey.value += 1;
             }else if(value == "Loan"){
@@ -589,11 +595,13 @@ export default defineComponent({
                 additionalFields1.value[2].disabled = 'disabled-div';
                 additionalFields1.value[5].disabled = 'disabled-div';
                 additionalFields1.value[6].disabled = 'disabled-div';
+                additionalFields1.value[7].disabled = 'disabled-div';
                 additionalFields1.value[2].hidden = true;
                 additionalFields1.value[3].hidden = true;
                 additionalFields1.value[4].hidden = false;
                 additionalFields1.value[5].hidden = true;
                 additionalFields1.value[6].hidden = true;
+                additionalFields1.value[7].hidden = true;
                 savComponentKey.value += 1;
                 shaComponentKey.value += 1;
             }else if(value == "Guaranteed Loan"){
@@ -602,11 +610,13 @@ export default defineComponent({
                 additionalFields1.value[2].disabled = 'disabled-div';
                 additionalFields1.value[4].disabled = 'disabled-div';
                 additionalFields1.value[6].disabled = 'disabled-div';
+                additionalFields1.value[7].disabled = 'disabled-div';
                 additionalFields1.value[2].hidden = true;
                 additionalFields1.value[3].hidden = true;
                 additionalFields1.value[4].hidden = true;
                 additionalFields1.value[5].hidden = false;
                 additionalFields1.value[6].hidden = true;
+                additionalFields1.value[7].hidden = true;
                 savComponentKey.value += 1;
                 shaComponentKey.value += 1;
             }else if(value == "Loan Fees"){
@@ -615,11 +625,28 @@ export default defineComponent({
                 additionalFields1.value[2].disabled = 'disabled-div';
                 additionalFields1.value[4].disabled = 'disabled-div';
                 additionalFields1.value[5].disabled = 'disabled-div';
+                additionalFields1.value[7].disabled = 'disabled-div';
                 additionalFields1.value[2].hidden = true;
                 additionalFields1.value[3].hidden = true;
                 additionalFields1.value[5].hidden = true;
                 additionalFields1.value[4].hidden = true;
                 additionalFields1.value[6].hidden = false;
+                additionalFields1.value[7].hidden = true;
+                savComponentKey.value += 1;
+                shaComponentKey.value += 1;
+            }else if(value == "Loan Recovery"){
+                additionalFields1.value[7].disabled = '';
+                additionalFields1.value[3].disabled = 'disabled-div';
+                additionalFields1.value[2].disabled = 'disabled-div';
+                additionalFields1.value[4].disabled = 'disabled-div';
+                additionalFields1.value[5].disabled = 'disabled-div';
+                additionalFields1.value[6].disabled = 'disabled-div';
+                additionalFields1.value[2].hidden = true;
+                additionalFields1.value[3].hidden = true;
+                additionalFields1.value[5].hidden = true;
+                additionalFields1.value[4].hidden = true;
+                additionalFields1.value[6].hidden = true;
+                additionalFields1.value[7].hidden = false;
                 savComponentKey.value += 1;
                 shaComponentKey.value += 1;
             }
@@ -724,10 +751,29 @@ export default defineComponent({
             await store.dispatch('Application_Fees/updateState', {feeID: ''});
             itemObj.value = {};
         };
+        const handleLoanGuarantor = async(option) =>{
+            await store.dispatch('Loan_Guarantors/handleSelectedGuarantor', option)
+            itemObj.value = {
+                journal_no : "LOAN RECOVERY",
+                type: "loan_recovery",
+                journal_id : store.state.Loan_Guarantors.guarantorID,
+                description : `Loan Repayment - ${store.state.Loan_Guarantors.applicationNumber}`,
+                total_amount : additionalFields1.value[1].value,
+                total_paid : additionalFields1.value[1].value,
+                due_amount : 0,
+                payment_allocation : additionalFields1.value[1].value,
+                bal_after_alloc : 0,
+                cost: additionalFields1.value[1].value
+            }
+        };
+        const clearLoanGuarantor = async() =>{
+            await store.dispatch('Loan_Guarantors/updateState', {guarantorID: '', applicationNumber: ''});
+            itemObj.value = {};
+        };
         const additionalFields1 = ref([]);
         const updateAdditionalFields1 = () =>{
             additionalFields1.value = [
-                { type: 'dropdown', name: 'item',label: "Receipt Item", value: '', placeholder: "", required: true, options: [{ text: 'Savings', value: 'Savings' }, { text: 'Shares', value: 'Shares' }, { text: 'Loan', value: 'Loan' }, { text: 'Guaranteed Loan', value: 'Guaranteed Loan' }, { text: 'Loan Fees', value: 'Loan Fees' }, { text: 'Membership Fees', value: 'Membership Fees' }, { text: 'Other Charges', value: 'Other Charges' }], method: selectReceiptItem },
+                { type: 'dropdown', name: 'item',label: "Receipt Item", value: '', placeholder: "", required: true, options: [{ text: 'Savings', value: 'Savings' }, { text: 'Shares', value: 'Shares' }, { text: 'Loan', value: 'Loan' }, { text: 'Guaranteed Loan', value: 'Guaranteed Loan' }, { text: 'Loan Recovery', value: 'Loan Recovery' }, { text: 'Loan Fees', value: 'Loan Fees' }, { text: 'Membership Fees', value: 'Membership Fees' }, { text: 'Other Charges', value: 'Other Charges' }], method: selectReceiptItem },
                 { type: 'text', name: 'amount',label: "Amount", value: '0', required: true },
                 {  
                     type:'search-dropdown', label:"Saving Account", value: '', componentKey: savComponentKey, disabled:'disabled-div',
@@ -758,6 +804,12 @@ export default defineComponent({
                     selectOptions: loanFeesArray, optionSelected: handleLoanApplicationFeeItem, required: false,
                     searchPlaceholder: 'Select Loan Fees...', dropdownWidth: '500px', hidden: true,
                     fetchData: store.dispatch('Application_Fees/fetchApplicationFees', {company:companyID.value,member: memberID.value}), clearSearch: clearLoanApplicationFeeItem
+                },
+                {  
+                    type:'search-dropdown', label:"Guarantors", value: '', componentKey: grntComponentKey, disabled:'disabled-div',
+                    selectOptions: guarantorsArray, optionSelected: handleLoanGuarantor, required: false,
+                    searchPlaceholder: 'Select Guarantor...', dropdownWidth: '500px', hidden: true,
+                    fetchData: store.dispatch('Loan_Guarantors/fetchLoanGuarantors', {company:companyID.value,member: memberID.value}), clearSearch: clearLoanGuarantor
                 },
             ]
         };
