@@ -110,7 +110,7 @@ export default{
             {name: 'view', icon: 'fa fa-file-pdf-o', title: 'View Ledger Details', rightName: 'View Ledger Statement'},
         ])
         const companyID = computed(()=> store.state.userData.company_id);
-        const defaultSettings = computed(()=> store.state.Default_Settings.settingsList);
+        const defaultSettings = computed(()=> store.state.userData.defaultSettings);
         const from_date_search = ref("");
         const to_date_search = ref("");
         const ledger_code_search = ref("");
@@ -122,7 +122,7 @@ export default{
             {type:'date', placeholder:"To Date...", value: to_date_search, width:36, title: "Date To Search"},
         ]);
         const fetchDefaultSettings = async() =>{
-            await store.dispatch('Default_Settings/fetchDefaultSettings', {company:companyID.value})
+            // await store.dispatch('Default_Settings/fetchDefaultSettings', {company:companyID.value})
             for(let i=0; i < defaultSettings.value.length; i++){
                 if(defaultSettings.value[i].setting_name === 'Merge Patients Ledgers in Reports'){
                     merge_patients_setting.value = defaultSettings.value[i].setting_value_name;
@@ -132,6 +132,12 @@ export default{
                     merge_vendors_setting.value = defaultSettings.value[i].setting_value_name;
                 }else if(defaultSettings.value[i].setting_name === 'Merge Tenants Ledgers in Reports'){
                     merge_tenants_setting.value = defaultSettings.value[i].setting_value_name;
+                }else if(defaultSettings.value[i].setting_name === 'Merge Loans Ledgers in Reports'){
+                    merge_loans_setting.value = defaultSettings.value[i].setting_value_name;
+                }else if(defaultSettings.value[i].setting_name === 'Merge Savings Ledgers in Reports'){
+                    merge_savings_setting.value = defaultSettings.value[i].setting_value_name;
+                }else if(defaultSettings.value[i].setting_name === 'Merge Shares Ledgers in Reports'){
+                    merge_shares_setting.value = defaultSettings.value[i].setting_value_name;
                 }
             }
         };

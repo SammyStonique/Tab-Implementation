@@ -207,6 +207,14 @@
                                 </select>
                                 <button type="button" class="absolute ml-2 rounded px-2 bg-green-500 text-white" @click="saveDefaultSetting('Accounts','Merge Debtors Ledgers in Reports',debtorsOption,debtorsOption)"><i class="fa fa-check"></i></button>
                             </div>
+                            <div class="basis-1/4 relative mr-12">
+                                <label for="">Merge Loans Ledgers in Reports:<em>*</em></label><br />
+                                <select  v-model="loansOption" name="" class="bg-slate-50 rounded border border-gray-400 text-sm pl-2 pt-2 w-full">
+                                    <option value="Yes">Yes</option>
+                                    <option value="No">No</option>
+                                </select>
+                                <button type="button" class="absolute ml-2 rounded px-2 bg-green-500 text-white" @click="saveDefaultSetting('Accounts','Merge Loans Ledgers in Reports',loansOption,loansOption)"><i class="fa fa-check"></i></button>
+                            </div>
                         </div>
                         <div class="flex mb-3">
                             <div class="basis-1/4 relative mr-12">
@@ -217,6 +225,14 @@
                                 </select>
                                 <button type="button" class="absolute ml-2 rounded px-2 bg-green-500 text-white" @click="saveDefaultSetting('Accounts','Merge Vendors Ledgers in Reports',vendorsOption,vendorsOption)"><i class="fa fa-check"></i></button>
                             </div>
+                            <div class="basis-1/4 relative mr-12">
+                                <label for="">Merge Shares Ledgers in Reports:<em>*</em></label><br />
+                                <select  v-model="sharesOption" name="" class="bg-slate-50 rounded border border-gray-400 text-sm pl-2 pt-2 w-full">
+                                    <option value="Yes">Yes</option>
+                                    <option value="No">No</option>
+                                </select>
+                                <button type="button" class="absolute ml-2 rounded px-2 bg-green-500 text-white" @click="saveDefaultSetting('Accounts','Merge Shares Ledgers in Reports',sharesOption,sharesOption)"><i class="fa fa-check"></i></button>
+                            </div>
                         </div>
                         <div class="flex mb-3">
                             <div class="basis-1/4 relative mr-12">
@@ -226,6 +242,14 @@
                                     <option value="No">No</option>
                                 </select>
                                 <button type="button" class="absolute ml-2 rounded px-2 bg-green-500 text-white" @click="saveDefaultSetting('Accounts','Merge Tenants Ledgers in Reports',tenantsOption,tenantsOption)"><i class="fa fa-check"></i></button>
+                            </div>
+                            <div class="basis-1/4 relative mr-12">
+                                <label for="">Merge Savings Ledgers in Reports:<em>*</em></label><br />
+                                <select  v-model="savingsOption" name="" class="bg-slate-50 rounded border border-gray-400 text-sm pl-2 pt-2 w-full">
+                                    <option value="Yes">Yes</option>
+                                    <option value="No">No</option>
+                                </select>
+                                <button type="button" class="absolute ml-2 rounded px-2 bg-green-500 text-white" @click="saveDefaultSetting('Accounts','Merge Savings Ledgers in Reports',savingsOption,savingsOption)"><i class="fa fa-check"></i></button>
                             </div>
                         </div>
                     </div>
@@ -623,6 +647,9 @@ export default defineComponent({
         const debtorsOption = ref("");
         const vendorsOption = ref("");
         const tenantsOption = ref("");
+        const loansOption = ref("");
+        const sharesOption = ref("");
+        const savingsOption = ref("");
 
         const mmsAutoPenalizeOption = ref("");
         const mmsStrictGuarantorshipOption = ref("");
@@ -926,6 +953,12 @@ export default defineComponent({
                         tenantsOption.value = response.data[i].setting_value_name;
                     }else if(response.data[i].setting_name === 'Allow Duplicate Transactions'){
                         duplicatesOption.value = response.data[i].setting_value_name;
+                    }else if(response.data[i].setting_name === 'Merge Loans Ledgers in Reports'){
+                        loansOption.value = response.data[i].setting_value_name;
+                    }else if(response.data[i].setting_name === 'Merge Shares Ledgers in Reports'){
+                        sharesOption.value = response.data[i].setting_value_name;
+                    }else if(response.data[i].setting_name === 'Merge Savings Ledgers in Reports'){
+                        savingsOption.value = response.data[i].setting_value_name;
                     }
 
                     
@@ -1050,7 +1083,7 @@ export default defineComponent({
             loader,showLoader,hideLoader,hms_settings_options,inventory_settings_options,pms_settings_options,hr_settings_options,accounts_settings_options,membership_settings_options,pss_settings_options,
             settings_settings_options, showHMSSettings, showPMSSettings, showAccountsSettings, showInventorySettings, showHRSettings, showSettingsSettings,showMembershipSettings,showPSSSettings,
             dropdownWidth,incomePlaceholder, ledgerArr, incomeLedgerArr, expenseLedgerArr, liabilityLedgerArr, cashbookLedgerArr, fetchIncomeLedgers, fetchExpenseLedgers,
-            fetchCashbookLedgers, fetchLiabilityLedgers, rentalIncome, rentalSecurityDeposit, rentalLeaseIncome, rentalPenaltyIncome,fetchLedgers,
+            fetchCashbookLedgers, fetchLiabilityLedgers, rentalIncome, rentalSecurityDeposit, rentalLeaseIncome, rentalPenaltyIncome,fetchLedgers,loansOption, sharesOption, savingsOption,
             ledgerID,ledgerName, handleSelectedLedger, clearSelectedLedger, saveDefaultSetting, removeDefaultSetting, tenantCodePrefix, tenantCodeCounter,pmsAutoInvoiceOption,tenantInvoiceDay,
             patientsOption,duplicatesOption, debtorsOption, vendorsOption, tenantsOption, fetchRetailOutlets,handleSelectedOutlet, clearSelectedOutlet, fetchOutletCounters,outletID,outletName,counterID,counterName,
             channelID,channelName,handleSelectedCounter, clearSelectedCounter, fetchCounterChannels,handleSelectedChannel, clearSelectedChannel,outletCounterArr,retailOutletArr,counterChannelArr,

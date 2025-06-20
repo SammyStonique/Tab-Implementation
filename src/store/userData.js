@@ -144,10 +144,9 @@ const actions = {
     fetchUser({ commit,state }, formData) {
         axios.post(`api/v1/department-staff-list/`,formData)
         .then((response)=>{
-            const selectedDepartment = response.data.user_department.code + ' - ' + response.data.user_department.name;
-            commit('SET_SELECTED_DEPARTMENT',selectedDepartment);
             state.selectedUser = response.data;
             commit('SET_SELECTED_USER',response.data);
+            commit('SET_SELECTED_DEPARTMENT',(response.data.user_department != null) ? (response.data.user_department.code + ' - ' + response.data.user_department.name) : "");          
         })
         .catch((error)=>{
           console.log(error.message);

@@ -84,9 +84,8 @@ export default defineComponent({
 
                 {  
                     type:'search-dropdown', label:"Department", value: depValue.value, componentKey: depComponentKey,
-                    selectOptions: depArray, optionSelected: handleSelectedDepartment, required: true,
+                    selectOptions: depArray, optionSelected: handleSelectedDepartment, required: false,
                     searchPlaceholder: 'Select Department...', dropdownWidth: '400px', updateValue: selectedDepartment.value,
-                    fetchData: store.dispatch('Departments/fetchDepartments', {company:companyID.value})
                 },
             ];
         };
@@ -147,9 +146,6 @@ export default defineComponent({
                 if(formFields.value[i].value =='' && formFields.value[i].required == true){
                     errors.value.push(formFields.value[i].label);
                 }
-            }
-            if(depValue.value == '' ){
-                errors.value.push('Error');
             }
             for(let i=0; i < additionalFields.value.length; i++){
                 if(additionalFields.value[i].value =='' && additionalFields.value[i].required == true){

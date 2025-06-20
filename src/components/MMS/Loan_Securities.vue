@@ -147,7 +147,7 @@ export default{
             {type:'text', placeholder:"Search Name...", value: name_search, width:48,},
             {
                 type:'dropdown', placeholder:"Status..", value: security_status_search, width:44,
-                options: [{ text: 'Borrower Possession', value: 'Borrower Possession' }, { text: 'Company Possession', value: 'Company Possession' }, { text: 'Auctioned', value: 'Auctioned' },{ text: 'Reclaimed', value: 'Reclaimed' }, { text: 'Under Litigation', value: 'Under Litigation' },{ text: 'Writen-off', value: 'Writen-off' },{ text: 'Settled', value: 'Settled' }]
+                options: [{ text: 'Borrower Possession', value: 'Borrower Possession' }, { text: 'Company Possession', value: 'Company Possession' }, { text: 'Joint Possession', value: 'Joint Possession' }, { text: 'Auctioned', value: 'Auctioned' },{ text: 'Reclaimed', value: 'Reclaimed' }, { text: 'Under Litigation', value: 'Under Litigation' },{ text: 'Writen-off', value: 'Writen-off' },{ text: 'Settled', value: 'Settled' }]
             },
         ]);
         const handleSelectionChange = (ids) => {

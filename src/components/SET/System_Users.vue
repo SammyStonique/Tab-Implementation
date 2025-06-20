@@ -204,9 +204,7 @@ export default{
             get: () => store.state.userData.profile_search,
             set: (value) => store.commit('userData/SET_SEARCH_FILTERS', {"profile_search":value}),
         });
-        const depArray = computed({
-            get: () => store.state.Departments.depArr,
-        });
+         const depArray = computed(() => store.state.Departments.depArr);
         const searchFilters = ref([
             {type:'text', placeholder:"Name...", value: name_search, width:48,},
             {type:'text', placeholder:"ID Number...", value: id_number_search, width:48,},
@@ -400,11 +398,9 @@ export default{
         const handleActionClick = async(rowIndex, action, row) =>{
             if( action == 'edit'){
                 const userID = row[idField];
-                const departmentID = row['user_department_id'];
                 let formData = {
                     company: companyID.value,
                     staff: userID,
-                    department: departmentID
                 }
                 await store.dispatch('userData/fetchUser',formData).
                 then(()=>{

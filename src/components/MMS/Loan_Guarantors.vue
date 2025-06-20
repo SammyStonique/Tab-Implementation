@@ -93,6 +93,7 @@ export default{
         const computedProdMinAmnt = computed(() =>  productMinAmount);
         const tableColumns = ref([
             {type: "checkbox"},
+            {label: "Date", key: "date", type: "text", editable: false},
             {label: "Member No", key: "member_number", type: "text", editable: false},
             {label: "Member Name", key: "member_name", type: "text", editable: false},
             {label: "Phone No", key: "phone_number", type: "text", editable: false},

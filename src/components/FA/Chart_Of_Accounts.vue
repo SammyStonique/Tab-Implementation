@@ -465,6 +465,12 @@ export default{
                     merge_vendors_setting.value = defaultSettings.value[i].setting_value_name;
                 }else if(defaultSettings.value[i].setting_name === 'Merge Tenants Ledgers in Reports'){
                     merge_tenants_setting.value = defaultSettings.value[i].setting_value_name;
+                }else if(defaultSettings.value[i].setting_name === 'Merge Loans Ledgers in Reports'){
+                    merge_loans_setting.value = defaultSettings.value[i].setting_value_name;
+                }else if(defaultSettings.value[i].setting_name === 'Merge Savings Ledgers in Reports'){
+                    merge_savings_setting.value = defaultSettings.value[i].setting_value_name;
+                }else if(defaultSettings.value[i].setting_name === 'Merge Shares Ledgers in Reports'){
+                    merge_shares_setting.value = defaultSettings.value[i].setting_value_name;
                 }
             }
         };
