@@ -46,6 +46,11 @@ import Vendors from './FA/Vendors';
 import Fiscal_Periods from './FA/Fiscal_Periods';
 import Asset_Categories from './FA/Asset_Categories';
 import Assets from './FA/Assets';
+import Petty_Cash from './FA/Petty_Cash';
+import Petty_Cash_Refunds from './FA/Petty_Cash_Refunds';
+import Petty_Cash_Item_Categories from './FA/Petty_Cash_Item_Categories';
+import Petty_Cash_Replenishments from './FA/Petty_Cash_Replenishments';
+import Petty_Cash_Vouchers from './FA/Petty_Cash_Vouchers';
 
 import Item_Categories from './INV/Item_Categories';
 import Items_Catalog from './INV/Items_Catalog';
@@ -180,7 +185,8 @@ export default createStore({
     Item_Categories,Items_Catalog,Uom,Retail_Outlets,Item_Location,Outlet_Counters,Direct_Sales,Counter_Channels,Direct_Purchases,
     Stock_Adjustments,Stock_Transfers,
     
-    Ledgers, Currencies, Taxes, Journals, Customers, Vendors,Fiscal_Periods,Asset_Categories,Assets,
+    Ledgers, Currencies, Taxes, Journals, Customers, Vendors,Fiscal_Periods,Asset_Categories,Assets,Petty_Cash,Petty_Cash_Refunds,Petty_Cash_Replenishments,
+    Petty_Cash_Vouchers,Petty_Cash_Item_Categories,
 
     Pay_Cycles,Pay_Groups,Deductions,Leave_Types,Holidays,Paye,Nssf,Shif,Housing_Levy,Employees,Payrolls,Leave_Applications,Leave_Allocations,Salary_Advances,
     Employee_Loan_Applications,Employee_Loan_Disbursements,Leave_Ammendments,Appraisals,Performance_Indicators,Skill_Ratings,Appraisal_Periods,Appraisal_Categories,

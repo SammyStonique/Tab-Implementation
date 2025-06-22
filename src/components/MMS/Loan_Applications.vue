@@ -148,6 +148,7 @@ export default{
         const loan_number_search = ref("");
         const member_number_search = ref("");
         const approval_status_search = ref("");
+        const penalty_status_search = ref("");
         const repayment_status_search = ref("");
         const disbursed_status_search = ref("");
         const from_date_search = ref("");
@@ -186,6 +187,10 @@ export default{
             {
                 type:'dropdown', placeholder:"Repayment Status..", value: repayment_status_search, width:44,
                 options: [{text:'On-Time Payments',value:'On-Time'},{text:'Prepaid Clients',value:'Prepaid'},{text:'Defaulting',value:'Defaulted'}]
+            },
+            {
+                type:'dropdown', placeholder:"Penalty Exemption..", value: penalty_status_search, width:44,
+                options: [{text:'Yes',value:'Yes'},{text:'No',value:'No'}]
             },
         ]);
         const handleSelectionChange = (ids) => {
@@ -319,6 +324,7 @@ export default{
                 loan_number: loan_number_search.value,
                 member_number: member_number_search.value,
                 approval_status: approval_status_search.value,
+                penalty_status: penalty_status_search.value,
                 disbursed: disbursed_status_search.value,
                 repayment_status: repayment_status_search.value,
                 from_date: from_date_search.value,
@@ -362,6 +368,7 @@ export default{
             member_number_search.value = "";
             loan_number_search.value = "";
             approval_status_search.value = "";
+            penalty_status_search.value = "";
             disbursed_status_search.value = "";
             repayment_status_search.value = "";
             from_date_search.value = "";
@@ -771,6 +778,8 @@ export default{
                     searchApplications();
                 }else if(response.data.msg == "Excess"){
                     toast.error("Maximum Disbursement Exceeded")
+                }else if(response.data.msg == "Exists"){
+                    toast.error("Duplicate Disbursement Reference No")
                 }else{
                     toast.error("Error Disbursing Loan")
                 }                   

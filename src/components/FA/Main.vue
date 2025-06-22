@@ -57,6 +57,13 @@ import Income_Statement from '@/components/FA/Income_Statement.vue';
 import Balance_Sheet from '@/components/FA/Balance_Sheet.vue';
 import Trial_Balance from '@/components/FA/Trial_Balance.vue';
 import Currencies from '@/components/FA/Currencies.vue';
+import Petty_Cash from '@/components/FA/Petty_Cash.vue';
+import Item_Categories from '@/components/FA/Item_Categories.vue';
+import Replenishments from '@/components/FA/Replenishments.vue';
+import Petty_Cash_Refunds from '@/components/FA/Petty_Cash_Refunds.vue';
+import Petty_Cash_Vouchers from '@/components/FA/Petty_Cash_Vouchers.vue';
+import Voucher_Details from '@/components/FA/Voucher_Details.vue';
+import Petty_Cash_Statement from '@/components/FA/Petty_Cash_Statement.vue';
 
 import Default_Settings from '@/components/SET/Default_Settings.vue';
 
@@ -68,7 +75,7 @@ export default{
         Dashboard, Client_Categories,Chart_Of_Accounts,Ledger_Details,General_Invoices,Invoice_Details,General_Receipts,
         Receipt_Details,General_Bills, Bill_Details,Payment_Vouchers,Payment_Details,Direct_Voucher,Customers,Vendors,Debtor_Statement,Vendor_Statement,
         Journals,Journal_Details,Vat_Transactions, Tax_Mapping,Withholding_Tax,Withholding_Vat,Fiscal_Periods,Income_Statement,Balance_Sheet,
-        Trial_Balance,Currencies,
+        Trial_Balance,Currencies,Petty_Cash,Item_Categories,Replenishments,Petty_Cash_Refunds,Petty_Cash_Vouchers,Voucher_Details,Petty_Cash_Statement,
 
         Default_Settings
     },

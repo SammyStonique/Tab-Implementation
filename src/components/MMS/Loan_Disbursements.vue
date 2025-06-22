@@ -261,6 +261,8 @@ export default{
                     searchDisbursements();
                 }else if(response.data.msg == "Excess"){
                     toast.error("Maximum Disbursement Exceeded")
+                }else if(response.data.msg == "Exists"){
+                    toast.error("Duplicate Disbursement Reference No")
                 }else{
                     toast.error("Error Disbursing Loan")
                 }                  

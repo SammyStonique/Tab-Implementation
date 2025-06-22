@@ -28,6 +28,48 @@
             </div> 
             <div class="web-links dropdown">
                 <div class="py-0.5 px-2.5 h-full hover:bg-slate-500 hover:rounded">
+                <button class="flex" @click="showPettyCashDropdown">
+                    <i class="fa fa-wallet pt-2 mr-2" aria-hidden="true"></i>
+                    <p class="pt-1.5">Petty Cash</p>
+                </button>
+                </div>
+                <div class="dropdown-content w-56 absolute rounded border border-gray-200 bg-white shadow-slate-400 shadow-sm pt-2" v-if="petty_cash_dropdown">
+                    <div class="py-2 px-3 pl-4 w-full hover:bg-slate-500 hover:w-full">
+                        <button class="flex text-sm" @click="openPage({'FA':'Petty_Cash'})">
+                            <i class="fa fa-wallet pt-2 mr-2" aria-hidden="true"></i>
+                            <p class="">Petty Cash</p>
+                        </button>
+
+                    </div>
+                    <div class="py-2 px-3 pl-4 w-full hover:bg-slate-500 hover:w-full">
+                        <button class="flex text-sm" @click="openPage({'FA':'Item_Categories'})">
+                            <i class="fa fa-bars pt-2 mr-2" aria-hidden="true"></i>
+                            <p class="">Petty Cash Item Categories</p>
+                        </button>
+
+                    </div>
+                    <div class="py-2 px-3 pl-4 w-full hover:bg-slate-500 hover:w-full">
+                        <button class="flex text-sm" @click="openPage({'FA':'Replenishments'})">
+                            <i class="fa fa-redo pt-2 mr-2" aria-hidden="true"></i>
+                            <p class="">Petty Cash Replenishments</p>
+                        </button>
+                    </div>
+                    <div class="py-2 px-3 pl-4 w-full hover:bg-slate-500 hover:w-full">
+                        <button class="flex text-sm" @click="openPage({'FA':'Petty_Cash_Vouchers'})">
+                            <i class="fa fa-coins pt-2 mr-2" aria-hidden="true"></i>
+                            <p class="">Petty Cash Vouchers</p>
+                        </button>
+                    </div>
+                    <div class="py-2 px-3 pl-4 w-full hover:bg-slate-500 hover:w-full">
+                        <button class="flex text-sm" @click="openPage({'FA':'Petty_Cash_Refunds'})">
+                            <i class="fa fa-sync-alt pt-2 mr-2" aria-hidden="true"></i>
+                            <p class="">Petty Cash Refunds</p>
+                        </button>
+                    </div>
+                </div>
+            </div>
+            <div class="web-links dropdown">
+                <div class="py-0.5 px-2.5 h-full hover:bg-slate-500 hover:rounded">
                 <button class="flex" @click="showInvoicesDropdown">
                     <i class="fa fa-file-invoice pt-2 mr-2" aria-hidden="true"></i>
                     <p class="pt-1.5">Invoices</p>
@@ -184,14 +226,25 @@ export default defineComponent({
         const invoices_dropdown = ref(false);
         const reports_dropdown = ref(false);
         const bills_dropdown = ref(false);
+        const petty_cash_dropdown = ref(false);
         const userDetails = ref([]);
         const dropdown = ref(false);
+
+        const showPettyCashDropdown = () =>{
+            dropdown.value = true;
+            taxes_dropdown.value = false;
+            reports_dropdown.value  = false;
+            bills_dropdown.value  = false;
+            invoices_dropdown.value  = false;
+            petty_cash_dropdown.value  = !petty_cash_dropdown.value ;
+        }
 
         const showInvoicesDropdown = () =>{
             dropdown.value = true;
             taxes_dropdown.value = false;
             reports_dropdown.value  = false;
             bills_dropdown.value  = false;
+            petty_cash_dropdown.value  = false;
             invoices_dropdown.value  = !invoices_dropdown.value ;
         }
         const showBillsDropdown = () =>{
@@ -199,6 +252,7 @@ export default defineComponent({
             invoices_dropdown.value = false;
             reports_dropdown.value = false;
             taxes_dropdown.value = false;
+            petty_cash_dropdown.value  = false;
             bills_dropdown.value = !bills_dropdown.value;
         }
         const showReportsDropdown = () =>{
@@ -206,6 +260,7 @@ export default defineComponent({
             taxes_dropdown.value = false;
             invoices_dropdown.value = false;
             bills_dropdown.value  = false;
+            petty_cash_dropdown.value  = false;
             reports_dropdown.value = !reports_dropdown.value;
         }
         const showTaxesDropdown = () =>{
@@ -213,6 +268,7 @@ export default defineComponent({
             invoices_dropdown.value = false;
             reports_dropdown.value = false;
             bills_dropdown.value  = false;
+            petty_cash_dropdown.value  = false;
             taxes_dropdown.value = !taxes_dropdown.value;
         }
         const closeDropdown = () =>{
@@ -220,6 +276,7 @@ export default defineComponent({
             reports_dropdown.value  = false;
             bills_dropdown.value  = false;
             taxes_dropdown.value = false;
+            petty_cash_dropdown.value  = false;
             dropdown.value = false;
         }
         const openPage = (pageName) =>{
@@ -231,8 +288,8 @@ export default defineComponent({
             store.commit('modulesTab/MINIMIZE_TAB')
         };
         return{
-            dropdown, taxes_dropdown,invoices_dropdown, bills_dropdown, reports_dropdown, userDetails,
-            showInvoicesDropdown, showBillsDropdown, showTaxesDropdown, showReportsDropdown, closeDropdown,
+            dropdown,petty_cash_dropdown, taxes_dropdown,invoices_dropdown, bills_dropdown, reports_dropdown, userDetails,
+            showPettyCashDropdown,showInvoicesDropdown, showBillsDropdown, showTaxesDropdown, showReportsDropdown, closeDropdown,
             openPage,showHomePage
         }
     },

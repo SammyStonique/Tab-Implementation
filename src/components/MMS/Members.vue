@@ -217,9 +217,11 @@ export default{
                 }
                 try{
                     const response = await store.dispatch('Members/deleteMember',formData)
-                    if(response && response.status == 200){
+                    if(response && response.data.msg == "Success"){
                         toast.success("Member Removed Succesfully");
                         searchMembers();
+                    }else if(response && response.data.msg == "Failed"){
+                        toast.error("Failed to remove Member");
                     }
                 }
                 catch(error){
@@ -243,9 +245,11 @@ export default{
                 }
                 try{
                     const response = await store.dispatch('Members/deleteMember',formData)
-                    if(response && response.status == 200){
+                    if(response && response.data.msg == "Success"){
                         toast.success("Member(s) Removed Succesfully");
-                        searchPropertys();
+                        searchMembers();
+                    }else if(response && response.data.msg == "Failed"){
+                        toast.error("Failed to remove Member");
                     }
                 }
                 catch(error){
@@ -478,10 +482,13 @@ export default{
                     company: companyID.value,
                     member: memberID
                 }
-                await store.dispatch('Members/deleteMember',formData).
-                then(()=>{
+                const response = await store.dispatch('Members/deleteMember',formData)
+                if(response && response.data.msg == "Success"){
+                    toast.success("Member(s) Removed Succesfully");
                     searchMembers();
-                })
+                }else if(response && response.data.msg == "Failed"){
+                    toast.error("Failed to remove Member");
+                }
             }else if(action == 'view'){
                 await store.dispatch('Members/updateState', {currentTab: 'Members_Biodata',selectedMember: null,selectedCategory: null,selectedSponsor: null,selectedCurrency: null,isEditing: false});
                 const memberID = row[idField];
