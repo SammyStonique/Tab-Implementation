@@ -126,16 +126,6 @@ export default defineComponent({
     const sortColumn = ref(null);
     const sortDirection = ref('asc');
 
-    // Deep clone the rows to avoid shared references between rows
-    // const rows = computed(() => {
-    //   return props.rows.map(row => ({
-    //     ...row,
-    //     // Clone any complex properties, for example, if `itemData` is shared
-    //     itemData: JSON.parse(JSON.stringify(row.itemData || {})),
-    //     // Similarly, you can deep clone any other nested data like `row[column.key]` or `row.specificProperty`
-    //   }));
-    // });
-
     // Initialize selected state for each row
     props.rows.forEach(row => {
       row.selected = false;

@@ -127,23 +127,19 @@ const actions = {
 
       axios.post(`api/v1/petty-cash-statement-search/`,formData)
       .then((response)=>{
-          let newArr = []
-          for(let i=0; i<response.data.items.length; i++){
-              if(response.data.items[i] == "Prepayment"){
-                response.data.items[i] = "Prepymt"
-              }else{
-                newArr.push(response.data.items[i] )
+          let running_balance = 0;
+          for(let i=0; i<response.data.tableData.length; i++){
+              if(parseFloat(response.data.tableData[i].cash_in) > 0){
+                running_balance += response.data.tableData[i].cash_in;
+                response.data.tableData[i]['running_balance'] = Number(running_balance).toLocaleString();
+                state.tableData.push(response.data.tableData[i])
+              }else if(parseFloat(response.data.tableData[i].cash_out) > 0){
+                running_balance -= response.data.tableData[i].cash_out;
+                response.data.tableData[i]['running_balance'] = Number(running_balance).toLocaleString();
+                state.tableData.push(response.data.tableData[i])
               }
-          }
-          // for(let i=0; i<response.data.invoicedTotals.length; i++){
-          //     state.invoicedSum += response.data.invoicedTotals[i];
-          // }
-          // for(let i=0; i<response.data.paidTotals.length; i++){
-          //     state.paidSum += response.data.paidTotals[i];
-          // }
-  
+          } 
           state.subHeaders = response.data.items;
-          state.tableData = response.data.tableData;
           state.itemCategoryTotals = response.data.itemCategoryTotals;
           state.debitTotals = response.data.debitTotals;
           state.creditTotals = response.data.creditTotals;

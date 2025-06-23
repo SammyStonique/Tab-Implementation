@@ -72,6 +72,7 @@ export default defineComponent({
         
         const receiptColumns = ref([
             {label: "Item Category", key:"category_name", type: "text", editable: false},
+            {label: "Sub Category", key:"sub_category", type: "dropdown", editable: false},
             {label: "Payment Description", key:"description", type: "text", editable: true, minWidth:"700px", maxWidth:"700px"},
             {label: "Total", key: "total_amount", type: "text", editable: true},
         ]);
@@ -104,6 +105,7 @@ export default defineComponent({
         };
         const checkMaxAmount = (value) =>{
             if(availableAmount.value < value){
+                receipt_totals.value = 0;
                 receipt_totals.value = 0;
                 formFields.value[5].value = 0;
                 toast.error(`Max Available Petty Cash Amount is ${availableAmount.value}`);

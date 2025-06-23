@@ -46,7 +46,6 @@
                             <i class="fa fa-bars pt-2 mr-2" aria-hidden="true"></i>
                             <p class="">Petty Cash Item Categories</p>
                         </button>
-
                     </div>
                     <div class="py-2 px-3 pl-4 w-full hover:bg-slate-500 hover:w-full">
                         <button class="flex text-sm" @click="openPage({'FA':'Replenishments'})">
@@ -58,6 +57,12 @@
                         <button class="flex text-sm" @click="openPage({'FA':'Petty_Cash_Vouchers'})">
                             <i class="fa fa-coins pt-2 mr-2" aria-hidden="true"></i>
                             <p class="">Petty Cash Vouchers</p>
+                        </button>
+                    </div>
+                    <div class="py-2 px-3 pl-4 w-full hover:bg-slate-500 hover:w-full">
+                        <button class="flex text-sm" @click="openPage({'FA':'Petty_Cash_Items'})">
+                            <i class="fa fa-bars pt-2 mr-2" aria-hidden="true"></i>
+                            <p class="">Petty Cash Items</p>
                         </button>
                     </div>
                     <div class="py-2 px-3 pl-4 w-full hover:bg-slate-500 hover:w-full">

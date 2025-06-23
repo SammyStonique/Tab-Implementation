@@ -30,6 +30,7 @@
             :showPreviousBtn="showPreviousBtn"
             :selectedValue="selectedValue"
             @selectSearchQuantity="selectSearchQuantity"
+            
         />
         <MovableModal v-model:visible="propModalVisible" :title="title" :modal_top="modal_top" :modal_left="modal_left" :modal_width="modal_width"
             :loader="modal_loader" @showLoader="showModalLoader" @hideLoader="hideModalLoader" @closeModal="closeModal">
@@ -38,6 +39,7 @@
                 :displayButtons="displayButtons" @handleSubmit="savePettyCash" @handleReset="handleReset"
             />
         </MovableModal>
+        
     </div>
 </template>
 
@@ -114,6 +116,7 @@ export default{
         const handleSelectionChange = (ids) => {
             selectedIds.value = ids;
         };
+        
         const handleSelectedLedger = async(option) =>{
             await store.dispatch('Ledgers/handleSelectedLedger', option);
             ledgerID.value = store.state.Ledgers.ledgerID;
@@ -308,7 +311,6 @@ export default{
                     }
                 }
                 catch(error){
-                    console.error(error.message);
                     toast.error('Failed to remove Petty Cash: ' + error.message);
                 }
                 finally{
@@ -444,7 +446,8 @@ export default{
         const closeModal = () =>{
             propModalVisible.value = false;
             handleReset();
-        }
+        };
+        
         onBeforeMount(()=>{
             searchPettyCash();
             

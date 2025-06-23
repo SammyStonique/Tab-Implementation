@@ -1,5 +1,6 @@
 import axios from "axios";
 import Swal from 'sweetalert2';
+import { generateRandomNumber } from '@/composables/RandomNumberGen';
 
 const state = {
     categoryList: [],
@@ -7,6 +8,7 @@ const state = {
     categoryArray: [],
     categoryID: "",
     selectedCategory: null,
+    selectedSubCategory: null,
     selectedLedger: null,
     paymentItemsArray: [],
     isEditing: "",
@@ -21,12 +23,17 @@ const state = {
       state.categoryID = '';
       state.category_name_search = '';
       state.selectedCategory = null;
+      state.selectedSubCategory = null;
       state.selectedLedger = null;
       state.isEditing = false;
       state.paymentItemsArray = [];
     },
     SET_SELECTED_CATEGORY(state, category) {
       state.selectedCategory = category;
+      state.isEditing = true;
+    },
+    SET_SELECTED_SUBCATEGORY(state, category) {
+      state.selectedSubCategory = category;
       state.isEditing = true;
     },
     CATEGORIES_ARRAY(state, categories){
@@ -101,17 +108,29 @@ const state = {
       })
       
     },
+    fetchItemSubCategory({ commit,state }, formData) {
+      axios.post(`api/v1/get-petty-cash-item-subcategories/`,formData)
+      .then((response)=>{
+        state.selectedSubCategory = response.data;
+        commit('SET_SELECTED_SUBCATEGORY',response.data);
+      })
+      .catch((error)=>{
+        console.log(error.message);
+      })
+      
+    },
     handleSelectedCategory({ commit, state }, option){
       state.categoryArray = [];
       const selectedCategory = state.categoryList.find(category => (category.category_name) === option);
       if (selectedCategory) {
-          state.categoryID = selectedCategory.petty_cash_item_category_id;
-          state.categoryArray = [...state.categoryArray, selectedCategory];
-          selectedCategory.description = "";
-          selectedCategory.total_amount = 0;
-      }
-      state.paymentItemsArray.push(selectedCategory);
-        
+        const categoryCopy = JSON.parse(JSON.stringify(selectedCategory));
+        state.categoryArray = [...state.categoryArray, categoryCopy];
+        state.categoryID = categoryCopy.petty_cash_item_category_id;
+        categoryCopy.description = "";
+        categoryCopy.total_amount = 0;
+        categoryCopy.options = categoryCopy.sub_categories;
+        state.paymentItemsArray.push(categoryCopy);
+      }   
     },
   
     async updateItemCategory({ commit,state }, formData) {

@@ -64,6 +64,7 @@ import Petty_Cash_Refunds from '@/components/FA/Petty_Cash_Refunds.vue';
 import Petty_Cash_Vouchers from '@/components/FA/Petty_Cash_Vouchers.vue';
 import Voucher_Details from '@/components/FA/Voucher_Details.vue';
 import Petty_Cash_Statement from '@/components/FA/Petty_Cash_Statement.vue';
+import Petty_Cash_Items from '@/components/FA/Petty_Cash_Items.vue';
 
 import Default_Settings from '@/components/SET/Default_Settings.vue';
 
@@ -76,6 +77,7 @@ export default{
         Receipt_Details,General_Bills, Bill_Details,Payment_Vouchers,Payment_Details,Direct_Voucher,Customers,Vendors,Debtor_Statement,Vendor_Statement,
         Journals,Journal_Details,Vat_Transactions, Tax_Mapping,Withholding_Tax,Withholding_Vat,Fiscal_Periods,Income_Statement,Balance_Sheet,
         Trial_Balance,Currencies,Petty_Cash,Item_Categories,Replenishments,Petty_Cash_Refunds,Petty_Cash_Vouchers,Voucher_Details,Petty_Cash_Statement,
+        Petty_Cash_Items,
 
         Default_Settings
     },
