@@ -233,6 +233,7 @@ export default defineComponent({
                             hideLoader();
                             toast.success('Voucher created successfully!');
                             handleReset();
+                            updateFormFields();
                             mainComponentKey.value += 1;
                             propComponentKey.value += 1;
                             ledComponentKey.value += 1;

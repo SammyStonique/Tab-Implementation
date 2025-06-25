@@ -433,7 +433,9 @@ export default{
                 const pettyCashID = row[idField];
                 let formData = {
                     company: companyID.value,
-                    petty_cash: pettyCashID
+                    petty_cash: pettyCashID,
+                    with_effect_from: null,
+                    with_effect_to: null
                 }
                 await store.dispatch('Petty_Cash/fetchStatementData',formData).
                 then(()=>{

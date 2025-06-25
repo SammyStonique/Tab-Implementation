@@ -130,11 +130,11 @@ const actions = {
           let running_balance = 0;
           for(let i=0; i<response.data.tableData.length; i++){
               if(parseFloat(response.data.tableData[i].cash_in) > 0){
-                running_balance += response.data.tableData[i].cash_in;
+                running_balance += (parseFloat(response.data.tableData[i].cash_in));
                 response.data.tableData[i]['running_balance'] = Number(running_balance).toLocaleString();
                 state.tableData.push(response.data.tableData[i])
               }else if(parseFloat(response.data.tableData[i].cash_out) > 0){
-                running_balance -= response.data.tableData[i].cash_out;
+                running_balance -= (parseFloat(response.data.tableData[i].cash_out));
                 response.data.tableData[i]['running_balance'] = Number(running_balance).toLocaleString();
                 state.tableData.push(response.data.tableData[i])
               }

@@ -4,8 +4,8 @@
             <div class="flex mt-6">
                 <div class="basis-1/2 flex h-16">
                     <DynamicForm  :fields="formFields" :flex_basis="flex_basis" :flex_basis_percentage="flex_basis_percentage"  @handleSubmit="createTenantReceipt" @handleReset="handleReset" /> 
-                    <button @click="fetchTransactions" class="rounded bg-green-400 text-sm h-8 w-24 mt-2 text-white px-1.5 py-1.5"><i class="fa fa-check-circle text-xs mr-1.5" aria-hidden="true"></i>Load</button>
-                    <button @click="printStatement" class="rounded bg-green-400 text-sm h-8 w-24 ml-1.5 mt-2 text-white px-1.5 py-1.5"><i class="fa fa-eye text-xs mr-1.5" aria-hidden="true"></i>Print</button>
+                    <button @click="fetchTransactions" class="rounded bg-green-400 text-sm h-8 w-24 mt-2 text-white px-1.5 py-1.5"><i class="fa fa-binoculars text-xs mr-1.5" aria-hidden="true"></i>Search</button>
+                    <button @click="printStatement" class="rounded bg-green-400 text-sm h-8 w-24 ml-1.5 mt-2 text-white px-1.5 py-1.5"><i class="fa fa-print text-xs mr-1.5" aria-hidden="true"></i>Print</button>
                 </div>
             </div>
             <div class="table-container capitalize text-xs min-h-[480px] mt-3">
@@ -16,7 +16,7 @@
                             <th rowspan="2" style="width:6%;">Date</th>
                             <th rowspan="2" style="width:4%;">Txn No</th>
                             <th rowspan="2" style="width:6%;">Ref No</th>
-                            <th rowspan="2" style="width:20%;">Description</th>
+                            <th rowspan="2" style="width:30%;">Description</th>
                             <th rowspan="2" style="width:5%;">Cash In</th>
                             <th rowspan="2" style="width:5%;">Cash Out</th>
                             <th rowspan="2" style="width:5%;">Running Bal</th>
@@ -153,11 +153,13 @@ export default defineComponent({
             showLoader();
             let formData = {
                 company: companyID.value,
-                petty_cash: selectedPettyCashID.value
+                petty_cash: selectedPettyCashID.value,
+                with_effect_from: formFields.value[0].value,
+                with_effect_to: formFields.value[1].value
             }
             await store.dispatch('Petty_Cash/fetchStatementData',formData)
             .then(()=>{
-                hideLoader
+                hideLoader();
             })
         }
 
@@ -167,16 +169,14 @@ export default defineComponent({
         const printStatement = () =>{
             showLoader();
             let formData = {
-                month: formFields.value[1].value,
-                year: formFields.value[2].value,
-                with_effect_from: formFields.value[3].value,
-                with_effect_to: formFields.value[4].value,
-                property: propertyID.value,
-                company: companyID.value
+                company: companyID.value,
+                petty_cash: selectedPettyCashID.value,
+                with_effect_from: formFields.value[0].value,
+                with_effect_to: formFields.value[1].value
             } 
 
             axios
-            .post("api/v1/export-landlord-statement-pdf/", formData, { responseType: 'blob' })
+            .post("api/v1/export-petty-cash-statement-pdf/", formData, { responseType: 'blob' })
                 .then((response)=>{
                     if(response.status == 200){
                         const blob1 = new Blob([response.data]);

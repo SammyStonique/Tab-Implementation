@@ -7,6 +7,9 @@ const state = {
     categoryArr: [],
     categoryArray: [],
     categoryID: "",
+    subCategoryID: "",
+    subCategoryArr: [],
+    subCategoryList: [],
     selectedCategory: null,
     selectedSubCategory: null,
     selectedLedger: null,
@@ -21,6 +24,9 @@ const state = {
       state.categoryArr = [];
       state.categoryArray = [];
       state.categoryID = '';
+      state.subCategoryID = '';
+      state.subCategoryList = [];
+      state.subCategoryArr = [];
       state.category_name_search = '';
       state.selectedCategory = null;
       state.selectedSubCategory = null;
@@ -41,6 +47,9 @@ const state = {
     },
     LIST_ITEM_CATEGORIES(state, categories) {
       state.categoryList = categories;
+    },
+    LIST_ITEM_SUBCATEGORIES(state, categories) {
+      state.subCategoryList = categories;
     },
     SET_SELECTED_LEDGER(state, ledger) {
         state.selectedLedger = ledger;
@@ -108,6 +117,20 @@ const state = {
       })
       
     },
+    fetchItemSubCategories({ commit,state }, formData) {
+      state.subCategoryArr = [];
+      axios.post(`api/v1/get-petty-cash-item-subcategories/`,formData)
+      .then((response)=>{
+        for(let i=0; i< response.data.length; i++){
+          state.subCategoryArr.push((response.data[i].category_name));
+        }
+        commit('LIST_ITEM_SUBCATEGORIES', response.data);
+      })
+      .catch((error)=>{
+        console.log(error.message);
+      })
+      
+    },
     fetchItemSubCategory({ commit,state }, formData) {
       axios.post(`api/v1/get-petty-cash-item-subcategories/`,formData)
       .then((response)=>{
@@ -129,7 +152,16 @@ const state = {
         categoryCopy.description = "";
         categoryCopy.total_amount = 0;
         categoryCopy.options = categoryCopy.sub_categories;
+        categoryCopy.sub_category = [];
         state.paymentItemsArray.push(categoryCopy);
+      }   
+    },
+    handleSelectedSubCategory({ commit, state }, option){
+      const selectedCategory = state.subCategoryList.find(category => (category.category_name) === option);
+      if (selectedCategory) {
+        const categoryCopy = JSON.parse(JSON.stringify(selectedCategory));
+        state.subCategoryID = categoryCopy.petty_cash_item_subcategory_id;
+
       }   
     },
   

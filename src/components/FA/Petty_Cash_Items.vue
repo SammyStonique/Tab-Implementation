@@ -21,6 +21,7 @@
         :showTotals="showTotals"
         @handleSelectionChange="handleSelectionChange"
         @handleActionClick="handleActionClick"
+        @handleRightClick="handleRightClick"
         :count="appCount"
         :currentPage="currentPage"
         :result="appArrLen"
@@ -38,7 +39,7 @@
     >
         <DynamicForm 
             :fields="formFields" :flex_basis="flex_basis" :flex_basis_percentage="flex_basis_percentage" 
-            :displayButtons="displayButtons" @handleSubmit="allocatePrepayment" @handleReset="handleReset"
+            :displayButtons="displayButtons" @handleSubmit="assignSubcategory" @handleReset="handleReset"
         />
     </MovableModal>
 </template>
@@ -68,11 +69,14 @@ export default{
         const propComponentKey = ref(0);
         const riskComponentKey = ref(0);
         const showAddButton = ref(false);
-        const title = ref('');
+        const title = ref('Assign/Change Sub Category');
         const companyID = computed(()=> store.state.userData.company_id);
         const idField = 'tenant_lease_id';
         const rightsModule = ref('Accounts');
         const categoryID = ref('');
+        const itemID = ref("");
+        const subCategoryID = ref('');
+        const subCatID = ref('');
         const selectedIds = ref([]);
         const appModalVisible = ref(false);
         const arrearsList = ref([]);
@@ -110,6 +114,7 @@ export default{
         const voucher_no_search = ref("");
         const from_date_search = ref("");
         const categoryArray = computed(()=> store.state.Petty_Cash_Item_Categories.categoryArr);
+        const subCategoryArray = computed(()=> store.state.Petty_Cash_Item_Categories.subCategoryArr);
         const handleSelectedCategory = async(option) =>{
             await store.dispatch('Petty_Cash_Item_Categories/handleSelectedCategory', option)
             categoryID.value = store.state.Petty_Cash_Item_Categories.categoryID;
@@ -118,6 +123,14 @@ export default{
             await store.dispatch('Petty_Cash_Item_Categories/updateState', {categoryID: ''});
             categoryID.value = store.state.Petty_Cash_Item_Categories.categoryID;
         };
+        const handleSelectedSubCategory = async(option) =>{
+            await store.dispatch('Petty_Cash_Item_Categories/handleSelectedSubCategory', option)
+            subCategoryID.value = store.state.Petty_Cash_Item_Categories.subCategoryID;
+        };
+        const clearSelectedSubCategory = async() =>{
+            await store.dispatch('Petty_Cash_Item_Categories/updateState', {subCategoryID: ''});
+            subCategoryID.value = store.state.Petty_Cash_Item_Categories.subCategoryID;
+        };
         const searchFilters = ref([
             {
                 type:'search-dropdown', value: categoryID.value, width:48, componentKey: propComponentKey,
@@ -125,6 +138,13 @@ export default{
                 searchPlaceholder: 'Category...', dropdownWidth: '250px',
                 fetchData: store.dispatch('Petty_Cash_Item_Categories/fetchItemCategories', {company:companyID.value}),
                 clearSearch: clearSelectedCategory
+            },
+            {
+                type:'search-dropdown', value: subCategoryID.value, width:48, componentKey: propComponentKey,
+                selectOptions: subCategoryArray, optionSelected: handleSelectedSubCategory,
+                searchPlaceholder: 'Sub Category...', dropdownWidth: '250px',
+                fetchData: store.dispatch('Petty_Cash_Item_Categories/fetchItemSubCategories', {company:companyID.value}),
+                clearSearch: clearSelectedSubCategory
             },
             {type:'text', placeholder:"Voucher...", value: voucher_no_search, width:32},
             {type:'date', placeholder:"Date...", value: from_date_search, width:32, title: "From Date"},
@@ -135,8 +155,76 @@ export default{
         const handleSelectionChange = (ids) => {
             selectedIds.value = ids;
         };
-        const handleActionClick = () =>{
+        
+        watch(() => store.state.contextMenu.selectedAction, (actionPayload) => {
+            if (!actionPayload) return;
 
+            const { rowIndex, action, data } = actionPayload;
+
+            handleActionClick(rowIndex, action, data);
+
+            store.commit('contextMenu/CLEAR_SELECTED_ACTION');
+        });
+        const handleSelectedSubCat = async(option) =>{
+            await store.dispatch('Petty_Cash_Item_Categories/handleSelectedSubCategory', option)
+            subCatID.value = store.state.Petty_Cash_Item_Categories.subCategoryID;
+        };
+        const clearSelectedSubCat = async() =>{
+            await store.dispatch('Petty_Cash_Item_Categories/updateState', {subCategoryID: ''});
+            subCatID.value = store.state.Petty_Cash_Item_Categories.subCategoryID;
+        };
+        const formFields = ref([]);
+        const updateFormFields = () => {
+            formFields.value = [
+                {  
+                    type:'search-dropdown', label:"Sub Category", value: subCatID.value, componentKey: propComponentKey,
+                    selectOptions: subCategoryArray, optionSelected: handleSelectedSubCat, required: true,
+                    searchPlaceholder: 'Select Sub Category...', dropdownWidth: '300px', updateValue: "",
+                    clearSearch: clearSelectedSubCat
+                },
+            ];
+        };
+        const handleRightClick = (row, rowIndex, event) => {
+
+            const menuOptions = [
+                { label: 'Add To SubCategory', action: 'add-subcategory', rowIndex: rowIndex , icon: 'fa fa-arrows-alt'},
+            ];
+
+            store.commit('contextMenu/SHOW_CONTEXT_MENU', {
+                x: event.clientX,
+                y: event.clientY,
+                options: menuOptions,
+                contextData: row,
+            });
+        };
+        const handleActionClick = async(rowIndex, action, row) =>{
+            if( action == 'add-subcategory'){
+                itemID.value = row['petty_cash_item_id'];
+                appModalVisible.value = true;
+                updateFormFields();
+            }
+        };
+        const assignSubcategory = async() =>{
+            showModalLoader();
+            let formData = {
+                company: companyID.value,
+                petty_cash_item: itemID.value,
+                sub_category: subCatID.value
+            }
+            await axios.post('api/v1/assign-petty-cash-item-subcategory/',formData)
+            .then((response)=>{
+                if(response.data.msg == "Success"){
+                    toast.success("Success");
+                    closeModal();
+                }
+            })
+            .catch((error)=>{
+                toast.error(error.message);
+            })
+            .finally(()=>{
+                hideModalLoader();
+                searchItems();
+            })
         }
         const dropdownOptions = ref([
             
@@ -149,7 +237,11 @@ export default{
         }
         const hideModalLoader = () =>{
             modal_loader.value = "none";
-        }
+        };
+        const closeModal = () =>{
+            appModalVisible.value = false;
+            subCatID.value = "";
+        };
         const showLoader = () =>{
             loader.value = "block";
         }
@@ -166,7 +258,7 @@ export default{
                 to_date: to_date_search.value,
                 from_date: from_date_search.value,
                 category: categoryID.value,
-                sub_category: "",
+                sub_category: subCategoryID.value,
                 company: companyID.value,
                 page_size: selectedValue.value
             }
@@ -228,7 +320,8 @@ export default{
             currentPage.value = 1;
             selectedValue.value = 50;
             propComponentKey.value += 1;
-            categoryID.value = ""
+            categoryID.value = "";
+            subCategoryID.value = "";
             to_date_search.value = "";
             voucher_no_search.value = "";
             from_date_search.value = "";
@@ -241,7 +334,7 @@ export default{
                 to_date: to_date_search.value,
                 from_date: from_date_search.value,
                 category: categoryID.value,
-                sub_category: "",
+                sub_category: subCategoryID.value,
                 company: companyID.value,
                 page_size: selectedValue.value
             }
@@ -270,7 +363,7 @@ export default{
         return{
             showAddButton,title, searchItems, idField, selectedIds, actions, showActions, arrearsList, appArrLen,appCount,appResults,appModalVisible,
             currentPage,searchFilters,tableColumns,resetFilters,loadPrev,loadNext,firstPage,lastPage,dropdownOptions,handleDynamicOption,
-            showNextBtn,showPreviousBtn, handleActionClick,displayButtons,
+            showNextBtn,showPreviousBtn, handleActionClick,handleRightClick,displayButtons,assignSubcategory,formFields,closeModal,
             modal_top, modal_left, modal_width, showLoader, loader, hideLoader, modal_loader, showModalLoader, hideModalLoader,rightsModule,
             handleSelectionChange, pageComponentKey, flex_basis, flex_basis_percentage,showTotals,printArrearsList,selectSearchQuantity,selectedValue
         }
