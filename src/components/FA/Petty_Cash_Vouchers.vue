@@ -64,7 +64,7 @@
         >
             <DynamicForm 
                 :fields="formFields" :flex_basis="flex_basis" :flex_basis_percentage="flex_basis_percentage" 
-                :displayButtons="displayButtons" @handleSubmit="savePaymentVoucher" @handleReset="handleReset"
+                :displayButtons="displayButtons" @handleSubmit="approveVoucher" @handleReset="handleReset"
             />
         </MovableModal>
     </div>
@@ -102,11 +102,11 @@ export default{
         const removingRight = ref('Deleting Payment Vouchers');
         const rightsModule = ref('Accounts');
         const submitButtonLabel = ref('Add');
-        const title = ref('Receipt Booking');
+        const title = ref('Voucher Approval');
         const detailsTitle = ref('Item Details');
         const tabs = ref(['Journal Entries','Receipt Lines']);
         const activeTab = ref(0);
-        const invoiceID = ref(null);
+        const voucherID = ref(null);
         const vendComponentKey = ref(0);
         const invModalVisible = ref(false);
         const modal_top = ref('150px');
@@ -150,9 +150,11 @@ export default{
         const actions = ref([
             {name: 'print', icon: 'fa fa-print', title: 'Print Voucher', rightName: 'Print Payment Voucher'},
             {name: 'download', icon: 'fa fa-download', title: 'Download Voucher', rightName: 'Print Payment Voucher'},
+            {name: 'approve/reject', icon: 'fa fa-check-circle', title: 'Approve/Reject Voucher', rightName: 'Approving Petty Cash Vouchers'},
             {name: 'delete', icon: 'fa fa-trash', title: 'Delete Voucher', rightName: 'Deleting Payment Vouchers'},
         ])
         const companyID = computed(()=> store.state.userData.company_id);
+        const userID = computed(()=> store.state.userData.user_id);
         const fetchPettyCash = async() =>{
             await store.dispatch('Petty_Cash/fetchPettyCashes', {company:companyID.value})
         };
@@ -346,13 +348,64 @@ export default{
             currentPage.value = pageCount.value;
             searchVouchers();
             // scrollToTop();
+        };
+        const formFields = ref([]);
+        const updateFormFields = () => {
+            formFields.value = [
+                { type: 'date', name: 'date',label: "Date", value: '', placeholder: "", required: true},
+                { type: 'dropdown', name: 'require_approval',label: "Approval Status", value: '', placeholder: "", required: true, options: [{ text: 'Approve', value: 'Approved' }, { text: 'Reject', value: 'Rejected' }] },
+            ];
+        };
+        const handleReset = () =>{
+            for(let i=0; i < formFields.value.length; i++){
+                formFields.value[i].value = "";
+            }
+            voucherID.value = "";
+        }
+        const approveVoucher = async() =>{
+            showModalLoader();
+            let formData = {
+                company: companyID.value,
+                user: userID.value,
+                petty_cash_voucher: voucherID.value,
+                approval_status: formFields.value[1].value,
+                approval_date: formFields.value[0].value,
+            }
+            await axios.post('api/v1/approve-petty-cash-voucher/', formData)
+            .then((response)=>{
+                if(response.data.msg == "Success"){
+                    toast.success("Success");
+                    closeModal();
+                    searchVouchers();
+                }
+            })
+            .catch((error)=>{
+                toast.error(error.message);
+            })
+            .finally(()=>{
+                hideModalLoader();
+            })
         }
         const handleActionClick = async(rowIndex, action, row) =>{
-            if(action == 'delete'){
-                const journalID = [row['petty_cash_voucher_id']];
+            if(action == 'approve/reject'){
+                voucherID.value = row['petty_cash_voucher_id'];
+                const approvalStatus = row['approval_status'];
+                if(approvalStatus == 'Pending'){
+                    updateFormFields();
+                    invModalVisible.value = true;   
+                    flex_basis.value = '1/2';
+                    flex_basis_percentage.value = '50';
+                }else{
+                    toast.error(`Voucher Already ${approvalStatus}`)
+                }
+                
+                
+            }
+            else if(action == 'delete'){
+                const voucherID = [row['petty_cash_voucher_id']];
                 let formData = {
                     company: companyID.value,
-                    petty_cash_voucher: journalID,
+                    petty_cash_voucher: voucherID,
 
                 }
                 await store.dispatch('Petty_Cash_Vouchers/deletePettyCashVoucher',formData).
@@ -361,35 +414,56 @@ export default{
                 })
             }else if(action == 'print'){
                 showLoader();
-                const journalID = row['journal_id'];
+                const voucherID = row['petty_cash_voucher_id'];
                 let formData = {
-                    receipt: journalID,
-                    client: row['customer_id'],
-                    type: 'PMT',
+                    voucher: voucherID,
                     company: companyID.value
                 }
-                await store.dispatch('Journals/previewClientReceipt',formData).
-                then(()=>{
+                await axios.post('api/v1/export-petty-cash-voucher-pdf/', formData, { responseType: 'blob' })
+                .then((response) => {
+                if(response.status == 200){
+                    const blob1 = new Blob([response.data]);
+                    const url = URL.createObjectURL(blob1);
+                    PrintJS({printable: url, type: 'pdf'});
+                }
+                
+                })
+                .catch((error)=>{
+                    console.log(error.message);
+                })
+                .finally(()=>{
                     hideLoader();
                 })
+            
             }else if(action == 'download'){
                 showLoader();
-                const journalID = row['journal_id'];
+                const voucherID = row['petty_cash_voucher_id'];
                 let formData = {
-                    receipt: journalID,
-                    client: row['customer_id'],
-                    type: 'PMT',
+                    voucher: voucherID,
                     company: companyID.value
                 }
-                await store.dispatch('Journals/downloadPaymentVoucher',formData).
-                then(()=>{
+                await axios.post('api/v1/export-petty-cash-voucher-pdf/', formData, { responseType: 'blob' })
+                .then((response) => {
+                if(response.status == 200){
+                    const url = window.URL.createObjectURL(new Blob([response.data]));
+                    const link = document.createElement('a');
+                    link.href = url;
+                    link.setAttribute('download', 'Petty Cash Voucher.pdf');
+                    document.body.appendChild(link);
+                    link.click();
+                }      
+                })
+                .catch((error)=>{
+                    console.log(error.message);
+                })
+                .finally(()=>{
                     hideLoader();
                 })
             }
         };
         const handleShowDetails = async(row) =>{
             activeTab.value = 0;
-            invoiceID.value = row['journal_id'];
+            voucherID.value = row['journal_id'];
             detailsTitle.value = row['voucher_no'] + ' Details';
             showDetails.value = true;
             let formData = {
@@ -407,7 +481,7 @@ export default{
         const selectTab = async(index) => {
             let formData = {
                 company: companyID.value,
-                journal: invoiceID.value,
+                journal: voucherID.value,
             }
             if(index == 1){
                 activeTab.value = index;
@@ -477,14 +551,14 @@ export default{
             
         })
         return{
-            showTotals, title, searchVouchers,resetFilters, addButtonLabel, searchFilters, tableColumns, vouchersList,
+            showTotals, title, searchVouchers,resetFilters, addButtonLabel, searchFilters, tableColumns, vouchersList,formFields,
             currentPage,propResults, propArrLen, propCount, pageCount, showNextBtn, showPreviousBtn,invModalVisible,
             loadPrev, loadNext, firstPage, lastPage, idField, actions, handleActionClick, propModalVisible, closeModal,
             submitButtonLabel, showModal, showLoader, loader, hideLoader, modal_loader, modal_top, modal_left, modal_width,displayButtons,
             showModalLoader, hideModalLoader, handleSelectionChange, flex_basis,flex_basis_percentage,
             removePaymentVoucher, removePaymentVouchers, dropdownOptions, handleDynamicOption, addNewVoucher, printVouchersList,
             addingRight,removingRight,rightsModule,selectSearchQuantity,selectedValue,showDetails,detailsTitle,hideDetails,handleShowDetails,journalEntries,
-            receiptLines,tabs,selectTab,activeTab
+            receiptLines,tabs,selectTab,activeTab,approveVoucher,handleReset
         }
     }
 };
