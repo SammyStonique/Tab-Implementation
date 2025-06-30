@@ -53,6 +53,13 @@
             :displayButtons="displayButtons" @handleSubmit="postLoanBalance" @handleReset="handleRefReset"
         />
     </MovableModal>
+    <MovableModal v-model:visible="appModalVisible" :title="title1" :modal_top="modal_top" :modal_left="modal_left" :modal_width="modal_width"
+        :loader="modal_loader1" @showLoader="showModalLoader1" @hideLoader="hideModalLoader1" @closeModal="closeModal1">
+        <DynamicForm 
+            :fields="formFields1" :flex_basis="flex_basis" :flex_basis_percentage="flex_basis_percentage" 
+            :displayButtons="displayButtons" @handleSubmit="updateRepaymentDate" @handleReset="handleReset1"
+        />
+    </MovableModal>
 
 </template>
 
@@ -80,6 +87,7 @@ export default{
         const { formatDate } = useDateFormatter();
         const current_date = new Date();
         const loader = ref('');
+        const modal_loader1 = ref('none');
         const ledComponentKey = ref(0);
         const propComponentKey = ref(0);
         const displayButtons = ref(true);
@@ -106,8 +114,10 @@ export default{
         const detailsTitle = ref('Application Documents');
         const transTitle = ref('Approve/Reject Loan');
         const refTitle = ref('Post Loan Balance');
+        const title1 = ref('Update Repayment Date');
         const transModalVisible = ref(false);
         const refModalVisible = ref(false);
+        const appModalVisible = ref(false);
         const dropdownWidth = ref("500px")
         const modal_top = ref('200px');
         const modal_left = ref('400px');
@@ -209,7 +219,57 @@ export default{
             for(let i=0; i < formFields.value.length; i++){
                 formFields.value[i].value = '';
             }
+        };
+        const formFields1 = ref([]);
+        const updateFormFields1 = () => {
+            formFields1.value = [
+                { type: 'number', name: 'day',label: "New Repayment Day", value: 1, required: true },
+                { type: 'text', name: 'installment',label: "Installment From", value: 0, required: true },
+            ]
+        };
+        const handleReset1 = () =>{
+            for(let i=0; i < formFields1.value.length; i++){
+                formFields1.value[i].value = '';
+            }
+        };
+        const showModalLoader1 = () =>{
+            modal_loader1.value = "block";
         }
+        const hideModalLoader1 = () =>{
+            modal_loader1.value = "none";
+        };
+        const updateRepaymentDate = async() =>{
+            showModalLoader1();
+            let formData = {
+                loan_application: applicationID.value,
+                new_day: formFields1.value[0].value,
+                installment: formFields1.value[1].value,
+                company: companyID.value
+            }
+            axios.post(`api/v1/update-loan-repayment-date/`,formData)
+            .then((response)=>{
+                if(response.data.msg == "Success"){
+                    toast.success("Success")
+                    closeModal1();
+                    searchApplications();
+                }else{
+                    toast.error("Error Updating Repayment Date");
+                }                   
+            })
+            .catch((error)=>{
+                toast.error(error.message)
+                hideModalLoader1();
+            })
+            .finally(()=>{
+                hideModalLoader1();
+            })
+        
+        };
+        const closeModal1 = () =>{
+            appModalVisible.value = false;
+            applicationID.value = null;
+            hideModalLoader1();
+        };
         const removeApplication = async() =>{
             if(selectedIds.value.length == 1){
                 let formData = {
@@ -446,6 +506,7 @@ export default{
             {label: 'Unexempt Penalty', action: 'unexempt-penalty'},
             {label: 'Post Loan Balance', action: 'post-balance'},
             {label: 'Unpost Loan Balance', action: 'unpost-balance'},
+            {label: 'Update Repayment Date', action: 'repayment-date'}, 
         ]);
         const handleDynamicOption = (option) =>{
             if( option == 'exempt-penalty'){
@@ -602,6 +663,19 @@ export default{
                         Swal.fire(`Balance(s) has not been Unposted!`);
                     }
                 })                 
+            }else if(option == 'repayment-date'){
+                if(selectedIds.value.length == 1){
+                    applicationID.value = selectedIds.value[0];
+                    appModalVisible.value = true;
+                    updateFormFields1();
+                    flex_basis.value = '1/2';
+                    flex_basis_percentage.value = '50';
+          
+                }else if(selectedIds.value.length > 1){
+                    toast.error("You have selected more than 1 Application")
+                }else{
+                    toast.error("Please Select An Application")
+                }
             }
         };
         
@@ -722,7 +796,7 @@ export default{
             handleSelectionChange,addingRight,removingRight,rightsModule,printApplicationList,selectSearchQuantity,selectedValue,
             modal_left,modal_top,modal_width,trans_modal_loader,transModalVisible,transTitle,showTransModalLoader,hideTransModalLoader,approveLoan,closeTransModal,
             dropdownOptions,handleDynamicOption,refTitle,refFormFields,refModalVisible,ref_modal_loader,handleRefReset,showRefModalLoader,hideRefModalLoader,closeRefModal,
-            postLoanBalance
+            postLoanBalance,appModalVisible,title1,modal_loader1,showModalLoader1,hideModalLoader1,updateFormFields,formFields1,handleReset1,closeModal1,updateRepaymentDate
         }
     }
 };

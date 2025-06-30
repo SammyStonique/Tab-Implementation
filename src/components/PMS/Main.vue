@@ -67,6 +67,8 @@ import Exit_Charges from '@/components/PMS/Exit_Charges.vue';
 import Tenant_Move_Out from '@/components/PMS/Tenant_Move_Out.vue';
 import Late_Payment_Fees from '@/components/PMS/Late_Payment_Fees.vue';
 import Tenant_Balances from '@/components/PMS/Tenant_Balances.vue';
+import Payment_Vouchers from '@/components/PMS/Payment_Vouchers.vue';
+import Payment_Details from '@/components/PMS/Payment_Details.vue';
 
 import Default_Settings from '@/components/SET/Default_Settings.vue';
 import Templates from '@/components/PMS/Templates.vue';
@@ -81,7 +83,8 @@ export default{
         Meter_Setup, Meter_Readings,Batch_Readings,Tenant_Invoices,Tenant_Receipts,Receipt_Details, Tenant_Prepayments, Prepayment_Allocations,
         Tenant_Details, Variation_Periods, Tenant_Statement, Tenant_Deposits, Statement_Transactions, Property_Statements, Statement_Processing,
         Tenant_Arrears,Lease_Fees,Debit_Notes,Credit_Notes,Debit_Note_Details,Credit_Note_Details,Terminated_Leases,Term_Lease_Statement,
-        Exit_Charges,Tenant_Move_Out,Import_Property_Units,Import_Properties,Import_Tenants,Late_Payment_Fees,Tenant_Balances,
+        Exit_Charges,Tenant_Move_Out,Import_Property_Units,Import_Properties,Import_Tenants,Late_Payment_Fees,Tenant_Balances,Payment_Vouchers,
+        Payment_Details,
         
         Default_Settings,Templates,Design_Template
     },

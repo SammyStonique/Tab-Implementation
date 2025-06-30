@@ -116,7 +116,7 @@ export default{
         const taxArray = computed(() => store.state.Taxes.taxArr);
         const transModalVisible = ref(false);
         const utilModalVisible = ref(false);
-        const dropdownWidth = ref("500px")
+        const dropdownWidth = ref("300px")
         const modal_top = ref('200px');
         const modal_left = ref('400px');
         const modal_width = ref('30vw');

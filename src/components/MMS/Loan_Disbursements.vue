@@ -106,6 +106,7 @@ export default{
             {label: "Loan Product", key: "loan_product", type: "text", editable: false},
             {label: "Member No", key: "member_number", type: "text", editable: false},
             {label: "Member Name", key: "member_name", type: "text", editable: false},
+            {label: "Loan Amount", key: "loan_amount", type: "number", editable: false},
             {label: "Amount", key: "amount", type: "number", editable: false},
             {label: "P.V#", key: "journal_no", type: "text", editable: false},
         ])

@@ -230,10 +230,10 @@ export default defineComponent({
         const updateFormFields = () => {
             formFields.value = [
                 { type: 'date', name: 'lease_date',label: "Date", value: selectedTenant.value?.lease_date || '', required: true },
-                { type: 'dropdown', name: 'lease_type',label: "Lease Type", value: selectedTenant.value?.lease_type || '', placeholder: "", required: true, options: [{ text: 'Lease', value: 'Lease' }, { text: 'License', value: 'License' },{ text: 'Residence', value: 'Residence' }, { text: 'Other', value: 'Others' }] },
-                { type: 'dropdown', name: 'lease_mode',label: "Lease Mode", value: selectedTenant.value?.lease_mode || '', placeholder: "", required: true, options: [{ text: 'Residential', value: 'Residential' }, { text: 'Commercial', value: 'Commercial' }] },
-                { type: 'dropdown', name: 'schedule_type',label: "Schedule Type", value: selectedTenant.value?.schedule_type || '', placeholder: "", required: true, options: [{ text: 'Calendar Period', value: 'Calendar Period' }, { text: 'Provided Start Date', value: 'Provided Start Date' }] },               
-                { type: 'dropdown', name: 'lease_term_type',label: "Lease Term", value: selectedTenant.value?.lease_term_type || '', placeholder: "", required: true, options: [{ text: 'Open', value: 'Open' }, { text: 'Fixed', value: 'Fixed' }] },
+                { type: 'dropdown', name: 'lease_type',label: "Lease Type", value: selectedTenant.value?.lease_type || 'Lease', placeholder: "", required: true, options: [{ text: 'Lease', value: 'Lease' }, { text: 'License', value: 'License' },{ text: 'Residence', value: 'Residence' }, { text: 'Other', value: 'Others' }] },
+                { type: 'dropdown', name: 'lease_mode',label: "Lease Mode", value: selectedTenant.value?.lease_mode || 'Residential', placeholder: "", required: true, options: [{ text: 'Residential', value: 'Residential' }, { text: 'Commercial', value: 'Commercial' }] },
+                { type: 'dropdown', name: 'schedule_type',label: "Schedule Type", value: selectedTenant.value?.schedule_type || 'Calendar Period', placeholder: "", required: true, options: [{ text: 'Calendar Period', value: 'Calendar Period' }, { text: 'Provided Start Date', value: 'Provided Start Date' }] },               
+                { type: 'dropdown', name: 'lease_term_type',label: "Lease Term", value: selectedTenant.value?.lease_term_type || 'Open', placeholder: "", required: true, options: [{ text: 'Open', value: 'Open' }, { text: 'Fixed', value: 'Fixed' }] },
                 {  
                     type:'search-dropdown', label:"Property", value: propertyValue.value, componentKey: propComponentKey,
                     selectOptions: propertyArray, optionSelected: handleSelectedProperty, required: true,

@@ -251,6 +251,9 @@ export default defineComponent({
           row.total_amount = totalAmount;
           row.item_sales_income = salesIncome;
         }
+      }else if(subTotal > 0){
+        row.sub_total = subTotal;
+        row.total_amount = subTotal;
       }
       
     };
@@ -324,10 +327,11 @@ export default defineComponent({
       let totalAmount = parseFloat(row.unit_selling_price) || 0;
       let discount = parseFloat(row.discount) || 0;
       let charges_amount = parseFloat(row.charges_amount) || 0;
-      totalAmount = (totalAmount + charges_amount - discount).toFixed(2);
-      row.sale_total_amount = totalAmount;
-      row.formatted_sale_total_amount = Number(totalAmount).toLocaleString();
-      
+      if(row.unit_selling_price && row.discount && row.charges_amount){
+        totalAmount = (totalAmount + charges_amount - discount).toFixed(2);
+        row.sale_total_amount = totalAmount;
+        row.formatted_sale_total_amount = Number(totalAmount).toLocaleString();
+      }       
     };
 
     const handleChange = (event, row) =>{
@@ -356,8 +360,11 @@ export default defineComponent({
     const updateUnits = (row) =>{
       const prevReading = parseFloat(row.prev_reading) || 0;
       const currReading = parseFloat(row.current_reading) || 0;
-      row.units_consumed = (currReading - prevReading).toFixed(2);
-      row.total = ((row.units_consumed * row.unit_cost) + row.meter_rent).toFixed(2)
+      if(row.prev_reading || row.current_reading){
+        row.units_consumed = (currReading - prevReading).toFixed(2);
+        row.total = ((row.units_consumed * row.unit_cost) + row.meter_rent).toFixed(2)
+      }
+      
 
     }
     //RECEIPTING

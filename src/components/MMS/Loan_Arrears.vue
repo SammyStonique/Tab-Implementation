@@ -36,8 +36,8 @@
         :loader="modal_loader" @showLoader="showModalLoader" @hideLoader="hideModalLoader" @closeModal="closeModal"
     >
         <DynamicForm 
-            :fields="formFields" :flex_basis="flex_basis" :flex_basis_percentage="flex_basis_percentage" 
-            :displayButtons="displayButtons" @handleSubmit="allocatePrepayment" @handleReset="handleReset"
+            :fields="formFields" :flex_basis="flex_basis" :flex_basis_percentage="flex_basis_percentage" :saveButtonLabel="'Print'"
+            :displayButtons="displayButtons" @handleSubmit="printArrearsList" @handleReset="handleReset"
         />
     </MovableModal>
 </template>
@@ -67,7 +67,7 @@ export default{
         const propComponentKey = ref(0);
         const riskComponentKey = ref(0);
         const showAddButton = ref(false);
-        const title = ref('');
+        const title = ref('Print Loan Arrears');
         const companyID = computed(()=> store.state.userData.company_id);
         const idField = 'tenant_lease_id';
         const rightsModule = ref('MMS');
@@ -101,7 +101,7 @@ export default{
             {label: "Loan Amount", key: "loan_amount", type: "number", editable: false},
             {label: "Principal Arrears", key: "principal_arrears", type: "number", editable: false},
             {label: "Interest Arrears", key: "interest_arrears", type: "number", editable: false},
-            {label: "Total Arrears", key: "total_arrears", type: "number", editable: false},
+            {label: "Total Outstanding", key: "total_arrears", type: "number", editable: false},
         ])
         const showTotals = ref(true);
         const actions = ref([
@@ -204,9 +204,27 @@ export default{
                 })
             }
         } 
+        const formFields = ref();
+        const updateFormFields = () =>{
+            formFields.value = [
+                {  type: 'checkbox', label: 'Member No', name: 'member_number', value: '', required: false},
+                {  type: 'checkbox', label: 'Member Name', name: 'member_name', value: true, selected: true, required: false},
+                {  type: 'checkbox', label: 'Phone No', name: 'phone_number', value: true, selected: true, required: false},
+                {  type:'checkbox', label:'Email Address', name:'email_address', value:'', required:false},
+                {  type:'checkbox', label:'Guarantors', name:'guarantors', value:'', required:false},
+                {  type:'checkbox', label:'Loan Amount', name:'loan_amount', value:'', required:false},
+                {  type:'checkbox', label:'Principal Amount', name:'principal_amount', value:'', required:false},
+                {  type:'checkbox', label:'Interest Amount', name:'interest_amount', value:'', required:false},
+                {  type:'checkbox', label:'Principal Paid', name:'principal_paid', value:'', required:false},
+                {  type:'checkbox', label:'Interest Paid', name:'interest_paid', value:'', required:false},          
+                {required: false, value: ''},
+                {required: false, value: ''}
+            ]
+        };
         const dropdownOptions = ref([
             {label: 'SMS Loan Arrears', action: 'send-sms'},
             {label: 'Email Loan Arrears', action: 'send-email'},
+            {label: 'Print Detailed', action: 'print-detailed'},
         ]);
         const handleDynamicOption = async(option) =>{
             if(option == 'send-sms'){
@@ -255,6 +273,11 @@ export default{
                 .finally(()=>{
                     hideLoader();
                 })
+            }else if(option == 'print-detailed'){
+                appModalVisible.value = true;
+                updateFormFields();
+                flex_basis.value = '1/4';
+                flex_basis_percentage.value = '20';
             }
         };
         const showModalLoader = () =>{
@@ -348,6 +371,7 @@ export default{
             searchLoanArrears();
         };
         const printArrearsList = () =>{
+            appModalVisible.value = false;
             showLoader();
             let formData = {
                 client_code: member_number_search.value,
@@ -355,6 +379,7 @@ export default{
                 date: date_search.value,
                 product: productID.value,
                 company: companyID.value,
+                printData: formFields.value,
                 page_size: selectedValue.value
             } 
 
@@ -382,7 +407,7 @@ export default{
         return{
             showAddButton,title, searchLoanArrears, idField, selectedIds, actions, arrearsList, appArrLen,appCount,appResults,appModalVisible,
             currentPage,searchFilters,tableColumns,resetFilters,loadPrev,loadNext,firstPage,lastPage,dropdownOptions,handleDynamicOption,
-            showNextBtn,showPreviousBtn, handleActionClick,displayButtons,
+            showNextBtn,showPreviousBtn, handleActionClick,displayButtons,formFields,
             modal_top, modal_left, modal_width, showLoader, loader, hideLoader, modal_loader, showModalLoader, hideModalLoader,rightsModule,
             handleSelectionChange, pageComponentKey, flex_basis, flex_basis_percentage,showTotals,printArrearsList,selectSearchQuantity,selectedValue
         }

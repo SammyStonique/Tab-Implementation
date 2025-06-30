@@ -185,6 +185,12 @@
                         <p class="">Late Payment Fees</p>
                         </button>
                     </div>
+                    <div class="py-2 px-3 pl-4 w-full hover:bg-slate-500 hover:w-full">
+                        <button class="flex w-full" @click="openPage({'PMS':'Payment_Vouchers'})">
+                        <i class="fa fa-money mr-2" aria-hidden="true"></i>
+                        <p class="">Expenses</p>
+                        </button>
+                    </div>
                 </div>
             </div>
             <div class="web-links dropdown w-44">

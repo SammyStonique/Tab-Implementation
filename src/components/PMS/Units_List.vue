@@ -110,7 +110,7 @@ export default{
             {label: "Tenant Name", key: "tenant_name"},
             {label: "Mrkt Rent", key: "market_rent"},
             {label: "Curr. Rent", key: "current_rent"},
-            {label: "Vacancy", key:"vacancy_status"},
+            {label: "Vacancy", key:"vacancy_status", textColor:"textColor"},
             {label: "Owner Occ", key:"owner_occupied"},
             {label: "Bdrms", key:"bedrooms"},
         ])

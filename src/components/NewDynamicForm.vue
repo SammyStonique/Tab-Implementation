@@ -95,7 +95,18 @@
           <input type="text" name="" class="rounded border-2 border-gray-400 text-gray-500 text-sm pl-2 mr-2 mb-4 w-80 h-6" placeholder="" v-model="field.filePath" >
           <input :accept="field.accepted_formats" @change="onFileChange($event)" id="file-input" :name="field.name" type="file"  :disabled="field.disabled" :class="`bg-slate-50 rounded pl-3 border border-gray-400 text-sm w-full`" :placeholder="field.placeholder"/>
         </div>
+        <div v-if="field.type === 'checkbox'" class="text-left text-sm" :hidden="field.hidden">
+          <div v-if="field.required" class="flex gap-x-1">
+            <input v-model="field.selected" @change="checkboxSelection(field)" :disabled="field.disabled" :name="field.name" type="checkbox" :class="`checkbox h-4 w-4`"/>
+            <label class="min-w-[150px]" for=""><em>*</em> {{ field.label }}</label>
+          </div>
+          <div v-else class="flex gap-x-1">
+            <input v-model="field.selected" @change="checkboxSelection(field)" :disabled="field.disabled" :name="field.name" type="checkbox" :class="`checkbox h-4 w-4`"/>
+            <label class="min-w-[150px]"  for="">{{ field.label }}</label>
+          </div>
+        </div>
       </div>
+      
       <div class="flex-1 basis-full p-2">
         <slot name="additional-content"></slot>
       </div>
@@ -181,9 +192,17 @@ export default{
           emit('file-changed', { file: localFile.value,filePath: localFilePath.value});
       }
     }
+    const checkboxSelection = (field) => {
+      const isChecked = field.selected;
+      if (isChecked) {
+        field.value = true;
+      } else {
+        field.value = false;
+      }
+    };
 
     return{
-      handleSubmit, handleReset, handleChange, onFileChange,localFilePath
+      handleSubmit, handleReset, handleChange, onFileChange,localFilePath,checkboxSelection
     }
   }
 

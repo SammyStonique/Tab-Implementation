@@ -53,7 +53,7 @@ export default defineComponent({
                 { type: 'dropdown', name: 'gender',label: "Gender", value: '', placeholder: "", required: true, options: [{ text: 'Male', value: 'Male' }, { text: 'Female', value: 'Female' }, { text: 'Others', value: 'Others' }] },
                 { type: 'text', name: 'email',label: "Email", value: '', required: true },
                 { type: 'text', name: 'kra_pin',label: "Tax Pin", value: '', required: true },
-                { type: 'dropdown', name: 'tenant_type',label: "Tenant Type", value: '', placeholder: "", required: true, options: [{ text: 'Individual', value: 'Individual' }, { text: 'Company', value: 'Company' }] },
+                { type: 'dropdown', name: 'tenant_type',label: "Tenant Type", value: 'Individual', placeholder: "", required: true, options: [{ text: 'Individual', value: 'Individual' }, { text: 'Company', value: 'Company' }] },
                 { type: 'text', name: 'country',label: "Country", value: 'Kenya', required: true },
                 { type: 'text', name: 'address',label: "Address", value: '', required: false },
             ];
