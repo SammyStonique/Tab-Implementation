@@ -19,6 +19,7 @@ const state = {
   selectedProduct: null,
   selectedInterestLedger: null,
   selectedPenaltyLedger: null,
+  selectedRecoveryLedger: null,
   selectedCategory: null,
   selectedGuarantorCategory: null,
   isEditing: false
@@ -38,6 +39,7 @@ const mutations = {
     state.selectedProduct = null;
     state.selectedInterestLedger = null;
     state.selectedPenaltyLedger = null;
+    state.selectedRecoveryLedger = null;
     state.selectedCategory = null;
     state.selectedGuarantorCategory = null;
     state.loanCharges = [];
@@ -65,6 +67,9 @@ const mutations = {
   },
   SET_SELECTED_PENALTY_LEDGER(state, ledger) {
     state.selectedPenaltyLedger = ledger;
+  },
+  SET_SELECTED_RECOVERY_LEDGER(state, ledger) {
+    state.selectedRecoveryLedger = ledger;
   },
   SET_SELECTED_CATEGORY(state, category) {
     state.selectedCategory = category;
@@ -128,6 +133,7 @@ const actions = {
         state.selectedProduct = response.data;
         const selectedInterestLedger = response.data.interest_posting_account.ledger_code + " - " + response.data.interest_posting_account.ledger_name;
         const selectedPenaltyLedger = (response.data.penalty_posting_account != null) ? (response.data.penalty_posting_account.ledger_code + " - " + response.data.penalty_posting_account.ledger_name) : "";
+        const selectedRecoveryLedger = (response.data.recovery_posting_account != null) ? (response.data.recovery_posting_account.ledger_code + " - " + response.data.recovery_posting_account.ledger_name) : "";
         const selectedCategory = (response.data.member_category != null) ? (response.data.member_category.category_name) : "";
         const selectedGuarantorCategory = (response.data.guarantor_category != null) ? (response.data.guarantor_category.category_name) : "";
         commit('SET_SELECTED_PRODUCT',response.data);
@@ -135,6 +141,7 @@ const actions = {
         commit('SET_SELECTED_GUARANTOR_CATEGORY',selectedGuarantorCategory);
         commit('SET_SELECTED_INTEREST_LEDGER', selectedInterestLedger);
         commit('SET_SELECTED_PENALTY_LEDGER', selectedPenaltyLedger);
+        commit('SET_SELECTED_RECOVERY_LEDGER', selectedRecoveryLedger);
         commit('SET_PRODUCT_CHARGES',(response.data.loan_charges != null) ? (response.data.loan_charges) : []);
     })
     .catch((error)=>{

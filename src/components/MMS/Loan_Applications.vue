@@ -224,7 +224,8 @@ export default{
         const updateFormFields1 = () => {
             formFields1.value = [
                 { type: 'number', name: 'day',label: "New Repayment Day", value: 1, required: true },
-                { type: 'text', name: 'installment',label: "Installment From", value: 0, required: true },
+                { type: 'text', name: 'installment_from',label: "Installment From", value: 1, required: true },
+                { type: 'text', name: 'installment_to',label: "Installment To", value: 1, required: true },
             ]
         };
         const handleReset1 = () =>{
@@ -240,10 +241,16 @@ export default{
         };
         const updateRepaymentDate = async() =>{
             showModalLoader1();
+            if(formFields1.value[2].value < formFields1.value[1].value){
+                toast.error("Installment To Cannot Be Less Than Installment From");
+                hideModalLoader1();
+                return;
+            }
             let formData = {
                 loan_application: applicationID.value,
                 new_day: formFields1.value[0].value,
-                installment: formFields1.value[1].value,
+                installment_from: formFields1.value[1].value,
+                installment_to: formFields1.value[2].value,
                 company: companyID.value
             }
             axios.post(`api/v1/update-loan-repayment-date/`,formData)

@@ -138,7 +138,7 @@ export default{
             {label: "Voucher#", key:"journal_no"},
             {label: "Date", key: "date"},
             {label: "Bank. Date", key: "banking_date"},
-            {label: "Vendor Name", key:"customer_name"},
+            {label: "Payee Name", key:"customer_name"},
             {label: "Cashbook", key:"cashbook"},
             {label: "Pay. Method", key:"payment_method"},
             {label: "Ref No", key:"reference_no"},

@@ -62,6 +62,7 @@ export default defineComponent({
         const mainComponentKey = ref(0);
         const intComponentKey = ref(0);
         const penComponentKey = ref(0);
+        const recComponentKey = ref(0);
         const catComponentKey = ref(0);
         const grntCatComponentKey = ref(0);
         const chargeComponentKey = ref(0);
@@ -80,6 +81,7 @@ export default defineComponent({
         const selectedProduct = computed(()=> store.state.Loan_Products.selectedProduct);
         const selectedInterestLedger = computed(()=> store.state.Loan_Products.selectedInterestLedger);
         const selectedPenaltyLedger = computed(()=> store.state.Loan_Products.selectedPenaltyLedger);
+        const selectedRecoveryLedger = computed(()=> store.state.Loan_Products.selectedRecoveryLedger);
         const selectedCategory = computed(()=> store.state.Loan_Products.selectedCategory);
         const selectedGuarantorCategory = computed(()=> store.state.Loan_Products.selectedGuarantorCategory);
         const loanCharges = computed(()=> store.state.Loan_Products.loanCharges);
@@ -87,6 +89,7 @@ export default defineComponent({
         const ledgerArray = computed(() => store.state.Ledgers.ledgerArr);
         const intLedgerID = ref('');
         const penaltyLedgerID = ref('');
+        const recoveryLedgerID = ref('');
         const chargeArr = computed(() => store.state.Loan_Fees.feeArr);
         const chargesDropdownWidth = ref('400px');
         const chargesSearchPlaceholder = ref('Select Charge...');
@@ -115,10 +118,6 @@ export default defineComponent({
         const clearSelectedCategory = async() =>{
             await store.dispatch('Member_Categories/updateState', {categoryID: ''});
             categoryID.value = store.state.Member_Categories.categoryID;
-            if(selectedProduct.value && selectedProduct.value.member_category != ""){
-                selectedProduct.value.member_category.member_category_id = categoryID.value;
-                categoryValue.value = categoryID.value
-            }
         };
         const handleSelectedGuarantorCategory = async(option) =>{
             await store.dispatch('Member_Categories/handleSelectedCategory', option)
@@ -128,10 +127,6 @@ export default defineComponent({
         const clearSelectedGuarantorCategory = async() =>{
             await store.dispatch('Member_Categories/updateState', {categoryID: ''});
             grntCategoryID.value = store.state.Member_Categories.categoryID;
-            if(selectedProduct.value && selectedProduct.value.member_category != ""){
-                selectedProduct.value.guarantor_category.member_category_id = grntCategoryID.value;
-                grntCategoryValue.value = grntCategoryID.value
-            }
         };
         const fetchAllLedgers = async() =>{
             await store.dispatch('Ledgers/fetchLedgers', {company:companyID.value})
@@ -151,7 +146,7 @@ export default defineComponent({
         const handleSelectedPenaltyLedger = async(option) =>{
             await store.dispatch('Ledgers/handleSelectedLedger', option)
             penaltyLedgerID.value = store.state.Ledgers.ledgerID;
-            if(selectedProduct.value){
+            if(selectedProduct.value && selectedProduct.value.penalty_posting_account){
                 selectedProduct.value.penalty_posting_account.ledger_id = penaltyLedgerID.value;
                 penaltyLedgerValue.value = penaltyLedgerID.value
             }
@@ -159,6 +154,18 @@ export default defineComponent({
         const clearSelectedPenaltyLedger = async() =>{
             await store.dispatch('Ledgers/updateState', {ledgerID: ''});
             penaltyLedgerID.value = store.state.Ledgers.ledgerID;
+        };
+        const handleSelectedRecoveryLedger = async(option) =>{
+            await store.dispatch('Ledgers/handleSelectedLedger', option)
+            recoveryLedgerID.value = store.state.Ledgers.ledgerID;
+            if(selectedProduct.value && selectedProduct.value.recovery_posting_account){
+                selectedProduct.value.recovery_posting_account.ledger_id = recoveryLedgerID.value;
+                recoveryLedgerValue.value = recoveryLedgerID.value
+            }
+        };
+        const clearSelectedRecoveryLedger = async() =>{
+            await store.dispatch('Ledgers/updateState', {ledgerID: ''});
+            recoveryLedgerID.value = store.state.Ledgers.ledgerID;
         };
         const fetchCharges = async() =>{
             await store.dispatch('Loan_Fees/fetchLoanFees', {company:companyID.value})
@@ -178,12 +185,15 @@ export default defineComponent({
         const penaltyLedgerValue = computed(() => {
             return (selectedProduct.value && selectedProduct.value.penalty_posting_account && !penaltyLedgerID.value) ? selectedProduct.value.penalty_posting_account.ledger_id : penaltyLedgerID.value;
         });
+        const recoveryLedgerValue = computed(() => {
+            return (selectedProduct.value && selectedProduct.value.recovery_posting_account && !recoveryLedgerID.value) ? selectedProduct.value.recovery_posting_account.ledger_id : recoveryLedgerID.value;
+        });
         const updateFormFields = () => {
             formFields.value = [
                 {  
                     type:'search-dropdown', label:"Member Category", value: categoryValue.value, componentKey: catComponentKey,
                     selectOptions: categoryArray, optionSelected: handleSelectedCategory, required: false,
-                    searchPlaceholder: 'Select Category...', dropdownWidth: '450px', updateValue: selectedCategory.value,
+                    searchPlaceholder: 'Select Category...', dropdownWidth: '300px', updateValue: selectedCategory.value,
                     fetchData: store.dispatch('Member_Categories/fetchMemberCategories', {company:companyID.value}), clearSearch: clearSelectedCategory
                 },
                 { type: 'text', name: 'product_code',label: "Code", value: selectedProduct.value?.product_code || '', required: false },
@@ -209,22 +219,29 @@ export default defineComponent({
                 {  
                     type:'search-dropdown', label:"Guarantor Category", value: grntCategoryValue.value, componentKey: grntCatComponentKey,
                     selectOptions: categoryArray, optionSelected: handleSelectedGuarantorCategory, required: false,
-                    searchPlaceholder: 'Select Category...', dropdownWidth: '450px', updateValue: selectedGuarantorCategory.value,
+                    searchPlaceholder: 'Select Category...', dropdownWidth: '300px', updateValue: selectedGuarantorCategory.value,
                     clearSearch: clearSelectedGuarantorCategory
                 },
                 { type: 'dropdown', name: 'use_security',label: "Use Security", value: selectedProduct.value?.use_security || 'No', placeholder: "", required: true, options: [{ text: 'Yes', value: 'Yes' }, { text: 'No', value: 'No' }] },
                 { type: 'dropdown', name: 'credit_reduction',label: "Credit Reduction", value: selectedProduct.value?.credit_reduction || 'No', placeholder: "", required: true, options: [{ text: 'Yes', value: 'Yes' }, { text: 'No', value: 'No' }] },
+                { type: 'dropdown', name: 'recovery_option',label: "Loan Recovery Option", value: selectedProduct.value?.recovery_option || 'Payable', placeholder: "", required: true, options: [{ text: 'Payable', value: 'Payable' },{ text: 'Savings', value: 'Savings' }, { text: 'Shares', value: 'Shares' }] },                
                 {  
                     type:'search-dropdown', label:"Interest Posting Account", value: intLedgerValue.value, componentKey: intComponentKey,
                     selectOptions: ledgerArray, optionSelected: handleSelectedInterestLedger, required: true,
-                    searchPlaceholder: 'Select Posting Acc...', dropdownWidth: '450px', updateValue: selectedInterestLedger.value,
-                    fetchData: store.dispatch('Ledgers/fetchLedger', {company:companyID.value}), clearSearch: clearSelectedInterestLedger
+                    searchPlaceholder: 'Select Posting Acc...', dropdownWidth: '400px', updateValue: selectedInterestLedger.value,
+                    clearSearch: clearSelectedInterestLedger
                 },
                 {  
                     type:'search-dropdown', label:"Penalty Income Posting Account", value: penaltyLedgerValue.value, componentKey: penComponentKey,
                     selectOptions: ledgerArray, optionSelected: handleSelectedPenaltyLedger, required: false,
-                    searchPlaceholder: 'Select Posting Acc...', dropdownWidth: '450px', updateValue: selectedPenaltyLedger.value,
-                    fetchData: store.dispatch('Ledgers/fetchLedger', {company:companyID.value}), clearSearch: clearSelectedPenaltyLedger
+                    searchPlaceholder: 'Select Posting Acc...', dropdownWidth: '400px', updateValue: selectedPenaltyLedger.value,
+                    clearSearch: clearSelectedPenaltyLedger
+                },
+                {  
+                    type:'search-dropdown', label:"Loan Recovery Payable Account", value: recoveryLedgerValue.value, componentKey: recComponentKey,
+                    selectOptions: ledgerArray, optionSelected: handleSelectedRecoveryLedger, required: false,
+                    searchPlaceholder: 'Select Payable Acc...', dropdownWidth: '400px', updateValue: selectedRecoveryLedger.value,
+                    clearSearch: clearSelectedRecoveryLedger
                 },
                 {required: false}
             ];
@@ -236,57 +253,39 @@ export default defineComponent({
                 ];
         };
 
-        watch([categoryID, intLedgerID,penaltyLedgerID,grntCategoryID], () => {
+        watch([categoryID, intLedgerID,penaltyLedgerID,grntCategoryID,recoveryLedgerID], () => {
             if (categoryID.value != "") {
                 formFields.value[0].value = categoryID.value;
             }
             if(intLedgerID.value != ""){
-                formFields.value[24].value = intLedgerID.value;
+                formFields.value[25].value = intLedgerID.value;
             }
             if(penaltyLedgerID.value != ""){
-                formFields.value[25].value = penaltyLedgerID.value;
+                formFields.value[26].value = penaltyLedgerID.value;
             }
             if (grntCategoryID.value != "") {
                 formFields.value[21].value = grntCategoryID.value;
             }
+            if (recoveryLedgerID.value != "") {
+                formFields.value[27].value = recoveryLedgerID.value;
+            }
         }, { immediate: true });
 
-        watch([selectedProduct, selectedInterestLedger, selectedPenaltyLedger, selectedCategory, selectedGuarantorCategory, loanCharges], () => {
+        watch([selectedProduct, selectedInterestLedger, selectedPenaltyLedger, selectedRecoveryLedger, selectedCategory, selectedGuarantorCategory, loanCharges], () => {
             if(loanCharges.value){
                 store.dispatch('Loan_Fees/updateState',{feeArray: loanCharges.value})
                 tableKey.value += 1;
             }
-            if (selectedProduct.value && selectedInterestLedger.value && selectedCategory.value && selectedGuarantorCategory.value && selectedPenaltyLedger.value) {
+            if(selectedProduct.value){
                 catComponentKey.value += 1;
                 intComponentKey.value += 1;
                 penComponentKey.value += 1;
+                recComponentKey.value += 1;
                 grntCatComponentKey.value += 1;
                 updateFormFields();
                 updateAdditionalFormFields();
-
             }
-            else if (selectedProduct.value && selectedInterestLedger.value && selectedCategory.value) {
-                catComponentKey.value += 1;
-                intComponentKey.value += 1;
-                updateFormFields();
-                updateAdditionalFormFields();
-
-            }else if (selectedProduct.value && selectedInterestLedger.value&& selectedGuarantorCategory.value) {
-                intComponentKey.value += 1;
-                grntCatComponentKey.value += 1;
-                updateFormFields();
-                updateAdditionalFormFields();
-
-            }
-            else if(selectedProduct.value && selectedInterestLedger.value){
-                intComponentKey.value += 1;
-                updateFormFields();
-                updateAdditionalFormFields();
-                    
-            }else if(selectedProduct.value){
-                updateFormFields();
-                updateAdditionalFormFields();
-            }
+            
         }, { immediate: true });
 
         const handleReset = async() =>{
@@ -299,16 +298,18 @@ export default defineComponent({
                 additionalFields.value[i].value = '';
             }
             await store.dispatch('Loan_Fees/updateState', {feeArray: []});
-            await store.dispatch('Loan_Products/updateState', {selectedProduct: null, loanCharges: [], selectedInterestLedger: null, selectedPenaltyLedger: null, selectedCategory: null, selectedGuarantorCategory: null, isEditing:false});
+            await store.dispatch('Loan_Products/updateState', {selectedProduct: null, loanCharges: [], selectedInterestLedger: null, selectedPenaltyLedger: null, selectedRecoveryLedger: null, selectedCategory: null, selectedGuarantorCategory: null, isEditing:false});
             mainComponentKey.value += 1;
             intComponentKey.value += 1;
             catComponentKey.value += 1;
             grntCatComponentKey.value += 1;
             penComponentKey.value += 1;
+            recComponentKey.value += 1;
             intLedgerID.value = "";
             penaltyLedgerID.value = "";
             categoryID.value = "";
             grntCategoryID.value = "";
+            recoveryLedgerID.value = "";
         }
          
         const showLoader = () =>{
@@ -343,10 +344,13 @@ export default defineComponent({
                 guarantors_percentage: formFields.value[20].value,
                 use_security: formFields.value[22].value,
                 credit_reduction: formFields.value[23].value,
+                recovery_option: formFields.value[24].value,
                 interest_posting_account: intLedgerID.value,
                 interest_posting_account_id: intLedgerID.value,
                 penalty_posting_account: penaltyLedgerID.value,
                 penalty_posting_account_id: penaltyLedgerID.value,
+                recovery_posting_account: recoveryLedgerID.value,
+                recovery_posting_account_id: recoveryLedgerID.value,
                 member_category: categoryID.value,
                 member_category_id: categoryID.value,
                 guarantor_category: grntCategoryID.value,
@@ -413,10 +417,13 @@ export default defineComponent({
                 guarantors_percentage: formFields.value[20].value,
                 use_security: formFields.value[22].value,
                 credit_reduction: formFields.value[23].value,
+                recovery_option: formFields.value[24].value,
                 interest_posting_account: intLedgerValue.value,
                 interest_posting_account_id: intLedgerValue.value,
                 penalty_posting_account: penaltyLedgerValue.value,
                 penalty_posting_account_id: penaltyLedgerValue.value,
+                recovery_posting_account: recoveryLedgerValue.value,
+                recovery_posting_account_id: recoveryLedgerValue.value,
                 member_category: categoryValue.value,
                 member_category_id: categoryValue.value,
                 guarantor_category: grntCategoryValue.value,
@@ -478,7 +485,7 @@ export default defineComponent({
             fetchCharges();
             updateFormFields();
             updateAdditionalFormFields();
-            flex_basis.value = '1/4';
+            flex_basis.value = '1/6';
             flex_basis_percentage.value = '25';
             additional_flex_basis.value = '1/4';
             additional_flex_basis_percentage.value = '25';

@@ -345,14 +345,14 @@ export default{
         }
         const addNewProduct = async() =>{
             store.commit('Loan_Products/initializeStore');
-            await store.dispatch('Loan_Products/updateState', {selectedProduct: null,selectedCategory: null, selectedGuarantorCategory: null,selectedInterestLedger: null, selectedPenaltyLedger: null,isEditing: false});
+            await store.dispatch('Loan_Products/updateState', {selectedProduct: null,selectedCategory: null, selectedGuarantorCategory: null,selectedInterestLedger: null, selectedPenaltyLedger: null, selectedRecoveryLedger: null,isEditing: false});
             await store.dispatch('Loan_Fees/updateState', {feeArray: []})
             store.commit('pageTab/ADD_PAGE', {'MMS':'Loan_Product_Details'});
             store.state.pageTab.mmsActiveTab = 'Loan_Product_Details';          
         }
         const handleActionClick = async(rowIndex, action, row) =>{
             if( action == 'edit'){
-                await store.dispatch('Loan_Products/updateState', {selectedProduct: null,selectedCategory: null, selectedGuarantorCategory: null,selectedInterestLedger: null, selectedPenaltyLedger: null,isEditing: false});
+                await store.dispatch('Loan_Products/updateState', {selectedProduct: null,selectedCategory: null, selectedGuarantorCategory: null,selectedInterestLedger: null, selectedPenaltyLedger: null, selectedRecoveryLedger: null,isEditing: false});
                 const productID = row[idField];
                 let formData = {
                     company: companyID.value,
