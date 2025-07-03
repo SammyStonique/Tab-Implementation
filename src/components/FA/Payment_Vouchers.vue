@@ -442,7 +442,7 @@ export default{
         }
 
         const dropdownOptions = ref([
-            {label: 'Direct Voucher', action: 'direct-voucher'},
+            {label: 'Direct Voucher', action: 'direct-voucher', rightName: 'Adding Payment Voucher'},
         ]);
         const handleDynamicOption = (option) =>{
             if(option == 'direct-voucher'){

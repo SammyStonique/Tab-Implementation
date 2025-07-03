@@ -542,7 +542,7 @@ export default{
         }
 
         const dropdownOptions = ref([
-            {label: 'Batch Reading', action: 'batch-meter-reading'},
+            {label: 'Batch Reading', action: 'batch-meter-reading', rightName: 'Adding Meter Reading'},
         ]);
         const handleDynamicOption = (option) =>{
             if(option == 'batch-meter-reading'){

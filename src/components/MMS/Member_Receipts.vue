@@ -508,8 +508,8 @@ export default{
         }
 
         const dropdownOptions = ref([
-            {label: 'SMS Member Receipts', action: 'send-sms'},
-            {label: 'Email Member Receipts', action: 'send-email'},
+            {label: 'SMS Member Receipts', action: 'send-sms', rightName: 'Sending MMS SMS'},
+            {label: 'Email Member Receipts', action: 'send-email', rightName: 'Sending MMS Emails'},
         ]);
         const handleDynamicOption = async(option) =>{
             if(option == 'send-sms'){

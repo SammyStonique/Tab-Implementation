@@ -222,9 +222,9 @@ export default{
             ]
         };
         const dropdownOptions = ref([
-            {label: 'SMS Loan Arrears', action: 'send-sms'},
-            {label: 'Email Loan Arrears', action: 'send-email'},
-            {label: 'Print Detailed', action: 'print-detailed'},
+            {label: 'SMS Loan Arrears', action: 'send-sms', rightName: 'Sending MMS SMS'},
+            {label: 'Email Loan Arrears', action: 'send-email', rightName: 'Sending MMS Emails'},
+            {label: 'Print Detailed', action: 'print-detailed', rightName: 'Printing MMS Reports'},
         ]);
         const handleDynamicOption = async(option) =>{
             if(option == 'send-sms'){
@@ -234,12 +234,12 @@ export default{
                     tenant: tenantID,
                     company: companyID.value
                 }
-                await axios.post('api/v1/tenant-balance-reminder-sms/',formData).
+                await axios.post('api/v1/loan-arrears-reminder-sms/',formData).
                 then((response)=>{
                     if(response.data.msg == "Success"){
                         toast.success("SMS Sent!")
                     }else if(response.data.msg == "Missing Template"){
-                        toast.error("Tenant Balance Reminder Template Not Set!")
+                        toast.error("Loan Balance Reminder Template Not Set!")
                     }else{
                         toast.error(response.data.msg)
                     }
@@ -257,12 +257,12 @@ export default{
                     tenant: tenantID,
                     company: companyID.value
                 }
-                await axios.post('api/v1/tenant-balance-reminder-email/',formData).
+                await axios.post('api/v1/loan-arrears-reminder-email/',formData).
                 then((response)=>{
                     if(response.data.msg == "Success"){
                         toast.success("Email Sent!")
                     }else if(response.data.msg == "Missing Template"){
-                        toast.error("Tenant Balance Reminder Template Not Set!")
+                        toast.error("Loan Balance Reminder Template Not Set!")
                     }else{
                         toast.error(response.data.msg)
                     }
@@ -379,7 +379,7 @@ export default{
                 date: date_search.value,
                 product: productID.value,
                 company: companyID.value,
-                printData: formFields.value,
+                printData: formFields.value || [],
                 page_size: selectedValue.value
             } 
 

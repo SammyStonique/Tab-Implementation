@@ -275,6 +275,7 @@ export default{
         const closeModal1 = () =>{
             appModalVisible.value = false;
             applicationID.value = null;
+            selectedIds.value = [];
             hideModalLoader1();
         };
         const removeApplication = async() =>{
@@ -606,10 +607,10 @@ export default{
             });
         };
         const dropdownOptions = ref([
-            {label: 'Exempt Penalty', action: 'exempt-penalty'},
-            {label: 'Unexempt Penalty', action: 'unexempt-penalty'},
-            {label: 'Email Loan Statement', action: 'send-email'},
-            {label: 'Update Repayment Date', action: 'repayment-date'}, 
+            {label: 'Exempt Penalty', action: 'exempt-penalty', rightName: 'Exempting Loan Penalty'},
+            {label: 'Unexempt Penalty', action: 'unexempt-penalty', rightName: 'Exempting Loan Penalty'},
+            {label: 'Email Loan Statement', action: 'send-email', rightName: 'Sending MMS Emails'},
+            {label: 'Update Repayment Date', action: 'repayment-date', rightName: 'Updating Loan Repayment Date'}, 
         ]);
         const handleDynamicOption = async(option) =>{
             if( option == 'exempt-penalty'){

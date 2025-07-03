@@ -147,10 +147,10 @@ export default{
         const utilityID = ref("");
         const utilityTaxID = ref("");
         const dropdownOptions = ref([
-            {label: 'Add Tenant Utilities', action: 'add-tenant-utilties'},
-            {label: 'Tenancy Agreement', action: 'tenancy-agreement-report'},
-            {label: 'SMS Tenant Statement', action: 'send-sms'},
-            {label: 'Email Tenant Statement', action: 'send-email'},
+            {label: 'Add Tenant Utilities', action: 'add-tenant-utilties', rightName: 'Adding Tenant Utility'},
+            {label: 'Tenancy Agreement', action: 'tenancy-agreement-report', rightName: 'Printing PMS Reports'},
+            {label: 'SMS Tenant Statement', action: 'send-sms', rightName: 'Sending PMS SMS'},
+            {label: 'Email Tenant Statement', action: 'send-email', rightName: 'Sending PMS Emails'},
         ]);
         
         const name_search = computed({

@@ -82,7 +82,7 @@ export default{
         const rightsModule = ref('MMS');
         const submitButtonLabel = ref('Add');
         const title = ref('Penalty Processing');
-        const propComponentKey = ref(0);
+        const lnComponentKey = ref(0);
         const invModalVisible = ref(false);
         const modal_top = ref('150px');
         const modal_left = ref('400px');
@@ -122,6 +122,8 @@ export default{
         ])
         const companyID = computed(()=> store.state.userData.company_id);
         const batchID = computed(()=> store.state.Penalty_Batches.batchID);
+        const applicationArray = computed(() => store.state.Loan_Applications.applicationArr);
+        const applicationID = ref('');
         const member_number_search = ref("");
         const member_name_search = ref("");
         const loan_number_search = ref("");
@@ -139,10 +141,24 @@ export default{
             selectedIds.value = ids;
         };
 
+        const handleSelectedApplication = async(option) =>{
+            await store.dispatch('Loan_Applications/handleSelectedApplication', option)
+            applicationID.value = store.state.Loan_Applications.applicationID;
+        };
+        const clearSelectedApplication = async() =>{
+            await store.dispatch('Loan_Applications/updateState', {applicationID: ''});
+            applicationID.value = store.state.Loan_Applications.applicationID;
+        };
+
         const formFields = ref([]);
         const updateFormFields = () =>{
             formFields.value = [
-
+                {  
+                    type:'search-dropdown', label:"Loan Application", value: applicationID.value, componentKey: lnComponentKey,
+                    selectOptions: applicationArray, optionSelected: handleSelectedApplication, required: true,
+                    searchPlaceholder: 'Select Loan Application...', dropdownWidth: '400px', updateValue: "",
+                    fetchData: store.dispatch('Loan_Applications/fetchLoanApplications', {company:companyID.value}), clearSearch: clearSelectedApplication
+                },
                 { type: 'date', name: 'period_year',label: "Date From", value: "", required: true },
                 { type: 'date', name: 'period_year',label: "Date To", value: "", required: true },
             ]
@@ -152,7 +168,9 @@ export default{
             for(let i=0; i < formFields.value.length; i++){
                 formFields.value[i].value = '';
             }
-
+            lnComponentKey.value += 1;
+            invModalVisible.value = false;
+            applicationID.value = '';
         }
         
         const showModalLoader = () =>{
@@ -164,16 +182,20 @@ export default{
         const processPenalty = async() =>{
             showModalLoader();
             let formData = {
-                date_from: formFields.value[0].value,
-                date_to: formFields.value[1].value,
+                loan_application: applicationID.value,
+                from_date: formFields.value[1].value,
+                to_date: formFields.value[2].value,
                 company: companyID.value
             }
 
             errors.value = [];
             for(let i=0; i < (formFields.value.length); i++){
-                if(formFields.value[i].value =='' && formFields.value[i].required == true){
+                if(formFields.value[i].value =='' && formFields.value[i].required == true && formFields.value[i].type != 'search-dropdown'){
                     errors.value.push(formFields.value[i].label);
                 }
+            }
+            if(applicationID.value == ''){
+                errors.value.push('Loan Application');
             }
 
             if(errors.value.length){
@@ -181,11 +203,11 @@ export default{
                 hideModalLoader();
             }else{
                 try {
-                    axios.post(`api/v1/process-loan-penalty/`,formData).
+                    await axios.post(`api/v1/process-individual-loan-penalty/`,formData).
                     then((response)=>{
                         if (response.data.msg === "Success"){
                             hideModalLoader();
-                            toast.success('Penalty(s) Posted Successfully!');
+                            toast.success('Success!');
                             handleReset();
                             searchPenalties();
                         }else if(response.data.msg === "Processed"){

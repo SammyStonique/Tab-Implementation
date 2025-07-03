@@ -507,7 +507,7 @@ export default{
         }
 
         const dropdownOptions = ref([
-            {label: 'Direct Voucher', action: 'direct-voucher'},
+            
         ]);
         const handleDynamicOption = (option) =>{
             if(option == 'direct-voucher'){

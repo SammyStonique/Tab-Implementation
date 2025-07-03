@@ -133,7 +133,7 @@
                     </div>
                     <div class="py-2 px-3 pl-4 w-full hover:bg-slate-500 hover:w-full">
                         <button class="flex w-full" @click="openPage({'PMS':'Tenant_Balances'})">
-                            <i class="fa fa-list-ul mr-2" aria-hidden="true"></i>
+                            <i class="fa fa-coins mr-2" aria-hidden="true"></i>
                             <p class="">Take-On Balances</p>
                         </button>
     

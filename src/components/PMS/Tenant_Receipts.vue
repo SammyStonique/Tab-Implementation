@@ -718,9 +718,9 @@ export default{
         }
 
         const dropdownOptions = ref([
-            {label: 'Cancel Reversal', action: 'cancel-receipt-reversal'},
-            {label: 'SMS Tenant Receipts', action: 'send-sms'},
-            {label: 'Email Tenant Receipts', action: 'send-email'},
+            {label: 'Cancel Reversal', action: 'cancel-receipt-reversal', rightName: 'Canceling Tenant Receipt Reversal'},
+            {label: 'SMS Tenant Receipts', action: 'send-sms', rightName: 'Sending PMS SMS'},
+            {label: 'Email Tenant Receipts', action: 'send-email', rightName: 'Sending PMS Emails'},
         ]);
         const handleDynamicOption = async(option) =>{           
             if(option == 'cancel-receipt-reversal'){
