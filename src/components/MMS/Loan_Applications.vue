@@ -589,14 +589,15 @@ export default{
 
             store.commit('contextMenu/CLEAR_SELECTED_ACTION');
         });
+        
         const handleRightClick = (row, rowIndex, event) => {
 
             const menuOptions = [
-                { label: 'Edit', action: 'edit', rowIndex: rowIndex , icon: 'fa fa-edit'},
-                { label: 'View', action: 'view', rowIndex: rowIndex, icon: 'fa fa-file-pdf-o' },
-                { label: 'Approve', action: 'approve', rowIndex: rowIndex, icon: 'fa fa-check-circle' },
-                { label: 'Disburse', action: 'disburse', rowIndex: rowIndex, icon: 'fa fa-credit-card' },
-                { label: 'Delete', action: 'delete', rowIndex: rowIndex, icon: 'fa fa-trash' },
+                { label: 'Edit', action: 'edit', rowIndex: rowIndex , icon: 'fa fa-edit', rightName: 'Editing Loan Applications'},
+                { label: 'View', action: 'view', rowIndex: rowIndex, icon: 'fa fa-file-pdf-o', rightName: 'Viewing Loan Ledger' },
+                { label: 'Approve', action: 'approve', rowIndex: rowIndex, icon: 'fa fa-check-circle', rightName: 'Approving Loan Applications' },
+                { label: 'Disburse', action: 'disburse', rowIndex: rowIndex, icon: 'fa fa-credit-card', rightName: 'Disbursing Member Loan' },
+                { label: 'Delete', action: 'delete', rowIndex: rowIndex, icon: 'fa fa-trash', rightName: 'Deleting Loan Applications' },
             ];
 
             store.commit('contextMenu/SHOW_CONTEXT_MENU', {

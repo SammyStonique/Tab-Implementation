@@ -51,6 +51,7 @@ import Petty_Cash_Refunds from './FA/Petty_Cash_Refunds';
 import Petty_Cash_Item_Categories from './FA/Petty_Cash_Item_Categories';
 import Petty_Cash_Replenishments from './FA/Petty_Cash_Replenishments';
 import Petty_Cash_Vouchers from './FA/Petty_Cash_Vouchers';
+import Ledger_Balances from './FA/Ledger_Balances';
 
 import Item_Categories from './INV/Item_Categories';
 import Items_Catalog from './INV/Items_Catalog';
@@ -186,7 +187,7 @@ export default createStore({
     Stock_Adjustments,Stock_Transfers,
     
     Ledgers, Currencies, Taxes, Journals, Customers, Vendors,Fiscal_Periods,Asset_Categories,Assets,Petty_Cash,Petty_Cash_Refunds,Petty_Cash_Replenishments,
-    Petty_Cash_Vouchers,Petty_Cash_Item_Categories,
+    Petty_Cash_Vouchers,Petty_Cash_Item_Categories,Ledger_Balances,
 
     Pay_Cycles,Pay_Groups,Deductions,Leave_Types,Holidays,Paye,Nssf,Shif,Housing_Levy,Employees,Payrolls,Leave_Applications,Leave_Allocations,Salary_Advances,
     Employee_Loan_Applications,Employee_Loan_Disbursements,Leave_Ammendments,Appraisals,Performance_Indicators,Skill_Ratings,Appraisal_Periods,Appraisal_Categories,

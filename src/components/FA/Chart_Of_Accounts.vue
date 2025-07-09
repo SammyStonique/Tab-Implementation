@@ -28,7 +28,7 @@
                       <thead class="bg-gray-800 text-white">
                           <tr class="rounded bg-slate-800 text-white font-semibold text-xs uppercase">
                               <th style="width: 1%;">#</th>
-                              <th class="text-left py-2 px-2" style="width: 10%;">Code</th>
+                              <th class="text-left py-2 px-2 sticky" style="width: 10%;">Code</th>
                               <th class="text-left py-2 px-2" style="width: 30%;">Account Name</th>
                               <th class="text-left py-2 px-2" style="width: 15%;">Type</th>
                               <th class="text-left py-2 px-2" style="width: 25%;">Financial Statement</th>

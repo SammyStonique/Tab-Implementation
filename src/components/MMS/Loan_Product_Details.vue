@@ -228,21 +228,22 @@ export default defineComponent({
                 {  
                     type:'search-dropdown', label:"Interest Posting Account", value: intLedgerValue.value, componentKey: intComponentKey,
                     selectOptions: ledgerArray, optionSelected: handleSelectedInterestLedger, required: true,
-                    searchPlaceholder: 'Select Posting Acc...', dropdownWidth: '400px', updateValue: selectedInterestLedger.value,
+                    searchPlaceholder: 'Select Posting Acc...', dropdownWidth: '350px', updateValue: selectedInterestLedger.value,
                     clearSearch: clearSelectedInterestLedger
                 },
                 {  
                     type:'search-dropdown', label:"Penalty Income Posting Account", value: penaltyLedgerValue.value, componentKey: penComponentKey,
                     selectOptions: ledgerArray, optionSelected: handleSelectedPenaltyLedger, required: false,
-                    searchPlaceholder: 'Select Posting Acc...', dropdownWidth: '400px', updateValue: selectedPenaltyLedger.value,
+                    searchPlaceholder: 'Select Posting Acc...', dropdownWidth: '350px', updateValue: selectedPenaltyLedger.value,
                     clearSearch: clearSelectedPenaltyLedger
                 },
                 {  
                     type:'search-dropdown', label:"Loan Recovery Payable Account", value: recoveryLedgerValue.value, componentKey: recComponentKey,
                     selectOptions: ledgerArray, optionSelected: handleSelectedRecoveryLedger, required: false,
-                    searchPlaceholder: 'Select Payable Acc...', dropdownWidth: '400px', updateValue: selectedRecoveryLedger.value,
+                    searchPlaceholder: 'Select Payable Acc...', dropdownWidth: '350px', updateValue: selectedRecoveryLedger.value,
                     clearSearch: clearSelectedRecoveryLedger
                 },
+                { type: 'dropdown', name: 'enable_reminders',label: "Enable Reminder", value: selectedProduct.value?.enable_reminders || 'No', placeholder: "", required: true, options: [{ text: 'Yes', value: 'Yes' }, { text: 'No', value: 'No' }] },
                 {required: false}
             ];
         };
@@ -345,6 +346,7 @@ export default defineComponent({
                 use_security: formFields.value[22].value,
                 credit_reduction: formFields.value[23].value,
                 recovery_option: formFields.value[24].value,
+                enable_reminders: formFields.value[28].value,
                 interest_posting_account: intLedgerID.value,
                 interest_posting_account_id: intLedgerID.value,
                 penalty_posting_account: penaltyLedgerID.value,
@@ -418,6 +420,7 @@ export default defineComponent({
                 use_security: formFields.value[22].value,
                 credit_reduction: formFields.value[23].value,
                 recovery_option: formFields.value[24].value,
+                enable_reminders: formFields.value[28].value,
                 interest_posting_account: intLedgerValue.value,
                 interest_posting_account_id: intLedgerValue.value,
                 penalty_posting_account: penaltyLedgerValue.value,

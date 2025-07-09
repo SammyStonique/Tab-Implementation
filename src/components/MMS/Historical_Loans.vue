@@ -23,6 +23,7 @@
             :idField="idField"
             @handleSelectionChange="handleSelectionChange"
             @handleActionClick="handleActionClick"
+            @handleRightClick="handleRightClick"
             :count="propCount"
             :currentPage="currentPage"
             :result="propArrLen"
@@ -65,7 +66,7 @@
 
 <script>
 import axios from "axios";
-import { ref, computed, onMounted, onBeforeMount} from 'vue';
+import { ref, computed, watch, onMounted, onBeforeMount} from 'vue';
 import PageComponent from '@/components/PageComponent.vue'
 import { useStore } from "vuex";
 import { useToast } from "vue-toastification";
@@ -508,6 +509,30 @@ export default{
                 }
             }
         };
+        watch(() => store.state.contextMenu.selectedAction, (actionPayload) => {
+            if (!actionPayload) return;
+
+            const { rowIndex, action, data } = actionPayload;
+
+            handleActionClick(rowIndex, action, data);
+
+            store.commit('contextMenu/CLEAR_SELECTED_ACTION');
+        });
+        
+        const handleRightClick = (row, rowIndex, event) => {
+
+            const menuOptions = [
+                { label: 'View', action: 'view', rowIndex: rowIndex, icon: 'fa fa-file-pdf-o', rightName: 'Viewing Loan Ledger' },
+                { label: 'Delete', action: 'delete', rowIndex: rowIndex, icon: 'fa fa-trash', rightName: 'Deleting Loan Applications' },
+            ];
+
+            store.commit('contextMenu/SHOW_CONTEXT_MENU', {
+                x: event.clientX,
+                y: event.clientY,
+                options: menuOptions,
+                contextData: row,
+            });
+        };
         const dropdownOptions = ref([
             {label: 'Exempt Penalty', action: 'exempt-penalty', rightName: 'Exempting Loan Penalty'},
             {label: 'Unexempt Penalty', action: 'unexempt-penalty', rightName: 'Exempting Loan Penalty'},
@@ -798,7 +823,7 @@ export default{
         return{
             showAddButton,searchApplications,resetFilters, addButtonLabel, searchFilters, tableColumns, applicationList,dropdownWidth,displayButtons,importApplications,
             currentPage,propResults, propArrLen, propCount, pageCount, showNextBtn, showPreviousBtn,flex_basis,flex_basis_percentage,formFields,handleReset,
-            loadPrev, loadNext, firstPage, lastPage, idField, actions, handleActionClick,showDetails,detailsTitle,hideDetails,
+            loadPrev, loadNext, firstPage, lastPage, idField, actions, handleActionClick,showDetails,detailsTitle,hideDetails,handleRightClick,
             submitButtonLabel, showModal, addNewApplication, showLoader, loader, hideLoader, removeApplication, removeApplications,
             handleSelectionChange,addingRight,removingRight,rightsModule,printApplicationList,selectSearchQuantity,selectedValue,
             modal_left,modal_top,modal_width,trans_modal_loader,transModalVisible,transTitle,showTransModalLoader,hideTransModalLoader,approveLoan,closeTransModal,

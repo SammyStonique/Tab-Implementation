@@ -244,11 +244,29 @@ export default{
         }
         const handleActionClick = async(rowIndex, action, row) =>{
             if( action == 'resend'){
-                flex_basis.value = '1/2';
-                flex_basis_percentage.value = '50';
-                testModalVisible.value = true;
-                updateFormFields1();
-
+                showLoader();
+                const content = row['status_description'];
+                const phone_number = row['number'];
+                const recepient_names = row['recipient_name'];
+                let formData = {
+                    content: content,
+                    phone_numbers: [phone_number],
+                    recepient_names: [recepient_names],
+                    company: companyID.value
+                }        
+                try {
+                    const response = await axios.post('api/v1/test-send-sms/', formData);
+                    if(response && response.data.msg === "Success") {
+                        toast.success('SMS Resent Successfully!');
+                    } else {
+                        toast.error('Failed to resend SMS.');
+                    }
+                } catch (error) {
+                    console.error(error.message);
+                    toast.error('Failed to resend SMS: ' + error.message);
+                } finally {
+                    hideLoader();
+                }
             }
         };
         const composeSMS = async() =>{

@@ -300,7 +300,7 @@ export default defineComponent({
             }  
         }
         const dropdownOptions = ref([
-            {label: 'Email Loan Statement', action: 'send-email'},
+            {label: 'Email Loan Statement', action: 'send-email', rightName: 'Sending MMS Emails'},
         ]);
         const handleDynamicOption = async(option) =>{           
             if(option == 'send-sms'){

@@ -25,7 +25,7 @@
                     </thead>
                     <tbody>
                         <tr v-for="(row, rowIndex) in tableData" :key="rowIndex">
-                            <td>{{ row.date }}</td>
+                            <td>{{ row.formatted_date }}</td>
                             <td>{{ row.txn_no }}</td>
                             <td>{{ row.ref_no }}</td>
                             <td>{{ row.description }}</td>
