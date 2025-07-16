@@ -72,6 +72,13 @@
                 :displayButtons="displayButtons" @handleSubmit="createRecurringBill" @handleReset="handleReset"
             />
         </MovableModal>
+        <MovableModal v-model:visible="refModalVisible" :title="refTitle" :modal_top="modal_top" :modal_left="modal_left" :modal_width="modal_width"
+        :loader="ref_modal_loader" @showLoader="showRefModalLoader" @hideLoader="hideRefModalLoader" @closeModal="closeRefModal">
+        <DynamicForm 
+            :fields="refFormFields" :flex_basis="flex_basis" :flex_basis_percentage="flex_basis_percentage" 
+            :displayButtons="displayButtons" @handleSubmit="payBill" @handleReset="handleRefReset"
+        />
+    </MovableModal>
     </div>
 </template>
 
@@ -97,6 +104,8 @@ export default{
     setup(){
         const store = useStore();     
         const toast = useToast();
+        const { formatDate } = useDateFormatter();
+        const current_date = new Date();
         const { getYear } = useDateFormatter();
         const { getMonth } = useDateFormatter();
         const addingRight = ref('Adding Bills');
@@ -104,6 +113,10 @@ export default{
         const rightsModule = ref('Accounts');
         const loader = ref('none');
         const modal_loader = ref('none');
+        const ref_modal_loader = ref('none');
+        const refModalVisible = ref(false);
+        const refTitle = ref('Bill Payment Details');
+        const cashbookID = ref('');
         const idField = 'journal_id';
         const addButtonLabel = ref('New Bill');
         const submitButtonLabel = ref('Add');
@@ -113,6 +126,7 @@ export default{
         const activeTab = ref(0);
         const invoiceID = ref(null);
         const vendComponentKey = ref(0);
+        const ledComponentKey = ref(0);
         const invModalVisible = ref(false);
         const modal_top = ref('150px');
         const modal_left = ref('400px');
@@ -154,6 +168,7 @@ export default{
         ])
         const showTotals = ref(true);
         const actions = ref([
+            {name: 'pay', icon: 'fa fa-money', title: 'Pay Bill', rightName: 'Adding Payment Voucher'},
             {name: 'print', icon: 'fa fa-print', title: 'Print Bill', rightName: 'Print Bill'},
             {name: 'download', icon: 'fa fa-download', title: 'Download Bill', rightName: 'Print Bill'},
             {name: 'reccur', icon: 'fa fa-repeat', title: 'Recurring Bill', rightName: 'Adding Bills'},
@@ -161,6 +176,10 @@ export default{
         ])
         const companyID = computed(()=> store.state.userData.company_id);
         const userID = computed(()=> store.state.userData.user_id);
+        const cashbookArr = computed(() => store.state.Ledgers.cashbookLedgerArr);
+        const dueAmount = ref(0);
+        const billDueAmnt = ref(0);
+        const computedDueAmount = computed(() => {return dueAmount});
         const fetchVendors = async() =>{
             await store.dispatch('Vendors/fetchVendors', {company:companyID.value})
         };
@@ -443,6 +462,18 @@ export default{
                 flex_basis.value = '1/2';
                 flex_basis_percentage.value = '50';
                 
+            }else if(action == 'pay'){
+                dueAmount.value = row['unformatted_due_amount'];
+                billDueAmnt.value = row['unformatted_due_amount'];
+                billID.value = row['journal_id'];
+                if(parseFloat(dueAmount.value) > 0){
+                    dueAmount.value = row['unformatted_due_amount'];
+                    refModalVisible.value = true;
+                    flex_basis.value = '1/3';
+                    flex_basis_percentage.value = '33.333';
+                }else{
+                    toast.error("Bill Is Already Paid") 
+                }
             }
         };
         const handleShowDetails = async(row) =>{
@@ -540,9 +571,105 @@ export default{
             .finally(()=>{
                 hideLoader();
             })
+        };
+        const fetchLedgers = async() =>{
+            await store.dispatch('Ledgers/fetchCashbookLedgers', {company:companyID.value, ledger_type: 'Cashbook'})
+        };
+        const fetchAllLedgers = async() =>{
+            await store.dispatch('Ledgers/fetchLedgers', {company:companyID.value})
+        };
+        const handleSelectedLedger = async(option) =>{
+            await store.dispatch('Ledgers/handleSelectedLedger', option)
+            cashbookID.value = store.state.Ledgers.ledgerID;
+        };
+        const clearSelectedLedger = async() =>{
+            await store.dispatch('Ledgers/updateState', {ledgerID: ''});
+            cashbookID.value = ""
+        };
+        const checkDueLimit = (value) =>{
+            if(parseFloat(billDueAmnt.value) < parseFloat(value)){
+                toast.error(`Due Amount is ${billDueAmnt.value}`)
+                refFormFields.value[5].value = billDueAmnt.value;
+            }
+        };
+        
+        const refFormFields = ref([
+            {  
+                type:'search-dropdown', label:"Cashbook", value: cashbookID.value, componentKey: ledComponentKey,
+                selectOptions: cashbookArr, optionSelected: handleSelectedLedger, required: true,
+                searchPlaceholder: 'Select Cashbook...', dropdownWidth: '550px', updateValue: "",
+                clearSearch: clearSelectedLedger
+            },
+            { type: 'date', name: 'issue_date',label: "Recording Date", value: formatDate(current_date), required: true, maxDate: formatDate(current_date) },
+            { type: 'date', name: 'banking_date',label: "Banking Date", value: formatDate(current_date), required: true, maxDate: formatDate(current_date) },
+            { type: 'dropdown', name: 'payment_method',label: "Payment Method", value: '', placeholder: "", required: true, options: [{ text: 'Cash', value: 'Cash' }, { text: 'Mpesa', value: 'Mpesa' },{ text: 'Bank Deposit', value: 'Bank Deposit' }, { text: 'Cheque', value: 'Cheque' },{ text: 'Check-off', value: 'Check-off' }, { text: 'RTGS', value: 'RTGS' },{ text: 'EFT', value: 'EFT' }, { text: 'Not Applicable', value: 'Not Applicable' }] },
+            { type: 'text', name: 'reference_no',label: "Reference No", value: '', required: true,},
+            { type: 'number', name: 'total_amount',label: "Amount", value: computedDueAmount.value, required: true , method: checkDueLimit},
+        ]);
+        const handleRefReset = () =>{
+            for(let i=0; i < refFormFields.value.length; i++){
+                refFormFields.value[i].value = '';
+            }
+            billID.value = null;
+            cashbookID.value = null;
+            ledComponentKey.value +=1;
+            refFormFields.value[1].value = formatDate(current_date);
+            refFormFields.value[2].value = formatDate(current_date);
         }
+        const showRefModalLoader = () =>{
+            ref_modal_loader.value = "block";
+        }
+        const hideRefModalLoader = () =>{
+            ref_modal_loader.value = "none";
+        }
+        const payBill = async() =>{
+            showRefModalLoader();
+            let formData = {
+                cashbook: cashbookID.value,
+                issue_date: refFormFields.value[1].value,
+                bill: billID.value,
+                banking_date: refFormFields.value[2].value,
+                amount: refFormFields.value[5].value,
+                payment_method: refFormFields.value[3].value,
+                reference_no: refFormFields.value[4].value,
+                user: userID.value,
+                company: companyID.value
+            }
+            axios.post(`api/v1/pay-general-bill/`,formData)
+            .then((response)=>{
+                if(response.data.msg == "Success"){
+                    toast.success("Success")
+                    closeRefModal();
+                    searchBills();
+                }else if(response.data.msg == "Excess"){
+                    toast.error("Due Amount Exceeded")
+                }else if(response.data.msg == "Exists"){
+                    toast.error("Duplicate Payment Reference No")
+                }else{
+                    toast.error("Error Paying Bill")
+                }                   
+            })
+            .catch((error)=>{
+                console.log(error.message);
+                toast.error(error.message)
+                hideRefModalLoader();
+            })
+            .finally(()=>{
+                hideRefModalLoader();
+            })
+        
+        };
+        const closeRefModal = () =>{
+            refModalVisible.value = false;
+            billID.value = null;
+            cashbookID.value = null;
+            handleRefReset();
+            hideRefModalLoader();
+        };
         onBeforeMount(()=>{
             searchBills();
+            fetchAllLedgers();
+            fetchLedgers();
             
         })
         return{
@@ -553,7 +680,8 @@ export default{
             showModalLoader, hideModalLoader, formFields, handleSelectionChange, flex_basis,flex_basis_percentage,
             removeBill, removeBills, dropdownOptions, handleDynamicOption, addNewBill, printBillList, addingRight,removingRight,rightsModule,
             createRecurringBill,selectSearchQuantity,selectedValue,showDetails,detailsTitle,hideDetails,handleShowDetails,journalEntries,
-            invoiceLines,invoicePayments,tabs,selectTab,activeTab
+            invoiceLines,invoicePayments,tabs,selectTab,activeTab,
+            refTitle,refFormFields,refModalVisible,ref_modal_loader,handleRefReset,showRefModalLoader,hideRefModalLoader,closeRefModal,payBill
         }
     }
 };

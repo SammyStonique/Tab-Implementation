@@ -255,7 +255,7 @@ export default defineComponent({
             }  
         }
         const dropdownOptions = ref([
-            {label: 'Email Sale Statement', action: 'send-email'},
+            {label: 'Email Sale Statement', action: 'send-email', rightName: 'Sending PSS Emails'},
         ]);
         
         const handleDynamicOption1 = async(option) =>{           

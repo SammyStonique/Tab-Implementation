@@ -89,7 +89,7 @@ export default{
         const errors = ref([]);
         const modal_top = ref('150px');
         const modal_left = ref('400px');
-        const modal_width = ref('35vw');
+        const modal_width = ref('45vw');
         const tableColumns = ref([
             {type: "checkbox"},
             {label: "Loan No", key:"loan_number",type: "text", editable: false},
@@ -217,8 +217,11 @@ export default{
                 {  type:'checkbox', label:'Interest Amount', name:'interest_amount', value:'', required:false},
                 {  type:'checkbox', label:'Principal Paid', name:'principal_paid', value:'', required:false},
                 {  type:'checkbox', label:'Interest Paid', name:'interest_paid', value:'', required:false},          
-                {required: false, value: ''},
-                {required: false, value: ''}
+                {  type:'checkbox', label:'Principal Balance', name:'principal_balance', value:'', required:false},
+                {  type:'checkbox', label:'Interest Balance', name:'interest_balance', value:'', required:false}, 
+                {  type:'checkbox', label:'Arrears Inclusive', name:'arrears_inclusive', value: true, selected: true, required:false},
+                {  type:'checkbox', label:'Arrears Exclusive', name:'arrears_exclusive', value:'', required:false},
+                {  type:'checkbox', label:'Loan Balance', name:'loan_balance', value:'', required:false}, 
             ]
         };
         const dropdownOptions = ref([

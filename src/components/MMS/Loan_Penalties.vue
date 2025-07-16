@@ -140,6 +140,9 @@ export default{
         const handleSelectionChange = (ids) => {
             selectedIds.value = ids;
         };
+        const fetchLoanApplications = async() =>{
+            await store.dispatch('Loan_Applications/fetchLoanApplications', {company:companyID.value});
+        };
 
         const handleSelectedApplication = async(option) =>{
             await store.dispatch('Loan_Applications/handleSelectedApplication', option)
@@ -157,7 +160,7 @@ export default{
                     type:'search-dropdown', label:"Loan Application", value: applicationID.value, componentKey: lnComponentKey,
                     selectOptions: applicationArray, optionSelected: handleSelectedApplication, required: true,
                     searchPlaceholder: 'Select Loan Application...', dropdownWidth: '400px', updateValue: "",
-                    fetchData: store.dispatch('Loan_Applications/fetchLoanApplications', {company:companyID.value}), clearSearch: clearSelectedApplication
+                    clearSearch: clearSelectedApplication
                 },
                 { type: 'date', name: 'period_year',label: "Date From", value: "", required: true },
                 { type: 'date', name: 'period_year',label: "Date To", value: "", required: true },
@@ -522,7 +525,7 @@ export default{
         }
         onBeforeMount(()=>{
             searchPenalties();
-            
+            fetchLoanApplications();
         })
         return{
             showTotals,title, searchPenalties,resetFilters, addButtonLabel, searchFilters, tableColumns, penaltyList,

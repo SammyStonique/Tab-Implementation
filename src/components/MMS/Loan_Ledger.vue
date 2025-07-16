@@ -734,7 +734,7 @@ export default defineComponent({
                     toast.error("C.R Already Processed")
                 }
                            
-            }else if( action == 'process-credit-reduction'){
+            }else if( action == 'unprocess-credit-reduction'){
                 const postedStatus = row['credit_reduction_applied']
                 const scheduleID = [row['armotization_schedule_id']]
                 if(postedStatus == 'Yes'){
