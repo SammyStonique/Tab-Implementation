@@ -22,6 +22,7 @@
             :idField="idField"
             @handleSelectionChange="handleSelectionChange"
             @handleActionClick="handleActionClick"
+            :groupingKey=true
             :count="propCount"
             :currentPage="currentPage"
             :result="propArrLen"
@@ -128,7 +129,8 @@ export default{
             {label: "Code", key:"tenant_code"},
             {label: "Tenant Name", key:"tenant_name"},
             {label: "Phone Number", key: "phone_number"},
-            {label: "Property", key:"property_name"},
+            {label: "Email", key: "email"},
+            // {label: "Property", key:"property_name"},
             {label: "Unit", key:"unit_number"},
             {label: "Rent Amnt", key:"current_rent"},
             {label: "Balance", key:"running_balance", type: "number", textColor: "black"},

@@ -22,6 +22,7 @@
             :idField="idField"
             @handleSelectionChange="handleSelectionChange"
             @handleActionClick="handleActionClick"
+            :groupingKey=true
             :count="propCount"
             :currentPage="currentPage"
             :result="propArrLen"
@@ -109,7 +110,7 @@ export default{
             {label: "Name", key:"name"},
             {label: "Start Date", key:"start_date"},
             {label: "Reg No", key: "registration_number"},
-            {label: "Type", key:"asset_type"},
+            // {label: "Type", key:"asset_type"},
             {label: "Selling As", key:"selling_as"},
             {label: "Location", key:"location"},
             {label: "Units", key:"units_quantity"},

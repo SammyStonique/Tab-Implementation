@@ -23,6 +23,7 @@
             @handleSelectionChange="handleSelectionChange"
             @handleActionClick="handleActionClick"
             @handleShowDetails="handleShowDetails"
+            :groupingKey=true
             :count="propCount"
             :currentPage="currentPage"
             :result="propArrLen"
@@ -78,7 +79,7 @@
             :fields="refFormFields" :flex_basis="flex_basis" :flex_basis_percentage="flex_basis_percentage" 
             :displayButtons="displayButtons" @handleSubmit="payBill" @handleReset="handleRefReset"
         />
-    </MovableModal>
+        </MovableModal>
     </div>
 </template>
 

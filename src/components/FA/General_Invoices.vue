@@ -23,6 +23,7 @@
             @handleSelectionChange="handleSelectionChange"
             @handleActionClick="handleActionClick"
             @handleShowDetails="handleShowDetails"
+            :groupingKey=true
             :count="propCount"
             :currentPage="currentPage"
             :result="propArrLen"
@@ -72,6 +73,13 @@
                 :displayButtons="displayButtons" @handleSubmit="saveInvoice" @handleReset="handleReset"
             />
         </MovableModal>
+        <MovableModal v-model:visible="refModalVisible" :title="refTitle" :modal_top="modal_top" :modal_left="modal_left" :modal_width="modal_width"
+        :loader="ref_modal_loader" @showLoader="showRefModalLoader" @hideLoader="hideRefModalLoader" @closeModal="closeRefModal">
+        <DynamicForm 
+            :fields="refFormFields" :flex_basis="flex_basis" :flex_basis_percentage="flex_basis_percentage" 
+            :displayButtons="displayButtons" @handleSubmit="receiptInvoice" @handleReset="handleRefReset"
+        />
+        </MovableModal>
     </div>
 </template>
 
@@ -97,6 +105,7 @@ export default{
     setup(){
         const store = useStore();     
         const toast = useToast();
+        const { formatDate } = useDateFormatter();
         const { getYear } = useDateFormatter();
         const { getMonth } = useDateFormatter();
         const addingRight = ref('Adding Invoice');
@@ -105,6 +114,10 @@ export default{
         const current_date = new Date();
         const loader = ref('none');
         const modal_loader = ref('none');
+        const ref_modal_loader = ref('none');
+        const refModalVisible = ref(false);
+        const refTitle = ref('Invoice Receipt Details');
+        const cashbookID = ref('');
         const idField = 'journal_id';
         const addButtonLabel = ref('New Invoice');
         const submitButtonLabel = ref('Add');
@@ -114,6 +127,7 @@ export default{
         const activeTab = ref(0);
         const invoiceID = ref(null);
         const custComponentKey = ref(0);
+        const ledComponentKey = ref(0);
         const invModalVisible = ref(false);
         const modal_top = ref('150px');
         const modal_left = ref('400px');
@@ -154,11 +168,17 @@ export default{
         ])
         const showTotals = ref(true);
         const actions = ref([
+            {name: 'receipt', icon: 'fa fa-money', title: 'Receipt Invoice', rightName: 'Adding Receipt'},
             {name: 'print', icon: 'fa fa-print', title: 'Print Invoice', rightName: 'Print Invoice'},
             {name: 'download', icon: 'fa fa-download', title: 'Download Invoice', rightName: 'Print Invoice'},
             {name: 'delete', icon: 'fa fa-trash', title: 'Delete Invoice',rightName: 'Deleting Invoice'},
         ])
         const companyID = computed(()=> store.state.userData.company_id);
+        const userID = computed(()=> store.state.userData.user_id);
+        const cashbookArr = computed(() => store.state.Ledgers.cashbookLedgerArr);
+        const dueAmount = ref(0);
+        const invoiceDueAmnt = ref(0);
+        const computedDueAmount = computed(() => {return dueAmount});
         const fetchCustomers = async() =>{
             await store.dispatch('Customers/fetchCustomers', {company:companyID.value})
         };
@@ -406,6 +426,18 @@ export default{
                 then(()=>{
                     hideLoader();
                 })
+            }else if(action == 'receipt'){
+                dueAmount.value = row['unformatted_due_amount'];
+                invoiceDueAmnt.value = row['unformatted_due_amount'];
+                invoiceID.value = row['journal_id'];
+                if(parseFloat(dueAmount.value) > 0){
+                    dueAmount.value = row['unformatted_due_amount'];
+                    refModalVisible.value = true;
+                    flex_basis.value = '1/3';
+                    flex_basis_percentage.value = '33.333';
+                }else{
+                    toast.error("Invoice Is Already Receipted"); 
+                }
             }
         }
         const handleShowDetails = async(row) =>{
@@ -503,10 +535,105 @@ export default{
             .finally(()=>{
                 hideLoader();
             })
+        };
+        const fetchLedgers = async() =>{
+            await store.dispatch('Ledgers/fetchCashbookLedgers', {company:companyID.value, ledger_type: 'Cashbook'})
+        };
+        const fetchAllLedgers = async() =>{
+            await store.dispatch('Ledgers/fetchLedgers', {company:companyID.value})
+        };
+        const handleSelectedLedger = async(option) =>{
+            await store.dispatch('Ledgers/handleSelectedLedger', option)
+            cashbookID.value = store.state.Ledgers.ledgerID;
+        };
+        const clearSelectedLedger = async() =>{
+            await store.dispatch('Ledgers/updateState', {ledgerID: ''});
+            cashbookID.value = ""
+        };
+        const checkDueLimit = (value) =>{
+            if(parseFloat(invoiceDueAmnt.value) < parseFloat(value)){
+                toast.error(`Due Amount is ${invoiceDueAmnt.value}`)
+                refFormFields.value[5].value = invoiceDueAmnt.value;
+            }
+        };
+        
+        const refFormFields = ref([
+            {  
+                type:'search-dropdown', label:"Cashbook", value: cashbookID.value, componentKey: ledComponentKey,
+                selectOptions: cashbookArr, optionSelected: handleSelectedLedger, required: true,
+                searchPlaceholder: 'Select Cashbook...', dropdownWidth: '550px', updateValue: "",
+                clearSearch: clearSelectedLedger
+            },
+            { type: 'date', name: 'issue_date',label: "Recording Date", value: formatDate(current_date), required: true, maxDate: formatDate(current_date) },
+            { type: 'date', name: 'banking_date',label: "Banking Date", value: formatDate(current_date), required: true, maxDate: formatDate(current_date) },
+            { type: 'dropdown', name: 'payment_method',label: "Payment Method", value: '', placeholder: "", required: true, options: [{ text: 'Cash', value: 'Cash' }, { text: 'Mpesa', value: 'Mpesa' },{ text: 'Bank Deposit', value: 'Bank Deposit' }, { text: 'Cheque', value: 'Cheque' },{ text: 'Check-off', value: 'Check-off' }, { text: 'RTGS', value: 'RTGS' },{ text: 'EFT', value: 'EFT' }, { text: 'Not Applicable', value: 'Not Applicable' }] },
+            { type: 'text', name: 'reference_no',label: "Reference No", value: '', required: true,},
+            { type: 'number', name: 'total_amount',label: "Amount", value: computedDueAmount.value, required: true , method: checkDueLimit},
+        ]);
+        const handleRefReset = () =>{
+            for(let i=0; i < refFormFields.value.length; i++){
+                refFormFields.value[i].value = '';
+            }
+            invoiceID.value = null;
+            cashbookID.value = null;
+            ledComponentKey.value +=1;
+            refFormFields.value[1].value = formatDate(current_date);
+            refFormFields.value[2].value = formatDate(current_date);
         }
+        const showRefModalLoader = () =>{
+            ref_modal_loader.value = "block";
+        }
+        const hideRefModalLoader = () =>{
+            ref_modal_loader.value = "none";
+        }
+        const receiptInvoice = async() =>{
+            showRefModalLoader();
+            let formData = {
+                cashbook: cashbookID.value,
+                issue_date: refFormFields.value[1].value,
+                invoice: invoiceID.value,
+                banking_date: refFormFields.value[2].value,
+                amount: refFormFields.value[5].value,
+                payment_method: refFormFields.value[3].value,
+                reference_no: refFormFields.value[4].value,
+                user: userID.value,
+                company: companyID.value
+            }
+            axios.post(`api/v1/receipt-general-invoice/`,formData)
+            .then((response)=>{
+                if(response.data.msg == "Success"){
+                    toast.success("Success")
+                    closeRefModal();
+                    searchInvoices();
+                }else if(response.data.msg == "Excess"){
+                    toast.error("Due Amount Exceeded")
+                }else if(response.data.msg == "Exists"){
+                    toast.error("Duplicate Receipt Reference No")
+                }else{
+                    toast.error("Error Receipting Invoice")
+                }                   
+            })
+            .catch((error)=>{
+                console.log(error.message);
+                toast.error(error.message)
+                hideRefModalLoader();
+            })
+            .finally(()=>{
+                hideRefModalLoader();
+            })
+        
+        };
+        const closeRefModal = () =>{
+            refModalVisible.value = false;
+            invoiceID.value = null;
+            cashbookID.value = null;
+            handleRefReset();
+            hideRefModalLoader();
+        };
         onBeforeMount(()=>{
             searchInvoices();
-            
+            fetchAllLedgers();
+            fetchLedgers();
         })
         return{
             showTotals,title, searchInvoices,resetFilters, addButtonLabel, searchFilters, tableColumns, invoicesList,
@@ -516,7 +643,8 @@ export default{
             showModalLoader, hideModalLoader, formFields, handleSelectionChange, flex_basis,flex_basis_percentage,
             removeInvoice, removeInvoices, dropdownOptions, handleDynamicOption, addNewInvoice, printInvoiceList,
             addingRight,removingRight,rightsModule,selectSearchQuantity,selectedValue,showDetails,detailsTitle,hideDetails,handleShowDetails,journalEntries,
-            invoiceLines,invoicePayments,tabs,selectTab,activeTab
+            invoiceLines,invoicePayments,tabs,selectTab,activeTab,
+            refTitle,refFormFields,refModalVisible,ref_modal_loader,handleRefReset,showRefModalLoader,hideRefModalLoader,closeRefModal,receiptInvoice
         }
     }
 };

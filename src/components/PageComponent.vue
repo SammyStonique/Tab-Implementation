@@ -38,6 +38,7 @@
                     :actions="actions"
                     :showTotals="showTotals"
                     :showActions="showActions"
+                    :groupingKey="groupingKey"
                     @action-click="handleActionClick"
                     @row-db-click="handleShowDetails"
                     @right-click="handleRightClick"
@@ -193,6 +194,10 @@ export default defineComponent({
         rightsModule:{
             type: String,
             default: () => ''
+        },
+        groupingKey: {
+            type: String,
+            default: null,
         },
         addingRight:{
             type: String,

@@ -20,6 +20,7 @@
         :showTotals="showTotals"
         @handleSelectionChange="handleSelectionChange"
         @handleActionClick="handleActionClick"
+        :groupingKey=true
         :count="appCount"
         :currentPage="currentPage"
         :result="appArrLen"
@@ -97,7 +98,7 @@ export default{
             {label: "Member Name", key:"member_name",type: "text", editable: false},
             {label: "Phone No", key:"phone_number",type: "text", editable: false},
             {label: "Email", key:"member_email",type: "text", editable: false},
-            {label: "Loan Product", key:"product_name",type: "text", editable: false},
+            // {label: "Loan Product", key:"product_name",type: "text", editable: false},
             {label: "Loan Amount", key: "loan_amount", type: "number", editable: false},
             {label: "Principal Arrears", key: "principal_arrears", type: "number", editable: false},
             {label: "Interest Arrears", key: "interest_arrears", type: "number", editable: false},

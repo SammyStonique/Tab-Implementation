@@ -21,42 +21,56 @@
         </tr>
       </thead>
       <tbody class="table-body text-xxs">
-        <tr v-for="(row, rowIndex) in sortedRows" :key="rowIndex" @dblclick="handleRowClick(row)" @contextmenu.prevent="handleRightClick(row, rowIndex, $event)" :style="shouldAddLine(row) ? { textDecoration: 'line-through' } : {}" :class="['cursor-pointer text-xxs sm:text-xs uppercase hover:bg-orange-50',row.selected ? 'bg-orange-50' : (rowIndex % 2 === 0 ? 'bg-gray-100' : 'bg-white')]">
-          <td v-for="(column, colIndex) in columns" :key="colIndex" :hidden="column.hidden" 
-              :class="[{'ellipsis': column.maxWidth}, { 'max-w-[300px]': column.maxWidth }, { 'min-w-[120px]': column.minWidth }]">
-            <template v-if="column.type === 'checkbox'">
-              <input type="checkbox" v-model="row.selected" class="checkbox mt-0.5" @change="updateSelectedIds(row)"/>
-            </template>
-            <template v-else-if="column.type === 'dropdown'">
-              <select @change="handleChange($event, row)" v-model="row[column.key]" :name="row[column.key]" class="bg-inherit outline-none h-full text-xxs sm:text-xs w-full uppercase">
-                <option v-for="(option, index) in row.options" :key="index" :value="option.value">{{ option.text }}</option>
-              </select>
-            </template>
-            <template v-else-if="column.type === 'select-dropdown'">
-              <select @change="handleChange($event, row)" v-model="row[column.key]" :name="row[column.key]" class="bg-inherit outline-none h-full text-xxs sm:text-xs w-full uppercase">
-                <option v-for="(option, index) in column.options" :key="index" :value="option.value">{{ option.text }}</option>
-              </select>
-            </template>
-            <template v-else>
-              <div v-if="column.editable === true && column.type === 'number'" :class="`text-${column.textColor}-800 font-bold`">
-                <input :type="column.type" @change="handleInputChange($event, row)" pattern="^\d+(\.\d{0,2})?$" oninput="this.value = this.value.replace(/[^0-9.]/g, '').replace(/(\.\d{2})\d+/g, '$1')" class="w-full" v-model="row[column.key]" />             
-              </div>
-              <div v-else-if="column.editable === true">
-                <input :type="column.type" @change="handleInputChange($event, row)" v-model="row[column.key]" /> 
-              </div>
-              <div v-else :class="`bg-${row[column.textColor]}-500`">
-                {{ getNestedValue(row, column.key) }}
-              </div>
-            </template>
-          </td>
-          <td class="flex gap-x-2 h-6 border-0" v-if="showActions">
-            <div v-for="action in actions">
-              <button :class="{ 'disabled': isDisabled(`${action.rightName}`) }" @click.stop="handleAction(rowIndex, action.name, action.rightName, row)" :title="action.title">
-                <i :class="action.icon"></i>
-              </button>
-            </div>
-          </td>
-        </tr>
+          <template v-for="(rows, groupKey) in groupedRows" :key="groupKey">
+          <!-- Group Header Row -->
+          <tr @click="toggleGroup(groupKey)" class="cursor-pointer font-bold bg-slate-200 text-xs uppercase hover:bg-slate-300" v-if="groupingKey">
+            <td :colspan="columns.length + (showActions ? 1 : 0)">
+              <span class="mr-2">
+                {{ expandedGroups[groupKey] !== false ? '▼' : '▶' }}
+              </span>
+              {{ groupKey }} ({{ rows.length }} {{ pluralize(rows[0]?.group_label, rows.length) }})
+            </td>
+          </tr>
+          <template v-if="expandedGroups[groupKey] !== false">
+            <tr v-for="(row, rowIndex) in rows" :key="rowIndex" @dblclick="handleRowClick(row)" @contextmenu.prevent="handleRightClick(row, rowIndex, $event)" :style="shouldAddLine(row) ? { textDecoration: 'line-through' } : {}" :class="['cursor-pointer text-xxs sm:text-xs uppercase hover:bg-orange-50',row.selected ? 'bg-orange-50' : (rowIndex % 2 === 0 ? 'bg-gray-100' : 'bg-white')]">
+              <td v-for="(column, colIndex) in columns" :key="colIndex" :hidden="column.hidden" 
+                  :class="[{'ellipsis': column.maxWidth}, { 'max-w-[300px]': column.maxWidth }, { 'min-w-[120px]': column.minWidth }]">
+                <template v-if="column.type === 'checkbox'">
+                  <input type="checkbox" v-model="row.selected" class="checkbox mt-0.5" @change="updateSelectedIds(row)"/>
+                </template>
+                <template v-else-if="column.type === 'dropdown'">
+                  <select @change="handleChange($event, row)" v-model="row[column.key]" :name="row[column.key]" class="bg-inherit outline-none h-full text-xxs sm:text-xs w-full uppercase">
+                    <option v-for="(option, index) in row.options" :key="index" :value="option.value">{{ option.text }}</option>
+                  </select>
+                </template>
+                <template v-else-if="column.type === 'select-dropdown'">
+                  <select @change="handleChange($event, row)" v-model="row[column.key]" :name="row[column.key]" class="bg-inherit outline-none h-full text-xxs sm:text-xs w-full uppercase">
+                    <option v-for="(option, index) in column.options" :key="index" :value="option.value">{{ option.text }}</option>
+                  </select>
+                </template>
+                <template v-else>
+                  <div v-if="column.editable === true && column.type === 'number'" :class="`text-${column.textColor}-800 font-bold`">
+                    <input :type="column.type" @change="handleInputChange($event, row)" pattern="^\d+(\.\d{0,2})?$" oninput="this.value = this.value.replace(/[^0-9.]/g, '').replace(/(\.\d{2})\d+/g, '$1')" class="w-full" v-model="row[column.key]" />             
+                  </div>
+                  <div v-else-if="column.editable === true">
+                    <input :type="column.type" @change="handleInputChange($event, row)" v-model="row[column.key]" /> 
+                  </div>
+                  <div v-else :class="`bg-${row[column.textColor]}-500`">
+                    {{ getNestedValue(row, column.key) }}
+                  </div>
+                </template>
+              </td>
+              <td class="flex gap-x-2 h-6 border-0" v-if="showActions">
+                <div v-for="action in actions">
+                  <button :class="{ 'disabled': isDisabled(`${action.rightName}`) }" @click.stop="handleAction(rowIndex, action.name, action.rightName, row)" :title="action.title">
+                    <i :class="action.icon"></i>
+                  </button>
+                </div>
+              </td>
+            </tr>
+          </template>
+          
+        </template>
         <tr class="font-bold text-xxs sm:text-sm" v-if="showTotals && rows.length">
           <td v-for="(column, colIndex) in columns" :key="colIndex" 
               :class="[{'ellipsis': column.maxWidth}, { 'max-w-[300px]': column.maxWidth }, { 'min-w-[120px]': column.minWidth }]">
@@ -76,6 +90,7 @@
 import { defineComponent, ref, onMounted, computed} from 'vue';
 import axios from "axios";
 import { useStore } from "vuex";
+import { reactive } from 'vue';
 
 
 export default defineComponent({
@@ -111,6 +126,10 @@ export default defineComponent({
     rightsModule:{
       type: String,
       default: () => ''
+    },
+    groupingKey: {
+      type: String,
+      default: null,
     },
   },
   emits : ['row-db-click', 'action-click','selection-changed', 'update-receipt-amount'],
@@ -178,7 +197,7 @@ export default defineComponent({
     const getNestedValue = (row, key) => {
       return key.split('.').reduce((obj, keyPart) => obj && obj[keyPart], row);
     };
-
+    // Sort rows based on the selected column and direction
     const sortedRows = computed(() => {
       if (!sortColumn.value) return props.rows;
 
@@ -207,6 +226,42 @@ export default defineComponent({
         sortColumn.value = column.key;
         sortDirection.value = 'asc';
       }
+    };
+
+    //GROUPING ITEMS BY CATEGORY
+    const expandedGroups = reactive({});
+    const groupingKey = computed(() => props.groupingKey);
+    const groupedRows = computed(() => {
+      if (!props.groupingKey) {
+        return { All: props.rows };
+      }
+
+      const groups = {};
+
+      sortedRows.value.forEach(row => {
+        const groupKey = row.group_category || 'Ungrouped';
+        const groupLabel = row.group_label || 'Item';
+
+        if (!groups[groupKey]) {
+          groups[groupKey] = []
+        }
+
+        groups[groupKey].push(row);
+      });
+
+      return groups;
+    });
+
+    const toggleGroup = (groupKey) => {
+      expandedGroups[groupKey] = !expandedGroups[groupKey];
+    };
+    const pluralize = (word = 'Item', count) => {
+      if (!word) return ''; 
+      if (count === 1) return word;
+
+      // Basic pluralization rules
+      if (word.endsWith('y')) return word.slice(0, -1) + 'ies';
+      return word + 's';
     };
 
 
@@ -400,7 +455,8 @@ export default defineComponent({
     return {
       handleRowClick,handleRightClick, handleAction, handleChange, getNestedValue, handleInputChange,
       tableRef, toggleSelectAll, selectedIds, allSelected, updateSelectedIds, calculateColumnTotal,isDisabled,
-      shouldAddLine,sortedRows,sortColumn,sortDirection,handleSort,
+      shouldAddLine,sortedRows,sortColumn,sortDirection,handleSort,groupedRows,expandedGroups,toggleGroup,pluralize,
+      groupingKey
     };
   }
 });

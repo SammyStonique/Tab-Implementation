@@ -24,6 +24,7 @@
             @handleSelectionChange="handleSelectionChange"
             @handleActionClick="handleActionClick"
             @handleRightClick="handleRightClick"
+            :groupingKey=true
             :count="propCount"
             :currentPage="currentPage"
             :result="propArrLen"
@@ -131,7 +132,7 @@ export default{
             {label: "Date", key:"application_date"},
             {label: "Loan No", key:"loan_number"},
             {label: "Member Name", key:"member"},
-            {label: "Product Name", key:"loan_product"},
+            // {label: "Product Name", key:"loan_product"},
             {label: "Applied", key: "formatted_applied_amount"},
             {label: "Approved", key: "formatted_approved_amount"},
             {label: "Disbursed", key: "disbursed"},

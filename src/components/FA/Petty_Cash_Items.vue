@@ -22,6 +22,7 @@
         @handleSelectionChange="handleSelectionChange"
         @handleActionClick="handleActionClick"
         @handleRightClick="handleRightClick"
+        :groupingKey=true
         :count="appCount"
         :currentPage="currentPage"
         :result="appArrLen"
@@ -100,7 +101,7 @@ export default{
             {label: "Date", key:"date",type: "text"},
             {label: "Voucher#", key:"voucher",type: "text"},
             {label: "Petty Cash", key:"petty_cash",type: "text"},
-            {label: "Category", key:"category",type: "text"},
+            // {label: "Category", key:"category",type: "text"},
             {label: "Sub Category", key:"sub_category",type: "text"},
             {label: "Description", key:"description",type: "text"},
             {label: "Amount", key:"amount",type: "number"},

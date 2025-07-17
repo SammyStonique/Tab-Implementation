@@ -22,6 +22,7 @@
             :idField="idField"
             @handleSelectionChange="handleSelectionChange"
             @handleActionClick="handleActionClick"
+            :groupingKey=true
             :count="propCount"
             :currentPage="currentPage"
             :result="propArrLen"
@@ -107,7 +108,7 @@ export default{
         const tableColumns = ref([
             {type: "checkbox"},
             {label: "Unit No", key:"unit_number"},
-            {label: "Asset Name", key:"asset"},
+            // {label: "Asset Name", key:"asset"},
             {label: "Category", key:"asset_unit_category"},
             {label: "Client Name", key: "client_name"},
             {label: "Unit Size", key: "unit_size"},

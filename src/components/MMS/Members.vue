@@ -22,6 +22,7 @@
             :idField="idField"
             @handleSelectionChange="handleSelectionChange"
             @handleActionClick="handleActionClick"
+            :groupingKey=true
             :count="propCount"
             :currentPage="currentPage"
             :result="propArrLen"
@@ -152,7 +153,7 @@ export default{
             {label: "Phone No", key: "phone_number"},
             {label: "Email", key:"email"},
             {label: "Gender", key:"gender"},
-            {label: "Category", key:"member_category"},
+            // {label: "Category", key:"member_category"},
             {label: "Savings", key:"total_savings", textColor: "savingsColor"},
             {label: "Free Savings", key:"formatted_free_savings", textColor: "freeSavingsColor"},
             {label: "Shares", key:"total_shares", textColor: "savingsColor"},
