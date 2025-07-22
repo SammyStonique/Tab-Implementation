@@ -426,13 +426,15 @@ const actions = {
     state.journalArray = [];
     const selectedJournal = state.journalsList.find(journal => (journal.journal_no + " - " +journal.description + " - " +journal.due_amount) === option);
     if (selectedJournal) {
-        state.journalID = selectedJournal.journal_id;
-        state.journalNo = selectedJournal.journal_no;
-        state.invoiceDescription = selectedJournal.description;
-        state.invoiceDueAmount = selectedJournal.due_amount;
-        state.journalArray = [...state.journalArray, selectedJournal];
+      const journalCopy = JSON.parse(JSON.stringify(selectedJournal));
+      state.journalID = journalCopy.journal_id;
+      state.journalNo = journalCopy.journal_no;
+      state.invoiceDescription = journalCopy.description;
+      state.invoiceDueAmount = journalCopy.due_amount;
+      state.journalArray = [...state.journalArray, journalCopy];
+
+      commit('JOURNALS_ARRAY', state.journalArray);
     }
-    commit('JOURNALS_ARRAY', state.journalArray);
       
   },
 

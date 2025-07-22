@@ -17,6 +17,7 @@
         :showTotals="showTotals"
         @handleSelectionChange="handleSelectionChange"
         @handleActionClick="handleActionClick"
+        @handleOpenLink="handleOpenLink"
         :count="appCount"
         :currentPage="currentPage"
         :result="appArrLen"
@@ -100,11 +101,11 @@ export default{
         const modal_width = ref('35vw');
         const tableColumns = ref([
             {type: "checkbox"},
-            {label: "Date", key:"date",type: "text", editable: false},
-            {label: "Member#", key:"member_number",type: "text", editable: false},
-            {label: "Member Name", key:"member_name",type: "text", editable: false},
-            {label: "Loan#", key:"loan_number",type: "text", editable: false},
-            {label: "Receipt", key:"receipt_no",type: "text", editable: false},
+            {label: "Date", key:"date"},
+            {label: "Member#", key:"member_number"},
+            {label: "Member Name", key:"member_name"},
+            {label: "Loan#", key:"loan_number", type:'link'},
+            {label: "Receipt", key:"receipt_no"},
             {label: "Amount", key: "total_amount", type: "number", editable: false},
             {label: "Allocated", key: "allocated_amount", type: "number", editable: false},
             {label: "Balance", key: "due_amount", type: "number", editable: false},
@@ -174,7 +175,18 @@ export default{
             scheduleID.value = '';
             formFields.value[1].value = formatDate(current_date);
         }
-        
+        const handleOpenLink = async(row) =>{
+            const applicationID = row['loan_application_id'];
+            let formData = {
+                company: companyID.value,
+                loan_application: applicationID
+            }
+            await store.dispatch('Loan_Applications/fetchLoanDetails',formData).
+            then(()=>{
+                store.commit('pageTab/ADD_PAGE', {'MMS':'Loan_Ledger'});
+                store.state.pageTab.mmsActiveTab = 'Loan_Ledger'; 
+            })
+        }
         const handleActionClick = async(rowIndex, action, row) =>{
             if(action == 'allocate'){
                 updateFormFields();
@@ -337,7 +349,10 @@ export default{
         }
         const resetFilters = () =>{
             currentPage.value = 1;
-            store.commit('Loan_Prepayments/RESET_SEARCH_FILTERS')
+            member_name_search.value = "";
+            member_number_search.value = "";
+            from_date_search.value = "";
+            to_date_search.value = "";
             searchPrepayments();
         }
         const closeModal = () =>{
@@ -354,7 +369,7 @@ export default{
             currentPage,showNextBtn,showPreviousBtn, handleActionClick,allocatePrepayment,displayButtons,handleReset,
             modal_top, modal_left, modal_width, showLoader, loader, hideLoader, modal_loader, showModalLoader, hideModalLoader,
             closeModal, handleSelectionChange, pageComponentKey, flex_basis, flex_basis_percentage, prepaymentAllocations,
-            addingRight,rightsModule,selectSearchQuantity,selectedValue
+            addingRight,rightsModule,selectSearchQuantity,selectedValue,handleOpenLink
         }
     }
 }

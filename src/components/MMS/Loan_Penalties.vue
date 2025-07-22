@@ -118,7 +118,7 @@ export default{
         ])
         const showTotals = ref(true);
         const actions = ref([
-            {name: 'delete', icon: 'fas fa-trash', title: 'Delete Penalty', rightName: 'Deleting Loan Penalties'},
+            {name: 'delete', icon: 'fa fa-trash', title: 'Delete Penalty', rightName: 'Deleting Loan Penalties'},
         ])
         const companyID = computed(()=> store.state.userData.company_id);
         const batchID = computed(()=> store.state.Penalty_Batches.batchID);

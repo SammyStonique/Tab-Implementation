@@ -17,6 +17,7 @@
         :idField="idField"
         @handleSelectionChange="handleSelectionChange"
         @handleActionClick="handleActionClick"
+        @handleOpenLink="handleOpenLink"
         :count="depCount"
         :currentPage="currentPage"
         :result="depArrLen"
@@ -93,14 +94,14 @@ export default{
         const computedProdMinAmnt = computed(() =>  productMinAmount);
         const tableColumns = ref([
             {type: "checkbox"},
-            {label: "Date", key: "date", type: "text", editable: false},
-            {label: "Member No", key: "member_number", type: "text", editable: false},
-            {label: "Member Name", key: "member_name", type: "text", editable: false},
-            {label: "Phone No", key: "phone_number", type: "text", editable: false},
-            {label: "Loan No", key: "loan_number", type: "text", editable: false},
-            {label: "Guarantee", key: "guarantee", type: "text", editable: false},
-            {label: "Amount", key: "amount", type: "text", editable: false},
-            {label: "Approved", key: "approval_status", type: "text", editable: false},
+            {label: "Date", key: "date"},
+            {label: "Member No", key: "member_number"},
+            {label: "Member Name", key: "member_name"},
+            {label: "Phone No", key: "phone_number"},
+            {label: "Loan No", key: "loan_number", type:"link"},
+            {label: "Guarantee", key: "guarantee"},
+            {label: "Amount", key: "amount"},
+            {label: "Approved", key: "approval_status"},
         ])
         const actions = ref([
             {name: 'delete', icon: 'fa fa-trash', title: 'Delete Guarantor', rightName: 'Deleting Loan Guarantors'},
@@ -180,6 +181,18 @@ export default{
             store.dispatch("Loan_Guarantors/updateState",{selectedGuarantor:null, selectedMember:null, selectedApplication:null,isEditing:false})
             flex_basis.value = '1/2';
             flex_basis_percentage.value = '50';
+        };
+        const handleOpenLink = async(row) =>{
+            const applicationID = row['loan_application_id'];
+            let formData = {
+                company: companyID.value,
+                loan_application: applicationID
+            }
+            await store.dispatch('Loan_Applications/fetchLoanDetails',formData).
+            then(()=>{
+                store.commit('pageTab/ADD_PAGE', {'MMS':'Loan_Ledger'});
+                store.state.pageTab.mmsActiveTab = 'Loan_Ledger'; 
+            })
         }
         const handleActionClick = async(rowIndex, action, row) =>{
             if( action == 'edit'){
@@ -411,7 +424,7 @@ export default{
             loadPrev, loadNext, firstPage, lastPage, actions, formFields, depModalVisible, addNewGuarantor,
             displayButtons,flex_basis,flex_basis_percentage, handleActionClick, handleReset, createLoanGuarantor,
             showLoader, loader, hideLoader, modal_loader, showModalLoader, hideModalLoader, removeGuarantor, removeGuarantors,
-            addingRight,removingRight,rightsModule, closeModal,selectSearchQuantity,selectedValue,handleSelectionChange
+            addingRight,removingRight,rightsModule, closeModal,selectSearchQuantity,selectedValue,handleSelectionChange,handleOpenLink
         }
     }
 }

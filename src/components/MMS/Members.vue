@@ -356,6 +356,7 @@ export default{
                     if(response.data.msg == "Success"){
                         toast.success("SMS Sent!")
                         closeModal1();
+                        searchMembers();
                     }else{
                         toast.error(response.data.msg)
                     }
@@ -507,7 +508,7 @@ export default{
             }
         };
         const dropdownOptions = ref([
-            {label: 'SMS Selected Member', action: 'send-sms', rightName: 'Sending MMS SMS'},
+            {label: 'SMS Selected Member', action: 'send-sms', icon: 'fa-sms', colorClass: 'text-blue-500', rightName: 'Sending MMS SMS'},
         ]);
         const handleDynamicOption = async(option) =>{
             if(option == 'send-sms'){

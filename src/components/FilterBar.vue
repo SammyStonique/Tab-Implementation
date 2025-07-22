@@ -38,19 +38,19 @@
     <div>
       <button @click="showDropdown" class="rounded bg-green-400 text-xs  text-white px-2 py-1.5">{{ actionsButtonLabel }} <i class="fa fa-caret-down pl-2" aria-hidden="true"></i></button>
       <button class="fixed inset-0 bg-gray-50 opacity-15 cursor-default w-full" v-if="dropdown" @click="dropdown = !dropdown"></button>
-      <div class="text-left text-sm mt-1.5 absolute right-1 rounded bg-white w-44 py-1.5 px-1.5 shadow-md shadow-slate-500" v-if="dropdown">
+      <div class="text-left text-sm mt-1.5 absolute right-1 rounded bg-white w-56 py-1.5 px-1.5 shadow-md shadow-slate-500" v-if="dropdown">
         <div class="actionsDropdown ">
-          <button @click="importData" class="hover:bg-slate-500 hover:w-full">Import</button><br />
-          <button @click="removeItem" class="hover:bg-slate-500 hover:w-full" :class="{ 'disabled': isDisabled(`${removingRight}`) }">Remove</button><br />
-          <button @click="removeSelectedItems" class="hover:bg-slate-500 hover:w-full" :class="{ 'disabled': isDisabled(`${removingRight}`) }">Remove Multiple</button><br />
+          <button @click="importData" class="hover:bg-slate-500 hover:w-full"><i class="fa fa-file-import text-blue-500 mr-2 text-xs" aria-hidden="true"></i> Import</button><br />
+          <button @click="removeItem" class="hover:bg-slate-500 hover:w-full" :class="{ 'disabled': isDisabled(`${removingRight}`) }"><i class="fa fa-times-circle text-red-500 mr-2 text-xs" aria-hidden="true"></i> Remove</button><br />
+          <button @click="removeSelectedItems" class="hover:bg-slate-500 hover:w-full" :class="{ 'disabled': isDisabled(`${removingRight}`) }"><i class="fa fa-times-circle text-red-500 mr-2 text-xs" aria-hidden="true"></i> Remove Multiple</button><br />
           <button @click="displaySideDropdown"><i class="fa fa-caret-left pl-2" aria-hidden="true"></i> Print List</button><br />
         </div>
         <div v-for="(option, index) in dropdownOptions" :key="index">
-          <button :class="{ 'disabled': isDisabled(`${option.rightName}`) }" @click="handleDynamicOption(option.action)" class="hover:bg-slate-500 hover:w-full">{{ option.label }}</button><br />
+          <button :class="{ 'disabled': isDisabled(`${option.rightName}`) }" @click="handleDynamicOption(option.action)" class="hover:bg-slate-500 hover:w-full"><i :class="['fa', option.icon, option.colorClass,'mr-2']" style="font-size: 12px;" aria-hidden="true"></i> {{ option.label }}</button><br />
         </div>
       </div>
       <div class="relative">        
-        <div class="absolute left-[-240px] top-20 w-36 bg-white rounded shadow-md py-1.5 px-2 text-sm text-left" v-if="hoverDropdown" @mouseover="hoverDropdown = true" @mouseleave="hoverDropdown = false">
+        <div class="absolute left-[-296px] top-20 w-36 bg-white rounded shadow-md py-1.5 px-2 text-sm text-left" v-if="hoverDropdown" @mouseover="hoverDropdown = true" @mouseleave="hoverDropdown = false">
           <button @click="printList" class="hover:bg-slate-500 hover:w-full">Print List PDF</button><br />
           <button @click="printExcel" class="hover:bg-slate-500 hover:w-full">Download Excel</button><br />
           <button @click="printCSV" class="hover:bg-slate-500 hover:w-full">Download CSV</button><br />

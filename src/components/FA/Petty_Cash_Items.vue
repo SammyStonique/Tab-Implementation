@@ -188,7 +188,7 @@ export default{
         const handleRightClick = (row, rowIndex, event) => {
 
             const menuOptions = [
-                { label: 'Add To SubCategory', action: 'add-subcategory', rowIndex: rowIndex , icon: 'fa fa-arrows-alt'},
+                { label: 'Add To SubCategory', action: 'add-subcategory', rowIndex: rowIndex , icon: 'fa fa-arrows-alt', rightName: 'Adding Petty Cash Item Category'},
             ];
 
             store.commit('contextMenu/SHOW_CONTEXT_MENU', {

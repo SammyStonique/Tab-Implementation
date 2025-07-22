@@ -102,7 +102,7 @@
                     </div> 
                     <div v-show="activeTab == 3">                  
                         <DynamicTable :key="paymentTableKey" :rightsModule="rightsModule" :columns="paymentColumns" :rows="computedPaymentRows" :idField="idFieldPayment" :actions="actionsUtility" @action-click="paymentActionClick" 
-                                        :showActions="showActions" :showTotals="showTotals"/>
+                                        @link-db-click="handleOpenLink" :showActions="showActions" :showTotals="showTotals"/>
                     </div> 
                     <div v-show="activeTab == 4">                  
                         <DynamicTable :key="guarantorTableKey" :rightsModule="rightsModule" :columns="guarantorColumns" :rows="computedGuarantorRows" :idField="idFieldGuarantor" :actions="actionsUtility" @action-click="guarantorActionClick" 
@@ -186,9 +186,9 @@ export default defineComponent({
         const loanProduct = computed(()=> store.state.Loan_Applications.loanProduct);
         const scheduleColumns = ref([
             {type: "checkbox"},
-            {label: "#", key:"installment", type: "text", editable: false},
-            {label: "Due", key:"due_date", type: "text", editable: false},
-            {label: "Balance", key:"formatted_loan_balance", type: "text", editable: false},
+            {label: "#", key:"installment"},
+            {label: "Due", key:"due_date"},
+            {label: "Balance", key:"formatted_loan_balance"},
             {label: "Principal", key:"formatted_principal_amount", type: "number", editable: false},
             {label: "Interest", key:"formatted_interest_amount", type: "number", editable: false},
             {label: "Penalty", key:"penalty", type: "number", editable: false},
@@ -201,8 +201,8 @@ export default defineComponent({
             {label: "Princ. Bal", key:"formatted_principal_balance", type: "number", editable: false},
             {label: "Int. Bal.", key:"formatted_interest_balance", type: "number", editable: false},
             {label: "Total Bal.", key:"formatted_installment_balance", type: "number", editable: false},
-            {label: "I.P", key:"interest_posted", type: "text", editable: false},
-            {label: "C.R.P", key:"credit_reduction_applied", type: "text", editable: false},
+            {label: "I.P", key:"interest_posted"},
+            {label: "C.R.P", key:"credit_reduction_applied"},
         ]);
         const showTotals = ref(true);
         const actionsSchedule = ref([
@@ -214,11 +214,11 @@ export default defineComponent({
 
         const paymentColumns = ref([
             {type: "checkbox"},
-            {label: "Date", key:"journal.issue_date", type: "text", editable: false},
-            {label: "Txn No", key:"journal.journal_no", type: "text", editable: false},
-            {label: "Description", key: "description", type: "text", editable: false},
+            {label: "Date", key:"issue_date"},
+            {label: "Txn No", key:"journal_no", type:"link"},
+            {label: "Description", key: "description"},
             {label: "Amount", key: "amount", type: "number", editable: false},
-            {label: "Paid By", key: "journal.client", type: "text", editable: false},
+            {label: "Paid By", key: "client"},
         ]);
         const guarantorColumns = ref([
             {type: "checkbox"},
@@ -251,13 +251,13 @@ export default defineComponent({
 
         const statementColumns = ref([
             {type: "checkbox"},
-            {label: "Date", key:"date", type: "text", editable: false},
-            {label: "Ref No", key:"reference_no", type: "text", editable: false},
-            {label: "Txn No", key: "journal_no", type: "text", editable: false},
-            {label: "Narration", key: "description", type: "text", editable: false, maxWidth:"1200px"},
-            {label: "Charges", key: "debit_amount", type: "text", editable: false},
-            {label: "Payments", key: "credit_amount", type: "text", editable: false},
-            {label: "Balance", key: "running_balance", type: "text", editable: false},
+            {label: "Date", key:"date"},
+            {label: "Ref No", key:"reference_no"},
+            {label: "Txn No", key: "journal_no"},
+            {label: "Narration", key: "description", maxWidth:"1200px"},
+            {label: "Charges", key: "debit_amount"},
+            {label: "Payments", key: "credit_amount"},
+            {label: "Balance", key: "running_balance"},
         ]);
 
         const actionsStatement = ref([
@@ -265,13 +265,13 @@ export default defineComponent({
         ]);
         const statement1Columns = ref([
             {type: "checkbox"},
-            {label: "Date", key:"date", type: "text", editable: false},
-            {label: "Amount Paid", key:"amount_paid", type: "text", editable: false},
-            {label: "Interest", key: "interest", type: "text", editable: false},
-            {label: "Penalty", key: "penalty", type: "text", editable: false},
-            {label: "Principal", key: "principal", type: "text", editable: false},
-            {label: "Prepayment", key: "prepayment", type: "text", editable: false},
-            {label: "Running Balance", key: "running_balance", type: "text", editable: false},
+            {label: "Date", key:"date"},
+            {label: "Amount Paid", key:"amount_paid"},
+            {label: "Interest", key: "interest"},
+            {label: "Penalty", key: "penalty"},
+            {label: "Principal", key: "principal"},
+            {label: "Prepayment", key: "prepayment"},
+            {label: "Running Balance", key: "running_balance"},
         ]);
 
         const from_date_search = ref("");
@@ -300,24 +300,20 @@ export default defineComponent({
             }  
         }
         const dropdownOptions = ref([
-            {label: 'Email Loan Statement', action: 'send-email', rightName: 'Sending MMS Emails'},
+            {label: 'SMS Statement Link', action: 'send-sms', icon: 'fa-sms', colorClass: 'text-blue-500', rightName: 'Sending MMS SMS'},
+            {label: 'Email Loan Statement', action: 'send-email', icon: 'fa-envelope', colorClass: 'text-indigo-500', rightName: 'Sending MMS Emails'},
         ]);
         const handleDynamicOption = async(option) =>{           
             if(option == 'send-sms'){
                 showLoader();
                 let formData = {
-                    client: [loanDetails.value.loan_application_id],
+                    loan_application: [loanDetails.value.loan_application_id],
                     company: companyID.value,
-                    date_from: from_date_search.value,
-                    date_to: to_date_search.value,
-                    company: companyID.value
                 }
-                await axios.post('api/v1/loan-statement-sms/',formData).
+                await axios.post('api/v1/member-loan-statement-sms/',formData).
                 then((response)=>{
                     if(response.data.msg == "Success"){
                         toast.success("SMS Sent!")
-                    }else if(response.data.msg == "Missing Template"){
-                        toast.error("Loan Statement Template Not Set!")
                     }else{
                         toast.error(response.data.msg)
                     }
@@ -333,10 +329,6 @@ export default defineComponent({
                 let formData = {
                     company: companyID.value,
                     loan_application: [loanDetails.value.loan_application_id],
-                    historical_loan: null,
-                    date_from: from_date_search.value,
-                    date_to: to_date_search.value,
-                    company: companyID.value
                 }
                 await axios.post('api/v1/member-loan-statement-email/',formData).
                 then((response)=>{
@@ -360,18 +352,13 @@ export default defineComponent({
             if(option == 'send-sms'){
                 showLoader();
                 let formData = {
-                    client: [loanDetails.value.loan_application_id],
+                    loan_application: [loanDetails.value.loan_application_id],
                     company: companyID.value,
-                    date_from: from_date_search.value,
-                    date_to: to_date_search.value,
-                    company: companyID.value
                 }
-                await axios.post('api/v1/loan-statement-sms/',formData).
+                await axios.post('api/v1/member-loan-statement-sms/',formData).
                 then((response)=>{
                     if(response.data.msg == "Success"){
                         toast.success("SMS Sent!")
-                    }else if(response.data.msg == "Missing Template"){
-                        toast.error("Loan Statement Template Not Set!")
                     }else{
                         toast.error(response.data.msg)
                     }
@@ -849,7 +836,19 @@ export default defineComponent({
                 
             }
         }
+        const handleOpenLink = async(row) =>{
+            const receiptNo = row['journal_no'];
 
+            let formData = {
+                journal_no_search: receiptNo,
+            }
+            await store.dispatch('Journals/updateState',formData).
+            then(()=>{
+                store.commit('pageTab/ADD_PAGE', {'MMS':'Member_Receipts'});
+                store.state.pageTab.mmsActiveTab = 'Member_Receipts'; 
+            })
+            
+        }
         const paymentActionClick = async(rowIndex, action, row) =>{
             if( action == 'void-utility'){
                 
@@ -910,7 +909,7 @@ export default defineComponent({
             scheduleActionClick,tnt_modal_loader, dep_modal_loader, util_modal_loader, depModalVisible, displayButtons,guarantorColumns,securityColumns, printLoanStatement,handleDynamicOption1,
             documentActionClick,documentColumns,documentTableKey,actionsDocument,computedDocumentRows,
             modal_top, modal_left, modal_width, showDepModalLoader, hideDepModalLoader, handleDepReset,
-            flex_basis, flex_basis_percentage, paymentActionClick,rightsModule,isDisabled,
+            flex_basis, flex_basis_percentage, paymentActionClick,handleOpenLink,rightsModule,isDisabled,
         }
     }
 })

@@ -23,6 +23,7 @@
             @handleSelectionChange="handleSelectionChange"
             @handleActionClick="handleActionClick"
             @handleShowDetails="handleShowDetails"
+            :groupingKey=true
             :count="propCount"
             :currentPage="currentPage"
             :result="propArrLen"
@@ -304,7 +305,8 @@ export default{
             selectedValue.value = newValue;
             searchReceipts(selectedValue.value);
         };
-        const resetFilters = () =>{
+        const resetFilters = async() =>{
+            await store.dispatch('Journals/updateState', {journal_no_search:''});
             client_name_search.value = "";
             client_code_search.value = "";
             from_date_search.value = "";
@@ -508,8 +510,8 @@ export default{
         }
 
         const dropdownOptions = ref([
-            {label: 'SMS Member Receipts', action: 'send-sms', rightName: 'Sending MMS SMS'},
-            {label: 'Email Member Receipts', action: 'send-email', rightName: 'Sending MMS Emails'},
+            {label: 'SMS Member Receipts', action: 'send-sms', icon: 'fa-sms', colorClass: 'text-blue-500', rightName: 'Sending MMS SMS'},
+            {label: 'Email Member Receipts', action: 'send-email', icon: 'fa-envelope', colorClass: 'text-indigo-500', rightName: 'Sending MMS Emails'},
         ]);
         const handleDynamicOption = async(option) =>{
             if(option == 'send-sms'){
@@ -611,8 +613,8 @@ export default{
             })
         }
         onBeforeMount(()=>{
-            searchReceipts();
-            
+            journal_no_search.value = store.state.Journals.journal_no_search;
+            searchReceipts();     
         })
         return{
             showTotals,title, searchReceipts,resetFilters, addButtonLabel, searchFilters, tableColumns, receiptsList,

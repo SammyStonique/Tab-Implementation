@@ -131,6 +131,7 @@ export default defineComponent({
         const chargeColumns = ref([
             {label: "Name", key:"fee_name", type: "text", editable: false},
             {label: "Charge Mode", key:"charge_mode", type: "text", editable: false},
+            // {label: "Divide", key:"divide", type: "text", editable: false},
             {label: "Amount", key: "default_amount", type: "number", editable: true},
         ]);
         const saleChargeRows = computed(() => {

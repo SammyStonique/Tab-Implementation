@@ -23,6 +23,7 @@
             @handleSelectionChange="handleSelectionChange"
             @handleActionClick="handleActionClick"
             @handleShowDetails="handleShowDetails"
+            :groupingKey=true
             :count="propCount"
             :currentPage="currentPage"
             :result="propArrLen"
@@ -442,7 +443,7 @@ export default{
         }
 
         const dropdownOptions = ref([
-            {label: 'Direct Voucher', action: 'direct-voucher', rightName: 'Adding Payment Voucher'},
+            {label: 'Direct Voucher', action: 'direct-voucher', icon: 'fa-coins', colorClass: 'text-green-600', rightName: 'Adding Payment Voucher'},
         ]);
         const handleDynamicOption = (option) =>{
             if(option == 'direct-voucher'){

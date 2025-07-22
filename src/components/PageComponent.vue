@@ -41,6 +41,7 @@
                     :groupingKey="groupingKey"
                     @action-click="handleActionClick"
                     @row-db-click="handleShowDetails"
+                    @link-db-click="handleOpenLink"
                     @right-click="handleRightClick"
                     @selection-changed="handleSelectionChange"
                     :rightsModule="rightsModule"
@@ -265,6 +266,9 @@ export default defineComponent({
         const handleShowDetails = (row) =>{
             emit('handleShowDetails',row)
         };
+        const handleOpenLink = (row) =>{
+            emit('handleOpenLink', row)
+        }
         const handleAddNew = () =>{
             emit('handleAddNew');
         }
@@ -284,7 +288,7 @@ export default defineComponent({
             searchPage, resetFilters, loadPrev, loadNext, firstPage, lastPage, handleActionClick, handleAddNew,
             showLoader, hideLoader, importData, removeItem, removeSelectedItems, printList, handleDynamicOption,
             handleSelectionChange,selectSearchQuantity,selectedValue,printExcel,printCSV,hideDetails,handleShowDetails,
-            handleRightClick
+            handleRightClick,handleOpenLink
         }
     }
 })

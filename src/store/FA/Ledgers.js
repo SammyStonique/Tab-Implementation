@@ -27,6 +27,7 @@ const state = {
   invoiceItemsArray: [],
   billItemsArray: [],
   paymentItemsArray: [],
+  receiptItemsArray: [],
   journalItemsArray: [],
 };
   
@@ -119,8 +120,8 @@ const actions = {
         // state.ledgerTitle = response.data.result.ledger_code + " - " + response.data.result.ledger_name;
         state.jnlSortedArr = state.journalsArray.sort(function(a, b){
             // Convert the date strings to Date objects
-            let dateA = new Date(a.date);
-            let dateB = new Date(b.date);
+            let dateA = new Date(a.txn_date);
+            let dateB = new Date(b.txn_date);
 
             // Subtract the dates to get a value that is either negative, positive, or zero
             return dateA - dateB;
@@ -246,19 +247,20 @@ const actions = {
     state.ledgerArray = [];
     const selectedLedger = state.ledgersList.find(ledger => (ledger.ledger_code + " - " +ledger.ledger_name) === option);
     if (selectedLedger) {
-        state.ledgerID = selectedLedger.ledger_id;
-        state.ledgerName = selectedLedger.ledger_code + " - " + selectedLedger.ledger_name;
-        selectedLedger.posting_account = selectedLedger.ledger_code + " - " + selectedLedger.ledger_name;
-        selectedLedger.charge_type = "";
-        selectedLedger.description = "";
-        selectedLedger.cost = 0;
-        selectedLedger.quantity = 1;
-        selectedLedger.vat_rate = null;
-        selectedLedger.vat_inclusivity = "Inclusive";
-        selectedLedger.vat_amount = 0;
-        selectedLedger.sub_total = 0;
-        selectedLedger.total_amount = 0;
-        state.ledgerArray = [...state.ledgerArray, selectedLedger];
+      const ledgerCopy = JSON.parse(JSON.stringify(selectedLedger));
+      state.ledgerID = ledgerCopy.ledger_id;
+      state.ledgerName = ledgerCopy.ledger_code + " - " + ledgerCopy.ledger_name;
+      ledgerCopy.posting_account = ledgerCopy.ledger_code + " - " + ledgerCopy.ledger_name;
+      ledgerCopy.charge_type = "";
+      ledgerCopy.description = "";
+      ledgerCopy.cost = 0;
+      ledgerCopy.quantity = 1;
+      ledgerCopy.vat_rate = null;
+      ledgerCopy.vat_inclusivity = "Inclusive";
+      ledgerCopy.vat_amount = 0;
+      ledgerCopy.sub_total = 0;
+      ledgerCopy.total_amount = 0;
+      state.ledgerArray = [...state.ledgerArray, ledgerCopy];
     }
       
   },
@@ -267,63 +269,93 @@ const actions = {
     state.ledgerArray = [];
     const selectedLedger = state.ledgersList.find(ledger => (ledger.ledger_code + " - " +ledger.ledger_name) === option);
     if (selectedLedger) {
-        state.ledgerID = selectedLedger.ledger_id;
-        state.ledgerName = selectedLedger.ledger_code + " - " + selectedLedger.ledger_name;
-        selectedLedger.posting_account = selectedLedger.ledger_code + " - " + selectedLedger.ledger_name;
-        selectedLedger.charge_type = "";
-        selectedLedger.description = "";
-        selectedLedger.cost = 0;
-        selectedLedger.quantity = 1;
-        selectedLedger.vat_rate = null;
-        selectedLedger.vat_inclusivity = "Inclusive";
-        selectedLedger.vat_amount = 0;
-        selectedLedger.sub_total = 0;
-        selectedLedger.total_amount = 0;
-        state.ledgerArray = [...state.ledgerArray, selectedLedger];
+      const ledgerCopy = JSON.parse(JSON.stringify(selectedLedger));
+      state.ledgerID = ledgerCopy.ledger_id;
+      state.ledgerName = ledgerCopy.ledger_code + " - " + ledgerCopy.ledger_name;
+      ledgerCopy.posting_account = ledgerCopy.ledger_code + " - " + ledgerCopy.ledger_name;
+      ledgerCopy.charge_type = "";
+      ledgerCopy.description = "";
+      ledgerCopy.cost = 0;
+      ledgerCopy.quantity = 1;
+      ledgerCopy.vat_rate = null;
+      ledgerCopy.vat_inclusivity = "Inclusive";
+      ledgerCopy.vat_amount = 0;
+      ledgerCopy.sub_total = 0;
+      ledgerCopy.total_amount = 0;
+      state.ledgerArray = [...state.ledgerArray, ledgerCopy];
+
+      state.invoiceItemsArray.push(ledgerCopy);
     }
-    state.invoiceItemsArray.push(selectedLedger);
       
   },
   handleSelectedLedgerBill({ commit, state }, option){
     state.ledgerArray = [];
     const selectedLedger = state.ledgersList.find(ledger => (ledger.ledger_code + " - " +ledger.ledger_name) === option);
     if (selectedLedger) {
-        state.ledgerID = selectedLedger.ledger_id;
-        state.ledgerName = selectedLedger.ledger_code + " - " + selectedLedger.ledger_name;
-        selectedLedger.posting_account = selectedLedger.ledger_code + " - " + selectedLedger.ledger_name;
-        selectedLedger.charge_type = "";
-        selectedLedger.description = "";
-        selectedLedger.cost = 0;
-        selectedLedger.quantity = 1;
-        selectedLedger.vat_rate = null;
-        selectedLedger.vat_inclusivity = "Inclusive";
-        selectedLedger.vat_amount = 0;
-        selectedLedger.sub_total = 0;
-        selectedLedger.total_amount = 0;
-        state.ledgerArray = [...state.ledgerArray, selectedLedger];
-    }
-    state.billItemsArray.push(selectedLedger);
+      const ledgerCopy = JSON.parse(JSON.stringify(selectedLedger));
+      state.ledgerID = ledgerCopy.ledger_id;
+      state.ledgerName = ledgerCopy.ledger_code + " - " + ledgerCopy.ledger_name;
+      ledgerCopy.posting_account = ledgerCopy.ledger_code + " - " + ledgerCopy.ledger_name;
+      ledgerCopy.charge_type = "";
+      ledgerCopy.description = "";
+      ledgerCopy.cost = 0;
+      ledgerCopy.quantity = 1;
+      ledgerCopy.vat_rate = null;
+      ledgerCopy.vat_inclusivity = "Inclusive";
+      ledgerCopy.vat_amount = 0;
+      ledgerCopy.sub_total = 0;
+      ledgerCopy.total_amount = 0;
+      state.ledgerArray = [...state.ledgerArray, ledgerCopy];
+
+      state.billItemsArray.push(ledgerCopy);
+    }  
       
   },
+  handleSelectedLedgerReceipt({ commit, state }, option){
+    state.ledgerArray = [];
+    const selectedLedger = state.ledgersList.find(ledger => (ledger.ledger_code + " - " +ledger.ledger_name) === option);
+    if (selectedLedger) {
+      const ledgerCopy = JSON.parse(JSON.stringify(selectedLedger));
+      state.ledgerID = ledgerCopy.ledger_id;
+      state.ledgerName = ledgerCopy.ledger_code + " - " + ledgerCopy.ledger_name;
+      ledgerCopy.posting_account = ledgerCopy.ledger_code + " - " + ledgerCopy.ledger_name;
+      ledgerCopy.charge_type = "";
+      ledgerCopy.description = "";
+      ledgerCopy.cost = 0;
+      ledgerCopy.quantity = 1;
+      ledgerCopy.vat_rate = null;
+      ledgerCopy.vat_inclusivity = "Inclusive";
+      ledgerCopy.vat_amount = 0;
+      ledgerCopy.sub_total = 0;
+      ledgerCopy.total_amount = 0;
+      state.ledgerArray = [...state.ledgerArray, ledgerCopy];
+
+      state.receiptItemsArray.push(ledgerCopy);
+    }
+      
+  },
+
   handleSelectedLedgerVoucher({ commit, state }, option){
     state.ledgerArray = [];
     const selectedLedger = state.ledgersList.find(ledger => (ledger.ledger_code + " - " +ledger.ledger_name) === option);
     if (selectedLedger) {
-        state.ledgerID = selectedLedger.ledger_id;
-        state.ledgerName = selectedLedger.ledger_code + " - " + selectedLedger.ledger_name;
-        selectedLedger.posting_account = selectedLedger.ledger_code + " - " + selectedLedger.ledger_name;
-        selectedLedger.charge_type = "";
-        selectedLedger.description = "";
-        selectedLedger.cost = 0;
-        selectedLedger.quantity = 1;
-        selectedLedger.vat_rate = null;
-        selectedLedger.vat_inclusivity = "Inclusive";
-        selectedLedger.vat_amount = 0;
-        selectedLedger.sub_total = 0;
-        selectedLedger.total_amount = 0;
-        state.ledgerArray = [...state.ledgerArray, selectedLedger];
+      const ledgerCopy = JSON.parse(JSON.stringify(selectedLedger));
+      state.ledgerID = ledgerCopy.ledger_id;
+      state.ledgerName = ledgerCopy.ledger_code + " - " + ledgerCopy.ledger_name;
+      ledgerCopy.posting_account = ledgerCopy.ledger_code + " - " + ledgerCopy.ledger_name;
+      ledgerCopy.charge_type = "";
+      ledgerCopy.description = "";
+      ledgerCopy.cost = 0;
+      ledgerCopy.quantity = 1;
+      ledgerCopy.vat_rate = null;
+      ledgerCopy.vat_inclusivity = "Inclusive";
+      ledgerCopy.vat_amount = 0;
+      ledgerCopy.sub_total = 0;
+      ledgerCopy.total_amount = 0;
+      state.ledgerArray = [...state.ledgerArray, ledgerCopy];
+
+      state.paymentItemsArray.push(ledgerCopy);
     }
-    state.paymentItemsArray.push(selectedLedger);
       
   },
 
@@ -331,15 +363,17 @@ const actions = {
     state.ledgerArray = [];
     const selectedLedger = state.ledgersList.find(ledger => (ledger.ledger_code + " - " +ledger.ledger_name) === option);
     if (selectedLedger) {
-      state.ledgerID = selectedLedger.ledger_id;
-      state.ledgerName = selectedLedger.ledger_code + " - " + selectedLedger.ledger_name;
-      selectedLedger.posting_account = selectedLedger.ledger_code + " - " + selectedLedger.ledger_name;
-      selectedLedger.debit_amount = 0;
-      selectedLedger.credit_amount = 0;
-      state.ledgerArray = [...state.ledgerArray, selectedLedger];
+      const ledgerCopy = JSON.parse(JSON.stringify(selectedLedger));
+      state.ledgerID = ledgerCopy.ledger_id;
+      state.ledgerName = ledgerCopy.ledger_code + " - " + ledgerCopy.ledger_name;
+      ledgerCopy.posting_account = ledgerCopy.ledger_code + " - " + ledgerCopy.ledger_name;
+      ledgerCopy.debit_amount = 0;
+      ledgerCopy.credit_amount = 0;
+      state.ledgerArray = [...state.ledgerArray, ledgerCopy];
+
+      state.journalItemsArray.push(ledgerCopy);
+      commit('LEDGERS_ARRAY', state.ledgerArray);
     }
-    state.journalItemsArray.push(selectedLedger);
-    commit('LEDGERS_ARRAY', state.ledgerArray);
       
   },
 
@@ -400,6 +434,9 @@ const actions = {
   },
   removeBillLine({commit, state}, index){
     state.billItemsArray.splice(index, 1); 
+  },
+  removeReceiptLine({commit, state}, index){
+    state.receiptItemsArray.splice(index, 1); 
   },
   removeVoucherLine({commit, state}, index){
     state.paymentItemsArray.splice(index, 1); 

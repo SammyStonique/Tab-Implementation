@@ -48,6 +48,14 @@
                     <option v-for="(option, index) in column.options" :key="index" :value="option.value">{{ option.text }}</option>
                   </select>
                 </template>
+                <template v-else-if="column.type === 'link'">
+                  <span class="text-blue-600 underline cursor-pointer" @dblclick="handleLinkDblClick(row, column.key)">
+                    {{ row[column.key] }}
+                  </span>
+                </template>
+                <!-- <template v-if="column.type === 'data-checkbox'">
+                  <input v-model="row[column.key.selected]" @change="checkboxSelection(row)"  :name="row[column.key]" type="checkbox" :class="`checkbox mt-0.5`"/>
+                </template> -->
                 <template v-else>
                   <div v-if="column.editable === true && column.type === 'number'" :class="`text-${column.textColor}-800 font-bold`">
                     <input :type="column.type" @change="handleInputChange($event, row)" pattern="^\d+(\.\d{0,2})?$" oninput="this.value = this.value.replace(/[^0-9.]/g, '').replace(/(\.\d{2})\d+/g, '$1')" class="w-full" v-model="row[column.key]" />             
@@ -63,7 +71,7 @@
               <td class="flex gap-x-2 h-6 border-0" v-if="showActions">
                 <div v-for="action in actions">
                   <button :class="{ 'disabled': isDisabled(`${action.rightName}`) }" @click.stop="handleAction(rowIndex, action.name, action.rightName, row)" :title="action.title">
-                    <i :class="action.icon"></i>
+                    <i :class="[action.icon, iconColor(action.icon)]"></i>
                   </button>
                 </div>
               </td>
@@ -132,7 +140,7 @@ export default defineComponent({
       default: null,
     },
   },
-  emits : ['row-db-click', 'action-click','selection-changed', 'update-receipt-amount'],
+  emits : ['row-db-click','link-db-click', 'action-click','selection-changed', 'update-receipt-amount'],
   setup(props, { emit }) {
 
     const tableRef = ref(null);
@@ -269,11 +277,18 @@ export default defineComponent({
     const journalLineCheck = (row) =>{
       let debitAmount = parseFloat(row.debit_amount) || 0;
       let creditAmount = parseFloat(row.credit_amount) || 0;
-      if(debitAmount > 0){
+      const description = row.description || '';
+      if(description == ''){
         row.credit_amount = 0;
-      }else if(creditAmount > 0){
         row.debit_amount = 0;
+      }else{
+        if(debitAmount > 0){
+          row.credit_amount = 0;
+        }else if(creditAmount > 0){
+          row.debit_amount = 0;
+        }
       }
+      
     }
     //TABLE TOTALS
     const calculateColumnTotal =(columnKey) =>{
@@ -286,31 +301,39 @@ export default defineComponent({
     const calculateTaxAmount = (row) =>{
       const subTotal = (parseFloat(row.quantity) * parseFloat(row.cost)) || 0;
       const taxRate = parseFloat(row.vat_rate?.tax_rate) || 0;
-      if(taxRate > 0){
-        const taxIncl = row.vat_inclusivity || "Inclusive";
-        let totalAmount = parseFloat(row.total_amount) || 0;
-        let taxAmount = parseFloat(row.vat_amount) || 0;
-        let salesIncome = ((parseFloat(row.selling_price) - parseFloat(row.cost)) * parseFloat(row.quantity)) || 0;
-        if(taxIncl == "Inclusive" && taxRate != 0){
-          taxAmount = ((taxRate/100) * subTotal).toFixed(2);
-          totalAmount = subTotal.toFixed(2);
-          row.vat_amount = taxAmount;
-          row.sub_total = (parseFloat(subTotal) - parseFloat(taxAmount)).toFixed(2);
-          row.total_amount = totalAmount;
-          row.item_sales_income = salesIncome - taxAmount;
-        }else{
-          taxAmount = ((taxRate/100) * subTotal).toFixed(2);
-          totalAmount = (parseFloat(subTotal) + parseFloat(taxAmount)).toFixed(2);
-          row.sub_total = subTotal.toFixed(2);
-          row.vat_amount = taxAmount;
-          row.total_amount = totalAmount;
-          row.item_sales_income = salesIncome;
+      const description = row.description || '';
+      if(description == ''){
+        row.sub_total = 0;
+        row.vat_amount = 0;
+        row.total_amount = 0;
+        row.item_sales_income = 0;
+        row.cost = 0;
+      }else{
+        if(taxRate > 0){
+          const taxIncl = row.vat_inclusivity || "Inclusive";
+          let totalAmount = parseFloat(row.total_amount) || 0;
+          let taxAmount = parseFloat(row.vat_amount) || 0;
+          let salesIncome = ((parseFloat(row.selling_price) - parseFloat(row.cost)) * parseFloat(row.quantity)) || 0;
+          if(taxIncl == "Inclusive" && taxRate != 0){
+            taxAmount = ((taxRate/100) * subTotal).toFixed(2);
+            totalAmount = subTotal.toFixed(2);
+            row.vat_amount = taxAmount;
+            row.sub_total = (parseFloat(subTotal) - parseFloat(taxAmount)).toFixed(2);
+            row.total_amount = totalAmount;
+            row.item_sales_income = salesIncome - taxAmount;
+          }else{
+            taxAmount = ((taxRate/100) * subTotal).toFixed(2);
+            totalAmount = (parseFloat(subTotal) + parseFloat(taxAmount)).toFixed(2);
+            row.sub_total = subTotal.toFixed(2);
+            row.vat_amount = taxAmount;
+            row.total_amount = totalAmount;
+            row.item_sales_income = salesIncome;
+          }
+        }else if(subTotal > 0){
+          row.sub_total = subTotal;
+          row.total_amount = subTotal;
         }
-      }else if(subTotal > 0){
-        row.sub_total = subTotal;
-        row.total_amount = subTotal;
       }
-      
     };
     //CALCULATE EMPLOYEE APPRAISAL AVERAGE RATING
     const calculateAverageRating = (row) =>{
@@ -382,10 +405,11 @@ export default defineComponent({
       let totalAmount = parseFloat(row.unit_selling_price) || 0;
       let discount = parseFloat(row.discount) || 0;
       let charges_amount = parseFloat(row.charges_amount) || 0;
-      if(row.unit_selling_price && row.discount && row.charges_amount){
-        totalAmount = (totalAmount + charges_amount - discount).toFixed(2);
-        row.sale_total_amount = totalAmount;
-        row.formatted_sale_total_amount = Number(totalAmount).toLocaleString();
+
+      if((row.unit_selling_price != null) && (row.discount != null) && (row.charges_amount != null)){
+        let saleAmount = (totalAmount + charges_amount - discount).toFixed(2);
+        row.sale_total_amount = saleAmount;
+        row.formatted_sale_total_amount = Number(saleAmount).toLocaleString();
       }       
     };
 
@@ -410,6 +434,9 @@ export default defineComponent({
       calculateAssetUnitAmount(row);
     };
 
+    const handleLinkDblClick = (row) =>{
+      emit('link-db-click', row);
+    };
 
     //METER READING
     const updateUnits = (row) =>{
@@ -427,12 +454,19 @@ export default defineComponent({
       const invAmount = parseFloat(row.due_amount) || 0;
       const paymentAllocation = parseFloat(row.payment_allocation) || 0;
       const balance = (invAmount - paymentAllocation).toFixed(2);
-      if(balance >= 0){
-        row.bal_after_alloc = balance;
-      }else{
+      const description = row.description || '';
+      if(description == ""){
         row.payment_allocation = 0;
         row.bal_after_alloc = 0;
+      }else{
+        if(balance >= 0){
+          row.bal_after_alloc = balance;
+        }else{
+          row.payment_allocation = 0;
+          row.bal_after_alloc = 0;
+        }
       }
+      
       emit('update-receipt-amount', paymentAllocation)
     };
 
@@ -440,6 +474,25 @@ export default defineComponent({
         const permission = allowedRights.value.find(p => p.rightName === permissionName);
         return permission ? !permission.right_status : true;
     };
+
+    const checkboxSelection = (row) => {
+      const isChecked = row.selected;
+    };
+
+    const iconColor = (icon) =>{
+      const colors = {
+        'fa fa-trash': 'text-red-600',
+        'fa fa-edit': 'text-blue-600',
+        'fa fa-check-circle': 'text-green-600',
+        'fa fa-print': 'text-gray-700',
+        'fa fa-paperclip': 'text-slate-600',
+        'fas fa-comment': 'text-green-600',
+        'fas fa-envelope': 'text-cyan-600',
+        'fa fa-exchange': 'text-amber-600',
+        'fa fa-cloud-upload': 'text-indigo-600'
+      };
+      return colors[icon] || '';
+    }
 
     onMounted(() => {
       // Optional: Adjust column widths programmatically if needed
@@ -453,10 +506,10 @@ export default defineComponent({
     });
 
     return {
-      handleRowClick,handleRightClick, handleAction, handleChange, getNestedValue, handleInputChange,
+      handleRowClick,handleLinkDblClick,handleRightClick, handleAction, handleChange, getNestedValue, handleInputChange,
       tableRef, toggleSelectAll, selectedIds, allSelected, updateSelectedIds, calculateColumnTotal,isDisabled,
       shouldAddLine,sortedRows,sortColumn,sortDirection,handleSort,groupedRows,expandedGroups,toggleGroup,pluralize,
-      groupingKey
+      groupingKey,checkboxSelection,iconColor
     };
   }
 });

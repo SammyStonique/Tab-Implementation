@@ -23,6 +23,7 @@
             @handleSelectionChange="handleSelectionChange"
             @handleActionClick="handleActionClick"
             @handleShowDetails="handleShowDetails"
+            :groupingKey=true
             :count="propCount"
             :currentPage="currentPage"
             :result="propArrLen"
@@ -435,12 +436,12 @@ export default{
         }
 
         const dropdownOptions = ref([
-            {label: 'Withholding Tax', action: 'withholding-tax'},
+            {label: 'Direct Receipt', action: 'direct-receipt', icon: 'fa-coins', colorClass: 'text-green-600', rightName: 'Adding Receipt'},
         ]);
         const handleDynamicOption = (option) =>{
-            if(option == 'batch-meter-reading'){
-                store.commit('pageTab/ADD_PAGE', {'PMS':'Batch_Readings'})
-                store.state.pageTab.faActiveTab = 'Batch_Readings';
+            if(option == 'direct-receipt'){
+                store.commit('pageTab/ADD_PAGE', {'FA':'Direct_Receipt'});
+                store.state.pageTab.faActiveTab = 'Direct_Receipt';
             }
         };
         const printReceiptsList = () =>{

@@ -14,6 +14,11 @@ export function useTextareaEditor(initialContent = '') {
     { value: 'member_id', label: 'Member ID' },
     
   ];
+  const clientPlaceholders = [
+    { value: 'client_name', label: 'Client Name' },
+    { value: 'client_code', label: 'Client Code' },
+    
+  ];
 
   // Insert placeholder at cursor position
   const insertPlaceholder = () => {
@@ -48,6 +53,6 @@ export function useTextareaEditor(initialContent = '') {
   });
 
   return {
-    content,contentModel,textareaRef,placeholders,selectedPlaceholder,insertPlaceholder,
+    content,contentModel,textareaRef,placeholders,clientPlaceholders,selectedPlaceholder,insertPlaceholder,
   };
 }

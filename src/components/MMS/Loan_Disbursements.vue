@@ -19,6 +19,7 @@
         :idField="idField"
         @handleSelectionChange="handleSelectionChange"
         @handleActionClick="handleActionClick"
+        @handleOpenLink="handleOpenLink"
         :count="depCount"
         :currentPage="currentPage"
         :result="depArrLen"
@@ -101,14 +102,14 @@ export default{
         const computedApprovedAmount = computed(() => {return approvedAmount});
         const tableColumns = ref([
             {type: "checkbox"},
-            {label: "Date", key: "date", type: "text", editable: false},
-            {label: "Loan No", key: "loan_number", type: "text", editable: false},
-            {label: "Loan Product", key: "loan_product", type: "text", editable: false},
-            {label: "Member No", key: "member_number", type: "text", editable: false},
-            {label: "Member Name", key: "member_name", type: "text", editable: false},
+            {label: "Date", key: "date"},
+            {label: "Loan No", key: "loan_number", type:'link'},
+            {label: "Loan Product", key: "loan_product"},
+            {label: "Member No", key: "member_number"},
+            {label: "Member Name", key: "member_name"},
             {label: "Loan Amount", key: "loan_amount", type: "number", editable: false},
             {label: "Amount", key: "amount", type: "number", editable: false},
-            {label: "P.V#", key: "journal_no", type: "text", editable: false},
+            {label: "P.V#", key: "journal_no"},
         ])
         const actions = ref([
             {name: 'delete', icon: 'fa fa-trash', title: 'Delete Disbursement', rightName: 'Deleting Loan Disbursements'},
@@ -204,6 +205,18 @@ export default{
             store.dispatch("Loan_Disbursements/updateState",{selectedDisbursement:null, selectedApplication:null, selectedLedger:null,isEditing:false})
             flex_basis.value = '1/3';
             flex_basis_percentage.value = '33.333';
+        };
+        const handleOpenLink = async(row) =>{
+            const applicationID = row['loan_application_id'];
+            let formData = {
+                company: companyID.value,
+                loan_application: applicationID
+            }
+            await store.dispatch('Loan_Applications/fetchLoanDetails',formData).
+            then(()=>{
+                store.commit('pageTab/ADD_PAGE', {'MMS':'Loan_Ledger'});
+                store.state.pageTab.mmsActiveTab = 'Loan_Ledger'; 
+            })
         }
         const handleActionClick = async(rowIndex, action, row) =>{
             if(action == 'delete'){
@@ -456,7 +469,7 @@ export default{
             loadPrev, loadNext, firstPage, lastPage, actions, formFields, depModalVisible, addNewDisbursement,
             displayButtons,flex_basis,flex_basis_percentage, handleActionClick, handleReset, disburseMemberLoan,printDisbursementsList,
             showLoader, loader, hideLoader, modal_loader, showModalLoader, hideModalLoader, removeDisbursement, removeDisbursements,
-            addingRight,removingRight,rightsModule, closeModal,handleSelectionChange,selectSearchQuantity,selectedValue,
+            addingRight,removingRight,rightsModule, closeModal,handleSelectionChange,selectSearchQuantity,selectedValue,handleOpenLink
         }
     }
 }

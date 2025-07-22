@@ -37,6 +37,7 @@ import General_Invoices from '@/components/FA/General_Invoices.vue';
 import Invoice_Details from '@/components/FA/Invoice_Details.vue';
 import General_Receipts from '@/components/FA/General_Receipts.vue';
 import Receipt_Details from '@/components/FA/Receipt_Details.vue';
+import Direct_Receipt from '@/components/FA/Direct_Receipt.vue';
 import General_Bills from '@/components/FA/General_Bills.vue';
 import Bill_Details from '@/components/FA/Bill_Details.vue';
 import Payment_Vouchers from '@/components/FA/Payment_Vouchers.vue';
@@ -74,7 +75,7 @@ export default{
         NavBar,
         NavBarFA,
         PagesTab,
-        Dashboard, Client_Categories,Chart_Of_Accounts,Ledger_Details,General_Invoices,Invoice_Details,General_Receipts,
+        Dashboard, Client_Categories,Chart_Of_Accounts,Ledger_Details,General_Invoices,Invoice_Details,General_Receipts,Direct_Receipt,
         Receipt_Details,General_Bills, Bill_Details,Payment_Vouchers,Payment_Details,Direct_Voucher,Customers,Vendors,Debtor_Statement,Vendor_Statement,
         Journals,Journal_Details,Vat_Transactions, Tax_Mapping,Withholding_Tax,Withholding_Vat,Fiscal_Periods,Income_Statement,Balance_Sheet,
         Trial_Balance,Currencies,Petty_Cash,Item_Categories,Replenishments,Petty_Cash_Refunds,Petty_Cash_Vouchers,Voucher_Details,Petty_Cash_Statement,

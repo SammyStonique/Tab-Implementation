@@ -614,11 +614,11 @@ export default{
         }
 
         const dropdownOptions = ref([
-            {label: 'Batch Post Interest', action: 'batch-post-interest', rightName: 'Posting Loan Interest'},
-            {label: 'Batch Unpost Interest', action: 'batch-unpost-interest', rightName: 'Posting Loan Interest'},
-            {label: 'SMS Schedule Balances', action: 'send-sms', rightName: 'Sending MMS SMS'},
-            {label: 'Email Schedule Balances', action: 'send-email', rightName: 'Sending MMS Emails'},
-            {label: 'Process Penalty', action: 'process-penalty', rightName: 'Processing Loan Penalties'},
+            {label: 'Batch Post Interest', action: 'batch-post-interest', icon: 'fa-check-circle',colorClass: 'text-green-600', rightName: 'Posting Loan Interest'},
+            {label: 'Batch Unpost Interest', action: 'batch-unpost-interest', icon: 'fa-times-circle', colorClass: 'text-red-600', rightName: 'Posting Loan Interest'},
+            {label: 'SMS Schedule Balances', action: 'send-sms', icon: 'fa-sms', colorClass: 'text-blue-500', rightName: 'Sending MMS SMS'},
+            {label: 'Email Schedule Balances', action: 'send-email', icon: 'fa-envelope', colorClass: 'text-indigo-500', rightName: 'Sending MMS Emails'},
+            {label: 'Process Penalty', action: 'process-penalty', icon: 'fa-check-circle',colorClass: 'text-green-600', rightName: 'Processing Loan Penalties'},
         ]);
         const handleDynamicOption = async(option) =>{
             if(option == 'send-sms'){

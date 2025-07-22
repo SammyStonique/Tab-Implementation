@@ -2,10 +2,10 @@
     <PageStyleComponent :key="mainComponentKey" :loader="loader" @showLoader="showLoader" @hideLoader="hideLoader">
         <template v-slot:body>
             <div class="mt-6">
-                <DynamicForm  :fields="formFields" :flex_basis="flex_basis" :flex_basis_percentage="flex_basis_percentage" :displayButtons="displayButtons" @handleSubmit="createPaymentVoucher" @handleReset="handleReset"> 
+                <DynamicForm  :fields="formFields" :flex_basis="flex_basis" :flex_basis_percentage="flex_basis_percentage" :displayButtons="displayButtons" @handleSubmit="createDirectReceipt" @handleReset="handleReset"> 
                     <template v-slot:additional-content>                  
                         <div class="px-3 min-h-[220px]">
-                            <DynamicTable :key="tableKey" :columns="receiptColumns" :rows="receiptRows" :showActions="showActions" :idField="idField" :rightsModule="rightsModule" :actions="actions" @action-click="deletePaymentLine"/>
+                            <DynamicTable :key="tableKey" :columns="receiptColumns" :rows="receiptRows" :showActions="showActions" :idField="idField" :rightsModule="rightsModule" :actions="actions" @action-click="deleteReceiptLine"/>
                         </div>
                     </template>
                 </DynamicForm>
@@ -25,7 +25,7 @@ import { useDateFormatter } from '@/composables/DateFormatter';
 import DynamicTable from '@/components/DynamicTable.vue';
 
 export default defineComponent({
-    name: 'Direct_Voucher',
+    name: 'Direct_Receipt',
     components:{
         PageStyleComponent, DynamicForm, DynamicTable, MovableModal
     },
@@ -69,13 +69,13 @@ export default defineComponent({
         const ledgerArray = computed(() => store.state.Ledgers.cashbookLedgerArr);
         const ledger_array = computed(() => store.state.Ledgers.ledgerArr);
         const receiptRows = computed(() => {
-            return store.state.Ledgers.paymentItemsArray;
+            return store.state.Ledgers.receiptItemsArray;
         });
         const taxRates = computed(() => store.getters['Taxes/getFormatedTax']);
         
         const receiptColumns = ref([
             {label: "Posting Account", key:"posting_account", type: "text", editable: false},
-            {label: "Payment Description", key:"description", type: "text", editable: true, minWidth:"700px", maxWidth:"700px"},
+            {label: "Receipt Description", key:"description", type: "text", editable: true, minWidth:"700px", maxWidth:"700px"},
             {label: "Cost", key: "cost", type: "number", editable: true, minWidth:"50px", maxWidth:"50px"},
             {label: "Qty", key: "quantity", type: "number", editable: true, minWidth:"50px", maxWidth:"50px"},
             {label: "Vat Rate", key: "vat_rate", type: "select-dropdown", editable: false, options: taxRates},
@@ -85,11 +85,11 @@ export default defineComponent({
         ]);
 
         const actions = ref([
-            {name: 'delete', icon: 'fa fa-minus-circle', title: 'Remove Payment Line', rightName: "Adding Payment Voucher"},
+            {name: 'delete', icon: 'fa fa-minus-circle', title: 'Remove Receipt Line', rightName: "Adding Receipt"},
         ])
 
-        const deletePaymentLine = (rowIndex, action, row) =>{
-            store.dispatch('Ledgers/removeVoucherLine', rowIndex);
+        const deleteReceiptLine = (rowIndex, action, row) =>{
+            store.dispatch('Ledgers/removeReceiptLine', rowIndex);
         }
         const fetchTaxes = async() =>{
             await store.dispatch('Taxes/fetchTaxes', {company:companyID.value})
@@ -108,15 +108,15 @@ export default defineComponent({
             await store.dispatch('Ledgers/updateState', {ledgerID: ''});
             ledgerID.value = ""
         }
-        const handleSelectedVoucherLedger = async(option) =>{
-            await store.dispatch('Ledgers/handleSelectedLedgerVoucher', option)
+        const handleSelectedReceiptLedger = async(option) =>{
+            await store.dispatch('Ledgers/handleSelectedLedgerReceipt', option)
             vouComponentKey.value += 1;
         };
         
         const formFields = ref([]);
         const updateFormFields = () =>{
             formFields.value = [
-                { type: 'text', name: 'reference_no',label: "Payee Name", value: '', required: true,},
+                { type: 'text', name: 'reference_no',label: "Received From", value: '', required: true,},
                 {
                     type:'search-dropdown', label:"Cashbook", value: ledgerID.value, componentKey: ledComponentKey,
                     selectOptions: ledgerArray, optionSelected: handleSelectedLedger, required: true,
@@ -130,7 +130,7 @@ export default defineComponent({
                 { type: 'number', name: 'total_amount',label: "Amount", value: receiptTotals.value || 0, required: true},
                 {
                     type:'search-dropdown', label:"Select Posting Account ", value: "", componentKey: vouComponentKey,
-                    selectOptions: ledger_array, optionSelected: handleSelectedVoucherLedger, required: true,
+                    selectOptions: ledger_array, optionSelected: handleSelectedReceiptLedger, required: true,
                     searchPlaceholder: 'Select Account...', dropdownWidth: '400px', updateValue: "",  
                 },
                 {type:'text-area', label:"Memo", value: receipt_memo.value, textarea_rows: '3', textarea_cols: '56', required: true},
@@ -145,7 +145,7 @@ export default defineComponent({
             }
         }, { immediate: true })
         const handleReset = () =>{
-            store.dispatch('Ledgers/updateState', {paymentItemsArray: []})
+            store.dispatch('Ledgers/updateState', {receiptItemsArray: []})
             mainComponentKey.value += 1;
             for(let i=0; i < formFields.value.length; i++){
                 if(formFields.value[i].type == 'number'){
@@ -178,7 +178,7 @@ export default defineComponent({
         const hideLoader = () =>{
             loader.value = "none";
         } 
-        const createPaymentVoucher = async() =>{
+        const createDirectReceipt = async() =>{
             showLoader();
             if(formFields.value[8].value == ""){
                 const descriptions = receiptRows.value.filter(row => row.total_amount > 0).map(row => row.description);
@@ -202,7 +202,7 @@ export default defineComponent({
                     let jnlEntry1 = {
                         "date": formFields.value[2].value,
                         "description": receiptRows.value[i].description,
-                        "txn_type": "PMT",
+                        "txn_type": "RCPT",
                         "posting_account": receiptRows.value[i].ledger_id,
                         "debit_amount": receiptRows.value[i].sub_total,
                         "credit_amount": 0,
@@ -210,10 +210,10 @@ export default defineComponent({
                     let jnlEntry2 = {
                         "date": formFields.value[2].value,
                         "description": receiptRows.value[i].description+", Tax Payable",
-                        "txn_type": "PMT",
-                        "posting_account": receiptRows.value[i].vat_rate.tax_input_account,
-                        "debit_amount": receiptRows.value[i].vat_amount,
-                        "credit_amount": 0,
+                        "txn_type": "RCPT",
+                        "posting_account": receiptRows.value[i].vat_rate.tax_output_account,
+                        "debit_amount": 0,
+                        "credit_amount": receiptRows.value[i].vat_amount,
                     }
                     let taxTxn ={
                         "tax": receiptRows.value[i].vat_rate.tax_id,
@@ -222,7 +222,7 @@ export default defineComponent({
                         "amount": receiptRows.value[i].vat_amount,
                         "description": receiptRows.value[i].description+", Tax Payable",
                         "tax_inclusive": receiptRows.value[i].vat_inclusivity,
-                        "tax_category": 'Input'
+                        "tax_category": 'Output'
                     }
                     
                     journalEntryArr.value.push(jnlEntry1, jnlEntry2);
@@ -232,10 +232,10 @@ export default defineComponent({
                     let jnlEntry1 = {
                         "date": formFields.value[2].value,
                         "description": receiptRows.value[i].description,
-                        "txn_type": "PMT",
+                        "txn_type": "RCPT",
                         "posting_account": receiptRows.value[i].ledger_id,
-                        "debit_amount": receiptRows.value[i].sub_total,
-                        "credit_amount": 0,
+                        "debit_amount": 0,
+                        "credit_amount": receiptRows.value[i].sub_total,
                     }
                     journalEntryArr.value.push(jnlEntry1);
                 }
@@ -248,10 +248,10 @@ export default defineComponent({
                 let jnlEntry3 = {
                     "date": formFields.value[2].value,
                     "description": formFields.value[8].value,
-                    "txn_type": "PMT",
+                    "txn_type": "RCPT",
                     "posting_account": ledgerID.value,
-                    "debit_amount": 0,
-                    "credit_amount": receiptTotals.value,
+                    "debit_amount": receiptTotals.value,
+                    "credit_amount": 0,
                 }
                 journalEntryArr.value.push(jnlEntry3)
             }
@@ -259,10 +259,10 @@ export default defineComponent({
                 company: companyID.value,
                 client: formFields.value[0].value,
                 client_id: ledgerID.value,
-                customer_id: "Direct Payment",
+                customer_id: "Direct Receipt",
                 client_category: "Customers",
                 description: formFields.value[8].value,
-                txn_type: "PMT",
+                txn_type: "RCPT",
                 issue_date: formFields.value[2].value,
                 banking_date: formFields.value[3].value,
                 payment_method: formFields.value[4].value,
@@ -286,10 +286,10 @@ export default defineComponent({
             }
 
             if(Number(receiptTotals.value) <= 0){
-                toast.error('Invalid Payment Amount');
+                toast.error('Invalid Receipt Amount');
                 hideLoader();
             }else if(Number(receiptTotals.value) != Number(formFields.value[6].value)){
-                toast.error('Invalid Payment Amount');
+                toast.error('Invalid Receipt Amount');
                 hideLoader();
             }
             else{
@@ -301,7 +301,7 @@ export default defineComponent({
                         const response = await store.dispatch('Journals/createJournal', formData);
                         if (response && response.data.msg === "Success") {
                             hideLoader();
-                            toast.success('Voucher created successfully!');
+                            toast.success('Receipt created successfully!');
                             handleReset();
                             mainComponentKey.value += 1;
                             propComponentKey.value += 1;
@@ -311,12 +311,11 @@ export default defineComponent({
                             hideLoader();
                             toast.error('Duplicate Reference No!');
                         }else {
-                            toast.error('An error occurred while creating the Voucher.');
+                            toast.error('An error occurred while creating the Receipt.');
                             hideLoader();
                         }
                     } catch (error) {
-                        console.error(error.message);
-                        toast.error('Failed to create Voucher: ' + error.message);
+                        toast.error('Failed to create Receipt: ' + error.message);
                     } finally {
                         hideLoader();
                     }              
@@ -364,11 +363,11 @@ export default defineComponent({
         })
 
         return{
-            formFields, flex_basis, flex_basis_percentage, displayButtons, createPaymentVoucher, mainComponentKey,
+            formFields, flex_basis, flex_basis_percentage, displayButtons, createDirectReceipt, mainComponentKey,
             handleReset, loader, showLoader, hideLoader, tableKey, receiptColumns, receiptRows, showActions, idField,
             autoPopulatePaymentAlloc, allocateInputAmount,actions,rightsModule,
             title, modal_loader, modal_left, modal_top, modal_width, prepModalVisible, showModalLoader, hideModalLoader,
-            flex_basis_additional, flex_basis_percentage_additional, deletePaymentLine, 
+            flex_basis_additional, flex_basis_percentage_additional, deleteReceiptLine, 
         }
     }
 })

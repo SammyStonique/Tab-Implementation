@@ -20,6 +20,7 @@
             :idField="idField"
             @handleSelectionChange="handleSelectionChange"
             @handleActionClick="handleActionClick"
+            :groupingKey=true
             :count="propCount"
             :currentPage="currentPage"
             :result="propArrLen"
@@ -99,7 +100,7 @@ export default{
             {type: "checkbox"},
             {label: "Code", key:"customer_code"},
             {label: "Name", key:"customer_name"},
-            {label: "Category", key:"category"},
+            // {label: "Category", key:"category"},
             {label: "Email", key: "email"},
             {label: "Pin No", key:"pin_no"},
             {label: "Phone No", key:"phone_number"},

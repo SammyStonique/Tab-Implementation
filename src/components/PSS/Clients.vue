@@ -5,6 +5,8 @@
             :addButtonLabel="addButtonLabel"
             @handleAddNew="addNewDebtor"
             :searchFilters="searchFilters"
+            :dropdownOptions="dropdownOptions"
+            @handleDynamicOption="handleDynamicOption"
             @searchPage="searchAssetClients"
             @resetFilters="resetFilters"
             @importData="importDebtors"
@@ -39,6 +41,28 @@
                 :displayButtons="displayButtons" @handleSubmit="saveDebtor" @handleReset="handleReset"
             />
         </MovableModal>
+        <MovableModal v-model:visible="transModalVisible" :title="title1" :modal_top="modal_top" :modal_left="modal_left" :modal_width="modal_width"
+            :loader="modal_loader1" @showLoader="showModalLoader1" @hideLoader="hideModalLoader1"  @closeModal="closeModal1">
+            <div class="px-3">
+                <div class="text-left mb-4">
+                    <label for="">Message:</label><br />
+                    <!-- <quill-editor :key="editorComponentKey" v-model:value="messageContent"></quill-editor> -->
+                    <div class="flex">
+                        <div class="basis-1/2 mb-4 mr-3">
+                            <select v-model="selectedPlaceholder" class="bg-slate-50 rounded border border-gray-400 text-sm pl-2 pt-1 w-full">
+                                <option value="" disabled>Select Placeholder</option>
+                                <option v-for="placeholder in clientPlaceholders" :key="placeholder.value" :value="placeholder.value">
+                                    {{ placeholder.label }}
+                                </option>
+                            </select>
+                        </div>
+                        <button @click="insertPlaceholder" :disabled="!selectedPlaceholder" class="w-24 h-8 rounded bg-green-400 text-sm mr-2  text-white px-2 py-0.5">Insert</button>
+                    </div>
+                    <textarea v-model="contentModel" ref="textareaRef" rows="8" cols="64" class="bg-slate-50 rounded border border-gray-400 text-sm pl-2 pt-2" placeholder="Type your content here..."></textarea>
+                </div>
+                <button @click="sendClientSMS" class="rounded bg-green-400 text-sm mr-2  text-white px-2 py-1.5"><i class="fa fa-check-circle text-xs mr-1.5" aria-hidden="true"></i>Send SMS</button>
+            </div>
+        </MovableModal>
     </div>
 </template>
 
@@ -51,13 +75,21 @@ import DynamicForm from '../NewDynamicForm.vue';
 import { useStore } from "vuex";
 import { useToast } from "vue-toastification";
 import PrintJS from 'print-js';
+import { quillEditor } from 'vue3-quill';
+import { useTextareaEditor } from '@/composables/TextAreaEditor';
 
 export default{
     name: 'Clients',
     components:{
-        PageComponent, MovableModal,DynamicForm
+        PageComponent, MovableModal,DynamicForm,quillEditor
     },
     setup(){
+        const { contentModel,textareaRef,clientPlaceholders,selectedPlaceholder,insertPlaceholder,} = useTextareaEditor('');
+        const messageContent = ref('');
+        const modal_loader1 = ref('none');
+        const title1 = ref('SMS Member');
+        const transModalVisible = ref(false);
+        const clientID = ref('');
         const store = useStore();     
         const toast = useToast();
         const loader = ref('none');
@@ -439,6 +471,82 @@ export default{
             .finally(()=>{
                 hideLoader();
             })
+        };
+        const showModalLoader1 = () =>{
+            modal_loader1.value = "block";
+        }
+        const hideModalLoader1 = () =>{
+            modal_loader1.value = "none";
+        }
+        const handleReset1 = () =>{
+            contentModel.value = "";
+            clientID.value = "";
+        }
+        const sendClientSMS = async() =>{
+            if(clientID.value && contentModel.value){
+                showModalLoader1();
+                let formData = {
+                    content: contentModel.value,
+                    client: clientID.value,
+                    company: companyID.value
+                }
+                await axios.post('api/v1/member-general-sms/',formData).
+                then((response)=>{
+                    if(response.data.msg == "Success"){
+                        toast.success("SMS Sent!")
+                        closeModal1();
+                        searchAssetClients();
+                    }else{
+                        toast.error(response.data.msg)
+                    }
+                })
+                .catch((error)=>{
+                    toast.error(error.message)
+                })
+                .finally(()=>{
+                    hideModalLoader1();
+                })
+            }else if(clientID.value == ""){
+                toast.error("No Client Selected!!")
+            }else if(contentModel.value == ""){
+                toast.error("Cannot Send Blank SMS!!")
+            }
+            
+        };
+        const dropdownOptions = ref([
+            {label: 'SMS Selected Client', action: 'send-sms', rightName: 'Sending PSS SMS'},
+        ]);
+        const handleDynamicOption = async(option) =>{
+            if(option == 'send-sms'){
+                clientID.value = selectedIds.value;
+                transModalVisible.value = true;
+                
+            }else if(option == 'send-email'){
+                showLoader();
+                const clientID = [];
+                let formData = {
+                    member: clientID,
+                    company: companyID.value
+                }
+                await axios.post('api/v1/member-general-email/',formData).
+                then((response)=>{
+                    if(response.data.msg == "Success"){
+                        toast.success("Email Sent!")
+                    }else{
+                        toast.error(response.data.msg)
+                    }
+                })
+                .catch((error)=>{
+                    toast.error(error.message)
+                })
+                .finally(()=>{
+                    hideLoader();
+                })
+            }
+        };
+        const closeModal1 = async() =>{
+            transModalVisible.value = false;
+            handleReset1();
         }
         onBeforeMount(()=>{
             searchAssetClients();
@@ -446,11 +554,13 @@ export default{
         })
         return{
             title, searchAssetClients,resetFilters, addButtonLabel, searchFilters, tableColumns, debtorList,
-            currentPage,propResults, propArrLen, propCount, pageCount, showNextBtn, showPreviousBtn,
+            currentPage,propResults, propArrLen, propCount, pageCount, showNextBtn, showPreviousBtn,dropdownOptions,handleDynamicOption,
             loadPrev, loadNext, firstPage, lastPage, idField, actions, handleActionClick, propModalVisible, closeModal,
             submitButtonLabel, showModal, addNewDebtor, showLoader, loader, hideLoader, modal_loader, modal_top, modal_left, modal_width,displayButtons,
             showModalLoader, hideModalLoader, saveDebtor, formFields, handleSelectionChange, flex_basis,flex_basis_percentage,
-            importDebtors, removeDebtor, removeDebtors, handleReset,printCustomersList,addingRight,removingRight,rightsModule,selectSearchQuantity,selectedValue
+            importDebtors, removeDebtor, removeDebtors, handleReset,printCustomersList,addingRight,removingRight,rightsModule,selectSearchQuantity,selectedValue,
+            messageContent,modal_loader1,title1,showModalLoader1,hideModalLoader1,sendClientSMS,transModalVisible,
+            closeModal1,contentModel,textareaRef,clientPlaceholders,selectedPlaceholder,insertPlaceholder,
         }
     }
 };

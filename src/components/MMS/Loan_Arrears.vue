@@ -20,6 +20,7 @@
         :showTotals="showTotals"
         @handleSelectionChange="handleSelectionChange"
         @handleActionClick="handleActionClick"
+        @handleOpenLink="handleOpenLink"
         :groupingKey=true
         :count="appCount"
         :currentPage="currentPage"
@@ -93,16 +94,16 @@ export default{
         const modal_width = ref('45vw');
         const tableColumns = ref([
             {type: "checkbox"},
-            {label: "Loan No", key:"loan_number",type: "text", editable: false},
-            {label: "Member No", key:"member_number",type: "text", editable: false},
-            {label: "Member Name", key:"member_name",type: "text", editable: false},
-            {label: "Phone No", key:"phone_number",type: "text", editable: false},
-            {label: "Email", key:"member_email",type: "text", editable: false},
-            // {label: "Loan Product", key:"product_name",type: "text", editable: false},
-            {label: "Loan Amount", key: "loan_amount", type: "number", editable: false},
-            {label: "Principal Arrears", key: "principal_arrears", type: "number", editable: false},
-            {label: "Interest Arrears", key: "interest_arrears", type: "number", editable: false},
-            {label: "Total Outstanding", key: "total_arrears", type: "number", editable: false},
+            {label: "Loan No", key:"loan_number",type: "link"},
+            {label: "Member No", key:"member_number"},
+            {label: "Member Name", key:"member_name"},
+            {label: "Phone No", key:"phone_number"},
+            {label: "Email", key:"member_email"},
+            // {label: "Loan Product", key:"product_name"},
+            {label: "Loan Amount", key: "loan_amount", type: "number"},
+            {label: "Principal Arrears", key: "principal_arrears", type: "number"},
+            {label: "Interest Arrears", key: "interest_arrears", type: "number"},
+            {label: "Total Outstanding", key: "total_arrears", type: "number"},
         ])
         const showTotals = ref(true);
         const actions = ref([
@@ -138,7 +139,18 @@ export default{
         const handleSelectionChange = (ids) => {
             selectedIds.value = ids;
         };
-        
+        const handleOpenLink = async(row) =>{
+            const applicationID = row['loan_application_id'];
+            let formData = {
+                company: companyID.value,
+                loan_application: applicationID
+            }
+            await store.dispatch('Loan_Applications/fetchLoanDetails',formData).
+            then(()=>{
+                store.commit('pageTab/ADD_PAGE', {'MMS':'Loan_Ledger'});
+                store.state.pageTab.mmsActiveTab = 'Loan_Ledger'; 
+            })
+        }
         const handleActionClick = async(rowIndex, action, row) =>{
             if(action == 'send-sms'){
                 showLoader();
@@ -226,9 +238,9 @@ export default{
             ]
         };
         const dropdownOptions = ref([
-            {label: 'SMS Loan Arrears', action: 'send-sms', rightName: 'Sending MMS SMS'},
-            {label: 'Email Loan Arrears', action: 'send-email', rightName: 'Sending MMS Emails'},
-            {label: 'Print Detailed', action: 'print-detailed', rightName: 'Printing MMS Reports'},
+            {label: 'SMS Loan Arrears', action: 'send-sms', icon: 'fa-sms', colorClass: 'text-blue-500', rightName: 'Sending MMS SMS'},
+            {label: 'Email Loan Arrears', action: 'send-email', icon: 'fa-envelope', colorClass: 'text-indigo-500', rightName: 'Sending MMS Emails'},
+            {label: 'Print Detailed', action: 'print-detailed',icon: 'fa-print',colorClass: 'text-gray-700', rightName: 'Printing MMS Reports'},
         ]);
         const handleDynamicOption = async(option) =>{
             if(option == 'send-sms'){
@@ -411,7 +423,7 @@ export default{
         return{
             showAddButton,title, searchLoanArrears, idField, selectedIds, actions, arrearsList, appArrLen,appCount,appResults,appModalVisible,
             currentPage,searchFilters,tableColumns,resetFilters,loadPrev,loadNext,firstPage,lastPage,dropdownOptions,handleDynamicOption,
-            showNextBtn,showPreviousBtn, handleActionClick,displayButtons,formFields,
+            showNextBtn,showPreviousBtn, handleActionClick,displayButtons,formFields,handleOpenLink,
             modal_top, modal_left, modal_width, showLoader, loader, hideLoader, modal_loader, showModalLoader, hideModalLoader,rightsModule,
             handleSelectionChange, pageComponentKey, flex_basis, flex_basis_percentage,showTotals,printArrearsList,selectSearchQuantity,selectedValue
         }
