@@ -159,7 +159,7 @@ export default defineComponent({
                     searchPlaceholder: 'Select Income Account...', dropdownWidth: '400px', updateValue: "",
                     fetchData: fetchLedgers(), clearSearch: clearSelectedLedger()  
                 },
-                {type:'text-area', label:"Memo", value: invoice_memo.value, textarea_rows: '2', textarea_cols: '56', required: true},
+                {type:'text-area', label:"Memo", value: invoice_memo.value, textarea_rows: '3', textarea_cols: '56', required: true},
                 
             ]
         };

@@ -362,7 +362,7 @@ export default defineComponent({
                     date_to: to_date_search.value,
                     company: companyID.value
                 }
-                await axios.post('api/v1/loan-statement-sms/',formData).
+                await axios.post('api/v1/member-loan-statement-sms/',formData).
                 then((response)=>{
                     if(response.data.msg == "Success"){
                         toast.success("SMS Sent!")

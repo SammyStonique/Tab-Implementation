@@ -166,7 +166,7 @@ export default defineComponent({
 
         const handleReset = () =>{
             store.dispatch('Journals/updateState', {})
-            store.dispatch('Ledgers/updateState', { invoiceItemsArray: []})
+            store.dispatch('Ledgers/updateState', { billItemsArray: []})
             mainComponentKey.value += 1;
             for(let i=0; i < formFields.value.length; i++){
                 if(formFields.value[i].type == 'number'){

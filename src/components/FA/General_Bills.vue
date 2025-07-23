@@ -244,6 +244,7 @@ export default{
             modal_loader.value = "none";
         }
         const addNewBill = () =>{
+            store.dispatch('Ledgers/updateState', {billItemsArray: []})
             store.commit('pageTab/ADD_PAGE', {'FA':'Bill_Details'});
             store.state.pageTab.faActiveTab = 'Bill_Details'; 
         }
@@ -535,11 +536,12 @@ export default{
 
         const dropdownOptions = ref([
             {label: 'Withholding Tax', action: 'withholding-tax'},
+            {label: 'Recurring Bills', action: 'recurring', icon: 'fa-repeat', colorClass: 'text-yellow-600', rightName: 'Adding Bills'},
         ]);
         const handleDynamicOption = (option) =>{
-            if(option == 'batch-meter-reading'){
-                store.commit('pageTab/ADD_PAGE', {'PMS':'Batch_Readings'})
-                store.state.pageTab.faActiveTab = 'Batch_Readings';
+            if(option == 'recurring'){
+                store.commit('pageTab/ADD_PAGE', {'FA':'Recurring_Bills'})
+                store.state.pageTab.faActiveTab = 'Recurring_Bills';
             }
         };
         const printBillList = () =>{
