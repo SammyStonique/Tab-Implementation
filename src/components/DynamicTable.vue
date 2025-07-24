@@ -61,7 +61,7 @@
                     <input :type="column.type" @change="handleInputChange($event, row)" pattern="^\d+(\.\d{0,2})?$" oninput="this.value = this.value.replace(/[^0-9.]/g, '').replace(/(\.\d{2})\d+/g, '$1')" class="w-full" v-model="row[column.key]" />             
                   </div>
                   <div v-else-if="column.editable === true">
-                    <input :type="column.type" @change="handleInputChange($event, row)" v-model="row[column.key]" /> 
+                    <input :type="column.type" @change="handleInputChange($event, row)" v-model="row[column.key]" :class="[showValidation ? 'zigzag-border' : '']" /> 
                   </div>
                   <div v-else :class="`bg-${row[column.textColor]}-500`">
                     {{ getNestedValue(row, column.key) }}
@@ -152,6 +152,7 @@ export default defineComponent({
     const userID = computed(()=> store.state.userData.user_id);
     const sortColumn = ref(null);
     const sortDirection = ref('asc');
+    const showValidation = ref(false);
 
     // Initialize selected state for each row
     props.rows.forEach(row => {
@@ -279,9 +280,11 @@ export default defineComponent({
       let creditAmount = parseFloat(row.credit_amount) || 0;
       const description = row.description || '';
       if(description == ''){
+        showValidation.value = true;
         row.credit_amount = 0;
         row.debit_amount = 0;
       }else{
+        showValidation.value = false;
         if(debitAmount > 0){
           row.credit_amount = 0;
         }else if(creditAmount > 0){
@@ -303,12 +306,14 @@ export default defineComponent({
       const taxRate = parseFloat(row.vat_rate?.tax_rate) || 0;
       const description = row.description || '';
       if(description == ''){
+        showValidation.value = true;
         row.sub_total = 0;
         row.vat_amount = 0;
         row.total_amount = 0;
         row.item_sales_income = 0;
         row.cost = 0;
       }else{
+        showValidation.value = false;
         if(taxRate > 0){
           const taxIncl = row.vat_inclusivity || "Inclusive";
           let totalAmount = parseFloat(row.total_amount) || 0;
@@ -482,6 +487,7 @@ export default defineComponent({
     const iconColor = (icon) =>{
       const colors = {
         'fa fa-trash': 'text-red-600',
+        'fa fa-minus-circle': 'text-red-600',
         'fa fa-edit': 'text-blue-600',
         'fa fa-check-circle': 'text-green-600',
         'fa fa-print': 'text-gray-700',
@@ -509,7 +515,7 @@ export default defineComponent({
       handleRowClick,handleLinkDblClick,handleRightClick, handleAction, handleChange, getNestedValue, handleInputChange,
       tableRef, toggleSelectAll, selectedIds, allSelected, updateSelectedIds, calculateColumnTotal,isDisabled,
       shouldAddLine,sortedRows,sortColumn,sortDirection,handleSort,groupedRows,expandedGroups,toggleGroup,pluralize,
-      groupingKey,checkboxSelection,iconColor
+      groupingKey,checkboxSelection,iconColor,showValidation
     };
   }
 });
@@ -576,6 +582,14 @@ input {
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
+}
+.zigzag-border {
+  border: 2px solid red;
+  border-image: repeating-linear-gradient(
+    -45deg,
+    red 0 5px,
+    transparent 5px 10px
+  ) 10;
 }
 
 </style>

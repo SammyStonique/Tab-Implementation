@@ -136,7 +136,7 @@ import PrintJS from 'print-js';
 import Swal from 'sweetalert2';
 
 export default defineComponent({
-    name: 'Loan_Ledger',
+    name: 'Historical_Loan_Statement',
     components:{
         PageStyleComponent, DynamicTable, MovableModal, DynamicForm,FilterBar
     },
@@ -215,7 +215,7 @@ export default defineComponent({
         const paymentColumns = ref([
             {type: "checkbox"},
             {label: "Date", key:"issue_date"},
-            {label: "Txn No", key:"journal_no", type:"link"},
+            {label: "Txn No", key:"journal_no", type: "link"},
             {label: "Description", key: "description"},
             {label: "Amount", key: "amount", type: "number", editable: false},
             {label: "Paid By", key: "client"},
@@ -329,6 +329,10 @@ export default defineComponent({
                 let formData = {
                     company: companyID.value,
                     loan_application: [loanDetails.value.loan_application_id],
+                    historical_loan: null,
+                    date_from: from_date_search.value,
+                    date_to: to_date_search.value,
+                    company: companyID.value
                 }
                 await axios.post('api/v1/member-loan-statement-email/',formData).
                 then((response)=>{
@@ -352,13 +356,18 @@ export default defineComponent({
             if(option == 'send-sms'){
                 showLoader();
                 let formData = {
-                    loan_application: [loanDetails.value.loan_application_id],
+                    client: [loanDetails.value.loan_application_id],
                     company: companyID.value,
+                    date_from: from_date_search.value,
+                    date_to: to_date_search.value,
+                    company: companyID.value
                 }
                 await axios.post('api/v1/member-loan-statement-sms/',formData).
                 then((response)=>{
                     if(response.data.msg == "Success"){
                         toast.success("SMS Sent!")
+                    }else if(response.data.msg == "Missing Template"){
+                        toast.error("Loan Statement Template Not Set!")
                     }else{
                         toast.error(response.data.msg)
                     }
@@ -721,7 +730,7 @@ export default defineComponent({
                     toast.error("C.R Already Processed")
                 }
                            
-            }else if( action == 'unprocess-credit-reduction'){
+            }else if( action == 'process-credit-reduction'){
                 const postedStatus = row['credit_reduction_applied']
                 const scheduleID = [row['armotization_schedule_id']]
                 if(postedStatus == 'Yes'){
@@ -909,7 +918,7 @@ export default defineComponent({
             scheduleActionClick,tnt_modal_loader, dep_modal_loader, util_modal_loader, depModalVisible, displayButtons,guarantorColumns,securityColumns, printLoanStatement,handleDynamicOption1,
             documentActionClick,documentColumns,documentTableKey,actionsDocument,computedDocumentRows,
             modal_top, modal_left, modal_width, showDepModalLoader, hideDepModalLoader, handleDepReset,
-            flex_basis, flex_basis_percentage, paymentActionClick,handleOpenLink,rightsModule,isDisabled,
+            flex_basis, flex_basis_percentage, paymentActionClick,rightsModule,isDisabled,handleOpenLink
         }
     }
 })

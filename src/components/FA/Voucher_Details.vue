@@ -74,7 +74,7 @@ export default defineComponent({
             {label: "Item Category", key:"category_name", type: "text", editable: false},
             {label: "Sub Category", key:"sub_category", type: "dropdown", editable: false},
             {label: "Payment Description", key:"description", type: "text", editable: true, minWidth:"700px", maxWidth:"700px"},
-            {label: "Total", key: "total_amount", type: "text", editable: true},
+            {label: "Total", key: "total_amount", type: "number", editable: true},
         ]);
 
         const actions = ref([

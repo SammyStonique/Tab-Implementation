@@ -3,7 +3,8 @@
         <div v-if="displayButtons" class="flex flex-wrap gap-2">
             <div v-for="(field, index) in fields" :key="index" >
                 <div v-if="(field.type === 'add' || field.type === 'other' || field.type === 'remove')">
-                    <button @click="field.method" :class="['rounded cursor-pointer text-xs text-white px-1 py-0.5',field.type === 'remove' ? 'bg-red-400' : 'bg-green-400']">
+                    <button  @click="field.method" :class="[{ 'disabled': isDisabled(`${field.rightName}`) },'rounded cursor-pointer text-xs px-2 py-1 font-medium border transition',field.type === 'remove'
+                            ? 'bg-red-100 text-red-600 border-red-300 hover:bg-red-200': 'bg-green-100 text-green-600 border-green-300 hover:bg-green-200']">
                         <i :class="field.icon"></i> {{ field.label }}
                     </button>
                 </div>
@@ -26,6 +27,7 @@
 <script>
 import { defineComponent, ref, onMounted, computed} from 'vue';
 import DynamicTable from '@/components/DynamicTable.vue'
+import { useStore } from "vuex";
 
 export default defineComponent({
     name: 'ShowDetailsTable',
@@ -70,14 +72,20 @@ export default defineComponent({
         },
     },
     setup(props, { emit }) {
+        const store = useStore();
+        const allowedRights = computed(()=> store.state.userData.permissions);
         const handleActionClick = (rowIndex, action, row) =>{
             emit('handleActionClick',rowIndex, action, row)
         };
         const handleSelectionChange = (selectedIds) =>{
             emit('handleSelectionChange', selectedIds);
         };
+        const isDisabled =(permissionName) =>{
+            const permission = allowedRights.value.find(p => p.rightName === permissionName);
+            return permission ? !permission.right_status : true;
+        };
         return{
-            handleActionClick,handleSelectionChange
+            handleActionClick,handleSelectionChange,isDisabled
         }
     }
 })
@@ -85,6 +93,10 @@ export default defineComponent({
 </script>
 
 <style scoped>
+.disabled {
+  opacity: 0.5;
+  pointer-events: none;
+}
 .table-container {
   position: relative;
   max-height: 110px;

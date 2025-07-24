@@ -101,7 +101,7 @@ export default{
         const updateFormFields = (security) => {
             formFields.value = [
                 { type: 'text', name: 'security_name',label: "Name", value: security?.security_name || '', required: true },
-                { type: 'dropdown', name: 'security_type',label: "Type", value: security?.security_type || '', placeholder: "", required: false, options: [{ text: 'Real Estate', value: 'Real Estate' }, { text: 'Vehicle', value: 'Vehicle' }, { text: 'Stocks/Bonds', value: 'Stocks/Bonds' },{ text: 'Personal Guarantee', value: 'Personal Guarantee' }, { text: 'Other', value: 'Other' }] },
+                { type: 'dropdown', name: 'security_type',label: "Type", value: security?.security_type || '', placeholder: "", required: true, options: [{ text: 'Real Estate', value: 'Real Estate' }, { text: 'Vehicle', value: 'Vehicle' }, { text: 'Stocks/Bonds', value: 'Stocks/Bonds' },{ text: 'Personal Guarantee', value: 'Personal Guarantee' }, { text: 'Other', value: 'Other' }] },
                 { type: 'text', name: 'security_value',label: "Value", value: security?.security_value || '0', required: true },
                 {type:'text-area', label:"Description", value: security?.description, textarea_rows: '4', textarea_cols: '56', required: false},
 

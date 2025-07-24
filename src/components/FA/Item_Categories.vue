@@ -479,6 +479,7 @@ export default{
             handleReset();
         };
         const handleShowDetails = async(row) =>{
+            selectedCategoryIds.value = [];
             activeTab.value = 0;
             categoryID.value = row['petty_cash_item_category_id'];
             detailsTitle.value = row['category_name'] + ' Category';
@@ -585,9 +586,9 @@ export default{
             })     
         };
         const detailsField = ref([
-            {type: 'add', label: 'Add SubCategory', icon: 'fa fa-plus', method: displaySubCategories},
-            {type: 'other', label: 'Edit SubCategory', icon: 'fa fa-edit', method: editSubCategory},
-            {type: 'remove', label: 'Remove SubCategory', icon: 'fa fa-times', method: removeSubCategory},
+            {type: 'add', label: 'Add SubCategory', icon: 'fa fa-plus', rightName: 'Adding Petty Cash Item Category', method: displaySubCategories},
+            {type: 'other', label: 'Edit SubCategory', icon: 'fa fa-edit', rightName: 'Adding Petty Cash Item Category', method: editSubCategory},
+            {type: 'remove', label: 'Remove SubCategory', icon: 'fa fa-times', rightName: 'Deleting Petty Cash Item Category', method: removeSubCategory},
         ]);
         const showModalLoader1 = () =>{
             modal_loader1.value = "block";
@@ -599,6 +600,7 @@ export default{
             depModalVisible.value = false;
             hideModalLoader1();
             categoryID.value = '';
+            selectedCategoryIds.value = [];
         };
         const createSubCategory = async() =>{
             showModalLoader1();

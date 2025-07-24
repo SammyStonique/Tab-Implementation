@@ -8,7 +8,7 @@
           <div v-else>
             <label for="">{{ field.label }}:</label><br />
           </div>
-          <input v-model="field.value" @change="handleChange($event, field)" :disabled="field.disabled" :name="field.name" type="text" :class="`bg-slate-50 rounded pl-3 border border-gray-400 text-sm w-full`" :placeholder="field.placeholder"/>
+          <input v-model="field.value" @change="handleChange($event, field)" :disabled="field.disabled" :name="field.name" type="text" :class="[[`bg-slate-50 rounded pl-3 border border-gray-400 text-sm w-full`,showValidation && field.required && !field.value ? 'zigzag-border' : ''],showValidation && field.required && !field.value ? 'zigzag-border' : '']" :placeholder="field.placeholder"/>
         </div>
         <div v-if="field.type === 'password'" class="text-left text-sm" :hidden="field.hidden">
           <div v-if="field.required">
@@ -17,7 +17,7 @@
           <div v-else>
             <label for="">{{ field.label }}:</label><br />
           </div>
-          <input v-model="field.value" :disabled="field.disabled" :name="field.name" type="password" :class="`bg-slate-50 rounded pl-3 border border-gray-400 text-sm w-full`" :placeholder="field.placeholder"/>
+          <input v-model="field.value" :disabled="field.disabled" :name="field.name" type="password" :class="[`bg-slate-50 rounded pl-3 border border-gray-400 text-sm w-full`,showValidation && field.required && !field.value ? 'zigzag-border' : '']" :placeholder="field.placeholder"/>
         </div>
         <div v-if="field.type === 'number'" class="text-left text-sm" :hidden="field.hidden">
           <div v-if="field.required">
@@ -26,7 +26,7 @@
           <div v-else>
             <label for="">{{ field.label }}:</label><br />
           </div>
-          <input v-model="field.value" @change="handleChange($event, field)" :disabled="field.disabled" :name="field.name" type="number" pattern="^\d+(\.\d{0,2})?$" oninput="this.value = this.value.replace(/[^0-9.]/g, '').replace(/(\.\d{2})\d+/g, '$1')" :class="`bg-slate-50 rounded pl-3 border border-gray-400 text-sm w-full`" :placeholder="field.placeholder"/>
+          <input v-model="field.value" @change="handleChange($event, field)" :disabled="field.disabled" :name="field.name" type="number" pattern="^\d+(\.\d{0,2})?$" oninput="this.value = this.value.replace(/[^0-9.]/g, '').replace(/(\.\d{2})\d+/g, '$1')" :class="[`bg-slate-50 rounded pl-3 border border-gray-400 text-sm w-full`,showValidation && field.required && !field.value ? 'zigzag-border' : '']" :placeholder="field.placeholder"/>
         </div>
         <div v-if="field.type === 'date'" class="mr-2 text-left text-sm" :hidden="field.hidden">
           <div v-if="field.required">
@@ -35,7 +35,7 @@
           <div v-else>
             <label for="">{{ field.label }}:</label><br />
           </div>
-          <input v-model="field.value" @change="handleChange($event, field)" :name="field.name" type="date" :disabled="field.disabled" :min="field.minDate" :max="field.maxDate" :class="`bg-slate-50 rounded pl-3 border border-gray-400 text-sm w-full`" :placeholder="field.placeholder"/>
+          <input v-model="field.value" @change="handleChange($event, field)" :name="field.name" type="date" :disabled="field.disabled" :min="field.minDate" :max="field.maxDate" :class="[`bg-slate-50 rounded pl-3 border border-gray-400 text-sm w-full`,showValidation && field.required && !field.value ? 'zigzag-border' : '']" :placeholder="field.placeholder"/>
         </div>
         <div v-if="field.type === 'time'" class="mr-2 text-left text-sm" :hidden="field.hidden">
           <div v-if="field.required">
@@ -44,7 +44,7 @@
           <div v-else>
             <label for="">{{ field.label }}:</label><br />
           </div>
-          <input v-model="field.value" :name="field.name" type="time" :disabled="field.disabled" :class="`bg-slate-50 rounded pl-3 border border-gray-400 text-base w-full`" :placeholder="field.placeholder"/>
+          <input v-model="field.value" :name="field.name" type="time" :disabled="field.disabled" :class="[`bg-slate-50 rounded pl-3 border border-gray-400 text-base w-full`,showValidation && field.required && !field.value ? 'zigzag-border' : '']" :placeholder="field.placeholder"/>
         </div>
         <div v-else-if="field.type === 'dropdown'" class="mr-2 text-left text-sm" :hidden="field.hidden">
           <div v-if="field.required">
@@ -53,7 +53,7 @@
           <div v-else>
             <label for="">{{ field.label }}:</label><br />
           </div>
-          <select @change="handleChange($event, field)" v-model="field.value" :name="field.name" :disabled="field.disabled" class="bg-slate-50 rounded border border-gray-400 text-sm pl-2 pt-1 w-full">
+          <select @change="handleChange($event, field)" v-model="field.value" :name="field.name" :disabled="field.disabled" :class="['bg-slate-50 rounded border border-gray-400 text-sm pl-2 pt-1 w-full',showValidation && field.required && !field.value ? 'zigzag-border' : '']">
             <option value="" selected disabled>{{ field.placeholder }}</option>
             <option v-for="(option, index) in field.options" :key="index" :value="option.value" class="text-sm">{{ option.text }}</option>
           </select>
@@ -83,7 +83,7 @@
             <div v-else>
               <label for="">{{ field.label }}:</label><br />
             </div>
-            <textarea v-model="field.value" :name="field.name" :disabled="field.disabled" class="bg-slate-50 rounded border border-gray-400 text-sm pl-2 pt-2" :rows="field.textarea_rows" :cols="field.textarea_cols"></textarea>
+            <textarea v-model="field.value" :name="field.name" :disabled="field.disabled" :class="['bg-slate-50 rounded border border-gray-400 text-sm pl-2 pt-2',showValidation && field.required && !field.value ? 'zigzag-border' : '']" :rows="field.textarea_rows" :cols="field.textarea_cols"></textarea>
         </div>
         <div v-if="field.type === 'file'" class="mr-2 text-left text-sm" :hidden="field.hidden">
           <div v-if="field.required">
@@ -93,7 +93,7 @@
             <label for="">{{ field.label }}:</label><br />
           </div>
           <input type="text" name="" class="rounded border-2 border-gray-400 text-gray-500 text-sm pl-2 mr-2 mb-4 w-80 h-6" placeholder="" v-model="field.filePath" >
-          <input :accept="field.accepted_formats" @change="onFileChange($event)" id="file-input" :name="field.name" type="file"  :disabled="field.disabled" :class="`bg-slate-50 rounded pl-3 border border-gray-400 text-sm w-full`" :placeholder="field.placeholder"/>
+          <input :accept="field.accepted_formats" @change="onFileChange($event)" id="file-input" :name="field.name" type="file"  :disabled="field.disabled" :class="[`bg-slate-50 rounded pl-3 border border-gray-400 text-sm w-full`]" :placeholder="field.placeholder"/>
         </div>
         <div v-if="field.type === 'checkbox'" class="text-left text-sm" :hidden="field.hidden">
           <div v-if="field.required" class="flex gap-x-1">
@@ -123,6 +123,7 @@
 <script>
 import { ref } from 'vue';
 import { getCurrentInstance } from 'vue';
+import { useToast } from "vue-toastification";
 import SearchableDropdown from './SearchableDropdown.vue';
 
 export default{
@@ -156,10 +157,22 @@ export default{
     SearchableDropdown
   },
   setup(props, {emit}){
+    const toast = useToast();
     const localFile = ref(null);
     const localFilePath = ref('');
+    const showValidation = ref(false);
     const {proxy} = getCurrentInstance();
     const handleSubmit = () =>{
+      showValidation.value = true;
+
+      const hasErrors = props.fields.some(field =>
+        field.required && !field.value && !field.selected
+      );
+
+      if (hasErrors) {
+        toast.error('Required Fields Missing');
+        return;
+      }
       emit('handleSubmit');
     }
     const handleReset = () =>{
@@ -202,7 +215,7 @@ export default{
     };
 
     return{
-      handleSubmit, handleReset, handleChange, onFileChange,localFilePath,checkboxSelection
+      handleSubmit, handleReset, handleChange, onFileChange,localFilePath,checkboxSelection,showValidation
     }
   }
 
@@ -232,6 +245,14 @@ color: red;
 .disabled-div {
     pointer-events: none;
     opacity: 0.5;
+}
+.zigzag-border {
+  border: 2px solid red;
+  border-image: repeating-linear-gradient(
+    -45deg,
+    red 0 5px,
+    transparent 5px 10px
+  ) 10;
 }
 
 </style>

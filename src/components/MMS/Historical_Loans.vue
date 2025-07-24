@@ -492,8 +492,8 @@ export default{
                 }
                 await store.dispatch('Loan_Applications/fetchLoanDetails',formData).
                 then(()=>{
-                    store.commit('pageTab/ADD_PAGE', {'MMS':'Historical_Loan_Ledger'});
-                    store.state.pageTab.mmsActiveTab = 'Historical_Loan_Ledger'; 
+                    store.commit('pageTab/ADD_PAGE', {'MMS':'Hist_Loan_Statement'});
+                    store.state.pageTab.mmsActiveTab = 'Hist_Loan_Statement'; 
                 })
             }else{
                 toast.error(`Cannot View ${applicationStatus} Loan`)
@@ -520,8 +520,8 @@ export default{
                     }
                     await store.dispatch('Loan_Applications/fetchLoanDetails',formData).
                     then(()=>{
-                        store.commit('pageTab/ADD_PAGE', {'MMS':'Historical_Loan_Ledger'});
-                        store.state.pageTab.mmsActiveTab = 'Historical_Loan_Ledger'; 
+                        store.commit('pageTab/ADD_PAGE', {'MMS':'Hist_Loan_Statement'});
+                        store.state.pageTab.mmsActiveTab = 'Hist_Loan_Statement'; 
                     })
                 }else{
                     toast.error(`Cannot View ${applicationStatus} Loan`)
