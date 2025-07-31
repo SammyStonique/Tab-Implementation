@@ -244,7 +244,12 @@ export default defineComponent({
                     clearSearch: clearSelectedRecoveryLedger
                 },
                 { type: 'dropdown', name: 'enable_reminders',label: "Enable Reminder", value: selectedProduct.value?.enable_reminders || 'No', placeholder: "", required: true, options: [{ text: 'Yes', value: 'Yes' }, { text: 'No', value: 'No' }] },
-                {required: false}
+                { type: 'dropdown', name: 'reminder_mode',label: "Reminder Mode", value: selectedProduct.value?.reminder_mode || 'On Schedule Day', placeholder: "", required: true, options: [{ text: 'On Schedule Day', value: 'On Schedule Day' }, { text: 'Day(s) Before and After Schedule Date', value: 'Before and After Schedule Date' },{ text: 'Day(s) Before Schedule Date', value: 'Before Schedule Date' }, { text: 'Day(s) After Schedule Date', value: 'After Schedule Date' },{ text: 'On Schedule Day and Day(s) Before Schedule Date', value: 'On Schedule Day and Before Schedule Date' }, { text: 'On Schedule Day and Day(s) After Schedule Date', value: 'On Schedule Day and After Schedule Date' }] },
+                { type: 'number', name: 'reminder_days',label: "Reminder Days", value: selectedProduct.value?.reminder_days || 1, required: false },
+                {required: false},
+                {required: false},
+                {required: false},
+                {required: false},
             ];
         };
 
@@ -347,6 +352,8 @@ export default defineComponent({
                 credit_reduction: formFields.value[23].value,
                 recovery_option: formFields.value[24].value,
                 enable_reminders: formFields.value[28].value,
+                reminder_mode: formFields.value[29].value,
+                reminder_days: formFields.value[30].value,
                 interest_posting_account: intLedgerID.value,
                 interest_posting_account_id: intLedgerID.value,
                 penalty_posting_account: penaltyLedgerID.value,
@@ -421,6 +428,8 @@ export default defineComponent({
                 credit_reduction: formFields.value[23].value,
                 recovery_option: formFields.value[24].value,
                 enable_reminders: formFields.value[28].value,
+                reminder_mode: formFields.value[29].value,
+                reminder_days: formFields.value[30].value,
                 interest_posting_account: intLedgerValue.value,
                 interest_posting_account_id: intLedgerValue.value,
                 penalty_posting_account: penaltyLedgerValue.value,

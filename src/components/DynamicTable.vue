@@ -32,11 +32,11 @@
             </td>
           </tr>
           <template v-if="expandedGroups[groupKey] !== false">
-            <tr v-for="(row, rowIndex) in rows" :key="rowIndex" @dblclick="handleRowClick(row)" @contextmenu.prevent="handleRightClick(row, rowIndex, $event)" :style="shouldAddLine(row) ? { textDecoration: 'line-through' } : {}" :class="['cursor-pointer text-xxs sm:text-xs uppercase hover:bg-orange-50',row.selected ? 'bg-orange-50' : (rowIndex % 2 === 0 ? 'bg-gray-100' : 'bg-white')]">
+            <tr v-for="(row, rowIndex) in rows" :key="rowIndex" @dblclick="handleRowClick(row, rowIndex)" @contextmenu.prevent="handleRightClick(row, rowIndex, $event)" :style="shouldAddLine(row) ? { textDecoration: 'line-through' } : {}" :class="['cursor-pointer text-xxs sm:text-xs uppercase', `hover:bg-orange-50`, row.reconciled === 'Yes' ? 'bg-green-200': row.selected && row.rowColor ? row.rowColor : (rowIndex % 2 === 0 ? 'bg-gray-100' : 'bg-white')]">
               <td v-for="(column, colIndex) in columns" :key="colIndex" :hidden="column.hidden" 
                   :class="[{'ellipsis': column.maxWidth}, { 'max-w-[300px]': column.maxWidth }, { 'min-w-[120px]': column.minWidth }]">
                 <template v-if="column.type === 'checkbox'">
-                  <input type="checkbox" v-model="row.selected" class="checkbox mt-0.5" @change="updateSelectedIds(row)"/>
+                  <input type="checkbox" v-model="row.selected" class="checkbox mt-0.5" @change="updateSelectedIds(row, rowIndex)"/>
                 </template>
                 <template v-else-if="column.type === 'dropdown'">
                   <select @change="handleChange($event, row)" v-model="row[column.key]" :name="row[column.key]" class="bg-inherit outline-none h-full text-xxs sm:text-xs w-full uppercase">
@@ -95,7 +95,7 @@
 
 
 <script>
-import { defineComponent, ref, onMounted, computed} from 'vue';
+import { defineComponent, ref, onMounted, computed, onBeforeMount} from 'vue';
 import axios from "axios";
 import { useStore } from "vuex";
 import { reactive } from 'vue';
@@ -164,8 +164,17 @@ export default defineComponent({
       return row.reversed === 'Yes'; 
     };
 
-    const handleRowClick = (row) => {
-      emit('row-db-click', row);
+    const handleRowClick = (row, rowIndex) => {
+      if( row.reconciled){
+        row.rowColor = row.reconciled ? 'bg-green-200' : null;
+        if(row.reconciled === 'Yes'){
+          row.reconciled = 'No';
+        }else{
+          row.reconciled = 'Yes';
+        }
+      }
+      
+      emit('row-db-click', row, rowIndex);
     };
     const handleRightClick = (row, rowIndex, event) => {
       emit('right-click', row, rowIndex, event);
@@ -189,13 +198,13 @@ export default defineComponent({
 
     const updateSelectedIds = (row) => {
       const rowId = row[props.idField];
-      if (row.selected) {
+      if(row.selected && !row.reconciled){
         selectedIds.value.push(rowId);
-      } else {
+      }else {
         const index = selectedIds.value.indexOf(rowId);
         if (index > -1) {
           selectedIds.value.splice(index, 1);
-        }
+        }  
       }
       emit('selection-changed', selectedIds.value);
     };
@@ -508,8 +517,11 @@ export default defineComponent({
         const tds = table.querySelectorAll('tbody td');
         // Logic to ensure column widths are consistent
       }
-;
+; 
     });
+    onBeforeMount(() =>{
+      
+    })
 
     return {
       handleRowClick,handleLinkDblClick,handleRightClick, handleAction, handleChange, getNestedValue, handleInputChange,
@@ -525,6 +537,11 @@ export default defineComponent({
 .disabled {
   opacity: 0.5;
   pointer-events: none;
+}
+thead th {
+  position: sticky;
+  top: 0;
+  /* z-index: 10; */
 }
 input {
   width: 100%;

@@ -159,10 +159,8 @@ export default defineComponent({
             if (file) {
                 localFile.value = file;
                 localFilePath.value = "C:\\fakepath\\" + file.name;
-
-                console.log("The target is ", e.target);
-                console.log("The file is ", file);
-
+                // console.log("The target is ", e.target);
+                // console.log("The file is ", file);
                 emit('file-changed', { file: localFile.value,filePath: localFilePath.value});
             }
         };

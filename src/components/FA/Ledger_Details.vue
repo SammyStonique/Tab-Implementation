@@ -164,8 +164,8 @@ export default{
             {label: "Ref No", key:"reference_no", type: "text", editable: false},
             {label: "Txn No", key: "journal_no", type: "text", editable: false},
             {label: "Narration", key: "description", type: "text", editable: false, maxWidth:"700px"},
-            {label: "Debit", key: "debit_amount", type: "text", editable: false},
-            {label: "Credit", key: "credit_amount", type: "text", editable: false},
+            {label: "Debit", key: "formatted_debit_amount", type: "text", editable: false},
+            {label: "Credit", key: "formatted_credit_amount", type: "text", editable: false},
             {label: "Balance", key: "running_balance", type: "text", editable: false},
         ]);
         const actions = ref([
@@ -184,7 +184,6 @@ export default{
         ]);
         const handleSelectionChange = (ids) => {
             selectedIds.value = ids;
-            console.log("THE SELECTED IDS ARE ",selectedIds.value)
         };
 
         const selectTab = async(index) => {
@@ -198,6 +197,9 @@ export default{
                 max_amount: max_amount_search.value == "" ? 0 : max_amount_search.value,
             }
             if(index == 1){
+                if(ledgerDetails.value.ledger_type == "Cashbook"){
+                    dropdownOptions.value[1].hidden = false;
+                }
                 activeTab.value = index;
                 await store.dispatch('Ledgers/fetchClientJournals',formData1)
                 .then(()=>{
@@ -290,7 +292,8 @@ export default{
             }
         } 
         const dropdownOptions = ref([
-            {label: 'Move Transactions', action: 'move-transaction'},
+            {label: 'Move Transactions', action: 'move-transaction', icon: 'fa-arrows-alt', colorClass:'text-green-600', rightName: "Moving Ledger Transactions"},
+            {label: 'Reconcile', action: 'reconcile', icon: 'fa-balance-scale', colorClass:'text-blue-600', rightName: "Accounts Reconciliation", hidden: true},
         ]);
         const handleDynamicOption = async(option) =>{
             if( option == 'move-transaction'){
@@ -298,6 +301,10 @@ export default{
                 appModalVisible.value = true;
                 flex_basis.value = "1/2";
                 flex_basis_percentage.value = '50';
+            }else if(option == 'reconcile'){
+                await store.dispatch('Ledgers/updateState',{reconciliationLedgerID: ledgerDetails.value.ledger_id, reconciliationLedgerName: ledgerDetails.value.ledger_name, cashbookArray: [], cbkArray:[], cbkRunningBalance:0, bnkArray:[], cbkDebitTotal: 0, cbkCreditTotal: 0, cbkDebitCount: 0, cbkCreditCount: 0});
+                store.commit('pageTab/ADD_PAGE', {'FA':'Bank_Reconciliation'});
+                store.state.pageTab.faActiveTab = 'Bank_Reconciliation'; 
             }
         };
         const showModalLoader = () =>{
@@ -413,7 +420,7 @@ export default{
         const handleRightClick = (row, rowIndex, event) => {
 
             const menuOptions = [
-                { label: 'Move Transaction', action: 'move-transaction', rowIndex: rowIndex , icon: 'fa fa-arrows-alt'},
+                { label: 'Move Transaction', action: 'move-transaction', rowIndex: rowIndex , icon: 'fa fa-arrows-alt', rightName: 'Moving Ledger Transactions'},
             ];
 
             store.commit('contextMenu/SHOW_CONTEXT_MENU', {
@@ -423,6 +430,36 @@ export default{
                 contextData: row,
             });
         };
+        const printExcel = () =>{
+            showLoader();
+            let formData = {
+                posting_account: ledgerDetails.value.ledger_id,
+                company: companyID.value,
+                date_from: from_date_search.value,
+                date_to: to_date_search.value,
+                min_amount: min_amount_search.value == "" ? 0 : min_amount_search.value,
+                max_amount: max_amount_search.value == "" ? 0 : max_amount_search.value,
+            } 
+
+            axios
+            .post("api/v1/export-ledger-transactions-excel/", formData, { responseType: 'blob' })
+                .then((response)=>{
+                    if(response.status == 200){
+                        const url = window.URL.createObjectURL(new Blob([response.data]));
+                        const link = document.createElement('a');
+                        link.href = url;
+                        link.setAttribute('download', 'Ledger Transactions.xls');
+                        document.body.appendChild(link);
+                        link.click();
+                    }
+                })
+            .catch((error)=>{
+                console.log(error.message);
+            })
+            .finally(()=>{
+                hideLoader();
+            })
+        }
         onMounted(() =>{
             
         })
@@ -433,7 +470,7 @@ export default{
             modal_top, modal_left, modal_width, showLoader, loader, hideLoader, modal_loader, showModalLoader, hideModalLoader,
             closeModal, handleSelectionChange, pageComponentKey, flex_basis, flex_basis_percentage, ledgerDetails,ledgerRunningBalance,
             selectTab, activeTab,showActions,showDetails,detailsTitle,hideDetails,handleShowDetails,journalEntries,tabs1,selectTab1,activeTab1,
-            handleRightClick,moveTransaction,dropdownOptions,handleDynamicOption
+            handleRightClick,moveTransaction,dropdownOptions,handleDynamicOption,printExcel
         }
     }
 }

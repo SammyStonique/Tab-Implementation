@@ -195,6 +195,12 @@
                         </button>
                     </div>
                     <div class="py-2 px-3 pl-4 w-full hover:bg-slate-500 hover:w-full">
+                        <button class="flex text-sm w-full" @click="openPage({'MMS':'Loan_Balances'})">
+                            <i class="fa fa-coins pt-2 mr-2" aria-hidden="true"></i>
+                            <p class="">Loan Balances</p>
+                        </button>
+                    </div>
+                    <div class="py-2 px-3 pl-4 w-full hover:bg-slate-500 hover:w-full">
                         <button class="flex text-sm w-full" @click="openPage({'MMS':'Loan_Schedules'})">
                             <i class="fa fa-calendar-check pt-2 mr-2" aria-hidden="true"></i>
                             <p class="">Loan Schedules</p>

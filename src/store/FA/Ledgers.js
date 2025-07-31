@@ -11,6 +11,13 @@ const state = {
   ledgerRunningBalance: 0,
   ledgerDetails: [],
   ledgerArray: [],
+  reconciliationLedgerID: '',
+  reconciliationLedgerName: '',
+  cbkRunningBalance: 0,
+  cbkDebitCount: 0,
+  cbkCreditCount: 0,
+  cbkDebitTotal: 0,
+  cbkCreditTotal: 0,
   ledgerID: '',
   ledgerName: '',
   ledgerTitle: "",
@@ -24,6 +31,9 @@ const state = {
   journalsArray: [],
   jnlSortedArr: [],
   jnlArray: [],
+  cashbookArray: [],
+  cbkArray: [],
+  bnkArray: [],
   invoiceItemsArray: [],
   billItemsArray: [],
   paymentItemsArray: [],
@@ -51,6 +61,16 @@ const mutations = {
     state.journalsArray = [];
     state.jnlSortedArr = [];
     state.jnlArray = [];
+    state.reconciliationLedgerID = '';
+    state.reconciliationLedgerName = '';
+    state.cashbookArray = [];
+    state.cbkArray = [];
+    state.bnkArray = [];
+    state.cbkRunningBalance = 0;
+    state.cbkDebitCount = 0;
+    state.cbkDebitTotal = 0;
+    state.cbkCreditCount = 0;
+    state.cbkCreditTotal = 0;
   },
   SET_SELECTED_LEDGER(state, ledger) {
     state.selectedLedger = ledger;
@@ -158,6 +178,56 @@ const actions = {
     })
     .catch((error)=>{
         console.log(error.message)
+    })
+    .finally(()=>{
+    
+    })
+  },
+
+  async fetchCashbookEntries({ commit,state }, formData){
+    state.cashbookArray = [];
+    axios
+    .post("api/v1/ledger-journals-entries-search/", formData)
+    .then((response)=>{
+        state.cbkArray = [];
+        state.cbkDebitTotal = 0;
+        state.cbkCreditTotal = 0;
+        state.cbkDebitCount = 0;
+        state.cbkCreditCount = 0;
+        let running_balance = 0;
+        state.cashbookArray = response.data.results;
+        state.jnlSortedArr = state.cashbookArray.sort(function(a, b){
+            // Convert the date strings to Date objects
+            let dateA = new Date(a.txn_date);
+            let dateB = new Date(b.txn_date);
+
+            // Subtract the dates to get a value that is either negative, positive, or zero
+            return dateA - dateB;
+        })
+
+        for(let i=0; i<state.cashbookArray.length; i++){
+            if(state.cashbookArray[i].debit_amount != 0 && state.cashbookArray[i].txn_type != "BAL"){
+                running_balance += state.cashbookArray[i].debit_amount;
+                state.cashbookArray[i]['running_balance'] = Number(running_balance).toLocaleString();
+                state.cashbookArray[i]['reconciled'] = 'No';
+                state.cbkArray.push(state.cashbookArray[i]);
+                state.cbkDebitTotal += state.cashbookArray[i].debit_amount;
+                state.cbkDebitCount += 1;
+            }
+            else if(state.cashbookArray[i].credit_amount != 0 && state.cashbookArray[i].txn_type != "BAL"){
+                running_balance -= state.cashbookArray[i].credit_amount;
+                state.cashbookArray[i]['running_balance'] = Number(running_balance).toLocaleString();
+                state.cashbookArray[i]['reconciled'] = 'No';
+                state.cbkArray.push(state.cashbookArray[i]);
+                state.cbkCreditTotal += state.cashbookArray[i].credit_amount;
+                state.cbkCreditCount += 1;
+            }
+        }
+        state.cbkRunningBalance =  Number(running_balance).toLocaleString();
+    })
+    .catch((error)=>{
+        console.log(error.message)
+        throw error;
     })
     .finally(()=>{
     

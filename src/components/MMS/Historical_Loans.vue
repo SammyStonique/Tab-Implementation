@@ -133,7 +133,6 @@ export default{
             {label: "Date", key:"application_date"},
             {label: "Loan No", key:"loan_number", type:"link"},
             {label: "Member Name", key:"member"},
-            // {label: "Product Name", key:"loan_product"},
             {label: "Applied", key: "formatted_applied_amount"},
             {label: "Approved", key: "formatted_approved_amount"},
             {label: "Disbursed", key: "disbursed"},
@@ -142,6 +141,7 @@ export default{
             {label: "Appr. By", key:"approved_by"},
             {label: "Exempt", key:"exempt_penalty"},
             {label: "Posted", key:"posted"},
+            {label: "Due", key:"loan_due_date"},
         ])
         const actions = ref([
             {name: 'view', icon: 'fa fa-file-pdf-o', title: 'View Loan', rightName: 'Viewing Loan Ledger'},
@@ -229,6 +229,7 @@ export default{
                 { type: 'number', name: 'day',label: "New Repayment Day", value: 1, required: true },
                 { type: 'text', name: 'installment_from',label: "Installment From", value: 1, required: true },
                 { type: 'text', name: 'installment_to',label: "Installment To", value: 1, required: true },
+                { type: 'date', name: 'new_repayment_date',label: "New Date", value: '', required: false },
             ]
         };
         const handleReset1 = () =>{
@@ -254,6 +255,7 @@ export default{
                 new_day: formFields1.value[0].value,
                 installment_from: formFields1.value[1].value,
                 installment_to: formFields1.value[2].value,
+                new_repayment_date: formFields1.value[3].value,
                 company: companyID.value
             }
             axios.post(`api/v1/update-loan-repayment-date/`,formData)

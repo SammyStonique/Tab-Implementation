@@ -46,7 +46,7 @@
           <button @click="displaySideDropdown"><i class="fa fa-caret-left pl-2" aria-hidden="true"></i> Print List</button><br />
         </div>
         <div v-for="(option, index) in dropdownOptions" :key="index">
-          <button :class="{ 'disabled': isDisabled(`${option.rightName}`) }" @click="handleDynamicOption(option.action)" class="hover:bg-slate-500 hover:w-full"><i :class="['fa', option.icon, option.colorClass,'mr-2']" style="font-size: 12px;" aria-hidden="true"></i> {{ option.label }}</button><br />
+          <button :class="{ 'disabled': isDisabled(`${option.rightName}`) }" :hidden="option.hidden" @click="handleDynamicOption(option.action)" class="hover:bg-slate-500 hover:w-full"><i :class="['fa', option.icon, option.colorClass,'mr-2']" style="font-size: 12px;" aria-hidden="true"></i> {{ option.label }}</button><br />
         </div>
       </div>
       <div class="relative">        

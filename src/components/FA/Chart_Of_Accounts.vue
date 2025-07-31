@@ -64,19 +64,19 @@
                           <td v-if="led.ledger_type=='Cashbook'">
                                 <div class="flex">
                                   <div class="basis-1/4" :class="{ 'disabled': isDisabled('Editing Posting Account') }">
-                                      <button @click="editLedger(index)"><i class="fa fa-pencil" aria-hidden="true" title="Edit"></i></button>
+                                      <button @click="editLedger(index)"><i class="fa fa-pencil text-blue-600" aria-hidden="true" title="Edit"></i></button>
                                   </div>
                                   <div class="basis-1/4" :class="{ 'disabled': isDisabled('View Ledger Statement') }">
                                       <button @click="viewLedger(index)"><i class="fa fa-file-pdf-o" aria-hidden="true" title="View"></i></button>
                                   </div>
                                   <div class="basis-1/4" v-if="led.status === 'Active'" :class="{ 'disabled': isDisabled('Block Posting Account') }">
-                                      <button @click="blockLedger(index)"><i class="fa fa-circle-o" aria-hidden="true" title="Block"></i></button>
+                                      <button @click="blockLedger(index)"><i class="fa fa-circle-o text-green-600" aria-hidden="true" title="Block"></i></button>
                                   </div>
                                   <div class="basis-1/4" v-else :class="{ 'disabled': isDisabled('Block Posting Account') }">
-                                      <button @click="unblockLedger(index)"><i class="fa fa-ban" aria-hidden="true" title="Unblock"></i></button>
+                                      <button @click="unblockLedger(index)"><i class="fa fa-ban text-red-600" aria-hidden="true" title="Unblock"></i></button>
                                   </div>
                                   <div class="basis-1/4" :class="{ 'disabled': isDisabled('Deleting Posting Account') }">
-                                      <button @click="removeLedger(index)"><i class="fa fa-trash-o" aria-hidden="true" title="Delete"></i></button>
+                                      <button @click="removeLedger(index)"><i class="fa fa-trash-o text-red-600" aria-hidden="true" title="Delete"></i></button>
                                   </div>
                                 </div>
                           </td>
@@ -100,19 +100,19 @@
                           <td v-if="led.ledger_type=='Current Asset'">
                             <div class="flex">
                                 <div class="basis-1/4" :class="{ 'disabled': isDisabled('Editing Posting Account') }">
-                                    <button @click="editLedger(index)"><i class="fa fa-pencil" aria-hidden="true" title="Edit"></i></button>
+                                    <button @click="editLedger(index)"><i class="fa fa-pencil text-blue-600" aria-hidden="true" title="Edit"></i></button>
                                 </div>
                                 <div class="basis-1/4" :class="{ 'disabled': isDisabled('View Ledger Statement') }">
                                     <button @click="viewLedger(index)"><i class="fa fa-file-pdf-o" aria-hidden="true" title="View"></i></button>
                                 </div>
                                 <div class="basis-1/4" v-if="led.status === 'Active'" :class="{ 'disabled': isDisabled('Block Posting Account') }">
-                                    <button @click="blockLedger(index)"><i class="fa fa-circle-o" aria-hidden="true" title="Block"></i></button>
+                                    <button @click="blockLedger(index)"><i class="fa fa-circle-o text-green-600" aria-hidden="true" title="Block"></i></button>
                                 </div>
                                 <div class="basis-1/4" v-else :class="{ 'disabled': isDisabled('Block Posting Account') }">
-                                    <button @click="unblockLedger(index)"><i class="fa fa-ban" aria-hidden="true" title="Unblock"></i></button>
+                                    <button @click="unblockLedger(index)"><i class="fa fa-ban text-red-600" aria-hidden="true" title="Unblock"></i></button>
                                 </div>
                                 <div class="basis-1/4" :class="{ 'disabled': isDisabled('Deleting Posting Account') }">
-                                    <button @click="removeLedger(index)"><i class="fa fa-trash-o" aria-hidden="true" title="Delete"></i></button>
+                                    <button @click="removeLedger(index)"><i class="fa fa-trash-o text-red-600" aria-hidden="true" title="Delete"></i></button>
                                 </div>
                             </div>
                           </td>
@@ -136,19 +136,19 @@
                           <td v-if="led.ledger_type=='Fixed Asset'">
                             <div class="flex">
                                 <div class="basis-1/4" :class="{ 'disabled': isDisabled('Editing Posting Account') }">
-                                    <button @click="editLedger(index)"><i class="fa fa-pencil" aria-hidden="true" title="Edit"></i></button>
+                                    <button @click="editLedger(index)"><i class="fa fa-pencil text-blue-600" aria-hidden="true" title="Edit"></i></button>
                                 </div>
                                 <div class="basis-1/4" :class="{ 'disabled': isDisabled('View Ledger Statement') }">
                                     <button @click="viewLedger(index)"><i class="fa fa-file-pdf-o" aria-hidden="true" title="View"></i></button>
                                 </div>
                                 <div class="basis-1/4" v-if="led.status === 'Active'" :class="{ 'disabled': isDisabled('Block Posting Account') }">
-                                    <button @click="blockLedger(index)"><i class="fa fa-circle-o" aria-hidden="true" title="Block"></i></button>
+                                    <button @click="blockLedger(index)"><i class="fa fa-circle-o text-green-600" aria-hidden="true" title="Block"></i></button>
                                 </div>
                                 <div class="basis-1/4" v-else :class="{ 'disabled': isDisabled('Block Posting Account') }">
-                                    <button @click="unblockLedger(index)"><i class="fa fa-ban" aria-hidden="true" title="Unblock"></i></button>
+                                    <button @click="unblockLedger(index)"><i class="fa fa-ban text-red-600" aria-hidden="true" title="Unblock"></i></button>
                                 </div>
                                 <div class="basis-1/4" :class="{ 'disabled': isDisabled('Deleting Posting Account') }">
-                                    <button @click="removeLedger(index)"><i class="fa fa-trash-o" aria-hidden="true" title="Delete"></i></button>
+                                    <button @click="removeLedger(index)"><i class="fa fa-trash-o text-red-600" aria-hidden="true" title="Delete"></i></button>
                                 </div>
                             </div>
                           </td>
@@ -180,19 +180,19 @@
                           <td v-if="led.ledger_type=='Current Liability'">
                             <div class="flex">
                                 <div class="basis-1/4" :class="{ 'disabled': isDisabled('Editing Posting Account') }">
-                                    <button @click="editLedger(index)"><i class="fa fa-pencil" aria-hidden="true" title="Edit"></i></button>
+                                    <button @click="editLedger(index)"><i class="fa fa-pencil text-blue-600" aria-hidden="true" title="Edit"></i></button>
                                 </div>
                                 <div class="basis-1/4" :class="{ 'disabled': isDisabled('View Ledger Statement') }">
                                     <button @click="viewLedger(index)"><i class="fa fa-file-pdf-o" aria-hidden="true" title="View"></i></button>
                                 </div>
                                 <div class="basis-1/4" v-if="led.status === 'Active'" :class="{ 'disabled': isDisabled('Block Posting Account') }">
-                                    <button @click="blockLedger(index)"><i class="fa fa-circle-o" aria-hidden="true" title="Block"></i></button>
+                                    <button @click="blockLedger(index)"><i class="fa fa-circle-o text-green-600" aria-hidden="true" title="Block"></i></button>
                                 </div>
                                 <div class="basis-1/4" v-else :class="{ 'disabled': isDisabled('Block Posting Account') }">
-                                    <button @click="unblockLedger(index)"><i class="fa fa-ban" aria-hidden="true" title="Unblock"></i></button>
+                                    <button @click="unblockLedger(index)"><i class="fa fa-ban text-red-600" aria-hidden="true" title="Unblock"></i></button>
                                 </div>
                                 <div class="basis-1/4" :class="{ 'disabled': isDisabled('Deleting Posting Account') }">
-                                    <button @click="removeLedger(index)"><i class="fa fa-trash-o" aria-hidden="true" title="Delete"></i></button>
+                                    <button @click="removeLedger(index)"><i class="fa fa-trash-o text-red-600" aria-hidden="true" title="Delete"></i></button>
                                 </div>
                             </div>
                           </td>
@@ -216,19 +216,19 @@
                           <td v-if="led.ledger_type=='Longterm Liability'">
                             <div class="flex">
                                 <div class="basis-1/4" :class="{ 'disabled': isDisabled('Editing Posting Account') }">
-                                    <button @click="editLedger(index)"><i class="fa fa-pencil" aria-hidden="true" title="Edit"></i></button>
+                                    <button @click="editLedger(index)"><i class="fa fa-pencil text-blue-600" aria-hidden="true" title="Edit"></i></button>
                                 </div>
                                 <div class="basis-1/4" :class="{ 'disabled': isDisabled('View Ledger Statement') }">
                                     <button @click="viewLedger(index)"><i class="fa fa-file-pdf-o" aria-hidden="true" title="View"></i></button>
                                 </div>
                                 <div class="basis-1/4" v-if="led.status === 'Active'" :class="{ 'disabled': isDisabled('Block Posting Account') }">
-                                    <button @click="blockLedger(index)"><i class="fa fa-circle-o" aria-hidden="true" title="Block"></i></button>
+                                    <button @click="blockLedger(index)"><i class="fa fa-circle-o text-green-600" aria-hidden="true" title="Block"></i></button>
                                 </div>
                                 <div class="basis-1/4" v-else :class="{ 'disabled': isDisabled('Block Posting Account') }">
-                                    <button @click="unblockLedger(index)"><i class="fa fa-ban" aria-hidden="true" title="Unblock"></i></button>
+                                    <button @click="unblockLedger(index)"><i class="fa fa-ban text-red-600" aria-hidden="true" title="Unblock"></i></button>
                                 </div>
                                 <div class="basis-1/4" :class="{ 'disabled': isDisabled('Deleting Posting Account') }">
-                                    <button @click="removeLedger(index)"><i class="fa fa-trash-o" aria-hidden="true" title="Delete"></i></button>
+                                    <button @click="removeLedger(index)"><i class="fa fa-trash-o text-red-600" aria-hidden="true" title="Delete"></i></button>
                                 </div>
                             </div>
                           </td>
@@ -252,19 +252,19 @@
                           <td v-if="led.ledger_type=='Owner Equity'">
                             <div class="flex">
                                 <div class="basis-1/4" :class="{ 'disabled': isDisabled('Editing Posting Account') }">
-                                    <button @click="editLedger(index)"><i class="fa fa-pencil" aria-hidden="true" title="Edit"></i></button>
+                                    <button @click="editLedger(index)"><i class="fa fa-pencil text-blue-600" aria-hidden="true" title="Edit"></i></button>
                                 </div>
                                 <div class="basis-1/4" :class="{ 'disabled': isDisabled('View Ledger Statement') }">
                                     <button @click="viewLedger(index)"><i class="fa fa-file-pdf-o" aria-hidden="true" title="View"></i></button>
                                 </div>
                                 <div class="basis-1/4" v-if="led.status === 'Active'" :class="{ 'disabled': isDisabled('Block Posting Account') }">
-                                    <button @click="blockLedger(index)"><i class="fa fa-circle-o" aria-hidden="true" title="Block"></i></button>
+                                    <button @click="blockLedger(index)"><i class="fa fa-circle-o text-green-600" aria-hidden="true" title="Block"></i></button>
                                 </div>
                                 <div class="basis-1/4" v-else :class="{ 'disabled': isDisabled('Block Posting Account') }">
-                                    <button @click="unblockLedger(index)"><i class="fa fa-ban" aria-hidden="true" title="Unblock"></i></button>
+                                    <button @click="unblockLedger(index)"><i class="fa fa-ban text-red-600" aria-hidden="true" title="Unblock"></i></button>
                                 </div>
                                 <div class="basis-1/4" :class="{ 'disabled': isDisabled('Deleting Posting Account') }">
-                                    <button @click="removeLedger(index)"><i class="fa fa-trash-o" aria-hidden="true" title="Delete"></i></button>
+                                    <button @click="removeLedger(index)"><i class="fa fa-trash-o text-red-600" aria-hidden="true" title="Delete"></i></button>
                                 </div>
                             </div>
                           </td>
@@ -288,19 +288,19 @@
                           <td v-if="led.ledger_type === 'Income'">
                             <div class="flex">
                                 <div class="basis-1/4" :class="{ 'disabled': isDisabled('Editing Posting Account') }">
-                                    <button @click="editLedger(index)"><i class="fa fa-pencil" aria-hidden="true" title="Edit"></i></button>
+                                    <button @click="editLedger(index)"><i class="fa fa-pencil text-blue-600" aria-hidden="true" title="Edit"></i></button>
                                 </div>
                                 <div class="basis-1/4" :class="{ 'disabled': isDisabled('View Ledger Statement') }">
                                     <button @click="viewLedger(index)"><i class="fa fa-file-pdf-o" aria-hidden="true" title="View"></i></button>
                                 </div>
                                 <div class="basis-1/4" v-if="led.status === 'Active'" :class="{ 'disabled': isDisabled('Block Posting Account') }">
-                                    <button @click="blockLedger(index)"><i class="fa fa-circle-o" aria-hidden="true" title="Block"></i></button>
+                                    <button @click="blockLedger(index)"><i class="fa fa-circle-o text-green-600" aria-hidden="true" title="Block"></i></button>
                                 </div>
                                 <div class="basis-1/4" v-else :class="{ 'disabled': isDisabled('Block Posting Account') }">
-                                    <button @click="unblockLedger(index)"><i class="fa fa-ban" aria-hidden="true" title="Unblock"></i></button>
+                                    <button @click="unblockLedger(index)"><i class="fa fa-ban text-red-600" aria-hidden="true" title="Unblock"></i></button>
                                 </div>
                                 <div class="basis-1/4" :class="{ 'disabled': isDisabled('Deleting Posting Account') }">
-                                    <button @click="removeLedger(index)"><i class="fa fa-trash-o" aria-hidden="true" title="Delete"></i></button>
+                                    <button @click="removeLedger(index)"><i class="fa fa-trash-o text-red-600" aria-hidden="true" title="Delete"></i></button>
                                 </div>
                             </div>
                           </td>
@@ -324,19 +324,19 @@
                           <td v-if="led.ledger_type=='Expenses'">
                             <div class="flex">
                                 <div class="basis-1/4" :class="{ 'disabled': isDisabled('Editing Posting Account') }">
-                                    <button @click="editLedger(index)"><i class="fa fa-pencil" aria-hidden="true" title="Edit"></i></button>
+                                    <button @click="editLedger(index)"><i class="fa fa-pencil text-blue-600" aria-hidden="true" title="Edit"></i></button>
                                 </div>
                                 <div class="basis-1/4" :class="{ 'disabled': isDisabled('View Ledger Statement') }">
                                     <button @click="viewLedger(index)"><i class="fa fa-file-pdf-o" aria-hidden="true" title="View"></i></button>
                                 </div>
                                 <div class="basis-1/4" v-if="led.status === 'Active'" :class="{ 'disabled': isDisabled('Block Posting Account') }">
-                                    <button @click="blockLedger(index)"><i class="fa fa-circle-o" aria-hidden="true" title="Block"></i></button>
+                                    <button @click="blockLedger(index)"><i class="fa fa-circle-o text-green-600" aria-hidden="true" title="Block"></i></button>
                                 </div>
                                 <div class="basis-1/4" v-else :class="{ 'disabled': isDisabled('Block Posting Account') }">
-                                    <button @click="unblockLedger(index)"><i class="fa fa-ban" aria-hidden="true" title="Unblock"></i></button>
+                                    <button @click="unblockLedger(index)"><i class="fa fa-ban text-red-600" aria-hidden="true" title="Unblock"></i></button>
                                 </div>
                                 <div class="basis-1/4" :class="{ 'disabled': isDisabled('Deleting Posting Account') }">
-                                    <button @click="removeLedger(index)"><i class="fa fa-trash-o" aria-hidden="true" title="Delete"></i></button>
+                                    <button @click="removeLedger(index)"><i class="fa fa-trash-o text-red-600" aria-hidden="true" title="Delete"></i></button>
                                 </div>
                             </div>
                           </td>
