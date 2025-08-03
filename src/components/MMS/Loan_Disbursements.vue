@@ -9,6 +9,9 @@
         @removeItem="removeDisbursement"
         @removeSelectedItems="removeDisbursements"
         @printList="printDisbursementsList"
+        v-model:printModalVisible="printModalVisible"
+        :printTitle="printTitle"
+        :pdfUrl="pdfUrl"
         :addingRight="addingRight"
         :removingRight="removingRight"
         :rightsModule="rightsModule"
@@ -73,6 +76,9 @@ export default{
         const rightsModule = ref('MMS');
         const idField = 'loan_disbursement_id';
         const depModalVisible = ref(false);
+        const printModalVisible = ref(false);
+        const pdfUrl = ref(null);
+        const printTitle = ref('Print Loan Disbursements');
         const selectedIds = ref([]);
         const disbursementsList = ref([]);
         const depResults = ref([]);
@@ -447,10 +453,11 @@ export default{
             .post("api/v1/export-loan-disbursements-pdf/", formData, { responseType: 'blob' })
                 .then((response)=>{
                     if(response.status == 200){
-                        const blob1 = new Blob([response.data]);
-                        // Convert blob to URL
+                        const blob1 = new Blob([response.data], { type: 'application/pdf' });
                         const url = URL.createObjectURL(blob1);
-                        PrintJS({printable: url, type: 'pdf'});
+                        // PrintJS({printable: url, type: 'pdf'});
+                        pdfUrl.value = url;
+                        printModalVisible.value = true;
                     }
                 })
             .catch((error)=>{
@@ -466,7 +473,7 @@ export default{
         return{
             title,idField, searchDisbursements, addButtonLabel, searchFilters, resetFilters, tableColumns, disbursementsList,showTotals,
             currentPage,depResults, depArrLen, depCount, pageCount, showNextBtn, showPreviousBtn,modal_top, modal_left, modal_width,
-            loadPrev, loadNext, firstPage, lastPage, actions, formFields, depModalVisible, addNewDisbursement,
+            loadPrev, loadNext, firstPage, lastPage, actions, formFields, depModalVisible, addNewDisbursement,printModalVisible,pdfUrl, printTitle,
             displayButtons,flex_basis,flex_basis_percentage, handleActionClick, handleReset, disburseMemberLoan,printDisbursementsList,
             showLoader, loader, hideLoader, modal_loader, showModalLoader, hideModalLoader, removeDisbursement, removeDisbursements,
             addingRight,removingRight,rightsModule, closeModal,handleSelectionChange,selectSearchQuantity,selectedValue,handleOpenLink

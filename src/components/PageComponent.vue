@@ -28,6 +28,9 @@
                     :selectOptions="selectOptions"
                     :updateValue="updateValue"
                     :searchPlaceholder="searchPlaceholder"
+                    v-model:printModalVisible="modalVisibleProxy"
+                    :printTitle="printTitle"
+                    :pdfUrl="pdfUrl"
                     />
             </div>
             <div class="fixed table w-[97.5%] top-[9.9rem] z-20">
@@ -77,7 +80,7 @@
 </template>
 
 <script>
-import { defineComponent, ref} from 'vue';
+import { defineComponent, ref, computed} from 'vue';
 import FilterBar from '@/components/FilterBar.vue'
 import Loader from '@/components/Loader.vue'
 import DynamicTable from '@/components/DynamicTable.vue'
@@ -112,6 +115,18 @@ export default defineComponent({
         dropdownOptions: {
             type: Array,
             default: () => []
+        },
+        printModalVisible:{
+            type: Boolean,
+            required: true
+        },
+        printTitle:{
+            type: String,
+            default: 'Print'
+        },
+        pdfUrl:{
+            type: String,
+            default: ''
         },
         searchFilters:{
             type: Array,
@@ -210,6 +225,7 @@ export default defineComponent({
         },
 
     },
+    emits: ['update:printModalVisible'],
     components:{
         FilterBar, DynamicTable, MyPagination, Loader, PageStyleComponent,ShowDetails
     },
@@ -284,11 +300,15 @@ export default defineComponent({
         const hideDetails = () =>{
             emit('hideDetails');
         };
+        const modalVisibleProxy = computed({
+            get: () => props.printModalVisible,
+            set: (val) => emit('update:printModalVisible', val)
+        });
         return{
             searchPage, resetFilters, loadPrev, loadNext, firstPage, lastPage, handleActionClick, handleAddNew,
             showLoader, hideLoader, importData, removeItem, removeSelectedItems, printList, handleDynamicOption,
             handleSelectionChange,selectSearchQuantity,selectedValue,printExcel,printCSV,hideDetails,handleShowDetails,
-            handleRightClick,handleOpenLink
+            handleRightClick,handleOpenLink,modalVisibleProxy
         }
     }
 })

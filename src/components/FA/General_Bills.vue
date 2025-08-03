@@ -12,6 +12,9 @@
             @removeItem="removeBill"
             @removeSelectedItems="removeBills"
             @printList="printBillList"
+            v-model:printModalVisible="printModalVisible"
+            :printTitle="printTitle"
+            :pdfUrl="pdfUrl"
             :addingRight="addingRight"
             :removingRight="removingRight"
             :rightsModule="rightsModule"
@@ -80,6 +83,9 @@
             :displayButtons="displayButtons" @handleSubmit="payBill" @handleReset="handleRefReset"
         />
         </MovableModal>
+        <PrintModal v-model:visible="printModalVisible1" :title="printTitle" >
+            <iframe v-if="pdfUrl" :src="pdfUrl" width="100%" height="100%" type="application/pdf" style="border: none;"></iframe>
+        </PrintModal>
     </div>
 </template>
 
@@ -96,11 +102,13 @@ import JournalEntries from "@/components/JournalEntries.vue";
 import InvoiceLines from "@/components/InvoiceLines.vue";
 import InvoicePayments from "@/components/InvoicePayments.vue";
 import PrintJS from 'print-js';
+import PrintModal from '@/components/PrintModal.vue';
+
 
 export default{
     name: 'General_Bills',
     components:{
-        PageComponent, MovableModal,DynamicForm,JournalEntries,InvoiceLines,InvoicePayments
+        PageComponent, MovableModal,DynamicForm,JournalEntries,InvoiceLines,InvoicePayments,PrintModal,
     },
     setup(){
         const store = useStore();     
@@ -129,6 +137,10 @@ export default{
         const vendComponentKey = ref(0);
         const ledComponentKey = ref(0);
         const invModalVisible = ref(false);
+        const printModalVisible = ref(false);
+        const printModalVisible1 = ref(false);
+        const pdfUrl = ref(null);
+        const printTitle = ref('Print Bill');
         const modal_top = ref('150px');
         const modal_left = ref('400px');
         const modal_width = ref('32vw');
@@ -441,10 +453,15 @@ export default{
                     invoice: journalID,
                     company: companyID.value
                 }
-                await store.dispatch('Journals/previewClientInvoice',formData).
-                then(()=>{
-                    hideLoader();
-                })
+                const response = await store.dispatch('Journals/previewClientInvoice',formData)
+                if (response && response.status === 200) {
+                    const blob1 = new Blob([response.data], { type: 'application/pdf' });
+                    const url = URL.createObjectURL(blob1);
+                    // PrintJS({printable: url, type: 'pdf'});
+                    pdfUrl.value = url;
+                    printModalVisible1.value = true;
+                }
+                hideLoader();
             }else if(action == 'download'){
                 showLoader();
                 const journalID = row['journal_id'];
@@ -562,10 +579,11 @@ export default{
             .post("api/v1/export-clients-invoices-pdf/", formData, { responseType: 'blob' })
                 .then((response)=>{
                     if(response.status == 200){
-                        const blob1 = new Blob([response.data]);
-                        // Convert blob to URL
+                        const blob1 = new Blob([response.data], { type: 'application/pdf' });
                         const url = URL.createObjectURL(blob1);
-                        PrintJS({printable: url, type: 'pdf'});
+                        // PrintJS({printable: url, type: 'pdf'});
+                        pdfUrl.value = url;
+                        printModalVisible.value = true;
                     }
                 })
             .catch((error)=>{
@@ -676,8 +694,8 @@ export default{
             
         })
         return{
-            showTotals,title, searchBills,resetFilters, addButtonLabel, searchFilters, tableColumns, billsList,
-            currentPage,propResults, propArrLen, propCount, pageCount, showNextBtn, showPreviousBtn,invModalVisible,
+            showTotals,title, searchBills,resetFilters, addButtonLabel, searchFilters, tableColumns, billsList,printModalVisible,pdfUrl, printTitle,
+            currentPage,propResults, propArrLen, propCount, pageCount, showNextBtn, showPreviousBtn,invModalVisible,printModalVisible1,
             loadPrev, loadNext, firstPage, lastPage, idField, actions, handleActionClick, propModalVisible, closeModal,
             submitButtonLabel, showModal, showLoader, loader, hideLoader, modal_loader, modal_top, modal_left, modal_width,displayButtons,
             showModalLoader, hideModalLoader, formFields, handleSelectionChange, flex_basis,flex_basis_percentage,

@@ -766,19 +766,14 @@ const actions = {
     })
   },
   previewClientInvoice({commit,state}, formData){
-    axios
+    return axios
     .post(`api/v1/client-invoice-pdf/`, formData, { responseType: 'blob' })
     .then((response) => {
-      if(response.status == 200){
-        const blob1 = new Blob([response.data]);
-        // Convert blob to URL
-        const url = URL.createObjectURL(blob1);
-        PrintJS({printable: url, type: 'pdf'});
-    }
+      return response;
     
     })
     .catch((error)=>{
-        console.log(error.message);
+        throw error;
     })
   },
   downloadClientInvoice({commit,state}, formData){
@@ -818,19 +813,14 @@ const actions = {
     })
   },
   previewClientReceipt({commit,state}, formData){
-    axios
+    return axios
     .post(`api/v1/client-receipt-pdf/`, formData, { responseType: 'blob' })
     .then((response) => {
-      if(response.status == 200){
-        const blob1 = new Blob([response.data]);
-        // Convert blob to URL
-        const url = URL.createObjectURL(blob1);
-        PrintJS({printable: url, type: 'pdf'});
-    }
+      return response;
     
     })
     .catch((error)=>{
-        console.log(error.message);
+        throw error;
     })
   },
   downloadClientReceipt({commit,state}, formData){
@@ -870,19 +860,14 @@ const actions = {
     })
   },
   previewTenantInvoice({commit,state}, formData){
-    axios
+    return axios
     .post(`api/v1/tenant-invoice-pdf/`, formData, { responseType: 'blob' })
     .then((response) => {
-      if(response.status == 200){
-        const blob1 = new Blob([response.data]);
-        // Convert blob to URL
-        const url = URL.createObjectURL(blob1);
-        PrintJS({printable: url, type: 'pdf'});
-    }
+      return response;
     
     })
     .catch((error)=>{
-        console.log(error.message);
+        throw error;
     })
   },
   downloadTenantInvoice({commit,state}, formData){
@@ -904,19 +889,14 @@ const actions = {
     })
   },
   previewTenantReceipt({commit,state}, formData){
-    axios
+    return axios
     .post(`api/v1/tenant-receipt-pdf/`, formData, { responseType: 'blob' })
     .then((response) => {
-      if(response.status == 200){
-        const blob1 = new Blob([response.data]);
-        // Convert blob to URL
-        const url = URL.createObjectURL(blob1);
-        PrintJS({printable: url, type: 'pdf'});
-    }
+      return response;
     
     })
     .catch((error)=>{
-        console.log(error.message);
+        throw error;
     })
   },
   downloadTenantReceipt({commit,state}, formData){

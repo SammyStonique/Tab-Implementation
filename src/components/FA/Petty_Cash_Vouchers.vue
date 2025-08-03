@@ -67,6 +67,9 @@
                 :displayButtons="displayButtons" @handleSubmit="approveVoucher" @handleReset="handleReset"
             />
         </MovableModal>
+        <PrintModal v-model:visible="printModalVisible1" :title="printTitle" >
+            <iframe v-if="pdfUrl" :src="pdfUrl" width="100%" height="100%" type="application/pdf" style="border: none;"></iframe>
+        </PrintModal>
     </div>
 </template>
 
@@ -82,11 +85,12 @@ import { useDateFormatter } from '@/composables/DateFormatter';
 import JournalEntries from "@/components/JournalEntries.vue";
 import ReceiptLines from "@/components/ReceiptLines.vue";
 import PrintJS from 'print-js';
+import PrintModal from '@/components/PrintModal.vue';
 
 export default{
     name: 'Petty_Cash_Vouchers',
     components:{
-        PageComponent, MovableModal,DynamicForm,JournalEntries,ReceiptLines,
+        PageComponent, MovableModal,DynamicForm,JournalEntries,ReceiptLines,PrintModal
     },
     setup(){
         const store = useStore();     
@@ -109,6 +113,9 @@ export default{
         const voucherID = ref(null);
         const vendComponentKey = ref(0);
         const invModalVisible = ref(false);
+        const printModalVisible1 = ref(false);
+        const pdfUrl = ref(null);
+        const printTitle = ref('Print Vouchers');
         const modal_top = ref('150px');
         const modal_left = ref('400px');
         const modal_width = ref('32vw');
@@ -422,9 +429,11 @@ export default{
                 await axios.post('api/v1/export-petty-cash-voucher-pdf/', formData, { responseType: 'blob' })
                 .then((response) => {
                 if(response.status == 200){
-                    const blob1 = new Blob([response.data]);
+                    const blob1 = new Blob([response.data], { type: 'application/pdf' });
                     const url = URL.createObjectURL(blob1);
-                    PrintJS({printable: url, type: 'pdf'});
+                    // PrintJS({printable: url, type: 'pdf'});
+                    pdfUrl.value = url;
+                    printModalVisible1.value = true;
                 }
                 
                 })
@@ -552,7 +561,7 @@ export default{
         })
         return{
             showTotals, title, searchVouchers,resetFilters, addButtonLabel, searchFilters, tableColumns, vouchersList,formFields,
-            currentPage,propResults, propArrLen, propCount, pageCount, showNextBtn, showPreviousBtn,invModalVisible,
+            currentPage,propResults, propArrLen, propCount, pageCount, showNextBtn, showPreviousBtn,invModalVisible,printModalVisible1,pdfUrl, printTitle,
             loadPrev, loadNext, firstPage, lastPage, idField, actions, handleActionClick, propModalVisible, closeModal,
             submitButtonLabel, showModal, showLoader, loader, hideLoader, modal_loader, modal_top, modal_left, modal_width,displayButtons,
             showModalLoader, hideModalLoader, handleSelectionChange, flex_basis,flex_basis_percentage,

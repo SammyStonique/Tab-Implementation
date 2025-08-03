@@ -12,6 +12,9 @@
             @removeItem="removePenalty"
             @removeSelectedItems="removePenalties"
             @printList="printPenaltiesList"
+            v-model:printModalVisible="printModalVisible"
+            :printTitle="printTitle"
+            :pdfUrl="pdfUrl"
             :addingRight="addingRight"
             :removingRight="removingRight"
             :rightsModule="rightsModule"
@@ -84,6 +87,9 @@ export default{
         const title = ref('Penalty Processing');
         const lnComponentKey = ref(0);
         const invModalVisible = ref(false);
+        const printModalVisible = ref(false);
+        const pdfUrl = ref(null);
+        const printTitle = ref('Print Loan Penalties');
         const modal_top = ref('150px');
         const modal_left = ref('400px');
         const modal_width = ref('32vw');
@@ -152,7 +158,9 @@ export default{
             await store.dispatch('Loan_Applications/updateState', {applicationID: ''});
             applicationID.value = store.state.Loan_Applications.applicationID;
         };
-
+        const autoPopulateDate = () =>{
+            formFields.value[2].value = formFields.value[1].value;
+        }
         const formFields = ref([]);
         const updateFormFields = () =>{
             formFields.value = [
@@ -162,7 +170,7 @@ export default{
                     searchPlaceholder: 'Select Loan Application...', dropdownWidth: '400px', updateValue: "",
                     clearSearch: clearSelectedApplication
                 },
-                { type: 'date', name: 'period_year',label: "Date From", value: "", required: true },
+                { type: 'date', name: 'period_year',label: "Date From", value: "", required: true, method: autoPopulateDate },
                 { type: 'date', name: 'period_year',label: "Date To", value: "", required: true },
             ]
         };
@@ -510,10 +518,11 @@ export default{
             .post("api/v1/export-loan-penalties-pdf/", formData, { responseType: 'blob' })
                 .then((response)=>{
                     if(response.status == 200){
-                        const blob1 = new Blob([response.data]);
-                        // Convert blob to URL
+                        const blob1 = new Blob([response.data], { type: 'application/pdf' });
                         const url = URL.createObjectURL(blob1);
-                        PrintJS({printable: url, type: 'pdf'});
+                        // PrintJS({printable: url, type: 'pdf'});
+                        pdfUrl.value = url;
+                        printModalVisible.value = true;
                     }
                 })
             .catch((error)=>{
@@ -528,7 +537,7 @@ export default{
             fetchLoanApplications();
         })
         return{
-            showTotals,title, searchPenalties,resetFilters, addButtonLabel, searchFilters, tableColumns, penaltyList,
+            showTotals,title, searchPenalties,resetFilters, addButtonLabel, searchFilters, tableColumns, penaltyList,printModalVisible,pdfUrl, printTitle,
             currentPage,propResults, propArrLen, propCount, pageCount, showNextBtn, showPreviousBtn,invModalVisible,
             loadPrev, loadNext, firstPage, lastPage, idField, actions, handleActionClick, propModalVisible, closeModal,
             submitButtonLabel, showModal, runPenalty, showLoader, loader, hideLoader, modal_loader, modal_top, modal_left, modal_width,displayButtons,

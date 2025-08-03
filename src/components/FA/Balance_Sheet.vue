@@ -11,6 +11,9 @@
                     @search="searchBalanceSheet"
                     @reset="resetFilters"
                     @printList="printBalanceSheet"
+                    v-model:printModalVisible="printModalVisible"
+                    :printTitle="printTitle"
+                    :pdfUrl="pdfUrl"
                     :dropdownOptions="dropdownOptions"
                     @handleDynamicOption="handleDynamicOption"
                     :options="options"
@@ -110,6 +113,9 @@ export default{
         const periodList = ref([]);
         const currentPage = ref(1);
         const propModalVisible = ref(false);
+        const printModalVisible = ref(false);
+        const pdfUrl = ref(null);
+        const printTitle = ref('Print Balance Sheet');
         const flex_basis = ref('');
         const flex_basis_percentage = ref('');
         const displayButtons = ref(true);
@@ -397,10 +403,11 @@ export default{
             .post("api/v1/export-balance-sheet-pdf/", formData, { responseType: 'blob' })
                 .then((response)=>{
                     if(response.status == 200){
-                        const blob1 = new Blob([response.data]);
-                        // Convert blob to URL
+                        const blob1 = new Blob([response.data], { type: 'application/pdf' });
                         const url = URL.createObjectURL(blob1);
-                        PrintJS({printable: url, type: 'pdf'});
+                        // PrintJS({printable: url, type: 'pdf'});
+                        pdfUrl.value = url;
+                        printModalVisible.value = true;
                     }
                 })
             .catch((error)=>{
@@ -419,7 +426,7 @@ export default{
         })
         return{
             showAddButton,title, searchBalanceSheet,resetFilters, addButtonLabel, searchFilters, periodList,
-            idField, actions, propModalVisible,
+            idField, actions, propModalVisible,printModalVisible,pdfUrl, printTitle,
             submitButtonLabel, showModal, showLoader, loader, hideLoader, modal_loader, modal_top, modal_left, modal_width,displayButtons,
             showModalLoader, hideModalLoader, formFields, handleSelectionChange, flex_basis,flex_basis_percentage,
             patient_ledger_totals,customer_ledger_totals,vendor_ledger_totals,assetTotals,liabilitiesTotals,balanceSheetList,assetsList,liabilitiesList,

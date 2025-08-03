@@ -12,6 +12,9 @@
         @removeItem="removeAllocation"
         @removeSelectedItems="removeAllocations"
         @printList="printLoansList"
+        v-model:printModalVisible="printModalVisible"
+        :printTitle="printTitle"
+        :pdfUrl="pdfUrl"
         :columns="tableColumns"
         :rows="classList"
         :actions="actions"
@@ -76,6 +79,9 @@ export default{
         const riskID = ref('');
         const selectedIds = ref([]);
         const appModalVisible = ref(false);
+        const printModalVisible = ref(false);
+        const pdfUrl = ref(null);
+        const printTitle = ref('Print Loan Classifications');
         const classList = ref([]);
         const appResults = ref([]);
         const appArrLen = ref(0);
@@ -267,10 +273,11 @@ export default{
             .post("api/v1/export-loan-classifications-pdf/", formData, { responseType: 'blob' })
                 .then((response)=>{
                     if(response.status == 200){
-                        const blob1 = new Blob([response.data]);
-                        // Convert blob to URL
+                        const blob1 = new Blob([response.data], { type: 'application/pdf' });
                         const url = URL.createObjectURL(blob1);
-                        PrintJS({printable: url, type: 'pdf'});
+                        // PrintJS({printable: url, type: 'pdf'});
+                        pdfUrl.value = url;
+                        printModalVisible.value = true;
                     }
                 })
             .catch((error)=>{
@@ -287,7 +294,7 @@ export default{
         return{
             showAddButton,showActions,title, searchLoanClassifications, idField, selectedIds, actions, classList, appArrLen,appCount,appResults,appModalVisible,
             currentPage,searchFilters,tableColumns,resetFilters,loadPrev,loadNext,firstPage,lastPage,dropdownOptions,handleDynamicOption,
-            showNextBtn,showPreviousBtn, handleActionClick,displayButtons,
+            showNextBtn,showPreviousBtn, handleActionClick,displayButtons,printModalVisible,pdfUrl, printTitle,
             modal_top, modal_left, modal_width, showLoader, loader, hideLoader, modal_loader, showModalLoader, hideModalLoader,rightsModule,
             handleSelectionChange, pageComponentKey, flex_basis, flex_basis_percentage,showTotals,printLoansList,selectSearchQuantity,selectedValue
         }

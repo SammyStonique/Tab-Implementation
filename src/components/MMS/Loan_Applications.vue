@@ -12,6 +12,9 @@
             @removeItem="removeApplication"
             @removeSelectedItems="removeApplications"
             @printList="printApplicationList"
+            v-model:printModalVisible="printModalVisible"
+            :printTitle="printTitle"
+            :pdfUrl="pdfUrl"
             :addingRight="addingRight"
             :removingRight="removingRight"
             :rightsModule="rightsModule"
@@ -61,6 +64,9 @@
             :displayButtons="displayButtons" @handleSubmit="updateRepaymentDate" @handleReset="handleReset1"
         />
     </MovableModal>
+    <!-- <PrintModal v-model:visible="printModalVisible" :title="printTitle" >
+        <iframe v-if="pdfUrl" :src="pdfUrl" width="100%" height="100%" type="application/pdf" style="border: none;"></iframe>
+    </PrintModal> -->
 
 </template>
 
@@ -73,6 +79,7 @@ import { useToast } from "vue-toastification";
 import { useDateFormatter } from '@/composables/DateFormatter';
 import PrintJS from 'print-js';
 import MovableModal from '@/components/MovableModal.vue';
+import PrintModal from '@/components/PrintModal.vue';
 import DynamicForm from '@/components/NewDynamicForm.vue';
 import SearchableDropdown from '@/components/SearchableDropdown.vue';
 import Swal from 'sweetalert2';
@@ -80,7 +87,7 @@ import Swal from 'sweetalert2';
 export default{
     name: 'Loan_Applications',
     components:{
-        PageComponent,MovableModal,SearchableDropdown,DynamicForm
+        PageComponent,MovableModal,SearchableDropdown,DynamicForm,PrintModal
     },
     setup(){
         const store = useStore();
@@ -118,6 +125,9 @@ export default{
         const transModalVisible = ref(false);
         const refModalVisible = ref(false);
         const appModalVisible = ref(false);
+        const printModalVisible = ref(false);
+        const pdfUrl = ref(null);
+        const printTitle = ref('Print Loan Applications');
         const dropdownWidth = ref("500px")
         const modal_top = ref('200px');
         const modal_left = ref('400px');
@@ -812,7 +822,6 @@ export default{
                 }
             }
         };
-        
         const printApplicationList = () =>{
             showLoader();
             let formData = {
@@ -832,10 +841,11 @@ export default{
             .post("api/v1/export-loan-applications-pdf/", formData, { responseType: 'blob' })
                 .then((response)=>{
                     if(response.status == 200){
-                        const blob1 = new Blob([response.data]);
-                        // Convert blob to URL
+                        const blob1 = new Blob([response.data], { type: 'application/pdf' });
                         const url = URL.createObjectURL(blob1);
-                        PrintJS({printable: url, type: 'pdf'});
+                        // PrintJS({printable: url, type: 'pdf'});
+                        pdfUrl.value = url;
+                        printModalVisible.value = true;
                     }
                 })
             .catch((error)=>{
@@ -944,7 +954,7 @@ export default{
             
         })
         return{
-            searchApplications,resetFilters, addButtonLabel, searchFilters, tableColumns, applicationList,dropdownWidth,displayButtons,
+            searchApplications,resetFilters, addButtonLabel, searchFilters, tableColumns, applicationList,dropdownWidth,displayButtons,printModalVisible,pdfUrl, printTitle,
             currentPage,propResults, propArrLen, propCount, pageCount, showNextBtn, showPreviousBtn,flex_basis,flex_basis_percentage,formFields,handleReset,
             loadPrev, loadNext, firstPage, lastPage, idField, actions, handleActionClick,handleRightClick,showDetails,detailsTitle,hideDetails,
             submitButtonLabel, showModal, addNewApplication, showLoader, loader, hideLoader, removeApplication, removeApplications,

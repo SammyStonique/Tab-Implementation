@@ -57,6 +57,9 @@
             :displayButtons="displayButtons" @handleSubmit="" @handleReset=""
         />
     </MovableModal>
+    <PrintModal v-model:visible="printModalVisible" :title="printTitle" >
+        <iframe v-if="pdfUrl" :src="pdfUrl" width="100%" height="100%" type="application/pdf" style="border: none;"></iframe>
+    </PrintModal>
 </template>
 
 <script>
@@ -70,11 +73,12 @@ import { useDateFormatter } from '@/composables/DateFormatter';
 import axios from 'axios';
 import DynamicTable from '@/components/DynamicTable.vue';
 import PrintJS from 'print-js';
+import PrintModal from '@/components/PrintModal.vue';
 
 export default defineComponent({
     name: 'Petty_Cash_Statement',
     components:{
-        PageStyleComponent, DynamicForm, DynamicTable, MovableModal
+        PageStyleComponent, DynamicForm, DynamicTable, MovableModal, PrintModal
     },
     setup(){
         const store = useStore();
@@ -95,6 +99,9 @@ export default defineComponent({
         const mainComponentKey = ref(0);
         const propComponentKey = ref(0);
         const prepModalVisible = ref(false);
+        const printModalVisible = ref(false);
+        const pdfUrl = ref(null);
+        const printTitle = ref('Print Petty Cash Statement');
         const title = ref('Add Prepayment');
         const modal_top = ref('150px');
         const modal_left = ref('400px');
@@ -179,10 +186,11 @@ export default defineComponent({
             .post("api/v1/export-petty-cash-statement-pdf/", formData, { responseType: 'blob' })
                 .then((response)=>{
                     if(response.status == 200){
-                        const blob1 = new Blob([response.data]);
-                        // Convert blob to URL
+                        const blob1 = new Blob([response.data], { type: 'application/pdf' });
                         const url = URL.createObjectURL(blob1);
-                        PrintJS({printable: url, type: 'pdf'});
+                        // PrintJS({printable: url, type: 'pdf'});
+                        pdfUrl.value = url;
+                        printModalVisible.value = true;
                     }
                 })
             .catch((error)=>{
@@ -204,7 +212,7 @@ export default defineComponent({
         })
 
         return{
-            subHeaders, tableData, creditTotals, itemCategoryTotals, debitTotals, formFields, flex_basis, 
+            subHeaders, tableData, creditTotals, itemCategoryTotals, debitTotals, formFields, flex_basis, printModalVisible,pdfUrl, printTitle,
             flex_basis_percentage, displayButtons, mainComponentKey, handleReset, loader, showLoader, hideLoader, tableKey, showActions, idField,          
             title, modal_loader, modal_left, modal_top, modal_width, prepModalVisible, showModalLoader, hideModalLoader, closeModal,
             fetchTransactions, processStatement,printStatement

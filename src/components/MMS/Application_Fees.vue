@@ -9,6 +9,9 @@
         @removeItem="removeFee"
         @removeSelectedItems="removeFees"
         @printList="printFeesList"
+        v-model:printModalVisible="printModalVisible"
+        :printTitle="printTitle"
+        :pdfUrl="pdfUrl"
         :addingRight="addingRight"
         :removingRight="removingRight"
         :rightsModule="rightsModule"
@@ -71,6 +74,9 @@ export default{
         const rightsModule = ref('MMS');
         const idField = 'loan_application_fee_id';
         const depModalVisible = ref(false);
+        const printModalVisible = ref(false);
+        const pdfUrl = ref(null);
+        const printTitle = ref('Print Application Fees');
         const feesList = ref([]);
         const selectedIds = ref([]);
         const depResults = ref([]);
@@ -581,10 +587,11 @@ export default{
             .post("api/v1/export-loan-application-fees-pdf/", formData, { responseType: 'blob' })
                 .then((response)=>{
                     if(response.status == 200){
-                        const blob1 = new Blob([response.data]);
-                        // Convert blob to URL
+                        const blob1 = new Blob([response.data], { type: 'application/pdf' });
                         const url = URL.createObjectURL(blob1);
-                        PrintJS({printable: url, type: 'pdf'});
+                        // PrintJS({printable: url, type: 'pdf'});
+                        pdfUrl.value = url;
+                        printModalVisible.value = true;
                     }
                 })
             .catch((error)=>{
@@ -600,7 +607,7 @@ export default{
         return{
             title,idField, searchApplicationFees, addButtonLabel, searchFilters, resetFilters, tableColumns, feesList,showTotals,
             currentPage,depResults, depArrLen, depCount, pageCount, showNextBtn, showPreviousBtn,modal_top, modal_left, modal_width,
-            loadPrev, loadNext, firstPage, lastPage, actions, formFields, depModalVisible, addNewFee,
+            loadPrev, loadNext, firstPage, lastPage, actions, formFields, depModalVisible, addNewFee,printModalVisible,pdfUrl, printTitle,
             displayButtons,flex_basis,flex_basis_percentage, handleActionClick, handleReset, createApplicationFee,
             showLoader, loader, hideLoader, modal_loader, showModalLoader, hideModalLoader, removeFee, removeFees,printFeesList,
             addingRight,removingRight,rightsModule, closeModal,selectSearchQuantity,selectedValue,handleSelectionChange

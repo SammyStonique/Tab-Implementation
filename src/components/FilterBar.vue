@@ -58,14 +58,15 @@
       </div>
     </div>
   </div>
-  <MovableModal v-model:visible="printModalVisible" :title="title" :modal_top="modal_top" :modal_left="modal_left" :modal_width="modal_width"
-      :loader="modal_loader" @showLoader="showModalLoader" @hideLoader="hideModalLoader" @closeModal="closeModal"
-  />
+  <PrintModal v-model:visible="modalVisibleProxy" :title="printTitle" >
+      <iframe v-if="pdfUrl" :src="pdfUrl" width="100%" height="100%" type="application/pdf" style="border: none;"></iframe>
+        <!-- <embed v-if="pdfUrl" :src="pdfUrl" type="application/pdf" width="100%" height="100%" /> -->
+  </PrintModal>
 </template>
 
 <script>
 import SearchableDropdown from '@/components/SearchableDropdown.vue'
-import MovableModal from './MovableModal.vue';
+import PrintModal from './PrintModal.vue';
 import { ref, computed, defineComponent, onMounted, onBeforeMount} from 'vue';
 import axios from "axios";
 import { useStore } from "vuex";
@@ -117,27 +118,15 @@ export default defineComponent({
     },
     printModalVisible:{
       type: Boolean,
-      default: () => false
+      required: true
     },
-    title:{
+    printTitle:{
       type: String,
-      default: () => ''
+      default: 'Print'
     },
-    modal_left:{
+    pdfUrl:{
       type: String,
-      default: () => ''
-    },
-    modal_top:{
-      type: String,
-      default: () => ''
-    },
-    modal_width:{
-      type: String,
-      default: () => ''
-    },
-    modal_loader:{
-      type: String,
-      default: () => ''
+      default: ''
     },
     rightsModule:{
       type: String,
@@ -152,8 +141,11 @@ export default defineComponent({
       default: () => ''
     }
   },
+
+  emits: ['update:printModalVisible'],
+  
   components:{
-    SearchableDropdown, MovableModal
+    SearchableDropdown, PrintModal
   },
   setup(props,{emit}){
     const store = useStore(); 
@@ -222,6 +214,11 @@ export default defineComponent({
         const permission = allowedRights.value.find(p => p.rightName === permissionName);
         return permission ? !permission.right_status : true;
     };
+    const closeProps = (val) => emit('update:printModalVisible', val);
+    const modalVisibleProxy = computed({
+      get: () => props.printModalVisible,
+      set: (val) => emit('update:printModalVisible', val),
+    });
     onBeforeMount(() =>{
       
     })
@@ -229,7 +226,7 @@ export default defineComponent({
     return{
       dropdown, dropdownHeight, handleAddNew, handleReset, showDropdown, optionSelected, handleSearch, clearSearch,
       importData, removeItem, removeSelectedItems, printList, handleDynamicOption, showModalLoader,
-      hideModalLoader,isDisabled,hoverDropdown,printExcel,printCSV,displaySideDropdown
+      hideModalLoader,isDisabled,hoverDropdown,printExcel,printCSV,displaySideDropdown,closeProps,modalVisibleProxy
     }
   },
 });

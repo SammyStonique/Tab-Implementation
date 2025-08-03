@@ -95,7 +95,6 @@ export default defineComponent({
         const journalTotals = ref(0);
         const debitTotals = ref(0);
         const creditTotals = ref(0);
-        const journalEntryArr = ref([]);
         const title = ref('Import Bank Statement');
         const rightsModule = ref('Accounts');
         const depModalVisible = ref(false);
@@ -219,35 +218,41 @@ export default defineComponent({
             loader.value = "none";
         } 
         const reconcileCashbook = async() =>{
-            showLoader();
-            journalEntryArr.value = [];
-            journalTotals.value = 0;
-            creditTotals.value = 0;
-            debitTotals.value = 0;
-            
-            for(let i=0; i<cashbookRows.value.length; i++){
-                debitTotals.value += Number(cashbookRows.value[i].debit_amount);
-                creditTotals.value += Number(cashbookRows.value[i].credit_amount);
-                journalTotals.value += Number(cashbookRows.value[i].credit_amount);
-
-                let jnlEntry = {
-                    "date": formFields.value[1].value,
-                    "description": cashbookRows.value[i].description,
-                    "txn_type": "JNL",
-                    "posting_account": cashbookRows.value[i].ledger_id,
-                    "debit_amount": cashbookRows.value[i].debit_amount,
-                    "credit_amount": cashbookRows.value[i].credit_amount,
-                }
-                journalEntryArr.value.push(jnlEntry)
+            showLoader();           
+            if(cashbookRows.value.length == 0){
+                toast.error('Invalid Reconciliation!');
+                hideLoader();
+                return;
             }
-
+            let status = "Incomplete";
+            if(formFields.value[3].value == '0'){
+                status = "Complete";
+            }
             let formData = {
                 company: companyID.value,
-                description: formFields.value[3].value,
-                txn_type: "JNL",
-                issue_date: formFields.value[1].value,
-                total_amount: journalTotals.value,
-                journal_entry_array: journalEntryArr.value,
+                ledger: ledgerID.value,
+                ledger_id: ledgerID.value,
+                reconciliation_date: formFields.value[1].value,
+                statement_balance: formFields.value[0].value,
+                cashbook_balance: formFields.value[2].value,
+                variance: formFields.value[3].value,
+                deposits_cleared_count: formFields1.value[0].value,
+                deposits_cleared_amount: formFields1.value[0].value1,
+                withdrawals_cleared_count: formFields1.value[1].value,
+                withdrawals_cleared_amount: formFields1.value[1].value1,
+                deposits_transit_count: formFields1.value[2].value,
+                deposits_transit_amount: formFields1.value[2].value1,
+                unpresented_cheques_count: formFields1.value[3].value,
+                unpresented_cheques_amount: formFields1.value[3].value1,
+                unposted_deposits_count: formFields1.value[4].value,
+                unposted_deposits_amount: formFields1.value[4].value1,
+                unposted_withdrawals_count: formFields1.value[5].value,
+                unposted_withdrawals_amount: formFields1.value[5].value1,
+                matching_balance: formFields1.value[6].value1,
+                cashbook_txns: cashbookRows.value,
+                bank_txns: bankRows.value,
+                status: status,
+                done_by: null,
                 user: userID.value
             }
             
@@ -266,21 +271,18 @@ export default defineComponent({
                     hideLoader();
                 }else{
                     try {
-                        const response = await store.dispatch('Journals/reconcileCashbook', formData);
-                        if (response && response.status === 200) {
+                        const response = await store.dispatch('Ledgers/createBankReconciliation', formData);
+                        if (response && response.status === 201) {
                             hideLoader();
-                            toast.success('Journal created successfully!');
+                            toast.success('Success!');
                             handleReset();
-                            mainComponentKey.value += 1;
-                            ledComponentKey.value += 1;
-                            store.dispatch('Ledgers/updateState', { journalItemsArray: []})
                         } else {
-                            toast.error('An error occurred while creating the Journal.');
+                            toast.error('An error occurred while creating the Reconciliation.');
                             hideLoader();
                         }
                     } catch (error) {
                         console.error(error.message);
-                        toast.error('Failed to create Journal: ' + error.message);
+                        toast.error('Failed to create Reconciliation: ' + error.message);
                     } finally {
                         hideLoader();
                     }
@@ -330,6 +332,8 @@ export default defineComponent({
                     await store.dispatch('Ledgers/updateState', { cbkCreditCount: cbkCreditCount.value + 1, cbkCreditTotal: +(cbkCreditTotal.value + Number(row.credit_amount)).toFixed(2)});
                 }
             }
+            let cbkBalance = parseFloat((formFields.value[2].value || '0').toString().replace(/,/g, ''));
+            formFields1.value[6].value1 = cbkBalance - formFields1.value[2].value1 + formFields1.value[3].value1 + formFields1.value[4].value1 - formFields1.value[5].value1;
         };
         const markAsReconciled = async (row) => {
             if (row.reconciled === "Yes") {

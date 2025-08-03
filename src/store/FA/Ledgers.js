@@ -129,6 +129,16 @@ const actions = {
       throw error;
     })
   },
+   async createBankReconciliation({ commit,state }, formData) {
+    return axios.post('api/v1/create-bank-reconciliation/', formData)
+    .then((response)=>{
+      return response;
+    })
+    .catch((error)=>{
+      console.log(error.message);
+      throw error;
+    })
+  },
   fetchClientJournals({ commit,state }, formData){
     state.journalsArray = [];
     axios
@@ -457,6 +467,16 @@ const actions = {
       throw error;
     })  
   },
+  async updateBankReconciliation({ commit,state }, formData) {
+    return axios.put(`api/v1/update-bank-reconciliation/`,formData)
+    .then((response)=>{
+      return response;
+    })
+    .catch((error)=>{
+      console.log(error.message);
+      throw error;
+    })  
+  },
 
   deleteLedger({ commit,state }, formData) {
     Swal.fire({
@@ -496,6 +516,47 @@ const actions = {
         })
       }else{
         Swal.fire(`Ledger has not been deleted!`);
+      }
+    })
+  },
+  deleteBankReconciliation({ commit,state }, formData) {
+    Swal.fire({
+      title: "Are you sure?",
+      text: `Do you wish to delete Reconciliation?`,
+      type: 'warning',
+      showCloseButton: true,
+      showCancelButton: true,
+      confirmButtonText: 'Yes Delete Reconciliation!',
+      cancelButtonText: 'Cancel!',
+      customClass: {
+          confirmButton: 'swal2-confirm-custom',
+          cancelButton: 'swal2-cancel-custom',
+      },
+      showLoaderOnConfirm: true,
+    }).then((result) => {
+      if (result.value) {
+        axios.post(`api/v1/delete-bank-reconciliation/`,formData)
+        .then((response)=>{
+          if(response.data.msg == "Success"){
+              Swal.fire("Poof! Reconciliation removed succesfully!", {
+                icon: "success",
+              }); 
+          }else{
+            Swal.fire({
+              title: "Error Deleting Reconciliation",
+              icon: "warning",
+            });
+          }                   
+        })
+        .catch((error)=>{
+          console.log(error.message);
+          Swal.fire({
+            title: error.message,
+            icon: "warning",
+          });
+        })
+      }else{
+        Swal.fire(`Reconciliation has not been deleted!`);
       }
     })
   },

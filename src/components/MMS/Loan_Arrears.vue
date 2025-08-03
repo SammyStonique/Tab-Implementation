@@ -12,6 +12,9 @@
         @removeItem="removeAllocation"
         @removeSelectedItems="removeAllocations"
         @printList="printArrearsList"
+        v-model:printModalVisible="printModalVisible"
+        :printTitle="printTitle"
+        :pdfUrl="pdfUrl"
         :columns="tableColumns"
         :rows="arrearsList"
         :actions="actions"
@@ -76,6 +79,9 @@ export default{
         const productID = ref('');
         const selectedIds = ref([]);
         const appModalVisible = ref(false);
+        const printModalVisible = ref(false);
+        const pdfUrl = ref(null);
+        const printTitle = ref('Print Loan Arrears');
         const arrearsList = ref([]);
         const appResults = ref([]);
         const appArrLen = ref(0);
@@ -403,10 +409,11 @@ export default{
             .post("api/v1/export-loan-arrears-pdf/", formData, { responseType: 'blob' })
                 .then((response)=>{
                     if(response.status == 200){
-                        const blob1 = new Blob([response.data]);
-                        // Convert blob to URL
+                        const blob1 = new Blob([response.data], { type: 'application/pdf' });
                         const url = URL.createObjectURL(blob1);
-                        PrintJS({printable: url, type: 'pdf'});
+                        // PrintJS({printable: url, type: 'pdf'});
+                        pdfUrl.value = url;
+                        printModalVisible.value = true;
                     }
                 })
             .catch((error)=>{
@@ -423,7 +430,7 @@ export default{
         return{
             showAddButton,title, searchLoanArrears, idField, selectedIds, actions, arrearsList, appArrLen,appCount,appResults,appModalVisible,
             currentPage,searchFilters,tableColumns,resetFilters,loadPrev,loadNext,firstPage,lastPage,dropdownOptions,handleDynamicOption,
-            showNextBtn,showPreviousBtn, handleActionClick,displayButtons,formFields,handleOpenLink,
+            showNextBtn,showPreviousBtn, handleActionClick,displayButtons,formFields,handleOpenLink,printModalVisible,pdfUrl, printTitle,
             modal_top, modal_left, modal_width, showLoader, loader, hideLoader, modal_loader, showModalLoader, hideModalLoader,rightsModule,
             handleSelectionChange, pageComponentKey, flex_basis, flex_basis_percentage,showTotals,printArrearsList,selectSearchQuantity,selectedValue
         }

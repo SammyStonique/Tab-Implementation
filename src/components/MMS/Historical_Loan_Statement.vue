@@ -94,6 +94,9 @@
                                 @printCSV="printCSV"
                                 :dropdownOptions="dropdownOptions"
                                 @handleDynamicOption="handleDynamicOption1"
+                                v-model:printModalVisible="printModalVisible"
+                                :printTitle="printTitle"
+                                :pdfUrl="pdfUrl"
                             />
                         </div>   
                         <div class="table w-[100%] top-[17.1rem] z-30 px-6">              
@@ -153,6 +156,9 @@ export default defineComponent({
         const rightsModule = ref('MMS');
         const allowedRights = ref([]);
         const depModalVisible = ref(false);
+        const printModalVisible = ref(false);
+        const pdfUrl = ref(null);
+        const printTitle = ref('Print Loan Statement');
         const displayButtons = ref(true);
         const flex_basis = ref('');
         const flex_basis_percentage = ref('');
@@ -448,10 +454,11 @@ export default defineComponent({
             .post("api/v1/loan-statement-pdf/", formData, { responseType: 'blob' })
             .then((response)=>{
                 if(response.status == 200){
-                    const blob1 = new Blob([response.data]);
-                    // Convert blob to URL
-                    const url = URL.createObjectURL(blob1);
-                    PrintJS({printable: url, type: 'pdf'});
+                    const blob1 = new Blob([response.data], { type: 'application/pdf' });
+                        const url = URL.createObjectURL(blob1);
+                        // PrintJS({printable: url, type: 'pdf'});
+                        pdfUrl.value = url;
+                        printModalVisible.value = true;
                 }
             })
             .catch((error)=>{
@@ -911,7 +918,7 @@ export default defineComponent({
         });
 
         return{
-            tabs, activeTab, mainComponentKey, scheduleColumns, paymentColumns, selectTab, loader, showLoader, hideLoader, formFields, additionalFields,showTotals,
+            tabs, activeTab, mainComponentKey, scheduleColumns, paymentColumns, selectTab, loader, showLoader, hideLoader, formFields, additionalFields,showTotals,printModalVisible,pdfUrl, printTitle,
             tableKey,paymentTableKey, idFieldSchedule, idFieldPayment, actionsSchedule, actionsUtility, computedScheduleRows, computedPaymentRows,computedGuarantorRows,computedSecurityRows,printSchedule,
             scheduleTableKey, idFieldSchedule, scheduleColumns, actionsSchedule, statementTableKey, idFieldStatement, statementRows,statement1Rows,showActions,searchFilters,resetFilters,dropdownOptions,
             statementColumns,statement1Columns, actionsStatement, loanDetails,loanProduct,loanMember, scheduleActionClick,showAddButton,searchLoanTransactions,printLoanTransactions,handleDynamicOption,

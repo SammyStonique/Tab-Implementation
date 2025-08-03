@@ -13,6 +13,9 @@
             @removeItem="removeMember"
             @removeSelectedItems="removeMembers"
             @printList="printMembersList"
+            v-model:printModalVisible="printModalVisible"
+            :printTitle="printTitle"
+            :pdfUrl="pdfUrl"
             :addingRight="addingRight"
             :removingRight="removingRight"
             :rightsModule="rightsModule"
@@ -136,6 +139,9 @@ export default{
         const title1 = ref('SMS Member');
         const transModalVisible = ref(false);
         const propModalVisible = ref(false);
+        const printModalVisible = ref(false);
+        const pdfUrl = ref(null);
+        const printTitle = ref('Print Members List');
         const dropdownWidth = ref("500px")
         const modal_top = ref('200px');
         const modal_left = ref('400px');
@@ -556,10 +562,11 @@ export default{
             .post("api/v1/export-members-pdf/", formData, { responseType: 'blob' })
                 .then((response)=>{
                     if(response.status == 200){
-                        const blob1 = new Blob([response.data]);
-                        // Convert blob to URL
+                        const blob1 = new Blob([response.data], { type: 'application/pdf' });
                         const url = URL.createObjectURL(blob1);
-                        PrintJS({printable: url, type: 'pdf'});
+                        // PrintJS({printable: url, type: 'pdf'});
+                        pdfUrl.value = url;
+                        printModalVisible.value = true;
                     }
                 })
             .catch((error)=>{
@@ -581,7 +588,7 @@ export default{
             
         })
         return{
-            searchMembers,resetFilters, addButtonLabel, searchFilters, tableColumns, membersList,dropdownWidth,displayButtons,
+            searchMembers,resetFilters, addButtonLabel, searchFilters, tableColumns, membersList,dropdownWidth,displayButtons,printModalVisible,pdfUrl, printTitle,
             currentPage,propResults, propArrLen, propCount, pageCount, showNextBtn, showPreviousBtn,flex_basis,flex_basis_percentage,
             loadPrev, loadNext, firstPage, lastPage, idField, actions, handleActionClick,showDetails,detailsTitle,hideDetails,
             submitButtonLabel, showModal, addNewMember, showLoader, loader, hideLoader, importMembers, removeMember, removeMembers,

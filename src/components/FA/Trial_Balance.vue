@@ -11,6 +11,9 @@
             @searchPage="searchTrialBalance"
             @resetFilters="resetFilters"
             @printList="printTrialBalance"
+            v-model:printModalVisible="printModalVisible"
+            :printTitle="printTitle"
+            :pdfUrl="pdfUrl"
             :rightsModule="rightsModule"
             :columns="tableColumns"
             :rows="trialBalanceList"
@@ -61,6 +64,9 @@ export default{
         const submitButtonLabel = ref('Add');
         const title = ref('Invoice Booking');
         const invModalVisible = ref(false);
+        const printModalVisible = ref(false);
+        const pdfUrl = ref(null);
+        const printTitle = ref('Print Trial Balance');
         const modal_top = ref('150px');
         const modal_left = ref('400px');
         const modal_width = ref('32vw');
@@ -565,10 +571,11 @@ export default{
             .post("api/v1/export-trial-balance-pdf/", formData, { responseType: 'blob' })
                 .then((response)=>{
                     if(response.status == 200){
-                        const blob1 = new Blob([response.data]);
-                        // Convert blob to URL
+                        const blob1 = new Blob([response.data], { type: 'application/pdf' });
                         const url = URL.createObjectURL(blob1);
-                        PrintJS({printable: url, type: 'pdf'});
+                        // PrintJS({printable: url, type: 'pdf'});
+                        pdfUrl.value = url;
+                        printModalVisible.value = true;
                     }
                 })
             .catch((error)=>{
@@ -586,7 +593,7 @@ export default{
         })
         return{
             showAddButton,showTotals,title, searchTrialBalance,resetFilters, addButtonLabel, searchFilters, tableColumns, trialBalanceList,
-            invModalVisible, idField, actions, handleActionClick, propModalVisible, closeModal,
+            invModalVisible, idField, actions, handleActionClick, propModalVisible, closeModal,printModalVisible,pdfUrl, printTitle,
             submitButtonLabel, showModal, showLoader, loader, hideLoader, modal_loader, modal_top, modal_left, modal_width,displayButtons,
             showModalLoader, hideModalLoader, formFields, handleSelectionChange, flex_basis,flex_basis_percentage,
              dropdownOptions, handleDynamicOption,printTrialBalance,rightsModule
