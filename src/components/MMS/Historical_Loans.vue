@@ -138,6 +138,7 @@ export default{
             {type: "checkbox"},
             {label: "Date", key:"application_date"},
             {label: "Loan No", key:"loan_number", type:"link"},
+            {label: "Member#", key:"member_number"},
             {label: "Member Name", key:"member"},
             {label: "Applied", key: "formatted_applied_amount"},
             {label: "Approved", key: "formatted_approved_amount"},

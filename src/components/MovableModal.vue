@@ -1,5 +1,6 @@
 <template>
   <teleport to="body">
+    <transition name="modal-zoom">
       <div v-if="visible" class="modal-overlay" :style="{top: modal_top, left: modal_left, width: modal_width}">
         <div class="modal" :style="modalStyle">
             <header class="modal-header cursor-move" @mousedown="startDrag" @mousemove="onDrag" @mouseup="stopDrag">
@@ -32,6 +33,7 @@
             </div>
         </div>
       </div>
+    </transition>
   </teleport>
 </template>
 
@@ -191,5 +193,22 @@ onUnmounted(() => {
   position: relative;
   height: 100%;
   width: 100%;
+}
+.modal-zoom-enter-active,
+.modal-zoom-leave-active {
+  transition: all 1s ease;
+  transform-origin: center center; /* Zoom from center */
+}
+
+.modal-zoom-enter-from,
+.modal-zoom-leave-to {
+  opacity: 0;
+  transform: scale(0.3);
+}
+
+.modal-zoom-enter-to,
+.modal-zoom-leave-from {
+  opacity: 1;
+  transform: scale(1);
 }
 </style>

@@ -116,7 +116,7 @@ export default{
         ])
         const member_name_search = ref("");
         const member_number_search = ref("");
-        const posted_search = ref("");
+        const loan_number_search = ref("");
         const from_date_search = ref("");
         const to_date_search = ref("");
         const fetchLoanItems = async(applicationID) =>{
@@ -135,6 +135,7 @@ export default{
             scheduleID.value = ""
         }
         const searchFilters = ref([
+            {type:'text', placeholder:"Loan No...", value: loan_number_search, width:44},
             {type:'text', placeholder:"Member No...", value: member_number_search, width:36},
             {type:'text', placeholder:"Member Name...", value: member_name_search, width:64},
             {type:'date', placeholder:"From Date...", value: from_date_search, width:36, title: "Date From Search"},
@@ -287,6 +288,7 @@ export default{
             let formData = {
                 client_code: member_number_search.value,
                 client_name: member_name_search.value,
+                loan_number: loan_number_search.value,
                 from_date: from_date_search.value,
                 to_date: to_date_search.value,
                 company: companyID.value,
@@ -353,6 +355,7 @@ export default{
             member_number_search.value = "";
             from_date_search.value = "";
             to_date_search.value = "";
+            loan_number_search.value = "";
             searchPrepayments();
         }
         const closeModal = () =>{

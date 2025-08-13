@@ -10,7 +10,10 @@
                     @add-new=""
                     @search="searchIncomeStatement"
                     @reset="resetFilters"
-                    @printList="printList"
+                    @printList="printIncomeStatement"
+                    v-model:printModalVisible="printModalVisible"
+                    :printTitle="printTitle"
+                    :pdfUrl="pdfUrl"
                     :dropdownOptions="dropdownOptions"
                     @handleDynamicOption="handleDynamicOption"
                     :options="options"
@@ -21,38 +24,38 @@
                     />
             </div>
             <div class="table-container  min-h-[330px] mt-20 uppercase">
-                  <table class="min-w-full bg-white chart-of-accounts-table" style="width: 100%;"> 
-                      <thead class="bg-gray-800 text-white">
-                          <tr class="rounded bg-slate-800 text-white font-semibold text-xs uppercase">
-                            <th class="text-left py-2 px-2" style="width: 30%;">Account</th>
-                            <th class="text-left py-2 px-2" v-for="month in months_array" :key="month">{{ month }}</th>
-                          </tr>
-                      </thead>
-                      <tbody>
-                        <tr>
-                            <td class="text-left py-2 font-bold text-xs">Income</td>
+                <table class="min-w-full bg-white chart-of-accounts-table" style="width: 100%;"> 
+                    <thead class="bg-gray-800 text-white">
+                        <tr class="rounded bg-slate-800 text-white font-semibold text-xs uppercase">
+                        <th class="text-left py-2 px-2" style="width: 30%;">Account</th>
+                        <th class="text-left py-2 px-2" v-for="month in months_array" :key="month">{{ month }}</th>
                         </tr>
-                        <tr v-for="(monthlyData, account) in formattedIncomeData" :key="account" class="even:bg-gray-100 text-xs">
-                            <td class="text-left py-1 px-2" :style="account === 'Totals' ? 'font-weight: bold;' : ''">{{ account }}</td>
-                            <td class="text-left py-1 px-2"  v-for="month in months_array" :key="month" :style="account === 'Totals' ? 'font-weight: bold;' : ''">{{ Number(monthlyData[month]).toLocaleString() }}</td>
-                        </tr>
+                    </thead>
+                    <tbody>
+                    <tr>
+                        <td class="text-left py-2 font-bold text-xs">Income</td>
+                    </tr>
+                    <tr v-for="(monthlyData, account) in formattedIncomeData" :key="account" class="even:bg-gray-100 text-xs">
+                        <td class="text-left py-1 px-2" :style="account === 'Totals' ? 'font-weight: bold;' : ''">{{ account }}</td>
+                        <td class="text-left py-1 px-2"  v-for="month in months_array" :key="month" :style="account === 'Totals' ? 'font-weight: bold;' : ''">{{ Number(monthlyData[month]).toLocaleString() }}</td>
+                    </tr>
 
-                        <tr>
-                            <td class="text-left py-2 font-bold text-xs">Expenses</td>
-                        </tr>
-                        <tr v-for="(monthlyData, account) in formattedExpensesData" :key="account" class="even:bg-gray-100 mb-6 text-xs">
-                            <td class="text-left py-1 px-2" :style="account === 'Totals' ? 'font-weight: bold;' : ''">{{ account }}</td>
-                            <td class="text-left py-1 px-2"  v-for="month in months_array" :key="month" :style="account === 'Totals' ? 'font-weight: bold;' : ''">{{ Number(monthlyData[month]).toLocaleString() }}</td>
-                        </tr>
-                        <tr class="mt-6 text-sm">
-                            <td style="font-weight: bold;">Net Profit/Loss</td>
-                            <td v-for="month in months_array" :key="month" style="font-weight: bold;">
-                                {{ Number(netProfitLoss[month]).toLocaleString() }}
-                            </td>
-                        </tr>
-                      </tbody>
-                  </table>   
-                </div>
+                    <tr>
+                        <td class="text-left py-2 font-bold text-xs">Expenses</td>
+                    </tr>
+                    <tr v-for="(monthlyData, account) in formattedExpensesData" :key="account" class="even:bg-gray-100 mb-6 text-xs">
+                        <td class="text-left py-1 px-2" :style="account === 'Totals' ? 'font-weight: bold;' : ''">{{ account }}</td>
+                        <td class="text-left py-1 px-2"  v-for="month in months_array" :key="month" :style="account === 'Totals' ? 'font-weight: bold;' : ''">{{ Number(monthlyData[month]).toLocaleString() }}</td>
+                    </tr>
+                    <tr class="mt-6 text-sm">
+                        <td style="font-weight: bold;">Net Profit/Loss</td>
+                        <td v-for="month in months_array" :key="month" style="font-weight: bold;">
+                            {{ Number(netProfitLoss[month]).toLocaleString() }}
+                        </td>
+                    </tr>
+                    </tbody>
+                </table>   
+            </div>
 
     </template>
     </PageStyleComponent>
@@ -97,6 +100,9 @@ export default{
         const periodList = ref([]);
         const currentPage = ref(1);
         const propModalVisible = ref(false);
+        const printModalVisible = ref(false);
+        const pdfUrl = ref(null);
+        const printTitle = ref('Print Income Statement');
         const flex_basis = ref('');
         const flex_basis_percentage = ref('');
         const displayButtons = ref(true);
@@ -281,6 +287,31 @@ export default{
         }
         const resetFilters = () =>{
             searchIncomeStatement();
+        };
+        const printIncomeStatement = () =>{
+            showLoader();
+            let formData = {
+                fiscal_period: periodName.value,
+                company: companyID.value
+            }
+   
+            axios
+            .post("api/v1/export-income-statement-pdf/", formData, { responseType: 'blob' })
+                .then((response)=>{
+                    if(response.status == 200){
+                        const blob1 = new Blob([response.data], { type: 'application/pdf' });
+                        const url = URL.createObjectURL(blob1);
+                        // PrintJS({printable: url, type: 'pdf'});
+                        pdfUrl.value = url;
+                        printModalVisible.value = true;
+                    }
+                })
+            .catch((error)=>{
+                console.log(error.message);
+            })
+            .finally(()=>{
+                hideLoader();
+            })
         }
 
         onBeforeMount(()=>{
@@ -289,7 +320,7 @@ export default{
         })
         return{
             showAddButton,title, searchIncomeStatement,resetFilters, addButtonLabel, searchFilters, periodList,
-            idField, actions, propModalVisible,
+            idField, actions, propModalVisible,printIncomeStatement,printModalVisible,pdfUrl, printTitle,
             submitButtonLabel, showModal, showLoader, loader, hideLoader, modal_loader, modal_top, modal_left, modal_width,displayButtons,
             showModalLoader, hideModalLoader, formFields, handleSelectionChange, flex_basis,flex_basis_percentage,
             months_array, formattedIncomeData, formattedExpensesData, netProfitLoss, expenseAccountNames, incomeAccountNames

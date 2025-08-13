@@ -107,8 +107,10 @@ export default{
         const member_number_search = ref("");
         const from_date_search = ref("");
         const to_date_search = ref("");
+        const loan_number_search = ref("");
 
         const searchFilters = ref([
+            {type:'text', placeholder:"Loan No...", value: loan_number_search, width:44},
             {type:'text', placeholder:"Member No...", value: member_number_search, width:36},
             {type:'text', placeholder:"Member Name...", value: member_name_search, width:64},
             {type:'date', placeholder:"From Date...", value: from_date_search, width:36, title: "Date From Search"},
@@ -209,6 +211,7 @@ export default{
             let formData = {
                 client_code: member_number_search.value,
                 client_name: member_name_search.value,
+                loan_number: loan_number_search.value,
                 from_date: from_date_search.value,
                 to_date: to_date_search.value,
                 company: companyID.value,
@@ -271,7 +274,11 @@ export default{
         }
         const resetFilters = () =>{
             currentPage.value = 1;
-            store.commit('Loan_Prepayment_Alloc/RESET_SEARCH_FILTERS')
+            member_name_search.value = "";
+            member_number_search.value = "";
+            from_date_search.value = "";
+            to_date_search.value = "";
+            loan_number_search.value = "";
             searchAllocations();
         }
         const closeModal = () =>{

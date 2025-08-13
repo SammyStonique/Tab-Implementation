@@ -140,7 +140,8 @@ export default defineComponent({
                     outstanding_balance.value = store.state.Members.outstandingBalance;
                 })
                 
-            }       
+            }  
+            formFields.value[2].value = formFields.value[1].value;     
         };
         const handleSelectedMember = async(option) =>{
             await store.dispatch('Members/handleSelectedMember', option)

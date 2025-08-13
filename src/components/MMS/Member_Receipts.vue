@@ -273,6 +273,7 @@ export default{
         const searchReceipts = () =>{
             showLoader();
             showNextBtn.value = false;
+            selectedIds.value = [];
             showPreviousBtn.value = false;
             let formData = {
                 client_category: "Members",
@@ -317,6 +318,7 @@ export default{
             searchReceipts(selectedValue.value);
         };
         const resetFilters = async() =>{
+            currentPage.value = 1;
             await store.dispatch('Journals/updateState', {journal_no_search:''});
             client_name_search.value = "";
             client_code_search.value = "";
@@ -360,16 +362,19 @@ export default{
         }
         const handleActionClick = async(rowIndex, action, row) =>{
             if(action == 'delete'){
+                showLoader();
                 const journalID = [row['journal_id']];
                 let formData = {
                     company: companyID.value,
                     journal: journalID,
                     txn_type: "RCPT"
                 }
-                await store.dispatch('Journals/deleteReceipt',formData).
-                then(()=>{
+                const response = await store.dispatch('Journals/deleteReceipt',formData)
+                console.log(response);
+                if(response && response.status == 200){
                     searchReceipts();
-                })
+                }
+                hideLoader();
             }else if(action == 'print'){
                 showLoader();
                 const journalID = row['journal_id'];
@@ -634,7 +639,7 @@ export default{
             searchReceipts();     
         })
         return{
-            showTotals,title, searchReceipts,resetFilters, addButtonLabel, searchFilters, tableColumns, receiptsList,printModalVisible1,
+            currentPage,showTotals,title, searchReceipts,resetFilters, addButtonLabel, searchFilters, tableColumns, receiptsList,printModalVisible1,
             propResults, propArrLen, propCount, pageCount, showNextBtn, showPreviousBtn,invModalVisible,printModalVisible,pdfUrl, printTitle,
             loadPrev, loadNext, firstPage, lastPage, idField, actions, handleActionClick, propModalVisible, closeModal,
             submitButtonLabel, showModal, showLoader, loader, hideLoader, modal_loader, modal_top, modal_left, modal_width,displayButtons,

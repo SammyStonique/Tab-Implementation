@@ -522,7 +522,7 @@ const actions = {
       showLoaderOnConfirm: true,
     }).then((result) => {
       if (result.value) {
-        axios.post(`api/v1/delete-journal/`,formData)
+        return axios.post(`api/v1/delete-journal/`,formData)
         .then((response)=>{
           if(response.data.msg == "Success"){
               Swal.fire("Poof! Receipt(s) removed succesfully!", {
@@ -534,14 +534,15 @@ const actions = {
               title: "Cannot Delete Reversed Receipt",
               icon: "warning",
             });
-          }                  
+          }  
+          return response;                
         })
         .catch((error)=>{
-          console.log(error.message);
           Swal.fire({
             title: error.message,
             icon: "warning",
           });
+          throw error;
         })
       }else{
         Swal.fire(`Receipt has not been deleted!`);

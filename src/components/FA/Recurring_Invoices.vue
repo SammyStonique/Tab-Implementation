@@ -153,7 +153,7 @@ export default{
                 { type: 'number', name: 'recurring_day',label: "Invoice Day", value: selectedRecurringJournal.value?.recurring_day || 1, required: true },
                 { type: 'number', name: 'due_day',label: "Due Day", value: selectedRecurringJournal.value?.due_day || 1, required: true },
                 { type: 'dropdown', name: 'due_day_mode',label: "Due Day Mode", value: selectedRecurringJournal.value?.due_day_mode || 'Current Month', placeholder: "", required: true, options: [{ text: 'Of Current Month', value: 'Current Month' }, { text: 'Of The Following Month', value: 'Following Month' },{ text: 'Days After Invoice Date', value: 'After Invoice Date' }] },
-
+                {type:'text-area', label:"Description ({{day_place_holder}} {{month_place_holder}} {{year_place_holder}})", value: selectedRecurringJournal.value?.description || '', textarea_rows: '3', textarea_cols: '56', required: false},
             ];
         };
         const handleReset = () =>{
@@ -191,6 +191,7 @@ export default{
                 current_journal: journalID.value,
                 current_journal_id: journalID.value,
                 frequency: formFields.value[1].value,
+                description: formFields.value[7].value,
                 company: companyID.value
             }
   
@@ -239,6 +240,7 @@ export default{
                 journal: journalValue.value,
                 journal_id: journalValue.value,
                 frequency: formFields.value[1].value,
+                description: formFields.value[7].value,
                 company: companyID.value
             }
 

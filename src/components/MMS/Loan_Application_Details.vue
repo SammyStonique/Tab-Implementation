@@ -356,6 +356,7 @@ export default defineComponent({
                 { type: 'date', name: 'repayment_start_date',label: "Repayment Start Date", value: selectedApplication.value?.repayment_start_date || '', required: true, placeholder: '' },
                 { type: 'text', name: 'loan_due_date',label: "Due Day", value: selectedApplication.value?.loan_due_date || '1', required: true },
                 { type: 'text', name: 'installments',label: "Installments", value: installments.value, required: false },
+                { type: 'text', name: 'schedule_amount',label: "Schedule Amount", value: selectedApplication.value?.schedule_amount || '0', required: false },
                 { type: 'text-area', name: 'loan_remarks',label: "Remarks", value: selectedApplication.value?.loan_remarks || '', required: false,textarea_rows: '2', textarea_cols: '56'},
                 {required: false}
             ];
@@ -420,7 +421,7 @@ export default defineComponent({
 
         const handleReset = async() =>{
             for(let i=0; i < formFields.value.length; i++){
-                if(formFields.value[i].label == 'Applied Amount'){
+                if(formFields.value[i].label == 'Applied Amount' || formFields.value[i].label == 'Schedule Amount'){
                     formFields.value[i].value = '0';
                 }
                 if(formFields.value[i].label == 'Due Day'){
@@ -455,6 +456,7 @@ export default defineComponent({
                 repayment_start_date: formFields.value[4].value,
                 applied_amount: formFields.value[2].value,
                 installments: formFields.value[6].value,
+                schedule_amount: formFields.value[7].value,
                 company: companyID.value
             }
             let formData1 = {
@@ -566,7 +568,8 @@ export default defineComponent({
                 exempt_penalty: "No",
                 member: memberID.value,
                 member_id: memberID.value,
-                loan_remarks: formFields.value[7].value,
+                schedule_amount: formFields.value[7].value,
+                loan_remarks: formFields.value[8].value,
                 applied_amount: formFields.value[2].value,
                 loan_product: productID.value,
                 loan_product_id: productID.value,
@@ -623,7 +626,8 @@ export default defineComponent({
                 exempt_penalty: selectedApplication.value.exempt_penalty,
                 member: memberValue.value,
                 member_id: memberValue.value,
-                loan_remarks: formFields.value[7].value,
+                schedule_amount: formFields.value[7].value,
+                loan_remarks: formFields.value[8].value,
                 applied_amount: formFields.value[2].value,
                 loan_product: productValue.value,
                 loan_product_id: productValue.value,
