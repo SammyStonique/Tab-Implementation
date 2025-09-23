@@ -4,6 +4,8 @@
         :addButtonLabel="addButtonLabel"
         @handleAddNew="addNewGuarantor"
         :searchFilters="searchFilters"
+        :dropdownOptions="dropdownOptions"
+        @handleDynamicOption="handleDynamicOption"
         @searchPage="searchGuarantors"
         @resetFilters="resetFilters"
         @removeItem="removeGuarantor"
@@ -414,6 +416,15 @@ export default{
         const closeModal = async() =>{
             depModalVisible.value = false;
             handleReset();
+        };
+        const dropdownOptions = ref([
+            {label: 'Guarantor Interest', action: 'interest-report', icon: 'fa-receipt', colorClass: 'text-black-600', rightName: 'Adding Loan Guarantors'}, 
+        ]);
+        const handleDynamicOption = async(option) =>{
+            if( option == 'interest-report'){
+                store.commit('pageTab/ADD_PAGE', {'MMS':'Guarantor_Interest'});
+                store.state.pageTab.mmsActiveTab = 'Guarantor_Interest';          
+            }
         }
         onMounted(()=>{
             searchGuarantors();
@@ -424,7 +435,8 @@ export default{
             loadPrev, loadNext, firstPage, lastPage, actions, formFields, depModalVisible, addNewGuarantor,
             displayButtons,flex_basis,flex_basis_percentage, handleActionClick, handleReset, createLoanGuarantor,
             showLoader, loader, hideLoader, modal_loader, showModalLoader, hideModalLoader, removeGuarantor, removeGuarantors,
-            addingRight,removingRight,rightsModule, closeModal,selectSearchQuantity,selectedValue,handleSelectionChange,handleOpenLink
+            addingRight,removingRight,rightsModule, closeModal,selectSearchQuantity,selectedValue,handleSelectionChange,handleOpenLink,
+            dropdownOptions, handleDynamicOption
         }
     }
 }

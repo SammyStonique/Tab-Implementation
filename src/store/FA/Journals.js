@@ -492,6 +492,11 @@ const actions = {
               title: "Invoice Has A Prepayment Allocation",
               icon: "warning",
             });
+          }else if(response.data.msg == "Reconciled"){
+            Swal.fire({
+              title: "Cannot Delete Reconciled Invoice",
+              icon: "warning",
+            });
           }                   
         })
         .catch((error)=>{
@@ -534,7 +539,12 @@ const actions = {
               title: "Cannot Delete Reversed Receipt",
               icon: "warning",
             });
-          }  
+          }else if(response.data.msg == "Reconciled"){
+            Swal.fire({
+              title: "Cannot Delete Reconciled Receipt",
+              icon: "warning",
+            });
+          }   
           return response;                
         })
         .catch((error)=>{
@@ -581,6 +591,11 @@ const actions = {
               title: "Bill Has A Prepayment Allocation",
               icon: "warning",
             });
+          }else if(response.data.msg == "Reconciled"){
+            Swal.fire({
+              title: "Cannot Delete Reconciled Bill",
+              icon: "warning",
+            });
           }                   
         })
         .catch((error)=>{
@@ -623,7 +638,12 @@ const actions = {
               title: "Cannot Delete Payment Voucher",
               icon: "warning",
             });
-          }                   
+          }else if(response.data.msg == "Reconciled"){
+            Swal.fire({
+              title: "Cannot Delete Reconciled Voucher",
+              icon: "warning",
+            });
+          }                    
         })
         .catch((error)=>{
           console.log(error.message);
@@ -662,6 +682,11 @@ const actions = {
           }else if(response.data.msg == "Failed"){
             Swal.fire({
               title: "Cannot Delete Journal",
+              icon: "warning",
+            });
+          }else if(response.data.msg == "Reconciled"){
+            Swal.fire({
+              title: "Cannot Delete Reconciled Journal",
               icon: "warning",
             });
           }                  
@@ -710,7 +735,12 @@ const actions = {
               title: "Debit Note Has A Prepayment Allocation",
               icon: "warning",
             });
-          }                  
+          }else if(response.data.msg == "Reconciled"){
+            Swal.fire({
+              title: "Cannot Delete Reconciled Debit Note",
+              icon: "warning",
+            });
+          }                 
         })
         .catch((error)=>{
           console.log(error.message);
@@ -747,6 +777,11 @@ const actions = {
                 icon: "success",
               }); 
               toast.success("Credit Note(s) removed succesfully")
+          }else if(response.data.msg == "Reconciled"){
+            Swal.fire({
+              title: "Cannot Delete Reconciled Credit Note",
+              icon: "warning",
+            });
           }else{
             Swal.fire({
               title: "Cannot Delete Credit Note",

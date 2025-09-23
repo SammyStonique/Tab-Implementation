@@ -54,7 +54,7 @@ export default defineComponent({
         const modal_left = ref('400px');
         const modal_width = ref('32vw');
         const errors = ref([]);
-        const defaultSettings = computed(()=> store.state.Default_Settings.settingsList);
+        const defaultSettings = computed(()=> store.state.userData.defaultSettings);
         const companyID = computed(()=> store.state.userData.company_id);
         const userID = computed(()=> store.state.userData.user_id);
         const displayButtons = ref(true);
@@ -260,7 +260,7 @@ export default defineComponent({
                 journal_entry_array: journalEntryArr.value,
                 user: userID.value
             }
-            console.log("THE FORM DATA IS ",formData)
+            // console.log("THE FORM DATA IS ",formData)
             errors.value = [];
             if(outletFromID.value == '' || formFields.value[4].value == '' || formFields.value[0].value == ''){
                 errors.value.push('Error');
@@ -308,7 +308,6 @@ export default defineComponent({
         }
 
         const fetchDefaultSettings = async() =>{
-            await store.dispatch('Default_Settings/fetchDefaultSettings', {company:companyID.value})
             for(let i=0; i < defaultSettings.value.length; i++){
                 if(defaultSettings.value[i].setting_name === 'Inventory Stock Control A/c'){
                     stock_control_account.value = defaultSettings.value[i].setting_value;

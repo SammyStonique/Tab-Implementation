@@ -105,6 +105,7 @@ export default{
             {label: "Member#", key:"member_number"},
             {label: "Member Name", key:"member_name"},
             {label: "Loan#", key:"loan_number", type:'link'},
+            {label: "Due Day", key:"due_date"},
             {label: "Receipt", key:"receipt_no"},
             {label: "Amount", key: "total_amount", type: "number", editable: false},
             {label: "Allocated", key: "allocated_amount", type: "number", editable: false},

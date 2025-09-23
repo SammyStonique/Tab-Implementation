@@ -51,15 +51,17 @@
                 />
             </div>
             <div class="fixed w-[98%] z-30 bottom-5 pb-2 bg-white">
-                <ShowDetails 
-                    v-model:visible="showDetails"
-                    :detailsTitle="detailsTitle"
-                    @hideDetails="hideDetails"
-                >
-                    <template v-slot:detailSlot>
-                        <slot></slot>
-                    </template>
-                </ShowDetails>
+                <transition name="slide-up">
+                    <ShowDetails 
+                        v-model:visible="showDetails"
+                        :detailsTitle="detailsTitle"
+                        @hideDetails="hideDetails"
+                    >
+                        <template v-slot:detailSlot>
+                            <slot></slot>
+                        </template>
+                    </ShowDetails>
+                </transition>
                 <MyPagination 
                 :count="count"
                 :currentPage="currentPage"
@@ -323,5 +325,22 @@ export default defineComponent({
     max-height: 20vh;
     overflow-y: scroll;
     overflow-x: scroll;
+}
+.slide-up-enter-active,
+.slide-up-leave-active {
+  transition: transform 0.5s ease, opacity 0.5s ease;
+  transform-origin: bottom center; /* Animate from bottom */
+}
+
+.slide-up-enter-from,
+.slide-up-leave-to {
+  transform: scaleY(0);
+  opacity: 0;
+}
+
+.slide-up-enter-to,
+.slide-up-leave-from {
+  transform: scaleY(1);
+  opacity: 1;
 }
 </style>

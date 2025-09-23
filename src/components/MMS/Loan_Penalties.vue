@@ -40,6 +40,7 @@
             :showDetails="showDetails"
             :detailsTitle="detailsTitle"
             @hideDetails="hideDetails"
+            :groupingKey=true
         >
         </PageComponent>
         <MovableModal v-model:visible="invModalVisible" :title="title" :modal_top="modal_top" :modal_left="modal_left" :modal_width="modal_width"

@@ -45,9 +45,11 @@
                 </div>
               </template>
             </td>
-            <td class="actions flex gap-2 border-0" v-if="showActions">
+            <td class="flex gap-x-2 h-6 border-0" v-if="showActions">
               <div v-for="action in actions">
-                <button :class="{ 'disabled': isDisabled(`${action.rightName}`) }" @click.stop="handleAction(rowIndex,action.name,action.rightName, row)" :title="action.title"><i :class="action.icon"></i></button>
+                <button :class="{ 'disabled': isDisabled(`${action.rightName}`) }" @click.stop="handleAction(rowIndex, action.name, action.rightName, row)" :title="action.title">
+                  <i :class="[action.icon, iconColor(action.icon)]"></i>
+                </button>
               </div>
             </td>
           </tr>
@@ -57,9 +59,7 @@
                     {{ Number(calculateColumnTotal(column.key)).toLocaleString() }}
                 </template>
             </td>
-            <td class="actions" v-if="showActions">
-              
-          </td>
+            
         </tr>
         </tbody>
       </table>
@@ -112,7 +112,8 @@
       const tableRef = ref(null);
       const selectedIds = ref([]);
       const store = useStore(); 
-      const allowedRights = ref([]);
+      const allowedRights = computed(()=> store.state.userData.permissions);
+      const defaultSettings = computed(()=> store.state.userData.defaultSettings);
       const companyID = computed(()=> store.state.userData.company_id);
       const userID = computed(()=> store.state.userData.user_id);
   
@@ -138,7 +139,6 @@
         });
         selectedIds.value = isSelected ? props.rows.map(row => row[props.idField]) : [];
   
-        console.log("THE SELECTED IDs ARE ",selectedIds.value);
         emit('selection-changed', selectedIds.value);
       };
   
@@ -146,7 +146,6 @@
         const rowId = row[props.idField];
         if (row.selected) {
           selectedIds.value.push(rowId);
-          console.log("THE SELECTED IDs ARE ",selectedIds.value)
         } else {
           const index = selectedIds.value.indexOf(rowId);
           if (index > -1) {
@@ -248,7 +247,15 @@
           row.item_sales_income = salesIncome;
         }
       };
-  
+    //RECIPE INGREDIENTS
+      const recipeIngredientsTotals = (row) =>{
+        let ingredientID = row.recipe_ingredient_id || null;
+        let quantity = parseFloat(row.ingr_quantity);
+        let purchase_price = parseFloat(row.ingr_purchase_price) || 0;
+        if(ingredientID ){
+          row.ingr_total_amount = (quantity * purchase_price).toFixed(2);
+        }
+      }
       const handleChange = (event, row) =>{
         const selectedValue = event.target.value;
         calculateTaxAmount(row);
@@ -265,6 +272,7 @@
         journalLineCheck(row);
         availableItemQuantityCheck(row);
         saleDiscount(row);
+        recipeIngredientsTotals(row);
       }
 
       //RECEIPTING
@@ -281,23 +289,8 @@
         emit('update-receipt-amount', paymentAllocation)
       };
   
-      const fetchEnabledRights = () =>{
-          allowedRights.value = [];
-          let formData = {
-            user: userID.value,
-            module: props.rightsModule
-          }
-          axios
-          .post("api/v1/user-permissions-search/",formData)
-          .then((response)=>{
-            allowedRights.value = response.data.results;
-          })
-          .catch((error)=>{
-            console.log(error.message);
-          })
-        };
         const isDisabled =(permissionName) =>{
-            const permission = allowedRights.value.find(p => p.permission_name === permissionName);
+            const permission = allowedRights.value.find(p => p.rightName === permissionName);
             return permission ? !permission.right_status : true;
         };
   
@@ -309,12 +302,27 @@
           const tds = table.querySelectorAll('tbody td');
           // Logic to ensure column widths are consistent
         }
-        fetchEnabledRights();
       });
+      const iconColor = (icon) =>{
+        const colors = {
+          'fa fa-trash': 'text-red-600',
+          'fa fa-minus-circle': 'text-red-600',
+          'fa fa-edit': 'text-blue-600',
+          'fa fa-check-circle': 'text-green-600',
+          'fa fa-print': 'text-gray-700',
+          'fa fa-paperclip': 'text-slate-600',
+          'fas fa-comment': 'text-green-600',
+          'fas fa-envelope': 'text-cyan-600',
+          'fa fa-exchange': 'text-amber-600',
+          'fa fa-cloud-upload': 'text-indigo-600'
+        };
+        return colors[icon] || '';
+      }
   
       return {
         handleRowClick, handleAction, handleChange, getNestedValue, handleInputChange,
-        tableRef, toggleSelectAll, selectedIds, allSelected, updateSelectedIds, calculateColumnTotal,isDisabled
+        tableRef, toggleSelectAll, selectedIds, allSelected, updateSelectedIds, calculateColumnTotal,isDisabled,
+        iconColor
       };
     }
   });

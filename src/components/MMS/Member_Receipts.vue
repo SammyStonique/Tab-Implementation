@@ -115,6 +115,7 @@ export default{
         const activeTab = ref(0);
         const invoiceID = ref(null);
         const custComponentKey = ref(0);
+        const ledComponentKey = ref(0);
         const invModalVisible = ref(false);
         const modal_top = ref('150px');
         const modal_left = ref('400px');
@@ -166,29 +167,42 @@ export default{
             
         ])
         const companyID = computed(()=> store.state.userData.company_id);
-        const fetchCustomers = async() =>{
-            await store.dispatch('Customers/fetchCustomers', {company:companyID.value})
-        };
-        const handleSearchCustomers = async(option) =>{
-            await store.dispatch('Customers/handleSelectedCustomer', option)
-            customerID.value = store.state.Customers.customerID;
-        };
-        const clearSearchCustomer = async() =>{
-            await store.dispatch('Customers/updateState', {customerID: ''});
-            customerID.value = ""
-        };
+        const ledgerID = ref('');
+        const ledgerArray = computed(() => store.state.Ledgers.cashbookLedgerArr);
         const journal_no_search = ref("");
         const client_name_search = ref("");
         const client_code_search = ref("");
         const from_date_search = ref("");
         const to_date_search = ref("");
         const reversal_status_search = ref("");
+        const reference_no_search = ref("");
+        const fetchAllLedgers = async() =>{
+            await store.dispatch('Ledgers/fetchLedgers', {company:companyID.value})
+        };
+        const fetchLedgers = async() =>{
+            await store.dispatch('Ledgers/fetchCashbookLedgers', {company:companyID.value, ledger_type: 'Cashbook'})
+        };
+        const handleSelectedLedger = async(option) =>{
+            await store.dispatch('Ledgers/handleSelectedLedger', option)
+            ledgerID.value = store.state.Ledgers.ledgerID;
+        };
+        const clearSelectedLedger = async() =>{
+            await store.dispatch('Ledgers/updateState', {ledgerID: ''});
+            ledgerID.value = ""
+        }
         const searchFilters = ref([
             {type:'text', placeholder:"Receipt#...", value: journal_no_search, width:24},
             {type:'text', placeholder:"Member No...", value: client_code_search, width:36},
             {type:'text', placeholder:"Member Name...", value: client_name_search, width:64},
             {type:'date', placeholder:"From Date...", value: from_date_search, width:36, title: "Date From Search"},
             {type:'date', placeholder:"To Date...", value: to_date_search, width:36, title: "Date To Search"},
+            {type:'text', placeholder:"Reference No...", value: reference_no_search, width:36},
+            {
+                type:'search-dropdown', label:"Cashbook", value: ledgerID.value, componentKey: ledComponentKey,
+                selectOptions: ledgerArray, optionSelected: handleSelectedLedger, required: true,
+                searchPlaceholder: 'Select Cashbook...', dropdownWidth: '250px', updateValue: "",
+                fetchData: fetchLedgers(),clearSearch: clearSelectedLedger()  
+            },
             {
                 type:'dropdown', placeholder:"Reversed..", value: reversal_status_search, width:32,
                 options: [{text:'Yes',value:'Yes'},{text:'No',value:'No'}]
@@ -286,6 +300,8 @@ export default{
                 status: "",
                 reversed: reversal_status_search.value,
                 property: customerID.value,
+                cashbook_ledger: ledgerID.value,
+                reference_no: reference_no_search.value,
                 company: companyID.value,
                 page_size: selectedValue.value
             } 
@@ -325,9 +341,10 @@ export default{
             from_date_search.value = "";
             to_date_search.value = "";
             reversal_status_search.value = "";
+            reference_no_search.value = "";
             journal_no_search.value= "";
-            custComponentKey.value += 1;
-            customerID.value = "";
+            ledComponentKey.value += 1;
+            ledgerID.value = "";
             searchReceipts();
         }
         const loadPrev = () =>{
@@ -636,7 +653,8 @@ export default{
         }
         onBeforeMount(()=>{
             journal_no_search.value = store.state.Journals.journal_no_search;
-            searchReceipts();     
+            searchReceipts();   
+            fetchAllLedgers();  
         })
         return{
             currentPage,showTotals,title, searchReceipts,resetFilters, addButtonLabel, searchFilters, tableColumns, receiptsList,printModalVisible1,

@@ -63,25 +63,27 @@
                     </div>             
                 </div>
                 <div class="fixed w-[95%] z-30 bottom-5 pb-2 bg-white">
-                    <ShowDetails v-model:visible="showDetails" :detailsTitle="detailsTitle" @hideDetails="hideDetails">
-                        <template v-slot:detailSlot>
-                            <div>
-                            <div class="tabs pt-2">
-                                <button v-for="(tab, index) in tabs1" :key="tab" :class="['tab', { active: activeTab1 === index }]"@click="selectTab1(index)">
-                                    {{ tab }}
-                                </button>
-                            </div>
-                            <div class="tab-content mt-3">
-                                <div v-if="activeTab1 == 0">
-                                    <JournalEntries 
-                                        :detailRows="journalEntries"
-                                    />
+                    <transition name="slide-up">
+                        <ShowDetails v-model:visible="showDetails" :detailsTitle="detailsTitle" @hideDetails="hideDetails">
+                            <template v-slot:detailSlot>
+                                <div>
+                                <div class="tabs pt-2">
+                                    <button v-for="(tab, index) in tabs1" :key="tab" :class="['tab', { active: activeTab1 === index }]"@click="selectTab1(index)">
+                                        {{ tab }}
+                                    </button>
                                 </div>
+                                <div class="tab-content mt-3">
+                                    <div v-if="activeTab1 == 0">
+                                        <JournalEntries 
+                                            :detailRows="journalEntries"
+                                        />
+                                    </div>
+                                </div>
+                                
                             </div>
-                            
-                        </div>
-                        </template>
-                    </ShowDetails>
+                            </template>
+                        </ShowDetails>
+                    </transition>
                 </div>
             </div>
 
@@ -500,5 +502,21 @@ export default{
     overflow-y: scroll;
     overflow-x: scroll;
 }
+.slide-up-enter-active,
+.slide-up-leave-active {
+  transition: transform 0.5s ease, opacity 0.5s ease;
+  transform-origin: bottom center; /* Animate from bottom */
+}
 
+.slide-up-enter-from,
+.slide-up-leave-to {
+  transform: scaleY(0);
+  opacity: 0;
+}
+
+.slide-up-enter-to,
+.slide-up-leave-from {
+  transform: scaleY(1);
+  opacity: 1;
+}
 </style>

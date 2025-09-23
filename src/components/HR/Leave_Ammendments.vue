@@ -133,7 +133,7 @@ export default{
             {label: "Days", key:"days_ammended"},
             {label: "Reason", key: "reason"},
             {label: "Approved", key:"days_approved"},
-            {label: "Status", key:"status"},
+            {label: "Status", key:"status", textColor: "textColor"},
         ])
         const actions = ref([
             {name: 'edit', icon: 'fa fa-edit', title: 'Edit Ammendment', rightName: 'Editing Leave Ammendments'},

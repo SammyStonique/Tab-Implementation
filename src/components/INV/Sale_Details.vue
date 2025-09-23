@@ -68,7 +68,7 @@ export default defineComponent({
         const errors = ref([]);
         const companyID = computed(()=> store.state.userData.company_id);
         const userID = computed(()=> store.state.userData.user_id);
-        const defaultSettings = computed(()=> store.state.Default_Settings.settingsList);
+        const defaultSettings = computed(()=> store.state.userData.defaultSettings);
         const defaultOutlet = computed(()=> store.state.Direct_Sales.defaultOutlet);
         const defaultCounter = computed(()=> store.state.Direct_Sales.defaultCounter);
         const defaultChannel = computed(()=> store.state.Direct_Sales.defaultChannel);
@@ -96,7 +96,7 @@ export default defineComponent({
             {label: "Avail.", key:"batch_count", type: "text", editable: false},
             {label: "Batch", key: "available_batch_count", type: "text", editable: false,},
             {label: "Qty", key: "quantity", type: "number", editable: true, minWidth:"50px", maxWidth:"50px"},
-            {label: "S.Price", key:"selling_price", type: "text", editable: false,},
+            {label: "S.Price", key:"selling_price", type: "text", editable: true,},
             {label: "Vat rate", key: "vat_rate", type: "select-dropdown", editable: false, options: taxRates, maxWidth:"50px"},
             {label: "Incl.", key: "vat_inclusivity", type: "select-dropdown", editable: false, maxWidth:"20px", options: [{ text: 'Yes', value: 'Inclusive' }, { text: 'No', value: 'Exclusive' }]},
             {label: "Vat Amnt", key: "vat_amount", type: "number", editable: false, maxWidth:"30px"},
@@ -401,7 +401,6 @@ export default defineComponent({
         }
 
         const fetchDefaultSettings = async() =>{
-            await store.dispatch('Default_Settings/fetchDefaultSettings', {company:companyID.value})
             for(let i=0; i < defaultSettings.value.length; i++){
                 if(defaultSettings.value[i].setting_name === 'Inventory Stock Control A/c'){
                     stock_control_account.value = defaultSettings.value[i].setting_value;

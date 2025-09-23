@@ -13,6 +13,9 @@
             @printList="printItemsList"
             @printExcel="downloadItemsExcel"
             @printCSV="downloadItemsCSV"
+            v-model:printModalVisible="printModalVisible"
+            :printTitle="printTitle"
+            :pdfUrl="pdfUrl"
             :addingRight="addingRight"
             :rightsModule="rightsModule"
             :columns="tableColumns"
@@ -22,6 +25,7 @@
             :idField="idField"
             @handleSelectionChange="handleSelectionChange"
             @handleActionClick="handleActionClick"
+            :groupingKey=true
             :count="propCount"
             :currentPage="currentPage"
             :result="propArrLen"
@@ -71,18 +75,24 @@ export default{
         const showNextBtn = ref(false);
         const showPreviousBtn = ref(false);
         const propModalVisible = ref(false);
+        const printModalVisible = ref(false);
+        const pdfUrl = ref(null);
+        const printTitle = ref('Print Item Catalog');
         const showModal = ref(false);
         const tableColumns = ref([
             {type: "checkbox"},
             {label: "Code", key:"item_code"},
             {label: "Item Name", key:"item_name"},
-            {label: "Category", key: "item_category"},
-            {label: "Type", key:"inventory_type"},
-            {label: "Stock", key:"available_stock", type: "number", textColor: "green"},
+            // {label: "Category", key: "item_category"},
+            {label: "Sale Type", key:"inventory_type"},
+            {label: "Stock Type", key:"stock_type"},
+            {label: "Stock", key:"available_stock", type: "number", txtColor: "txtColor"},
             {label: "P.Price", key:"default_purchase_price"},
             {label: "S.Price", key:"default_selling_price"},
-            {label: "Sold", key:"quantity_sold", type: "number", textColor: "red"},
+            {label: "Sold", key:"quantity_sold", type: "number", txtColor: "soldTxtColor"},
             {label: "Reorder", key:"reorder_level"},
+            {label: "Uom", key:"unit_of_measure"},
+            {label: "Vendor", key:"preferred_vendor"},
         ]);
         const showTotals = ref(true);
         const actions = ref([
@@ -91,21 +101,10 @@ export default{
         ])
         const companyID = computed(()=> store.state.userData.company_id);
         const categoryID = ref(null);
-        const item_name_search = computed({
-            get: () => store.state.Items_Catalog.item_name_search,
-            set: (value) => store.commit('Items_Catalog/SET_SEARCH_FILTERS', {"item_name_search":value}),
-        });
-        const item_code_search = computed({
-            get: () => store.state.Items_Catalog.item_code_search,
-            set: (value) => store.commit('Items_Catalog/SET_SEARCH_FILTERS', {"item_code_search":value}),
-        });
-        const stock_type_search = computed({
-            get: () => store.state.Items_Catalog.stock_type_search,
-            set: (value) => store.commit('Items_Catalog/SET_SEARCH_FILTERS', {"stock_type_search":value}),
-        });
-        const categories_array = computed({
-            get: () => store.state.Item_Categories.categoryArr,
-        });
+        const item_name_search = ref('');
+        const item_code_search = ref('');
+        const stock_type_search = ref('');
+        const categories_array = computed(() => store.state.Item_Categories.categoryArr);
         const handleSelectedCategory= async(option) =>{
             await store.dispatch('Item_Categories/handleSelectedCategory', option)
             categoryID.value = store.state.Item_Categories.categoryID;
@@ -196,6 +195,7 @@ export default{
         const searchItems = () =>{
             showLoader();
             showNextBtn.value = false;
+            selectedIds.value = [];
             showPreviousBtn.value = false;
             let formData = {
                 item_name: item_name_search.value,
@@ -233,8 +233,12 @@ export default{
             searchItems(selectedValue.value);
         };
         const resetFilters = () =>{
-            store.commit('Items_Catalog/RESET_SEARCH_FILTERS')
-            
+            item_name_search.value = "";
+            item_code_search.value = "";
+            stock_type_search.value = "";
+            categoryID.value = null;
+            currentPage.value = 1;
+            selectedValue.value = 50;
             searchItems();
         }
         const loadPrev = () =>{
@@ -317,10 +321,11 @@ export default{
             .post("api/v1/export-inventory-items-pdf/", formData, { responseType: 'blob' })
                 .then((response)=>{
                     if(response.status == 200){
-                        const blob1 = new Blob([response.data]);
-                        // Convert blob to URL
+                        const blob1 = new Blob([response.data], { type: 'application/pdf' });
                         const url = URL.createObjectURL(blob1);
-                        PrintJS({printable: url, type: 'pdf'});
+                        // PrintJS({printable: url, type: 'pdf'});
+                        pdfUrl.value = url;
+                        printModalVisible.value = true;
                     }
                 })
             .catch((error)=>{
@@ -389,12 +394,12 @@ export default{
             
         })
         return{
-            showTotals,searchItems,resetFilters, addButtonLabel, searchFilters, tableColumns, itemsList,
+            currentPage,showTotals,searchItems,resetFilters, addButtonLabel, searchFilters, tableColumns, itemsList,
             propResults, propArrLen, propCount, pageCount, showNextBtn, showPreviousBtn,
             loadPrev, loadNext, firstPage, lastPage, idField, actions, handleActionClick, propModalVisible, closeModal,
             submitButtonLabel, showModal, addNewItem, showLoader, loader, hideLoader, importItems, removeItem, removeItems,
             handleSelectionChange,addingRight,rightsModule,printItemsList,selectSearchQuantity,selectedValue,downloadItemsExcel,
-            downloadItemsCSV
+            downloadItemsCSV,printModalVisible,pdfUrl, printTitle,
         }
     }
 };

@@ -32,7 +32,7 @@
             </td>
           </tr>
           <template v-if="expandedGroups[groupKey] !== false">
-            <tr v-for="(row, rowIndex) in rows" :key="rowIndex" @dblclick="handleRowClick(row, rowIndex)" @contextmenu.prevent="handleRightClick(row, rowIndex, $event)" :style="shouldAddLine(row) ? { textDecoration: 'line-through' } : {}" :class="['cursor-pointer text-xxs sm:text-xs uppercase', `hover:bg-orange-50`, row.reconciled === 'Yes' ? 'bg-green-200': row.selected && row.rowColor ? row.rowColor : (rowIndex % 2 === 0 ? 'bg-gray-100' : 'bg-white')]">
+            <tr v-for="(row, rowIndex) in rows" :key="rowIndex" @dblclick="handleRowClick(row, rowIndex)" @contextmenu.prevent="handleRightClick(row, rowIndex, $event)" :style="shouldAddLine(row) ? { textDecoration: 'line-through' } : {}" :class="['cursor-pointer text-xxs sm:text-xs uppercase', `hover:bg-orange-50`, row.reconciled === 'Yes' ? 'bg-green-200': row.selected ? 'bg-orange-100' : (rowIndex % 2 === 0 ? 'bg-gray-100' : 'bg-white')]">
               <td v-for="(column, colIndex) in columns" :key="colIndex" :hidden="column.hidden" 
                   :class="[{'ellipsis': column.maxWidth}, { 'max-w-[300px]': column.maxWidth }, { 'min-w-[120px]': column.minWidth }]">
                 <template v-if="column.type === 'checkbox'">
@@ -57,13 +57,13 @@
                   <input v-model="row[column.key.selected]" @change="checkboxSelection(row)"  :name="row[column.key]" type="checkbox" :class="`checkbox mt-0.5`"/>
                 </template> -->
                 <template v-else>
-                  <div v-if="column.editable === true && column.type === 'number'" :class="`text-${column.textColor}-800 font-bold`">
+                  <div v-if="column.editable === true && column.type === 'number'" :class="`text-${row[column.txtColor]}-500 font-bold`">
                     <input :type="column.type" @change="handleInputChange($event, row)" pattern="^\d+(\.\d{0,2})?$" oninput="this.value = this.value.replace(/[^0-9.]/g, '').replace(/(\.\d{2})\d+/g, '$1')" class="w-full" v-model="row[column.key]" />             
                   </div>
                   <div v-else-if="column.editable === true">
                     <input :type="column.type" @change="handleInputChange($event, row)" v-model="row[column.key]" :class="[showValidation ? 'zigzag-border' : '']" /> 
                   </div>
-                  <div v-else :class="`bg-${row[column.textColor]}-500`">
+                  <div v-else :class="[`bg-${row[column.textColor]}-500`, `text-${row[column.txtColor]}-500`, { 'font-bold': !!row[column.txtColor] }]">
                     {{ getNestedValue(row, column.key) }}
                   </div>
                 </template>

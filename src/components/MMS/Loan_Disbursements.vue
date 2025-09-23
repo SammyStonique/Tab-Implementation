@@ -34,6 +34,7 @@
         :showPreviousBtn="showPreviousBtn"
         :selectedValue="selectedValue"
         @selectSearchQuantity="selectSearchQuantity"
+        :groupingKey=true
     />
     <MovableModal v-model:visible="depModalVisible" :title="title" :modal_top="modal_top" :modal_left="modal_left" :modal_width="modal_width"
         :loader="modal_loader" @showLoader="showModalLoader" @hideLoader="hideModalLoader"  @closeModal="closeModal">
@@ -114,6 +115,7 @@ export default{
             {label: "Member No", key: "member_number"},
             {label: "Member Name", key: "member_name"},
             {label: "Loan Amount", key: "loan_amount", type: "number", editable: false},
+            {label: "Cashbook", key: "cashbook",},
             {label: "Amount", key: "amount", type: "number", editable: false},
             {label: "P.V#", key: "journal_no"},
         ])

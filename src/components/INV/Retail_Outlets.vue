@@ -80,9 +80,9 @@ export default{
         const selectedOutlet = computed(()=> store.state.Retail_Outlets.selectedOutlet);
         const tableColumns = ref([
             {type: "checkbox"},
-            {label: "Name", key: "warehouse_name", type: "text", editable: false},
-            {label: "Type", key: "area_location", type: "text", editable: false},
-            {label: "Location", key: "retail_type", type: "text", editable: false},
+            {label: "Name", key: "warehouse_name", type: "text"},
+            {label: "Type", key: "retail_type", type: "text"},
+            {label: "Location", key: "area_location", type: "text"},
         ])
         const actions = ref([
             {name: 'edit', icon: 'fa fa-edit', title: 'Edit Outlet', rightName: 'Editing Outlet Counter'},

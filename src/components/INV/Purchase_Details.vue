@@ -22,7 +22,8 @@ import PageStyleComponent from '@/components/PageStyleComponent.vue';
 import { useStore } from "vuex";
 import { useToast } from "vue-toastification";
 import { useDateFormatter } from '@/composables/DateFormatter';
-import DynamicTable from '../DynamicTable.vue';
+// import DynamicTable from '../DynamicTable.vue';
+import DynamicTable from '@/components/INV/DynamicTable.vue';
 
 export default defineComponent({
     name: 'Purchase_Details',
@@ -117,7 +118,8 @@ export default defineComponent({
 
         const handleSelectedOutlet = async(option) =>{
             await store.dispatch('Retail_Outlets/handleSelectedOutlet', option)
-            outletID.value = store.state.Retail_Outlets.outletID;
+            // outletID.value = store.state.Retail_Outlets.outletID;     
+            await store.dispatch('Direct_Purchases/updateState', {defaultOutletID: store.state.Retail_Outlets.outletID});
         };
         const handleSelectedCashbook = async(option) =>{
             await store.dispatch('Ledgers/handleSelectedLedger', option)
@@ -131,6 +133,7 @@ export default defineComponent({
         const clearSelectedOutlet = async() =>{
             await store.dispatch('Retail_Outlets/updateState', {outletID: ''});
             outletID.value = ""
+            await store.dispatch('Direct_Purchases/updateState', {defaultOutletID: outletID.value});
         }
         const clearSelectedCashbook = async() =>{
             await store.dispatch('Ledgers/updateState', {ledgerID: ''});

@@ -10,6 +10,9 @@
             @removeItem="removePurchase"
             @removeSelectedItems="removePurchases"
             @printList="printPurchasesList"
+            v-model:printModalVisible="printModalVisible"
+            :printTitle="printTitle"
+            :pdfUrl="pdfUrl"
             :addingRight="addingRight"
             :rightsModule="rightsModule"
             :columns="tableColumns"
@@ -79,7 +82,7 @@ export default{
         const toast = useToast();
         const loader = ref('');
         const catComponentKey = ref('');
-        const defaultSettings = computed(()=> store.state.Default_Settings.settingsList);
+        const defaultSettings = computed(()=> store.state.userData.defaultSettings);
         const idField = 'sale_id';
         const addButtonLabel = ref('New Purchase Order');
         const addingRight = ref('Adding Inventory Purchase Order');
@@ -103,6 +106,9 @@ export default{
         const showNextBtn = ref(false);
         const showPreviousBtn = ref(false);
         const propModalVisible = ref(false);
+        const printModalVisible = ref(false);
+        const pdfUrl = ref(null);
+        const printTitle = ref('Print Purchase Orders List');
         const showModal = ref(false);
         const tableColumns = ref([
             {type: "checkbox"},
@@ -114,7 +120,7 @@ export default{
             {label: "Amount", key:"total_amount", type: "number"},
             {label: "Paid", key:"total_paid", type: "number"},
             {label: "Balance", key:"balance", type: "number"},
-            {label: "Status", key:"status"},
+            {label: "Status", key:"status", textColor: "textColor"},
             {label: "Done By", key:"done_by"},
         ]);
         const showTotals = ref(true);
@@ -208,6 +214,7 @@ export default{
         const searchPurchases = () =>{
             showLoader();
             showNextBtn.value = false;
+            selectedIds.value = [];
             showPreviousBtn.value = false;
             let formData = {
                 date_from: date_from_search.value,
@@ -249,6 +256,8 @@ export default{
             searchPurchases(selectedValue.value);
         };
         const resetFilters = () =>{
+            currentPage.value = 1,
+            selectedValue.value = 50,
             date_from_search.value = "",
             date_to_search.value = "",
             sale_code_search.value = "",
@@ -289,7 +298,6 @@ export default{
             // scrollToTop();
         };
         const fetchDefaultSettings = async() =>{
-            await store.dispatch('Default_Settings/fetchDefaultSettings', {company:companyID.value})
             for(let i=0; i < defaultSettings.value.length; i++){
                 if(defaultSettings.value[i].setting_name === 'Default Retail Outlet'){
                     store.dispatch('Direct_Sales/updateState', {defaultOutlet:defaultSettings.value[i].setting_value_name, defaultOutletID:defaultSettings.value[i].setting_value})
@@ -385,7 +393,7 @@ export default{
         };
         const selectTab = async(index) => {
             let formData = {
-                company: companyID.value,
+                company_id: companyID.value,
                 sale: saleID.value,
             }
             if(index == 1){
@@ -429,11 +437,12 @@ export default{
             .post("api/v1/export-inventory-sales-pdf/", formData, { responseType: 'blob' })
                 .then((response)=>{
                     if(response.status == 200){
-                        const blob1 = new Blob([response.data]);
-                        // Convert blob to URL
+                        const blob1 = new Blob([response.data], { type: 'application/pdf' });
                         const url = URL.createObjectURL(blob1);
-                        PrintJS({printable: url, type: 'pdf'});
-                    }
+                        // PrintJS({printable: url, type: 'pdf'});
+                        pdfUrl.value = url;
+                        printModalVisible.value = true;
+                    } 
                 })
             .catch((error)=>{
                 console.log(error.message);
@@ -449,8 +458,8 @@ export default{
             
         })
         return{
-            showTotals,searchPurchases,resetFilters, addButtonLabel, searchFilters, tableColumns, purchasesList,
-            propResults, propArrLen, propCount, pageCount, showNextBtn, showPreviousBtn,
+            currentPage,showTotals,searchPurchases,resetFilters, addButtonLabel, searchFilters, tableColumns, purchasesList,
+            propResults, propArrLen, propCount, pageCount, showNextBtn, showPreviousBtn,printModalVisible,pdfUrl, printTitle,
             loadPrev, loadNext, firstPage, lastPage, idField, actions, handleActionClick, propModalVisible, closeModal,
             submitButtonLabel, showModal, addNewPurchase, showLoader, loader, hideLoader, removePurchase, removePurchases,
             handleSelectionChange,addingRight,rightsModule,printPurchasesList,selectSearchQuantity,selectedValue,showDetails,

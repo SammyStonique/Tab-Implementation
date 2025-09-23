@@ -221,7 +221,7 @@ export default{
             }else{
                 try {
                     const response = await store.dispatch('Customers/createCustomer', formData);
-                    if (response && response.status === 200) {
+                    if (response && response.status === 201) {
                         hideModalLoader();
                         toast.success('Debtor created successfully!');
                         handleReset();

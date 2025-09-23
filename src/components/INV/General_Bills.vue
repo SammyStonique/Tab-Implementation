@@ -22,6 +22,7 @@
             @handleSelectionChange="handleSelectionChange"
             @handleActionClick="handleActionClick"
             @handleShowDetails="handleShowDetails"
+            :groupingKey=true
             :count="propCount"
             :currentPage="currentPage"
             :result="propArrLen"
@@ -89,7 +90,7 @@ import InvoicePayments from "@/components/InvoicePayments.vue";
 import PrintJS from 'print-js';
 
 export default{
-    name: 'Bills',
+    name: 'General_Bills',
     components:{
         PageComponent, MovableModal,DynamicForm,JournalEntries,InvoiceLines,InvoicePayments
     },

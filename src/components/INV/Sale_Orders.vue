@@ -10,6 +10,9 @@
             @removeItem="removeSale"
             @removeSelectedItems="removeSales"
             @printList="printSalesList"
+            v-model:printModalVisible="printModalVisible"
+            :printTitle="printTitle"
+            :pdfUrl="pdfUrl"
             :addingRight="addingRight"
             :rightsModule="rightsModule"
             :columns="tableColumns"
@@ -79,7 +82,7 @@ export default{
         const toast = useToast();
         const loader = ref('');
         const catComponentKey = ref('');
-        const defaultSettings = computed(()=> store.state.Default_Settings.settingsList);
+        const defaultSettings = computed(()=> store.state.userData.defaultSettings);
         const idField = 'sale_id';
         const addButtonLabel = ref('New Sale Order');
         const addingRight = ref('Adding Inventory Sale Order');
@@ -103,6 +106,9 @@ export default{
         const showNextBtn = ref(false);
         const showPreviousBtn = ref(false);
         const propModalVisible = ref(false);
+        const printModalVisible = ref(false);
+        const pdfUrl = ref(null);
+        const printTitle = ref('Print Sale Orders List');
         const showModal = ref(false);
         const tableColumns = ref([
             {type: "checkbox"},
@@ -112,7 +118,7 @@ export default{
             {label: "Customer", key:"client"},
             {label: "Phone No", key:"client_phone_number"},
             {label: "Amount", key:"total_amount", type: "number"},
-            {label: "Status", key:"status"},
+            {label: "Status", key:"status", textColor:"textColor"},
             {label: "Done By", key:"done_by"},
         ]);
         const showTotals = ref(true);
@@ -206,6 +212,7 @@ export default{
         const searchSales = () =>{
             showLoader();
             showNextBtn.value = false;
+            selectedIds.value = [];
             showPreviousBtn.value = false;
             let formData = {
                 date_from: date_from_search.value,
@@ -247,6 +254,8 @@ export default{
             searchSales(selectedValue.value);
         };
         const resetFilters = () =>{
+            currentPage.value = 1,
+            selectedValue.value = 50,
             date_from_search.value = "",
             date_to_search.value = "",
             sale_code_search.value = "",
@@ -286,8 +295,7 @@ export default{
             searchSales();
             // scrollToTop();
         };
-        const fetchDefaultSettings = async() =>{
-            await store.dispatch('Default_Settings/fetchDefaultSettings', {company:companyID.value})
+        const fetchDefaultSettings = () =>{
             for(let i=0; i < defaultSettings.value.length; i++){
                 if(defaultSettings.value[i].setting_name === 'Default Retail Outlet'){
                     store.dispatch('Direct_Sales/updateState', {defaultOutlet:defaultSettings.value[i].setting_value_name, defaultOutletID:defaultSettings.value[i].setting_value})
@@ -392,7 +400,7 @@ export default{
         };
         const selectTab = async(index) => {
             let formData = {
-                company: companyID.value,
+                company_id: companyID.value,
                 sale: saleID.value,
             }
             if(index == 1){
@@ -436,11 +444,12 @@ export default{
             .post("api/v1/export-inventory-sales-pdf/", formData, { responseType: 'blob' })
                 .then((response)=>{
                     if(response.status == 200){
-                        const blob1 = new Blob([response.data]);
-                        // Convert blob to URL
+                        const blob1 = new Blob([response.data], { type: 'application/pdf' });
                         const url = URL.createObjectURL(blob1);
-                        PrintJS({printable: url, type: 'pdf'});
-                    }
+                        // PrintJS({printable: url, type: 'pdf'});
+                        pdfUrl.value = url;
+                        printModalVisible.value = true;
+                    } 
                 })
             .catch((error)=>{
                 console.log(error.message);
@@ -456,8 +465,8 @@ export default{
             
         })
         return{
-            showTotals,searchSales,resetFilters, addButtonLabel, searchFilters, tableColumns, salesList,
-            propResults, propArrLen, propCount, pageCount, showNextBtn, showPreviousBtn,
+            currentPage,showTotals,searchSales,resetFilters, addButtonLabel, searchFilters, tableColumns, salesList,
+            propResults, propArrLen, propCount, pageCount, showNextBtn, showPreviousBtn,printModalVisible,pdfUrl, printTitle,
             loadPrev, loadNext, firstPage, lastPage, idField, actions, handleActionClick, propModalVisible, closeModal,
             submitButtonLabel, showModal, addNewSale, showLoader, loader, hideLoader, removeSale, removeSales,
             handleSelectionChange,addingRight,rightsModule,printSalesList,selectSearchQuantity,selectedValue,showDetails,

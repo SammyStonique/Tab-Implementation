@@ -144,7 +144,7 @@ const actions = {
       if (result.value) {
         axios.post(`api/v1/delete-loan-disbursement/`,formData)
         .then((response)=>{
-          if(response.status == 200){
+          if(response.data.msg == "Success"){
               Swal.fire("Poof! Loan Disbursement removed succesfully!", {
                 icon: "success",
               }); 

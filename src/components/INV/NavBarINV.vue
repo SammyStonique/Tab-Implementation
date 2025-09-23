@@ -112,13 +112,13 @@
                         </button>
                     </div>
                     <div class="py-2 px-3 pl-4 w-full hover:bg-slate-500 hover:w-full">
-                        <button class="flex text-sm w-full" @click="openPage({'INV':'Invoices'})">
+                        <button class="flex text-sm w-full" @click="openPage({'INV':'General_Invoices'})">
                             <i class="fa fa-file-invoice pt-2 mr-2" aria-hidden="true"></i>
                             <p class="">Invoices</p>
                         </button>
                     </div>
                     <div class="py-2 px-3 pl-4 w-full hover:bg-slate-500 hover:w-full">
-                        <button class="flex text-sm w-full" @click="openPage({'INV':'Receipts'})">
+                        <button class="flex text-sm w-full" @click="openPage({'INV':'General_Receipts'})">
                             <i class="fa fa-pencil-square-o pt-2 mr-2" aria-hidden="true"></i>
                             <p class="">Receipts</p>
                         </button>
@@ -168,13 +168,13 @@
     
                     </div>
                     <div class="py-2 px-3 pl-4 w-full hover:bg-slate-500 hover:w-full">
-                        <button class="flex text-sm w-full" @click="openPage({'INV':'Bills'})">
+                        <button class="flex text-sm w-full" @click="openPage({'INV':'General_Bills'})">
                             <i class="fa fa-credit-card pt-2 mr-2" aria-hidden="true"></i>
                             <p class="">Bills</p>
                         </button>
                     </div>
                     <div class="py-2 px-3 pl-4 w-full hover:bg-slate-500 hover:w-full">
-                        <button class="flex text-sm w-full" @click="openPage({'INV':'Payments'})">
+                        <button class="flex text-sm w-full" @click="openPage({'INV':'Payment_Vouchers'})">
                             <i class="fa fa-pencil-square-o pt-2 mr-2" aria-hidden="true"></i>
                             <p class="">Payments</p>
                         </button>
@@ -215,6 +215,30 @@
                     </div>
                 </div>
             </div> 
+
+            <div class="web-links dropdown w-36">
+                <div class="py-0.5 px-2.5 h-full hover:bg-slate-500 hover:rounded">
+                    <button class="flex w-full" @click="showManDropdown">
+                        <i class="fa fa-industry pt-2 mr-2" aria-hidden="true"></i>
+                        <p class="pt-1.5">Manufacturing</p>
+                    </button>
+                </div>
+                <div class="dropdown-content w-48 absolute rounded border border-gray-200 bg-white shadow-slate-400 shadow-sm" v-if="manufacturing_dropdown">
+                    <div class="py-2 px-3 pl-4 w-full hover:bg-slate-500 hover:w-full">
+                        <button class="flex text-sm w-full" @click="openPage({'INV':'Recipes'})">
+                            <i class="fa fa-book-open pt-2 mr-2" aria-hidden="true"></i>
+                            <p class="">Recipes</p>
+                        </button>
+                    </div>
+                    <div class="py-2 px-3 pl-4 w-full hover:bg-slate-500 hover:w-full">
+                        <button class="flex text-sm w-full" @click="openPage({'INV':'Production_Batches'})">
+                        <i class="fa fa-gears pt-2 mr-2" aria-hidden="true"></i>
+                        <p class="">Production Batches</p>
+                        </button>
+                    </div>
+                    
+                </div>
+            </div>
        
         </div>
     </div>
@@ -232,6 +256,7 @@ export default defineComponent({
         const sales_dropdown = ref(false);
         const purchases_dropdown = ref(false);
         const stock_dropdown = ref(false);
+        const manufacturing_dropdown = ref(false);
         const userDetails = ref([]);
         const dropdown = ref(false);
 
@@ -240,6 +265,7 @@ export default defineComponent({
             settings_dropdown.value = false;
             purchases_dropdown.value  = false;
             stock_dropdown.value = false;
+            manufacturing_dropdown.value = false;
             dropdown.value = true;
             items_dropdown.value  = !items_dropdown.value ;
         }
@@ -248,6 +274,7 @@ export default defineComponent({
             settings_dropdown.value = false;
             items_dropdown.value  = false;
             stock_dropdown.value = false;
+            manufacturing_dropdown.value = false;
             dropdown.value = true;
             purchases_dropdown.value  = !purchases_dropdown.value ;
         }
@@ -256,6 +283,7 @@ export default defineComponent({
             items_dropdown.value  = false;
             purchases_dropdown.value = false;
             stock_dropdown.value = false;
+            manufacturing_dropdown.value = false;
             dropdown.value = true;
             sales_dropdown.value  = !sales_dropdown.value ;
         }
@@ -264,6 +292,7 @@ export default defineComponent({
             items_dropdown.value  = false;
             purchases_dropdown.value  = false;
             stock_dropdown.value = false;
+            manufacturing_dropdown.value = false;
             dropdown.value = true;
             settings_dropdown.value  = !settings_dropdown.value ;
         }
@@ -272,8 +301,18 @@ export default defineComponent({
             items_dropdown.value  = false;
             purchases_dropdown.value  = false;
             settings_dropdown.value = false;
+            manufacturing_dropdown.value = false;
             dropdown.value = true;
             stock_dropdown.value  = !stock_dropdown.value ;
+        }
+        const showManDropdown = () =>{
+            sales_dropdown.value = false;
+            items_dropdown.value  = false;
+            purchases_dropdown.value  = false;
+            settings_dropdown.value = false;
+            stock_dropdown.value = false;
+            dropdown.value = true;
+            manufacturing_dropdown.value  = !manufacturing_dropdown.value ;
         }
         const closeDropdown = () =>{
             sales_dropdown.value = false;
@@ -281,6 +320,7 @@ export default defineComponent({
             purchases_dropdown.value  = false;
             settings_dropdown.value = false;
             stock_dropdown.value = false;
+            manufacturing_dropdown.value = false;
             dropdown.value = false;
         }
         const openPage = (pageName) =>{
@@ -292,12 +332,12 @@ export default defineComponent({
             store.commit('modulesTab/MINIMIZE_TAB')
         };
         return{
-            dropdown, settings_dropdown, sales_dropdown,
+            dropdown, settings_dropdown, sales_dropdown,manufacturing_dropdown,
             items_dropdown, stock_dropdown,purchases_dropdown, 
             userDetails, closeDropdown,
             showItemsDropdown, showSalesDropdown,
             showPurchasesDropdown, showStockDropdown,
-            showSettingsDropdown,
+            showSettingsDropdown,showManDropdown,
             openPage,showHomePage
         }
     },

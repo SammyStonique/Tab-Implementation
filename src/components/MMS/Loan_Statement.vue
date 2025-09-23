@@ -118,6 +118,9 @@
                     <div v-show="activeTab == 6">                  
                         <DynamicTable :key="documentTableKey" :rightsModule="rightsModule" :columns="documentColumns" :rows="computedDocumentRows" :idField="idFieldDocument" :actions="actionsDocument" @action-click="documentActionClick"/>
                     </div>  
+                    <div v-show="activeTab == 7">                  
+                        <DynamicTable :key="documentTableKey" :columns="activityColumns" :rows="computedActivityRows" :showActions=false />
+                    </div> 
                 </div>
             </div>
         </template>
@@ -168,7 +171,7 @@ export default defineComponent({
         const companyID = computed(()=> store.state.userData.company_id);
         const userID = computed(()=> store.state.userData.user_id);
         // const tabs = ref(['Loan Details','Armotization Schedule','Loan Statement','Statement','Loan Repayment','Loan Guarantors','Loan Securities','Loan Documents']);
-        const tabs = ref(['Loan Details','Armotization Schedule','Statement','Loan Repayment','Loan Guarantors','Loan Securities','Loan Documents']);
+        const tabs = ref(['Loan Details','Armotization Schedule','Statement','Loan Repayment','Loan Guarantors','Loan Securities','Loan Documents', 'Loan Activity Logs']);
         const activeTab = ref(0);
         const mainComponentKey = ref(0);
         const tableKey = ref(0);
@@ -185,6 +188,7 @@ export default defineComponent({
         const computedGuarantorRows = computed(()=> store.state.Loan_Applications.selectedGuarantors);
         const computedSecurityRows = computed(()=> store.state.Loan_Applications.selectedSecurities);
         const computedDocumentRows = computed(()=> store.state.Loan_Applications.selectedDocuments);
+        const computedActivityRows = computed(()=> store.state.Loan_Applications.loanActivities);
         const statementRows = computed(()=> store.state.Loan_Applications.selectedTransactions);
         const statement1Rows = computed(()=> store.state.Loan_Applications.selectedStatement);
         const loanDetails = computed(()=> store.state.Loan_Applications.loanDetails);
@@ -249,7 +253,12 @@ export default defineComponent({
         const actionsDocument = ref([
             {name: 'preview', icon: 'fa fa-paperclip', title: 'View Document',rightName: 'Adding Loan Documents'},
         ]);
-
+        const activityColumns = ref([
+            {label: "Date", key:"created_at", type: "text"},
+            {label: "Activity Type", key:"activity_type", type: "text"},
+            {label: "Description", key:"description", type: "text"},
+            {label: "Done By", key:"done_by", type: "text"},
+        ]);
         const actionsUtility = ref([
 
         ]);
@@ -914,7 +923,7 @@ export default defineComponent({
             scheduleTableKey, idFieldSchedule, scheduleColumns, actionsSchedule, statementTableKey, idFieldStatement, statementRows,statement1Rows,showActions,searchFilters,resetFilters,dropdownOptions,
             statementColumns,statement1Columns, actionsStatement, loanDetails,loanProduct,loanMember, scheduleActionClick,showAddButton,searchLoanTransactions,printLoanTransactions,handleDynamicOption,
             scheduleActionClick,tnt_modal_loader, dep_modal_loader, util_modal_loader, depModalVisible, displayButtons,guarantorColumns,securityColumns, printLoanStatement,handleDynamicOption1,
-            documentActionClick,documentColumns,documentTableKey,actionsDocument,computedDocumentRows,
+            documentActionClick,documentColumns,documentTableKey,actionsDocument,computedDocumentRows,activityColumns,computedActivityRows,
             modal_top, modal_left, modal_width, showDepModalLoader, hideDepModalLoader, handleDepReset,
             flex_basis, flex_basis_percentage, paymentActionClick,handleOpenLink,rightsModule,isDisabled,
         }

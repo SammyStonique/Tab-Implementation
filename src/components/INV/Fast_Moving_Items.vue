@@ -9,6 +9,9 @@
         @removeItem=""
         @removeSelectedItems=""
         @printList="printItemsList"
+        v-model:printModalVisible="printModalVisible"
+        :printTitle="printTitle"
+        :pdfUrl="pdfUrl"
         :columns="tableColumns"
         :rows="itemsList"
         :actions="actions"
@@ -17,6 +20,7 @@
         :idField="idField"
         @handleSelectionChange="handleSelectionChange"
         @handleActionClick="handleActionClick"
+        :groupingKey=true
         :count="propCount"
         :currentPage="currentPage"
         :result="propArrLen"
@@ -68,12 +72,13 @@ export default{
         const companyID = computed(()=> store.state.userData.company_id);
         const outletID = ref('');
         const categoryID = ref(null);
-        const outlets_array = computed({
-            get: () => store.state.Retail_Outlets.outletArr,
-        });
+        const outlets_array = computed(() => store.state.Retail_Outlets.outletArr);
         const idField = 'inventory_item_id';
         const selectedIds = ref([]);
         const appModalVisible = ref(false);
+        const printModalVisible = ref(false);
+        const pdfUrl = ref(null);
+        const printTitle = ref('Print Fast Moving Items');
         const itemsList = ref([]);
         const propResults = ref([]);
         const propArrLen = ref(0);
@@ -97,7 +102,7 @@ export default{
             {label: "Type", key:"inventory_type"},
             {label: "P.Price", key:"default_purchase_price"},
             {label: "S.Price", key:"default_selling_price"},
-            {label: "Sold", key:"quantity_sold", type: "number"},
+            {label: "Sold", key:"quantity_sold", type: "number", txtColor: "soldTxtColor"},
             {label: "Reorder", key:"reorder_level"},
         ])
         const showTotals = ref(true);
@@ -105,21 +110,10 @@ export default{
         const actions = ref([
             {name: 'delete', icon: 'fa fa-trash', title: 'Delete Item'},
         ])
-        const item_name_search = computed({
-            get: () => store.state.Items_Catalog.item_name_search,
-            set: (value) => store.commit('Items_Catalog/SET_SEARCH_FILTERS', {"item_name_search":value}),
-        });
-        const item_code_search = computed({
-            get: () => store.state.Items_Catalog.item_code_search,
-            set: (value) => store.commit('Items_Catalog/SET_SEARCH_FILTERS', {"item_code_search":value}),
-        });
-        const stock_type_search = computed({
-            get: () => store.state.Items_Catalog.stock_type_search,
-            set: (value) => store.commit('Items_Catalog/SET_SEARCH_FILTERS', {"stock_type_search":value}),
-        });
-        const categories_array = computed({
-            get: () => store.state.Item_Categories.categoryArr,
-        });
+        const item_name_search = ref('');
+        const item_code_search = ref('');
+        const stock_type_search = ref('');
+        const categories_array = computed(() => store.state.Item_Categories.categoryArr);
         const handleSelectedOutlet= async(option) =>{
             await store.dispatch('Retail_Outlets/handleSelectedOutlet', option)
             outletID.value = store.state.Retail_Outlets.outletID;
@@ -177,6 +171,7 @@ export default{
             if(outletID.value != ''){
                 showLoader();
                 showNextBtn.value = false;
+                selectedIds.value = [];
                 showPreviousBtn.value = false;
                 let formData = {
                     item_name: item_name_search.value,
@@ -249,6 +244,10 @@ export default{
             stock_type_search.value = "";
             catComponentKey.value += 1;
             outComponentKey.value += 1;
+            categoryID.value = null;
+            outletID.value = '';
+            currentPage.value = 1;
+            selectedValue.value = 50;
             searchItems();
         }
         const closeModal = () =>{
@@ -269,10 +268,11 @@ export default{
             .post("api/v1/export-fast-moving-items-pdf/", formData, { responseType: 'blob' })
                 .then((response)=>{
                     if(response.status == 200){
-                        const blob1 = new Blob([response.data]);
-                        // Convert blob to URL
+                        const blob1 = new Blob([response.data], { type: 'application/pdf' });
                         const url = URL.createObjectURL(blob1);
-                        PrintJS({printable: url, type: 'pdf'});
+                        // PrintJS({printable: url, type: 'pdf'});
+                        pdfUrl.value = url;
+                        printModalVisible.value = true;
                     }
                 })
             .catch((error)=>{
@@ -286,9 +286,9 @@ export default{
             
         })
         return{
-            showAddButton,showActions,showTotals,title, searchItems, idField, selectedIds, actions, itemsList, propArrLen,propCount,propResults,appModalVisible,
+            currentPage,showAddButton,showActions,showTotals,title, searchItems, idField, selectedIds, actions, itemsList, propArrLen,propCount,propResults,appModalVisible,
             searchFilters,tableColumns,resetFilters,loadPrev,loadNext,firstPage,lastPage,
-            showNextBtn,showPreviousBtn,displayButtons,
+            showNextBtn,showPreviousBtn,displayButtons,printModalVisible,pdfUrl, printTitle,
             modal_top, modal_left, modal_width, showLoader, loader, hideLoader, modal_loader, showModalLoader, hideModalLoader,
             closeModal, handleSelectionChange, pageComponentKey, flex_basis, flex_basis_percentage,printItemsList,selectSearchQuantity,selectedValue
         }

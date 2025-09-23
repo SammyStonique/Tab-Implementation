@@ -11,8 +11,10 @@ const state = {
   itemsArr: [],
   itemsArray: [],
   lineItemsArray: [],
+  ingredientsArray: [],
   itemID: null,
   itemName: '',
+  item_uom: null,
   item_name_search: '',
   item_code_search: '',
   stock_type_search: '',
@@ -32,8 +34,10 @@ const mutations = {
     state.itemsArr = [];
     state.itemsArray = [];
     state.lineItemsArray = [];
+    state.ingredientsArray = [];
     state.itemID = null;
     state.itemName = null;
+    state.item_uom = null;
     state.item_name_search = '';
     state.item_code_search = '';
     state.stock_type_search = '';
@@ -71,6 +75,9 @@ const mutations = {
   },
   SET_SELECTED_VENDOR(state, vendor) {
     state.selectedVendor = vendor;
+  },
+  SET_INGREDIENTS_ARRAY(state, ingredients){
+    state.ingredientsArray = ingredients;
   },
   SET_STATE(state, payload) {
     for (const key in payload) {
@@ -282,9 +289,30 @@ const actions = {
     if (selectedItem) {
         state.itemID = selectedItem.inventory_item_id;
         state.itemName = selectedItem.item_code + " - " + selectedItem.item_name;
+        state.item_uom = selectedItem.unit_of_measure.uom_name;
         state.itemsArray = [...state.itemsArray, selectedItem];
     }
     commit('ITEMS_ARRAY', state.itemsArray);
+      
+  },
+  handleSelectedRecipeIngredient({ commit, state }, option){
+    const selectedItem = state.itemsList.find(item => (item.item_code + " - " +item.item_name) === option);
+    if (selectedItem) {
+        state.itemID = selectedItem.inventory_item_id;
+        state.itemName = selectedItem.item_code + " - " + selectedItem.item_name;
+        selectedItem.uom = selectedItem.unit_of_measure.uom_name;
+        selectedItem.recipe_ingredient_id = 'recipe_ingredient_id';
+        selectedItem.ingr_wastage = 0;
+        selectedItem.ingr_quantity = 1;
+        selectedItem.ingr_purchase_price = parseFloat(selectedItem.default_purchase_price)
+        selectedItem.ingr_total_amount = parseFloat(selectedItem.default_purchase_price) * 1;
+        const exists = state.ingredientsArray.some(item => item.inventory_item_id === selectedItem.inventory_item_id);
+        if (!exists) {
+            state.ingredientsArray = [...state.ingredientsArray, selectedItem];
+        }
+        
+    }
+    commit('SET_INGREDIENTS_ARRAY', state.ingredientsArray);
       
   },
   handleSelectedItem({ commit, state }, option){
@@ -416,6 +444,9 @@ const actions = {
   removeItemLine({commit, state}, index){
     state.lineItemsArray.splice(index, 1); 
   },
+  removeIngredientLine({commit, state}, index){
+    state.ingredientsArray.splice(index, 1); 
+  }
 };
   
 const getters = {

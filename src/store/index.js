@@ -65,6 +65,8 @@ import Counter_Channels from './INV/Counter_Channels';
 import Direct_Purchases from './INV/Direct_Purchases';
 import Stock_Adjustments from './INV/Stock_Adjustments';
 import Stock_Transfers from './INV/Stock_Transfers';
+import Recipes from './INV/Recipes';
+import Production_Batches from './INV/Production_Batches';
 
 
 import Pay_Cycles from './HR/Pay_Cycles';
@@ -185,7 +187,7 @@ export default createStore({
     Templates,Late_Payment_Fees,Tenant_Balances,
 
     Item_Categories,Items_Catalog,Uom,Retail_Outlets,Item_Location,Outlet_Counters,Direct_Sales,Counter_Channels,Direct_Purchases,
-    Stock_Adjustments,Stock_Transfers,
+    Stock_Adjustments,Stock_Transfers,Recipes,Production_Batches,
     
     Ledgers, Currencies, Taxes, Journals, Customers, Vendors,Fiscal_Periods,Asset_Categories,Assets,Petty_Cash,Petty_Cash_Refunds,Petty_Cash_Replenishments,
     Petty_Cash_Vouchers,Petty_Cash_Item_Categories,Ledger_Balances,Recurring_Journals,

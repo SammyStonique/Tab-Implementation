@@ -129,7 +129,7 @@ export default{
             {label: "End Date", key:"end_date"},
             {label: "Applied", key:"days_requested"},
             {label: "Approved", key:"days_approved"},
-            {label: "Status", key:"status"},
+            {label: "Status", key:"status", textColor: "textColor"},
         ])
         const actions = ref([
             {name: 'edit', icon: 'fa fa-edit', title: 'Edit Application', rightName: 'Editing Leave Applications'},

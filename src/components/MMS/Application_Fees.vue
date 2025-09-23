@@ -41,6 +41,13 @@
             :displayButtons="displayButtons" @handleSubmit="createApplicationFee" @handleReset="handleReset"
         />
     </MovableModal>
+    <MovableModal v-model:visible="postModalVisible" :title="title1" :modal_top="modal_top" :modal_left="modal_left" :modal_width="modal_width"
+        :loader="modal_loader1" @showLoader="showModalLoader1" @hideLoader="hideModalLoader1"  @closeModal="closeModal1">
+        <DynamicForm 
+            :fields="formFields1" :flex_basis="flex_basis" :flex_basis_percentage="flex_basis_percentage" 
+            :displayButtons="displayButtons" @handleSubmit="postApplicationFee" @handleReset="handleReset1"
+        />
+    </MovableModal>
 </template>
 
 <script>
@@ -64,16 +71,19 @@ export default{
         const toast = useToast();
         const loader = ref('');
         const modal_loader = ref('none');
+        const modal_loader1 = ref('none');
         const memComponentKey = ref(0);
         const prodComponentKey = ref(0);
         const feeSearchComponentKey = ref(0);
         const title = ref('Loan Fees Details');
+        const title1 = ref('Post Loan Fees');
         const addButtonLabel = ref('New Fee');
         const addingRight = ref('Adding Loan Fees');
         const removingRight = ref('Deleting Loan Fees');
         const rightsModule = ref('MMS');
         const idField = 'loan_application_fee_id';
         const depModalVisible = ref(false);
+        const postModalVisible = ref(false);
         const printModalVisible = ref(false);
         const pdfUrl = ref(null);
         const printTitle = ref('Print Application Fees');
@@ -114,12 +124,15 @@ export default{
             {label: "Posted", key: "posted", type: "text", editable: false},
         ])
         const actions = ref([
+            {name: 'post-fees', icon: 'fa fa-check-circle', title: 'Post Fees', rightName: 'Adding Loan Fees'},
+            {name: 'unpost-fees', icon: 'fa fa-repeat', title: 'Unpost Fees', rightName: 'Adding Loan Fees'},
             {name: 'mark-posted', icon: 'fa fa-spinner', title: 'Mark As Posted', rightName: 'Adding Loan Fees'},
             {name: 'unmark-posted', icon: 'fa fa-minus-circle', title: 'Unmark As Posted', rightName: 'Adding Loan Fees'},
             {name: 'delete', icon: 'fa fa-trash', title: 'Delete Fee', rightName: 'Deleting Loan Fees'},
         ])
         const companyID = computed(()=> store.state.userData.company_id);
         const loanFeeID = ref('');
+        const feeID = ref([]);
         const feeSearchID =ref('');
         const applicationID = ref('');
         const handleSelectedSearchfee = async(option) =>{
@@ -205,6 +218,9 @@ export default{
                 { type: 'text', name: 'amount',label: "Amount", value: selectedFee.value?.amount || '0', required: true },
             ];
         };
+        const formFields1 = ref([
+            { type: 'date', name: 'date',label: "Date", value: '', required: true },
+        ]);
         watch([selectedFee, selectedFee, selectedApplication], () => {
             if (selectedFee.value && selectedFee.value && selectedApplication.value) {
                 memComponentKey.value += 1;
@@ -222,8 +238,108 @@ export default{
             flex_basis.value = '1/3';
             flex_basis_percentage.value = '33.333';
         }
+        const postApplicationFee = async() =>{
+            showModalLoader1();
+            let formData = {
+                date: formFields1.value[0].value,
+                loan_fees: [feeID.value],
+                company: companyID.value
+            }
+            await axios.post('api/v1/post-loan-application-fee/', formData)
+            .then((response)=>{
+                if(response.data.msg == "Success"){
+                    toast.success("Fee Posted Successfully");
+                    postModalVisible.value = false;
+                    searchApplicationFees();
+                    handleReset1();
+                }else{
+                    toast.error("Error Posting Fee");
+                }
+            })
+            .catch((error)=>{
+                toast.error("Error Posting Fee: " + error.message);
+            })
+            .finally(()=>{
+                hideModalLoader1();
+            })
+        };
+        const handleReset1 = () =>{
+            formFields1.value[0].value = '';
+            feeID.value = "";
+        }
+        const showModalLoader1 = () =>{
+            modal_loader1.value = "block";
+        }
+        const hideModalLoader1 = () =>{
+            modal_loader1.value = "none";
+        }
         const handleActionClick = async(rowIndex, action, row) =>{
-            if( action == 'mark-posted'){
+            if( action == 'post-fees'){
+                feeID.value = row['loan_application_fee_id'];
+                const postedStatus = row['posted'];
+                if(postedStatus == "No"){
+                    postModalVisible.value = true;                
+                }else{
+                    toast.error("Fee Already Posted!")
+                }
+                
+                
+            }else if( action == 'unpost-fees'){
+                const appFeeID = [row['loan_application_fee_id']];
+                const postedStatus = row['posted'];
+                if(postedStatus == "Yes"){
+                    let formData = {
+                        loan_fees: appFeeID,
+                        company: companyID.value
+                    }
+                    Swal.fire({
+                        title: "Are you sure?",
+                        text: `Do you wish to Unpost Fee?`,
+                        type: 'warning',
+                        showCloseButton: true,
+                        showCancelButton: true,
+                        confirmButtonText: 'Yes, Unpost!',
+                        cancelButtonText: 'Cancel!',
+                        customClass: {
+                            confirmButton: 'swal2-confirm-custom',
+                            cancelButton: 'swal2-cancel-custom',
+                        },
+                        showLoaderOnConfirm: true,
+                        }).then((result) => {
+                        if (result.value) {
+                            axios.post(`api/v1/unpost-loan-application-fee/`,formData)
+                            .then((response)=>{
+                            if(response.data.msg == "Success"){
+                                Swal.fire("Success!", {
+                                    icon: "success",
+                                }); 
+                                searchApplicationFees();
+                            }
+                            else{
+                                Swal.fire({
+                                    title: "Error Unposting Fee",
+                                    icon: "warning",
+                                });
+                            }                   
+                            })
+                            .catch((error)=>{
+                                toast.error(error.message)
+                                Swal.fire({
+                                    title: error.message,
+                                    icon: "warning",
+                                });
+                            })
+                        }else{
+                            Swal.fire(`Fee Not Posted!`);
+                        }
+                    })
+                }else{
+                    toast.error("Fee Not Posted!")
+                }
+                
+                
+            }
+            else if( action == 'mark-posted'){
                 const appFeeID = row['loan_application_fee_id'];
                 const loan_fee_id = row['loan_fee_id'];
                 const loan_app_id = row['loan_application_id'];
@@ -568,6 +684,10 @@ export default{
             depModalVisible.value = false;
             handleReset();
         };
+        const closeModal1 = async() =>{
+            postModalVisible.value = false;
+            handleReset1();
+        };
         const printFeesList = () =>{
             showLoader();
             let formData = {
@@ -610,7 +730,8 @@ export default{
             loadPrev, loadNext, firstPage, lastPage, actions, formFields, depModalVisible, addNewFee,printModalVisible,pdfUrl, printTitle,
             displayButtons,flex_basis,flex_basis_percentage, handleActionClick, handleReset, createApplicationFee,
             showLoader, loader, hideLoader, modal_loader, showModalLoader, hideModalLoader, removeFee, removeFees,printFeesList,
-            addingRight,removingRight,rightsModule, closeModal,selectSearchQuantity,selectedValue,handleSelectionChange
+            addingRight,removingRight,rightsModule, closeModal,selectSearchQuantity,selectedValue,handleSelectionChange,
+            postModalVisible,title1,formFields1,postApplicationFee,handleReset1,modal_loader1,showModalLoader1,hideModalLoader1,closeModal1
         }
     }
 }

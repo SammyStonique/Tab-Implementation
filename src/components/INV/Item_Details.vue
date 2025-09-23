@@ -138,7 +138,7 @@ export default defineComponent({
                 {  
                     type:'search-dropdown', label:"Category", value: categoryValue.value, componentKey: catComponentKey,
                     selectOptions: categoryArray, optionSelected: handleSelectedCategory, required: true,
-                    searchPlaceholder: 'Select Category...', dropdownWidth: '390px', updateValue: selectedCategory.value,
+                    searchPlaceholder: 'Select Category...', dropdownWidth: '280px', updateValue: selectedCategory.value,
                     fetchData: fetchCategories(), clearSearch: clearSelectedCategory()
                 },
                 { type: 'text', name: 'item_code',label: "Code", value: selectedItem.value?.item_code || '', required: true },
@@ -152,14 +152,18 @@ export default defineComponent({
                 {  
                     type:'search-dropdown', label:"Uom", value: uomValue.value, componentKey: uomComponentKey,
                     selectOptions: uomArray, optionSelected: handleSelectedUom, required: true,
-                    searchPlaceholder: 'Select Uom...', dropdownWidth: '390px', updateValue: selectedUom.value,
+                    searchPlaceholder: 'Select Uom...', dropdownWidth: '280px', updateValue: selectedUom.value,
                     fetchData: fetchUoms(), clearSearch: clearSelectedUom()
                 },
             ];
         };
         const handleReset = () =>{
             for(let i=0; i < formFields.value.length; i++){
-                formFields.value[i].value = '';
+                if(formFields.value[i].type == 'number'){
+                    formFields.value[i].value = 0;
+                }else{
+                    formFields.value[i].value = '';
+                }
             }
             vendorID.value = '';
             uomID.value = '';
@@ -168,13 +172,25 @@ export default defineComponent({
             catComponentKey.value += 1;
             uomComponentKey.value += 1;
             for(let i=0; i < additionalFields.value.length; i++){
-                additionalFields.value[i].value = '';
+                if(additionalFields.value[i].type == 'number'){
+                    additionalFields.value[i].value = 0;
+                }else{
+                    additionalFields.value[i].value = '';
+                }
             }
             for(let i=0; i < additionalFields1.value.length; i++){
-                additionalFields1.value[i].value = '';
+                if(additionalFields1.value[i].type == 'number'){
+                    additionalFields1.value[i].value = 0;
+                }else{
+                    additionalFields1.value[i].value = '';
+                }
             }
             for(let i=0; i < additionalFields2.value.length; i++){
-                additionalFields2.value[i].value = '';
+                if(additionalFields2.value[i].type == 'number'){
+                    additionalFields2.value[i].value = 0;
+                }else{
+                    additionalFields2.value[i].value = '';
+                }
             }
         }
 
@@ -197,12 +213,8 @@ export default defineComponent({
             ];
         };
         const calculateSellingPrice = (value) =>{
-            calculated_selling_price.value = computed_purchase_price.value + ((value/100) * computed_purchase_price.value);
-            console.log("THE VALUE IS ",value)
-            console.log("THE PURCHASE PRICE IS ",computed_purchase_price.value)
-            console.log("THE MARKUP IS ",selling_markup.value)
-            console.log("THE SELLING PRICE IS ",calculated_selling_price.value)
-        }
+            additionalFields1.value[2].value = additionalFields1.value[0].value + ((value/100) * additionalFields1.value[0].value);
+        };
         const additionalFields1 = ref([]);
         const updateAdditionalFormFields1 = () => {
             additionalFields1.value = [
@@ -218,6 +230,8 @@ export default defineComponent({
                     searchPlaceholder: 'Select Prefered Vendor...', dropdownWidth: '390px', updateValue: selectedVendor.value,
                     fetchData: fetchVendors(), clearSearch: clearSelectedVendor()
                 },
+                {required: false},
+                {required: false},
             ];
         };
 
@@ -420,8 +434,8 @@ export default defineComponent({
             venComponentKey.value += 1;
             catComponentKey.value += 1;
             uomComponentKey.value += 1;
-            flex_basis.value = '1/4';
-            flex_basis_percentage.value = '25';
+            flex_basis.value = '1/6';
+            flex_basis_percentage.value = '20';
             additional_flex_basis.value = '1/5';
             additional_flex_basis_percentage.value = '25';
         })

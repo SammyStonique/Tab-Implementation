@@ -10,6 +10,9 @@
             @removeItem="removeSale"
             @removeSelectedItems="removeSales"
             @printList="printSalesList"
+            v-model:printModalVisible="printModalVisible"
+            :printTitle="printTitle"
+            :pdfUrl="pdfUrl"
             :addingRight="addingRight"
             :rightsModule="rightsModule"
             :columns="tableColumns"
@@ -20,6 +23,7 @@
             @handleSelectionChange="handleSelectionChange"
             @handleActionClick="handleActionClick"
             @handleShowDetails="handleShowDetails"
+            :groupingKey=true
             :count="propCount"
             :currentPage="currentPage"
             :result="propArrLen"
@@ -79,7 +83,7 @@ export default{
         const toast = useToast();
         const loader = ref('');
         const catComponentKey = ref('');
-        const defaultSettings = computed(()=> store.state.Default_Settings.settingsList);
+        const defaultSettings = computed(()=> store.state.userData.defaultSettings);
         const idField = 'sale_id';
         const addButtonLabel = ref('New Direct Sale');
         const addingRight = ref('Adding Inventory Sale');
@@ -103,6 +107,9 @@ export default{
         const showNextBtn = ref(false);
         const showPreviousBtn = ref(false);
         const propModalVisible = ref(false);
+        const printModalVisible = ref(false);
+        const pdfUrl = ref(null);
+        const printTitle = ref('Print Direct Sales List');
         const showModal = ref(false);
         const tableColumns = ref([
             {type: "checkbox"},
@@ -111,9 +118,9 @@ export default{
             {label: "Outlet", key: "outlet_name"},
             {label: "Customer", key:"client"},
             {label: "Phone No", key:"client_phone_number"},
-            {label: "Amnt", key:"total_amount", type: "number"},
+            {label: "Amnt", key:"total_amount", type: "number", txtColor:"txtColorPaid"},
             {label: "Paid", key:"total_paid", type: "number"},
-            {label: "Bal.", key:"balance", type: "number"},
+            {label: "Bal.", key:"balance", type: "number", txtColor:"txtColorBal"},
             {label: "Rcpt No", key:"receipt_no"},
             {label: "Ref No", key:"reference_no"},
             {label: "Done By", key:"done_by"},
@@ -126,36 +133,13 @@ export default{
         ])
         const companyID = computed(()=> store.state.userData.company_id);
         const categoryID = ref(null);
-        const sale_code_search = computed({
-            get: () => store.state.Direct_Sales.sale_code_search,
-            set: (value) => store.commit('Direct_Sales/SET_SEARCH_FILTERS', {"sale_code_search":value}),
-        });
-
-        const min_amount_search = computed({
-            get: () => store.state.Direct_Sales.min_amount_search,
-            set: (value) => store.commit('Direct_Sales/SET_SEARCH_FILTERS', {"min_amount_search":value}),
-        });
-        const max_amount_search = computed({
-            get: () => store.state.Direct_Sales.max_amount_search,
-            set: (value) => store.commit('Direct_Sales/SET_SEARCH_FILTERS', {"max_amount_search":value}),
-        });
-
-        const done_by_search = computed({
-            get: () => store.state.Direct_Sales.done_by_search,
-            set: (value) => store.commit('Direct_Sales/SET_SEARCH_FILTERS', {"done_by_search":value}),
-        });
-        const date_from_search = computed({
-            get: () => store.state.Direct_Sales.date_from_search,
-            set: (value) => store.commit('Direct_Sales/SET_SEARCH_FILTERS', {"date_from_search":value}),
-        });
-        const date_to_search = computed({
-            get: () => store.state.Direct_Sales.date_to_search,
-            set: (value) => store.commit('Direct_Sales/SET_SEARCH_FILTERS', {"date_to_search":value}),
-        });
-        const customer_search = computed({
-            get: () => store.state.Direct_Sales.customer_search,
-            set: (value) => store.commit('Direct_Sales/SET_SEARCH_FILTERS', {"customer_search":value}),
-        });
+        const sale_code_search = ref('');
+        const min_amount_search = ref('');
+        const max_amount_search = ref('');
+        const done_by_search = ref('');
+        const date_from_search = ref('');
+        const date_to_search = ref('');
+        const customer_search = ref('');
 
         const searchFilters = ref([
             {type:'text', placeholder:"Code...", value: sale_code_search, width:40,},
@@ -231,6 +215,7 @@ export default{
         const searchSales = () =>{
             showLoader();
             showNextBtn.value = false;
+            selectedIds.value = [];
             showPreviousBtn.value = false;
             let formData = {
                 date_from: date_from_search.value,
@@ -273,7 +258,15 @@ export default{
             searchSales(selectedValue.value);
         }
         const resetFilters = () =>{
-            store.commit('Direct_Sales/RESET_SEARCH_FILTERS')
+            date_from_search.value = '';
+            date_to_search.value = '';
+            sale_code_search.value = '';   
+            min_amount_search.value = '';
+            max_amount_search.value = '';
+            customer_search.value = '';
+            done_by_search.value = '';
+            currentPage.value = 1;
+            selectedValue.value = 50;
             searchSales();
         }
         const loadPrev = () =>{
@@ -307,7 +300,6 @@ export default{
             // scrollToTop();
         };
         const fetchDefaultSettings = async() =>{
-            await store.dispatch('Default_Settings/fetchDefaultSettings', {company:companyID.value})
             for(let i=0; i < defaultSettings.value.length; i++){
                 if(defaultSettings.value[i].setting_name === 'Default Retail Outlet'){
                     store.dispatch('Direct_Sales/updateState', {defaultOutlet:defaultSettings.value[i].setting_value_name, defaultOutletID:defaultSettings.value[i].setting_value})
@@ -403,11 +395,12 @@ export default{
             .post("api/v1/export-inventory-sales-pdf/", formData, { responseType: 'blob' })
                 .then((response)=>{
                     if(response.status == 200){
-                        const blob1 = new Blob([response.data]);
-                        // Convert blob to URL
+                        const blob1 = new Blob([response.data], { type: 'application/pdf' });
                         const url = URL.createObjectURL(blob1);
-                        PrintJS({printable: url, type: 'pdf'});
-                    }               
+                        // PrintJS({printable: url, type: 'pdf'});
+                        pdfUrl.value = url;
+                        printModalVisible.value = true;
+                    }             
                 })
             .catch((error)=>{
                 console.log(error.message);
@@ -423,8 +416,8 @@ export default{
             
         })
         return{
-            showTotals,searchSales,resetFilters, addButtonLabel, searchFilters, tableColumns, salesList,
-            propResults, propArrLen, propCount, pageCount, showNextBtn, showPreviousBtn,
+            currentPage,showTotals,searchSales,resetFilters, addButtonLabel, searchFilters, tableColumns, salesList,
+            propResults, propArrLen, propCount, pageCount, showNextBtn, showPreviousBtn,printModalVisible,pdfUrl, printTitle,
             loadPrev, loadNext, firstPage, lastPage, idField, actions, handleActionClick, propModalVisible, closeModal,
             submitButtonLabel, showModal, addNewSale, showLoader, loader, hideLoader, removeSale, removeSales,
             handleSelectionChange,addingRight,rightsModule,printSalesList,selectedValue,selectSearchQuantity,showDetails,

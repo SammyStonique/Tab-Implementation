@@ -158,7 +158,7 @@ export default{
                 {  
                     type:'search-dropdown', label:"Category", value: categoryValue.value, componentKey: catComponentKey,
                     selectOptions: categoryArray, optionSelected: handleSelectedCategory, required: true,
-                    searchPlaceholder: 'Select Category...', dropdownWidth: '500px', updateValue: selectedCategory.value,
+                    searchPlaceholder: 'Select Category...', dropdownWidth: '600px', updateValue: selectedCategory.value,
                     fetchData: fetchCategories(), clearSearch: clearSelectedCategory()
                 },
                 { type: 'text', name: 'vendor_name',label: "Name", value: selectedVendor.value?.vendor_name || '', required: true },
@@ -194,6 +194,7 @@ export default{
         const createVendor = async() =>{
             showModalLoader();
             let formData = {
+                vendor_code: '-',
                 vendor_name: formFields.value[1].value,
                 contact_person: formFields.value[5].value,
                 email: formFields.value[3].value,
@@ -221,7 +222,7 @@ export default{
             }else{
                 try {
                     const response = await store.dispatch('Vendors/createVendor', formData);
-                    if (response && response.status === 200) {
+                    if (response && response.status === 201) {
                         hideModalLoader();
                         toast.success('Vendor created successfully!');
                         handleReset();
@@ -242,6 +243,7 @@ export default{
             errors.value = [];
             let formData = {
                 vendor: selectedVendor.value.vendor_id,
+                vendor_code: selectedVendor.value.vendor_code,
                 vendor_name: formFields.value[1].value,
                 contact_person: formFields.value[5].value,
                 email: formFields.value[3].value,

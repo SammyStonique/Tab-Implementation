@@ -56,7 +56,7 @@ export default defineComponent({
         const errors = ref([]);
         const companyID = computed(()=> store.state.userData.company_id);
         const userID = computed(()=> store.state.userData.user_id);
-        const defaultSettings = computed(()=> store.state.Default_Settings.settingsList);
+        const defaultSettings = computed(()=> store.state.userData.defaultSettings);
         const defaultOutlet = computed(()=> store.state.Direct_Sales.defaultOutlet);
         const defaultStockType = computed(()=> store.state.Direct_Sales.defaultStockType);
         const selectedSale = computed(()=> store.state.Direct_Sales.selectedSale);
@@ -398,8 +398,6 @@ export default defineComponent({
                 company: companyID.value,
                 user: userID.value,
             }
-
-            console.log("THE FORM DATA IS ",formData)
        
             errors.value = [];
             for(let i=0; i < formFields.value.length ; i++){
@@ -579,9 +577,9 @@ export default defineComponent({
             modal_loader.value = "none";
         }
 
-        const fetchDefaultSettings = async() =>{
-            await store.dispatch('Default_Settings/fetchDefaultSettings', {company:companyID.value})
-        };
+        // const fetchDefaultSettings = async() =>{
+        //     await store.dispatch('Default_Settings/fetchDefaultSettings', {company:companyID.value})
+        // };
 
         onBeforeMount(()=>{ 
             store.dispatch('Ledgers/updateState', { invoiceItemsArray: []})
@@ -590,7 +588,7 @@ export default defineComponent({
             flex_basis_percentage.value = '20';
         })
         onMounted(async()=>{
-            fetchDefaultSettings();
+            // fetchDefaultSettings();
             fetchTaxes();
             if(defaultOutlet.value != null && defaultStockType.value != null){
                 fetchItems(defaultStockType.value)

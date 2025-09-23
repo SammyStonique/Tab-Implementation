@@ -142,10 +142,10 @@ export default{
             {label: "Member Name", key:"member"},
             {label: "Applied", key: "formatted_applied_amount"},
             {label: "Approved", key: "formatted_approved_amount"},
-            {label: "Disbursed", key: "disbursed"},
+            // {label: "Disbursed", key: "disbursed"},
             {label: "Status", key:"approval_status", textColor: "textColor"},
             {label: "Loan Remarks", key:"loan_remarks"},
-            {label: "Appr. By", key:"approved_by"},
+            // {label: "Appr. By", key:"approved_by"},
             {label: "Exempt", key:"exempt_penalty"},
             {label: "Posted", key:"posted"},
             {label: "Due", key:"loan_due_date"},
@@ -237,6 +237,7 @@ export default{
                 { type: 'text', name: 'installment_from',label: "Installment From", value: 1, required: true },
                 { type: 'text', name: 'installment_to',label: "Installment To", value: 1, required: true },
                 { type: 'date', name: 'new_repayment_date',label: "New Date", value: '', required: false },
+                { type: 'text-area', name: 'loan_remarks',label: "Loan Remarks", value: null , required: false,textarea_rows: '3', textarea_cols: '56'}
             ]
         };
         const handleReset1 = () =>{
@@ -263,6 +264,8 @@ export default{
                 installment_from: formFields1.value[1].value,
                 installment_to: formFields1.value[2].value,
                 new_repayment_date: formFields1.value[3].value,
+                loan_remarks: formFields1.value[4].value || null,
+                user: userID.value,
                 company: companyID.value
             }
             axios.post(`api/v1/update-loan-repayment-date/`,formData)
@@ -578,7 +581,8 @@ export default{
                 }else{
                     let formData = {
                         loan_application: selectedIds.value,
-                        company: companyID.value
+                        company: companyID.value,
+                        user: userID.value
                     }
                     Swal.fire({
                         title: "Are you sure?",
@@ -635,7 +639,8 @@ export default{
                 }else{
                     let formData = {
                         loan_application: selectedIds.value,
-                        company: companyID.value
+                        company: companyID.value,
+                        user: userID.value
                     }
                     Swal.fire({
                         title: "Are you sure?",

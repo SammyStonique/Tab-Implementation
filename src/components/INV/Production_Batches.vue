@@ -3,26 +3,27 @@
         <PageComponent 
             :loader="loader" @showLoader="showLoader" @hideLoader="hideLoader"
             :addButtonLabel="addButtonLabel"
-            @handleAddNew="addNewAdjustment"
+            @handleAddNew="addNewBatch"
             :searchFilters="searchFilters"
-            @searchPage="searchAdjustments"
+            @searchPage="searchBatches"
             @resetFilters="resetFilters"
-            @removeItem="removeAdjustment"
-            @removeSelectedItems="removeAdjustments"
-            @printList="printAdjustmentsList"
+            @removeItem="removeBatch"
+            @removeSelectedItems="removeBatchs"
+            @printList="printBatchesList"
             v-model:printModalVisible="printModalVisible"
             :printTitle="printTitle"
             :pdfUrl="pdfUrl"
             :addingRight="addingRight"
             :rightsModule="rightsModule"
             :columns="tableColumns"
-            :rows="adjustmentsList"
+            :rows="recipeList"
             :actions="actions"
             :showTotals="showTotals"
             :idField="idField"
             @handleSelectionChange="handleSelectionChange"
             @handleActionClick="handleActionClick"
             @handleShowDetails="handleShowDetails"
+            :groupingKey=true
             :count="propCount"
             :currentPage="currentPage"
             :result="propArrLen"
@@ -46,11 +47,6 @@
                 </div>
                 <div class="tab-content mt-3">
                     <div v-if="activeTab == 0">
-                        <JournalEntries 
-                            :detailRows="journalEntries"
-                        />
-                    </div>
-                    <div v-if="activeTab == 1">
                         <StockAdjustments 
                             :adjustmentItemsRows="itemLines"
                         />
@@ -68,34 +64,31 @@ import { ref, computed, onMounted, onBeforeMount} from 'vue';
 import PageComponent from '@/components/PageComponent.vue'
 import { useStore } from "vuex";
 import { useToast } from "vue-toastification";
-import JournalEntries from "@/components/JournalEntries.vue";
 import StockAdjustments from "@/components/StockAdjustments.vue";
 import PrintJS from 'print-js';
 
 export default{
-    name: 'Stock_Adjustments',
+    name: 'Production_Batches',
     components:{
-        PageComponent,JournalEntries,StockAdjustments,
+        PageComponent,StockAdjustments,
     },
     setup(){
         const store = useStore();
         const toast = useToast();
         const loader = ref('');
-        const catComponentKey = ref('');
-        const defaultSettings = computed(()=> store.state.Default_Settings.settingsList);
-        const idField = 'adjustment_id';
-        const addButtonLabel = ref('New Stock Adjustment');
-        const addingRight = ref('Adding Stock Adjustment');
+        const idField = 'production_batch_id';
+        const addButtonLabel = ref('New Batch');
+        const addingRight = ref('Adding Production Batches');
         const rightsModule = ref('Inventory');
         const submitButtonLabel = ref('Add');
         const selectedIds = ref([]);
-        const adjustmentsList = ref([]);
+        const recipeList = ref([]);
         const propResults = ref([]);
         const propArrLen = ref(0);
         const propCount = ref(0);
         const selectedValue = ref(50);
         const detailsTitle = ref('Item Details');
-        const tabs = ref(['Journal Entries','Adjustment Items']);
+        const tabs = ref(['Ingredients']);
         const activeTab = ref(0);
         const adjustmentID = ref(null);
         const showDetails = ref(false);
@@ -108,88 +101,88 @@ export default{
         const propModalVisible = ref(false);
         const printModalVisible = ref(false);
         const pdfUrl = ref(null);
-        const printTitle = ref('Print Stock Adjustments');
+        const printTitle = ref('Print Production Batches List');
         const showModal = ref(false);
         const tableColumns = ref([
             {type: "checkbox"},
-            {label: "Code", key:"adjustment_code"},
-            {label: "Date", key:"date"},
-            {label: "Outlet Name", key: "warehouse_name"},
-            {label: "Amount", key:"total_amount", type: "number"},
-            {label: "Done By", key:"done_by"},
+            {label: "Date", key:"production_date"},
+            {label: "Batch#", key:"batch_number"},
+            {label: "Code", key:"item_code"},
+            {label: "Item Name", key:"item_name"},
+            {label: "Quantity", key: "quantity"},
+            {label: "Expiry Date", key:"expiry_date"},
         ]);
-        const showTotals = ref(true);
+        const showTotals = ref(false);
         const actions = ref([
-            {name: 'delete', icon: 'fa fa-trash', title: 'Delete Adjustment', rightName: 'Deleting Stock Adjustment'},
+            {name: 'delete', icon: 'fa fa-trash', title: 'Delete Recipe', rightName: 'Deleting Production Batches'},
         ])
         const companyID = computed(()=> store.state.userData.company_id);
-        const categoryID = ref(null);
-        const adjustment_code_search = ref('');
-        const done_by_search = ref('');
-        const date_from_search = ref('');
-        const date_to_search = ref('');
-        const warehouse_search = ref('');
+        const item_code_search = ref('');
+        const item_name_search = ref('');
+        const from_date_search = ref('');
+        const to_date_search = ref('');
+        const batch_number_search = ref('');
 
         const searchFilters = ref([
-            {type:'text', placeholder:"Code...", value: adjustment_code_search, width:40,},
-            {type:'text', placeholder:"Outlet...", value: warehouse_search, width:48,},
-            {type:'date', placeholder:"From Date...", value: date_from_search, width:30,},
-            {type:'date', placeholder:"To Date...", value: date_to_search, width:30,},
-            {type:'text', placeholder:"Done By...", value: done_by_search, width:48,},
+            {type:'text', placeholder:"Batch#...", value: batch_number_search, width:36,},
+            {type:'text', placeholder:"Code...", value: item_code_search, width:32,},
+            {type:'text', placeholder:"Item Name...", value: item_name_search, width:48,},
+            {type:'date', placeholder:"From Date...", value: from_date_search, width:32, title: "Date From Search"},
+            {type:'date', placeholder:"To Date...", value: to_date_search, width:32, title: "Date To Search"},
         ]);
         const handleSelectionChange = (ids) => {
             selectedIds.value = ids;
         };
 
-        const removeAdjustment = async() =>{
+        const removeBatch = async() =>{
             if(selectedIds.value.length == 1){
                 let formData = {
                     company: companyID.value,
-                    adjustment_array: selectedIds.value
+                    production_batch: selectedIds.value
                 }
                 try{
-                    const response = await store.dispatch('Stock_Adjustments/deleteStockAdjustment',formData)
+                    const response = await store.dispatch('Production_Batches/deleteProductionBatch',formData)
                     if(response && response.data.msg == "Success"){
-                        toast.success("Adjustment Removed Succesfully");
-                        searchAdjustments();
+                        toast.success("Batch Removed Succesfully");
+                        searchBatches();
                     }
                 }
                 catch(error){
                     console.error(error.message);
-                    toast.error('Failed to remove Adjustment: ' + error.message);
+                    toast.error('Failed to remove Batch: ' + error.message);
                 }
                 finally{
                     selectedIds.value = [];
                 }
             }else if(selectedIds.value.length > 1){
-                toast.error("You have selected more than 1 Adjustment") 
+                toast.error("You have selected more than 1 Batch") 
             }else{
-                toast.error("Please Select An Adjustment To Remove")
+                toast.error("Please Select A Batch To Remove")
             }
         }
-        const removeAdjustments = async() =>{
+        const removeBatchs = async() =>{
             if(selectedIds.value.length){
                 let formData = {
                     company: companyID.value,
-                    adjustment_array: selectedIds.value
+                    production_batch: selectedIds.value
                 }
                 try{
-                    const response = await store.dispatch('Stock_Adjustments/deleteStockAdjustment',formData)
+                    const response = await store.dispatch('Production_Batches/deleteProductionBatch',formData)
                     if(response && response.data.msg == "Success"){
-                        toast.success("Adjustment(s) Removed Succesfully");
-                        searchAdjustments();
+                        toast.success("Batch(s) Removed Succesfully");
+                        searchBatches();
                     }
                 }
                 catch(error){
                     console.error(error.message);
-                    toast.error('Failed to remove Adjustments: ' + error.message);
+                    toast.error('Failed to remove Batches: ' + error.message);
                 }
                 finally{
                     selectedIds.value = [];
 
                 }
             }else{
-                toast.error("Please Select Adjustments To Remove")
+                toast.error("Please Select Batches To Remove")
             }
         }
         const showLoader = () =>{
@@ -199,28 +192,27 @@ export default{
             loader.value = "none";
         }
        
-        const searchAdjustments = () =>{
+        const searchBatches = () =>{
             showLoader();
             showNextBtn.value = false;
             selectedIds.value = [];
             showPreviousBtn.value = false;
             let formData = {
-                date_from: date_from_search.value,
-                date_to: date_to_search.value,
-                adjustment_code: adjustment_code_search.value,
-                warehouse: warehouse_search.value,
-                inventory_item: "",
-                done_by: done_by_search.value,
-                company_id: companyID.value,
+                batch_number: batch_number_search.value,
+                date_from: from_date_search.value,
+                date_to: to_date_search.value,
+                item_name: item_name_search.value,
+                item_code: item_code_search.value,
+                company: companyID.value,
                 page_size: selectedValue.value
             } 
             axios
-            .post(`api/v1/stock-adjustment-search/?page=${currentPage.value}`,formData)
+            .post(`api/v1/production-batch-search/?page=${currentPage.value}`,formData)
             .then((response)=>{
-                adjustmentsList.value = response.data.results;
-                store.commit('Stock_Adjustments/LIST_ADJUSTMENTS', adjustmentsList.value)
+                recipeList.value = response.data.results;
+                store.commit('Production_Batches/LIST_BATCHES', recipeList.value)
                 propResults.value = response.data;
-                propArrLen.value = adjustmentsList.value.length;
+                propArrLen.value = recipeList.value.length;
                 propCount.value = propResults.value.count;
                 pageCount.value = Math.ceil(propCount.value / selectedValue.value);
                 if(response.data.next){
@@ -239,17 +231,17 @@ export default{
         };
         const selectSearchQuantity = (newValue) =>{
             selectedValue.value = newValue;
-            searchSales(selectedValue.value);
+            searchBatches(selectedValue.value);
         }
         const resetFilters = () =>{
             currentPage.value = 1;
-            adjustment_code_search.value = '';
-            done_by_search.value = '';
-            date_from_search.value = '';
-            date_to_search.value = '';
-            warehouse_search.value = '';    
+            item_code_search.value = '';
+            item_name_search.value = '';  
+            from_date_search.value = '';
+            to_date_search.value = '';
+            batch_number_search.value = ''; 
             selectedValue.value = 50;
-            searchAdjustments();
+            searchBatches();
         }
         const loadPrev = () =>{
             if (currentPage.value <= 1){
@@ -258,7 +250,7 @@ export default{
                 currentPage.value -= 1;
             }
             
-            searchAdjustments();
+            searchBatches();
             // scrollToTop();
         }
         const loadNext = () =>{
@@ -268,70 +260,60 @@ export default{
                 currentPage.value += 1;
             }
             
-            searchAdjustments();
+            searchBatches();
             // scrollToTop(); 
         }
         const firstPage = ()=>{
             currentPage.value = 1;
-            searchAdjustments();
+            searchBatches();
             // scrollToTop();
         }
         const lastPage = () =>{
             currentPage.value = pageCount.value;
-            searchAdjustments();
+            searchBatches();
             // scrollToTop();
         };
-        const addNewAdjustment = () =>{
-            store.commit('Stock_Adjustments/initializeStore');
-            store.commit('pageTab/ADD_PAGE', {'INV':'Stock_Adjustment_Details'});
-            store.state.pageTab.invActiveTab = 'Stock_Adjustment_Details';         
+        const addNewBatch = () =>{
+            store.dispatch('Production_Batches/updateState', { ingredientsArray: []})
+            store.dispatch('Items_Catalog/updateState', { item_uom: null, ingredientsArray: []})
+            store.commit('Production_Batches/initializeStore');
+            store.commit('pageTab/ADD_PAGE', {'INV':'Production_Details'});
+            store.state.pageTab.invActiveTab = 'Production_Details';         
         }
         const handleActionClick = async(rowIndex, action, row) =>{
             if(action == 'delete'){
-                const adjustmentID = [row[idField]];
-                const outletID = row['warehouse_id'];
+                const batchID = [row[idField]];
                 let formData = {
                     company: companyID.value,
-                    adjustment_array: adjustmentID,
-                    outlet: outletID
+                    production_batch: batchID,
                 }
-                await store.dispatch('Stock_Adjustments/deleteStockAdjustment',formData).
+                await store.dispatch('Production_Batches/deleteProductionBatch',formData).
                 then(()=>{
-                    searchAdjustments();
+                    searchBatches();
                 })
-            }else if(action == 'view'){
+            }
+            else if(action == 'view'){
                 console.log("VIEWING TAKING PLACE");
             }
         };
         const handleShowDetails = async(row) =>{
             activeTab.value = 0;
-            adjustmentID.value = row['adjustment_code'];
-            detailsTitle.value = row['adjustment_code'] + ' Details';
+            adjustmentID.value = row['item_code'];
+            detailsTitle.value = row['item_code'] + ' Details';
             showDetails.value = true;
-            let formData = {
-                client_id: row['adjustment_id'],
-                company: companyID.value
-            }
-            axios.post('api/v1/inventory-journal-entries-search/',formData)
-            .then((response)=>{
-                journalEntries.value = response.data.journal_entries;
-            })
-            .catch((error)=>{
-                console.log(error.message)
-            })
         };
         const selectTab = async(index) => {
             let formData = {
                 company: companyID.value,
                 date_from: "",
                 date_to: "",
-                adjustment_code: adjustmentID.value,
+                item_code: adjustmentID.value,
                 warehouse: "",
                 inventory_item: "",
             }
             if(index == 1){
                 activeTab.value = index;
-                await axios.post('api/v1/stock-adjustment-item-search/',formData)
+                await axios.post('api/v1/recipe-ingredients-search/',formData)
                 .then((response)=>{
                     itemLines.value = response.data.results;
                 })
@@ -350,21 +332,20 @@ export default{
         const closeModal = () =>{
             propModalVisible.value = false;
         };
-        const printAdjustmentsList = () =>{
+        const printBatchesList = () =>{
             showLoader();
 
             let formData = {
-                date_from: date_from_search.value,
-                date_to: date_to_search.value,
-                adjustment_code: adjustment_code_search.value,
-                warehouse: warehouse_search.value,
-                inventory_item: "",
-                done_by: done_by_search.value,
-                company_id: companyID.value
+                batch_number: batch_number_search.value,
+                date_from: from_date_search.value,
+                date_to: to_date_search.value,
+                item_name: item_name_search.value,
+                item_code: item_code_search.value,
+                company: companyID.value,
             } 
    
             axios
-            .post("api/v1/export-stock-adjustments-pdf/", formData, { responseType: 'blob' })
+            .post("api/v1/export-production-batch-pdf/", formData, { responseType: 'blob' })
                 .then((response)=>{
                     if(response.status == 200){
                         const blob1 = new Blob([response.data], { type: 'application/pdf' });
@@ -383,15 +364,15 @@ export default{
         }
         
         onBeforeMount(()=>{
-            searchAdjustments();
+            searchBatches();
             
         })
         return{
-            currentPage,showTotals,searchAdjustments,resetFilters, addButtonLabel, searchFilters, tableColumns, adjustmentsList,
+            currentPage,showTotals,searchBatches,resetFilters, addButtonLabel, searchFilters, tableColumns, recipeList,
             propResults, propArrLen, propCount, pageCount, showNextBtn, showPreviousBtn,printModalVisible,pdfUrl, printTitle,
             loadPrev, loadNext, firstPage, lastPage, idField, actions, handleActionClick, propModalVisible, closeModal,
-            submitButtonLabel, showModal, addNewAdjustment, showLoader, loader, hideLoader, removeAdjustment, removeAdjustments,
-            handleSelectionChange,addingRight,rightsModule,printAdjustmentsList,selectedValue,selectSearchQuantity,showDetails,
+            submitButtonLabel, showModal, addNewBatch, showLoader, loader, hideLoader, removeBatch, removeBatchs,
+            handleSelectionChange,addingRight,rightsModule,printBatchesList,selectedValue,selectSearchQuantity,showDetails,
             detailsTitle,hideDetails,handleShowDetails,journalEntries,itemLines,tabs,selectTab,activeTab
         }
     }

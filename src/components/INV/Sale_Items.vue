@@ -9,6 +9,9 @@
         @removeItem=""
         @removeSelectedItems=""
         @printList="printItemsList"
+        v-model:printModalVisible="printModalVisible"
+        :printTitle="printTitle"
+        :pdfUrl="pdfUrl"
         :columns="tableColumns"
         :rows="itemsList"
         :actions="actions"
@@ -17,6 +20,7 @@
         :idField="idField"
         @handleSelectionChange="handleSelectionChange"
         @handleActionClick="handleActionClick"
+        :groupingKey=true
         :count="propCount"
         :currentPage="currentPage"
         :result="propArrLen"
@@ -73,21 +77,16 @@ export default{
         const counterID = ref(null);
         const channelID = ref(null);
         const itemID = ref(null);
-        const outlets_array = computed({
-            get: () => store.state.Retail_Outlets.outletArr,
-        });
-        const counters_array = computed({
-            get: () => store.state.Outlet_Counters.counterArr,
-        });
-        const channels_array = computed({
-            get: () => store.state.Counter_Channels.channelArr,
-        });
-        const items_array = computed({
-            get: () => store.state.Items_Catalog.itemsArr,
-        });
+        const outlets_array = computed(() => store.state.Retail_Outlets.outletArr);
+        const counters_array = computed(() => store.state.Outlet_Counters.counterArr);
+        const channels_array = computed(() => store.state.Counter_Channels.channelArr);
+        const items_array = computed(() => store.state.Items_Catalog.itemsArr);
         const idField = 'sale_item_id';
         const selectedIds = ref([]);
         const appModalVisible = ref(false);
+        const printModalVisible = ref(false);
+        const pdfUrl = ref(null);
+        const printTitle = ref('Print Sale Items List');
         const itemsList = ref([]);
         const propResults = ref([]);
         const propArrLen = ref(0);
@@ -104,7 +103,7 @@ export default{
         const modal_width = ref('35vw');
         const tableColumns = ref([
             {type: "checkbox"},
-            {label: "Outlet", key:"outlet_name"},
+            // {label: "Outlet", key:"outlet_name"},
             {label: "Date", key:"date"},
             {label: "Customer Name", key: "client"},
             {label: "Item Name", key:"inventory_item_name"},
@@ -224,6 +223,7 @@ export default{
         const searchItems = () =>{
             showLoader();
             showNextBtn.value = false;
+            selectedIds.value = [];
             showPreviousBtn.value = false;
             let formData = {
                 date_from: date_from_search.value,
@@ -290,6 +290,8 @@ export default{
             searchItems();
         }
         const resetFilters = () =>{
+            currentPage.value = 1;
+            selectedValue.value = 50;
             date_from_search.value = "";
             date_to_search.value = "";
             done_by_search.value = "";
@@ -324,11 +326,12 @@ export default{
             .post("api/v1/export-sale-items-pdf/", formData, { responseType: 'blob' })
                 .then((response)=>{
                     if(response.status == 200){
-                        const blob1 = new Blob([response.data]);
-                        // Convert blob to URL
+                        const blob1 = new Blob([response.data], { type: 'application/pdf' });
                         const url = URL.createObjectURL(blob1);
-                        PrintJS({printable: url, type: 'pdf'});
-                    }
+                        // PrintJS({printable: url, type: 'pdf'});
+                        pdfUrl.value = url;
+                        printModalVisible.value = true;
+                    } 
                 })
             .catch((error)=>{
                 console.log(error.message);
@@ -341,9 +344,9 @@ export default{
             searchItems();
         })
         return{
-            showAddButton,showActions,showTotals,title, searchItems, idField, selectedIds, actions, itemsList, propArrLen,propCount,propResults,appModalVisible,
+            currentPage,showAddButton,showActions,showTotals,title, searchItems, idField, selectedIds, actions, itemsList, propArrLen,propCount,propResults,appModalVisible,
             searchFilters,tableColumns,resetFilters,loadPrev,loadNext,firstPage,lastPage,
-            showNextBtn,showPreviousBtn,displayButtons,
+            showNextBtn,showPreviousBtn,displayButtons,printModalVisible,pdfUrl, printTitle,
             modal_top, modal_left, modal_width, showLoader, loader, hideLoader, modal_loader, showModalLoader, hideModalLoader,
             closeModal, handleSelectionChange, pageComponentKey, flex_basis, flex_basis_percentage,printItemsList,selectedValue,selectSearchQuantity
         }

@@ -114,6 +114,7 @@ export default{
         const member_name_search = ref("");
         const member_number_search = ref("");
         const date_search = ref("");
+        const loan_number_search = ref("");
         const products_array = computed(()=> store.state.Loan_Products.productArr);
         const handleSelectedProduct = async(option) =>{
             await store.dispatch('Loan_Products/handleSelectedProduct', option)
@@ -131,6 +132,7 @@ export default{
                 fetchData: store.dispatch('Loan_Products/fetchLoanProducts', {company:companyID.value}),
                 clearSearch: clearSelectedProduct
             },
+            {type:'text', placeholder:"Loan#...", value: loan_number_search, width:32},
             {type:'text', placeholder:"Member No...", value: member_number_search, width:32},
             {type:'text', placeholder:"Member Name...", value: member_name_search, width:48},
             {type:'date', placeholder:"Date...", value: date_search, width:32, title: "As At Date Search"},
@@ -317,6 +319,7 @@ export default{
             let formData = {
                 client_code: member_number_search.value,
                 client_name: member_name_search.value,
+                loan_number: loan_number_search.value,
                 date: date_search.value,
                 product: productID.value,
                 company: companyID.value,
@@ -385,6 +388,7 @@ export default{
             member_name_search.value = "";
             member_number_search.value = "";
             date_search.value = "";
+            loan_number_search.value = "";
             searchLoanArrears();
         };
         const printArrearsList = () =>{
@@ -393,6 +397,7 @@ export default{
             let formData = {
                 client_code: member_number_search.value,
                 client_name: member_name_search.value,
+                loan_number: loan_number_search.value,
                 date: date_search.value,
                 product: productID.value,
                 company: companyID.value,

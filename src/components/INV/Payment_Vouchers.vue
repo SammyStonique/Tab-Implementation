@@ -3,25 +3,26 @@
         <PageComponent 
             :loader="loader" @showLoader="showLoader" @hideLoader="hideLoader"
             :addButtonLabel="addButtonLabel"
-            @handleAddNew="addNewReceipt"
+            @handleAddNew="addNewPaymentVoucher"
             :searchFilters="searchFilters"
             :dropdownOptions="dropdownOptions"
             @handleDynamicOption="handleDynamicOption"
-            @searchPage="searchReceipts"
+            @searchPage="searchPaymentVouchers"
             @resetFilters="resetFilters"
-            @removeItem="removeReceipt"
-            @removeSelectedItems="removeReceipts"
-            @printList="printReceiptsList"
+            @removeItem="removePaymentVoucher"
+            @removeSelectedItems="removePaymentVouchers"
+            @printList="printVouchersList"
             :addingRight="addingRight"
             :rightsModule="rightsModule"
             :columns="tableColumns"
-            :rows="receiptsList"
+            :rows="vouchersList"
             :actions="actions"
             :showTotals="showTotals"
             :idField="idField"
             @handleSelectionChange="handleSelectionChange"
             @handleActionClick="handleActionClick"
             @handleShowDetails="handleShowDetails"
+            :groupingKey=true
             :count="propCount"
             :currentPage="currentPage"
             :result="propArrLen"
@@ -63,7 +64,7 @@
         >
             <DynamicForm 
                 :fields="formFields" :flex_basis="flex_basis" :flex_basis_percentage="flex_basis_percentage" 
-                :displayButtons="displayButtons" @handleSubmit="saveReceipt" @handleReset="handleReset"
+                :displayButtons="displayButtons" @handleSubmit="savePaymentVoucher" @handleReset="handleReset"
             />
         </MovableModal>
     </div>
@@ -83,7 +84,7 @@ import ReceiptLines from "@/components/ReceiptLines.vue";
 import PrintJS from 'print-js';
 
 export default{
-    name: 'Receipts',
+    name: 'Payment_Vouchers',
     components:{
         PageComponent, MovableModal,DynamicForm,JournalEntries,ReceiptLines,
     },
@@ -92,25 +93,26 @@ export default{
         const toast = useToast();
         const { getYear } = useDateFormatter();
         const { getMonth } = useDateFormatter();
-        const addingRight = ref('Adding Receipt');
-        const rightsModule = ref('Accounts');
+        const current_date = new Date();
         const loader = ref('none');
         const modal_loader = ref('none');
         const idField = 'journal_id';
-        const addButtonLabel = ref('New Receipt');
+        const addButtonLabel = ref('New Payment Voucher');
+        const addingRight = ref('Adding Payment Voucher');
+        const rightsModule = ref('Accounts');
         const submitButtonLabel = ref('Add');
         const title = ref('Receipt Booking');
         const detailsTitle = ref('Item Details');
         const tabs = ref(['Journal Entries','Receipt Lines']);
         const activeTab = ref(0);
         const invoiceID = ref(null);
-        const custComponentKey = ref(0);
+        const vendComponentKey = ref(0);
         const invModalVisible = ref(false);
         const modal_top = ref('150px');
         const modal_left = ref('400px');
         const modal_width = ref('32vw');
         const selectedIds = ref([]);
-        const receiptsList = ref([]);
+        const vouchersList = ref([]);
         const propResults = ref([]);
         const propArrLen = ref(0);
         const propCount = ref(0);
@@ -127,15 +129,15 @@ export default{
         const flex_basis_percentage = ref('');
         const displayButtons = ref(true);
         const errors = ref([]);
-        const customerID = ref('');
-        const customerArray = computed(() => store.state.Customers.customerArr);
+        const vendorID = ref('');
+        const vendorArray = computed(() => store.state.Vendors.vendorArr);
         const showModal = ref(false);
         const tableColumns = ref([
             {type: "checkbox"},
-            {label: "Receipt#", key:"journal_no"},
+            {label: "Voucher#", key:"journal_no"},
             {label: "Date", key: "date"},
             {label: "Bank. Date", key: "banking_date"},
-            {label: "Customer Name", key:"customer_name"},
+            {label: "Vendor Name", key:"customer_name"},
             {label: "Cashbook", key:"cashbook"},
             {label: "Pay. Method", key:"payment_method"},
             {label: "Ref No", key:"reference_no"},
@@ -144,22 +146,22 @@ export default{
         ])
         const showTotals = ref(true);
         const actions = ref([
-            {name: 'print', icon: 'fa fa-print', title: 'Print Receipt', rightName: 'Print Receipt'},
-            {name: 'download', icon: 'fa fa-download', title: 'Download Receipt', rightName: 'Print Receipt'},
-            {name: 'delete', icon: 'fa fa-trash', title: 'Delete Receipt', rightName: 'Deleting Receipt'},
+            {name: 'print', icon: 'fa fa-print', title: 'Print Voucher', rightName: 'Print Payment Voucher'},
+            {name: 'download', icon: 'fa fa-download', title: 'Download Voucher', rightName: 'Print Payment Voucher'},
+            {name: 'delete', icon: 'fa fa-trash', title: 'Delete Voucher', rightName: 'Deleting Payment Vouchers'},
         ])
         const companyID = computed(()=> store.state.userData.company_id);
-        const fetchCustomers = async() =>{
-            await store.dispatch('Customers/fetchCustomers', {company:companyID.value})
+        const fetchVendors = async() =>{
+            await store.dispatch('Vendors/fetchVendors', {company:companyID.value})
         };
-        const handleSearchCustomers = async(option) =>{
-            await store.dispatch('Customers/handleSelectedCustomer', option)
-            customerID.value = store.state.Customers.customerID;
+        const handleSearchVendors = async(option) =>{
+            await store.dispatch('Vendors/handleSelectedVendor', option)
+            vendorID.value = store.state.Vendors.vendorID;
         };
-        const clearSearchCustomer = async() =>{
-            await store.dispatch('Customers/updateState', {customerID: ''});
-            customerID.value = ""
-        };
+        const clearSearchVendor = async() =>{
+            await store.dispatch('Vendors/updateState', {vendorID: ''});
+            vendorID.value = ""
+        }
         const journal_no_search = ref("");
         const client_name_search = ref("");
         const client_code_search = ref("");
@@ -167,16 +169,16 @@ export default{
         const to_date_search = ref("");
         const reversal_status_search = ref("");
         const searchFilters = ref([
-            {type:'text', placeholder:"Receipt#...", value: journal_no_search, width:24},
+            {type:'text', placeholder:"PV#...", value: journal_no_search, width:24},
             {type:'text', placeholder:"Client Code...", value: client_code_search, width:36},
             {type:'text', placeholder:"Client Name...", value: client_name_search, width:64},
             {type:'date', placeholder:"From Date...", value: from_date_search, width:36, title: "Date From Search"},
             {type:'date', placeholder:"To Date...", value: to_date_search, width:36, title: "Date To Search"},
             {
-                type:'search-dropdown', value: customerID.value, width:64, componentKey: custComponentKey,
-                selectOptions: customerArray, optionSelected: handleSearchCustomers,
-                searchPlaceholder: 'Customer Search...', dropdownWidth: '400px',
-                fetchData: fetchCustomers(), clearSearch: clearSearchCustomer          
+                type:'search-dropdown', value: vendorID.value, width:64, componentKey: vendComponentKey,
+                selectOptions: vendorArray, optionSelected: handleSearchVendors,
+                searchPlaceholder: 'Vendor Search...', dropdownWidth: '400px',
+                fetchData: fetchVendors(), clearSearch: clearSearchVendor           
             },
             {
                 type:'dropdown', placeholder:"Reversed..", value: reversal_status_search, width:32,
@@ -193,63 +195,63 @@ export default{
         const hideModalLoader = () =>{
             modal_loader.value = "none";
         }
-        const addNewReceipt = () =>{
-            store.commit('pageTab/ADD_PAGE', {'FA':'Receipt_Details'});
-            store.state.pageTab.faActiveTab = 'Receipt_Details'; 
+        const addNewPaymentVoucher = () =>{
+            store.commit('pageTab/ADD_PAGE', {'FA':'Payment_Details'});
+            store.state.pageTab.faActiveTab = 'Payment_Details'; 
         }
-        const removeReceipt = async() =>{
+        const removePaymentVoucher = async() =>{
             if(selectedIds.value.length == 1){
                 let formData = {
                     company: companyID.value,
                     journal: selectedIds.value,
-                    txn_type: "RCPT"
+                    txn_type: "PMT"
                 }
                 try{
-                    const response = await store.dispatch('Journals/deleteReceipt',formData)
+                    const response = await store.dispatch('Journals/deletePaymentVoucher',formData)
                     if(response && response.status == 200){
-                        toast.success("Receipt Removed Succesfully");
-                        searchReceipts();
+                        toast.success("Payment Voucher Removed Succesfully");
+                        searchPaymentVouchers();
                     }
                 }
                 catch(error){
                     console.error(error.message);
-                    toast.error('Failed to remove receipt: ' + error.message);
+                    toast.error('Failed to remove payment voucher: ' + error.message);
                 }
                 finally{
                     selectedIds.value = [];
-                    searchReceipts();
+                    searchPaymentVouchers();
                 }
             }else if(selectedIds.value.length > 1){
-                toast.error("You have selected more than 1 Receipt") 
+                toast.error("You have selected more than 1 Payment Voucher") 
             }else{
-                toast.error("Please Select A Receipt To Remove")
+                toast.error("Please Select A Payment Voucher To Remove")
             }
         }
-        const removeReceipts = async() =>{
+        const removePaymentVouchers = async() =>{
             if(selectedIds.value.length){
                 let formData = {
                     company: companyID.value,
                     journal: selectedIds.value,
-                    txn_type: "RCPT"
+                    txn_type: "PMT"
                 }
 
                 try{
-                    const response = await store.dispatch('Journals/deleteReceipt',formData)
+                    const response = await store.dispatch('Journals/deletePaymentVoucher',formData)
                     if(response && response.msg == "Success"){
-                        toast.success("Receipt(s) Removed Succesfully");
-                        searchReceipts();
+                        toast.success("Payment Voucher(s) Removed Succesfully");
+                        searchPaymentVouchers();
                     }
                 }
                 catch(error){
                     console.error(error.message);
-                    toast.error('Failed to remove receipts: ' + error.message);
+                    toast.error('Failed to remove Payment Voucher: ' + error.message);
                 }
                 finally{
                     selectedIds.value = [];
-                    searchReceipts();
+                    searchPaymentVouchers();
                 }
             }else{
-                toast.error("Please Select A Receipt To Remove")
+                toast.error("Please Select A Payment Voucher To Remove")
             }
         }
         const showLoader = () =>{
@@ -258,13 +260,13 @@ export default{
         const hideLoader = () =>{
             loader.value = "none";
         }
-        const searchReceipts = () =>{
+        const searchPaymentVouchers = () =>{
             showLoader();
             showNextBtn.value = false;
             showPreviousBtn.value = false;
             let formData = {
                 client_category: "Customers",
-                txn_type: "RCPT",
+                txn_type: "PMT",
                 client_name: client_name_search.value,
                 client_code: client_code_search.value,
                 from_date: from_date_search.value,
@@ -272,7 +274,7 @@ export default{
                 journal_no: journal_no_search.value,
                 status: "",
                 reversed: reversal_status_search.value,
-                property: customerID.value,
+                property: vendorID.value,
                 company: companyID.value,
                 page_size: selectedValue.value
             } 
@@ -280,10 +282,10 @@ export default{
             axios
             .post(`api/v1/clients-journals-search/?page=${currentPage.value}`,formData)
             .then((response)=>{
-                receiptsList.value = response.data.results;
-                store.commit('Journals/LIST_RECEIPTS', receiptsList.value)
+                vouchersList.value = response.data.results;
+                store.commit('Journals/LIST_RECEIPTS', vouchersList.value)
                 propResults.value = response.data;
-                propArrLen.value = receiptsList.value.length;
+                propArrLen.value = vouchersList.value.length;
                 propCount.value = propResults.value.count;
                 pageCount.value = Math.ceil(propCount.value / selectedValue.value);
                 if(response.data.next){
@@ -302,7 +304,7 @@ export default{
         };
         const selectSearchQuantity = (newValue) =>{
             selectedValue.value = newValue;
-            searchReceipts(selectedValue.value);
+            searchPaymentVouchers(selectedValue.value);
         };
         const resetFilters = () =>{
             client_name_search.value = "";
@@ -311,9 +313,9 @@ export default{
             to_date_search.value = "";
             reversal_status_search.value = "";
             journal_no_search.value= "";
-            custComponentKey.value += 1;
-            customerID.value = "";
-            searchReceipts();
+            vendComponentKey.value += 1;
+            vendorID.value = "";
+            searchPaymentVouchers();
         }
         const loadPrev = () =>{
             if (currentPage.value <= 1){
@@ -322,7 +324,7 @@ export default{
                 currentPage.value -= 1;
             }
             
-            searchReceipts();
+            searchPaymentVouchers();
             // scrollToTop();
         }
         const loadNext = () =>{
@@ -332,17 +334,17 @@ export default{
                 currentPage.value += 1;
             }
             
-            searchReceipts();
+            searchPaymentVouchers();
             // scrollToTop(); 
         }
         const firstPage = ()=>{
             currentPage.value = 1;
-            searchReceipts();
+            searchPaymentVouchers();
             // scrollToTop();
         }
         const lastPage = () =>{
             currentPage.value = pageCount.value;
-            searchReceipts();
+            searchPaymentVouchers();
             // scrollToTop();
         }
         const handleActionClick = async(rowIndex, action, row) =>{
@@ -351,11 +353,11 @@ export default{
                 let formData = {
                     company: companyID.value,
                     journal: journalID,
-                    txn_type: "RCPT"
+                    txn_type: "PMT"
                 }
-                await store.dispatch('Journals/deleteReceipt',formData).
+                await store.dispatch('Journals/deletePaymentVoucher',formData).
                 then(()=>{
-                    searchReceipts();
+                    searchPaymentVouchers();
                 })
             }else if(action == 'print'){
                 showLoader();
@@ -363,7 +365,7 @@ export default{
                 let formData = {
                     receipt: journalID,
                     client: row['customer_id'],
-                    type: 'RCPT',
+                    type: 'PMT',
                     company: companyID.value
                 }
                 await store.dispatch('Journals/previewClientReceipt',formData).
@@ -376,10 +378,10 @@ export default{
                 let formData = {
                     receipt: journalID,
                     client: row['customer_id'],
-                    type: 'RCPT',
+                    type: 'PMT',
                     company: companyID.value
                 }
-                await store.dispatch('Journals/downloadClientReceipt',formData).
+                await store.dispatch('Journals/downloadPaymentVoucher',formData).
                 then(()=>{
                     hideLoader();
                 })
@@ -439,7 +441,7 @@ export default{
                 store.state.pageTab.faActiveTab = 'Batch_Readings';
             }
         };
-        const printReceiptsList = () =>{
+        const printVouchersList = () =>{
             showLoader();
 
             let formData = {
@@ -448,7 +450,7 @@ export default{
                 client: "",
                 client_category: "Customers",
                 payment_method: "",
-                txn_type: "RCPT",
+                txn_type: "PMT",
                 date_from: from_date_search.value,
                 date_to: to_date_search.value,
                 company_id: companyID.value,
@@ -471,16 +473,16 @@ export default{
             })
         }
         onBeforeMount(()=>{
-            searchReceipts();
+            searchPaymentVouchers();
             
         })
         return{
-            showTotals,title, searchReceipts,resetFilters, addButtonLabel, searchFilters, tableColumns, receiptsList,
+            showTotals, title, searchPaymentVouchers,resetFilters, addButtonLabel, searchFilters, tableColumns, vouchersList,
             propResults, propArrLen, propCount, pageCount, showNextBtn, showPreviousBtn,invModalVisible,
             loadPrev, loadNext, firstPage, lastPage, idField, actions, handleActionClick, propModalVisible, closeModal,
             submitButtonLabel, showModal, showLoader, loader, hideLoader, modal_loader, modal_top, modal_left, modal_width,displayButtons,
             showModalLoader, hideModalLoader, handleSelectionChange, flex_basis,flex_basis_percentage,
-            removeReceipt, removeReceipts, dropdownOptions, handleDynamicOption, addNewReceipt, printReceiptsList,
+            removePaymentVoucher, removePaymentVouchers, dropdownOptions, handleDynamicOption, addNewPaymentVoucher, printVouchersList,
             addingRight,rightsModule,selectSearchQuantity,selectedValue,showDetails,detailsTitle,hideDetails,handleShowDetails,journalEntries,
             receiptLines,tabs,selectTab,activeTab
         }

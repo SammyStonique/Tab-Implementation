@@ -165,7 +165,7 @@ export default{
             {label: "Deductions", key:"deductions", type: "number"},
             {label: "Paye", key:"tax", type: "number"},
             {label: "Net Pay", key:"net_pay", type: "number"},
-            {label: "Status", key:"status"},
+            {label: "Status", key:"status", textColor: "textColor"},
             {label: "Appr. Date", key:"processed_at"},
         ])
         const showTotals = ref(true);

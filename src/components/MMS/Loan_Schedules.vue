@@ -434,8 +434,12 @@ export default{
                                     icon: "warning",
                                 });
                             })
+                            .finally(()=>{
+                                searchSchedules();
+                            })
                         }else{
                             Swal.fire(`Interest(s) has not been posted!`);
+                            searchSchedules();
                         }
                     })
                 }else{
@@ -490,8 +494,12 @@ export default{
                                     icon: "warning",
                                 });
                             })
+                            .finally(()=>{
+                                searchSchedules();
+                            })
                         }else{
                             Swal.fire(`Interest(s) has not been unposted!`);
+                            searchSchedules();
                         }
                     })
                 }else{
@@ -547,8 +555,12 @@ export default{
                                     icon: "warning",
                                 });
                             })
+                            .finally(()=>{
+                                searchSchedules();
+                            })
                         }else{
                             Swal.fire(`C.R(s) has not been processed!`);
+                            searchSchedules();
                         }
                     })
                 }else{
@@ -603,8 +615,12 @@ export default{
                                     icon: "warning",
                                 });
                             })
+                            .finally(()=>{
+                                searchSchedules();
+                            })
                         }else{
                             Swal.fire(`Credit Reduction(s) has not been unprocessed!`);
+                            searchSchedules();
                         }
                     })
                 }else{
@@ -649,6 +665,7 @@ export default{
                 })
                 .finally(()=>{
                     hideLoader();
+                    searchSchedules();
                 })
             }else if(option == 'send-email'){
                 showLoader();
@@ -672,6 +689,7 @@ export default{
                 })
                 .finally(()=>{
                     hideLoader();
+                    searchSchedules();
                 })
             }else if( option == 'batch-post-interest'){
                 let formData = {
@@ -719,8 +737,12 @@ export default{
                                 icon: "warning",
                             });
                         })
+                        .finally(()=>{
+                            searchSchedules();
+                        })
                     }else{
                         Swal.fire(`Interest(s) has not been posted!`);
+                        searchSchedules();
                     }
                 })
                            
@@ -770,8 +792,12 @@ export default{
                                 icon: "warning",
                             });
                         })
+                        .finally(()=>{
+                            searchSchedules();
+                        })
                     }else{
                         Swal.fire(`Interest(s) has not been unposted!`);
+                        searchSchedules();
                     }
                 })                 
             }
@@ -820,8 +846,12 @@ export default{
                                 icon: "warning",
                             });
                         })
+                        .finally(()=>{
+                            searchSchedules();
+                        })
                     }else{
                         Swal.fire(`C.R(s) has not been processed!`);
+                        searchSchedules();
                     }
                 })
                                  
@@ -870,8 +900,12 @@ export default{
                                 icon: "warning",
                             });
                         })
+                        .finally(()=>{
+                            searchSchedules();
+                        })
                     }else{
                         Swal.fire(`Credit Reduction(s) has not been unprocessed!`);
+                        searchSchedules();
                     }
                 })
                 
@@ -925,8 +959,12 @@ export default{
                                 icon: "warning",
                             });
                         })
+                        .finally(()=>{
+                            searchSchedules();
+                        })
                     }else{
                         Swal.fire(`Penalty(s) has not been processed!`);
+                        searchSchedules();
                     }
                 })
                            

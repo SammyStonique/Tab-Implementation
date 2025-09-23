@@ -126,6 +126,7 @@ export default defineComponent({
         const table4Key = ref(0);
         const errors = ref([]);
         const companyID = computed(()=> store.state.userData.company_id);
+        const userID = computed(()=> store.state.userData.user_id);
         const flex_basis = ref('');
         const flex_basis_percentage = ref('');
         const additional_flex_basis = ref('');
@@ -576,7 +577,8 @@ export default defineComponent({
                 charges: chargeRows.value,
                 guarantors: guarantorRows.value,
                 securities: securityRows.value,
-                company: companyID.value
+                company: companyID.value,
+                user: userID.value,
             }
             errors.value = [];
             for(let i=0; i < formFields.value.length; i++){
@@ -636,6 +638,7 @@ export default defineComponent({
                 securities: securityRows.value,
                 documents: documentRows.value,
                 charges: chargeRows.value,
+                user: userID.value,
             }
             errors.value = [];
             for(let i=0; i < formFields.value.length; i++){

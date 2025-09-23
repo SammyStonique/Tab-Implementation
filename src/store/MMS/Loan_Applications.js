@@ -14,6 +14,7 @@ const state = {
   loanSecurities: [],
   loanSchedules: [],
   loanDocuments: [],
+  loanActivities: [],
   selectedApplication: null,
   selectedProduct: null,
   selectedMember: null,
@@ -125,6 +126,9 @@ const mutations = {
   },
   SET_LOAN_DOCUMENTS(state, documents){
     state.selectedDocuments = documents;
+  },
+  SET_LOAN_ACTIVITIES(state, activities){
+    state.loanActivities = activities;
   },
   SET_LOAN_TRANSACTIONS(state, transactions){
     state.selectedTransactions = transactions;
@@ -244,6 +248,7 @@ const actions = {
         commit('SET_LOAN_SECURITIES',(response.data.loan_securities != null) ? (response.data.loan_securities) : []);
         commit('SET_LOAN_SCHEDULES',(response.data.loan_schedules != null) ? (response.data.loan_schedules) : []);
         commit('SET_LOAN_DOCUMENTS',(response.data.loan_documents != null) ? (response.data.loan_documents) : []);
+        commit('SET_LOAN_ACTIVITIES',(response.data.loan_activities != null) ? (response.data.loan_activities) : []);
     })
     .catch((error)=>{
       console.log(error.message);
