@@ -10,6 +10,12 @@
                                 <DynamicForm :fields="additionalFields" :flex_basis="additional_flex_basis" :flex_basis_percentage="additional_flex_basis_percentage" @handleReset="handleReset"/>
                             </div>
                         </div>
+                        <div class="border border-slate-200 rounded relative py-3 mt-3 px-2 flex">
+                            <h1 class="font-bold absolute top-[-13px] left-5 bg-white">Module Configuration</h1>
+                            <div class="px-3">
+                                <DynamicForm :fields="additionalFields1" :flex_basis="additional_flex_basis" :flex_basis_percentage="additional_flex_basis_percentage" @handleReset="handleReset1"/>
+                            </div>
+                        </div>
                     </template>
                 </DynamicForm>
             </div>
@@ -38,6 +44,8 @@ export default defineComponent({
         const mainComponentKey = ref(0);
         const componentKey = ref(0);
         const depComponentKey = ref(0);
+        const outComponentKey = ref(0);
+        const countComponentKey = ref(0);
         const errors = ref([]);
         const companyID = computed(()=> store.state.userData.company_id);
         const displayButtons = ref(true);
@@ -49,6 +57,10 @@ export default defineComponent({
         const selectedUser = computed(()=> store.state.userData.selectedUser);
         const selectedDepartment = computed(()=> store.state.userData.selectedDepartment);
         const depArray = computed(() => store.state.Departments.depArr);
+        const outletArray = computed(() => store.state.Retail_Outlets.outletArr);
+        const counterArray = computed(() => store.state.Outlet_Counters.counterArr);
+        const defaultCounter = computed(()=> store.state.userData.defaultCounter);
+        const defaultOutlet = computed(()=> store.state.userData.defaultOutlet);
         const depID = ref('');
         const temporary_password = ref('');
         const userDetails = ref([]);
@@ -107,12 +119,23 @@ export default defineComponent({
             }
         }, { immediate: true });
 
+        const displayInventoryOptions = (value) =>{
+            if(value == 'Enabled'){
+                additionalFields1.value[0].hidden = false;
+                additionalFields1.value[1].hidden = false;
+                fetchOutlets();
+            }else{
+                additionalFields1.value[0].hidden = true;
+                additionalFields1.value[1].hidden = true;
+            }
+        }
+
         const additionalFields = ref([]);
         const updateAdditionalFormFields = () => {
             additionalFields.value = [
                 { type: 'dropdown', name: 'pms_module',label: "Property Management", value: selectedUser.value?.pms_module || 'Disabled', placeholder: "", required: true, options: [{ text: 'Enabled', value: 'Enabled' }, { text: 'Disabled', value: 'Disabled' }] },
                 { type: 'dropdown', name: 'accounts_module',label: "Financial Accounts", value: selectedUser.value?.accounts_module || 'Disabled', placeholder: "", required: true, options: [{ text: 'Enabled', value: 'Enabled' }, { text: 'Disabled', value: 'Disabled' }] },
-                { type: 'dropdown', name: 'inventory_module',label: "Inventory Management", value: selectedUser.value?.inventory_module || 'Disabled', placeholder: "", required: true, options: [{ text: 'Enabled', value: 'Enabled' }, { text: 'Disabled', value: 'Disabled' }] },
+                { type: 'dropdown', name: 'inventory_module',label: "Inventory Management", value: selectedUser.value?.inventory_module || 'Disabled', placeholder: "", required: true, options: [{ text: 'Enabled', value: 'Enabled' }, { text: 'Disabled', value: 'Disabled' }], method: displayInventoryOptions },
                 { type: 'dropdown', name: 'hms_module',label: "Hospital Management", value: selectedUser.value?.hms_module || 'Disabled', placeholder: "", required: true, options: [{ text: 'Enabled', value: 'Enabled' }, { text: 'Disabled', value: 'Disabled' }] },
                 { type: 'dropdown', name: 'hr_module',label: "Human Resource", value: selectedUser.value?.hr_module || 'Disabled', placeholder: "", required: true, options: [{ text: 'Enabled', value: 'Enabled' }, { text: 'Disabled', value: 'Disabled' }] },
                 { type: 'dropdown', name: 'settings_module',label: "Settings", value: selectedUser.value?.settings_module || 'Disabled', placeholder: "", required: true, options: [{ text: 'Enabled', value: 'Enabled' }, { text: 'Disabled', value: 'Disabled' }] },
@@ -124,10 +147,61 @@ export default defineComponent({
                 {required: false},
             ];
         };
+        const outletID = ref(null);
+        const counterID = ref(null);
+
+        const fetchOutlets = async() =>{
+            await store.dispatch('Retail_Outlets/fetchOutlets', {company:companyID.value})
+        };
+        const fetchCounters = async() =>{
+            if(outletID.value){
+                await store.dispatch('Outlet_Counters/fetchCounters', {company:companyID.value, outlet:outletID.value})
+            }
+        };
+        const handleSelectedCounter = async(option) =>{
+            await store.dispatch('Outlet_Counters/handleSelectedCounter', option)
+            counterID.value = store.state.Outlet_Counters.counterID;
+        };
+        const handleSelectedOutlet = async(option) =>{
+            await store.dispatch('Retail_Outlets/handleSelectedOutlet', option)
+            outletID.value = store.state.Retail_Outlets.outletID;
+        };
+        const clearSelectedCounter = async() =>{
+            await store.dispatch('Outlet_Counters/updateState', {counterID: ''});
+            counterID.value = ""
+        }
+        const clearSelectedOutlet = async() =>{
+            await store.dispatch('Retail_Outlets/updateState', {outletID: ''});
+            outletID.value = ""
+        };
+        watch([outletID], () => {
+            if (outletID.value) {
+                fetchCounters();
+            }
+            
+        }, { immediate: true });
+        const additionalFields1 = ref([]);
+        const updateAdditionalFormFields1 = () => {
+            additionalFields1.value = [
+                {
+                    type:'search-dropdown', label:"Outlet", value: outletID.value, componentKey: outComponentKey,
+                    selectOptions: outletArray, optionSelected: handleSelectedOutlet, required: false, hidden:true, 
+                    searchPlaceholder: 'Select Outlet...', dropdownWidth: '280px', updateValue: defaultOutlet.value,
+                    clearSearch: clearSelectedOutlet()  
+                },
+                {
+                    type:'search-dropdown', label:"Counter", value: counterID.value, componentKey: countComponentKey,
+                    selectOptions: counterArray, optionSelected: handleSelectedCounter, required: false, hidden:true,
+                    searchPlaceholder: 'Select Counter...', dropdownWidth: '280px', updateValue: defaultCounter.value,
+                    clearSearch: clearSelectedCounter()  
+                },
+            ];
+        };
         watch([selectedUser, selectedDepartment], () => {
             if(selectedUser.value  && selectedDepartment.value){
                 depComponentKey.value += 1;
                 updateAdditionalFormFields();
+                updateAdditionalFormFields1();
             }
             
         }, { immediate: true });
@@ -183,7 +257,9 @@ export default defineComponent({
                         pss_module: additionalFields.value[8].value,
                         vss_module: additionalFields.value[9].value,
                         user_department: depValue.value,
-                        password: temporary_password.value
+                        password: temporary_password.value,
+                        default_counter: counterID.value,
+                        default_outlet: outletID.value
                     }
 
                     const response2 = await axios.post("api/v1/users/", formData);
@@ -261,6 +337,8 @@ export default defineComponent({
                     pss_module: additionalFields.value[8].value,
                     vss_module: additionalFields.value[9].value,
                     user_department: depValue.value,
+                    default_counter: counterID.value,
+                    default_outlet: outletID.value
                 };
 
                 try {
@@ -297,6 +375,7 @@ export default defineComponent({
         onBeforeMount(()=>{ 
             updateFormFields();
             updateAdditionalFormFields();
+            updateAdditionalFormFields1();
             depComponentKey.value += 1;
             flex_basis.value = '1/4';
             flex_basis_percentage.value = '25';
@@ -311,7 +390,7 @@ export default defineComponent({
         return{
             componentKey, formFields, additionalFields, flex_basis, flex_basis_percentage, additional_flex_basis,
             additional_flex_basis_percentage, displayButtons, saveUser, mainComponentKey,
-            handleReset, isEditing, loader, showLoader, hideLoader
+            handleReset, isEditing, loader, showLoader, hideLoader, additionalFields1
         }
     }
 })

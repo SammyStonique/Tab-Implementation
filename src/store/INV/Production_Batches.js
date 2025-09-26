@@ -118,6 +118,16 @@ const actions = {
               Swal.fire("Poof! Batch removed succesfully!", {
                 icon: "success",
               }); 
+          }else if(response.data.msg == "Sold"){
+              Swal.fire({
+                title: "Some Items Have Been Sold",
+                icon: "warning",
+              });
+          }else if(response.data.msg == "Ingredient"){
+              Swal.fire({
+                title: "Batch Already Used As Ingredient!",
+                icon: "warning",
+              });
           }else{
             Swal.fire({
               title: "Error Deleting Batch",

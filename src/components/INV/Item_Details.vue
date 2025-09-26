@@ -54,6 +54,7 @@ export default defineComponent({
         const catComponentKey = ref(0);
         const errors = ref([]);
         const companyID = computed(()=> store.state.userData.company_id);
+        const userID = computed(()=> store.state.userData.user_id);
         const displayButtons = ref(true);
         const isEditing = computed(()=> store.state.Items_Catalog.isEditing);
         const flex_basis = ref('');
@@ -294,7 +295,8 @@ export default defineComponent({
                 handling_lead_time: additionalFields.value[2].value,
                 delivery_lead_time: additionalFields.value[1].value,
                 // image: "",
-                company: companyID.value
+                company: companyID.value,
+                user: userID.value
             }
 
             errors.value = [];
@@ -317,7 +319,7 @@ export default defineComponent({
             }else{            
                 try {
                     const response = await store.dispatch('Items_Catalog/createInventoryItem', formData);
-                    if (response && response.status === 200) {
+                    if (response && response.status === 201) {
                         hideLoader();
                         toast.success('Item created successfully!');
                         handleReset();
@@ -388,7 +390,8 @@ export default defineComponent({
                     handling_lead_time: additionalFields.value[2].value,
                     delivery_lead_time: additionalFields.value[1].value,
                     // image: "",
-                    company: companyID.value
+                    company: companyID.value,
+                    user: userID.value
                 };
 
                 try {

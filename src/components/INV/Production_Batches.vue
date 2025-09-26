@@ -145,6 +145,10 @@ export default{
                     if(response && response.data.msg == "Success"){
                         toast.success("Batch Removed Succesfully");
                         searchBatches();
+                    }else if(response.data.msg == "Sold"){
+                        toast.error("Some Items Have Been Sold!");
+                    }else if(response.data.msg == "Ingredient"){
+                        toast.error("Batch Already Used As Ingredient!");
                     }
                 }
                 catch(error){
@@ -171,6 +175,10 @@ export default{
                     if(response && response.data.msg == "Success"){
                         toast.success("Batch(s) Removed Succesfully");
                         searchBatches();
+                    }else if(response.data.msg == "Sold"){
+                        toast.error("Some Items Have Been Sold!");
+                    }else if(response.data.msg == "Ingredient"){
+                        toast.error("Batch Already Used As Ingredient!");
                     }
                 }
                 catch(error){
@@ -274,8 +282,8 @@ export default{
             // scrollToTop();
         };
         const addNewBatch = () =>{
-            store.dispatch('Production_Batches/updateState', { ingredientsArray: []})
-            store.dispatch('Items_Catalog/updateState', { item_uom: null, ingredientsArray: []})
+            store.dispatch('Recipes/updateState', { prodIngredientsArray: []})
+            store.dispatch('Items_Catalog/updateState', { item_uom: null, prodIngredientsArray: []})
             store.commit('Production_Batches/initializeStore');
             store.commit('pageTab/ADD_PAGE', {'INV':'Production_Details'});
             store.state.pageTab.invActiveTab = 'Production_Details';         

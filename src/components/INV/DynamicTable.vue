@@ -225,12 +225,13 @@
       };
   
       const calculateTaxAmount = (row) =>{
+        console.log("THE ROW IS ",row)
         const subTotal = (parseFloat(row.quantity) * parseFloat(row.cost)) || 0;
         const taxRate = parseFloat(row.vat_rate?.tax_rate) || 0;
         const taxIncl = row.vat_inclusivity || "Inclusive";
         let totalAmount = parseFloat(row.total_amount) || 0;
         let taxAmount = parseFloat(row.vat_amount) || 0;
-        let salesIncome = ((parseFloat(row.selling_price) - parseFloat(row.cost)) * parseFloat(row.quantity)) || 0;
+        let salesIncome = ((parseFloat(row.selling_price) - parseFloat(row.purchase_price)) * parseFloat(row.quantity)) || 0;
         if(taxIncl == "Inclusive"){
           taxAmount = ((taxRate/100) * subTotal).toFixed(2);
           totalAmount = subTotal.toFixed(2);

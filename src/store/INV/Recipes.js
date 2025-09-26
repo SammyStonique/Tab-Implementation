@@ -7,6 +7,8 @@ const state = {
   recipeArray: [],
   recipeID: '',
   ingredientsArray: [],
+  prodIngredientsArray: [],
+  itemQuantity: 0,
   selectedRecipe: null,
   selectedItem: null,
   isEditing: false
@@ -19,9 +21,11 @@ const mutations = {
     state.recipeArray = [];
     state.recipeID = '';
     state.ingredientsArray = [];
+    state.prodIngredientsArray = [];
     state.isEditing = false;
     state.selectedRecipe = null;
     state.selectedItem = null;
+    state.itemQuantity = 0;
   },
   SET_SELECTED_RECIPE(state, recipe) {
     state.selectedRecipe = recipe;
@@ -75,7 +79,7 @@ const actions = {
     await axios.post(`api/v1/get-product-recipes/`,formData)
     .then((response)=>{
       for(let i=0; i< response.data.length; i++){
-        state.recipeArr.push((response.data[i].inventory_item.item_code + ' - ' + response.data[i].inventory_item.item_name));
+        state.recipeArr.push(('Recipe for ' + response.data[i].inventory_item.item_code + ' - ' + response.data[i].inventory_item.item_name));
       }
       commit('LIST_RECIPES', response.data);
     })
@@ -99,9 +103,11 @@ const actions = {
   },
   handleSelectedRecipe({ commit, state }, option){
     state.recipeArray = [];
-    const selectedRecipe = state.recipesList.find(recipe => (recipe.inventory_item.item_code + ' - ' + recipe.inventory_item.item_name) === option);
+    const selectedRecipe = state.recipesList.find(recipe => ('Recipe for ' + recipe.inventory_item.item_code + ' - ' + recipe.inventory_item.item_name) === option);
     if (selectedRecipe) {
         state.recipeID = selectedRecipe.recipe_id;
+        state.itemQuantity = selectedRecipe.quantity;
+        state.prodIngredientsArray = selectedRecipe.recipe_ingredients;
         state.recipeArray = [...state.recipeArray, selectedRecipe];
     }
     commit('RECIPES_ARRAY', state.recipeArray);

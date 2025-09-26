@@ -320,24 +320,24 @@
                     <button class="w-full text-left font-semibold" @click="showInventorySettings">Inventory Default Settings</button>
                     <div class="w-full mt-4" v-if="inventory_settings_options">
                         <div class="flex mb-1.5">
-                            <div class="basis-1/3 flex mr-3">
+                            <div class="basis-1/4 flex mr-3">
                                 <label for="">Current:<em></em></label>
                                 <p class="ml-4 font-bold">{{ retailOutlet }}</p>
                                 <button type="button" class="ml-4 text-red-600" @click="removeDefaultSetting('Inventory','Default Retail Outlet',retailOutlet)" v-if="retailOutlet"><i class="fa fa-times" aria-hidden="true"></i></button>
                             </div>
-                            <div class="basis-1/3 flex mr-3">
+                            <div class="basis-1/4 flex mr-3">
                                 <label for="">Current:<em></em></label>
                                 <p class="ml-4 font-bold">{{ stockControl }}</p>
                                 <button type="button" class="ml-4 text-red-600" @click="removeDefaultSetting('Inventory','Inventory Stock Control A/c',stockControl)" v-if="stockControl"><i class="fa fa-times" aria-hidden="true"></i></button>
                             </div>
-                            <div class="basis-1/3 flex mr-3">
+                            <div class="basis-1/4 flex mr-3">
                                 <label for="">Current:<em></em></label>
                                 <p class="ml-4 font-bold">{{ salesIncome }}</p>
                                 <button type="button" class="ml-4 text-red-600" @click="removeDefaultSetting('Inventory','Inventory Sales Income A/c',salesIncome)" v-if="salesIncome"><i class="fa fa-times" aria-hidden="true"></i></button>
                             </div>
                         </div>
                         <div class="flex mb-3">
-                            <div class="basis-1/3 mr-4 relative">
+                            <div class="basis-1/4 mr-4 relative">
                                 <label for="">Default Retail Outlet:<em>*</em></label><br />
                                 <SearchableDropdown
                                     :options="retailOutletArr"
@@ -349,7 +349,7 @@
                                 />
                                 <button type="button" class="absolute ml-4 rounded px-2 bg-green-500 text-white" @click="saveDefaultSetting('Inventory','Default Retail Outlet',outletID,outletName)"><i class="fa fa-check"></i></button>
                             </div>
-                            <div class="basis-1/3 mr-4 relative">
+                            <div class="basis-1/4 mr-4 relative">
                                 <label for="">Stock Control A/c:<em>*</em></label><br />
                                 <SearchableDropdown
                                     :options="ledgerArr"
@@ -360,7 +360,7 @@
                                 />
                                 <button type="button" class="absolute ml-4 rounded px-2 bg-green-500 text-white" @click="saveDefaultSetting('Inventory','Inventory Stock Control A/c',ledgerID,ledgerName)"><i class="fa fa-check"></i></button>
                             </div>
-                            <div class="basis-1/3 mr-3 relative">
+                            <div class="basis-1/4 mr-3 relative">
                                 <label for="">Sales Income A/c:<em>*</em></label><br />
                                 <SearchableDropdown
                                     :options="incomeLedgerArr"
@@ -374,24 +374,19 @@
                             </div>
                         </div>
                         <div class="flex mb-1.5">
-                            <div class="basis-1/3 flex mr-3">
+                            <div class="basis-1/4 flex mr-3">
                                 <label for="">Current:<em></em></label>
                                 <p class="ml-4 font-bold">{{ outletCounter }}</p>
                                 <button type="button" class="ml-4 text-red-600" @click="removeDefaultSetting('Inventory','Default Outlet Counter',outletCounter)" v-if="outletCounter"><i class="fa fa-times" aria-hidden="true"></i></button>
                             </div>
-                            <div class="basis-1/3 flex mr-3">
+                            <div class="basis-1/4 flex mr-3">
                                 <label for="">Current:<em></em></label>
                                 <p class="ml-4 font-bold">{{ invTakeOn }}</p>
                                 <button type="button" class="ml-4 text-red-600" @click="removeDefaultSetting('Inventory','Inventory Take On Balancing A/c',invTakeOn)" v-if="invTakeOn"><i class="fa fa-times" aria-hidden="true"></i></button>
                             </div>
-                            <div class="basis-1/3 flex mr-3">
-                                <label for="">Current:<em></em></label>
-                                <p class="ml-4 font-bold">{{ directSaleOrder }}</p>
-                                <button type="button" class="ml-4 text-red-600" @click="removeDefaultSetting('Inventory','Direct Sale Order',directSaleOrder)" v-if="directSaleOrder"><i class="fa fa-times" aria-hidden="true"></i></button>
-                            </div>
                         </div>
                         <div class="flex mb-3">
-                            <div class="basis-1/3 mr-4 relative">
+                            <div class="basis-1/4 mr-4 relative">
                                 <label for="">Default Outlet Counter:<em>*</em></label><br />
                                 <SearchableDropdown
                                     :options="outletCounterArr"
@@ -403,7 +398,7 @@
                                 />
                                 <button type="button" class="absolute ml-4 rounded px-2 bg-green-500 text-white" @click="saveDefaultSetting('Inventory','Default Outlet Counter',counterID,counterName)"><i class="fa fa-check"></i></button>
                             </div>
-                            <div class="basis-1/3 mr-4 relative">
+                            <div class="basis-1/4 mr-4 relative">
                                 <label for="">Inventory Take On Balancing A/c:<em>*</em></label><br />
                                 <SearchableDropdown
                                     :options="ledgerArr"
@@ -411,11 +406,11 @@
                                     :dropdownWidth="dropdownWidth"
                                     @option-selected="handleSelectedLedger"
                                     @clearSearch="clearSelectedLedger"   
-                                    @fetchData="fetchLedgers"                              
+                                                               
                                 />
                                 <button type="button" class="absolute ml-4 rounded px-2 bg-green-500 text-white" @click="saveDefaultSetting('Inventory','Inventory Take On Balancing A/c',ledgerID,ledgerName)"><i class="fa fa-check"></i></button>
                             </div>
-                            <div class="basis-1/3 relative">
+                            <div class="basis-1/4 relative">
                                 <label for="">Direct Sale Order:<em>*</em></label><br />
                                 <select  v-model="directSaleOrder" name="" class="bg-slate-50 rounded border border-gray-400 text-sm pl-2 pt-2 w-3/4">
                                     <option value="Yes">Yes</option>
@@ -425,10 +420,15 @@
                             </div>
                         </div>
                         <div class="flex mb-1.5">
-                            <div class="basis-1/2 flex mr-3">
+                            <div class="basis-1/4 flex mr-3">
                                 <label for="">Current:<em></em></label>
                                 <p class="ml-4 font-bold">{{ counterChannel }}</p>
                                 <button type="button" class="ml-4 text-red-600" @click="removeDefaultSetting('Inventory','Default Counter Channel',counterChannel)" v-if="counterChannel"><i class="fa fa-times" aria-hidden="true"></i></button>
+                            </div>
+                            <div class="basis-1/4 flex mr-3">
+                                <label for="">Current:<em></em></label>
+                                <p class="ml-4 font-bold">{{ prodControl }}</p>
+                                <button type="button" class="ml-4 text-red-600" @click="removeDefaultSetting('Inventory','Batch Production Control A/c',prodControl)" v-if="prodControl"><i class="fa fa-times" aria-hidden="true"></i></button>
                             </div>
                         </div>
                         <div class="flex mb-3">
@@ -444,9 +444,28 @@
                                 />
                                 <button type="button" class="absolute ml-4 rounded px-2 bg-green-500 text-white" @click="saveDefaultSetting('Inventory','Default Counter Channel',channelID,channelName)"><i class="fa fa-check"></i></button>
                             </div>
+                            <div class="basis-1/4 mr-3 relative">
+                                <label for="">Batch Production Control A/c:<em>*</em></label><br />
+                                <SearchableDropdown
+                                    :options="ledgerArr"
+                                    :updateValue="selectedLedger"
+                                    :dropdownWidth="dropdownWidth"
+                                    @option-selected="handleSelectedLedger"
+                                    @clearSearch="clearSelectedLedger"                                 
+                                />
+                                <button type="button" class="absolute ml-4 rounded px-2 bg-green-500 text-white" @click="saveDefaultSetting('Inventory','Batch Production Control A/c',ledgerID,ledgerName)"><i class="fa fa-check"></i></button>
+                            </div>
+                            <div class="basis-1/4 relative">
+                                <label for="">Update Selling Price For All Batches:<em>*</em></label><br />
+                                <select  v-model="updateBatchPrice" name="" class="bg-slate-50 rounded border border-gray-400 text-sm pl-2 pt-2 w-3/4">
+                                    <option value="Yes">Yes</option>
+                                    <option value="No">No</option>
+                                </select>
+                                <button type="button" class="absolute ml-4 rounded px-2 bg-green-500 text-white" @click="saveDefaultSetting('Inventory','Update Selling Price For All Batches',updateBatchPrice,updateBatchPrice)"><i class="fa fa-check"></i></button>
+                            </div>
                         </div>
                         <div class="flex mb-3">
-                            <div class="basis-1/3 relative">
+                            <div class="basis-1/4 relative">
                                 <label for="">Default Stock Type:<em>*</em></label><br />
                                 <select  v-model="stockType" name="" class="bg-slate-50 rounded border border-gray-400 text-sm pl-2 pt-2 w-3/4">
                                     <option value="Stocked">Stocked</option>
@@ -456,6 +475,7 @@
                                 </select>
                                 <button type="button" class="absolute ml-4 rounded px-2 bg-green-500 text-white" @click="saveDefaultSetting('Inventory','Default Stock Type',stockType,stockType)"><i class="fa fa-check"></i></button>
                             </div>
+                            
                         </div>
                     </div>
                 </div>
@@ -682,6 +702,8 @@ export default defineComponent({
         const salesIncome = ref("");
         const invTakeOn = ref("");
         const directSaleOrder = ref("");
+        const updateBatchPrice = ref("");
+        const prodControl = ref("");
 
         const defaultTimeout = ref(0);
 
@@ -998,6 +1020,10 @@ export default defineComponent({
                         invTakeOn.value = response.data[i].setting_value_name;
                     }else if(response.data[i].setting_name === 'Direct Sale Order'){
                         directSaleOrder.value = response.data[i].setting_value_name;
+                    }else if(response.data[i].setting_name === 'Update Selling Price For All Batches'){
+                        updateBatchPrice.value = response.data[i].setting_value_name; 
+                    }else if(response.data[i].setting_name === 'Batch Production Control A/c'){
+                        prodControl.value = response.data[i].setting_value_name; 
                     }
 
                     else if(response.data[i].setting_name === 'Sale Asset Control A/c'){
@@ -1107,7 +1133,7 @@ export default defineComponent({
             ledgerID,ledgerName, handleSelectedLedger, clearSelectedLedger, saveDefaultSetting, removeDefaultSetting, tenantCodePrefix, tenantCodeCounter,pmsAutoInvoiceOption,tenantInvoiceDay,
             patientsOption,duplicatesOption, debtorsOption, vendorsOption, tenantsOption,ledgerBalances, fetchRetailOutlets,handleSelectedOutlet, clearSelectedOutlet, fetchOutletCounters,outletID,outletName,counterID,counterName,
             channelID,channelName,handleSelectedCounter, clearSelectedCounter, fetchCounterChannels,handleSelectedChannel, clearSelectedChannel,outletCounterArr,retailOutletArr,counterChannelArr,
-            retailOutlet, outletCounter, counterChannel, salesIncome, invTakeOn, stockControl, stockType,directSaleOrder,defaultTimeout,
+            retailOutlet, outletCounter, counterChannel, salesIncome, invTakeOn, stockControl, stockType,directSaleOrder,updateBatchPrice,prodControl,defaultTimeout,
             mmsAutoPenalizeOption,mmsStrictGuarantorshipOption,mmsBalReminderOption,penaltyAutoTime,
             saleAssetAccount,saleAssetCommission,assetSaleIncome,saleInterestIncome,salesAgentAccount,salesAgentExpenseAccount
         }

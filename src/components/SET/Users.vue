@@ -654,7 +654,7 @@ export default{
             compModalVisible.value = false;
         };
         const dropdownOptions = ref([
-            {label: 'Reset Password', action: 'reset-password'},
+            {label: 'Reset Password', action: 'reset-password', icon: 'fa-key', colorClass: 'text-yellow-600', rightName: 'Adding User'},
         ]);
         const handleDynamicOption = (option) =>{
             if(option == 'reset-password'){

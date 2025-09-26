@@ -159,7 +159,7 @@ export default{
         const actions = ref([
             {name: 'edit', icon: 'fa fa-edit', title: 'Edit User', rightName: 'Editing User'},
             {name: 'assign', icon: 'fa fa-check-circle', title: 'Assign Rights', rightName: 'Assigning User Rights'},
-            {name: 'allowed-company', icon: 'fa fa-key', title: 'Assign Company', rightName: 'User Allowed Companies'},
+            {name: 'allowed-company', icon: 'fa fa-link', title: 'Assign Company', rightName: 'User Allowed Companies'},
             {name: 'lock', icon: 'fa fa-lock', title: 'Lock User', rightName: 'Locking User'},
             {name: 'delete', icon: 'fa fa-trash', title: 'Delete User', rightName: 'Deleting User'},
         ]);
@@ -654,7 +654,7 @@ export default{
             compModalVisible.value = false;
         };
         const dropdownOptions = ref([
-            {label: 'Reset Password', action: 'reset-password'},
+            {label: 'Reset Password', action: 'reset-password', icon: 'fa-key', colorClass: 'text-yellow-600', rightName: 'Adding User'},
         ]);
         const handleDynamicOption = (option) =>{
             if(option == 'reset-password'){

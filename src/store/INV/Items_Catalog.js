@@ -12,6 +12,7 @@ const state = {
   itemsArray: [],
   lineItemsArray: [],
   ingredientsArray: [],
+  prodIngredientsArray: [],
   itemID: null,
   itemName: '',
   item_uom: null,
@@ -35,6 +36,7 @@ const mutations = {
     state.itemsArray = [];
     state.lineItemsArray = [];
     state.ingredientsArray = [];
+    state.prodIngredientsArray = [];
     state.itemID = null;
     state.itemName = null;
     state.item_uom = null;
@@ -78,6 +80,9 @@ const mutations = {
   },
   SET_INGREDIENTS_ARRAY(state, ingredients){
     state.ingredientsArray = ingredients;
+  },
+  SET_PROD_INGREDIENTS_ARRAY(state, ingredients){
+    state.prodIngredientsArray = ingredients;
   },
   SET_STATE(state, payload) {
     for (const key in payload) {
@@ -315,6 +320,26 @@ const actions = {
     commit('SET_INGREDIENTS_ARRAY', state.ingredientsArray);
       
   },
+  handleSelectedProductionIngredient({ commit, state }, option){
+    const selectedItem = state.itemsList.find(item => (item.item_code + " - " +item.item_name) === option);
+    if (selectedItem) {
+        state.itemID = selectedItem.inventory_item_id;
+        state.itemName = selectedItem.item_code + " - " + selectedItem.item_name;
+        selectedItem.uom = selectedItem.unit_of_measure.uom_name;
+        selectedItem.recipe_ingredient_id = 'recipe_ingredient_id';
+        selectedItem.ingr_wastage = 0;
+        selectedItem.ingr_quantity = 1;
+        selectedItem.ingr_purchase_price = parseFloat(selectedItem.default_purchase_price)
+        selectedItem.ingr_total_amount = parseFloat(selectedItem.default_purchase_price) * 1;
+        const exists = state.prodIngredientsArray.some(item => item.inventory_item_id === selectedItem.inventory_item_id);
+        if (!exists) {
+            state.prodIngredientsArray = [...state.prodIngredientsArray, selectedItem];
+        }
+        
+    }
+    commit('SET_PROD_INGREDIENTS_ARRAY', state.prodIngredientsArray);
+      
+  },
   handleSelectedItem({ commit, state }, option){
     state.itemsArray = [];
     const selectedItem = state.itemsSaleList.find(item => (item.inventory_item_code + ' - ' + item.inventory_item_name) === option);
@@ -329,7 +354,7 @@ const actions = {
         selectedItem.vat_inclusivity = "Inclusive";
         selectedItem.vat_amount = 0;
         selectedItem.sub_total = 0;
-        selectedItem.total_amount = selectedItem.quantity * selectedItem.cost;
+        selectedItem.total_amount = selectedItem.quantity * selectedItem.selling_price;
         selectedItem.available_batch_count = selectedItem.batch_before_sale,
         selectedItem.item_sales_income = (parseFloat(selectedItem.selling_price) - parseFloat(selectedItem.purchase_price)) * 1,
         state.itemsArray = [...state.itemsArray, selectedItem];
@@ -446,6 +471,9 @@ const actions = {
   },
   removeIngredientLine({commit, state}, index){
     state.ingredientsArray.splice(index, 1); 
+  },
+  removeProdIngredientLine({commit, state}, index){
+    state.prodIngredientsArray.splice(index, 1); 
   }
 };
   

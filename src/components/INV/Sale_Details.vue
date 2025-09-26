@@ -96,7 +96,7 @@ export default defineComponent({
             {label: "Avail.", key:"batch_count", type: "text", editable: false},
             {label: "Batch", key: "available_batch_count", type: "text", editable: false,},
             {label: "Qty", key: "quantity", type: "number", editable: true, minWidth:"50px", maxWidth:"50px"},
-            {label: "S.Price", key:"selling_price", type: "text", editable: true,},
+            {label: "S.Price", key:"cost", type: "text", editable: true,},
             {label: "Vat rate", key: "vat_rate", type: "select-dropdown", editable: false, options: taxRates, maxWidth:"50px"},
             {label: "Incl.", key: "vat_inclusivity", type: "select-dropdown", editable: false, maxWidth:"20px", options: [{ text: 'Yes', value: 'Inclusive' }, { text: 'No', value: 'Exclusive' }]},
             {label: "Vat Amnt", key: "vat_amount", type: "number", editable: false, maxWidth:"30px"},

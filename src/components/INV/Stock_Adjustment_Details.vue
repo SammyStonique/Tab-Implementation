@@ -80,7 +80,7 @@ export default defineComponent({
         ]);
 
         const actions = ref([
-            {name: 'delete', icon: 'fa fa-minus-circle', title: 'Remove Invoice Line'},
+            {name: 'delete', icon: 'fa fa-minus-circle', title: 'Remove Invoice Line', rightName: 'Adding Stock Adjustment'},
         ])
 
         const deleteItemLine = (rowIndex, action, row) =>{
