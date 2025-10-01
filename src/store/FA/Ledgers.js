@@ -39,6 +39,7 @@ const state = {
   paymentItemsArray: [],
   receiptItemsArray: [],
   journalItemsArray: [],
+  reconItemsArray: [],
 };
   
 const mutations = {
@@ -50,6 +51,7 @@ const mutations = {
     state.invoiceItemsArray = [];
     state.accInvoiceItemsArray = [];
     state.billItemsArray = [];
+    state.reconItemsArray = [];
     state.ledgerRunningBalance = 0;
     state.ledgerID = '';
     state.ledgerName = '';
@@ -456,6 +458,24 @@ const actions = {
     }
       
   },
+  handleSelectedLedgerRecon({ commit, state }, option){
+    const selectedLedger = state.ledgersList.find(ledger => (ledger.ledger_code + " - " +ledger.ledger_name) === option);
+    if (selectedLedger) {
+      const ledgerCopy = JSON.parse(JSON.stringify(selectedLedger));
+      ledgerCopy.posting_account = ledgerCopy.ledger_code + " - " + ledgerCopy.ledger_name;
+      ledgerCopy.description = "";
+      ledgerCopy.cost = 0;
+      ledgerCopy.quantity = 1;
+      ledgerCopy.vat_rate = null;
+      ledgerCopy.vat_inclusivity = "Inclusive";
+      ledgerCopy.vat_amount = 0;
+      ledgerCopy.sub_total = 0;
+      ledgerCopy.total_amount = 0;
+
+      state.reconItemsArray.push(ledgerCopy);
+    }
+      
+  },
 
   async updateLedger({ commit,state }, formData) {
     return axios.put(`api/v1/update-ledger/`,formData)
@@ -574,6 +594,15 @@ const actions = {
   },
   removeJournalLine({commit, state}, index){
     state.journalItemsArray.splice(index, 1); 
+  },
+  removeCbkLine({commit, state}, index){
+    state.cbkArray.splice(index, 1); 
+  },
+  removeReconLine({commit, state}, index){
+    state.reconItemsArray.splice(index, 1); 
+  },
+  addQuickReconJournal({commit, state}, obj){
+    state.cbkArray.push(obj); 
   },
 };
   

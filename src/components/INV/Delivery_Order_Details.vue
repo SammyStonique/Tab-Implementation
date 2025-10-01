@@ -166,7 +166,9 @@ export default defineComponent({
                     selectOptions: itemArray, optionSelected: handleSelectedItem, required: true,
                     searchPlaceholder: 'Select Item...', dropdownWidth: '500px', updateValue: "",
                     // fetchData: fetchItems(), clearSearch: clearSelectedItem()  
-                },            
+                },     
+                {type: 'text', name: 'delivery_location', label: "Delivery Location", value: selectedSale.value?.delivery_location || '', placeholder: '', required: false,} ,
+                {required: false}        
             ]
         };
 
@@ -267,6 +269,7 @@ export default defineComponent({
                 total_amount: receiptTotals.value,
                 sale_type: "Credit",
                 sale_delivery: "Not Delivered",
+                delivery_location: formFields.value[5].value,
                 customer: customerID.value,
                 tax: tax_totals.value,
                 discount: discountTotals.value,

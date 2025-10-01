@@ -129,6 +129,7 @@ export default{
             {name: 'delete', icon: 'fa fa-trash', title: 'Delete Sale Order', rightName: 'Deleting Inventory Sale Order'},
         ])
         const companyID = computed(()=> store.state.userData.company_id);
+        const userID = computed(()=> store.state.userData.user_id);
         const categoryID = ref(null);
         const sale_code_search = ref("");
         const min_amount_search = ref("");
@@ -225,6 +226,7 @@ export default{
                 customer: customer_search.value,
                 done_by: done_by_search.value,
                 company_id: companyID.value,
+                user: userID.value,
                 page_size: selectedValue.value
             } 
             axios

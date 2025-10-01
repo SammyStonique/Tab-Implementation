@@ -64,6 +64,19 @@
             <button type="button" class="rounded bg-green-400 text-sm mr-3 h-8 w-24 text-white px-2 py-1.5" @click="displayExcelData"><i class="fa fa-file-import mr-2 text-xs"></i>Import</button>
          </div>               
     </MovableModal>
+    <MovableModal v-model:visible="propModalVisible" :title="title1" :modal_top="modal_top" :modal_left="modal_left" :modal_width="modal_width"
+        :loader="modal_loader1" @showLoader="showModalLoader1" @hideLoader="hideModalLoader1" @closeModal="closeModal">
+        <DynamicForm 
+            :fields="formFields2" :flex_basis="flex_basis1" :flex_basis_percentage="flex_basis_percentage1" 
+            :displayButtons="displayButtons" @handleSubmit="postQuickJournal" @handleReset="handleReset1"
+        >
+        <template v-slot:additional-content> 
+            <div class="px-3 min-h-[50px]">
+                <DynamicTable :key="tableKey" :columns="journalColumns" :rows="journalRows" :actions="reconActions" :showActions="showActions" :idField="idField" @action-click="deleteReconLine"/>
+            </div>
+        </template>
+        </DynamicForm>
+    </MovableModal>
 </template>
 
 <script>
@@ -89,6 +102,7 @@ export default defineComponent({
         const current_date = new Date();
         const loader = ref('none');
         const modal_loader = ref('none');
+        const modal_loader1 = ref('none');
         const tableKey = ref(0);
         const mainComponentKey = ref(0);
         const ledComponentKey = ref(0);
@@ -96,6 +110,8 @@ export default defineComponent({
         const debitTotals = ref(0);
         const creditTotals = ref(0);
         const title = ref('Import Bank Statement');
+        const title1 = ref("Add Quick Journal");
+        const propModalVisible = ref(false);
         const rightsModule = ref('Accounts');
         const depModalVisible = ref(false);
         const modal_top = ref('150px');
@@ -110,7 +126,9 @@ export default defineComponent({
         const selectedCashbookRow = ref([]);
         const selectedBankRow = ref([]);
         const flex_basis = ref('');
+        const flex_basis1 = ref('');
         const flex_basis_percentage = ref('');
+        const flex_basis_percentage1 = ref('');
         const ledgerName = computed(()=> store.state.Ledgers.reconciliationLedgerName);
         const ledgerID = computed(()=> store.state.Ledgers.reconciliationLedgerID);
         const cbkRunningBalance = computed(()=> store.state.Ledgers.cbkRunningBalance);
@@ -150,7 +168,23 @@ export default defineComponent({
         ])
 
         const deleteJournalLine = (rowIndex, action, row) =>{
-            store.dispatch('Ledgers/removeJournalLine', rowIndex);
+            if(row.journal_no != '-'){
+                toast.error('You Cannot Delete This Line!');
+            }else{
+                if (row.debit_amount > 0) {
+                    formFields1.value[0].value -= 1;
+                    formFields1.value[0].value1 -= Number(row.debit_amount);
+                    let variance = parseFloat((formFields.value[3].value || '0').toString().replace(/,/g, ''));
+                    formFields.value[3].value = Number(variance - Number(row.debit_amount)).toLocaleString();
+                }else if (row.credit_amount > 0) {
+                    formFields1.value[1].value -= 1;
+                    formFields1.value[1].value1 -= Number(row.credit_amount);
+                    let variance = parseFloat((formFields.value[3].value || '0').toString().replace(/,/g, ''));
+                    formFields.value[3].value = Number(variance + Number(row.credit_amount)).toLocaleString();
+                }
+                store.dispatch('Ledgers/removeCbkLine', rowIndex);
+            }
+            
         }
         const searchJournalEntries = async() =>{
             if(formFields.value[0].value == 0){
@@ -296,6 +330,12 @@ export default defineComponent({
         const hideModalLoader = () =>{
             modal_loader.value = "none";
         }
+        const showModalLoader1 = () =>{
+            modal_loader1.value = "block";
+        }
+        const hideModalLoader1 = () =>{
+            modal_loader1.value = "none";
+        }
         
         const applyReconciliation = async (row, reconciledStatus = "Yes") => {
             row.reconciled = reconciledStatus;
@@ -307,14 +347,22 @@ export default defineComponent({
                     formFields1.value[0].value1 += Number(row.debit_amount);
                     let variance = parseFloat((formFields.value[3].value || '0').toString().replace(/,/g, ''));
                     formFields.value[3].value = Number(variance + Number(row.debit_amount)).toLocaleString();
-                    await store.dispatch('Ledgers/updateState', { cbkDebitCount: cbkDebitCount.value - 1, cbkDebitTotal: +(cbkDebitTotal.value - Number(row.debit_amount)).toFixed(2)});
+                    if(row.journal_no != '-'){
+                       await store.dispatch('Ledgers/updateState', { cbkDebitCount: cbkDebitCount.value - 1, cbkDebitTotal: +(cbkDebitTotal.value - Number(row.debit_amount)).toFixed(2)}); 
+                    }else{
+                          await store.dispatch('Ledgers/updateState', { cbkDebitCount: cbkDebitCount.value, cbkDebitTotal: +(cbkDebitTotal.value).toFixed(2)});
+                    }
 
                 }else if (row.credit_amount > 0) {
                     formFields1.value[1].value += 1;
                     formFields1.value[1].value1 += Number(row.credit_amount);
                     let variance = parseFloat((formFields.value[3].value || '0').toString().replace(/,/g, ''));
                     formFields.value[3].value = Number(variance - Number(row.credit_amount)).toLocaleString();
-                    await store.dispatch('Ledgers/updateState', { cbkCreditCount: cbkCreditCount.value - 1, cbkCreditTotal: +(cbkCreditTotal.value - Number(row.credit_amount)).toFixed(2)});
+                    if(row.journal_no != '-'){
+                        await store.dispatch('Ledgers/updateState', { cbkCreditCount: cbkCreditCount.value - 1, cbkCreditTotal: +(cbkCreditTotal.value - Number(row.credit_amount)).toFixed(2)});
+                    }else{
+                        await store.dispatch('Ledgers/updateState', { cbkCreditCount: cbkCreditCount.value, cbkCreditTotal: +(cbkCreditTotal.value).toFixed(2)});
+                    }
                 }
             } else {
                 row.rowColor = 'bg-orange-50';
@@ -323,13 +371,21 @@ export default defineComponent({
                     formFields1.value[0].value1 -= Number(row.debit_amount);
                     let variance = parseFloat((formFields.value[3].value || '0').toString().replace(/,/g, ''));
                     formFields.value[3].value = Number(variance - Number(row.debit_amount)).toLocaleString();
-                    await store.dispatch('Ledgers/updateState', { cbkDebitCount: cbkDebitCount.value + 1, cbkDebitTotal: +(cbkDebitTotal.value + Number(row.debit_amount)).toFixed(2)});
+                    if(row.journal_no != '-'){
+                        await store.dispatch('Ledgers/updateState', { cbkDebitCount: cbkDebitCount.value + 1, cbkDebitTotal: +(cbkDebitTotal.value + Number(row.debit_amount)).toFixed(2)});
+                    }else{
+                        await store.dispatch('Ledgers/updateState', { cbkDebitCount: cbkDebitCount.value, cbkDebitTotal: +(cbkDebitTotal.value).toFixed(2)});
+                    }
                 }else if (row.credit_amount > 0) {
                     formFields1.value[1].value -= 1;
                     formFields1.value[1].value1 -= Number(row.credit_amount);
                     let variance = parseFloat((formFields.value[3].value || '0').toString().replace(/,/g, ''));
                     formFields.value[3].value = Number(variance + Number(row.credit_amount)).toLocaleString();
-                    await store.dispatch('Ledgers/updateState', { cbkCreditCount: cbkCreditCount.value + 1, cbkCreditTotal: +(cbkCreditTotal.value + Number(row.credit_amount)).toFixed(2)});
+                    if(row.journal_no != '-'){
+                        await store.dispatch('Ledgers/updateState', { cbkCreditCount: cbkCreditCount.value + 1, cbkCreditTotal: +(cbkCreditTotal.value + Number(row.credit_amount)).toFixed(2)});
+                    }else{
+                        await store.dispatch('Ledgers/updateState', { cbkCreditCount: cbkCreditCount.value, cbkCreditTotal: +(cbkCreditTotal.value).toFixed(2)});   
+                    }
                 }
             }
             let cbkBalance = parseFloat((formFields.value[2].value || '0').toString().replace(/,/g, ''));
@@ -465,25 +521,136 @@ export default defineComponent({
             }
             hideLoader();
         };
+        const addQuickJournal = () =>{
+            handleReset1();
+            propModalVisible.value = true;
+            // updateFormFields2();
+            ledComponentKey.value += 1;
+        };
+        const ledgerArray = computed(() => store.state.Ledgers.ledgerArr);
+        const fetchLedgers = async() =>{
+            await store.dispatch('Ledgers/fetchLedgers', {company:companyID.value})
+        };
+        const handleSelectedLedger = async(option) =>{
+            await store.dispatch('Ledgers/handleSelectedLedgerRecon', option)
+            ledComponentKey.value += 1;
+        };
+        const clearSelectedLedger = async() =>{
+            await store.dispatch('Ledgers/updateState', {ledgerID: ''});
+        }
+        const formFields2 = ref([]);
+        const updateFormFields2 = () => {
+            formFields2.value = [
+                { type: 'date', name: 'issue_date',label: "Recording Date", value: formatDate(current_date), required: true, maxDate: formatDate(current_date) },
+                { type: 'dropdown', name: 'txn_type',label: "Type", value: '', placeholder: "", required: true, options: [{ text: 'Direct Deposit', value: 'Deposit' }, { text: 'Direct Withdrawal', value: 'Withdrawal' }] },
+                { type: 'text', name: 'ref_no',label: "Reference No", value: '', required: false },
+                { type: 'number', name: 'total_amount',label: "Control Amount", value: 0, required: true,},
+                {type:'text-area', label:"Memo", value: "", textarea_rows: '2', textarea_cols: '50', required: true},
+                {
+                    type:'search-dropdown', label:"Posting A/c", value: "", componentKey: ledComponentKey,
+                    selectOptions: ledgerArray, optionSelected: handleSelectedLedger, required: true,
+                    searchPlaceholder: 'Select Posting A/c...', dropdownWidth: '300px', updateValue: "",
+                    fetchData: fetchLedgers(), clearSearch: clearSelectedLedger()  
+                },
+            ];
+        };
+        const handleReset1 = () =>{
+            updateFormFields2();
+            store.dispatch('Ledgers/updateState', { reconItemsArray: []});
+        }
+        const journalRows = computed(() => store.state.Ledgers.reconItemsArray);
+        const journalColumns = ref([
+            {label: "Account", key:"posting_account", type: "text", editable: false},
+            {label: "Description", key:"description", type: "text", editable: true},
+            {label: "Amount", key: "total_amount", type: "text", editable: true},
+        ]);
+        const reconActions = ref([
+            {name: 'delete', icon: 'fa fa-minus-circle', title: 'Remove Recon. Item', rightName: "Accounts Reconciliation"},
+        ])
+        const postQuickJournal = async() =>{
+            showModalLoader1();
+            if(journalRows.value.length <=0){
+                toast.error("Please Select Posting A/c")
+                hideModalLoader1();
+                return;
+            }else{
+                let totalAmount = 0;
+                for(let i=0; i<journalRows.value.length; i++){
+                    totalAmount += Number(journalRows.value[i].total_amount);
+                }
+                if(totalAmount != formFields2.value[3].value){
+                    toast.error("Line Total Amount Must Be Equal To Control Amount")
+                    hideModalLoader1();
+                    return;
+                }
+                if(formFields2.value[1].value == 'Deposit'){
+                    let obj1 = {
+                        "txn_date": formFields2.value[0].value,
+                        "txn_type": "Deposit",
+                        "banking_date": formFields2.value[0].value,
+                        "journal_no": "-",
+                        "reference_no": formFields2.value[2].value,
+                        "description": formFields2.value[4].value,
+                        "formatted_debit_amount": Number(formFields2.value[3].value).toLocaleString(),
+                        "formatted_credit_amount": 0,
+                        "debit_amount": formFields2.value[3].value,
+                        "total_amount": formFields2.value[3].value,
+                        "credit_amount": 0,
+                        "reconciled": "Yes",
+                        "journal_txns": journalRows.value
+                    }
+                    await store.dispatch('Ledgers/addQuickReconJournal', obj1);  
+                    markAsReconciled(obj1) 
+                }else{
+                    let obj2 = {
+                        "txn_date": formFields2.value[0].value,
+                        "txn_type": "Withdrawal",
+                        "banking_date": formFields2.value[0].value,
+                        "journal_no": "-",
+                        "reference_no": formFields2.value[2].value,
+                        "description": formFields2.value[4].value,
+                        "debit_amount": 0,
+                        "credit_amount": formFields2.value[3].value,
+                        "total_amount": formFields2.value[3].value,
+                        "formatted_debit_amount": 0,
+                        "formatted_credit_amount": Number(formFields2.value[3].value).toLocaleString(),
+                        "reconciled": "Yes",
+                        "journal_txns": journalRows.value
+                    } 
+                    await store.dispatch('Ledgers/addQuickReconJournal', obj2);  
+                    markAsReconciled(obj2) 
+                }
+               hideModalLoader1();  
+               propModalVisible.value = false;
+            }
+        };
+        const deleteReconLine = async(rowIndex, action, row) =>{
+            markAsReconciled(row);
+            await store.dispatch('Ledgers/removeReconLine', rowIndex);
+        }
 
         onBeforeMount(()=>{ 
-            store.dispatch('Ledgers/updateState', { journalItemsArray: []})
+            store.dispatch('Ledgers/updateState', { journalItemsArray: [], reconItemsArray: []})
             updateFormFields();
             updateFormFields1();
             ledComponentKey.value += 1;
             flex_basis.value = '1/6';
             flex_basis_percentage.value = '25';
+            flex_basis1.value = '1/3';
+            flex_basis_percentage.value = '33.33';
         })
         onMounted(()=>{
             store.dispatch('Ledgers/updateState', { journalItemsArray: []})
         })
 
         return{
-            formFields, formFields1, flex_basis, flex_basis_percentage, displayButtons, reconcileCashbook, mainComponentKey,showTotals,ledgerName,
+            formFields, formFields1, flex_basis, flex_basis1, flex_basis_percentage, displayButtons, reconcileCashbook, mainComponentKey,showTotals,ledgerName,
             handleReset, loader, showLoader, hideLoader, tableKey, cashbookColumns, cashbookRows, showActions, actions, deleteJournalLine, idField,
             depModalVisible,title, modal_loader, modal_left, modal_top, modal_width, showModalLoader, hideModalLoader,rightsModule,bankColumns,bankRows,
             markAsReconciled,downloadTemplate,importBankStatement,onFileChange,displayExcelData,localFilePath,
-            matchedTransactions,matchTransactions,markAllAsReconciled,unmarkAllAsReconciled,markAsMatched
+            matchedTransactions,matchTransactions,markAllAsReconciled,unmarkAllAsReconciled,markAsMatched,addQuickJournal,
+            propModalVisible,title1,modal_loader1,showModalLoader1,hideModalLoader1,formFields2,postQuickJournal,journalRows,journalColumns,deleteReconLine,reconActions
+
         }
     }
 })

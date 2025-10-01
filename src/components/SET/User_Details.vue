@@ -48,6 +48,7 @@ export default defineComponent({
         const countComponentKey = ref(0);
         const errors = ref([]);
         const companyID = computed(()=> store.state.userData.company_id);
+        const compModules = computed(() => store.state.userData.compModules);
         const displayButtons = ref(true);
         const isEditing = computed(()=> store.state.userData.isEditing);
         const flex_basis = ref('');
@@ -90,7 +91,7 @@ export default defineComponent({
                 { type: 'text', name: 'identification_no',label: "ID Number", value: selectedUser.value?.identification_no || '', required: true },
                 { type: 'text', name: 'email',label: "Email", value: selectedUser.value?.email || '', required: true, placeholder: '' },
                 { type: 'text', name: 'phone_number',label: "Phone Number", value: selectedUser.value?.phone_number || '', required: true },
-                { type: 'date', name: 'birth_date',label: "D.O.B", value: selectedUser.value?.birth_date || '', required: true },
+                { type: 'date', name: 'birth_date',label: "D.O.B", value: selectedUser.value?.birth_date || '', required: false },
                 { type: 'dropdown', name: 'gender',label: "Gender", value: selectedUser.value?.gender || '', placeholder: "", required: true, options: [{ text: 'Male', value: 'Male' }, { text: 'Female', value: 'Female' }, { text: 'Other', value: 'Other' }] },
                 { type: 'dropdown', name: 'profile',label: "Profile", value: selectedUser.value?.profile || '', placeholder: "", required: true, options: [{text:'Admin',value:'Admin'},{text:'Property Manager',value:'Property Manager'},{text:'Accountant',value:'Accountant'},{text:'Human Resource',value:'Human Resource'},{text:'Credit Officer',value:'Credit Officer'},{text:'Doctor',value:'Doctor'},{text:'Office Clerk',value:'Office Clerk'},{text:'Clinical Officer',value:'Clinical Officer'}] },
 
@@ -112,37 +113,43 @@ export default defineComponent({
             depComponentKey.value += 1;
         }
 
-        watch([selectedUser, selectedDepartment], () => {
-            if (selectedUser.value && selectedDepartment.value) {
-                depComponentKey.value += 1;
-                updateFormFields();
-            }
-        }, { immediate: true });
 
         const displayInventoryOptions = (value) =>{
             if(value == 'Enabled'){
                 additionalFields1.value[0].hidden = false;
                 additionalFields1.value[1].hidden = false;
+                additionalFields1.value[2].hidden = false;
                 fetchOutlets();
             }else{
                 additionalFields1.value[0].hidden = true;
                 additionalFields1.value[1].hidden = true;
+                additionalFields1.value[2].hidden = true;
+            }
+        };
+        const filterCompanyModules = (moduleName) =>{
+            console.log(moduleName)
+            console.log(compModules.value)
+            for(let mod of compModules.value){
+                console.log(mod.module_name)
+                if(mod.module_name == moduleName){
+                    return true;
+                }
             }
         }
 
         const additionalFields = ref([]);
         const updateAdditionalFormFields = () => {
             additionalFields.value = [
-                { type: 'dropdown', name: 'pms_module',label: "Property Management", value: selectedUser.value?.pms_module || 'Disabled', placeholder: "", required: true, options: [{ text: 'Enabled', value: 'Enabled' }, { text: 'Disabled', value: 'Disabled' }] },
-                { type: 'dropdown', name: 'accounts_module',label: "Financial Accounts", value: selectedUser.value?.accounts_module || 'Disabled', placeholder: "", required: true, options: [{ text: 'Enabled', value: 'Enabled' }, { text: 'Disabled', value: 'Disabled' }] },
-                { type: 'dropdown', name: 'inventory_module',label: "Inventory Management", value: selectedUser.value?.inventory_module || 'Disabled', placeholder: "", required: true, options: [{ text: 'Enabled', value: 'Enabled' }, { text: 'Disabled', value: 'Disabled' }], method: displayInventoryOptions },
-                { type: 'dropdown', name: 'hms_module',label: "Hospital Management", value: selectedUser.value?.hms_module || 'Disabled', placeholder: "", required: true, options: [{ text: 'Enabled', value: 'Enabled' }, { text: 'Disabled', value: 'Disabled' }] },
-                { type: 'dropdown', name: 'hr_module',label: "Human Resource", value: selectedUser.value?.hr_module || 'Disabled', placeholder: "", required: true, options: [{ text: 'Enabled', value: 'Enabled' }, { text: 'Disabled', value: 'Disabled' }] },
-                { type: 'dropdown', name: 'settings_module',label: "Settings", value: selectedUser.value?.settings_module || 'Disabled', placeholder: "", required: true, options: [{ text: 'Enabled', value: 'Enabled' }, { text: 'Disabled', value: 'Disabled' }] },
-                { type: 'dropdown', name: 'hhs_module',label: "Hotel Management", value: selectedUser.value?.hhs_module || 'Disabled', placeholder: "", required: true, options: [{ text: 'Enabled', value: 'Enabled' }, { text: 'Disabled', value: 'Disabled' }] },
-                { type: 'dropdown', name: 'mms_module',label: "Membership Management", value: selectedUser.value?.mms_module || 'Disabled', placeholder: "", required: true, options: [{ text: 'Enabled', value: 'Enabled' }, { text: 'Disabled', value: 'Disabled' }] },
-                { type: 'dropdown', name: 'pss_module',label: "Property Sales", value: selectedUser.value?.pss_module || 'Disabled', placeholder: "", required: true, options: [{ text: 'Enabled', value: 'Enabled' }, { text: 'Disabled', value: 'Disabled' }] }, 
-                { type: 'dropdown', name: 'vss_module',label: "Vehicle Sales", value: selectedUser.value?.vss_module || 'Disabled', placeholder: "", required: true, options: [{ text: 'Enabled', value: 'Enabled' }, { text: 'Disabled', value: 'Disabled' }] },  
+                { type: 'dropdown', name: 'pms_module',label: "Property Management", value: selectedUser.value?.pms_module || 'Disabled', placeholder: "", required: true, disabled: false, options: [{ text: 'Enabled', value: 'Enabled' }, { text: 'Disabled', value: 'Disabled' }] },
+                { type: 'dropdown', name: 'accounts_module',label: "Financial Accounts", value: selectedUser.value?.accounts_module || 'Disabled', placeholder: "", required: true, disabled: false, options: [{ text: 'Enabled', value: 'Enabled' }, { text: 'Disabled', value: 'Disabled' }] },
+                { type: 'dropdown', name: 'inventory_module',label: "Inventory Management", value: selectedUser.value?.inventory_module || 'Disabled', placeholder: "", required: true, disabled: false, options: [{ text: 'Enabled', value: 'Enabled' }, { text: 'Disabled', value: 'Disabled' }], method: displayInventoryOptions },
+                { type: 'dropdown', name: 'hms_module',label: "Hospital Management", value: selectedUser.value?.hms_module || 'Disabled', placeholder: "", required: true, disabled: false, options: [{ text: 'Enabled', value: 'Enabled' }, { text: 'Disabled', value: 'Disabled' }] },
+                { type: 'dropdown', name: 'hr_module',label: "Human Resource", value: selectedUser.value?.hr_module || 'Disabled', placeholder: "", required: true, disabled: false, options: [{ text: 'Enabled', value: 'Enabled' }, { text: 'Disabled', value: 'Disabled' }] },
+                { type: 'dropdown', name: 'settings_module',label: "Settings", value: selectedUser.value?.settings_module || 'Disabled', placeholder: "", required: true, disabled: false, options: [{ text: 'Enabled', value: 'Enabled' }, { text: 'Disabled', value: 'Disabled' }] },
+                { type: 'dropdown', name: 'hhs_module',label: "Hotel Management", value: selectedUser.value?.hhs_module || 'Disabled', placeholder: "", required: true, disabled: false, options: [{ text: 'Enabled', value: 'Enabled' }, { text: 'Disabled', value: 'Disabled' }] },
+                { type: 'dropdown', name: 'mms_module',label: "Membership Management", value: selectedUser.value?.mms_module || 'Disabled', placeholder: "", required: true, disabled: false, options: [{ text: 'Enabled', value: 'Enabled' }, { text: 'Disabled', value: 'Disabled' }] },
+                { type: 'dropdown', name: 'pss_module',label: "Property Sales", value: selectedUser.value?.pss_module || 'Disabled', placeholder: "", required: true, disabled: false, options: [{ text: 'Enabled', value: 'Enabled' }, { text: 'Disabled', value: 'Disabled' }] }, 
+                { type: 'dropdown', name: 'vss_module',label: "Vehicle Sales", value: selectedUser.value?.vss_module || 'Disabled', placeholder: "", required: true, disabled: false, options: [{ text: 'Enabled', value: 'Enabled' }, { text: 'Disabled', value: 'Disabled' }] },  
                 {required: false},
                 {required: false},
             ];
@@ -168,11 +175,11 @@ export default defineComponent({
         };
         const clearSelectedCounter = async() =>{
             await store.dispatch('Outlet_Counters/updateState', {counterID: ''});
-            counterID.value = ""
+            counterID.value = null;
         }
         const clearSelectedOutlet = async() =>{
             await store.dispatch('Retail_Outlets/updateState', {outletID: ''});
-            outletID.value = ""
+            outletID.value = null;
         };
         watch([outletID], () => {
             if (outletID.value) {
@@ -195,13 +202,36 @@ export default defineComponent({
                     searchPlaceholder: 'Select Counter...', dropdownWidth: '280px', updateValue: defaultCounter.value,
                     clearSearch: clearSelectedCounter()  
                 },
+                { type: 'dropdown', name: 'user_inv_sales_limit',label: "Limit Inv. Sales User", value: selectedUser.value?.user_inv_sales_limit || 'No', placeholder: "", required: false, hidden:true, options: [{ text: 'Yes', value: 'Yes' }, { text: 'No', value: 'No' }] },
+                {required: false},
             ];
         };
+        const applyingModulesFilter = () =>{
+            for(let i=0; i < additionalFields.value.length; i++){
+                let result = filterCompanyModules(additionalFields.value[i].label);
+                if(!result){
+                    additionalFields.value[i].disabled = true;
+                }else{
+                    additionalFields.value[i].disabled = false;
+                }
+            }
+        }
         watch([selectedUser, selectedDepartment], () => {
             if(selectedUser.value  && selectedDepartment.value){
                 depComponentKey.value += 1;
+                updateFormFields();
                 updateAdditionalFormFields();
                 updateAdditionalFormFields1();
+                displayInventoryOptions(selectedUser.value?.inventory_module || 'Disabled');
+                applyingModulesFilter();
+            }else if(selectedUser.value){
+                updateFormFields();
+                updateAdditionalFormFields();
+                updateAdditionalFormFields1();
+                displayInventoryOptions(selectedUser.value?.inventory_module || 'Disabled');
+                applyingModulesFilter();
+            }else{
+                applyingModulesFilter();
             }
             
         }, { immediate: true });
@@ -233,7 +263,10 @@ export default defineComponent({
                 try {
                     const response1 = await axios.get("api/v1/pass-gen/");
                     temporary_password.value = response1.data;
-
+                    
+                    let obj1 = {
+                        "user_inv_sales_limit": additionalFields1.value[2].value
+                    }
                     let formData = {
                         company: companyID.value,
                         first_name: formFields.value[0].value,
@@ -259,7 +292,8 @@ export default defineComponent({
                         user_department: depValue.value,
                         password: temporary_password.value,
                         default_counter: counterID.value,
-                        default_outlet: outletID.value
+                        default_outlet: outletID.value,
+                        user_configs: JSON.stringify(obj1)
                     }
 
                     const response2 = await axios.post("api/v1/users/", formData);
@@ -313,6 +347,9 @@ export default defineComponent({
                     toast.error('Fill In Required Fields');
                     hideLoader();
             }else{
+                let obj1 = {
+                    "user_inv_sales_limit": additionalFields1.value[2].value
+                }
                 const updatedUser = {
                     user: selectedUser.value.user_id,
                     company: companyID.value,
@@ -338,7 +375,8 @@ export default defineComponent({
                     vss_module: additionalFields.value[9].value,
                     user_department: depValue.value,
                     default_counter: counterID.value,
-                    default_outlet: outletID.value
+                    default_outlet: outletID.value,
+                    user_configs: JSON.stringify(obj1)
                 };
 
                 try {
@@ -376,6 +414,7 @@ export default defineComponent({
             updateFormFields();
             updateAdditionalFormFields();
             updateAdditionalFormFields1();
+            applyingModulesFilter();
             depComponentKey.value += 1;
             flex_basis.value = '1/4';
             flex_basis_percentage.value = '25';

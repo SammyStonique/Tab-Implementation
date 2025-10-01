@@ -18,6 +18,7 @@ const state = {
     activeComponent: 'Main',
     userDetails: null,
     isAuthenticated: false,
+    compModules: [],
     company_modules: [],
     user_companies: [],
     permissions: [],

@@ -5,6 +5,8 @@
             :addButtonLabel="addButtonLabel"
             @handleAddNew="addNewItem"
             :searchFilters="searchFilters"
+            :dropdownOptions="dropdownOptions"
+            @handleDynamicOption="handleDynamicOption"
             @searchPage="searchItems"
             @resetFilters="resetFilters"
             @importData="importItems"
@@ -389,6 +391,15 @@ export default{
                 hideLoader();
             })
         };
+        const dropdownOptions = ref([
+            {label: 'Product History', action: 'view-product-history', icon: 'fa-receipt', colorClass: 'text-yellow-600', rightName: 'Adding Inventory Item'},
+        ]);
+        const handleDynamicOption = async(option) =>{
+            if(option == 'view-product-history'){
+                store.commit('pageTab/ADD_PAGE', {'INV':'Product_History'})
+                store.state.pageTab.invActiveTab = 'Product_History';
+            }
+        }
         onBeforeMount(()=>{
             searchItems();
             
@@ -399,7 +410,7 @@ export default{
             loadPrev, loadNext, firstPage, lastPage, idField, actions, handleActionClick, propModalVisible, closeModal,
             submitButtonLabel, showModal, addNewItem, showLoader, loader, hideLoader, importItems, removeItem, removeItems,
             handleSelectionChange,addingRight,rightsModule,printItemsList,selectSearchQuantity,selectedValue,downloadItemsExcel,
-            downloadItemsCSV,printModalVisible,pdfUrl, printTitle,
+            downloadItemsCSV,printModalVisible,pdfUrl, printTitle,dropdownOptions,handleDynamicOption
         }
     }
 };

@@ -78,7 +78,7 @@ export default defineComponent({
         }
 
         const fetchLedgers = async() =>{
-            await store.dispatch('Ledgers/fetchLedgers', {company:companyID.value})
+            await store.dispatch('Ledgers/fetchLedgers', {company:companyID.value, include_all: 'Yes'})
         };
         const handleSelectedLedger = async(option) =>{
             await store.dispatch('Ledgers/handleJournalLedger', option)

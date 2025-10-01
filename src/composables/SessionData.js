@@ -21,6 +21,9 @@ export function useFetchSessionData() {
           const company_modules = {
             "company_modules": response.data.modules
           }
+          const compModules = {
+            "compModules": response.data.compModules
+          }
           const user_companies = {
             "user_companies": response.data.companies
           }
@@ -38,6 +41,7 @@ export function useFetchSessionData() {
           }
           
           store.dispatch('userData/updateState',company_modules)
+          store.dispatch('userData/updateState',compModules)
           store.dispatch('userData/updateState',user_companies)
           store.dispatch('userData/updateState',permissions)
           store.dispatch('userData/updateState',defaultSettings)

@@ -74,6 +74,7 @@ import Recipes from '@/components/INV/Recipes.vue';
 import Recipe_Details from '@/components/INV/Recipe_Details.vue';
 import Production_Batches from '@/components/INV/Production_Batches.vue';
 import Production_Details from '@/components/INV/Production_Details.vue';
+import Product_History from '@/components/INV/Product_History.vue';
 
 import Default_Settings from '@/components/SET/Default_Settings.vue';
 
@@ -87,7 +88,7 @@ export default{
         Bill_Details,Payment_Vouchers,Payment_Details,Vendors,Sale_Orders,Sale_Order_Details,Delivery_Orders,Delivery_Order_Details,Direct_Purchases,
         Purchase_Details,Purchase_Items,Purchase_Orders,Purchase_Order_Details,Counter_Channels,Received_Orders,Received_Order_Details,
         Stock_Adjustments,Stock_Transfers,Stock_Transfer_Details,Stock_Adjustment_Details,Debtor_Statement,Vendor_Statement,Recipes,Recipe_Details,
-        Production_Batches,Production_Details,
+        Production_Batches,Production_Details,Product_History,
 
         Default_Settings
     },

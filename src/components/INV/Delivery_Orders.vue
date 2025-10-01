@@ -112,8 +112,8 @@ export default{
             {label: "Customer", key:"client"},
             {label: "Phone No", key:"client_phone_number"},
             {label: "Amount", key:"total_amount", type: "number"},
-            {label: "Paid", key:"total_paid", type: "number"},
-            {label: "Balance", key:"balance", type: "number"},
+            {label: "Paid", key:"total_paid", type: "number", txtColor: "txtColorPaid"},
+            {label: "Balance", key:"balance", type: "number", txtColor: "txtColorBal"},
             {label: "Invoice#", key:"txn_no"},
             {label: "Done By", key:"done_by"},
         ]);
@@ -124,6 +124,7 @@ export default{
             {name: 'delete', icon: 'fa fa-trash', title: 'Delete Delivery Order', rightName: 'Deleting Inventory Delivery Order'},
         ])
         const companyID = computed(()=> store.state.userData.company_id);
+        const userID = computed(()=> store.state.userData.user_id);
         const categoryID = ref(null);
         const sale_code_search = ref("");
         const min_amount_search = ref("");
@@ -219,6 +220,7 @@ export default{
                 customer: customer_search.value,
                 done_by: done_by_search.value,
                 company_id: companyID.value,
+                user: userID.value,
                 page_size: selectedValue.value
             } 
             axios

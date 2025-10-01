@@ -438,6 +438,7 @@ const actions = {
       
   },
 
+
   async updateJournal({ commit,state }, formData) {
     return axios.put(`api/v1/update-journal/`,formData)
     .then((response)=>{

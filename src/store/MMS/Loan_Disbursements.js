@@ -148,7 +148,12 @@ const actions = {
               Swal.fire("Poof! Loan Disbursement removed succesfully!", {
                 icon: "success",
               }); 
-          }else{
+          }else if(response.data.msg == "Reconciled"){
+            Swal.fire({
+              title: "Voucher Already Reconciled!",
+              icon: "warning",
+            });
+          } else{
             Swal.fire({
               title: "Error Deleting Loan Disbursement",
               icon: "warning",
