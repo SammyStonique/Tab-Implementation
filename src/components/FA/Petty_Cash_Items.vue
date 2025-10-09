@@ -11,7 +11,10 @@
         @resetFilters="resetFilters"
         @removeItem="removeAllocation"
         @removeSelectedItems="removeAllocations"
-        @printList="printArrearsList"
+        @printList="printItemsList"
+        v-model:printModalVisible="printModalVisible"
+        :printTitle="printTitle"
+        :pdfUrl="pdfUrl"
         :columns="tableColumns"
         :rows="arrearsList"
         :actions="actions"
@@ -72,7 +75,7 @@ export default{
         const showAddButton = ref(false);
         const title = ref('Assign/Change Sub Category');
         const companyID = computed(()=> store.state.userData.company_id);
-        const idField = 'tenant_lease_id';
+        const idField = 'petty_cash_item_id';
         const rightsModule = ref('Accounts');
         const categoryID = ref('');
         const itemID = ref("");
@@ -80,6 +83,9 @@ export default{
         const subCatID = ref('');
         const selectedIds = ref([]);
         const appModalVisible = ref(false);
+        const printModalVisible = ref(false);
+        const pdfUrl = ref(null);
+        const printTitle = ref('Print Petty Cash Items List');
         const arrearsList = ref([]);
         const appResults = ref([]);
         const appArrLen = ref(0);
@@ -328,7 +334,7 @@ export default{
             from_date_search.value = "";
             searchItems();
         };
-        const printArrearsList = () =>{
+        const printItemsList = () =>{
             showLoader();
             let formData = {
                 voucher_no: voucher_no_search.value,
@@ -341,13 +347,14 @@ export default{
             }
 
             axios
-            .post("api/v1/export-loan-arrears-pdf/", formData, { responseType: 'blob' })
+            .post("api/v1/export-petty-cash-items-pdf/", formData, { responseType: 'blob' })
                 .then((response)=>{
                     if(response.status == 200){
-                        const blob1 = new Blob([response.data]);
-                        // Convert blob to URL
+                        const blob1 = new Blob([response.data], { type: 'application/pdf' });
                         const url = URL.createObjectURL(blob1);
-                        PrintJS({printable: url, type: 'pdf'});
+                        // PrintJS({printable: url, type: 'pdf'});
+                        pdfUrl.value = url;
+                        printModalVisible.value = true;
                     }
                 })
             .catch((error)=>{
@@ -366,7 +373,9 @@ export default{
             currentPage,searchFilters,tableColumns,resetFilters,loadPrev,loadNext,firstPage,lastPage,dropdownOptions,handleDynamicOption,
             showNextBtn,showPreviousBtn, handleActionClick,handleRightClick,displayButtons,assignSubcategory,formFields,closeModal,
             modal_top, modal_left, modal_width, showLoader, loader, hideLoader, modal_loader, showModalLoader, hideModalLoader,rightsModule,
-            handleSelectionChange, pageComponentKey, flex_basis, flex_basis_percentage,showTotals,printArrearsList,selectSearchQuantity,selectedValue
+            handleSelectionChange, pageComponentKey, flex_basis, flex_basis_percentage,showTotals,printItemsList,selectSearchQuantity,selectedValue,
+            printModalVisible,pdfUrl, printTitle,
+
         }
     }
 }

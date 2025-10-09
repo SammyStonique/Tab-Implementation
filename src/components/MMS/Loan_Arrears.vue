@@ -243,6 +243,9 @@ export default{
                 {  type:'checkbox', label:'Arrears Inclusive', name:'arrears_inclusive', value: true, selected: true, required:false},
                 {  type:'checkbox', label:'Arrears Exclusive', name:'arrears_exclusive', value:'', required:false},
                 {  type:'checkbox', label:'Loan Balance', name:'loan_balance', value:'', required:false}, 
+                {  type:'checkbox', label:'Active Only', name:'active_loans', value:'', required:false}, 
+                {required: false, value: false},
+                {required: false, value: false},
             ]
         };
         const dropdownOptions = ref([

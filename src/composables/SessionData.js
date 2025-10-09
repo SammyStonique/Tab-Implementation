@@ -14,6 +14,7 @@ export function useFetchSessionData() {
           // toast.error("Session Expired")
           const newState ={
             activeComponent:"Login",
+            // activeComponent:"CustomerServiceWeek",
             isAuthenticated: false,
           }
           store.dispatch('userData/updateState',newState);

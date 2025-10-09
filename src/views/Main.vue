@@ -192,6 +192,7 @@ export default {
 
         onMounted(() => {
             // store.dispatch('userData/reloadPage');
+            // store.dispatch('userData/updateState', {activeComponent: 'CustomerServiceWeek'});
         });
 
         return {

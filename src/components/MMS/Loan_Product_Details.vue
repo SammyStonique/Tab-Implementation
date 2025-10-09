@@ -213,6 +213,7 @@ export default defineComponent({
                 { type: 'dropdown', name: 'penalty_frequency',label: "Penalty Frequency", value: selectedProduct.value?.penalty_frequency || 'Monthly', placeholder: "", required: true, options: [{ text: 'Daily', value: 'Daily' }, { text: 'Weekly', value: 'Weekly' },{ text: 'Monthly', value: 'Monthly' }, { text: 'Annually', value: 'Annually' }, { text: 'One-Off', value: 'One-Off' }] },
                 { type: 'dropdown', name: 'penalty_mode',label: "Penalty Mode", value: selectedProduct.value?.penalty_mode || 'Flat Amount', placeholder: "", required: false, options: [{ text: 'Flat Amount', value: 'Flat Amount' }, { text: '% of Installment Principal', value: 'Installment Principal' },{ text: '% of Installment Interest', value: 'Installment Interest' }, { text: '% of Installment Principal + Interest', value: 'Installment Principal + Interest' }, { text: '% of Installment (Principal + Interest) Balance', value: 'Installment Principal + Interest Balance' },{ text: '% of Principal Balance', value: 'Principal Balance' }, { text: '% of Loan Balance', value: 'Loan Balance' }] },
                 { type: 'text', name: 'penalty_value',label: "Penalty Value", value: selectedProduct.value?.penalty_value || '0', required: false },
+                { type: 'number', name: 'penalty_days',label: "Exempt Penalty For Expired Loans(Days)", value: selectedProduct.value?.penalty_days || 0, required: false },
                 { type: 'dropdown', name: 'use_guarantors',label: "Use Guarantors", value: selectedProduct.value?.use_guarantors || 'Yes', placeholder: "", required: true, options: [{ text: 'Yes', value: 'Yes' }, { text: 'No', value: 'No' }] },
                 { type: 'text', name: 'min_guarantors',label: "Minimum Guarantors", value: selectedProduct.value?.min_guarantors || '0', required: false },
                 { type: 'text', name: 'guarantors_percentage',label: "Guarantors Percentage(%)", value: selectedProduct.value?.guarantors_percentage || '0', required: false },
@@ -264,16 +265,16 @@ export default defineComponent({
                 formFields.value[0].value = categoryID.value;
             }
             if(intLedgerID.value != ""){
-                formFields.value[25].value = intLedgerID.value;
+                formFields.value[26].value = intLedgerID.value;
             }
             if(penaltyLedgerID.value != ""){
-                formFields.value[26].value = penaltyLedgerID.value;
+                formFields.value[27].value = penaltyLedgerID.value;
             }
             if (grntCategoryID.value != "") {
-                formFields.value[21].value = grntCategoryID.value;
+                formFields.value[22].value = grntCategoryID.value;
             }
             if (recoveryLedgerID.value != "") {
-                formFields.value[27].value = recoveryLedgerID.value;
+                formFields.value[28].value = recoveryLedgerID.value;
             }
         }, { immediate: true });
 
@@ -345,15 +346,16 @@ export default defineComponent({
                 penalty_value: formFields.value[17].value,
                 status: 'Active',
                 penalty_mode: formFields.value[16].value,
-                use_guarantors: formFields.value[18].value,
-                min_guarantors: formFields.value[19].value,
-                guarantors_percentage: formFields.value[20].value,
-                use_security: formFields.value[22].value,
-                credit_reduction: formFields.value[23].value,
-                recovery_option: formFields.value[24].value,
-                enable_reminders: formFields.value[28].value,
-                reminder_mode: formFields.value[29].value,
-                reminder_days: formFields.value[30].value,
+                penalty_days: formFields.value[18].value,
+                use_guarantors: formFields.value[19].value,
+                min_guarantors: formFields.value[20].value,
+                guarantors_percentage: formFields.value[21].value,
+                use_security: formFields.value[23].value,
+                credit_reduction: formFields.value[24].value,
+                recovery_option: formFields.value[25].value,
+                enable_reminders: formFields.value[29].value,
+                reminder_mode: formFields.value[30].value,
+                reminder_days: formFields.value[31].value,
                 interest_posting_account: intLedgerID.value,
                 interest_posting_account_id: intLedgerID.value,
                 penalty_posting_account: penaltyLedgerID.value,
@@ -421,15 +423,16 @@ export default defineComponent({
                 penalty_value: formFields.value[17].value,
                 status: selectedProduct.value.status,
                 penalty_mode: formFields.value[16].value,
-                use_guarantors: formFields.value[18].value,
-                min_guarantors: formFields.value[19].value,
-                guarantors_percentage: formFields.value[20].value,
-                use_security: formFields.value[22].value,
-                credit_reduction: formFields.value[23].value,
-                recovery_option: formFields.value[24].value,
-                enable_reminders: formFields.value[28].value,
-                reminder_mode: formFields.value[29].value,
-                reminder_days: formFields.value[30].value,
+                penalty_days: formFields.value[18].value,
+                use_guarantors: formFields.value[19].value,
+                min_guarantors: formFields.value[20].value,
+                guarantors_percentage: formFields.value[21].value,
+                use_security: formFields.value[23].value,
+                credit_reduction: formFields.value[24].value,
+                recovery_option: formFields.value[25].value,
+                enable_reminders: formFields.value[29].value,
+                reminder_mode: formFields.value[30].value,
+                reminder_days: formFields.value[31].value,
                 interest_posting_account: intLedgerValue.value,
                 interest_posting_account_id: intLedgerValue.value,
                 penalty_posting_account: penaltyLedgerValue.value,

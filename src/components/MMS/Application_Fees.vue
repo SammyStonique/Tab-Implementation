@@ -121,7 +121,7 @@ export default{
             {label: "Charge Mode", key: "charge_mode", type: "text", editable: false},
             {label: "Charge Type", key: "charge_type", type: "text", editable: false},
             {label: "Amount", key: "formatted_amount", type: "number", editable: false},
-            {label: "Posted", key: "posted", type: "text", editable: false},
+            {label: "Posted", key: "posted", type: "text", editable: false, txtColor: "txtColor"},
         ])
         const actions = ref([
             {name: 'post-fees', icon: 'fa fa-check-circle', title: 'Post Fees', rightName: 'Adding Loan Fees'},

@@ -197,7 +197,7 @@ export default defineComponent({
         const scheduleColumns = ref([
             {type: "checkbox"},
             {label: "#", key:"installment"},
-            {label: "Due", key:"due_date"},
+            {label: "Due", key:"due_date", txtColor: "txtColor"},
             {label: "Balance", key:"formatted_loan_balance"},
             {label: "Principal", key:"formatted_principal_amount", type: "number", editable: false},
             {label: "Interest", key:"formatted_interest_amount", type: "number", editable: false},
@@ -210,7 +210,7 @@ export default defineComponent({
             {label: "Total Paid", key:"formatted_schedule_payment", type: "number", editable: false, },
             {label: "Princ. Bal", key:"formatted_principal_balance", type: "number", editable: false},
             {label: "Int. Bal.", key:"formatted_interest_balance", type: "number", editable: false},
-            {label: "Total Bal.", key:"formatted_installment_balance", type: "number", editable: false},
+            {label: "Total Bal.", key:"formatted_installment_balance", type: "number", editable: false, txtColor: "txtColor"},
             {label: "I.P", key:"interest_posted"},
             {label: "C.R.P", key:"credit_reduction_applied"},
         ]);

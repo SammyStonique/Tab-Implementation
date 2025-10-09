@@ -14,6 +14,14 @@
             </div>
           </div>
           <div class="py-3 px-6">
+            <h1 class="text-2xl sm:text-3xl font-bold text-green-600 mb-4">
+              Happy Customer Service Week 🎉
+            </h1>
+            <p class="text-gray-700 text-lg mb-6">
+              We appreciate your trust and support.  
+              Thank you for being part of our journey!  
+              💚 Your satisfaction is our priority.
+            </p>
             <form @submit.prevent="login">
               <div class="mb-4 flex flex-col sm:flex-row">
                 <label for="email" class="sm:w-1/4 sm:text-right mb-2 sm:mb-0">Username:</label>
@@ -44,6 +52,7 @@
   import { useStore } from "vuex";
   import { useToast } from "vue-toastification";
   import Loader from "@/components/Loader.vue";
+  import confetti from "canvas-confetti";
   
   export default defineComponent({
     name: 'LoginView',
@@ -66,6 +75,18 @@
       const hideLoader = () => {
         loader.value = "none";
       };
+
+      const fireConfetti = () => {
+        confetti({
+          particleCount: 120,
+          spread: 80,
+          origin: { y: 0.6 },
+        });
+        setTimeout(() => {
+          confetti({ particleCount: 80, angle: 60, spread: 70, origin: { x: 0 } });
+          confetti({ particleCount: 80, angle: 120, spread: 70, origin: { x: 1 } });
+        }, 500);
+      };
   
       const login = () => {
         if(email.value == "" || password.value == ""){
@@ -81,7 +102,12 @@
         axios.post('api/v1/auth-token/login/', formData)
           .then((response) => {
             if (response.status === 200) {
-              toast.success(`Welcome Back, ${response.data.user_names}`);
+              // toast.success(`Welcome Back, ${response.data.user_names}`);
+              setTimeout(() => {
+                hideLoader();
+                toast.success("🎊 Thank you for celebrating with us! We value you.");
+                fireConfetti();
+              }, 1500);
               const userData = {
                 user_id: response.data.user_id,
                 company_id: response.data.company_id,
@@ -116,6 +142,12 @@
       };
       onBeforeMount(()=>{ 
         store.dispatch('userData/reloadPage');
+      });
+      onMounted(() => {
+        setTimeout(() => {
+          toast.info("🎉 Welcome! Let’s celebrate Customer Service Week together!");
+          fireConfetti();
+        }, 1000);
       });
   
       return {

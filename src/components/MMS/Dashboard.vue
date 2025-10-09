@@ -191,8 +191,8 @@
             labels: ['January', 'February', 'March', 'April', 'May','June', 'July', 'August', 'September', 'October','November','December'], // X-axis labels
             datasets: [
               {
-                label: 'Isued Loans',
-                data: response.data.dashboard[0].monthlyIssuedTotals, // Isued Loans data points for each month
+                label: 'Issued Loans',
+                data: response.data.dashboard[0].monthlyIssuedTotals, // Issued Loans data points for each month
                 backgroundColor: '#FFA500', // Bar color
                 borderColor: '#1E88E5', // Border color of bars
                 borderWidth: 1,

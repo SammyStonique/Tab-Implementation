@@ -134,7 +134,7 @@ export default defineComponent({
                 { type: 'text', name: 'stk_pass_key',label: "STK Push Pass Key", value: selectedSetup.value?.stk_pass_key || '', placeholder: "", required: false },
                 { type: 'text', name: 'stk_callback_url',label: "STK Push Callback URL", value: selectedSetup.value?.stk_callback_url || '', placeholder: "", required: false },
                 { type: 'text', name: 'stk_process_url',label: "STK Push Process URL", value: selectedSetup.value?.stk_process_url || 'https://api.safaricom.co.ke/mpesa/stkpush/v1/processrequest', placeholder: "", required: false },
-                { type: 'dropdown', name: 'limit_group',label: "Limit To", value: selectedSetup.value?.limit_group || 'All', required: true, options: [{ text: 'All', value: 'All' }, { text: 'Customers', value: 'Customers' }, { text: 'Debtors', value: 'Debtors' }, { text: 'Tenants', value: 'Tenants' }]  },
+                { type: 'dropdown', name: 'limit_group',label: "Limit To", value: selectedSetup.value?.limit_group || 'All', required: true, options: [{ text: 'All', value: 'All' }, { text: 'Tenants', value: 'Tenants' }, { text: 'Members', value: 'Members' }, { text: 'Customers', value: 'Customers' }, { text: 'Debtors', value: 'Debtors' }]  },
                 { type: 'dropdown', name: 'auto_receipt',label: "Auto Receipt", value: selectedSetup.value?.auto_receipt || 'Yes', required: true, options: [{ text: 'Yes', value: 'Yes' }, { text: 'No', value: 'No' }]  },
                 {required: false}
             ];

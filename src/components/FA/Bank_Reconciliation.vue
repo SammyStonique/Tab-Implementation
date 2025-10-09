@@ -3,7 +3,7 @@
         <template v-slot:body>
             <div class="mt-6">
                 <h1 class="font-bold text-red-600 uppercase">{{ ledgerName }} Reconciliation</h1>
-                <DynamicForm :saveButtonLabel="Reconcile"  :fields="formFields" :flex_basis="flex_basis" :flex_basis_percentage="flex_basis_percentage" :displayButtons="displayButtons" @handleSubmit="reconcileCashbook" @handleReset="handleReset"> 
+                <DynamicForm :saveButtonLabel="Reconcile"  :fields="formFields" :flex_basis="flex_basis" :flex_basis_percentage="flex_basis_percentage" :displayButtons="displayButtons" @handleSubmit="saveReconciliation" @handleReset="handleReset"> 
                     <template v-slot:additional-content> 
                         <div class="flex flex-wrap gap-x-1 gap-y-1 text-xs">
                             <div v-for="(field, index) in formFields1" :key="index" class="flex items-center gap-x-1">
@@ -28,8 +28,28 @@
                                     <button @click="addReconcilingItem" class="rounded cursor-pointer text-xs px-2 py-1 font-medium border transition bg-blue-100 text-blue-600 border-blue-300 hover:bg-blue-200 ml-2">
                                         <i class="fa fa-plus text-blue-500 mr-2 text-xs"></i> Add Reconciling Item
                                     </button>
+                                </div>
+                                <div class="flex mb-1 items-end px-2">
+                                    <div class="basis-1/8 mr-3">
+                                        <input type="text" class="rounded pl-3 border-2 border-gray-200 text-sm w-full" name="name" id="" placeholder="Txn No...." v-model="txn_no_search">
+                                    </div>
+                                    <div class="basis-1/8 mr-3">
+                                        <input type="text" class="rounded pl-3 border-2 border-gray-200 text-sm w-full" name="name" id="" placeholder="Ref No...." v-model="ref_no_search">
+                                    </div>
+                                    <div class="basis-1/4 mr-3">
+                                        <input type="text" class="rounded pl-3 border-2 border-gray-200 text-sm w-full" name="name" id="" placeholder="Description...." v-model="description_search">
+                                    </div>
+                                    <div class="basis-1/8 mr-3">
+                                        <input type="number" class="rounded pl-3 border-2 border-gray-200 text-sm w-full" name="name" id="" placeholder="Money In...." v-model="money_in_search">
+                                    </div>
+                                    <div class="basis-1/8 mr-3">
+                                        <input type="number" class="rounded pl-3 border-2 border-gray-200 text-sm w-full" name="name" id="" placeholder="Money Out...." v-model="money_out_search">
+                                    </div>
+                                    <div class="basis-1/8 mr-3">
+                                        <input type="number" class="rounded pl-3 border-2 border-gray-200 text-sm w-full" name="name" id="" placeholder="Reconciled...." v-model="reconciled_search">
+                                    </div>
                                 </div>              
-                                <DynamicTable :key="tableKey" :showTotals="showTotals" :columns="cashbookColumns" :rows="cashbookRows" :showActions="showActions" :actions="actions" :rightsModule="rightsModule" @row-db-click="markAsReconciled"  @action-click="deleteJournalLine"/>
+                                <DynamicTable :key="tableKey" :showTotals="showTotals" :columns="cashbookColumns" :rows="filterCbkRows" :showActions="showActions" :actions="actions" :rightsModule="rightsModule" @row-db-click="markAsReconciled"  @action-click="deleteJournalLine"/>
                             </div> 
                         </div>
                         <div class="border border-slate-200 rounded relative py-1.5 mt-3 px-2 min-h-[300px]">
@@ -77,6 +97,14 @@
         </template>
         </DynamicForm>
     </MovableModal>
+    <MovableModal v-model:visible="reconModalVisible" :title="title2" :modal_top="modal_top" :modal_left="modal_left" :modal_width="modal_width"
+        :loader="modal_loader2" @showLoader="showModalLoader1" @hideLoader="hideModalLoader1" @closeModal="closeModal">
+        <DynamicForm 
+            :fields="formFields3" :flex_basis="flex_basis1" :flex_basis_percentage="flex_basis_percentage1" 
+            :displayButtons="displayButtons" @handleSubmit="postReconcilingItem" @handleReset="handleReset2"
+        >
+        </DynamicForm>
+    </MovableModal>
 </template>
 
 <script>
@@ -103,6 +131,7 @@ export default defineComponent({
         const loader = ref('none');
         const modal_loader = ref('none');
         const modal_loader1 = ref('none');
+        const modal_loader2 = ref('none');
         const tableKey = ref(0);
         const mainComponentKey = ref(0);
         const ledComponentKey = ref(0);
@@ -111,12 +140,20 @@ export default defineComponent({
         const creditTotals = ref(0);
         const title = ref('Import Bank Statement');
         const title1 = ref("Add Quick Journal");
+        const title2 = ref("Add Reconciling Item");
         const propModalVisible = ref(false);
+        const reconModalVisible = ref(false);
         const rightsModule = ref('Accounts');
         const depModalVisible = ref(false);
         const modal_top = ref('150px');
         const modal_left = ref('400px');
         const modal_width = ref('40vw');
+        const ref_no_search = ref('');
+        const txn_no_search = ref('');
+        const description_search = ref('');
+        const money_in_search = ref('');
+        const money_out_search = ref('');
+        const reconciled_search = ref('');
         const errors = ref([]);
         const companyID = computed(()=> store.state.userData.company_id);
         const userID = computed(()=> store.state.userData.user_id);
@@ -132,12 +169,26 @@ export default defineComponent({
         const ledgerName = computed(()=> store.state.Ledgers.reconciliationLedgerName);
         const ledgerID = computed(()=> store.state.Ledgers.reconciliationLedgerID);
         const cbkRunningBalance = computed(()=> store.state.Ledgers.cbkRunningBalance);
+        const cbkOpeningBalance = computed(()=> store.state.Ledgers.cbkOpeningBalance);
         const cbkDebitCount = computed(()=> store.state.Ledgers.cbkDebitCount);
         const cbkDebitTotal = computed(()=> store.state.Ledgers.cbkDebitTotal);
         const cbkCreditCount = computed(()=> store.state.Ledgers.cbkCreditCount);
         const cbkCreditTotal = computed(()=> store.state.Ledgers.cbkCreditTotal);
+        const selectedReconciliation = computed(()=> store.state.Ledgers.selectedReconciliation);
         const cashbookRows = computed(() => {
             return store.state.Ledgers.cbkArray;
+        });
+        const filterCbkRows = computed(() => {
+            return cashbookRows.value.filter(perm => {
+                const txnNo = (perm.journal_no?.toLowerCase() || '').includes(txn_no_search.value.toLowerCase());
+                const refNo = (perm.reference_no?.toLowerCase() || '').includes(ref_no_search.value.toLowerCase());
+                const desc = (perm.description?.toLowerCase() || '').includes(description_search.value.toLowerCase());
+                const moneyIn = money_in_search.value ? Number(perm.formatted_debit_amount) === Number(money_in_search.value): true;
+                const moneyOut = money_out_search.value ? Number(perm.formatted_credit_amount) === Number(money_out_search.value): true;
+                const reconciled = perm.reconciled.toLowerCase().includes(reconciled_search.value.toLowerCase())
+
+                return txnNo && refNo && desc && moneyIn && moneyOut && reconciled;
+            });
         });
         const bankRows = computed(()=> store.state.Ledgers.bnkArray);
         const localFile = ref(null);
@@ -174,49 +225,43 @@ export default defineComponent({
                 if (row.debit_amount > 0) {
                     formFields1.value[0].value -= 1;
                     formFields1.value[0].value1 -= Number(row.debit_amount);
-                    let variance = parseFloat((formFields.value[3].value || '0').toString().replace(/,/g, ''));
-                    formFields.value[3].value = Number(variance - Number(row.debit_amount)).toLocaleString();
+                    let variance = parseFloat((formFields.value[4].value || '0').toString().replace(/,/g, ''));
+                    formFields.value[4].value = Number(variance - Number(row.debit_amount)).toLocaleString();
                 }else if (row.credit_amount > 0) {
                     formFields1.value[1].value -= 1;
                     formFields1.value[1].value1 -= Number(row.credit_amount);
-                    let variance = parseFloat((formFields.value[3].value || '0').toString().replace(/,/g, ''));
-                    formFields.value[3].value = Number(variance + Number(row.credit_amount)).toLocaleString();
+                    let variance = parseFloat((formFields.value[4].value || '0').toString().replace(/,/g, ''));
+                    formFields.value[4].value = Number(variance + Number(row.credit_amount)).toLocaleString();
                 }
                 store.dispatch('Ledgers/removeCbkLine', rowIndex);
             }
             
         }
         const searchJournalEntries = async() =>{
-            if(formFields.value[0].value == 0){
-                toast.error('Bank Balance Required!')
-                formFields.value[1].value = '';
-            }else{
-                showLoader();
-                let formData = {
-                    posting_account: ledgerID.value,
-                    company: companyID.value,
-                    date_from: "",
-                    date_to: formFields.value[1].value,
-                    min_amount: 0,
-                    max_amount: 0,
-                    reconciled: false
-                }
-                await store.dispatch('Ledgers/fetchCashbookEntries',formData)
-                .then(()=>{
-                    hideLoader();
-                })
-                .finally(()=>{
-                    updateFormFields1();
-                })
+            showLoader();
+            let formData = {
+                posting_account: ledgerID.value,
+                company: companyID.value,
+                date_from: "",
+                date_to: formFields.value[0].value,
+                min_amount: 0,
+                max_amount: 0,
+                reconciled: false
             }
-
+            await store.dispatch('Ledgers/fetchCashbookEntries',formData)
+            .then(()=>{
+                hideLoader();
+            })
+            .finally(()=>{
+                updateFormFields1();
+            })        
         };
         const calculateVariance = () =>{
-            if(formFields.value[0].value == 0){
-                formFields.value[3].value = 0;
+            if(formFields.value[1].value == 0){
+                formFields.value[4].value = 0;
             }else{
-                let variance = formFields1.value[6].value1 - formFields.value[0].value;
-                formFields.value[3].value = Number(variance).toLocaleString();
+                let variance = formFields.value[2].value - formFields.value[1].value;
+                formFields.value[4].value = Number(variance).toLocaleString();
             }
         }
         const handleReset = () =>{
@@ -226,22 +271,23 @@ export default defineComponent({
         const formFields = ref([]);
         const updateFormFields = () =>{
             formFields.value = [
-                { type: 'number', name: 'journal_no',label: "Bank Statement Balance", value: 0, required: true, method: calculateVariance},
-                { type: 'date', name: 'issue_date',label: "Reconciliation Date", value: '', required: true, method: searchJournalEntries},
+                { type: 'date', name: 'issue_date',label: "Reconciliation Date", value: selectedReconciliation.value?.reconciliation_date ||'', required: true, method: searchJournalEntries},
+                { type: 'number', name: 'journal_no',label: "Bank Statement Balance", value: selectedReconciliation.value?.statement_balance || 0, required: true, method: calculateVariance},                
+                { type: 'number', name: 'journal_no',label: "Open. Cashbook Balance", value: selectedReconciliation.value?.opening_cashbook_balance || 0, required: false, method: calculateVariance},
                 { type: 'text', name: 'journal_no',label: "(+)Cashbook Balance", value: cbkRunningBalance, required: false, disabled:true},             
-                { type: 'text', name: 'journal_no',label: "Variance", value: 0, required: true, disabled:true},        
+                { type: 'text', name: 'journal_no',label: "Variance", value: selectedReconciliation.value?.variance ||0, required: false, disabled:true},        
             ]
         };
         const formFields1 = ref([]);
         const updateFormFields1 = () =>{
             formFields1.value = [
-                { label: "Deposits Cleared", value: 0, value1: 0, name: "deposits_cleared" },
-                { label: "Withdrawals Cleared", value: 0, value1: 0, name: "withdrawals_cleared" },
+                { label: "Deposits Cleared", value: +(Number(selectedReconciliation?.value?.deposits_cleared_count ?? 0).toFixed(0)), value1: Number(selectedReconciliation.value?.deposits_cleared_amount) || 0, name: "deposits_cleared" },
+                { label: "Withdrawals Cleared", value: +(Number(selectedReconciliation?.value?.withdrawals_cleared_count ?? 0).toFixed(0)), value1: Number(selectedReconciliation.value?.withdrawals_cleared_amount) || 0, name: "withdrawals_cleared" },
                 { label: "(-)Deposits In Transit", value: cbkDebitCount, value1: cbkDebitTotal, name: "deposits_in_transit" },
                 { label: "(+)Unpresented Cheques", value: cbkCreditCount, value1: cbkCreditTotal, name: "unpresented_cheques" },
-                { label: "(+)Unposted Bank Deposits", value: 0, value1: 0, name: "unposted_bank_deposits" },
-                { label: "(-)Unposted Bank Withdrawals", value: 0, value1: 0, name: "unposted_bank_withdrawals" },
-                { label: "(=)Matching Bank Balance", value: 0, value1: 0, name: "matching_bank_balance", hidden: true },
+                { label: "(+)Unposted Bank Deposits", value: +(Number(selectedReconciliation?.value?.unposted_deposits_count ?? 0).toFixed(0)), value1: Number(selectedReconciliation.value?.unposted_deposits_amount) || 0, name: "unposted_bank_deposits" },
+                { label: "(-)Unposted Bank Withdrawals", value: +(Number(selectedReconciliation?.value?.unposted_withdrawals_count ?? 0).toFixed(0)), value1: Number(selectedReconciliation.value?.unposted_withdrawals_amount) || 0, name: "unposted_bank_withdrawals" },
+                { label: "(=)Matching Bank Balance", value: 0, value1: selectedReconciliation.value?.matching_balance || 0, name: "matching_bank_balance", hidden: true },
             ]
         };
 
@@ -259,17 +305,18 @@ export default defineComponent({
                 return;
             }
             let status = "Incomplete";
-            if(formFields.value[3].value == '0'){
+            if(formFields.value[4].value == '0'){
                 status = "Complete";
             }
             let formData = {
                 company: companyID.value,
                 ledger: ledgerID.value,
                 ledger_id: ledgerID.value,
-                reconciliation_date: formFields.value[1].value,
-                statement_balance: formFields.value[0].value,
-                cashbook_balance: formFields.value[2].value,
-                variance: formFields.value[3].value,
+                reconciliation_date: formFields.value[0].value,
+                statement_balance: formFields.value[1].value,
+                opening_cashbook_balance: formFields.value[2].value,
+                cashbook_balance: formFields.value[3].value,
+                variance: formFields.value[4].value,
                 deposits_cleared_count: formFields1.value[0].value,
                 deposits_cleared_amount: formFields1.value[0].value1.toFixed(2),
                 withdrawals_cleared_count: formFields1.value[1].value,
@@ -291,7 +338,7 @@ export default defineComponent({
             }
             
             errors.value = [];
-            if(formFields.value[1].value == '' || formFields.value[3].value == ''){
+            if(formFields.value[0].value == '' || formFields.value[4].value == ''){
                 errors.value.push('Error');
             }
 
@@ -323,6 +370,87 @@ export default defineComponent({
                 }                       
             }       
         }
+        const updateReconciliation = async() =>{
+            showLoader();           
+            if(cashbookRows.value.length == 0){
+                toast.error('Invalid Reconciliation!');
+                hideLoader();
+                return;
+            }
+            let status = "Incomplete";
+            if(formFields.value[4].value == '0'){
+                status = "Complete";
+            }
+            let formData = {
+                bank_reconciliation: selectedReconciliation.value.bank_reconciliation_id,
+                company: companyID.value,
+                ledger: ledgerID.value,
+                ledger_id: ledgerID.value,
+                reconciliation_date: formFields.value[0].value,
+                statement_balance: formFields.value[1].value,
+                opening_cashbook_balance: formFields.value[2].value,
+                cashbook_balance: formFields.value[3].value,
+                variance: formFields.value[4].value,
+                deposits_cleared_count: formFields1.value[0].value,
+                deposits_cleared_amount: formFields1.value[0].value1,
+                withdrawals_cleared_count: formFields1.value[1].value,
+                withdrawals_cleared_amount: formFields1.value[1].value1,
+                deposits_transit_count: formFields1.value[2].value,
+                deposits_transit_amount: formFields1.value[2].value1,
+                unpresented_cheques_count: formFields1.value[3].value,
+                unpresented_cheques_amount: formFields1.value[3].value1,
+                unposted_deposits_count: formFields1.value[4].value,
+                unposted_deposits_amount: formFields1.value[4].value1,
+                unposted_withdrawals_count: formFields1.value[5].value,
+                unposted_withdrawals_amount: formFields1.value[5].value1,
+                matching_balance: formFields1.value[6].value1,
+                cashbook_txns: cashbookRows.value,
+                bank_txns: bankRows.value,
+                status: status,
+                done_by: null,
+                user: userID.value
+            }
+            
+            errors.value = [];
+            if(formFields.value[0].value == '' || formFields.value[4].value == ''){
+                errors.value.push('Error');
+            }
+
+            if(errors.value.length){
+                toast.error('Fill In Required Fields');
+                hideLoader();                 
+            }
+            else{  
+                if(creditTotals.value != debitTotals.value){
+                    toast.error('Debits and Credit Totals Do Not Match.');
+                    hideLoader();
+                }else{
+                    try {
+                        const response = await store.dispatch('Ledgers/updateBankReconciliation', formData);
+                        if (response && response.status === 200) {
+                            hideLoader();
+                            toast.success('Success!');
+                            handleReset();
+                        } else {
+                            toast.error('An error occurred while updating the Reconciliation.');
+                            hideLoader();
+                        }
+                    } catch (error) {
+                        console.error(error.message);
+                        toast.error('Failed to update Reconciliation: ' + error.message);
+                    } finally {
+                        hideLoader();
+                    }
+                }                       
+            }       
+        }
+        const saveReconciliation = async() =>{
+            if(selectedReconciliation.value){
+                await updateReconciliation();
+            }else{
+                await reconcileCashbook();
+            }
+        }
 
         const showModalLoader = () =>{
             modal_loader.value = "block";
@@ -338,6 +466,10 @@ export default defineComponent({
         }
         
         const applyReconciliation = async (row, reconciledStatus = "Yes") => {
+            if(formFields.value[1].value == 0){
+                toast.error('Bank Statement Balance Required!');
+                return;
+            }
             row.reconciled = reconciledStatus;
 
             if (reconciledStatus === "Yes") {
@@ -345,8 +477,8 @@ export default defineComponent({
                 if (row.debit_amount > 0) {
                     formFields1.value[0].value += 1;
                     formFields1.value[0].value1 += Number(row.debit_amount);
-                    let variance = parseFloat((formFields.value[3].value || '0').toString().replace(/,/g, ''));
-                    formFields.value[3].value = Number(variance + Number(row.debit_amount)).toLocaleString();
+                    let variance = parseFloat((formFields.value[4].value || '0').toString().replace(/,/g, ''));
+                    formFields.value[4].value = Number(variance + Number(row.debit_amount)).toLocaleString();
                     if(row.journal_no != '-'){
                        await store.dispatch('Ledgers/updateState', { cbkDebitCount: cbkDebitCount.value - 1, cbkDebitTotal: +(cbkDebitTotal.value - Number(row.debit_amount)).toFixed(2)}); 
                     }else{
@@ -356,8 +488,8 @@ export default defineComponent({
                 }else if (row.credit_amount > 0) {
                     formFields1.value[1].value += 1;
                     formFields1.value[1].value1 += Number(row.credit_amount);
-                    let variance = parseFloat((formFields.value[3].value || '0').toString().replace(/,/g, ''));
-                    formFields.value[3].value = Number(variance - Number(row.credit_amount)).toLocaleString();
+                    let variance = parseFloat((formFields.value[4].value || '0').toString().replace(/,/g, ''));
+                    formFields.value[4].value = Number(variance - Number(row.credit_amount)).toLocaleString();
                     if(row.journal_no != '-'){
                         await store.dispatch('Ledgers/updateState', { cbkCreditCount: cbkCreditCount.value - 1, cbkCreditTotal: +(cbkCreditTotal.value - Number(row.credit_amount)).toFixed(2)});
                     }else{
@@ -369,8 +501,8 @@ export default defineComponent({
                 if (row.debit_amount > 0) {
                     formFields1.value[0].value -= 1;
                     formFields1.value[0].value1 -= Number(row.debit_amount);
-                    let variance = parseFloat((formFields.value[3].value || '0').toString().replace(/,/g, ''));
-                    formFields.value[3].value = Number(variance - Number(row.debit_amount)).toLocaleString();
+                    let variance = parseFloat((formFields.value[4].value || '0').toString().replace(/,/g, ''));
+                    formFields.value[4].value = Number(variance - Number(row.debit_amount)).toLocaleString();
                     if(row.journal_no != '-'){
                         await store.dispatch('Ledgers/updateState', { cbkDebitCount: cbkDebitCount.value + 1, cbkDebitTotal: +(cbkDebitTotal.value + Number(row.debit_amount)).toFixed(2)});
                     }else{
@@ -379,8 +511,8 @@ export default defineComponent({
                 }else if (row.credit_amount > 0) {
                     formFields1.value[1].value -= 1;
                     formFields1.value[1].value1 -= Number(row.credit_amount);
-                    let variance = parseFloat((formFields.value[3].value || '0').toString().replace(/,/g, ''));
-                    formFields.value[3].value = Number(variance + Number(row.credit_amount)).toLocaleString();
+                    let variance = parseFloat((formFields.value[4].value || '0').toString().replace(/,/g, ''));
+                    formFields.value[4].value = Number(variance + Number(row.credit_amount)).toLocaleString();
                     if(row.journal_no != '-'){
                         await store.dispatch('Ledgers/updateState', { cbkCreditCount: cbkCreditCount.value + 1, cbkCreditTotal: +(cbkCreditTotal.value + Number(row.credit_amount)).toFixed(2)});
                     }else{
@@ -388,7 +520,7 @@ export default defineComponent({
                     }
                 }
             }
-            let cbkBalance = parseFloat((formFields.value[2].value || '0').toString().replace(/,/g, ''));
+            let cbkBalance = parseFloat((formFields.value[3].value || '0').toString().replace(/,/g, ''));
             formFields1.value[6].value1 = cbkBalance - formFields1.value[2].value1 + formFields1.value[3].value1 + formFields1.value[4].value1 - formFields1.value[5].value1;
         };
         const markAsReconciled = async (row) => {
@@ -522,10 +654,23 @@ export default defineComponent({
             hideLoader();
         };
         const addQuickJournal = () =>{
+            if(formFields.value[1].value == 0){
+                toast.error('Bank Balance Required!')
+                return;
+            }
             handleReset1();
             propModalVisible.value = true;
-            // updateFormFields2();
+            reconModalVisible.value = false;
             ledComponentKey.value += 1;
+        };
+        const addReconcilingItem = () =>{
+            if(formFields.value[1].value == 0){
+                toast.error('Bank Balance Required!')
+                return;
+            }
+            handleReset2();
+            reconModalVisible.value = true;
+            propModalVisible.value = false;
         };
         const ledgerArray = computed(() => store.state.Ledgers.ledgerArr);
         const fetchLedgers = async() =>{
@@ -554,9 +699,23 @@ export default defineComponent({
                 },
             ];
         };
+        const formFields3 = ref([]);
+        const updateFormFields3 = () => {
+            formFields3.value = [
+                { type: 'date', name: 'issue_date',label: "Recording Date", value: formatDate(current_date), required: true, maxDate: formatDate(current_date) },
+                { type: 'dropdown', name: 'txn_type',label: "Type", value: '', placeholder: "", required: true, options: [{ text: 'Direct Deposit', value: 'Deposit' }, { text: 'Direct Withdrawal', value: 'Withdrawal' }] },
+                { type: 'text', name: 'ref_no',label: "Reference No", value: '', required: true },
+                { type: 'number', name: 'total_amount',label: "Amount", value: 0, required: true,},
+                {type:'text-area', label:"Memo", value: "", textarea_rows: '2', textarea_cols: '50', required: true},
+                
+            ];
+        };
         const handleReset1 = () =>{
             updateFormFields2();
             store.dispatch('Ledgers/updateState', { reconItemsArray: []});
+        }
+        const handleReset2 = () =>{
+            updateFormFields3();
         }
         const journalRows = computed(() => store.state.Ledgers.reconItemsArray);
         const journalColumns = ref([
@@ -589,6 +748,7 @@ export default defineComponent({
                         "txn_type": "Deposit",
                         "banking_date": formFields2.value[0].value,
                         "journal_no": "-",
+                        "journal_entry_id": null,
                         "reference_no": formFields2.value[2].value,
                         "description": formFields2.value[4].value,
                         "formatted_debit_amount": Number(formFields2.value[3].value).toLocaleString(),
@@ -607,6 +767,7 @@ export default defineComponent({
                         "txn_type": "Withdrawal",
                         "banking_date": formFields2.value[0].value,
                         "journal_no": "-",
+                        "journal_entry_id": null,
                         "reference_no": formFields2.value[2].value,
                         "description": formFields2.value[4].value,
                         "debit_amount": 0,
@@ -627,7 +788,59 @@ export default defineComponent({
         const deleteReconLine = async(rowIndex, action, row) =>{
             markAsReconciled(row);
             await store.dispatch('Ledgers/removeReconLine', rowIndex);
-        }
+        };
+        const postReconcilingItem = async() =>{
+            showModalLoader1();
+            if(formFields3.value[1].value == 'Deposit'){
+                let obj1 = {
+                    "txn_date": formFields3.value[0].value,
+                    "txn_type": "Deposit",
+                    "journal_no": "-",
+                    "reference_no": formFields3.value[2].value,
+                    "description": formFields3.value[4].value,
+                    "formatted_debit_amount": Number(formFields3.value[3].value).toLocaleString(),
+                    "formatted_credit_amount": 0,
+                    "debit_amount": formFields3.value[3].value,
+                    "total_amount": formFields3.value[3].value,
+                    "credit_amount": 0,
+                    "reconciled": "Yes",
+                    "reconciling_item": true,
+                    "reconciling_item_id": null,
+                }
+                await store.dispatch('Ledgers/addQuickReconJournal', obj1);
+                markAsReconciled(obj1) 
+            }else{
+                let obj2 = {
+                    "txn_date": formFields3.value[0].value,
+                    "txn_type": "Withdrawal",
+                    "journal_no": "-",
+                    "reference_no": formFields3.value[2].value,
+                    "description": formFields3.value[4].value,
+                    "debit_amount": 0,
+                    "credit_amount": formFields3.value[3].value,
+                    "total_amount": formFields3.value[3].value,
+                    "formatted_debit_amount": 0,
+                    "formatted_credit_amount": Number(formFields3.value[3].value).toLocaleString(),
+                    "reconciled": "Yes",
+                    "reconciling_item": true,
+                    "reconciling_item_id": null,
+                } 
+                await store.dispatch('Ledgers/addQuickReconJournal', obj2); 
+                markAsReconciled(obj1) 
+            }
+           hideModalLoader1();  
+           reconModalVisible.value = false;
+        };
+        watch([selectedReconciliation, cbkOpeningBalance], () => {
+            if (selectedReconciliation.value) {
+                updateFormFields();
+                updateFormFields1();
+            }
+            if(cbkOpeningBalance.value){
+                formFields.value[2].value = store.state.Ledgers.cbkOpeningBalance;
+            }
+            
+        }, { immediate: true });
 
         onBeforeMount(()=>{ 
             store.dispatch('Ledgers/updateState', { journalItemsArray: [], reconItemsArray: []})
@@ -644,12 +857,14 @@ export default defineComponent({
         })
 
         return{
-            formFields, formFields1, flex_basis, flex_basis1, flex_basis_percentage, displayButtons, reconcileCashbook, mainComponentKey,showTotals,ledgerName,
-            handleReset, loader, showLoader, hideLoader, tableKey, cashbookColumns, cashbookRows, showActions, actions, deleteJournalLine, idField,
+            formFields, formFields1, flex_basis, flex_basis1, flex_basis_percentage,flex_basis_percentage1, displayButtons, saveReconciliation, mainComponentKey,showTotals,ledgerName,
+            handleReset, loader, showLoader, hideLoader, tableKey, cashbookColumns, cashbookRows,filterCbkRows, showActions, actions, deleteJournalLine, idField,
             depModalVisible,title, modal_loader, modal_left, modal_top, modal_width, showModalLoader, hideModalLoader,rightsModule,bankColumns,bankRows,
             markAsReconciled,downloadTemplate,importBankStatement,onFileChange,displayExcelData,localFilePath,
             matchedTransactions,matchTransactions,markAllAsReconciled,unmarkAllAsReconciled,markAsMatched,addQuickJournal,
-            propModalVisible,title1,modal_loader1,showModalLoader1,hideModalLoader1,formFields2,postQuickJournal,journalRows,journalColumns,deleteReconLine,reconActions
+            propModalVisible,title1,modal_loader1,showModalLoader1,hideModalLoader1,formFields2,postQuickJournal,journalRows,journalColumns,deleteReconLine,reconActions,
+            modal_loader2, reconModalVisible, title2, formFields3, postReconcilingItem, addReconcilingItem, handleReset1, handleReset2,
+            txn_no_search, ref_no_search, description_search, money_in_search, money_out_search, reconciled_search,
 
         }
     }

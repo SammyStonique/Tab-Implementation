@@ -201,6 +201,7 @@ export default{
             if(index == 1){
                 if(ledgerDetails.value.ledger_type == "Cashbook"){
                     dropdownOptions.value[1].hidden = false;
+                    dropdownOptions.value[2].hidden = false;
                 }
                 activeTab.value = index;
                 await store.dispatch('Ledgers/fetchClientJournals',formData1)
@@ -296,6 +297,7 @@ export default{
         const dropdownOptions = ref([
             {label: 'Move Transactions', action: 'move-transaction', icon: 'fa-arrows-alt', colorClass:'text-green-600', rightName: "Moving Ledger Transactions"},
             {label: 'Reconcile', action: 'reconcile', icon: 'fa-balance-scale', colorClass:'text-blue-600', rightName: "Accounts Reconciliation", hidden: true},
+            {label: 'Reconciling Items', action: 'reconciling-items', icon: 'fa-bars', colorClass:'text-blue-600', rightName: "Accounts Reconciliation", hidden: true},
         ]);
         const handleDynamicOption = async(option) =>{
             if( option == 'move-transaction'){
@@ -304,9 +306,13 @@ export default{
                 flex_basis.value = "1/2";
                 flex_basis_percentage.value = '50';
             }else if(option == 'reconcile'){
-                await store.dispatch('Ledgers/updateState',{reconciliationLedgerID: ledgerDetails.value.ledger_id, reconciliationLedgerName: ledgerDetails.value.ledger_name, cashbookArray: [], cbkArray:[], cbkRunningBalance:0, bnkArray:[], cbkDebitTotal: 0, cbkCreditTotal: 0, cbkDebitCount: 0, cbkCreditCount: 0});
+                await store.dispatch('Ledgers/updateState',{selectedReconciliation: null,reconciliationLedgerID: ledgerDetails.value.ledger_id, reconciliationLedgerName: ledgerDetails.value.ledger_name, cashbookArray: [], cbkArray:[], cbkRunningBalance:0, bnkArray:[], cbkDebitTotal: 0, cbkCreditTotal: 0, cbkDebitCount: 0, cbkCreditCount: 0});
                 store.commit('pageTab/ADD_PAGE', {'FA':'Bank_Reconciliation'});
                 store.state.pageTab.faActiveTab = 'Bank_Reconciliation'; 
+            }else if(option == 'reconciling-items'){
+                await store.dispatch('Ledgers/updateState',{reconciliationLedgerID:ledgerDetails.value.ledger_id});
+                store.commit('pageTab/ADD_PAGE', {'FA':'Reconciling_Items'});
+                store.state.pageTab.faActiveTab = 'Reconciling_Items'; 
             }
         };
         const showModalLoader = () =>{

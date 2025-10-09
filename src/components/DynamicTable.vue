@@ -504,7 +504,8 @@ export default defineComponent({
         'fas fa-comment': 'text-green-600',
         'fas fa-envelope': 'text-cyan-600',
         'fa fa-exchange': 'text-amber-600',
-        'fa fa-cloud-upload': 'text-indigo-600'
+        'fa fa-cloud-upload': 'text-indigo-600',
+        'fa fa-search-plus': 'text-blue-600',
       };
       return colors[icon] || '';
     }

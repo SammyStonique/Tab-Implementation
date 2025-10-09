@@ -310,7 +310,7 @@ export default{
         }
         const handleActionClick = async(rowIndex, action, row) =>{
             if( action == 'edit'){
-                const balanceID = row[idField];
+                const reconID = row[idField];
                 const reconStatus = row.status;
                 if(reconStatus == 'Complete'){
                     toast.error("Cannot Edit Completed Reconciliation");
@@ -318,12 +318,13 @@ export default{
                 }
                 let formData = {
                     company: companyID.value,
-                    bank_reconciliation: balanceID
+                    bank_reconciliation: reconID
                 }
                 await store.dispatch('Ledgers/fetchBankReconciliation',formData)
-                propModalVisible.value = true;
-                flex_basis.value = '1/2';
-                flex_basis_percentage.value = '50';
+                await store.dispatch('Ledgers/updateState',{reconciliationLedgerID: row['cashbook_id'], reconciliationLedgerName: row['cashbook'], cashbookArray: [], cbkArray:row['cashbook_txns'], cbkOpeningBalance:row['opening_cashbook_balance'], cbkRunningBalance:row['cashbook_balance'], bnkArray: row['bank_txns'],
+                 cbkDebitTotal: Number(row['deposits_transit_amount']), cbkCreditTotal: Number(row['unpresented_cheques_amount']), cbkDebitCount: Number(row['deposits_transit_count']), cbkCreditCount: Number(row['unpresented_cheques_count'])});
+                store.commit('pageTab/ADD_PAGE', {'FA':'Bank_Reconciliation'});
+                store.state.pageTab.faActiveTab = 'Bank_Reconciliation'; 
 
             }else if(action == 'delete'){
                 const balanceID = [row[idField]];

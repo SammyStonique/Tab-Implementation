@@ -25,6 +25,7 @@
             :idField="idField"
             @handleSelectionChange="handleSelectionChange"
             @handleActionClick="handleActionClick"
+            @handleRightClick="handleRightClick"
             @handleShowDetails="handleShowDetails"
             :count="propCount"
             :currentPage="currentPage"
@@ -62,7 +63,7 @@
         >
             <DynamicForm 
                 :fields="formFields" :flex_basis="flex_basis" :flex_basis_percentage="flex_basis_percentage" 
-                :displayButtons="displayButtons" @handleSubmit="saveJournal" @handleReset="handleReset"
+                :displayButtons="displayButtons" @handleSubmit="updateJournal" @handleReset="handleReset"
             />
         </MovableModal>
     </div>
@@ -98,7 +99,7 @@ export default{
         const idField = 'journal_id';
         const addButtonLabel = ref('New Journal');
         const submitButtonLabel = ref('Add');
-        const title = ref('Invoice Booking');
+        const title = ref('Updating Journal Amount');
         const detailsTitle = ref('Item Details');
         const tabs = ref(['Journal Entries']);
         const activeTab = ref(0);
@@ -127,8 +128,7 @@ export default{
         const flex_basis_percentage = ref('');
         const displayButtons = ref(true);
         const errors = ref([]);
-        const ledgerID = ref('');
-        const ledgersArray = computed(() => store.state.Ledgers.ledgerArr);
+        const jnlID = ref('');
         const showModal = ref(false);
         const tableColumns = ref([
             {type: "checkbox"},
@@ -182,7 +182,7 @@ export default{
         const formFields = ref([]);
         const updateFormFields = () =>{
             formFields.value = [
-
+                { type: 'number', name: 'total_amount',label: "Amount", value: 0, required: true},                
             ]
         };
 
@@ -358,6 +358,74 @@ export default{
                 }
                 await store.dispatch('Journals/deleteJournal',formData)
                 searchJournals();
+            }else if(action == 'edit'){
+                const reconJnl = row['is_reconciled'];
+                jnlID.value = row['journal_id'];
+                if(reconJnl){
+                    toast.error("Cannot Edit Reconciled Journal");
+                    return;
+                }
+                updateFormFields();
+                title.value = row['journal_no'];
+                invModalVisible.value = true;
+            }
+        };
+        watch(() => store.state.contextMenu.selectedAction, (actionPayload) => {
+            if (!actionPayload) return;
+
+            const { rowIndex, action, data } = actionPayload;
+
+            handleActionClick(rowIndex, action, data);
+
+            store.commit('contextMenu/CLEAR_SELECTED_ACTION');
+        });
+        
+        const handleRightClick = (row, rowIndex, event) => {
+
+            const menuOptions = [
+                { label: 'Update Amount', action: 'edit', rowIndex: rowIndex , icon: 'fa fa-edit', rightName: 'Deleting Journal'},
+                { label: 'Delete', action: 'delete', rowIndex: rowIndex, icon: 'fa fa-trash', rightName: 'Deleting Journal' },
+            ];
+
+            store.commit('contextMenu/SHOW_CONTEXT_MENU', {
+                x: event.clientX,
+                y: event.clientY,
+                options: menuOptions,
+                contextData: row,
+            });
+        };
+        const updateJournal = async() =>{
+            showModalLoader();
+            let formData = {
+                journal: jnlID.value,
+                total_amount: formFields.value[0].value,
+                company: companyID.value
+            }
+            if(formFields.value[0].value <= 0){
+                toast.error("Invalid Amount");
+                hideModalLoader();
+                return;
+            }
+            try{
+                const response = await axios.post('api/v1/update-journal-amount/',formData)
+                if(response && response.data.msg == "Success"){
+                    toast.success("Journal Updated Succesfully");
+                    invModalVisible.value = false;
+                    handleReset();
+                    searchJournals();
+                }
+                else if(response && response.data.msg == "Reconciled"){
+                    toast.error("Cannot Update Reconciled Journal!");
+                }
+            }
+            catch(error){
+                console.error(error.message);
+                toast.error('Failed to update Journal: ' + error.message);
+            }
+            finally{
+                hideModalLoader();
+                handleReset();
+                searchJournals();
             }
         };
         const handleShowDetails = async(row) =>{
@@ -445,11 +513,12 @@ export default{
         return{
             showTotals,title, searchJournals,resetFilters, addButtonLabel, searchFilters, tableColumns, journalsList,printModalVisible,pdfUrl, printTitle,
             currentPage,propResults, propArrLen, propCount, pageCount, showNextBtn, showPreviousBtn,invModalVisible,
-            loadPrev, loadNext, firstPage, lastPage, idField, actions, handleActionClick, propModalVisible, closeModal,
+            loadPrev, loadNext, firstPage, lastPage, idField, actions, handleActionClick,handleRightClick, propModalVisible, closeModal,
             submitButtonLabel, showModal, showLoader, loader, hideLoader, modal_loader, modal_top, modal_left, modal_width,displayButtons,
             showModalLoader, hideModalLoader, formFields, handleSelectionChange, flex_basis,flex_basis_percentage,
             removeJournal, removeJournals, dropdownOptions, handleDynamicOption, addNewJournal, printJournalsList,addingRight,removingRight,rightsModule,
-            selectSearchQuantity,selectedValue,showDetails,detailsTitle,hideDetails,handleShowDetails,journalEntries,tabs,selectTab,activeTab
+            selectSearchQuantity,selectedValue,showDetails,detailsTitle,hideDetails,handleShowDetails,journalEntries,tabs,selectTab,activeTab,
+            updateJournal
         }
     }
 };

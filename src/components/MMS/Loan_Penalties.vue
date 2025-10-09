@@ -226,7 +226,11 @@ export default{
                             hideModalLoader();
                             toast.error('Penalty(s) Already Processed!');
                             handleReset();
-                        } else {
+                        }else if(response.data.msg === "Expired"){
+                            hideModalLoader();
+                            toast.error('Loan Application Already Expired!');
+                            handleReset();
+                        }else {
                             toast.error('An error occurred while booking the Penalty(s).');
                         }
                     })

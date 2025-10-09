@@ -89,8 +89,8 @@ export default{
             {label: "Phone No", key:"phone_number"},
             {label: "Reference No", key:"reference"},
             {label: "Bill Ref", key:"bill_reference"},
-            {label: "Amnt", key:"amount", type: "number"},
-            {label: "Posted", key:"posted"},
+            {label: "Amount", key:"formatted_amount", type: "number"},
+            {label: "Posted", key:"posted", textColor:"textColor"},
             {label: "Receipt#", key:"receipt_no"},
         ])
         const showTotals = ref(true);

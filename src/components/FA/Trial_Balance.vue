@@ -105,7 +105,7 @@ export default{
         const showModal = ref(false);
         const tableColumns = ref([
             {type: "checkbox"},
-            {label: "Type", key:"ledger_type"},
+            {label: "Type", key:"ledger_type", txtColor: "txtColor"},
             {label: "Code", key: "ledger_code"},
             {label: "Account Name", key:"ledger_name"},
             {label: "Debits", key:"debits", type: "number"},
@@ -307,6 +307,7 @@ export default{
                             "debits": Number(patient_ledger_totals.value).toLocaleString(),
                             "credits": '-',
                             "status": 'Active',
+                            "txtColor": 'blue',
                         }
                         trialBalanceList.value.push(patientArr);
                     }else if(patient_ledger_totals.value < 0){
@@ -319,6 +320,7 @@ export default{
                             "credits": Number(Math.abs(patient_ledger_totals.value)).toLocaleString(),
                             "debits": '-',
                             "status": 'Active',
+                            "txtColor": 'blue',
                         }
                         trialBalanceList.value.push(patientArr);
                     }
@@ -332,6 +334,7 @@ export default{
                             "debits": Number(customer_ledger_totals.value).toLocaleString(),
                             "credits": '-',
                             "status": 'Active',
+                            "txtColor": 'blue',
                         }
                         trialBalanceList.value.push(customersArr);
                     }else if(customer_ledger_totals.value < 0){
@@ -344,6 +347,7 @@ export default{
                             "debits": '-',
                             "credits": Number(Math.abs(customer_ledger_totals.value)).toLocaleString(),
                             "status": 'Active',
+                            "txtColor": 'blue',
                         }
                         trialBalanceList.value.push(customersArr);
                     }
@@ -357,6 +361,7 @@ export default{
                             "debits": Number(vendor_ledger_totals.value).toLocaleString(),
                             "credits": '-',
                             "status": 'Active',
+                            "txtColor": 'yellow',
                         }
                         trialBalanceList.value.push(vendorsArr);
                     }else if(vendor_ledger_totals.value < 0){
@@ -369,6 +374,7 @@ export default{
                             "debits": '-',
                             "credits": Number(Math.abs(vendor_ledger_totals.value)).toLocaleString(),
                             "status": 'Active',
+                            "txtColor": 'yellow',
                         }
                         trialBalanceList.value.push(vendorsArr);
                     }
@@ -383,6 +389,7 @@ export default{
                             "debits": Number(tenant_ledger_totals.value).toLocaleString(),
                             "credits": '-',
                             "status": 'Active',
+                            "txtColor": 'blue',
                         }
                         trialBalanceList.value.push(tenantsArr);
                     }else if(tenant_ledger_totals.value < 0){
@@ -395,6 +402,7 @@ export default{
                             "debits": '-',
                             "credits": Number(Math.abs(tenant_ledger_totals.value)).toLocaleString(),
                             "status": 'Active',
+                            "txtColor": 'blue',
                         }
                         trialBalanceList.value.push(tenantsArr);
                     }
@@ -408,6 +416,7 @@ export default{
                             "debits": Number(member_ledger_totals.value).toLocaleString(),
                             "credits": '-',
                             "status": 'Active',
+                            "txtColor": 'blue',
                         }
                         trialBalanceList.value.push(membersArr);
                     }else if(member_ledger_totals.value < 0){
@@ -420,6 +429,7 @@ export default{
                             "debits": '-',
                             "credits": Number(Math.abs(member_ledger_totals.value)).toLocaleString(),
                             "status": 'Active',
+                            "txtColor": 'blue',
                         }
                         trialBalanceList.value.push(membersArr);
                     }
@@ -433,6 +443,7 @@ export default{
                             "debits": Number(loan_ledger_totals.value).toLocaleString(),
                             "credits": '-',
                             "status": 'Active',
+                            "txtColor": 'blue',
                         }
                         trialBalanceList.value.push(loansArr);
                     }else if(loan_ledger_totals.value < 0){
@@ -445,6 +456,7 @@ export default{
                             "debits": '-',
                             "credits": Number(Math.abs(loan_ledger_totals.value)).toLocaleString(),
                             "status": 'Active',
+                            "txtColor": 'blue',
                         }
                         trialBalanceList.value.push(loansArr);
                     }
@@ -458,6 +470,7 @@ export default{
                             "debits": Number(saving_ledger_totals.value).toLocaleString(),
                             "credits": '-',
                             "status": 'Active',
+                            "txtColor": 'yellow',
                         }
                         trialBalanceList.value.push(savingsArr);
                     }else if(saving_ledger_totals.value < 0){
@@ -470,6 +483,7 @@ export default{
                             "debits": '-',
                             "credits": Number(Math.abs(saving_ledger_totals.value)).toLocaleString(),
                             "status": 'Active',
+                            "txtColor": 'yellow',
                         }
                         trialBalanceList.value.push(savingsArr);
                     }

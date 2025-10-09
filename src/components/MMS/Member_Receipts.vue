@@ -154,7 +154,7 @@ export default{
             {label: "Cashbook", key:"cashbook"},
             {label: "Pay. Method", key:"payment_method"},
             {label: "Ref No", key:"reference_no"},
-            {label: "Amount", key:"total_amount", type:"number"},
+            {label: "Amount", key:"total_amount", type:"number", txtColor: "txtGreenColor"},
             {label: "Done By", key:"done_by"},
         ])
         const showTotals = ref(true);

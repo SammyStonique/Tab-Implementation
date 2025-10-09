@@ -10,13 +10,14 @@
 import axios from 'axios';
 import Login from './views/Login.vue';
 import Main from './views/Main.vue';
+import CustomerServiceWeek from './components/CustomerServiceWeek.vue';
 import { onBeforeMount, onMounted, computed, watch } from 'vue';
 import { useStore } from 'vuex';
 import ContextMenu from './components/ContextMenu.vue';
 
 export default{
   components:{
-    Login, Main, ContextMenu
+    Login, Main, ContextMenu,CustomerServiceWeek
   },
   setup(){
     const store = useStore();

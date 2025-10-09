@@ -168,15 +168,15 @@ export default{
         const showModal = ref(false);
         const tableColumns = ref([
             {type: "checkbox"},
-            {label: "Invoice#", key:"journal_no"},
-            {label: "Date", key: "date"},
-            {label: "Code", key:"code"},
-            {label: "Customer Name", key:"customer_name"},
-            {label: "Description", key:"description"},
-            {label: "Amount", key:"total_amount", type:"number"},
-            {label: "Paid", key:"total_paid", type:"number"},
-            {label: "Balance", key:"due_amount", type:"number"},
-            {label: "Status", key:"status"},
+            {label: "Invoice#", key:"journal_no", txtColor: "txtRowColor"},
+            {label: "Date", key: "date", txtColor: "txtRowColor"},
+            {label: "Code", key:"code", txtColor: "txtRowColor"},
+            {label: "Customer Name", key:"customer_name", txtColor: "txtRowColor"},
+            {label: "Description", key:"description", txtColor: "txtRowColor"},
+            {label: "Amount", key:"total_amount", type:"number", txtColor: "txtPaidColor"},
+            {label: "Paid", key:"total_paid", type:"number", txtColor: "txtPaidColor"},
+            {label: "Balance", key:"due_amount", type:"number", txtColor: "txtDueColor"},
+            {label: "Status", key:"status", txtColor: "txtStatusColor"},
         ])
         const showTotals = ref(true);
         const actions = ref([

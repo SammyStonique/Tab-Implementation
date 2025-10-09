@@ -64,6 +64,13 @@
             :displayButtons="displayButtons" @handleSubmit="updateRepaymentDate" @handleReset="handleReset1"
         />
     </MovableModal>
+    <MovableModal v-model:visible="statusModalVisible" :title="statusTitle" :modal_top="modal_top" :modal_left="modal_left" :modal_width="modal_width"
+        :loader="status_modal_loader" @showLoader="showStatusModalLoader" @hideLoader="hideStatusModalLoader" @closeModal="closeModal1">
+        <DynamicForm 
+            :fields="formFields2" :flex_basis="flex_basis" :flex_basis_percentage="flex_basis_percentage" 
+            :displayButtons="displayButtons" @handleSubmit="changeLoanStatus" @handleReset="handleReset1"
+        />
+    </MovableModal>
     <!-- <PrintModal v-model:visible="printModalVisible" :title="printTitle" >
         <iframe v-if="pdfUrl" :src="pdfUrl" width="100%" height="100%" type="application/pdf" style="border: none;"></iframe>
     </PrintModal> -->
@@ -100,6 +107,7 @@ export default{
         const displayButtons = ref(true);
         const trans_modal_loader = ref('none');
         const ref_modal_loader = ref('none');
+        const status_modal_loader = ref('none');
         const modal_loader1 = ref('none');
         const idField = 'loan_application_id';
         const addButtonLabel = ref('New Application');
@@ -122,10 +130,12 @@ export default{
         const transTitle = ref('Approve/Reject Loan');
         const refTitle = ref('Disburse Loan');
         const title1 = ref('Update Repayment Date');
+        const statusTitle = ref('Change Loan Status');
         const transModalVisible = ref(false);
         const refModalVisible = ref(false);
         const appModalVisible = ref(false);
         const printModalVisible = ref(false);
+        const statusModalVisible = ref(false);
         const pdfUrl = ref(null);
         const printTitle = ref('Print Loan Applications');
         const dropdownWidth = ref("500px")
@@ -144,16 +154,18 @@ export default{
             {label: "Applied", key: "formatted_applied_amount"},
             {label: "Approved", key: "formatted_approved_amount"},
             {label: "Disbursed", key: "disbursed"},
-            {label: "Status", key:"approval_status", textColor: "textColor"},
+            {label: "Appr. Status", key:"approval_status", textColor: "textColor"},
             {label: "Loan Remarks", key:"loan_remarks"},
             {label: "Appr. By", key:"approved_by"},
             {label: "Exempt", key:"exempt_penalty"},
             {label: "Due", key:"loan_due_date"},
+            {label: "Status", key:"loan_status", txtColor: "textStatusColor"},
         ])
         const actions = ref([
             {name: 'edit', icon: 'fa fa-edit', title: 'Edit Application', rightName: 'Editing Loan Applications'},
             {name: 'view', icon: 'fa fa-file-pdf-o', title: 'View Loan', rightName: 'Viewing Loan Ledger'},
             {name: 'approve/reject', icon: 'fa fa-check-circle', colorClass: 'text-green-500', title: 'Approve/Reject Loan', rightName: 'Approving Loan Applications'},
+            {name: 'transfer', icon: 'fa fa-exchange', title: 'Change Loan Status', rightName: 'Changing Loan Status'},
             {name: 'disburse', icon: 'fa fa-credit-card', title: 'Disburse Loan', rightName: 'Disbursing Member Loan'},
             {name: 'delete', icon: 'fa fa-trash', title: 'Delete Application', rightName: 'Deleting Loan Applications'},
         ])
@@ -254,6 +266,7 @@ export default{
         const hideModalLoader1 = () =>{
             modal_loader1.value = "none";
         };
+        
         const updateRepaymentDate = async() =>{
             showModalLoader1();
             if(formFields1.value[2].value < formFields1.value[1].value){
@@ -292,6 +305,7 @@ export default{
         };
         const closeModal1 = () =>{
             appModalVisible.value = false;
+            statusModalVisible.value = false;
             applicationID.value = null;
             selectedIds.value = [];
             hideModalLoader1();
@@ -399,7 +413,46 @@ export default{
         }
         const hideLoader = () =>{
             loader.value = "none";
+        };
+        const formFields2 = ref([]);
+        const updateFormFields2 = () => {
+            formFields2.value = [
+                { type: 'dropdown', name: 'loan_status',label: "Loan Status", value: '', placeholder: "", required: true, options: [{ text: 'Active', value: 'Active' }, { text: 'Cleared', value: 'Cleared' }, { text: 'Defaulted', value: 'Defaulted' }] },
+            ]
+        };
+        const showStatusModalLoader = () =>{
+            status_modal_loader.value = "block";
         }
+        const hideStatusModalLoader = () =>{
+            status_modal_loader.value = "none";
+        };
+        const changeLoanStatus = async() =>{
+            showStatusModalLoader();
+            let formData = {
+                loan_application: applicationID.value,
+                loan_status: formFields2.value[0].value,
+                user: userID.value,
+                company: companyID.value
+            }
+            axios.post(`api/v1/change-loan-status/`,formData)
+            .then((response)=>{
+                if(response.data.msg == "Success"){
+                    toast.success("Success")
+                    closeModal1();
+                }else{
+                    toast.error("Error Changing Loan Status");
+                }                   
+            })
+            .catch((error)=>{
+                toast.error(error.message)
+                hideStatusModalLoader();
+            })
+            .finally(()=>{
+                hideStatusModalLoader();
+                searchApplications();
+            })
+        
+        };
        
         const searchApplications = () =>{
             showLoader();
@@ -613,6 +666,17 @@ export default{
                     }
                 }
                 
+            }else if(action == 'transfer'){
+                const applicationStatus = row['approval_status']
+                if(applicationStatus == 'Approved'){
+                    updateFormFields2();
+                    applicationID.value = row[idField];
+                    statusModalVisible.value = true;
+                    flex_basis.value = '1/2';
+                    flex_basis_percentage.value = '50';
+                }else{
+                    toast.error(`Cannot Change Status Of ${applicationStatus} Loan`)
+                }
             }
         };
         watch(() => store.state.contextMenu.selectedAction, (actionPayload) => {
@@ -967,7 +1031,8 @@ export default{
             handleSelectionChange,addingRight,removingRight,rightsModule,printApplicationList,selectSearchQuantity,selectedValue,handleOpenLink,
             modal_left,modal_top,modal_width,trans_modal_loader,transModalVisible,transTitle,showTransModalLoader,hideTransModalLoader,approveLoan,closeTransModal,
             dropdownOptions,handleDynamicOption,refTitle,refFormFields,refModalVisible,ref_modal_loader,handleRefReset,showRefModalLoader,hideRefModalLoader,closeRefModal,
-            disburseMemberLoan,appModalVisible,title1,modal_loader1,showModalLoader1,hideModalLoader1,updateFormFields,formFields1,handleReset1,closeModal1,updateRepaymentDate
+            disburseMemberLoan,appModalVisible,title1,modal_loader1,showModalLoader1,hideModalLoader1,updateFormFields,formFields1,handleReset1,closeModal1,updateRepaymentDate,
+            statusModalVisible,statusTitle,status_modal_loader,showStatusModalLoader,hideStatusModalLoader,formFields2,changeLoanStatus,
         }
     }
 };

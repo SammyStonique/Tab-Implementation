@@ -14,6 +14,7 @@ const state = {
   reconciliationLedgerID: '',
   reconciliationLedgerName: '',
   cbkRunningBalance: 0,
+  cbkOpeningBalance: 0,
   cbkDebitCount: 0,
   cbkCreditCount: 0,
   cbkDebitTotal: 0,
@@ -40,6 +41,8 @@ const state = {
   receiptItemsArray: [],
   journalItemsArray: [],
   reconItemsArray: [],
+  matchReconItemsArray: [],
+  selectedReconciliation: null,
 };
   
 const mutations = {
@@ -52,6 +55,7 @@ const mutations = {
     state.accInvoiceItemsArray = [];
     state.billItemsArray = [];
     state.reconItemsArray = [];
+    state.matchReconItemsArray = [];
     state.ledgerRunningBalance = 0;
     state.ledgerID = '';
     state.ledgerName = '';
@@ -65,10 +69,12 @@ const mutations = {
     state.jnlArray = [];
     state.reconciliationLedgerID = '';
     state.reconciliationLedgerName = '';
+    state.selectedReconciliation = null;
     state.cashbookArray = [];
     state.cbkArray = [];
     state.bnkArray = [];
     state.cbkRunningBalance = 0;
+    state.cbkOpeningBalance = 0;
     state.cbkDebitCount = 0;
     state.cbkDebitTotal = 0;
     state.cbkCreditCount = 0;
@@ -235,7 +241,8 @@ const actions = {
                 state.cbkCreditCount += 1;
             }
         }
-        state.cbkRunningBalance =  Number(running_balance).toLocaleString();
+        state.cbkRunningBalance =  Number(response.data.journal_balance).toLocaleString();
+        state.cbkOpeningBalance =  parseFloat((response.data.cashbook_opening_balance).toString().replace(/,/g, ''));
     })
     .catch((error)=>{
         console.log(error.message)
@@ -319,6 +326,16 @@ const actions = {
       state.selectedLedger = response.data;
       commit('SET_SELECTED_LEDGER',response.data);
       commit('SET_LEDGER_DETAILS',response.data);
+    })
+    .catch((error)=>{
+      console.log(error.message);
+    })
+    
+  },
+  fetchBankReconciliation({ commit,state }, formData) {
+    axios.post(`api/v1/get-bank-reconciliations/`,formData)
+    .then((response)=>{
+      state.selectedReconciliation = response.data;
     })
     .catch((error)=>{
       console.log(error.message);
@@ -497,6 +514,36 @@ const actions = {
       throw error;
     })  
   },
+  async findMatchingReconcilingItems({ commit,state }, formData) {
+    return axios.post(`api/v1/find-matching-reconciling-items/`,formData)
+    .then((response)=>{
+      return response;
+    })
+    .catch((error)=>{
+      console.log(error.message);
+      throw error;
+    })  
+  },
+  async loadMatchingReconcilingItems({ commit,state }, formData) {
+    return axios.post(`api/v1/load-matching-reconciling-items/`,formData)
+    .then((response)=>{
+      return response;
+    })
+    .catch((error)=>{
+      console.log(error.message);
+      throw error;
+    })  
+  },
+  async matchReconcilingItems({ commit,state }, formData) {
+    return axios.post(`api/v1/match-reconciling-items/`,formData)
+    .then((response)=>{
+      return response;
+    })
+    .catch((error)=>{
+      console.log(error.message);
+      throw error;
+    })  
+  },
 
   deleteLedger({ commit,state }, formData) {
     Swal.fire({
@@ -577,6 +624,47 @@ const actions = {
         })
       }else{
         Swal.fire(`Reconciliation has not been deleted!`);
+      }
+    })
+  },
+  deleteReconcilingItem({ commit,state }, formData) {
+    Swal.fire({
+      title: "Are you sure?",
+      text: `Do you wish to delete Item?`,
+      type: 'warning',
+      showCloseButton: true,
+      showCancelButton: true,
+      confirmButtonText: 'Yes Delete Item!',
+      cancelButtonText: 'Cancel!',
+      customClass: {
+          confirmButton: 'swal2-confirm-custom',
+          cancelButton: 'swal2-cancel-custom',
+      },
+      showLoaderOnConfirm: true,
+    }).then((result) => {
+      if (result.value) {
+        axios.post(`api/v1/delete-reconciling-item/`,formData)
+        .then((response)=>{
+          if(response.data.msg == "Success"){
+              Swal.fire("Poof! Item removed succesfully!", {
+                icon: "success",
+              }); 
+          }else{
+            Swal.fire({
+              title: "Error Deleting Item",
+              icon: "warning",
+            });
+          }                   
+        })
+        .catch((error)=>{
+          console.log(error.message);
+          Swal.fire({
+            title: error.message,
+            icon: "warning",
+          });
+        })
+      }else{
+        Swal.fire(`Item has not been deleted!`);
       }
     })
   },
