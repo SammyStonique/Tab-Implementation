@@ -550,6 +550,7 @@ export default{
         const dropdownOptions = ref([
             {label: 'SMS Member Receipts', action: 'send-sms', icon: 'fa-sms', colorClass: 'text-blue-500', rightName: 'Sending MMS SMS'},
             {label: 'Email Member Receipts', action: 'send-email', icon: 'fa-envelope', colorClass: 'text-indigo-500', rightName: 'Sending MMS Emails'},
+            {label: 'Mpesa Direct Txns', action: 'mpesa-txns', icon: 'fa-money', colorClass: 'text-green-500', rightName: 'Adding Member Receipt'},
         ]);
         const handleDynamicOption = async(option) =>{
             if(option == 'send-sms'){
@@ -617,6 +618,9 @@ export default{
                 .finally(()=>{
                     hideLoader();
                 })
+            }else if(option == 'mpesa-txns'){
+                store.commit('pageTab/ADD_PAGE', {'MMS':'Mpesa_Transactions'});
+                store.state.pageTab.mmsActiveTab = 'Mpesa_Transactions'; 
             }
         };
         const printReceiptsList = () =>{

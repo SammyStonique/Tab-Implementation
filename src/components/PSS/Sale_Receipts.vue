@@ -12,6 +12,9 @@
             @removeItem="removeReceipt"
             @removeSelectedItems="removeReceipts"
             @printList="printReceiptsList"
+            v-model:printModalVisible="printModalVisible"
+            :printTitle="printTitle"
+            :pdfUrl="pdfUrl"
             :addingRight="addingRight"
             :removingRight="removingRight"
             :rightsModule="rightsModule"
@@ -67,6 +70,9 @@
                 :displayButtons="displayButtons" @handleSubmit="saveReceipt" @handleReset="handleReset"
             />
         </MovableModal>
+        <PrintModal v-model:visible="printModalVisible1" :title="printTitle" >
+            <iframe v-if="pdfUrl" :src="pdfUrl" width="100%" height="100%" type="application/pdf" style="border: none;"></iframe>
+        </PrintModal>
     </div>
 </template>
 
@@ -82,11 +88,12 @@ import { useDateFormatter } from '@/composables/DateFormatter';
 import JournalEntries from "@/components/JournalEntries.vue";
 import ReceiptLines from "@/components/ReceiptLines.vue";
 import PrintJS from 'print-js';
+import PrintModal from '@/components/PrintModal.vue';
 
 export default{
     name: 'Sale_Receipts',
     components:{
-        PageComponent, MovableModal,DynamicForm,JournalEntries,ReceiptLines,
+        PageComponent, MovableModal,DynamicForm,JournalEntries,ReceiptLines,PrintModal
     },
     setup(){
         const store = useStore();     
@@ -108,6 +115,10 @@ export default{
         const invoiceID = ref(null);
         const custComponentKey = ref(0);
         const invModalVisible = ref(false);
+        const printModalVisible = ref(false);
+        const printModalVisible1 = ref(false);
+        const pdfUrl = ref(null);
+        const printTitle = ref('Print Client Receipts');
         const modal_top = ref('150px');
         const modal_left = ref('400px');
         const modal_width = ref('32vw');
@@ -367,10 +378,15 @@ export default{
                     client_type: "Asset Client",
                     company: companyID.value
                 }
-                await store.dispatch('Journals/previewClientReceipt',formData).
-                then(()=>{
-                    hideLoader();
-                })
+                const response = await store.dispatch('Journals/previewClientReceipt',formData);
+                if (response && response.status === 200) {
+                    const blob1 = new Blob([response.data], { type: 'application/pdf' });
+                    const url = URL.createObjectURL(blob1);
+                    // PrintJS({printable: url, type: 'pdf'});
+                    pdfUrl.value = url;
+                    printModalVisible1.value = true;
+                };
+                hideLoader();
             }else if(action == 'download'){
                 showLoader();
                 const journalID = row['journal_id'];
@@ -508,8 +524,8 @@ export default{
         }
 
         const dropdownOptions = ref([
-            {label: 'SMS Sale Receipts', action: 'send-sms'},
-            {label: 'Email Sale Receipts', action: 'send-email'},
+            {label: 'SMS Client Receipts', action: 'send-sms', icon: 'fa-sms', colorClass: 'text-blue-500', rightName: 'Sending PSS SMS'},
+            {label: 'Email Client Receipts', action: 'send-email', icon: 'fa-envelope', colorClass: 'text-indigo-500', rightName: 'Sending PSS Emails'},
         ]);
         const handleDynamicOption = async(option) =>{
             if(option == 'send-sms'){
@@ -597,10 +613,11 @@ export default{
             .post("api/v1/export-clients-receipts-pdf/", formData, { responseType: 'blob' })
             .then((response)=>{
                 if(response.status == 200){
-                    const blob1 = new Blob([response.data]);
-                    // Convert blob to URL
+                    const blob1 = new Blob([response.data], { type: 'application/pdf' });
                     const url = URL.createObjectURL(blob1);
-                    PrintJS({printable: url, type: 'pdf'});
+                    // PrintJS({printable: url, type: 'pdf'});
+                    pdfUrl.value = url;
+                    printModalVisible.value = true;
                 }
             })
             .catch((error)=>{
@@ -622,7 +639,7 @@ export default{
             showModalLoader, hideModalLoader, handleSelectionChange, flex_basis,flex_basis_percentage,
             removeReceipt, removeReceipts, dropdownOptions, handleDynamicOption, addNewReceipt, printReceiptsList,
             addingRight,removingRight,rightsModule,selectSearchQuantity,selectedValue,showDetails,detailsTitle,hideDetails,handleShowDetails,journalEntries,
-            receiptLines,tabs,selectTab,activeTab
+            receiptLines,tabs,selectTab,activeTab,printModalVisible,pdfUrl, printTitle,printModalVisible1
         }
     }
 };

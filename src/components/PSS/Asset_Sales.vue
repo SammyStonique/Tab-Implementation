@@ -455,9 +455,9 @@ export default{
             }
         };
         const dropdownOptions = ref([
-            {label: 'Exempt Penalty', action: 'exempt-penalty'},
-            {label: 'Unexempt Penalty', action: 'unexempt-penalty'},
-            {label: 'Email Sale Statement', action: 'send-email'},
+            {label: 'Exempt Penalty', action: 'exempt-penalty', icon: 'fa-ban', colorClass: 'text-yellow-600', rightName: 'Exempting Sale Penalty'},
+            {label: 'Unexempt Penalty', action: 'unexempt-penalty', icon: 'fa-undo', colorClass: 'text-green-600' , rightName: 'Exempting Sale Penalty'},
+            {label: 'Email Sale Statement', action: 'send-email', icon: 'fa-envelope', colorClass: 'text-indigo-500', rightName: 'Sending PSS Emails'},
         ]);
         const handleDynamicOption = async(option) =>{
             if( option == 'exempt-penalty'){

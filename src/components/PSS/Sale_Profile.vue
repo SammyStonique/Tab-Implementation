@@ -76,6 +76,9 @@
                                 @printCSV="printCSV"
                                 :dropdownOptions="dropdownOptions"
                                 @handleDynamicOption="handleDynamicOption1"
+                                v-model:printModalVisible="printModalVisible"
+                                :printTitle="printTitle"
+                                :pdfUrl="pdfUrl"
                             />
                         </div>   
                         <div class="table w-[100%] top-[17.1rem] z-30 px-6">              
@@ -127,6 +130,9 @@ export default defineComponent({
         const rightsModule = ref('PSS');
         const allowedRights = ref([]);
         const depModalVisible = ref(false);
+        const printModalVisible = ref(false);
+        const pdfUrl = ref(null);
+        const printTitle = ref('Print Sale Statement');
         const displayButtons = ref(true);
         const flex_basis = ref('');
         const flex_basis_percentage = ref('');
@@ -157,23 +163,23 @@ export default defineComponent({
         const saleAsset = computed(()=> store.state.Asset_Sales.saleAsset);
         const scheduleColumns = ref([
             {type: "checkbox"},
-            {label: "#", key:"installment", type: "text", editable: false},
-            {label: "Due", key:"due_date", type: "text", editable: false},
-            {label: "Balance", key:"formatted_asset_balance", type: "text", editable: false},
-            {label: "Principal", key:"formatted_principal_amount", type: "number", editable: false},
-            {label: "Interest", key:"formatted_interest_amount", type: "number", editable: false},
-            {label: "Penalty", key:"penalty", type: "number", editable: false},
-            {label: "Sch. Total", key:"formatted_schedule_repayment", type: "number", editable: false},
-            {label: "Prepay.", key:"formatted_asset_prepayment", type: "number", editable: false},
-            {label: "Paid Princ.", key:"formatted_repaid_principal_amount", type: "number", editable: false},
-            {label: "Paid Int.", key:"formatted_repaid_interest_amount", type: "number", editable: false},
-            {label: "Paid Pen.", key:"formatted_repaid_penalty", type: "number", editable: false},
-            {label: "Total Paid", key:"formatted_schedule_payment", type: "number", editable: false, },
-            {label: "Princ. Bal", key:"formatted_principal_balance", type: "number", editable: false},
-            {label: "Int. Bal.", key:"formatted_interest_balance", type: "number", editable: false},
-            {label: "Total Bal.", key:"formatted_installment_balance", type: "number", editable: false},
-            {label: "I.P", key:"interest_posted", type: "text", editable: false},
-            {label: "C.R.P", key:"credit_reduction_applied", type: "text", editable: false},
+            {label: "#", key:"installment", type: "text"},
+            {label: "Due", key:"due_date", type: "text", txtColor: "txtColor"},
+            {label: "Balance", key:"formatted_asset_balance", type: "text"},
+            {label: "Principal", key:"formatted_principal_amount", type: "number"},
+            {label: "Interest", key:"formatted_interest_amount", type: "number"},
+            {label: "Penalty", key:"penalty", type: "number"},
+            {label: "Sch. Total", key:"formatted_schedule_repayment", type: "number"},
+            {label: "Prepay.", key:"formatted_asset_prepayment", type: "number"},
+            {label: "Paid Princ.", key:"formatted_repaid_principal_amount", type: "number"},
+            {label: "Paid Int.", key:"formatted_repaid_interest_amount", type: "number"},
+            {label: "Paid Pen.", key:"formatted_repaid_penalty", type: "number"},
+            {label: "Total Paid", key:"formatted_schedule_payment", type: "number", },
+            {label: "Princ. Bal", key:"formatted_principal_balance", type: "number"},
+            {label: "Int. Bal.", key:"formatted_interest_balance", type: "number"},
+            {label: "Total Bal.", key:"formatted_installment_balance", type: "number", txtColor: "txtColor"},
+            {label: "I.P", key:"interest_posted", type: "text"},
+            {label: "C.R.P", key:"credit_reduction_applied", type: "text"},
         ]);
         const showTotals = ref(true);
         const actionsSchedule = ref([
@@ -255,7 +261,7 @@ export default defineComponent({
             }  
         }
         const dropdownOptions = ref([
-            {label: 'Email Sale Statement', action: 'send-email', rightName: 'Sending PSS Emails'},
+            {label: 'Email Sale Statement', action: 'send-email', icon: 'fa-envelope', colorClass: 'text-indigo-500', rightName: 'Sending PSS Emails'},
         ]);
         
         const handleDynamicOption1 = async(option) =>{           
@@ -325,10 +331,11 @@ export default defineComponent({
             .post("api/v1/asset-sale-statement-pdf/", formData, { responseType: 'blob' })
             .then((response)=>{
                 if(response.status == 200){
-                    const blob1 = new Blob([response.data]);
-                    // Convert blob to URL
+                    const blob1 = new Blob([response.data], { type: 'application/pdf' });
                     const url = URL.createObjectURL(blob1);
-                    PrintJS({printable: url, type: 'pdf'});
+                    // PrintJS({printable: url, type: 'pdf'});
+                    pdfUrl.value = url;
+                    printModalVisible.value = true;
                 }
             })
             .catch((error)=>{
@@ -748,7 +755,7 @@ export default defineComponent({
             scheduleTableKey, idFieldSchedule, scheduleColumns, actionsSchedule, statementTableKey, idFieldStatement, statementRows,statement1Rows,showActions,searchFilters,resetFilters,dropdownOptions,
             statementColumns,statement1Columns, actionsStatement, saleDetails,saleAsset,saleClient, scheduleActionClick,showAddButton,searchLoanTransactions,
             scheduleActionClick,tnt_modal_loader, dep_modal_loader, util_modal_loader, depModalVisible, displayButtons, printSaleStatement,handleDynamicOption1,
-            documentActionClick,documentColumns,documentTableKey,actionsDocument,computedDocumentRows,
+            documentActionClick,documentColumns,documentTableKey,actionsDocument,computedDocumentRows,printModalVisible,pdfUrl, printTitle,
             modal_top, modal_left, modal_width, showDepModalLoader, hideDepModalLoader, handleDepReset,
             flex_basis, flex_basis_percentage, paymentActionClick,rightsModule,isDisabled,
         }

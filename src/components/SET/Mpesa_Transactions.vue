@@ -6,6 +6,8 @@
         :searchFilters="searchFilters"
         @searchPage="searchTransactions"
         @resetFilters="resetFilters"
+        :dropdownOptions="dropdownOptions"
+        @handleDynamicOption="handleDynamicOption"
         @removeItem=""
         @removeSelectedItems=""
         @printList="printTransactionsList"
@@ -32,7 +34,7 @@
     >
         <DynamicForm 
             :fields="formFields" :flex_basis="flex_basis" :flex_basis_percentage="flex_basis_percentage" 
-            :displayButtons="displayButtons" @handleSubmit="" @handleReset="handleReset"
+            :displayButtons="displayButtons" @handleSubmit="correctTransaction" @handleReset="handleReset"
         />
     </MovableModal>
 </template>
@@ -45,6 +47,7 @@ import PageComponent from "../PageComponent.vue";
 import MovableModal from '@/components/MovableModal.vue'
 import DynamicForm from '../NewDynamicForm.vue';
 import { useToast } from "vue-toastification";
+import { useDateFormatter } from '@/composables/DateFormatter';
 import PrintJS from 'print-js';
 
 export default{
@@ -56,16 +59,22 @@ export default{
     setup(){
         const store = useStore();
         const toast = useToast();
+        const { formatDate } = useDateFormatter();
+        const current_date = new Date();
         const loader = ref('none');
         const modal_loader = ref('none');
         const showAddButton = ref(false);
         const pageComponentKey = ref(0);
-        const title = ref('Mpesa Transactions');
+        const title = ref('Correct & Post Txn');
         const companyID = computed(()=> store.state.userData.company_id);
+        const userID = computed(()=> store.state.userData.user_id);
         const txnID = ref(null);
         const idField = 'mpesa_transaction_id';
         const selectedIds = ref([]);
         const appModalVisible = ref(false);
+        const billRef = ref('');
+        const computedBillRef = computed(()=> billRef.value);
+        const shortCode = ref('');
         const txnList = ref([]);
         const propResults = ref([]);
         const propArrLen = ref(0);
@@ -85,17 +94,24 @@ export default{
             {label: "Date", key:"recording_date"},
             {label: "Txn Date", key:"transaction_time"},
             {label: "Type", key:"transaction_type"},
-            {label: "Short Code", key: "shortcode"},
+            {label: "Paybill#", key: "shortcode"},
             {label: "Phone No", key:"phone_number"},
             {label: "Reference No", key:"reference"},
             {label: "Bill Ref", key:"bill_reference"},
             {label: "Amount", key:"formatted_amount", type: "number"},
+            {label: "F.Name", key:"first_name"},
+            {label: "L.Name", key:"last_name"},
             {label: "Posted", key:"posted", textColor:"textColor"},
-            {label: "Receipt#", key:"receipt_no"},
+            {label: "Receipt#", key:"receipt_no", textColor:"textColor"},
+            {label: "Offl.", key:"offline", textColor:"textColor"},
+            {label: "Corr.", key:"corrected_txn", textColor:"textColor"},
+            {label: "Corrected By", key:"corrected_by", textColor:"textColor"},
+            {label: "Error", key:"posting_error", textColor:"textColor"},
         ])
         const showTotals = ref(true);
-        const showActions = ref(false);
+        const showActions = ref(true);
         const actions = ref([
+            {name: 'correct-txn', icon: 'fa fa-check-circle', title: 'Correct Mpesa Txn', rightName: 'Correct Mpesa Transactions'},
             {name: 'delete', icon: 'fa fa-trash', title: 'Delete Item'},
         ])
         const date_from_search = computed({
@@ -137,7 +153,18 @@ export default{
         const handleSelectionChange = (ids) => {
             selectedIds.value = ids;
         };
-
+        const formFields = ref([]);
+        const updateFormFields = () => {
+            formFields.value = [
+                { type: 'text', name: 'bill_ref',label: "Reference Code", value: computedBillRef || '', required: true },
+                { type: 'date', name: 'recording_date',label: "Txn Date", value: formatDate(current_date), required: false },
+            ]
+        };
+        const handleReset = () =>{
+            txnID.value = null;
+            billRef.value = "";
+            shortCode.value = "";
+        }
         const showModalLoader = () =>{
             modal_loader.value = "block";
         }
@@ -217,7 +244,63 @@ export default{
         }
         const closeModal = () =>{
 
-        }
+        };
+        const handleActionClick = async(rowIndex, action, row) =>{
+            if( action == 'correct-txn'){
+                txnID.value = row[idField];
+                billRef.value = row['bill_reference'];
+                shortCode.value = row['shortcode'];
+                const posted = row['posted'];
+                if(posted == "Yes"){
+                    toast.error("Receipt Already Posted!")
+                }else{
+                    flex_basis.value = '1/2';
+                    flex_basis_percentage.value = '50';
+                    updateFormFields();
+                    appModalVisible.value = true;
+                }
+            }
+        };
+        const correctTransaction = async() =>{
+            showModalLoader();
+            let formData = {
+                transaction: txnID.value,
+                bill_reference: formFields.value[0].value,
+                date: formFields.value[1].value,
+                short_code: shortCode.value,
+                company: companyID.value,
+                user: userID.value
+            }
+            await axios.post(`api/v1/correct-mpesa-transaction/`,formData)
+            .then((response)=>{
+                if(response.data.msg == "Success"){
+                    toast.success("Success")
+                    handleReset();
+                }else if(response.data.msg == "Exists"){
+                    toast.error("Duplicate Reference No")
+                }else if(response.data.msg == "DoesNotExist"){
+                    toast.error("Member Does Not Exist")
+                }else{
+                    toast.error("Error Correcting Transaction");
+                }                   
+            })
+            .catch((error)=>{
+                toast.error(error.message)
+                hideModalLoader();
+            })
+            .finally(()=>{
+                hideModalLoader();
+                searchTransactions();
+            })
+        };
+        const dropdownOptions = ref([
+            {label: 'Correct & Post Txn', action: 'correct-txn', icon: 'fa-check-circle', colorClass: 'text-green-600', rightName: 'Correct Mpesa Transactions'}, 
+        ]);
+        const handleDynamicOption = async(option) =>{
+            if( option == 'correct-txn'){
+                            
+            }
+        };
         const printTransactionsList = () =>{
             showLoader();
             let formData = {
@@ -252,8 +335,8 @@ export default{
         })
         return{
             showAddButton,showActions,showTotals,title, searchTransactions, idField, selectedIds, actions, txnList, propArrLen,propCount,propResults,appModalVisible,
-            searchFilters,tableColumns,resetFilters,loadPrev,loadNext,firstPage,lastPage,
-            showNextBtn,showPreviousBtn,displayButtons,
+            searchFilters,tableColumns,resetFilters,loadPrev,loadNext,firstPage,lastPage,formFields,handleReset,
+            showNextBtn,showPreviousBtn,displayButtons,dropdownOptions,handleDynamicOption,handleActionClick,correctTransaction,
             modal_top, modal_left, modal_width, showLoader, loader, hideLoader, modal_loader, showModalLoader, hideModalLoader,
             closeModal, handleSelectionChange, pageComponentKey, flex_basis, flex_basis_percentage,printTransactionsList
         }

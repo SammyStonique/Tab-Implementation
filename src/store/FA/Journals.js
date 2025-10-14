@@ -802,7 +802,7 @@ const actions = {
       }
     })
   },
-  previewClientInvoice({commit,state}, formData){
+  async previewClientInvoice({commit,state}, formData){
     return axios
     .post(`api/v1/client-invoice-pdf/`, formData, { responseType: 'blob' })
     .then((response) => {
@@ -849,7 +849,7 @@ const actions = {
         console.log(error.message);
     })
   },
-  previewClientReceipt({commit,state}, formData){
+  async previewClientReceipt({commit,state}, formData){
     return axios
     .post(`api/v1/client-receipt-pdf/`, formData, { responseType: 'blob' })
     .then((response) => {

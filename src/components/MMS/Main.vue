@@ -88,6 +88,7 @@ import Loan_Balances from '@/components/MMS/Loan_Balances.vue';
 import Guarantor_Interest from '@/components/MMS/Guarantor_Interest.vue';
 
 import Default_Settings from '@/components/SET/Default_Settings.vue';
+import Mpesa_Transactions from '@/components/SET/Mpesa_Transactions.vue';
 
 export default{
     components:{
@@ -103,7 +104,7 @@ export default{
         Loan_Arrears,Saving_Transfers,Share_Transfers,Loan_Prepayments,Prepayment_Allocations,Interest_Rates,Dividend_Rates,Interest_Processing,Dividend_Processing,
         Templates,Design_Template,Share_Account_Details,Saving_Account_Details,Risk_Classifications,Loan_Classifications,Loan_Recovery,Loan_Balances,Guarantor_Interest,
 
-        Default_Settings
+        Default_Settings,Mpesa_Transactions
     },
     props: {
         title: {

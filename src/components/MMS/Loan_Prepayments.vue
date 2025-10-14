@@ -38,6 +38,14 @@
             :displayButtons="displayButtons" @handleSubmit="allocatePrepayment" @handleReset="handleReset"
         />
     </MovableModal>
+    <MovableModal v-model:visible="depModalVisible" :title="title1" :modal_top="modal_top" :modal_left="modal_left" :modal_width="modal_width"
+        :loader="modal_loader1" @showLoader="showTransModalLoader" @hideLoader="hideTransModalLoader" @closeModal="closeModal"
+    >
+        <DynamicForm 
+            :fields="formFields1" :flex_basis="flex_basis" :flex_basis_percentage="flex_basis_percentage" 
+            :displayButtons="displayButtons" @handleSubmit="transferPrepayment" @handleReset="handleReset1"
+        />
+    </MovableModal>
 </template>
 
 <script>
@@ -63,13 +71,17 @@ export default{
         const { formatDate } = useDateFormatter();
         const current_date = new Date();
         const modal_loader = ref('none');
+        const modal_loader1 = ref('none');
         const addButtonLabel = ref('Allocations');
         const addingRight = ref('View Prepayment Allocations');
         const rightsModule = ref('MMS');
         const pageComponentKey = ref(0);
         const invComponentKey = ref(0);
+        const lnComponentKey = ref(0);
         const title = ref('Prepayment Allocation');
+        const title1 = ref('Transfer Prepayment');
         const companyID = computed(()=> store.state.userData.company_id);
+        const userID = computed(()=> store.state.userData.user_id);
         const applicationID = ref("");
         const prepaymentID = ref("");
         const prepaymentAmount = ref(0);
@@ -80,9 +92,11 @@ export default{
         const itemType = ref('');
         const scheduleInstallment = ref('');
         const schedulesArray = computed(() => store.state.Loan_Prepayments.loanItems);
+        const applicationArray = computed(() => store.state.Loan_Applications.applicationArr);
         const idField = 'loan_prepayment_id';
         const selectedIds = ref([]);
         const appModalVisible = ref(false);
+        const depModalVisible = ref(false);
         const prepaymentsList = ref([]);
         const appResults = ref([]);
         const appArrLen = ref(0);
@@ -113,7 +127,8 @@ export default{
         ])
         const showTotals = ref(true);
         const actions = ref([
-            {name: 'allocate', icon: 'fa fa-exchange-alt', title: 'Allocate Prepayment', rightName: 'Allocate Prepayment'},
+            {name: 'allocate', icon: 'fa fa-check-circle', title: 'Allocate Prepayment', rightName: 'Allocate Prepayment'},
+            {name: 'transfer', icon: 'fa fa-exchange', title: 'Transfer Prepayment', rightName: 'Allocate Prepayment'},
         ])
         const member_name_search = ref("");
         const member_number_search = ref("");
@@ -170,13 +185,56 @@ export default{
             
             ];
         };
+        const fetchLoanApplications = async(memberID) =>{
+            await store.dispatch('Loan_Applications/fetchLoanApplications', {company:companyID.value, member: memberID});
+        };
+
+        const handleSelectedApplication = async(option) =>{
+            await store.dispatch('Loan_Applications/handleSelectedApplication', option)
+            applicationID.value = store.state.Loan_Applications.applicationID;
+        };
+        const clearSelectedApplication = async() =>{
+            await store.dispatch('Loan_Applications/updateState', {applicationID: ''});
+            applicationID.value = store.state.Loan_Applications.applicationID;
+        };
+        const checkTransferrableLimit = (value) =>{
+            if(parseFloat(scheduleDueAmount.value) < parseFloat(value)){
+                toast.error(`Cannot Transfer More Than  ${scheduleDueAmount.value}`)
+                formFields1.value[1].value = 0;
+            }
+        }
+        const formFields1 = ref([]);
+        const updateFormFields1 = () => {
+            formFields1.value = [
+                {  
+                    type:'search-dropdown', label:"Loan Application", value: applicationID.value, componentKey: lnComponentKey,
+                    selectOptions: applicationArray, optionSelected: handleSelectedApplication, required: true,
+                    searchPlaceholder: 'Select Loan Application...', dropdownWidth: '400px', updateValue: "",
+                    clearSearch: clearSelectedApplication
+                },
+                { type: 'number', name: 'allocated_amount',label: "Amount", value: 0, required: true, method: checkTransferrableLimit },
+                {required: false}
+            ];
+        };
         const handleReset = () =>{
             for(let i=1; i < formFields.value.length; i++){
                 formFields.value[i].value = '';
             }
             scheduleID.value = '';
+            applicationID.value = '';
+            prepaymentID.value = '';
+            invComponentKey.value += 1;
             formFields.value[1].value = formatDate(current_date);
-        }
+            scheduleDueAmount.value = 0;
+            prepaymentAmount.value = 0;
+        };
+        const handleReset1 = () =>{
+            applicationID.value = '';
+            prepaymentID.value = '';
+            lnComponentKey.value += 1;
+            scheduleDueAmount.value = 0;
+        };
+
         const handleOpenLink = async(row) =>{
             const applicationID = row['loan_application_id'];
             let formData = {
@@ -212,6 +270,69 @@ export default{
                 }
                 
                 
+            }else if(action == 'transfer'){
+                let dueAmount = parseFloat(row['due_amount'].replace(/,/g, ''));
+                if (dueAmount > 0){
+                    updateFormFields1();
+                    depModalVisible.value = true;
+                    handleReset1();
+                    flex_basis.value = '1/3';
+                    flex_basis_percentage.value = '33.333';
+                    applicationID.value = row['loan_application'];
+                    prepaymentID.value = row["loan_prepayment_id"];
+                    scheduleDueAmount.value = dueAmount;
+                    let memberID = row['member_id'];
+                    fetchLoanApplications(memberID);
+                }else{
+                    toast.error("Prepayment Is Fully Allocated")
+                }             
+            }
+        };
+        const showTransModalLoader = () =>{
+            modal_loader1.value = "block";
+        }
+        const hideTransModalLoader = () =>{
+            modal_loader1.value = "none";
+        }
+        const transferPrepayment = async() =>{
+            showTransModalLoader();
+            let formData = {
+                loan_prepayment: prepaymentID.value,
+                loan_application: applicationID.value,
+                amount: formFields1.value[1].value,
+                user: userID.value,
+                company: companyID.value
+            }
+
+            if(applicationID.value == ''){
+                toast.error('Fill In Required Fields');
+                hideTransModalLoader();
+            }else if(formFields1.value[1].value <= 0){
+                toast.error('Invalid Amount');
+                hideTransModalLoader();
+            }else{
+                try {
+                    const response = await axios.post(`api/v1/transferring-loan-prepayment/`, formData);
+                    if (response && response.data.msg === "Success") {
+                        hideTransModalLoader();
+                        toast.success('Prepayment Transferred Successfully!');
+                        handleReset1();
+                        invComponentKey.value += 1;
+                        depModalVisible.value = false;
+                    }else if(response && response.data.msg === "Same Loan"){
+                        hideTransModalLoader();
+                        toast.error('Select A Different Loan!');
+                    }
+                    else {
+                        toast.error('An error occurred while transferring the prepayment.');
+                    }
+                } catch (error) {
+                    console.error(error.message);
+                    toast.error('Failed to transfer prepayment: ' + error.message);
+                } finally {
+                    hideTransModalLoader();
+                    searchPrepayments();
+                }
             }
         } 
         const prepaymentAllocations = async() =>{
@@ -373,7 +494,8 @@ export default{
             currentPage,showNextBtn,showPreviousBtn, handleActionClick,allocatePrepayment,displayButtons,handleReset,
             modal_top, modal_left, modal_width, showLoader, loader, hideLoader, modal_loader, showModalLoader, hideModalLoader,
             closeModal, handleSelectionChange, pageComponentKey, flex_basis, flex_basis_percentage, prepaymentAllocations,
-            addingRight,rightsModule,selectSearchQuantity,selectedValue,handleOpenLink
+            addingRight,rightsModule,selectSearchQuantity,selectedValue,handleOpenLink,
+            modal_loader1,depModalVisible,formFields1,transferPrepayment,showTransModalLoader,hideTransModalLoader,title1,handleReset1
         }
     }
 }
