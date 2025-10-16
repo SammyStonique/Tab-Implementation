@@ -184,19 +184,19 @@ export default defineComponent({
                     type:'search-dropdown', label:"Currency", value: currencyValue.value, componentKey: currComponentKey,
                     selectOptions: currencyArray, optionSelected: handleSelectedCurrency, required: true,
                     searchPlaceholder: 'Select Currency...', dropdownWidth: '500px', updateValue: selectedCurrency.value,
-                    fetchData: fetchCurrencies(), clearSearch: clearSelectedCurrency
+                    clearSearch: clearSelectedCurrency
                 },
                 {  
                     type:'search-dropdown', label:"Category", value: categoryValue.value, componentKey: depComponentKey,
                     selectOptions: catArray, optionSelected: handleSelectedCategory, required: false,
                     searchPlaceholder: 'Select Category...', dropdownWidth: '500px', updateValue: selectedCategory.value,
-                    fetchData: fetchMemberCategories(), clearSearch: clearSelectedCategory
+                    clearSearch: clearSelectedCategory
                 },
                 {  
                     type:'search-dropdown', label:"Sponsor", value: sponsorValue.value, componentKey: userComponentKey,
                     selectOptions: sponsorArr, optionSelected: handleSelectedSponsor, required: false,
                     searchPlaceholder: 'Select Sponsor...', dropdownWidth: '500px', updateValue: selectedSponsor.value,
-                    fetchData: fetchMemberSponsors(), clearSearch: clearSelectedSponsor
+                    clearSearch: clearSelectedSponsor
                 },
             ];
         };
@@ -434,7 +434,9 @@ export default defineComponent({
             additional_flex_basis_percentage.value = '33.333';
         })
         onMounted(()=>{
-            
+            fetchCurrencies();
+            fetchMemberCategories();
+            fetchMemberSponsors();
         })
 
         return{

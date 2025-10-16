@@ -24,6 +24,7 @@ const state = {
     memberDetails: [],
     outstandingBalance: 0,
     receiptItems: [],
+    mpesaReceipt: null,
 };
   
 const mutations = {
@@ -48,6 +49,7 @@ const mutations = {
     state.memberDetails = [];
     state.receiptItems = [];
     state.memberCategoryID = "";
+    state.mpesaReceipt = null;
   },
   SET_SELECTED_MEMBER(state, member) {
     state.selectedMember = member;

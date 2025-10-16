@@ -35,6 +35,12 @@
                         </button>
                     </div>
                     <div class="py-2 px-3 pl-4 w-full hover:bg-slate-500 hover:w-full">
+                        <button class="flex text-sm w-full" @click="openPage({'INV':'Item_Batches'})">
+                            <i class="fa fa-bars pt-2 mr-2" aria-hidden="true"></i>
+                            <p class="">Item Batches</p>
+                        </button>
+                    </div>
+                    <div class="py-2 px-3 pl-4 w-full hover:bg-slate-500 hover:w-full">
                         <button class="flex text-sm w-full" @click="openPage({'INV':'Retail_Outlets'})">
                             <i class="fa fa-store pt-2 mr-2" aria-hidden="true"></i>
                             <p class="">Retail Outlets</p>

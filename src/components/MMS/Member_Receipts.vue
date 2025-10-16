@@ -218,8 +218,8 @@ export default{
         const hideModalLoader = () =>{
             modal_loader.value = "none";
         }
-        const addNewReceipt = () =>{
-            store.dispatch('Members/updateState', {receiptItems: [], outstandingBalance: 0})
+        const addNewReceipt = async() =>{
+            await store.dispatch('Members/updateState', {receiptItems: [], mpesaReceipt: null, outstandingBalance: 0})
             store.commit('pageTab/ADD_PAGE', {'MMS':'Receipt_Details'});
             store.state.pageTab.mmsActiveTab = 'Receipt_Details'; 
         }

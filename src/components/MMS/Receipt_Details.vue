@@ -44,7 +44,7 @@
 </template>
 
 <script>
-import { defineComponent, ref, onBeforeMount, onMounted, computed, watch } from 'vue';
+import { defineComponent, ref, onBeforeMount, onMounted, computed, watch, nextTick } from 'vue';
 import DynamicForm from '@/components/NewDynamicForm.vue';
 import MovableModal from '@/components/MovableModal.vue';
 import PageStyleComponent from '@/components/PageStyleComponent.vue';
@@ -112,6 +112,7 @@ export default defineComponent({
         const ledgerArray = computed(() => store.state.Ledgers.cashbookLedgerArr);
         const memberArray = computed(() => store.state.Members.memberArr);
         const receiptRows = computed(() => store.state.Members.receiptItems);
+        const mpesaReceipt = computed(()=> store.state.Members.mpesaReceipt);
         const receiptColumns = ref([
             {type: "checkbox"},
             {label: "Description", key:"description", type: "text", editable: false},
@@ -141,7 +142,12 @@ export default defineComponent({
                 })
                 
             }  
-            formFields.value[2].value = formFields.value[1].value;     
+            if(mpesaReceipt.value == null){
+                formFields.value[2].value = formFields.value[1].value;  
+            }else{
+                allocateReceivedAmount(formFields.value[5].value)
+            }
+               
         };
         const handleSelectedMember = async(option) =>{
             await store.dispatch('Members/handleSelectedMember', option)
@@ -232,28 +238,46 @@ export default defineComponent({
                     type:'search-dropdown', label:"Member", value: memberID.value, componentKey: memComponentKey,
                     selectOptions: memberArray, optionSelected: handleSelectedMember, required: true,
                     searchPlaceholder: 'Select Member...', dropdownWidth: '450px', updateValue: "",
-                    fetchData: fetchMembers(), clearSearch: clearSelectedMember()  
+                    clearSearch: clearSelectedMember()  
                 },
                 { type: 'date', name: 'issue_date',label: "Recording Date", value: formatDate(current_date), required: true, maxDate: formatDate(current_date), method: fetchReceiptItems },
-                { type: 'date', name: 'banking_date',label: "Banking Date", value: formatDate(current_date), required: true, maxDate: formatDate(current_date) },
-                { type: 'dropdown', name: 'payment_method',label: "Payment Method", value: '', placeholder: "", required: true, options: [{ text: 'Cash', value: 'Cash' }, { text: 'Mpesa', value: 'Mpesa' },{ text: 'Bank Deposit', value: 'Bank Deposit' }, { text: 'Cheque', value: 'Cheque' },{ text: 'Check-off', value: 'Check-off' }, { text: 'RTGS', value: 'RTGS' },{ text: 'EFT', value: 'EFT' }, { text: 'Not Applicable', value: 'Not Applicable' }] },
-                { type: 'text', name: 'reference_no',label: "Reference No", value: '', required: true,},
-                { type: 'number', name: 'total_amount',label: "Amount", value: receipt_totals.value || 0, required: true, method: allocateReceivedAmount },
+                { type: 'date', name: 'banking_date',label: "Banking Date", value: formatDate(current_date), required: true, disabled:false, maxDate: formatDate(current_date) },
+                { type: 'dropdown', name: 'payment_method',label: "Payment Method", value: '', placeholder: "", required: true, disabled:false, options: [{ text: 'Cash', value: 'Cash' }, { text: 'Mpesa', value: 'Mpesa' },{ text: 'Bank Deposit', value: 'Bank Deposit' }, { text: 'Cheque', value: 'Cheque' },{ text: 'Check-off', value: 'Check-off' }, { text: 'RTGS', value: 'RTGS' },{ text: 'EFT', value: 'EFT' }, { text: 'Not Applicable', value: 'Not Applicable' }] },
+                { type: 'text', name: 'reference_no',label: "Reference No", value: '', required: true, disabled:false,},
+                { type: 'number', name: 'total_amount',label: "Amount", value: receipt_totals.value || 0, required: true, disabled:false, method: allocateReceivedAmount },
                 {
                     type:'search-dropdown', label:"Cashbook", value: ledgerID.value, componentKey: ledComponentKey,
-                    selectOptions: ledgerArray, optionSelected: handleSelectedLedger, required: true,
+                    selectOptions: ledgerArray, optionSelected: handleSelectedLedger, required: true, disabled:'',
                     searchPlaceholder: 'Select Cashbook...', dropdownWidth: '450px', updateValue: "",
-                    fetchData: fetchLedgers(), clearSearch: clearSelectedLedger()  
+                    clearSearch: clearSelectedLedger()  
                 },
                 {type:'text-area', label:"Memo", value: receipt_memo.value, textarea_rows: '3', textarea_cols: '56', required: true},
                 {required: false}
             ]
         };
-        watch([receipt_memo, receipt_totals], () => {
+        watch([receipt_memo, receipt_totals, mpesaReceipt], async() => {
             if (receipt_memo.value.length) {
                 formFields.value[7].value = receipt_memo.value;
             }else if(receipt_totals.value == 0){
                 receipt_memo.value = "";
+            }
+            if(mpesaReceipt.value){
+                await nextTick();
+                updateFormFields();
+                nextTick(() => {
+                    formFields.value[1].value = mpesaReceipt.value.date;
+                    formFields.value[2].value = mpesaReceipt.value.date;
+                    formFields.value[2].disabled = true;
+                    formFields.value[3].value = 'Mpesa';
+                    formFields.value[3].disabled = true;
+                    formFields.value[4].value = mpesaReceipt.value.reference;
+                    formFields.value[4].disabled = true;
+                    formFields.value[5].value = mpesaReceipt.value.amount;
+                    formFields.value[5].disabled = true;
+                    formFields.value[6].value = mpesaReceipt.value.cashbook_id;
+                    ledgerID.value = mpesaReceipt.value.cashbook_id;
+                    formFields.value[6].disabled = 'disabled-div';
+                });
             }
         }, { immediate: true })
         const handleReset = () =>{
@@ -283,6 +307,7 @@ export default defineComponent({
         watch([memberID], () => {
             if(memberID.value){
                 fetchReceiptItems();
+                formFields.value[0].value = memberID.value;
             }    
         }, { immediate: true });
         watch([ledgerID], () => {
@@ -311,9 +336,9 @@ export default defineComponent({
             let formData = {
                 company: companyID.value,
                 txn_type: "RCPT",
-                member: memberID.value,
+                member: memberID.value || formFields.value[0].value,
                 user: userID.value,
-                cashbook: ledgerID.value,
+                cashbook: ledgerID.value || formFields.value[6].value,
                 description: formFields.value[7].value,
                 issue_date: formFields.value[1].value,
                 due_date: formFields.value[1].value,
@@ -323,16 +348,17 @@ export default defineComponent({
                 payment_method: formFields.value[3].value,
                 reference_no: formFields.value[4].value,
                 banking_date: formFields.value[2].value,
-                receipt_items: receiptRows.value
+                receipt_items: receiptRows.value,
+                mpesaTxn: mpesaReceipt.value?.mpesa_transaction_id || null
             }
-            
+   
             errors.value = [];
             for(let i=1; i < (formFields.value.length); i++){
                 if(formFields.value[i].value =='' && formFields.value[i].required == true){
                     errors.value.push(formFields.value[i].label);
                 }
             }
-            if(memberID.value == '' || ledgerID.value == ''){
+            if((memberID.value == '' && formFields.value[0].value =='') || (ledgerID.value == '' && formFields.value[6].value=='')){
                 errors.value.push('Error');
             }
             let rcptTotal = 0
@@ -513,19 +539,19 @@ export default defineComponent({
                     type:'search-dropdown', label:"Saving Account", value: '', componentKey: savComponentKey, disabled:'disabled-div',
                     selectOptions: savingsArray, optionSelected: handleSavingAccount, required: false,
                     searchPlaceholder: 'Select Account...', dropdownWidth: '500px', hidden: true,
-                    fetchData: store.dispatch('Saving_Accounts/fetchSavingAccounts', {company:companyID.value,member: memberID.value}), clearSearch: clearSavingAccount
+                    fetchData: store.dispatch('Saving_Accounts/fetchSavingAccounts', {company:companyID.value,member: memberID.value || formFields.value[0].value}), clearSearch: clearSavingAccount
                 },
                 {  
                     type:'search-dropdown', label:"Share Account", value: '', componentKey: shaComponentKey, disabled:'disabled-div',
                     selectOptions: sharesArray, optionSelected: handleShareAccount, required: false,
                     searchPlaceholder: 'Select Account...', dropdownWidth: '500px', hidden: true,
-                    fetchData: store.dispatch('Share_Accounts/fetchShareAccounts', {company:companyID.value,member: memberID.value}), clearSearch: clearShareAccount
+                    fetchData: store.dispatch('Share_Accounts/fetchShareAccounts', {company:companyID.value,member: memberID.value || formFields.value[0].value}), clearSearch: clearShareAccount
                 },
                 {  
                     type:'search-dropdown', label:"Loan Applications", value: '', componentKey: lonComponentKey, disabled:'disabled-div',
                     selectOptions: loansArray, optionSelected: handleLoanApplication, required: false,
                     searchPlaceholder: 'Select Application...', dropdownWidth: '500px', hidden: true,
-                    fetchData: store.dispatch('Loan_Applications/fetchLoanApplications', {company:companyID.value,member: memberID.value}), clearSearch: clearLoanApplication
+                    fetchData: store.dispatch('Loan_Applications/fetchLoanApplications', {company:companyID.value,member: memberID.value || formFields.value[0].value}), clearSearch: clearLoanApplication
                 },
             ]
         };
@@ -780,37 +806,37 @@ export default defineComponent({
                     type:'search-dropdown', label:"Saving Account", value: '', componentKey: savComponentKey, disabled:'disabled-div',
                     selectOptions: savingsArray, optionSelected: handleSavingAccountItem, required: false,
                     searchPlaceholder: 'Select Account...', dropdownWidth: '500px', hidden: true,
-                    fetchData: store.dispatch('Saving_Accounts/fetchSavingAccounts', {company:companyID.value,member: memberID.value}), clearSearch: clearSavingAccountItem
+                    fetchData: store.dispatch('Saving_Accounts/fetchSavingAccounts', {company:companyID.value,member: memberID.value || formFields.value[0].value}), clearSearch: clearSavingAccountItem
                 },
                 {  
                     type:'search-dropdown', label:"Share Account", value: '', componentKey: shaComponentKey, disabled:'disabled-div',
                     selectOptions: sharesArray, optionSelected: handleShareAccountItem, required: false,
                     searchPlaceholder: 'Select Account...', dropdownWidth: '500px', hidden: true,
-                    fetchData: store.dispatch('Share_Accounts/fetchShareAccounts', {company:companyID.value,member: memberID.value}), clearSearch: clearShareAccountItem
+                    fetchData: store.dispatch('Share_Accounts/fetchShareAccounts', {company:companyID.value,member: memberID.value || formFields.value[0].value}), clearSearch: clearShareAccountItem
                 },
                 {  
                     type:'search-dropdown', label:"Loan Applications", value: '', componentKey: lonComponentKey, disabled:'disabled-div',
                     selectOptions: loansArray, optionSelected: handleLoanApplicationItem, required: false,
                     searchPlaceholder: 'Select Application...', dropdownWidth: '500px', hidden: true,
-                    fetchData: store.dispatch('Loan_Applications/fetchLoanApplications', {company:companyID.value,member: memberID.value}), clearSearch: clearLoanApplicationItem
+                    fetchData: store.dispatch('Loan_Applications/fetchLoanApplications', {company:companyID.value,member: memberID.value || formFields.value[0].value}), clearSearch: clearLoanApplicationItem
                 },
                 {  
                     type:'search-dropdown', label:"Loan Applications", value: '', componentKey: lonComponentKey, disabled:'disabled-div',
                     selectOptions: grntLoansArr, optionSelected: handleGuaranteedLoanItem, required: false,
                     searchPlaceholder: 'Select Application...', dropdownWidth: '500px', hidden: true,
-                    fetchData: store.dispatch('Loan_Applications/fetchGuaranteedLoans', {company:companyID.value,member: memberID.value, guaranteed_loan: "Yes"}), clearSearch: clearLoanApplicationItem
+                    fetchData: store.dispatch('Loan_Applications/fetchGuaranteedLoans', {company:companyID.value,member: memberID.value || formFields.value[0].value, guaranteed_loan: "Yes"}), clearSearch: clearLoanApplicationItem
                 },
                 {  
                     type:'search-dropdown', label:"Loan Fees", value: '', componentKey: lonComponentKey, disabled:'disabled-div',
                     selectOptions: loanFeesArray, optionSelected: handleLoanApplicationFeeItem, required: false,
                     searchPlaceholder: 'Select Loan Fees...', dropdownWidth: '500px', hidden: true,
-                    fetchData: store.dispatch('Application_Fees/fetchApplicationFees', {company:companyID.value,member: memberID.value}), clearSearch: clearLoanApplicationFeeItem
+                    fetchData: store.dispatch('Application_Fees/fetchApplicationFees', {company:companyID.value,member: memberID.value || formFields.value[0].value}), clearSearch: clearLoanApplicationFeeItem
                 },
                 {  
                     type:'search-dropdown', label:"Guarantors", value: '', componentKey: grntComponentKey, disabled:'disabled-div',
                     selectOptions: guarantorsArray, optionSelected: handleLoanGuarantor, required: false,
                     searchPlaceholder: 'Select Guarantor...', dropdownWidth: '500px', hidden: true,
-                    fetchData: store.dispatch('Loan_Guarantors/fetchLoanGuarantors', {company:companyID.value,member: memberID.value}), clearSearch: clearLoanGuarantor
+                    fetchData: store.dispatch('Loan_Guarantors/fetchLoanGuarantors', {company:companyID.value,member: memberID.value || formFields.value[0].value}), clearSearch: clearLoanGuarantor
                 },
             ]
         };
@@ -821,7 +847,6 @@ export default defineComponent({
                 hideModalLoader();
             }else{
                 let formData = itemObj.value
-                console.log("THE FORM DATA IS ",formData);
                 await store.dispatch('Members/handleMemberPrepayment',formData);
                 toast.success("Receipt Item Added");
                 formFields.value[7].value += `${itemObj.value['description']},`
@@ -851,6 +876,7 @@ export default defineComponent({
         }
 
         onBeforeMount(()=>{ 
+            fetchMembers();
             updateFormFields();
             outstanding_balance.value = 0;
             ledComponentKey.value += 1;
@@ -860,6 +886,7 @@ export default defineComponent({
         })
         onMounted(()=>{
             fetchAllLedgers();
+            fetchLedgers();
         })
 
         return{

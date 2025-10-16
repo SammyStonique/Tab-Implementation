@@ -334,6 +334,35 @@ const actions = {
       }
     })
   },
+  async previewSaleReceipt({commit,state}, formData){
+    return axios
+    .post(`api/v1/export-direct-sales-thermal-receipt/`, formData, { responseType: 'blob' })
+    .then((response) => {
+      return response;
+    
+    })
+    .catch((error)=>{
+        throw error;
+    })
+  },
+  downloadSaleReceipt({commit,state}, formData){
+    axios
+    .post(`api/v1/export-direct-sales-thermal-receipt/`, formData, { responseType: 'blob' })
+    .then((response) => {
+    if(response.status == 200){
+        const url = window.URL.createObjectURL(new Blob([response.data]));
+        const link = document.createElement('a');
+        link.href = url;
+        link.setAttribute('download', 'Sale Receipt.pdf');
+        document.body.appendChild(link);
+        link.click();
+    }
+    
+    })
+    .catch((error)=>{
+        console.log(error.message);
+    })
+  },
 };
   
 const getters = {

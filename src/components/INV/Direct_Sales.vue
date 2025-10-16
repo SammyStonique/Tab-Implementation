@@ -60,6 +60,9 @@
                 
             </div>
         </PageComponent>
+        <PrintModal v-model:visible="printModalVisible1" :title="printTitle1" >
+            <iframe v-if="pdfUrl" :src="pdfUrl" width="100%" height="100%" type="application/pdf" style="border: none;"></iframe>
+        </PrintModal>
     </div>
 </template>
 
@@ -72,11 +75,12 @@ import { useToast } from "vue-toastification";
 import JournalEntries from "@/components/JournalEntries.vue";
 import SaleItems from "@/components/SaleItems.vue";
 import PrintJS from 'print-js';
+import PrintModal from '@/components/PrintModal.vue';
 
 export default{
     name: 'Direct_Sales',
     components:{
-        PageComponent,JournalEntries,SaleItems,
+        PageComponent,JournalEntries,SaleItems,PrintModal
     },
     setup(){
         const store = useStore();
@@ -108,8 +112,10 @@ export default{
         const showPreviousBtn = ref(false);
         const propModalVisible = ref(false);
         const printModalVisible = ref(false);
+        const printModalVisible1 = ref(false);
         const pdfUrl = ref(null);
         const printTitle = ref('Print Direct Sales List');
+        const printTitle1 = ref('Print Sale Receipt');
         const showModal = ref(false);
         const tableColumns = ref([
             {type: "checkbox"},
@@ -330,8 +336,42 @@ export default{
                 then(()=>{
                     searchSales();
                 })
-            }else if(action == 'view'){
-                console.log("VIEWING TAKING PLACE");
+            }else if(action == 'print'){
+                showLoader();
+                const saleID = row[idField];
+                let formData = {
+                    inventory_sale: saleID,
+                    company: companyID.value
+                }
+                const response = await store.dispatch('Direct_Sales/previewSaleReceipt',formData)
+                if (response && response.status === 200) {
+                    const blob = new Blob([response.data], { type: 'text/html' });
+                    const url = URL.createObjectURL(blob);
+                    pdfUrl.value = url; // reuse your same modal iframe
+                    printModalVisible1.value = true;
+                }
+                 // Request HTML version for thermal print
+                // const response = await axios.post('/api/v1/export-direct-sales-thermal-receipt/',formData,{ responseType: 'text' });
+                
+                // if (response && response.status === 200) {
+                //     // Open the thermal view in a new tab/window for printing
+                //     const newWindow = window.open('', '_blank');
+                //     newWindow.document.open();
+                //     newWindow.document.write(response.data);
+                //     newWindow.document.close();
+                // }
+                hideLoader();
+            }else if(action == 'download'){
+                showLoader();
+                const saleID = row[idField];
+                let formData = {
+                    inventory_sale: saleID,
+                    company: companyID.value
+                }
+                await store.dispatch('Direct_Sales/downloadClientReceipt',formData).
+                then(()=>{
+                    hideLoader();
+                })
             }
         };
         const handleShowDetails = async(row) =>{
@@ -419,8 +459,8 @@ export default{
             
         })
         return{
-            currentPage,showTotals,searchSales,resetFilters, addButtonLabel, searchFilters, tableColumns, salesList,
-            propResults, propArrLen, propCount, pageCount, showNextBtn, showPreviousBtn,printModalVisible,pdfUrl, printTitle,
+            currentPage,showTotals,searchSales,resetFilters, addButtonLabel, searchFilters, tableColumns, salesList,propResults, propArrLen, 
+            propCount, pageCount, showNextBtn, showPreviousBtn,printModalVisible,printModalVisible1,pdfUrl, printTitle,printTitle1,
             loadPrev, loadNext, firstPage, lastPage, idField, actions, handleActionClick, propModalVisible, closeModal,
             submitButtonLabel, showModal, addNewSale, showLoader, loader, hideLoader, removeSale, removeSales,
             handleSelectionChange,addingRight,rightsModule,printSalesList,selectedValue,selectSearchQuantity,showDetails,

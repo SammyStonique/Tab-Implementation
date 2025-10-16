@@ -105,6 +105,7 @@ export default{
             {label: "Receipt#", key:"receipt_no", textColor:"textColor"},
             {label: "Offl.", key:"offline", textColor:"textColor"},
             {label: "Corr.", key:"corrected_txn", textColor:"textColor"},
+            {label: "Corr. Ref", key:"corrected_ref_no", textColor:"textColor"},
             {label: "Corrected By", key:"corrected_by", textColor:"textColor"},
             {label: "Error", key:"posting_error", textColor:"textColor"},
         ])
@@ -112,6 +113,7 @@ export default{
         const showActions = ref(true);
         const actions = ref([
             {name: 'correct-txn', icon: 'fa fa-check-circle', title: 'Correct Mpesa Txn', rightName: 'Correct Mpesa Transactions'},
+            {name: 'add-receipt', icon: 'fa fa-receipt', title: 'Add Receipt', rightName: 'Correct Mpesa Transactions'},
             {name: 'delete', icon: 'fa fa-trash', title: 'Delete Item'},
         ])
         const date_from_search = computed({
@@ -156,7 +158,7 @@ export default{
         const formFields = ref([]);
         const updateFormFields = () => {
             formFields.value = [
-                { type: 'text', name: 'bill_ref',label: "Reference Code", value: computedBillRef || '', required: true },
+                { type: 'text', name: 'bill_ref',label: "Reference Code", value: computedBillRef.value || '', required: true },
                 { type: 'date', name: 'recording_date',label: "Txn Date", value: formatDate(current_date), required: false },
             ]
         };
@@ -252,12 +254,22 @@ export default{
                 shortCode.value = row['shortcode'];
                 const posted = row['posted'];
                 if(posted == "Yes"){
-                    toast.error("Receipt Already Posted!")
+                    toast.error("Transaction Already Posted!")
                 }else{
                     flex_basis.value = '1/2';
                     flex_basis_percentage.value = '50';
                     updateFormFields();
                     appModalVisible.value = true;
+                }
+            }
+            else if(action == 'add-receipt'){
+                const posted = row['posted'];
+                if(posted == "Yes"){
+                    toast.error("Transaction Already Posted!")
+                }else{
+                    store.commit('pageTab/ADD_PAGE', {'MMS':'Receipt_Details'});
+                    await store.dispatch('Members/updateState', {mpesaReceipt: row,receiptItems: [],outstandingBalance: 0});
+                    store.state.pageTab.mmsActiveTab = 'Receipt_Details'; 
                 }
             }
         };
@@ -275,6 +287,7 @@ export default{
             .then((response)=>{
                 if(response.data.msg == "Success"){
                     toast.success("Success")
+                    appModalVisible.value = false;
                     handleReset();
                 }else if(response.data.msg == "Exists"){
                     toast.error("Duplicate Reference No")

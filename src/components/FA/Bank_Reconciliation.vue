@@ -12,9 +12,9 @@
                                 <input disabled=true v-model="field.value1" :name="field.name" type="number" pattern="^\d+(\.\d{0,2})?$" oninput="this.value = this.value.replace(/[^0-9.]/g, '').replace(/(\.\d{2})\d+/g, '$1')" :class="[`bg-slate-50 rounded pl-3 border border-gray-400 text-sm w-36`]"/>
                             </div>
                         </div>
-                        <div class="border border-slate-200 rounded relative py-1.5 mt-3 px-2 min-h-[300px]">
+                        <div class="border border-slate-200 rounded relative py-1.5 mt-3 px-2 min-h-[400px]">
                             <h1 class="font-bold absolute top-[-13px] left-5 bg-white">Cashbook Entries</h1>  
-                            <div class="mt-1 max-h-[260px] overflow-y-auto">  
+                            <div class="mt-1 max-h-[380px] overflow-y-auto">  
                                 <div class="flex gap-x-2 mb-2">
                                     <button  @click="markAllAsReconciled" :class="['rounded cursor-pointer text-xs px-2 py-1 font-medium border transition','bg-green-100 text-green-600 border-green-300 hover:bg-green-200']">
                                         <i class="fas fa-check-double text-green-500 mr-2 text-xs"></i> Mark All
@@ -46,7 +46,7 @@
                                         <input type="number" class="rounded pl-3 border-2 border-gray-200 text-sm w-full" name="name" id="" placeholder="Money Out...." v-model="money_out_search">
                                     </div>
                                     <div class="basis-1/8 mr-3">
-                                        <input type="number" class="rounded pl-3 border-2 border-gray-200 text-sm w-full" name="name" id="" placeholder="Reconciled...." v-model="reconciled_search">
+                                        <input type="text" class="rounded pl-3 border-2 border-gray-200 text-sm w-full" name="name" id="" placeholder="Reconciled...." v-model="reconciled_search">
                                     </div>
                                 </div>              
                                 <DynamicTable :key="tableKey" :showTotals="showTotals" :columns="cashbookColumns" :rows="filterCbkRows" :showActions="showActions" :actions="actions" :rightsModule="rightsModule" @row-db-click="markAsReconciled"  @action-click="deleteJournalLine"/>
@@ -183,8 +183,9 @@ export default defineComponent({
                 const txnNo = (perm.journal_no?.toLowerCase() || '').includes(txn_no_search.value.toLowerCase());
                 const refNo = (perm.reference_no?.toLowerCase() || '').includes(ref_no_search.value.toLowerCase());
                 const desc = (perm.description?.toLowerCase() || '').includes(description_search.value.toLowerCase());
-                const moneyIn = money_in_search.value ? Number(perm.formatted_debit_amount) === Number(money_in_search.value): true;
-                const moneyOut = money_out_search.value ? Number(perm.formatted_credit_amount) === Number(money_out_search.value): true;
+                const parseAmount = val => Number((val || '').toString().replace(/,/g, ''));
+                const moneyIn = money_in_search.value ? parseAmount(perm.formatted_debit_amount) === parseAmount(money_in_search.value): true;
+                const moneyOut = money_out_search.value ? parseAmount(perm.formatted_credit_amount) === parseAmount(money_out_search.value): true;
                 const reconciled = perm.reconciled.toLowerCase().includes(reconciled_search.value.toLowerCase())
 
                 return txnNo && refNo && desc && moneyIn && moneyOut && reconciled;
@@ -196,13 +197,14 @@ export default defineComponent({
         const excelTxnsList = ref([]);
 
         const cashbookColumns = ref([
-            {label: "Date", key:"txn_date", type: "text"},
-            {label: "Bank. Date", key:"banking_date", type: "text"},
-            {label: "Txn No", key:"journal_no", type: "text"},
-            {label: "Ref No", key:"reference_no", type: "text"},
-            {label: "Description", key:"description", type: "text", minWidth:"500px", maxWidth: "500px"},
-            {label: "Money In", key: "formatted_debit_amount", type: "number"},
-            {label: "Money Out", key: "formatted_credit_amount", type: "number"},
+            {label: "Date", key:"txn_date", type: "text", minWidth:"50px",},
+            {label: "Bank. Date", key:"banking_date", type: "text", minWidth:"50px"},
+            {label: "Txn No", key:"journal_no", type: "text", minWidth:"50px"},
+            {label: "Ref No", key:"reference_no", type: "text", minWidth:"50px"},
+            // {label: "Description", key:"description", type: "text", minWidth:"500px", maxWidth: "500px"},
+            {label: "Description", key:"description", type: "text"},
+            {label: "Money In", key: "formatted_debit_amount", type: "number", minWidth:"50px"},
+            {label: "Money Out", key: "formatted_credit_amount", type: "number", minWidth:"50px"},
             {label: "Reconciled", key: "reconciled", type: "text"},
         ]);
         const bankColumns = ref([
@@ -826,7 +828,7 @@ export default defineComponent({
                     "reconciling_item_id": null,
                 } 
                 await store.dispatch('Ledgers/addQuickReconJournal', obj2); 
-                markAsReconciled(obj1) 
+                markAsReconciled(obj2) 
             }
            hideModalLoader1();  
            reconModalVisible.value = false;
