@@ -169,6 +169,7 @@ export default{
             {name: 'edit', icon: 'fa fa-edit', title: 'Edit Member', rightName: 'Editing Members'},
             {name: 'view', icon: 'fa fa-file-pdf-o', title: 'View Profile', rightName: 'Viewing Member Profile'},
             {name: 'transfer', icon: 'fa fa-exchange', title: 'Change Member Status', rightName: 'Changing Member Status'},
+            {name: 'invite', icon: 'fa fa-paper-plane', title: 'Invite Member', rightName: 'Inviting Members To Portal'},
             {name: 'delete', icon: 'fa fa-trash', title: 'Delete Member', rightName: 'Deleting Members'},
         ])
         const companyID = computed(()=> store.state.userData.company_id);
@@ -325,6 +326,62 @@ export default{
             }else{
                 Swal.fire(`Member Status has not been changed!`);
                 hideTransModalLoader();
+            }
+            })     
+        };
+        const memberPortalInvitation = async(member_id) =>{
+            let formData = {
+                member: member_id,
+                company: companyID.value
+            }
+            Swal.fire({
+            title: "Are you sure?",
+            text: `Do you wish to Invite To Portal?`,
+            type: 'warning',
+            showCloseButton: true,
+            showCancelButton: true,
+            confirmButtonText: 'Yes Invite Member!',
+            cancelButtonText: 'Cancel!',
+            customClass: {
+                confirmButton: 'swal2-confirm-custom',
+                cancelButton: 'swal2-cancel-custom',
+            },
+            showLoaderOnConfirm: true,
+            }).then((result) => {
+            if (result.value) {
+                axios.post(`api/v1/invite-member-portal/`,formData)
+                .then((response)=>{
+                if(response.data.msg == "Success"){
+                    Swal.fire("Member invited succesfully!", {
+                        icon: "success",
+                    }); 
+                    searchMembers();
+                }else if(response.data.msg == "Exists"){
+                    Swal.fire("Member Already Exists!", {
+                        icon: "warning",
+                    }); 
+                    searchMembers();
+                }else if(response.data.msg == "Failed"){
+                    Swal.fire("Invalid Email Address!", {
+                        icon: "warning",
+                    }); 
+                    searchMembers();
+                }else{
+                    Swal.fire({
+                    title: "Error Inviting Member",
+                    icon: "warning",
+                    });
+                }                   
+                })
+                .catch((error)=>{
+                    console.log(error.message);
+                    Swal.fire({
+                        title: error.message,
+                        icon: "warning",
+                    });
+                })
+            }else{
+                Swal.fire(`Member has not been invited!`);
             }
             })     
         };
@@ -511,6 +568,9 @@ export default{
                 hideTransModalLoader();
                 memberID.value = row['member_id'];
                 transModalVisible.value = true;
+            }else if(action == 'invite'){
+                let member_id = row['member_id'];
+                memberPortalInvitation(member_id);
             }
         };
         const dropdownOptions = ref([

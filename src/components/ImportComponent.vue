@@ -35,6 +35,37 @@
                             />
                         </div> 
                     </div> 
+                    <div class="flex flex-wrap gap-x-2 w-full">
+                        <div v-for="(field, index) in fields" :key="index" :class="`filter items-end flex-1 basis-${flex_basis} max-w-[calc(${flex_basis_percentage}%-1.5rem)] p-1`">
+                            <div v-if="field.type === 'text'" class="text-left text-sm" :hidden="field.hidden">
+                                <div v-if="field.required">
+                                    <label for="">{{ field.label }} : <em>*</em></label><br />
+                                </div>
+                                <div v-else>
+                                    <label for="">{{ field.label }}:</label><br />
+                                </div>
+                                <input v-model="field.value" :disabled="field.disabled" :name="field.name" type="text" :class="[`bg-slate-50 rounded pl-3 border border-gray-400 text-sm w-full`,showValidation && field.required && !field.value ? 'zigzag-border' : '']" :placeholder="field.placeholder"/>
+                            </div>
+                            <div v-if="field.type === 'number'" class="text-left text-sm" :hidden="field.hidden">
+                                <div v-if="field.required">
+                                    <label for="">{{ field.label }} : <em>*</em></label><br />
+                                </div>
+                                <div v-else>
+                                    <label for="">{{ field.label }}:</label><br />
+                                </div>
+                                <input v-model="field.value" :disabled="field.disabled" :name="field.name" type="number" pattern="^\d+(\.\d{0,2})?$" oninput="this.value = this.value.replace(/[^0-9.]/g, '').replace(/(\.\d{2})\d+/g, '$1')" :class="[`bg-slate-50 rounded pl-3 border border-gray-400 text-sm`,field.inputWidth ? `w-${field.inputWidth}` : 'w-full',showValidation && field.required && !field.value ? 'zigzag-border' : '']" :placeholder="field.placeholder"/>
+                            </div>
+                            <div v-if="field.type === 'date'" class="mr-2 text-left text-sm" :hidden="field.hidden">
+                            <div v-if="field.required">
+                                <label for="">{{ field.label }} : <em>*</em></label><br />
+                            </div>
+                            <div v-else>
+                                <label for="">{{ field.label }}:</label><br />
+                            </div>
+                            <input v-model="field.value" :name="field.name" type="date" :disabled="field.disabled" :min="field.minDate" :max="field.maxDate" :class="[`bg-slate-50 rounded pl-3 border border-gray-400 text-sm w-full`,showValidation && field.required && !field.value ? 'zigzag-border' : '']" :placeholder="field.placeholder"/>
+                            </div>
+                        </div>
+                    </div>
                                      
                 </div>
                 <div class="mt-2 min-h-[50vh]">
@@ -117,6 +148,11 @@ export default defineComponent({
             type: String,
             required: false,
             default: ''
+        },
+        fields:{
+          type: Array,
+          required: false,
+          default : []
         },
     },
     setup(props,{emit}){

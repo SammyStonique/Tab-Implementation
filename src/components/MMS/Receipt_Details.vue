@@ -351,7 +351,7 @@ export default defineComponent({
                 receipt_items: receiptRows.value,
                 mpesaTxn: mpesaReceipt.value?.mpesa_transaction_id || null
             }
-   
+            console.log("THE FORM DATA IS ",formData)
             errors.value = [];
             for(let i=1; i < (formFields.value.length); i++){
                 if(formFields.value[i].value =='' && formFields.value[i].required == true){

@@ -232,6 +232,14 @@
                                 </select>
                                 <button type="button" class="absolute ml-2 rounded px-2 bg-green-500 text-white" @click="saveDefaultSetting('Accounts','Merge Loans Ledgers in Reports',loansOption,loansOption)"><i class="fa fa-check"></i></button>
                             </div>
+                            <div class="basis-1/4 relative mr-12">
+                                <label for="">Auto Send SMS Receipt:<em>*</em></label><br />
+                                <select  v-model="autoSMSOption" name="" class="bg-slate-50 rounded border border-gray-400 text-sm pl-2 pt-2 w-full">
+                                    <option value="Yes">Yes</option>
+                                    <option value="No">No</option>
+                                </select>
+                                <button type="button" class="absolute ml-2 rounded px-2 bg-green-500 text-white" @click="saveDefaultSetting('Accounts','Auto Send SMS Receipt',autoSMSOption,autoSMSOption)"><i class="fa fa-check"></i></button>
+                            </div>
                         </div>
                         <div class="flex mb-3">
                             <div class="basis-1/4 relative mr-12">
@@ -688,6 +696,7 @@ export default defineComponent({
         const sharesOption = ref("");
         const savingsOption = ref("");
         const ledgerBalances = ref("");
+        const autoSMSOption = ref("");
 
         const mmsAutoPenalizeOption = ref("");
         const mmsStrictGuarantorshipOption = ref("");
@@ -999,8 +1008,10 @@ export default defineComponent({
                         sharesOption.value = response.data[i].setting_value_name;
                     }else if(response.data[i].setting_name === 'Merge Savings Ledgers in Reports'){
                         savingsOption.value = response.data[i].setting_value_name;
-                    }else if(response.data[i].setting_name === 'Ledger Balances Posting A/c'){
+                    }else if(response.data[i].setting_name === 'Ledger Balances Posting A/c'){ 
                         ledgerBalances.value = response.data[i].setting_value_name;
+                    }else if(response.data[i].setting_name === 'Auto Send SMS Receipt'){
+                        autoSMSOption.value = response.data[i].setting_value_name;
                     }
 
                     
@@ -1131,7 +1142,7 @@ export default defineComponent({
             dropdownWidth,incomePlaceholder, ledgerArr, incomeLedgerArr, expenseLedgerArr, liabilityLedgerArr, cashbookLedgerArr, fetchIncomeLedgers, fetchExpenseLedgers,
             fetchCashbookLedgers, fetchLiabilityLedgers, rentalIncome, rentalSecurityDeposit, rentalLeaseIncome, rentalPenaltyIncome,fetchLedgers,loansOption, sharesOption, savingsOption,
             ledgerID,ledgerName, handleSelectedLedger, clearSelectedLedger, saveDefaultSetting, removeDefaultSetting, tenantCodePrefix, tenantCodeCounter,pmsAutoInvoiceOption,tenantInvoiceDay,
-            patientsOption,duplicatesOption, debtorsOption, vendorsOption, tenantsOption,ledgerBalances, fetchRetailOutlets,handleSelectedOutlet, clearSelectedOutlet, fetchOutletCounters,outletID,outletName,counterID,counterName,
+            patientsOption,duplicatesOption, debtorsOption, vendorsOption, tenantsOption,ledgerBalances,autoSMSOption, fetchRetailOutlets,handleSelectedOutlet, clearSelectedOutlet, fetchOutletCounters,outletID,outletName,counterID,counterName,
             channelID,channelName,handleSelectedCounter, clearSelectedCounter, fetchCounterChannels,handleSelectedChannel, clearSelectedChannel,outletCounterArr,retailOutletArr,counterChannelArr,
             retailOutlet, outletCounter, counterChannel, salesIncome, invTakeOn, stockControl, stockType,directSaleOrder,updateBatchPrice,prodControl,defaultTimeout,
             mmsAutoPenalizeOption,mmsStrictGuarantorshipOption,mmsBalReminderOption,penaltyAutoTime,

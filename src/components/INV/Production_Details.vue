@@ -322,7 +322,10 @@ export default defineComponent({
                         mainComponentKey.value += 1;
                         ledComponentKey.value += 1;
                     }else if(response.data.msg == "Unavailable"){
-                        toast.error('Ingredient(s) Not In Stock');
+                        toast.error(`${response.data.item} Not In Stock`);
+                        hideLoader();
+                    }else if(response.data.msg == "Deficit"){
+                        toast.error(`${response.data.item} Stock Deficit`);
                         hideLoader();
                     }else {
                         toast.error('An error occurred while creating Batch.');

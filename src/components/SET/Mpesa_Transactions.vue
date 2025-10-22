@@ -8,8 +8,9 @@
         @resetFilters="resetFilters"
         :dropdownOptions="dropdownOptions"
         @handleDynamicOption="handleDynamicOption"
-        @removeItem=""
-        @removeSelectedItems=""
+        @removeItem="removeTransaction"
+        @removeSelectedItems="removeTransactions"
+        :removingRight="removingRight"
         @printList="printTransactionsList"
         :columns="tableColumns"
         :rows="txnList"
@@ -28,6 +29,8 @@
         @lastPage="lastPage"
         :showNextBtn="showNextBtn"
         :showPreviousBtn="showPreviousBtn"
+        :selectedValue="selectedValue"
+        @selectSearchQuantity="selectSearchQuantity"
     />
     <MovableModal v-model:visible="appModalVisible" :title="title" :modal_top="modal_top" :modal_left="modal_left" :modal_width="modal_width"
         :loader="modal_loader" @showLoader="showModalLoader" @hideLoader="hideModalLoader" @closeModal="closeModal"
@@ -66,6 +69,7 @@ export default{
         const showAddButton = ref(false);
         const pageComponentKey = ref(0);
         const title = ref('Correct & Post Txn');
+        const removingRight = ref('Deleting Mpesa Transactions');
         const companyID = computed(()=> store.state.userData.company_id);
         const userID = computed(()=> store.state.userData.user_id);
         const txnID = ref(null);
@@ -81,6 +85,7 @@ export default{
         const propCount = ref(0);
         const pageCount = ref(0);
         const currentPage = ref(1);
+        const selectedValue = ref(50);
         const showNextBtn = ref(false);
         const showPreviousBtn = ref(false);
         const flex_basis = ref('');
@@ -114,32 +119,16 @@ export default{
         const actions = ref([
             {name: 'correct-txn', icon: 'fa fa-check-circle', title: 'Correct Mpesa Txn', rightName: 'Correct Mpesa Transactions'},
             {name: 'add-receipt', icon: 'fa fa-receipt', title: 'Add Receipt', rightName: 'Correct Mpesa Transactions'},
-            {name: 'delete', icon: 'fa fa-trash', title: 'Delete Item'},
+            {name: 'delete', icon: 'fa fa-trash', title: 'Delete Item', rightName: 'Deleting Mpesa Transactions'},
         ])
-        const date_from_search = computed({
-            get: () => store.state.Mpesa_Transactions.date_from_search,
-            set: (value) => store.commit('Mpesa_Transactions/SET_SEARCH_FILTERS', {"date_from_search":value}),
-        });
-        const date_to_search = computed({
-            get: () => store.state.Mpesa_Transactions.date_to_search,
-            set: (value) => store.commit('Mpesa_Transactions/SET_SEARCH_FILTERS', {"date_to_search":value}),
-        });
-        const posted_status_search = computed({
-            get: () => store.state.Mpesa_Transactions.posted_status_search,
-            set: (value) => store.commit('Mpesa_Transactions/SET_SEARCH_FILTERS', {"posted_status_search":value}),
-        });
-        const reference_no_search = computed({
-            get: () => store.state.Mpesa_Transactions.reference_no_search,
-            set: (value) => store.commit('Mpesa_Transactions/SET_SEARCH_FILTERS', {"reference_no_search":value}),
-        });
-        const amount_search = computed({
-            get: () => store.state.Mpesa_Transactions.amount_search,
-            set: (value) => store.commit('Mpesa_Transactions/SET_SEARCH_FILTERS', {"amount_search":value}),
-        });
-        const phone_number_search = computed({
-            get: () => store.state.Mpesa_Transactions.phone_number_search,
-            set: (value) => store.commit('Mpesa_Transactions/SET_SEARCH_FILTERS', {"phone_number_search":value}),
-        });
+        const date_from_search = ref("");
+        const date_to_search = ref("");
+        const posted_status_search = ref("");
+        const reference_no_search = ref("");
+        const amount_search = ref("");
+        const phone_number_search = ref("");
+        const offline_search = ref("");
+        const corrected_search = ref("");
 
         const searchFilters = ref([
             {type:'date', placeholder:"From Date...", value: date_from_search, width:30,},
@@ -148,7 +137,15 @@ export default{
             {type:'text', placeholder:"Amount...", value: amount_search, width:44,},
             {type:'text', placeholder:"Phone No...", value: phone_number_search, width:44,},
             {
-                type:'dropdown', placeholder:"Posted", value: posted_status_search, width:48,
+                type:'dropdown', placeholder:"Posted", value: posted_status_search, width:36,
+                options: [{text:'Yes',value:'Yes'},{text:'No',value:'No'}]
+            },
+            {
+                type:'dropdown', placeholder:"Offline", value: offline_search, width:36,
+                options: [{text:'Yes',value:'Yes'},{text:'No',value:'No'}]
+            },
+            {
+                type:'dropdown', placeholder:"Corrected", value: corrected_search, width:36,
                 options: [{text:'Yes',value:'Yes'},{text:'No',value:'No'}]
             },
         ]);
@@ -166,7 +163,64 @@ export default{
             txnID.value = null;
             billRef.value = "";
             shortCode.value = "";
+        };
+        const removeTransaction = async() =>{
+            if(selectedIds.value.length == 1){
+                let formData = {
+                    company: companyID.value,
+                    mpesa_transaction: selectedIds.value
+                }
+                try{
+                    const response = await axios.post('api/v1/delete-mpesa-transaction/', formData)
+                    if(response && response.data.msg == "Success"){
+                        toast.success("Success");
+                        searchTransactions();
+                    }else if(response && response.data.msg == "Failed"){
+                        toast.error("Failed To Remove Transaction");
+                        searchTransactions();
+                    }
+                }
+                catch(error){
+                    console.error(error.message);
+                    toast.error('Failed to remove Transaction: ' + error.message);
+                }
+                finally{
+                    selectedIds.value = [];
+                }
+            }else if(selectedIds.value.length > 1){
+                toast.error("You have selected more than 1 Transaction") 
+            }else{
+                toast.error("Please Select A Transaction To Remove")
+            }
         }
+        const removeTransactions = async() =>{
+            if(selectedIds.value.length){
+                let formData = {
+                    company: companyID.value,
+                    mpesa_transaction: selectedIds.value
+                }
+                try{
+                    const response = await axios.post('api/v1/delete-mpesa-transaction/', formData)
+                    if(response && response.data.msg == "Success"){
+                        toast.success("Success");
+                        searchTransactions();
+                    }else if(response && response.data.msg == "Failed"){
+                        toast.error("Failed To Remove Transaction");
+                        searchTransactions();
+                    }
+                }
+                catch(error){
+                    console.error(error.message);
+                    toast.error('Failed to remove Transaction: ' + error.message);
+                }
+                finally{
+                    selectedIds.value = [];
+
+                }
+            }else{
+                toast.error("Please Select A Transaction To Remove")
+            }
+        };
         const showModalLoader = () =>{
             modal_loader.value = "block";
         }
@@ -182,6 +236,7 @@ export default{
         const searchTransactions = () =>{
             showLoader();
             showNextBtn.value = false;
+            selectedIds.value = [];
             showPreviousBtn.value = false;
             let formData = {
                 date_from: date_from_search.value,
@@ -190,7 +245,10 @@ export default{
                 phone_number: phone_number_search.value,
                 reference_no: reference_no_search.value,
                 amount: amount_search.value,
-                company: companyID.value
+                corrected: corrected_search.value,
+                offline: offline_search.value,
+                company: companyID.value,
+                page_size: selectedValue.value,
             } 
             axios
             .post(`api/v1/mpesa-transactions-search/?page=${currentPage.value}`,formData)
@@ -199,7 +257,7 @@ export default{
                 propResults.value = response.data;
                 propArrLen.value = txnList.value.length;
                 propCount.value = propResults.value.count;
-                pageCount.value = Math.ceil(propCount.value / 50);
+                pageCount.value = Math.ceil(propCount.value / selectedValue.value);
                 if(response.data.next){
                     showNextBtn.value = true;
                 }
@@ -240,8 +298,21 @@ export default{
             currentPage.value = pageCount.value;
             searchTransactions();
         }
+        const selectSearchQuantity = (newValue) =>{
+            selectedValue.value = newValue;
+            searchTransactions(selectedValue.value);
+        };
         const resetFilters = () =>{
-            store.commit('Mpesa_Transactions/RESET_SEARCH_FILTERS')
+            currentPage.value = 1;
+            selectedValue.value = 50;
+            date_from_search.value = "";
+            date_to_search.value = "";
+            posted_status_search.value = "";
+            phone_number_search.value = "";
+            reference_no_search.value = "";
+            amount_search.value = "";
+            corrected_search.value = "";
+            offline_search.value = "";
             searchTransactions();
         }
         const closeModal = () =>{
@@ -307,11 +378,12 @@ export default{
             })
         };
         const dropdownOptions = ref([
-            {label: 'Correct & Post Txn', action: 'correct-txn', icon: 'fa-check-circle', colorClass: 'text-green-600', rightName: 'Correct Mpesa Transactions'}, 
+            {label: 'Offline Upload', action: 'offline-upload', icon: 'fa-cloud-upload', colorClass: 'text-blue-600', rightName: 'Correct Mpesa Transactions'}, 
         ]);
         const handleDynamicOption = async(option) =>{
-            if( option == 'correct-txn'){
-                            
+            if( option == 'offline-upload'){
+                store.commit('pageTab/ADD_PAGE', {'MMS':'Mpesa_Offline_Uploads'});
+                store.state.pageTab.mmsActiveTab = 'Mpesa_Offline_Uploads';        
             }
         };
         const printTransactionsList = () =>{
@@ -348,10 +420,11 @@ export default{
         })
         return{
             showAddButton,showActions,showTotals,title, searchTransactions, idField, selectedIds, actions, txnList, propArrLen,propCount,propResults,appModalVisible,
-            searchFilters,tableColumns,resetFilters,loadPrev,loadNext,firstPage,lastPage,formFields,handleReset,
+            searchFilters,tableColumns,resetFilters,loadPrev,loadNext,firstPage,lastPage,formFields,handleReset,selectSearchQuantity,selectedValue,
             showNextBtn,showPreviousBtn,displayButtons,dropdownOptions,handleDynamicOption,handleActionClick,correctTransaction,
             modal_top, modal_left, modal_width, showLoader, loader, hideLoader, modal_loader, showModalLoader, hideModalLoader,
-            closeModal, handleSelectionChange, pageComponentKey, flex_basis, flex_basis_percentage,printTransactionsList
+            closeModal, handleSelectionChange, pageComponentKey, flex_basis, flex_basis_percentage,printTransactionsList,
+            removingRight,removeTransaction,removeTransactions
         }
     }
 }

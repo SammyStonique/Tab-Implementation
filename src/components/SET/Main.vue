@@ -55,8 +55,8 @@ import Email_Templates from '@/components/SET/Email_Templates.vue';
 import Design_Email_Template from '@/components/SET/Design_Email_Template.vue';
 import Sent_SMS from '@/components/SET/Sent_SMS.vue';
 import Sent_Emails from '@/components/SET/Sent_Emails.vue';
-
-
+import Mpesa_Offline_Uploads from '@/components/SET/Mpesa_Offline_Uploads.vue';
+import Import_Mpesa_Txns from '@/components/SET/Import_Mpesa_Txns.vue';
 
 export default{
     components:{
@@ -65,7 +65,8 @@ export default{
         PagesTab,
         Dashboard,Companies,Company_Details,Default_Settings,Company_Info,Departments,Branches,Users,System_Users,Import_Permissions,
         User_Details,User_Rights,SMS_Integrations,Email_Integrations,Mpesa_Authentication,Mpesa_Endpoints,Mpesa_Setup_Details,Mpesa_Transactions,
-        Import_Departments,Banks,SMS_Templates,Design_SMS_Template,Email_Templates,Design_Email_Template,Sent_SMS,Sent_Emails,
+        Import_Departments,Banks,SMS_Templates,Design_SMS_Template,Email_Templates,Design_Email_Template,Sent_SMS,Sent_Emails,Mpesa_Offline_Uploads,
+        Import_Mpesa_Txns
     },
     props: {
         title: {

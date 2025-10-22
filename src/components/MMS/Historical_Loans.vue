@@ -177,7 +177,7 @@ export default{
         const name_search = ref('');
         const loan_number_search = ref("");
         const member_number_search = ref("");
-        const approval_status_search = ref("");
+        const loan_status_search = ref("");
         const penalty_status_search = ref("");
         const disbursed_status_search = ref("");
         const repayment_status_search = ref("");
@@ -200,7 +200,7 @@ export default{
             {type:'date', placeholder:"From Date...", value: from_date_search, width:32, title: "Date From Search"},
             {type:'date', placeholder:"To Date...", value: to_date_search, width:32, title: "Date To Search"},
             {
-                type:'dropdown', placeholder:"Status..", value: approval_status_search, width:32,
+                type:'dropdown', placeholder:"Status..", value: loan_status_search, width:32,
                 options: [{text:'Active',value:'Active'},{text:'Defaulted',value:'Defaulted'},{text:'Cleared',value:'Cleared'}]
             },
             {
@@ -240,14 +240,29 @@ export default{
                 formFields.value[i].value = '';
             }
         };
+        const displayRecalculationOptions = (value) =>{
+            if(value == "Due Date"){
+                formFields1.value[1].hidden = false;
+                formFields1.value[2].hidden = false;
+                formFields1.value[3].hidden = false;
+                formFields1.value[4].hidden = true;
+            }else if(value == "Loan Amount"){
+                formFields1.value[1].hidden = true;
+                formFields1.value[2].hidden = true;
+                formFields1.value[3].hidden = true;
+                formFields1.value[4].hidden = false;
+            }
+        }
         const formFields1 = ref([]);
         const updateFormFields1 = () => {
             formFields1.value = [
-                { type: 'number', name: 'day',label: "New Repayment Day", value: 1, required: true },
-                { type: 'text', name: 'installment_from',label: "Installment From", value: 1, required: true },
-                { type: 'text', name: 'installment_to',label: "Installment To", value: 1, required: true },
+                { type: 'dropdown', name: 'recalc_mode',label: "Recalculate On", value: '', placeholder: "", required: true, options: [{ text: 'Due Date', value: 'Due Date' }, { text: 'Loan Amount', value: 'Loan Amount' }], method: displayRecalculationOptions },
+                { type: 'number', name: 'day',label: "New Repayment Day", value: 1, required: true, hidden: true },
+                { type: 'text', name: 'installment_from',label: "Installment From", value: 1, required: true, hidden: true },
+                { type: 'text', name: 'installment_to',label: "Installment To", value: 1, required: true, hidden: true },
+                { type: 'number', name: 'loan_amount',label: "Loan Amount", value: 0, required: false, hidden: true },
                 { type: 'date', name: 'new_repayment_date',label: "New Date", value: '', required: false },
-                { type: 'text-area', name: 'loan_remarks',label: "Loan Remarks", value: null , required: false,textarea_rows: '3', textarea_cols: '56'}
+                { type: 'text-area', name: 'loan_remarks',label: "Loan Remarks", value: null, required: false,textarea_rows: '3', textarea_cols: '56'}
             ]
         };
         const handleReset1 = () =>{
@@ -263,18 +278,20 @@ export default{
         };
         const updateRepaymentDate = async() =>{
             showModalLoader1();
-            if(formFields1.value[2].value < formFields1.value[1].value){
+            if(formFields1.value[3].value < formFields1.value[2].value){
                 toast.error("Installment To Cannot Be Less Than Installment From");
                 hideModalLoader1();
                 return;
             }
             let formData = {
                 loan_application: applicationID.value,
-                new_day: formFields1.value[0].value,
-                installment_from: formFields1.value[1].value,
-                installment_to: formFields1.value[2].value,
-                new_repayment_date: formFields1.value[3].value,
-                loan_remarks: formFields1.value[4].value || null,
+                recalculation_mode: formFields1.value[0].value,
+                new_day: formFields1.value[1].value,
+                installment_from: formFields1.value[2].value,
+                installment_to: formFields1.value[3].value,
+                loan_balance: formFields1.value[4].value,
+                new_repayment_date: formFields1.value[5].value,
+                loan_remarks: formFields1.value[6].value || null,
                 user: userID.value,
                 company: companyID.value
             }
@@ -456,7 +473,8 @@ export default{
                 member_name: name_search.value,
                 loan_number: loan_number_search.value,
                 member_number: member_number_search.value,
-                approval_status: approval_status_search.value,
+                approval_status: "Approved",
+                loan_status: loan_status_search.value,
                 penalty_status: penalty_status_search.value,
                 disbursed: disbursed_status_search.value,
                 repayment_status: repayment_status_search.value,
@@ -500,7 +518,7 @@ export default{
             name_search.value = "";
             member_number_search.value = "";
             loan_number_search.value = "";
-            approval_status_search.value = "";
+            loan_status_search.value = "";
             penalty_status_search.value = "";
             disbursed_status_search.value = "";
             repayment_status_search.value = "";
@@ -869,7 +887,8 @@ export default{
                 member_name: name_search.value,
                 loan_number: loan_number_search.value,
                 member_number: member_number_search.value,
-                approval_status: approval_status_search.value,
+                approval_status: "Approved",
+                loan_status: loan_status_search.value,
                 disbursed: disbursed_status_search.value,
                 from_date: from_date_search.value,
                 to_date: to_date_search.value,
