@@ -317,6 +317,9 @@ export default defineComponent({
         const fetchSecurities = async() =>{
             await store.dispatch('Security_Types/fetchSecurityTypes', {company:companyID.value})
         };
+        const fetchMembers = async() =>{
+            await store.dispatch('Members/fetchMembers', {company:companyID.value})
+        }
 
         const checkMemberEligiility = (value) =>{
             if(productValue.value == '' || memberValue.value == ''){
@@ -344,7 +347,7 @@ export default defineComponent({
                     type:'search-dropdown', label:"Member", value: memberValue.value, componentKey: catComponentKey,
                     selectOptions: memberArray, optionSelected: handleSelectedMember, required: true,
                     searchPlaceholder: 'Select Member...', dropdownWidth: '450px', updateValue: selectedMember.value,
-                    fetchData: store.dispatch('Members/fetchMembers', {company:companyID.value}), clearSearch: clearSelectedMember
+                    clearSearch: clearSelectedMember
                 },
                 {  
                     type:'search-dropdown', label:"Loan Product", value: productValue.value, componentKey: catComponentKey,
@@ -707,6 +710,7 @@ export default defineComponent({
         }
         
         onBeforeMount(()=>{ 
+            fetchMembers();
             fetchCharges();
             fetchSecurities();
             updateFormFields();

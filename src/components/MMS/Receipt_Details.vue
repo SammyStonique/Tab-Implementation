@@ -2,7 +2,7 @@
     <PageStyleComponent :key="mainComponentKey" :loader="loader" @showLoader="showLoader" @hideLoader="hideLoader">
         <template v-slot:body>
             <div class="mt-6">
-                <DynamicForm  :fields="formFields" :flex_basis="flex_basis" :flex_basis_percentage="flex_basis_percentage" :displayButtons="displayButtons" @handleSubmit="createMemberReceipt" @handleReset="handleReset"> 
+                <DynamicForm  :fields="formFields" :flex_basis="flex_basis" :flex_basis_percentage="flex_basis_percentage" :savePrint="savePrint" :displayButtons="displayButtons" @handleSubmit="createMemberReceipt" @handlePrintSubmit="createMemberReceiptPrint" v-model:printModalVisible="printModalVisible" :printTitle="printTitle" :pdfUrl="pdfUrl" @handleReset="handleReset"> 
                     <template v-slot:additional-content>
                         <div class="flex mb-1.5">
                             <div class="basis-1/3 text-left">
@@ -41,9 +41,13 @@
             :displayButtons="displayButtons" @handleSubmit="handleReceiptItem" @handleReset="handleReceiptItemReset"
         />
     </MovableModal>
+    <PrintModal v-model:visible="printModalVisible" :title="printTitle" >
+      <iframe v-if="pdfUrl" :src="pdfUrl" width="100%" height="100%" type="application/pdf" style="border: none;"></iframe>
+    </PrintModal>
 </template>
 
 <script>
+import axios from "axios";
 import { defineComponent, ref, onBeforeMount, onMounted, computed, watch, nextTick } from 'vue';
 import DynamicForm from '@/components/NewDynamicForm.vue';
 import MovableModal from '@/components/MovableModal.vue';
@@ -52,11 +56,12 @@ import { useStore } from "vuex";
 import { useToast } from "vue-toastification";
 import { useDateFormatter } from '@/composables/DateFormatter';
 import DynamicTable from '@/components/DynamicTable.vue';
+import PrintModal from '@/components/PrintModal.vue';
 
 export default defineComponent({
     name: 'Receipt_Details',
     components:{
-        PageStyleComponent, DynamicForm, DynamicTable, MovableModal
+        PageStyleComponent, DynamicForm, DynamicTable, MovableModal,PrintModal
     },
     setup(){
         const store = useStore();
@@ -100,15 +105,19 @@ export default defineComponent({
         const companyID = computed(()=> store.state.userData.company_id);
         const userID = computed(()=> store.state.userData.user_id);
         const displayButtons = ref(true);
+        const savePrint = ref(true);
         const showActions = ref(true);
         const showTotals = ref(true);
+        const printModalVisible = ref(false);
+        const pdfUrl = ref(null);
+        const printTitle = ref('Preview Client Receipt');
         const idField = ref('');
         const flex_basis = ref('');
         const flex_basis_percentage = ref('');
         const flex_basis_additional = ref('');
         const flex_basis_percentage_additional = ref('');
         const ledgerID = ref('');
-        const memberID = ref('');
+        const memberID = ref(null);
         const ledgerArray = computed(() => store.state.Ledgers.cashbookLedgerArr);
         const memberArray = computed(() => store.state.Members.memberArr);
         const receiptRows = computed(() => store.state.Members.receiptItems);
@@ -129,6 +138,7 @@ export default defineComponent({
             store.dispatch('Members/removeReceiptItem', rowIndex);
             tableKey.value += 1;
             outstanding_balance.value -= row['due_amount']
+            memberID.value = formFields.value[0].value;
         }
 
         const fetchMembers = async() =>{
@@ -156,7 +166,7 @@ export default defineComponent({
         };
         const clearSelectedMember = async() =>{
             await store.dispatch('Members/updateState', {memberID: ''});
-            memberID.value = ""
+            memberID.value = null;
         };
         const fetchAllLedgers = async() =>{
             await store.dispatch('Ledgers/fetchLedgers', {company:companyID.value})
@@ -293,7 +303,7 @@ export default defineComponent({
             }
             formFields.value[1].value = formatDate(current_date);
             formFields.value[2].value = formatDate(current_date);
-            memberID.value = '';
+            memberID.value = null;
             ledgerID.value = '';
             memComponentKey.value += 1;
             ledComponentKey.value += 1;
@@ -308,6 +318,7 @@ export default defineComponent({
             if(memberID.value){
                 fetchReceiptItems();
                 formFields.value[0].value = memberID.value;
+
             }    
         }, { immediate: true });
         watch([ledgerID], () => {
@@ -351,14 +362,14 @@ export default defineComponent({
                 receipt_items: receiptRows.value,
                 mpesaTxn: mpesaReceipt.value?.mpesa_transaction_id || null
             }
-            console.log("THE FORM DATA IS ",formData)
+
             errors.value = [];
             for(let i=1; i < (formFields.value.length); i++){
                 if(formFields.value[i].value =='' && formFields.value[i].required == true){
                     errors.value.push(formFields.value[i].label);
                 }
             }
-            if((memberID.value == '' && formFields.value[0].value =='') || (ledgerID.value == '' && formFields.value[6].value=='')){
+            if(((memberID.value == '' || memberID.value == null) && formFields.value[0].value =='') || (ledgerID.value == '' && formFields.value[6].value=='')){
                 errors.value.push('Error');
             }
             let rcptTotal = 0
@@ -402,7 +413,91 @@ export default defineComponent({
             }
             
         }
+        const createMemberReceiptPrint = async() =>{
+            showLoader();
+            if(formFields.value[7].value == ""){
+                let rcptMemo = ""
+                for(let i=0; i<receiptRows.value.length; i++){
+                    if(receiptRows.value[i].payment_allocation > 0){
+                        rcptMemo = rcptMemo + receiptRows.value[i].description + ', ';
+                    }
+                }
+                formFields.value[7].value = rcptMemo;
+            }
+            let formData = {
+                company: companyID.value,
+                txn_type: "RCPT",
+                member: memberID.value || formFields.value[0].value,
+                user: userID.value,
+                cashbook: ledgerID.value || formFields.value[6].value,
+                description: formFields.value[7].value,
+                issue_date: formFields.value[1].value,
+                due_date: formFields.value[1].value,
+                client_category: "Members",
+                total_amount: formFields.value[5].value,
+                tax_amount: 0,
+                payment_method: formFields.value[3].value,
+                reference_no: formFields.value[4].value,
+                banking_date: formFields.value[2].value,
+                receipt_items: receiptRows.value,
+                mpesaTxn: mpesaReceipt.value?.mpesa_transaction_id || null,
+                autoprint: true
+            }
 
+            errors.value = [];
+            for(let i=1; i < (formFields.value.length); i++){
+                if(formFields.value[i].value =='' && formFields.value[i].required == true){
+                    errors.value.push(formFields.value[i].label);
+                }
+            }
+            if(((memberID.value == '' || memberID.value == null) && formFields.value[0].value =='') || (ledgerID.value == '' && formFields.value[6].value=='')){
+                errors.value.push('Error');
+            }
+            let rcptTotal = 0
+            for(let i=0; i<receiptRows.value.length; i++){
+                rcptTotal += Number(receiptRows.value[i].payment_allocation);
+            }
+
+            if(formFields.value[5].value != Number(rcptTotal.toFixed(2))){
+                toast.error('Invalid Receipt Amount');
+                hideLoader();
+            }
+            else{
+                if(errors.value.length){
+                    toast.error('Fill In Required Fields');
+                    hideLoader();                 
+                }else{            
+                    try {
+                        const response = await axios.post(`api/v1/receipt-member-loan/`, formData, { responseType: 'blob' })
+                        if (response && response.status === 200) {
+                            toast.success('Receipt created successfully!');
+                            handleReset();
+                            mainComponentKey.value += 1;
+                            ledComponentKey.value += 1;
+                            memComponentKey.value += 1;
+                            const blob1 = new Blob([response.data], { type: 'application/pdf' });
+                            const url = URL.createObjectURL(blob1);
+                            pdfUrl.value = url;
+                            printModalVisible.value = true;
+                        }
+                        else if(response && response.data.msg === "Exists"){
+                            hideLoader();
+                            toast.error('Duplicate Reference No!');
+                        }
+                         else {
+                            toast.error('An error occurred while creating the receipt.');
+                            hideLoader();
+                        }
+                    } catch (error) {
+                        console.error(error.message);
+                        toast.error('Failed to create receipt: ' + error.message);
+                    } finally {
+                        hideLoader();
+                    }              
+                }
+            }
+            
+        }
         const autoPopulatePaymentAlloc = (row) =>{
             if(row.allocation_status == false){
                 row.payment_allocation = row.due_amount;
@@ -413,6 +508,7 @@ export default defineComponent({
         };
         const allocateInputAmount = (amount) =>{
             receipt_totals.value += amount;
+
         };
         const prepaymentCheck = () =>{
             if(receipt_totals.value <= outstanding_balance.value){
@@ -890,13 +986,13 @@ export default defineComponent({
         })
 
         return{
-            formFields, flex_basis, flex_basis_percentage, displayButtons, createMemberReceipt, mainComponentKey,addTitle,
+            formFields, flex_basis, flex_basis_percentage, displayButtons,savePrint, createMemberReceipt,createMemberReceiptPrint, mainComponentKey,addTitle,
             handleReset, loader, showLoader, hideLoader, tableKey, receiptColumns, receiptRows, showActions,showTotals, idField,
             autoPopulatePaymentAlloc, outstanding_balance, hasPrepayment, addPrepayment, handlePrepayment, allocateInputAmount,
             title, modal_loader, modal_left, modal_top, modal_width, prepModalVisible, showModalLoader, hideModalLoader, closeModal,
             additionalFields,flex_basis_additional, flex_basis_percentage_additional, handlePrepaymentReset,allotable_prepayment,addReceiptItems,
             actionsRcptItems,removeReceiptItem,rightsModule,addModalVisible,additionalFields1,handleReceiptItem,handleReceiptItemReset,
-            computedOutstandingBal
+            computedOutstandingBal,printModalVisible,pdfUrl, printTitle,
         }
     }
 })

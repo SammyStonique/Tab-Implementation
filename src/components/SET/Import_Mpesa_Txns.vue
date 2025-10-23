@@ -94,6 +94,8 @@ export default defineComponent({
                 .then((response)=>{
                     if(response.data.msg == "Incorrect"){
                         toast.error("Incorrect Short Code!")
+                    }else if(response.data.msg == "Empty"){
+                        toast.info("No Missing Transaction Found!")
                     }else{
                         excelTxnsList.value = response.data.transactions;
                     }          
@@ -176,6 +178,8 @@ export default defineComponent({
             excelTxnsList.value = [];
             filePath.value = "";
             excel_file.value = "";
+            formFields.value[0].value = "";
+            formFields.value[1].value = "";
         }
         onBeforeMount(()=>{
             updateFormFields();

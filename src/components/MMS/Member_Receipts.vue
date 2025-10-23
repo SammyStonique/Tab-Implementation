@@ -387,7 +387,6 @@ export default{
                     txn_type: "RCPT"
                 }
                 const response = await store.dispatch('Journals/deleteReceipt',formData)
-                console.log(response);
                 if(response && response.status == 200){
                     searchReceipts();
                 }
@@ -406,7 +405,6 @@ export default{
                 if (response && response.status === 200) {
                     const blob1 = new Blob([response.data], { type: 'application/pdf' });
                     const url = URL.createObjectURL(blob1);
-                    // PrintJS({printable: url, type: 'pdf'});
                     pdfUrl.value = url;
                     printModalVisible1.value = true;
                 }

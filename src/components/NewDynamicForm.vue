@@ -116,8 +116,10 @@
   </div>
   <div class="flex-1 basis-full px-2" v-if="displayButtons">
     <button @click="handleSubmit" class="rounded bg-green-400 cursor-pointer text-sm mr-2  text-white px-2 py-1"><i class="fa fa-check-circle text-xs mr-1.5" aria-hidden="true"></i>{{saveButtonLabel}}</button>
+    <button v-if="savePrint" @click="handlePrintSubmit" class="rounded bg-green-400 cursor-pointer text-sm mr-2  text-white px-2 py-1"><i class="fa fa-print text-xs mr-1.5" aria-hidden="true"></i>Save & Print</button>
     <button @click="handleReset" class="rounded bg-green-400 cursor-pointer text-sm mr-2  text-white px-2 py-1"><i class="fa fa-refresh text-xs mr-1.5" aria-hidden="true"></i>Reset</button>
   </div>
+  
 </template>
 
 <script>
@@ -125,6 +127,7 @@ import { ref } from 'vue';
 import { getCurrentInstance } from 'vue';
 import { useToast } from "vue-toastification";
 import SearchableDropdown from './SearchableDropdown.vue';
+
 
 export default{
   props:{
@@ -152,6 +155,11 @@ export default{
           type: String,
           required: true
       },
+      savePrint: {
+        type: Boolean,
+        required: false,
+        default: false
+      },
   },
   components:{
     SearchableDropdown
@@ -174,6 +182,19 @@ export default{
         return;
       }
       emit('handleSubmit');
+    }
+    const handlePrintSubmit = () =>{
+      showValidation.value = true;
+
+      const hasErrors = props.fields.some(field =>
+        field.required && !field.value && !field.selected && field.type !="search-dropdown"
+      );
+
+      if (hasErrors) {
+        toast.error('Required Fields Missing');
+        return;
+      }
+      emit('handlePrintSubmit');
     }
     const handleReset = () =>{
       for(let i=0; i < props.fields.length; i++){
@@ -215,7 +236,7 @@ export default{
     };
 
     return{
-      handleSubmit, handleReset, handleChange, onFileChange,localFilePath,checkboxSelection,showValidation
+      handleSubmit,handlePrintSubmit, handleReset, handleChange, onFileChange,localFilePath,checkboxSelection,showValidation
     }
   }
 
