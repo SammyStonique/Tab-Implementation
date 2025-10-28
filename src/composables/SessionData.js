@@ -34,6 +34,9 @@ export function useFetchSessionData() {
           const defaultSettings = {
             "defaultSettings": response.data.defaultSettings
           }
+          const exchangeRates = {
+            "exchangeRates": response.data.exchangeRates
+          }
           const agentAssets = {
             "agentAssets": response.data.agentAssets
           }
@@ -46,6 +49,7 @@ export function useFetchSessionData() {
           store.dispatch('userData/updateState',user_companies)
           store.dispatch('userData/updateState',permissions)
           store.dispatch('userData/updateState',defaultSettings)
+          store.dispatch('userData/updateState',exchangeRates)
           store.dispatch('userData/updateState',agentAssets)
           store.dispatch('userData/updateState',salesAgentID)
         }

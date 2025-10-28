@@ -255,13 +255,13 @@ export default defineComponent({
                     type:'search-dropdown', label:"Currency", value: currencyValue.value, componentKey: currComponentKey,
                     selectOptions: currencyArray, optionSelected: handleSelectedCurrency, required: true,
                     searchPlaceholder: 'Select Currency...', dropdownWidth: '500px', updateValue: selectedCurrency.value,
-                    fetchData: fetchCurrencies(), clearSearch: clearSelectedCurrency
+                    clearSearch: clearSelectedCurrency
                 },
                 {  
                     type:'search-dropdown', label:"Type", value: makeValue.value, componentKey: depComponentKey,
                     selectOptions: makeArray, optionSelected: handleSelectedMake, required: false,
                     searchPlaceholder: 'Select Type...', dropdownWidth: '500px', updateValue: selectedMake.value,
-                    fetchData: fetchAssetMakes(), clearSearch: clearSelectedMake
+                    clearSearch: clearSelectedMake
                 },
                 {  
                     type:'search-dropdown', label:"Design", value: modelValue.value, componentKey: userComponentKey,
@@ -599,6 +599,8 @@ export default defineComponent({
         }
         
         onBeforeMount(()=>{ 
+            fetchCurrencies();
+            fetchAssetMakes();
             fetchPlans();
             fetchVendors();
             fetchSalePlans();

@@ -23,6 +23,7 @@ const state = {
     user_companies: [],
     permissions: [],
     defaultSettings: [],
+    exchangeRates: [],
     agentAssets: [],
     salesAgentID: '',
     reloaded: false,
@@ -119,7 +120,7 @@ const actions = {
         commit('reloadingPage');
     },
     async createUser({ commit,state }, formData) {
-        return axios.post('api/v1/create-property/', formData)
+        return axios.post('api/v1/create-user/', formData)
         .then((response)=>{
           return response;
         })

@@ -23,6 +23,7 @@
             @handleSelectionChange="handleSelectionChange"
             @handleActionClick="handleActionClick"
             @handleShowDetails="handleShowDetails"
+            @handleOpenLink="handleOpenLink"
             :count="propCount"
             :currentPage="currentPage"
             :result="propArrLen"
@@ -139,7 +140,7 @@ export default{
         const tableColumns = ref([
             {type: "checkbox"},
             {label: "Date", key:"date"},
-            {label: "Code", key:"sale_code"},
+            {label: "Code", key:"sale_code", type:"link"},
             {label: "Asset Name", key:"asset"},
             {label: "Client Name", key: "customer"},
             {label: "Sales Plan", key:"payment_plan"},
@@ -365,6 +366,23 @@ export default{
   
         const addNewSale = async() =>{
          
+        };
+        const handleOpenLink = async(row) =>{
+            const saleID = row[idField];
+            const saleStatus = row['approval_status']
+            if(saleStatus == 'Approved'){
+                let formData = {
+                    company: companyID.value,
+                    asset_sale: saleID
+                }
+                await store.dispatch('Asset_Sales/fetchSaleDetails',formData).
+                then(()=>{
+                    store.commit('pageTab/ADD_PAGE', {'PSS':'Sale_Profile'});
+                    store.state.pageTab.pssActiveTab = 'Sale_Profile'; 
+                })
+            }else{
+                toast.error(`Cannot View ${saleStatus} Sale`)
+            }
         }
         const handleActionClick = async(rowIndex, action, row) =>{
             if(action == 'delete'){
@@ -728,7 +746,7 @@ export default{
         return{
             showAddButton,searchAssetSales,resetFilters, addButtonLabel, searchFilters, tableColumns, salesList,dropdownWidth,displayButtons,importSales,
             currentPage,propResults, propArrLen, propCount, pageCount, showNextBtn, showPreviousBtn,flex_basis,flex_basis_percentage,formFields,handleReset,
-            loadPrev, loadNext, firstPage, lastPage, idField, actions, handleActionClick,showDetails,handleShowDetails,detailsTitle,hideDetails,
+            loadPrev, loadNext, firstPage, lastPage, idField, actions, handleActionClick,handleOpenLink,showDetails,handleShowDetails,detailsTitle,hideDetails,
             submitButtonLabel, showModal, showLoader, loader, hideLoader, removeAssetSale, removeAssetSales,
             handleSelectionChange,addingRight,removingRight,rightsModule,printSalesList,selectSearchQuantity,selectedValue,
             modal_left,modal_top,modal_width,trans_modal_loader,transModalVisible,transTitle,showTransModalLoader,hideTransModalLoader,closeTransModal,

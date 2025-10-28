@@ -23,6 +23,8 @@
             @handleSelectionChange="handleSelectionChange"
             @handleActionClick="handleActionClick"
             @handleShowDetails="handleShowDetails"
+            @handleOpenLink="handleOpenLink"
+            :groupingKey=true
             :count="propCount"
             :currentPage="currentPage"
             :result="propArrLen"
@@ -137,14 +139,17 @@ export default{
         const tableColumns = ref([
             {type: "checkbox"},
             {label: "Date", key:"date"},
-            {label: "Code", key:"sale_code"},
-            {label: "Asset Name", key:"asset"},
+            {label: "Code", key:"sale_code", type:"link"},
+            // {label: "Asset Name", key:"asset"},
             {label: "Client Name", key: "customer"},
             {label: "Sales Plan", key:"payment_plan"},
+            {label: "Currency", key:"client_currency"},
             {label: "Amount", key:"formatted_total_amount"},
             {label: "Done By", key:"done_by"},
             {label: "Status", key:"approval_status", textColor: "textColor"},
             {label: "Exempt", key:"exempt_penalty"},
+            {label: "Due", key:"sale_due_date"},
+            {label: "Status", key:"sale_status", txtColor: "textStatusColor"},
         ])
         const actions = ref([
             {name: 'edit', icon: 'fa fa-edit', title: 'Edit Sale', rightName: 'Editing Asset Sales'},
@@ -153,11 +158,12 @@ export default{
             {name: 'delete', icon: 'fa fa-trash', title: 'Delete Sale', rightName: 'Deleting Asset Sales'},
         ]);
         const itemColumns = ref([
-            {label: "Unit Number", key:"unit_number", type: "text", editable: false},
-            {label: "Selling Price", key:"unit_selling_price", type: "number", editable: false},
-            {label: "Discount", key:"discount", type: "number", editable: false},
-            {label: "Charges", key:"charges_amount", type: "number", editable: false},
-            {label: "Total", key:"sale_total_amount", type: "number", editable: false},
+            {label: "Unit Number", key:"unit_number", type: "text"},
+            {label: "Currency", key:"unit_currency", type: "text"},
+            {label: "Selling Price", key:"unit_selling_price", type: "number"},
+            {label: "Discount", key:"discount", type: "number"},
+            {label: "Charges", key:"charges_amount", type: "number"},
+            {label: "Total", key:"sale_total_amount", type: "number"},
         ]);
         const companyID = computed(()=> store.state.userData.company_id);
         const saleID = ref("");
@@ -390,6 +396,23 @@ export default{
             await store.dispatch("Payment_Plans/updateState", {salePlanArray: []})
             store.commit('pageTab/ADD_PAGE', {'PSS':'Sale_Details'});
             store.state.pageTab.pssActiveTab = 'Sale_Details';          
+        }
+        const handleOpenLink = async(row) =>{
+            const saleID = row[idField];
+            const saleStatus = row['approval_status']
+            if(saleStatus == 'Approved'){
+                let formData = {
+                    company: companyID.value,
+                    asset_sale: saleID
+                }
+                await store.dispatch('Asset_Sales/fetchSaleDetails',formData).
+                then(()=>{
+                    store.commit('pageTab/ADD_PAGE', {'PSS':'Sale_Profile'});
+                    store.state.pageTab.pssActiveTab = 'Sale_Profile'; 
+                })
+            }else{
+                toast.error(`Cannot View ${saleStatus} Sale`)
+            }
         }
         const handleActionClick = async(rowIndex, action, row) =>{
             if( action == 'edit'){
@@ -671,7 +694,7 @@ export default{
         return{
             searchAssetSales,resetFilters, addButtonLabel, searchFilters, tableColumns, salesList,dropdownWidth,displayButtons,
             currentPage,propResults, propArrLen, propCount, pageCount, showNextBtn, showPreviousBtn,flex_basis,flex_basis_percentage,
-            loadPrev, loadNext, firstPage, lastPage, idField, actions, handleActionClick,showDetails,detailsTitle,hideDetails,
+            loadPrev, loadNext, firstPage, lastPage, idField, actions, handleActionClick,handleOpenLink,showDetails,detailsTitle,hideDetails,
             submitButtonLabel, showModal, addNewSale, showLoader, loader, hideLoader, importMembers, removeAssetSale, removeAssetSales,
             handleSelectionChange,addingRight,removingRight,rightsModule,printSalesList,selectSearchQuantity,selectedValue,
             modal_left,modal_top,modal_width,trans_modal_loader,formFields,transModalVisible,transTitle,showTransModalLoader,hideTransModalLoader,approveSale,closeTransModal,

@@ -10,6 +10,7 @@
             @handleDynamicOption="handleDynamicOption"
             @searchPage="searchReceipts"
             @resetFilters="resetFilters"
+            :groupingKey=true
             @removeItem="removeReceipt"
             @removeSelectedItems="removeReceipts"
             @printList="printReceiptsList"

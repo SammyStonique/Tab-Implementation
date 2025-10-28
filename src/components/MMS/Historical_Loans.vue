@@ -246,11 +246,19 @@ export default{
                 formFields1.value[2].hidden = false;
                 formFields1.value[3].hidden = false;
                 formFields1.value[4].hidden = true;
+                formFields1.value[4].required = false;
+                formFields1.value[1].required = true;
+                formFields1.value[2].required = true;
+                formFields1.value[3].required = true;
             }else if(value == "Loan Amount"){
                 formFields1.value[1].hidden = true;
                 formFields1.value[2].hidden = true;
                 formFields1.value[3].hidden = true;
                 formFields1.value[4].hidden = false;
+                formFields1.value[4].required = true;
+                formFields1.value[1].required = false;
+                formFields1.value[2].required = false;
+                formFields1.value[3].required = false;
             }
         }
         const formFields1 = ref([]);

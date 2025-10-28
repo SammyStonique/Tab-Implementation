@@ -72,6 +72,8 @@ import Recurring_Invoices from '@/components/FA/Recurring_Invoices.vue';
 import Bank_Reconciliation from '@/components/FA/Bank_Reconciliation.vue';
 import Reconciliations from '@/components/FA/Reconciliations.vue';
 import Reconciling_Items from '@/components/FA/Reconciling_Items.vue';
+import Exchange_Rates from '@/components/FA/Exchange_Rates.vue';
+import Fx_Gains_Loss from '@/components/FA/Fx_Gains_Loss.vue';
 
 import Default_Settings from '@/components/SET/Default_Settings.vue';
 
@@ -84,7 +86,8 @@ export default{
         Receipt_Details,General_Bills, Bill_Details,Payment_Vouchers,Payment_Details,Direct_Voucher,Customers,Vendors,Debtor_Statement,Vendor_Statement,
         Journals,Journal_Details,Vat_Transactions, Tax_Mapping,Withholding_Tax,Withholding_Vat,Fiscal_Periods,Income_Statement,Balance_Sheet,
         Trial_Balance,Currencies,Petty_Cash,Item_Categories,Replenishments,Petty_Cash_Refunds,Petty_Cash_Vouchers,Voucher_Details,Petty_Cash_Statement,
-        Petty_Cash_Items,Ledger_Balances,Recurring_Bills,Recurring_Invoices,Bank_Reconciliation,Reconciliations,Reconciling_Items,
+        Petty_Cash_Items,Ledger_Balances,Recurring_Bills,Recurring_Invoices,Bank_Reconciliation,Reconciliations,Reconciling_Items,Exchange_Rates,
+        Fx_Gains_Loss,
 
         Default_Settings
     },

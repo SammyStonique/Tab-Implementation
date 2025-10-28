@@ -12,6 +12,7 @@ const state = {
   customerEmail: '',
   customerIdNo: '',
   selectedCustomer: null,
+  selectedCurrency: null,
   isEditing: false,
   outstandingBalance: 0,
   receiptItems: [],
@@ -29,12 +30,16 @@ const mutations = {
     state.customerEmail = '';
     state.customerIdNo = '';
     state.selectedCustomer = null;
+    state.selectedCurrency = null;
     state.isEditing = false;
     state.receiptItems = [];
   },
   SET_SELECTED_CUSTOMER(state, customer) {
     state.selectedCustomer = customer;
     state.isEditing = true;
+  },
+  SET_SELECTED_CURRENCY(state, currency) {
+    state.selectedCurrency = currency;
   },
   LIST_CUSTOMERS(state, customers) {
     state.customersList = customers;
@@ -108,6 +113,7 @@ const actions = {
     axios.post(`api/v1/get-asset-sale-clients/`,formData)
     .then((response)=>{
       state.selectedCustomer = response.data;
+      commit('SET_SELECTED_CURRENCY',(response.data.client_currency != null) ? (response.data.client_currency.code + "-" + response.data.client_currency.name) : "");
       commit('SET_SELECTED_CUSTOMER',response.data);
       commit('SET_CUSTOMER_DETAILS',response.data);
     })

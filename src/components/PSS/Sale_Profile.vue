@@ -40,8 +40,8 @@
                                         <td>{{ saleDetails.installments }}</td>
                                     </tr>
                                     <tr class="text-left">
-                                        <td class="font-bold pt-3">Interest Rate(%):</td>
-                                        <td>{{ saleDetails.interest_rate }}</td>
+                                        <td class="font-bold pt-3">Sale Currency:</td>
+                                        <td>{{ saleDetails.sale_currency }}</td>
                                         <td></td>
                                         <td></td>
                                         <td class="font-bold pt-3">Interest Method:</td>
@@ -653,17 +653,18 @@ export default defineComponent({
             showLoader();
             let formData = {
                 company: companyID.value,
-                loan_application: saleID.value,
-                historical_loan: null
+                asset_sale: saleID.value,
             }
             axios
-            .post("api/v1/export-loan-schedule-pdf/", formData, { responseType: 'blob' })
+            .post("api/v1/export-asset-sale-schedule-pdf/", formData, { responseType: 'blob' })
                 .then((response)=>{
                     if(response.status == 200){
-                        const blob1 = new Blob([response.data]);
-                        // Convert blob to URL
+                        const blob1 = new Blob([response.data], { type: 'application/pdf' });
                         const url = URL.createObjectURL(blob1);
-                        PrintJS({printable: url, type: 'pdf'});
+                        // PrintJS({printable: url, type: 'pdf'});
+                        pdfUrl.value = url;
+                        printModalVisible.value = true;
+                        printTitle.value = "Print Sale Repayment Schedule";
                     }
                 })
             .catch((error)=>{

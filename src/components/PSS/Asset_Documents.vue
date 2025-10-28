@@ -11,6 +11,9 @@
         :addingRight="addingRight"
         :removingRight="removingRight"
         :rightsModule="rightsModule"
+        v-model:printModalVisible="printModalVisible"
+        :printTitle="printTitle"
+        :pdfUrl="pdfUrl"
         :columns="tableColumns"
         :rows="documentsList"
         :actions="actions"
@@ -67,6 +70,9 @@ export default{
         const rightsModule = ref('PSS');
         const idField = 'asset_document_id';
         const depModalVisible = ref(false);
+        const printModalVisible = ref(false);
+        const pdfUrl = ref(null);
+        const printTitle = ref('Print Asset Document');
         const documentsList = ref([]);
         const selectedIds = ref([]);
         const depResults = ref([]);
@@ -165,10 +171,11 @@ export default{
             .post("api/v1/preview-asset-attachment-pdf/", formData, { responseType: 'blob' })
                 .then((response)=>{
                     if(response.status == 200){
-                        const blob1 = new Blob([response.data]);
-                        // Convert blob to URL
+                        const blob1 = new Blob([response.data], { type: 'application/pdf' });
                         const url = URL.createObjectURL(blob1);
-                        PrintJS({printable: url, type: 'pdf'});
+                        // PrintJS({printable: url, type: 'pdf'});
+                        pdfUrl.value = url;
+                        printModalVisible.value = true;
                     }
                 })
             .catch((error)=>{
@@ -401,7 +408,7 @@ export default{
             displayButtons,flex_basis,flex_basis_percentage, handleActionClick, handleReset, createAssetDocument,
             showLoader, loader, hideLoader, modal_loader, showModalLoader, hideModalLoader, removeDocument, removeDocuments,
             addingRight,removingRight,rightsModule, closeModal,selectSearchQuantity,selectedValue,handleSelectionChange,
-            handleFileChange
+            handleFileChange,printModalVisible,pdfUrl, printTitle,
         }
     }
 }

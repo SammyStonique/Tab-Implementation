@@ -158,16 +158,16 @@ export default{
         const showModal = ref(false);
         const tableColumns = ref([
             {type: "checkbox"},
-            {label: "Invoice#", key:"journal_no"},
-            {label: "Date", key: "date"},
-            {label: "Tenant Name", key:"tenant_name"},
-            {label: "Property Name", key:"property_name"},
-            {label: "Unit", key:"unit_number"},
-            {label: "Description", key:"description"},
-            {label: "Amount", key:"total_amount", type: "number"},
-            {label: "Paid", key:"total_paid", type: "number"},
-            {label: "Balance", key:"due_amount", type: "number"},
-            {label: "Status", key:"status"},
+            {label: "Invoice#", key:"journal_no", txtColor: "txtRowColor"},
+            {label: "Date", key: "date", txtColor: "txtRowColor"},
+            {label: "Tenant Name", key:"tenant_name", txtColor: "txtRowColor"},
+            {label: "Property Name", key:"property_name", txtColor: "txtRowColor"},
+            {label: "Unit", key:"unit_number", txtColor: "txtRowColor"},
+            {label: "Description", key:"description", txtColor: "txtRowColor"},
+            {label: "Amount", key:"total_amount", type: "number", txtColor: "txtPaidColor"},
+            {label: "Paid", key:"total_paid", type: "number", txtColor: "txtPaidColor"},
+            {label: "Balance", key:"due_amount", type: "number", txtColor: "txtDueColor"},
+            {label: "Status", key:"status", txtColor: "txtStatusColor"},
         ])
         const showTotals = ref(true);
         const actions = ref([

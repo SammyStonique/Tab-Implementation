@@ -8,6 +8,9 @@
         @resetFilters="resetFilters"
         @removeItem="removeDocument"
         @removeSelectedItems="removeDocuments"
+        v-model:printModalVisible="printModalVisible"
+        :printTitle="printTitle"
+        :pdfUrl="pdfUrl"
         :addingRight="addingRight"
         :removingRight="removingRight"
         :rightsModule="rightsModule"
@@ -67,6 +70,9 @@ export default{
         const rightsModule = ref('PSS');
         const idField = 'sale_document_id';
         const depModalVisible = ref(false);
+        const printModalVisible = ref(false);
+        const pdfUrl = ref(null);
+        const printTitle = ref('Print Sale Document');
         const documentsList = ref([]);
         const selectedIds = ref([]);
         const depResults = ref([]);
@@ -169,10 +175,11 @@ export default{
             .post("api/v1/preview-asset-sale-document-pdf/", formData, { responseType: 'blob' })
                 .then((response)=>{
                     if(response.status == 200){
-                        const blob1 = new Blob([response.data]);
-                        // Convert blob to URL
+                        const blob1 = new Blob([response.data], { type: 'application/pdf' });
                         const url = URL.createObjectURL(blob1);
-                        PrintJS({printable: url, type: 'pdf'});
+                        // PrintJS({printable: url, type: 'pdf'});
+                        pdfUrl.value = url;
+                        printModalVisible.value = true;
                     }
                 })
             .catch((error)=>{
@@ -406,7 +413,7 @@ export default{
             displayButtons,flex_basis,flex_basis_percentage, handleActionClick, handleReset, createSaleDocument,
             showLoader, loader, hideLoader, modal_loader, showModalLoader, hideModalLoader, removeDocument, removeDocuments,
             addingRight,removingRight,rightsModule, closeModal,selectSearchQuantity,selectedValue,handleSelectionChange,
-            handleFileChange
+            handleFileChange,printModalVisible,pdfUrl, printTitle,
         }
     }
 }

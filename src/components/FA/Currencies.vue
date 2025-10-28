@@ -4,6 +4,8 @@
         :addButtonLabel="addButtonLabel"
         @handleAddNew="addNewCurrency"
         :searchFilters="searchFilters"
+        :dropdownOptions="dropdownOptions"
+        @handleDynamicOption="handleDynamicOption"
         @searchPage="searchCurrencies"
         @resetFilters="resetFilters"
         @removeItem="removeCurrency"
@@ -372,14 +374,27 @@ export default{
         const closeModal = async() =>{
             depModalVisible.value = false;
             handleReset();
-        }
+        };
+        const dropdownOptions = ref([
+            {label: 'Exchange Rates', action: 'view-exchange-rates', icon: 'fa-repeat', colorClass: 'text-yellow-600', rightName: 'Adding Currencies'},
+            {label: 'FX Gains/Loss', action: 'view-fx-gains', icon: 'fa-bar-chart', colorClass: 'text-blue-600', rightName: 'Adding Currencies'},
+        ]);
+        const handleDynamicOption = async(option) =>{
+            if(option == 'view-exchange-rates'){
+                store.commit('pageTab/ADD_PAGE', {'FA':'Exchange_Rates'});
+                store.state.pageTab.faActiveTab = 'Exchange_Rates'; 
+            }else if(option == 'view-fx-gains'){
+                store.commit('pageTab/ADD_PAGE', {'FA':'Fx_Gains_Loss'});
+                store.state.pageTab.faActiveTab = 'Fx_Gains_Loss'; 
+            }
+        };
         onMounted(()=>{
             searchCurrencies();
         })
         return{
             title,idField, searchCurrencies, addButtonLabel, searchFilters, resetFilters, tableColumns, currencyList,
             currentPage,depResults, depArrLen, depCount, pageCount, showNextBtn, showPreviousBtn,modal_top, modal_left, modal_width,
-            loadPrev, loadNext, firstPage, lastPage, actions, formFields, depModalVisible, addNewCurrency,
+            loadPrev, loadNext, firstPage, lastPage, actions, formFields, depModalVisible, addNewCurrency,dropdownOptions,handleDynamicOption,
             displayButtons,flex_basis,flex_basis_percentage, handleActionClick, handleReset, saveCurrency,
             showLoader, loader, hideLoader, modal_loader, showModalLoader, hideModalLoader, removeCurrency, removeCurrencies,
             addingRight,removingRight,rightsModule, closeModal,selectSearchQuantity,selectedValue,selectedIds

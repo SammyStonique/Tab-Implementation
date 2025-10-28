@@ -134,6 +134,7 @@ const actions = {
         state.unitID = selectedUnit.asset_unit_id;
         state.unitNumber = selectedUnit.unit_number;
         state.unitPrice = selectedUnit.unit_selling_price;
+        selectedUnit.currency = null;
         selectedUnit.reserved_unit_id = null;
         selectedUnit.asset_sale_item_id = null;
         selectedUnit.discount = 0;

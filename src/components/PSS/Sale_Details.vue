@@ -89,6 +89,7 @@ export default defineComponent({
         const errors = ref([]);
         const companyID = computed(()=> store.state.userData.company_id);
         const userID = computed(()=> store.state.userData.user_id);
+        const exchangeRates = computed(()=> store.state.userData.exchangeRates);
         const selectedReservation = computed(()=> store.state.Asset_Sales.selectedReservation);
         const selectedTransfer = computed(()=> store.state.Asset_Sales.selectedTransfer);
         const selectedSale = computed(()=> store.state.Asset_Sales.selectedSale);
@@ -136,15 +137,38 @@ export default defineComponent({
         const computedActualDepositValue = computed(() => actualDeposit);
         const computedRepayFrequency= computed(() => repayFrequency);
         const agentID = ref('');
+        const exRateID = ref(null);
+        const compCurrencies = computed(() => store.getters['Currencies/getFormatedCurrency']);
         const actionUnits = ref([
             {name: 'delete', icon: 'fa fa-minus-circle', title: 'Remove Unit', rightName: 'Adding Asset Sales'},
         ])
+        const convertAmount = (row) =>{
+            let newSellingPrice = 0;
+            if(exchangeRates.value.length == 0){
+                toast.error("Exchange Rates Not Set!");
+                return;
+            }
+            for(let i=0; i < exchangeRates.value.length; i++){
+                if(exchangeRates.value[i].target_currency_id == row.currency.currency_id){
+                    exRateID.value = exchangeRates.value[i].exchange_rate_id;
+                    let exRateToBase = exchangeRates.value[i].exchange_rate;
+                    let sellingPrice = row.unit_selling_price;
+                    newSellingPrice = parseFloat(sellingPrice / exRateToBase).toFixed(2);
+                    row.unit_selling_price = newSellingPrice;
+                    row.formatted_sale_total_amount = newSellingPrice;
+                    row.sale_total_amount = newSellingPrice;
+                    break;
+                }
+            }
+            
+        };
         const unitColumns = ref([
-            {label: "Unit Number", key:"unit_number", type: "text", editable: false},
+            {label: "Unit Number", key:"unit_number", type: "text"},
+            {label: "Currency", key:"currency", type: "select-dropdown", options: compCurrencies, method: convertAmount},
             {label: "Selling Price", key:"unit_selling_price", type: "number", editable: true},
             {label: "Discount", key:"discount", type: "number", editable: true},
             {label: "Charges", key:"charges_amount", type: "number", editable: true},
-            {label: "Total", key:"formatted_sale_total_amount", type: "number", editable: false},
+            {label: "Total", key:"formatted_sale_total_amount", type: "number"},
         ]);
         const unitRows = computed(() => {
             return store.state.Asset_Units.unitArray;
@@ -178,6 +202,9 @@ export default defineComponent({
         const scheduleRows = computed(() => {
             return store.state.Asset_Sales.assetSchedules;
         });
+        const fetchCurrencies = async() =>{
+            await store.dispatch('Currencies/fetchCurrencies', {company:companyID.value})
+        };
         const fetchAssetClients = async() =>{
             await store.dispatch('Asset_Clients/fetchAssetClients', {company:companyID.value});
         };
@@ -299,7 +326,7 @@ export default defineComponent({
         const calculateDepositAmount= (value) =>{
             if(formFields.value[5].hidden == false && formFields.value[5].value == "Percentage"){
                 let depAmount = (formFields.value[6].value / 100) * value;
-                formFields.value[7].value = depAmount;
+                formFields.value[7].value = parseFloat(depAmount).toFixed(2);
             }else if(formFields.value[5].hidden == false && formFields.value[5].value == "Fixed Amount"){
                 formFields.value[7].value = formFields.value[6].value;
             }
@@ -311,13 +338,13 @@ export default defineComponent({
                     type:'search-dropdown', label:"Client", value: clientValue.value, componentKey: clientComponetKey,
                     selectOptions: clientArray, optionSelected: handleSelectedClient, required: true,
                     searchPlaceholder: 'Select Client...', dropdownWidth: '300px', updateValue: selectedClient.value,
-                    fetchData: fetchAssetClients(), clearSearch: clearSelectedClient
+                    clearSearch: clearSelectedClient
                 },
                 {  
                     type:'search-dropdown', label:"Asset", value: assetValue.value, componentKey: assetComponentKey,
                     selectOptions: assetArray, optionSelected: handleSelectedAsset, required: true,
                     searchPlaceholder: 'Select Asset...', dropdownWidth: '300px', updateValue: selectedAsset.value,
-                    fetchData: fetchSaleAssets(), clearSearch: clearSelectedAsset
+                    clearSearch: clearSelectedAsset
                 },
                 {  
                     type:'search-dropdown', label:"Sales Plan", value: planValue.value, componentKey: planComponentKey,
@@ -553,6 +580,7 @@ export default defineComponent({
             mainComponentKey.value += 1;
             assetID.value = "";
             clientID.value = "";
+            exRateID.value = null;
         }
          
         const showLoader = () =>{
@@ -564,6 +592,11 @@ export default defineComponent({
         const createAssetSale = async() =>{
             showLoader();
             salePlanTermsArr.value = [];
+            let unitCurr = null;
+            for(let i=0; i < unitRows.value.length; i++){
+                unitCurr = unitRows.value[i].currency;
+                break;
+            }
             if(formFields.value[5].hidden == false){
                 let obj = {
                     'deposit_mode': formFields.value[5].value,
@@ -576,6 +609,11 @@ export default defineComponent({
                     'balance_mode': formFields.value[12].value,
                     'repayment_date': formFields.value[13].value,
                     'repayment_frequency': formFields.value[14].value,
+                    'sale_currency': null,
+                    'exchange_rate': exRateID.value,
+                }
+                if(unitCurr != null){
+                    obj['sale_currency'] = unitCurr.value?.currency_id || unitCurr.currency_id || null;
                 }
                 salePlanTermsArr.value.push(obj)
             }
@@ -608,6 +646,7 @@ export default defineComponent({
                 company: companyID.value,
                 user: userID.value,
             }
+
             errors.value = [];
             for(let i=0; i < formFields.value.length; i++){
                 if(formFields.value[i].value =='' && formFields.value[i].required == true && formFields.value[i].type != 'search-dropdown'){
@@ -617,12 +656,14 @@ export default defineComponent({
             let unitSum = 0;
             for(let i=0; i < unitRows.value.length; i++){
                 unitSum += parseFloat(unitRows.value[i].sale_total_amount);
+                // if(unitRows.value[i].currency == "-"){
+                //     toast.error("Unit Currency Not Selected!");
+                //     hideLoader();
+                //     return;
+                // }
             }
             if(assetValue.value == '' || clientValue.value == '' || planValue.value == ''){
                 errors.value.push('Error');
-                console.log("ASSET VALUE IS: ", assetValue.value);
-                console.log("CLIENT VALUE IS: ", clientValue.value);
-                console.log("PLAN VALUE IS: ", planValue.value);
             }
             if(errors.value.length){
                 toast.error('Fill In Required Fields');
@@ -659,6 +700,11 @@ export default defineComponent({
         const updateAssetSale = async() =>{
             showLoader();
             salePlanTermsArr.value = [];
+            let unitCurr = null;
+            for(let i=0; i < unitRows.value.length; i++){
+                unitCurr = unitRows.value[i].currency;
+                break;
+            }
             if(formFields.value[5].hidden == false){
                 let obj = {
                     'deposit_mode': formFields.value[5].value,
@@ -671,6 +717,10 @@ export default defineComponent({
                     'balance_mode': formFields.value[12].value,
                     'repayment_date': formFields.value[13].value,
                     'repayment_frequency': formFields.value[14].value,
+                    'sale_currency': null
+                }
+                if(unitCurr != null){
+                    obj['sale_currency'] = unitCurr.value?.currency_id || unitCurr.currency_id || null;
                 }
                 salePlanTermsArr.value.push(obj)
             }
@@ -827,6 +877,9 @@ export default defineComponent({
         };
         
         onBeforeMount(()=>{ 
+            fetchAssetClients();
+            fetchSaleAssets();
+            fetchCurrencies();
             fetchPlans();
             fetchCharges();
             fetchSalesAgents();

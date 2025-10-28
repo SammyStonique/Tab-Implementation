@@ -258,6 +258,23 @@
                                 </select>
                                 <button type="button" class="absolute ml-2 rounded px-2 bg-green-500 text-white" @click="saveDefaultSetting('Accounts','Merge Shares Ledgers in Reports',sharesOption,sharesOption)"><i class="fa fa-check"></i></button>
                             </div>
+                            <div class="basis-1/4 mr-8 relative">
+                                <div class="basis-1/3 flex mr-3">
+                                    <label for="">Current:<em></em></label>
+                                    <p class="ml-4 font-bold">{{ fxGain }}</p>
+                                    <button type="button" class="ml-4 text-red-600" @click="removeDefaultSetting('Accounts','FX Gain Posting A/c',fxGain)" v-if="fxGain"><i class="fa fa-times" aria-hidden="true"></i></button>
+                                </div>
+                                <label for="">FX Gain Posting A/c:<em>*</em></label><br />
+                                <SearchableDropdown
+                                    :options="ledgerArr"
+                                    :updateValue="selectedRentalIncome"
+                                    :dropdownWidth="dropdownWidth"
+                                    @option-selected="handleSelectedLedger"
+                                    @clearSearch="clearSelectedLedger"   
+                                
+                                />
+                                <button type="button" class="absolute ml-4 rounded px-2 bg-green-500 text-white" @click="saveDefaultSetting('Accounts','FX Gain Posting A/c',ledgerID,ledgerName)"><i class="fa fa-check"></i></button>
+                            </div>
                         </div>
                         <div class="flex mb-3">
                             <div class="basis-1/4 relative mr-12">
@@ -275,6 +292,23 @@
                                     <option value="No">No</option>
                                 </select>
                                 <button type="button" class="absolute ml-2 rounded px-2 bg-green-500 text-white" @click="saveDefaultSetting('Accounts','Merge Savings Ledgers in Reports',savingsOption,savingsOption)"><i class="fa fa-check"></i></button>
+                            </div>
+                            <div class="basis-1/4 mr-8 relative">
+                                <div class="basis-1/3 flex mr-3">
+                                    <label for="">Current:<em></em></label>
+                                    <p class="ml-4 font-bold">{{ fxLoss }}</p>
+                                    <button type="button" class="ml-4 text-red-600" @click="removeDefaultSetting('Accounts','FX Loss Posting A/c',fxLoss)" v-if="fxLoss"><i class="fa fa-times" aria-hidden="true"></i></button>
+                                </div>
+                                <label for="">FX Loss Posting A/c:<em>*</em></label><br />
+                                <SearchableDropdown
+                                    :options="ledgerArr"
+                                    :updateValue="selectedRentalIncome"
+                                    :dropdownWidth="dropdownWidth"
+                                    @option-selected="handleSelectedLedger"
+                                    @clearSearch="clearSelectedLedger"   
+                                
+                                />
+                                <button type="button" class="absolute ml-4 rounded px-2 bg-green-500 text-white" @click="saveDefaultSetting('Accounts','FX Loss Posting A/c',ledgerID,ledgerName)"><i class="fa fa-check"></i></button>
                             </div>
                         </div>
                     </div>
@@ -697,6 +731,8 @@ export default defineComponent({
         const savingsOption = ref("");
         const ledgerBalances = ref("");
         const autoSMSOption = ref("");
+        const fxGain = ref("");
+        const fxLoss = ref("");
 
         const mmsAutoPenalizeOption = ref("");
         const mmsStrictGuarantorshipOption = ref("");
@@ -1012,6 +1048,10 @@ export default defineComponent({
                         ledgerBalances.value = response.data[i].setting_value_name;
                     }else if(response.data[i].setting_name === 'Auto Send SMS Receipt'){
                         autoSMSOption.value = response.data[i].setting_value_name;
+                    }else if(response.data[i].setting_name === 'FX Gain Posting A/c'){
+                        fxGain.value = response.data[i].setting_value_name;
+                    }else if(response.data[i].setting_name === 'FX Loss Posting A/c'){
+                        fxLoss.value = response.data[i].setting_value_name;
                     }
 
                     
@@ -1142,7 +1182,7 @@ export default defineComponent({
             dropdownWidth,incomePlaceholder, ledgerArr, incomeLedgerArr, expenseLedgerArr, liabilityLedgerArr, cashbookLedgerArr, fetchIncomeLedgers, fetchExpenseLedgers,
             fetchCashbookLedgers, fetchLiabilityLedgers, rentalIncome, rentalSecurityDeposit, rentalLeaseIncome, rentalPenaltyIncome,fetchLedgers,loansOption, sharesOption, savingsOption,
             ledgerID,ledgerName, handleSelectedLedger, clearSelectedLedger, saveDefaultSetting, removeDefaultSetting, tenantCodePrefix, tenantCodeCounter,pmsAutoInvoiceOption,tenantInvoiceDay,
-            patientsOption,duplicatesOption, debtorsOption, vendorsOption, tenantsOption,ledgerBalances,autoSMSOption, fetchRetailOutlets,handleSelectedOutlet, clearSelectedOutlet, fetchOutletCounters,outletID,outletName,counterID,counterName,
+            patientsOption,duplicatesOption, debtorsOption, vendorsOption, tenantsOption,ledgerBalances,autoSMSOption,fxGain,fxLoss, fetchRetailOutlets,handleSelectedOutlet, clearSelectedOutlet, fetchOutletCounters,outletID,outletName,counterID,counterName,
             channelID,channelName,handleSelectedCounter, clearSelectedCounter, fetchCounterChannels,handleSelectedChannel, clearSelectedChannel,outletCounterArr,retailOutletArr,counterChannelArr,
             retailOutlet, outletCounter, counterChannel, salesIncome, invTakeOn, stockControl, stockType,directSaleOrder,updateBatchPrice,prodControl,defaultTimeout,
             mmsAutoPenalizeOption,mmsStrictGuarantorshipOption,mmsBalReminderOption,penaltyAutoTime,

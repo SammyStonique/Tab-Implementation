@@ -44,7 +44,7 @@
                   </select>
                 </template>
                 <template v-else-if="column.type === 'select-dropdown'">
-                  <select @change="handleChange($event, row)" v-model="row[column.key]" :name="row[column.key]" class="bg-inherit outline-none h-full text-xxs sm:text-xs w-full uppercase">
+                  <select @change="handleChange($event, row, column)" v-model="row[column.key]" :name="row[column.key]" :class="[`bg-inherit outline-none h-full text-xxs sm:text-xs w-full uppercase`]" >
                     <option v-for="(option, index) in column.options" :key="index" :value="option.value">{{ option.text }}</option>
                   </select>
                 </template>
@@ -419,21 +419,21 @@ export default defineComponent({
       let totalAmount = parseFloat(row.unit_selling_price) || 0;
       let discount = parseFloat(row.discount) || 0;
       let charges_amount = parseFloat(row.charges_amount) || 0;
-
+      
       if((row.unit_selling_price != null) && (row.discount != null) && (row.charges_amount != null)){
-        let saleAmount = (totalAmount + charges_amount - discount).toFixed(2);
-        row.sale_total_amount = saleAmount;
-        row.formatted_sale_total_amount = Number(saleAmount).toLocaleString();
+          let saleAmount = (totalAmount + charges_amount - discount).toFixed(2);
+          row.sale_total_amount = saleAmount;
+          row.formatted_sale_total_amount = Number(saleAmount).toLocaleString();   
       }       
     };
 
-    const handleChange = (event, row) =>{
+    const handleChange = (event, row, column) =>{
       const selectedValue = event.target.value;
       calculateTaxAmount(row);
-      if (row.method && typeof row.method === 'function') {
-        row.method(selectedValue); 
+      if (column.method && typeof column.method === 'function') {
+        column.method(row); 
       } else {
-        console.warn('Row method is not defined or is not a function');
+        console.warn('Column method is not defined or is not a function');
       }
     }
 

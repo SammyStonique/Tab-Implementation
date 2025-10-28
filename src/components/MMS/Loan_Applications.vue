@@ -251,11 +251,19 @@ export default{
                 formFields1.value[2].hidden = false;
                 formFields1.value[3].hidden = false;
                 formFields1.value[4].hidden = true;
+                formFields1.value[4].required = false;
+                formFields1.value[1].required = true;
+                formFields1.value[2].required = true;
+                formFields1.value[3].required = true;
             }else if(value == "Loan Amount"){
                 formFields1.value[1].hidden = true;
                 formFields1.value[2].hidden = true;
                 formFields1.value[3].hidden = true;
                 formFields1.value[4].hidden = false;
+                formFields1.value[4].required = true;
+                formFields1.value[1].required = false;
+                formFields1.value[2].required = false;
+                formFields1.value[3].required = false;
             }
         }
         const formFields1 = ref([]);
@@ -265,7 +273,7 @@ export default{
                 { type: 'number', name: 'day',label: "New Repayment Day", value: 1, required: true, hidden: true },
                 { type: 'text', name: 'installment_from',label: "Installment From", value: 1, required: true, hidden: true },
                 { type: 'text', name: 'installment_to',label: "Installment To", value: 1, required: true, hidden: true },
-                { type: 'number', name: 'loan_amount',label: "Loan Amount", value: 0, required: true, hidden: true },
+                { type: 'number', name: 'loan_amount',label: "Loan Amount", value: 0, required: false, hidden: true },
                 { type: 'date', name: 'new_repayment_date',label: "New Date", value: '', required: false },
                 { type: 'text-area', name: 'loan_remarks',label: "Loan Remarks", value: null, required: false,textarea_rows: '3', textarea_cols: '56'}
             ]

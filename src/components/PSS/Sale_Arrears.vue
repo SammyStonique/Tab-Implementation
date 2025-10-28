@@ -12,6 +12,9 @@
         @removeItem="removeAllocation"
         @removeSelectedItems="removeAllocations"
         @printList="printArrearsList"
+        v-model:printModalVisible="printModalVisible"
+        :printTitle="printTitle"
+        :pdfUrl="pdfUrl"
         :columns="tableColumns"
         :rows="arrearsList"
         :actions="actions"
@@ -20,6 +23,8 @@
         :showTotals="showTotals"
         @handleSelectionChange="handleSelectionChange"
         @handleActionClick="handleActionClick"
+        @handleOpenLink="handleOpenLink"
+        :groupingKey=true
         :count="appCount"
         :currentPage="currentPage"
         :result="appArrLen"
@@ -37,7 +42,7 @@
     >
         <DynamicForm 
             :fields="formFields" :flex_basis="flex_basis" :flex_basis_percentage="flex_basis_percentage" 
-            :displayButtons="displayButtons" @handleSubmit="allocatePrepayment" @handleReset="handleReset"
+            :displayButtons="displayButtons" @handleSubmit="printArrearsList" @handleReset="handleReset"
         />
     </MovableModal>
 </template>
@@ -70,10 +75,13 @@ export default{
         const title = ref('');
         const companyID = computed(()=> store.state.userData.company_id);
         const idField = 'tenant_lease_id';
-        const rightsModule = ref('MMS');
+        const rightsModule = ref('PSS');
         const assetID = ref('');
         const selectedIds = ref([]);
         const appModalVisible = ref(false);
+        const printModalVisible = ref(false);
+        const pdfUrl = ref(null);
+        const printTitle = ref('Print Sale Arrears');
         const arrearsList = ref([]);
         const appResults = ref([]);
         const appArrLen = ref(0);
@@ -92,16 +100,20 @@ export default{
         const modal_width = ref('35vw');
         const tableColumns = ref([
             {type: "checkbox"},
-            {label: "Sale Code", key:"sale_code",type: "text", editable: false},
-            {label: "Client Code", key:"client_code",type: "text", editable: false},
-            {label: "Client Name", key:"client_name",type: "text", editable: false},
-            {label: "Phone No", key:"phone_number",type: "text", editable: false},
-            {label: "Email", key:"client_email",type: "text", editable: false},
-            {label: "Asset Name", key:"asset_name",type: "text", editable: false},
-            {label: "Sale Amount", key: "sale_amount", type: "number", editable: false},
-            {label: "Principal Arrears", key: "principal_arrears", type: "number", editable: false},
-            {label: "Interest Arrears", key: "interest_arrears", type: "number", editable: false},
-            {label: "Total Arrears", key: "total_arrears", type: "number", editable: false},
+            {label: "Sale#", key:"sale_code",type: "link"},
+            {label: "Client#", key:"client_code",type: "text"},
+            {label: "Client Name", key:"client_name",type: "text"},
+            {label: "Phone No", key:"phone_number",type: "text"},
+            {label: "Email", key:"client_email",type: "text"},
+            {label: "Sale Amount", key: "sale_amount", type: "number"},
+            {label: "Principal Arrears", key: "principal_arrears", type: "number"},
+            {label: "Interest Arrears", key: "interest_arrears", type: "number"},
+            {label: "Total Arrears", key: "total_arrears", type: "number"},
+            {label: "Last Pay.", key:"last_pay_date",type: "text"},
+            {label: "0-30Days", key: "thirty_day_balance", type: "number"},
+            {label: "30-60Days", key: "sixty_day_balance", type: "number"},
+            {label: "60-90Days", key: "ninety_day_balance", type: "number"},
+            {label: ">90Days", key: "above_ninety_balance", type: "number"},
         ])
         const showTotals = ref(true);
         const actions = ref([
@@ -137,7 +149,19 @@ export default{
         const handleSelectionChange = (ids) => {
             selectedIds.value = ids;
         };
-        
+        const handleOpenLink = async(row) =>{
+            const saleID = row['asset_sale_id'];
+            let formData = {
+                company: companyID.value,
+                asset_sale: saleID
+            }
+            await store.dispatch('Asset_Sales/fetchSaleDetails',formData).
+            then(()=>{
+                store.commit('pageTab/ADD_PAGE', {'PSS':'Sale_Profile'});
+                store.state.pageTab.pssActiveTab = 'Sale_Profile'; 
+            })
+            
+        }
         const handleActionClick = async(rowIndex, action, row) =>{
             if(action == 'send-sms'){
                 showLoader();
@@ -204,9 +228,32 @@ export default{
                 })
             }
         } 
+        const formFields = ref();
+        const updateFormFields = () =>{
+            formFields.value = [
+                {  type: 'checkbox', label: 'Client Code', name: 'client_code', value: '', required: false},
+                {  type: 'checkbox', label: 'Client Name', name: 'client_name', value: true, selected: true, required: false},
+                {  type: 'checkbox', label: 'Phone No', name: 'phone_number', value: true, selected: true, required: false},
+                {  type:'checkbox', label:'Email Address', name:'email_address', value:'', required:false},
+                {  type:'checkbox', label:'Sale Amount', name:'sale_amount', value:'', selected: true, required:false},
+                {  type:'checkbox', label:'Principal Amount', name:'principal_amount', value:'', required:false},
+                {  type:'checkbox', label:'Interest Amount', name:'interest_amount', value:'', required:false},
+                {  type:'checkbox', label:'Principal Paid', name:'principal_paid', value:'', required:false},
+                {  type:'checkbox', label:'Interest Paid', name:'interest_paid', value:'', required:false},          
+                {  type:'checkbox', label:'Principal Balance', name:'principal_balance', value:'', required:false},
+                {  type:'checkbox', label:'Interest Balance', name:'interest_balance', value:'', required:false}, 
+                {  type:'checkbox', label:'Arrears Inclusive', name:'arrears_inclusive', value: true, selected: true, required:false},
+                {  type:'checkbox', label:'Arrears Exclusive', name:'arrears_exclusive', value:'', required:false},
+                {  type:'checkbox', label:'Sale Balance', name:'sale_balance', value:'', required:false}, 
+                {  type:'checkbox', label:'Active Only', name:'active_sales', value:'', required:false}, 
+                {required: false, value: false},
+                {required: false, value: false},
+            ]
+        };
         const dropdownOptions = ref([
-            {label: 'SMS Sale Arrears', action: 'send-sms'},
-            {label: 'Email Sale Arrears', action: 'send-email'},
+            {label: 'SMS Sale Arrears', action: 'send-sms', icon: 'fa-sms', colorClass: 'text-blue-500', rightName: 'Sending PSS SMS'},
+            {label: 'Email Sale Arrears', action: 'send-email', icon: 'fa-envelope', colorClass: 'text-indigo-500', rightName: 'Sending PSS Emails'},
+            {label: 'Print Detailed', action: 'print-detailed',icon: 'fa-print',colorClass: 'text-gray-700', rightName: 'Printing PSS Reports'},
         ]);
         const handleDynamicOption = async(option) =>{
             if(option == 'send-sms'){
@@ -216,12 +263,12 @@ export default{
                     tenant: tenantID,
                     company: companyID.value
                 }
-                await axios.post('api/v1/tenant-balance-reminder-sms/',formData).
+                await axios.post('api/v1/sale-balance-reminder-sms/',formData).
                 then((response)=>{
                     if(response.data.msg == "Success"){
                         toast.success("SMS Sent!")
                     }else if(response.data.msg == "Missing Template"){
-                        toast.error("Tenant Balance Reminder Template Not Set!")
+                        toast.error("Sale Balance Reminder Template Not Set!")
                     }else{
                         toast.error(response.data.msg)
                     }
@@ -239,12 +286,12 @@ export default{
                     tenant: tenantID,
                     company: companyID.value
                 }
-                await axios.post('api/v1/tenant-balance-reminder-email/',formData).
+                await axios.post('api/v1/sale-balance-reminder-email/',formData).
                 then((response)=>{
                     if(response.data.msg == "Success"){
                         toast.success("Email Sent!")
                     }else if(response.data.msg == "Missing Template"){
-                        toast.error("Tenant Balance Reminder Template Not Set!")
+                        toast.error("Sale Balance Reminder Template Not Set!")
                     }else{
                         toast.error(response.data.msg)
                     }
@@ -255,6 +302,11 @@ export default{
                 .finally(()=>{
                     hideLoader();
                 })
+            }else if(option == 'print-detailed'){
+                appModalVisible.value = true;
+                updateFormFields();
+                flex_basis.value = '1/4';
+                flex_basis_percentage.value = '20';
             }
         };
         const showModalLoader = () =>{
@@ -348,6 +400,7 @@ export default{
             searchLoanArrears();
         };
         const printArrearsList = () =>{
+            appModalVisible.value = false;
             showLoader();
             let formData = {
                 client_code: client_code_search.value,
@@ -355,17 +408,18 @@ export default{
                 date: date_search.value,
                 asset: assetID.value,
                 company: companyID.value,
+                printData: formFields.value || [],
                 page_size: selectedValue.value
             } 
 
             axios
-            .post("api/v1/export-loan-arrears-pdf/", formData, { responseType: 'blob' })
+            .post("api/v1/export-sale-arrears-pdf/", formData, { responseType: 'blob' })
                 .then((response)=>{
                     if(response.status == 200){
-                        const blob1 = new Blob([response.data]);
-                        // Convert blob to URL
+                        const blob1 = new Blob([response.data], { type: 'application/pdf' });
                         const url = URL.createObjectURL(blob1);
-                        PrintJS({printable: url, type: 'pdf'});
+                        pdfUrl.value = url;
+                        printModalVisible.value = true;
                     }
                 })
             .catch((error)=>{
@@ -382,7 +436,7 @@ export default{
         return{
             showAddButton,title, searchLoanArrears, idField, selectedIds, actions, arrearsList, appArrLen,appCount,appResults,appModalVisible,
             currentPage,searchFilters,tableColumns,resetFilters,loadPrev,loadNext,firstPage,lastPage,dropdownOptions,handleDynamicOption,
-            showNextBtn,showPreviousBtn, handleActionClick,displayButtons,
+            showNextBtn,showPreviousBtn, handleActionClick,handleOpenLink,displayButtons,printModalVisible,pdfUrl, printTitle,formFields,
             modal_top, modal_left, modal_width, showLoader, loader, hideLoader, modal_loader, showModalLoader, hideModalLoader,rightsModule,
             handleSelectionChange, pageComponentKey, flex_basis, flex_basis_percentage,showTotals,printArrearsList,selectSearchQuantity,selectedValue
         }

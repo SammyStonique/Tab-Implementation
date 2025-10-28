@@ -160,8 +160,15 @@ const actions = {
 };
   
 const getters = {
-  // users: (state) => state.users,
-  // currentUser: (state) => state.currentUser,
+  getFormatedCurrency: (state) =>{
+    return state.currenciesList.map((curr) => {
+      return {
+        text: curr.code + " - " +curr.name,
+        value: curr,
+      };
+    });
+    
+  },
 };
   
 export default {

@@ -89,7 +89,9 @@ export default{
         const modal_loader1 = ref('none');
         const title1 = ref('SMS Member');
         const transModalVisible = ref(false);
+        const currComponentKey = ref(0);
         const clientID = ref('');
+        const currencyID = ref('');
         const store = useStore();     
         const toast = useToast();
         const loader = ref('none');
@@ -121,6 +123,8 @@ export default{
         const modal_width = ref('45vw');
         const isEditing = computed(()=> store.state.Asset_Clients.isEditing);
         const selectedCustomer = computed(()=> store.state.Asset_Clients.selectedCustomer);
+        const selectedCurrency = computed(()=> store.state.Asset_Clients.selectedCurrency);
+        const currencyArray = computed(() => store.state.Currencies.currencyArr);
         const showModal = ref(false);
         const tableColumns = ref([
             {type: "checkbox"},
@@ -132,6 +136,7 @@ export default{
             {label: "Address", key:"invoicing_address"},
             {label: "Town", key:"town"},
             {label: "Country", key:"country"},
+            {label: "Currency", key:"currency"},
         ])
         const actions = ref([
             {name: 'edit', icon: 'fa fa-edit', title: 'Edit Client', rightName: 'Editing Client'},
@@ -149,7 +154,27 @@ export default{
         const handleSelectionChange = (ids) => {
             selectedIds.value = ids;
         };
-        
+        const handleSelectedCurrency = async(option) =>{
+            await store.dispatch('Currencies/handleSelectedCurrency', option)
+            currencyID.value = store.state.Currencies.currencyID;
+            if(selectedCustomer.value && selectedCurrency.value){
+                selectedCustomer.value.client_currency.currency_id = currencyID.value;
+            }
+        }
+        const clearSelectedCurrency = async() =>{
+            await store.dispatch('Currencies/updateState', {currencyID: ''});
+            currencyID.value = store.state.Currencies.currencyID;
+            if(selectedCustomer.value && selectedCurrency.value){
+                selectedCustomer.value.client_currency.currency_id = currencyID.value;
+            }
+        }
+
+        const fetchCurrencies = async() =>{
+            await store.dispatch('Currencies/fetchCurrencies', {company:companyID.value})
+        };
+        const currencyValue = computed(() => {
+           return (selectedCustomer.value && selectedCustomer.value.client_currency && !currencyID.value) ? selectedCustomer.value.client_currency.currency_id : currencyID.value;
+        });
         const formFields = ref([]);
         const updateFormFields = () => {
             formFields.value = [
@@ -160,6 +185,12 @@ export default{
                 { type: 'text', name: 'invoicing_address',label: "Address", value: selectedCustomer.value?.invoicing_address || '', required: true },
                 { type: 'text', name: 'town',label: "Town", value: selectedCustomer.value?.town || '', required: false },
                 { type: 'text', name: 'country',label: "Country", value: selectedCustomer.value?.country || '', required: false },
+                {  
+                    type:'search-dropdown', label:"Currency", value: currencyValue.value, componentKey: currComponentKey,
+                    selectOptions: currencyArray, optionSelected: handleSelectedCurrency, required: false,
+                    searchPlaceholder: 'Select Currency...', dropdownWidth: '500px', updateValue: selectedCurrency.value,
+                    clearSearch: clearSelectedCurrency
+                },
                 {required: false}
             ];
         };
@@ -169,8 +200,12 @@ export default{
             }
         }
 
-        watch([selectedCustomer], () => {
-            if (selectedCustomer.value) {
+        watch([selectedCustomer, selectedCurrency], () => {
+            if (selectedCustomer.value && selectedCurrency.value) {
+                updateFormFields();
+                currComponentKey.value += 1;
+            }
+            else if (selectedCustomer.value) {
                 updateFormFields();
           
             }
@@ -194,6 +229,8 @@ export default{
                 phone_number: formFields.value[1].value,
                 pin_no: formFields.value[3].value,
                 invoicing_address: formFields.value[4].value,
+                client_currency: currencyID.value,
+                client_currency_id: currencyID.value,
                 company: companyID.value
             }
   
@@ -239,14 +276,11 @@ export default{
                 phone_number: formFields.value[1].value,
                 pin_no: formFields.value[3].value,
                 invoicing_address: formFields.value[4].value,
+                client_currency: currencyValue.value,
+                client_currency_id: currencyValue.value,
                 company: companyID.value
             }
 
-            for(let i=1; i < formFields.value.length; i++){
-                if(formFields.value[i].value ==''){
-                    errors.value.push('Error');
-                }
-            }
             if(errors.value.length){
                 toast.error('Fill In Required Fields');
                 hideModalLoader();
@@ -266,7 +300,7 @@ export default{
                 } finally {
                     hideModalLoader();
                     propModalVisible.value = false;
-                    store.dispatch("Asset_Clients/updateState",{selectedCustomer:null})
+                    await store.dispatch("Asset_Clients/updateState",{selectedCustomer:null,selectedCurrency:null})
                     searchAssetClients();
                 }             
             }
@@ -414,7 +448,7 @@ export default{
         }
         const addNewDebtor = () =>{
             updateFormFields();
-            store.dispatch("Asset_Clients/updateState",{selectedCustomer:null, isEditing:false})
+            store.dispatch("Asset_Clients/updateState",{selectedCustomer:null,selectedCurrency:null, isEditing:false})
             propModalVisible.value = true;
             handleReset();
             flex_basis.value = '1/3';
@@ -550,7 +584,7 @@ export default{
         }
         onBeforeMount(()=>{
             searchAssetClients();
-            
+            fetchCurrencies();
         })
         return{
             title, searchAssetClients,resetFilters, addButtonLabel, searchFilters, tableColumns, debtorList,
