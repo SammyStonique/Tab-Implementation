@@ -116,16 +116,17 @@ export default{
         const applicationArray = computed(() => store.state.Loan_Applications.applicationArr);
         const tableColumns = ref([
             {type: "checkbox"},
-            {label: "Member No", key: "member_number", type: "text", editable: false},
-            {label: "Member Name", key: "member_name", type: "text", editable: false},
-            {label: "Loan No", key: "loan_number", type: "text", editable: false},
-            {label: "Security Type", key: "security_name", type: "text", editable: false},
-            {label: "Name", key: "name", type: "text", editable: false},
-            {label: "Reg/ID No", key: "registration_number", type: "text", editable: false},
-            {label: "Phone No", key: "phone_number", type: "text", editable: false},
-            {label: "Amount", key: "amount", type: "text", editable: false},
-            {label: "Status", key: "security_status", type: "text", editable: false},
-            {label: "Attach.?", key: "document_file", type: "text", editable: false},
+            {label: "Date", key: "date", type: "text"},
+            {label: "Member No", key: "member_number", type: "text"},
+            {label: "Member Name", key: "member_name", type: "text"},
+            {label: "Loan No", key: "loan_number", type: "text"},
+            {label: "Security Type", key: "security_name", type: "text"},
+            {label: "Name", key: "name", type: "text"},
+            {label: "Reg/ID No", key: "registration_number", type: "text"},
+            {label: "Phone No", key: "phone_number", type: "text"},
+            {label: "Amount", key: "amount", type: "text"},
+            {label: "Status", key: "security_status", type: "text"},
+            {label: "Attach.?", key: "document_file", type: "text"},
         ])
         const actions = ref([
             {name: 'edit', icon: 'fa fa-exchange', title: 'Change Status', rightName: 'Changing Security Status'},

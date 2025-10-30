@@ -86,11 +86,12 @@ export default{
         const selectedCurrency = computed(()=> store.state.Currencies.selectedCurrency);
         const tableColumns = ref([
             {type: "checkbox"},
-            {label: "Code", key: "code", type: "text", editable: false},
-            {label: "Name", key: "name", type: "text", editable: false},
-            {label: "Symbol", key: "symbol", type: "text", editable: false},
-            {label: "Country", key: "country", type: "text", editable: false},
-            {label: "Exchange Rate", key: "exchange_rate_to_base", type: "text", editable: false}
+            {label: "Code", key: "code", type: "text"},
+            {label: "Name", key: "name", type: "text"},
+            {label: "Symbol", key: "symbol", type: "text"},
+            {label: "Country", key: "country", type: "text"},
+            {label: "Exchange Rate", key: "exchange_rate_to_base", type: "text"},
+            {label: "Value Name", key: "value_name", type: "text"},
         ])
         const actions = ref([
             {name: 'edit', icon: 'fa fa-edit', title: 'Edit Currency', rightName: 'Editing Currencies'},
@@ -111,6 +112,7 @@ export default{
                 { type: 'text', name: 'symbol',label: "Symbol", value: currency?.symbol || '', required: true },
                 { type: 'text', name: 'country',label: "Country", value: currency?.country || '', required: true },
                 { type: 'text', name: 'exchange_rate_to_base',label: "Exchange Rate To Base", value: currency?.exchange_rate_to_base || 1, required: true },
+                { type: 'text', name: 'value_name',label: "Value Name", value: currency?.value_name || '', required: true },
             ];
         };
         watch(selectedCurrency, (newCurrency) => {
@@ -168,6 +170,7 @@ export default{
                 symbol: formFields.value[2].value,
                 country: formFields.value[3].value,
                 exchange_rate_to_base: formFields.value[4].value,
+                value_name: formFields.value[5].value,
                 company: companyID.value
             }
             errors.value = [];
@@ -208,6 +211,7 @@ export default{
                 symbol: formFields.value[2].value,
                 country: formFields.value[3].value,
                 exchange_rate_to_base: formFields.value[4].value,
+                value_name: formFields.value[5].value,
                 company: companyID.value,
                 currency: selectedCurrency.value.currency_id
             }

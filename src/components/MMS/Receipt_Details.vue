@@ -205,6 +205,9 @@ export default defineComponent({
                         receiptTotals.value = receiptTotals.value - receiptRows.value[i].payment_allocation;
                         receipt_memo.value += receiptRows.value[i].description + ', '
                     }else{
+                        if(receiptTotals.value == 0){
+                            break
+                        }
                         receiptRows.value[i].payment_allocation = receiptTotals.value;
                         receiptRows.value[i].bal_after_alloc = receiptRows.value[i].due_amount - receiptRows.value[i].payment_allocation;
                         receipt_memo.value += receiptRows.value[i].description;
@@ -221,6 +224,9 @@ export default defineComponent({
                         // receiptTotals.value = (receiptTotals.value - receiptRows.value[i].payment_allocation).toFixed(2);
                         receipt_memo.value += receiptRows.value[i].description + ','
                     }else{
+                        if(receiptTotals.value == 0){
+                            break
+                        }
                         receiptRows.value[i].payment_allocation = receiptTotals.value;
                         receiptRows.value[i].bal_after_alloc = receiptRows.value[i].due_amount - receiptRows.value[i].payment_allocation;
                         receipt_memo.value += receiptRows.value[i].description;

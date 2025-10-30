@@ -1,7 +1,7 @@
 <template>
   <teleport to="body">
     <transition name="modal-zoom">
-      <div v-if="visible" class="modal-overlay" :style="{top: modal_top, left: modal_left, width: modal_width}">
+      <div v-if="visible" :class="['modal-overlay', { minimized: isMinimized }]" :style="{top: modal_top, left: modal_left, width: modal_width}">
         <div class="modal" :style="modalStyle">
             <header class="modal-header cursor-move" @mousedown="startDrag" @mousemove="onDrag" @mouseup="stopDrag">
               <div class="flex">
@@ -19,7 +19,7 @@
                 </div>
               </div>
             </header>
-            <div class="modal-content" v-show="!isMinimized">
+            <div class="modal-content" v-if="!isMinimized">
               <div ref="modalRef" class="modal-body">
                 <Loader 
                   :loader="loader"
@@ -165,8 +165,13 @@ onUnmounted(() => {
   justify-content: center;
   align-items: center;
   z-index: 1001;
+  pointer-events: auto;
 }
-
+.modal-overlay.minimized {
+  width: auto;
+  height: auto;
+  pointer-events: none; 
+}
 .modal {
   background: white;
   border-radius: 8px;
@@ -182,6 +187,7 @@ onUnmounted(() => {
   /* background: #1F2937; */
   background: #384659;
   border-bottom: 1px solid #ddd;
+  pointer-events: auto !important;
 }
 
 .modal-content {

@@ -24,6 +24,8 @@
         :showTotals="showTotals"
         @handleSelectionChange="handleSelectionChange"
         @handleActionClick="handleActionClick"
+        @handleOpenLink="handleOpenLink"
+        :groupingKey=true
         :count="appCount"
         :currentPage="currentPage"
         :result="appArrLen"
@@ -100,15 +102,15 @@ export default{
         const modal_width = ref('35vw');
         const tableColumns = ref([
             {type: "checkbox"},
-            {label: "Loan No", key:"loan_number",type: "text", editable: false},
-            {label: "Member No", key:"member_number",type: "text", editable: false},
-            {label: "Member Name", key:"member_name",type: "text", editable: false},
-            {label: "Loan Product", key:"product_name",type: "text", editable: false},
-            {label: "Loan Amount", key: "loan_amount", type: "number", editable: false},
-            {label: "Portfolio At Risk", key: "principal_arrears", type: "number", editable: false},
-            {label: "Risk Class", key: "risk_classification", type: "text", editable: false},
-            {label: "Days In Arrears", key: "days_in_arrears", type: "text", editable: false},
-            {label: "Last Repay. Date", key: "last_repayment", type: "text", editable: false},
+            {label: "Loan No", key:"loan_number",type: "text",type: "link"},
+            {label: "Member No", key:"member_number",type: "text"},
+            {label: "Member Name", key:"member_name",type: "text"},
+            {label: "Loan Product", key:"product_name",type: "text"},
+            {label: "Loan Amount", key: "loan_amount", type: "number"},
+            {label: "Portfolio At Risk", key: "principal_arrears", type: "number"},
+            {label: "Risk Class", key: "risk_classification", type: "text", txtColor: "txtColor"},
+            {label: "Days In Arrears", key: "days_in_arrears", type: "text"},
+            {label: "Last Repay. Date", key: "last_repayment", type: "text"},
         ])
         const showTotals = ref(true);
         const showActions = ref(false);
@@ -157,7 +159,18 @@ export default{
         const handleSelectionChange = (ids) => {
             selectedIds.value = ids;
         };
-        
+        const handleOpenLink = async(row) =>{
+            const applicationID = row['loan_application_id'];
+            let formData = {
+                company: companyID.value,
+                loan_application: applicationID
+            }
+            await store.dispatch('Loan_Applications/fetchLoanDetails',formData).
+            then(()=>{
+                store.commit('pageTab/ADD_PAGE', {'MMS':'Loan_Statement'});
+                store.state.pageTab.mmsActiveTab = 'Loan_Statement'; 
+            })
+        }
         const handleActionClick = async(rowIndex, action, row) =>{
 
         } 
@@ -294,7 +307,7 @@ export default{
         return{
             showAddButton,showActions,title, searchLoanClassifications, idField, selectedIds, actions, classList, appArrLen,appCount,appResults,appModalVisible,
             currentPage,searchFilters,tableColumns,resetFilters,loadPrev,loadNext,firstPage,lastPage,dropdownOptions,handleDynamicOption,
-            showNextBtn,showPreviousBtn, handleActionClick,displayButtons,printModalVisible,pdfUrl, printTitle,
+            showNextBtn,showPreviousBtn, handleActionClick,displayButtons,printModalVisible,pdfUrl, printTitle,handleOpenLink,
             modal_top, modal_left, modal_width, showLoader, loader, hideLoader, modal_loader, showModalLoader, hideModalLoader,rightsModule,
             handleSelectionChange, pageComponentKey, flex_basis, flex_basis_percentage,showTotals,printLoansList,selectSearchQuantity,selectedValue
         }

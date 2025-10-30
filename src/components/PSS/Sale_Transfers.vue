@@ -146,6 +146,9 @@ export default{
         const fetchSaleItems = async(clientID) =>{
             await store.dispatch('Asset_Units/fetchSaleItems', {company:companyID.value, client: clientID,})
         };
+        const fetchSaleClients = async() =>{
+            await store.dispatch('Asset_Clients/fetchAssetClients', {company:companyID.value})
+        };
         const handleSelectedCustomer = async(option) =>{
             await store.dispatch('Asset_Clients/handleSelectedCustomer', option)
             customerID.value = store.state.Asset_Clients.customerID;
@@ -187,7 +190,7 @@ export default{
                     type:'search-dropdown', label:"Client From", value: accValue.value, componentKey: memComponentKey,
                     selectOptions: accArray, optionSelected: handleSelectedCustomer, required: true,
                     searchPlaceholder: 'Select Client From...', dropdownWidth: '500px',
-                    fetchData: store.dispatch('Asset_Clients/fetchAssetClients', {company:companyID.value}), clearSearch: clearSelectedCustomer
+                    clearSearch: clearSelectedCustomer
                 },
                 {  
                     type:'search-dropdown', label:"Sale Unit", value: itemValue.value, componentKey: prodComponentKey,
@@ -390,6 +393,7 @@ export default{
         const searchTransfers = () =>{
             showLoader();
             showNextBtn.value = false;
+            selectedIds.value = [];
             showPreviousBtn.value = false;
             let formData = {
                 asset_code: asset_code_search.value,
@@ -509,6 +513,7 @@ export default{
         };
         onMounted(()=>{
             searchTransfers();
+            fetchSaleClients();
         })
         return{
             title,idField, searchTransfers, addButtonLabel, searchFilters, resetFilters, tableColumns, transfersList,

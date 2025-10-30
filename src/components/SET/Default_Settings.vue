@@ -606,10 +606,15 @@
                             </div>
                         </div>
                         <div class="flex mb-1.5">
-                            <div class="basis-1/2 flex mr-3">
+                            <div class="basis-1/4 flex mr-3">
                                 <label for="">Current:<em></em></label>
                                 <p class="ml-4 font-bold">{{ assetSaleIncome }}</p>
                                 <button type="button" class="ml-4 text-red-600" @click="removeDefaultSetting('PSS','Asset Sale Income A/c',assetSaleIncome)" v-if="assetSaleIncome"><i class="fa fa-times" aria-hidden="true"></i></button>
+                            </div>
+                            <div class="basis-1/4 flex mr-3">
+                                <label for="">Current:<em></em></label>
+                                <p class="ml-4 font-bold">{{ referralTokenAccount }}</p>
+                                <button type="button" class="ml-4 text-red-600" @click="removeDefaultSetting('PSS','Referral Token Payable A/c',referralTokenAccount)" v-if="referralTokenAccount"><i class="fa fa-times" aria-hidden="true"></i></button>
                             </div>
                         </div>
                         <div class="flex mb-3">
@@ -624,6 +629,18 @@
     
                                 />
                                 <button type="button" class="absolute ml-4 rounded px-2 bg-green-500 text-white" @click="saveDefaultSetting('PSS','Asset Sale Income A/c',ledgerID,ledgerName)"><i class="fa fa-check"></i></button>
+                            </div>
+                            <div class="basis-1/4 mr-3 relative">
+                                <label for="">Referral Token Payable A/c:<em>*</em></label><br />
+                                <SearchableDropdown
+                                    :options="ledgerArr"
+                                    :updateValue="selectedBalancingAccount"
+                                    :dropdownWidth="dropdownWidth"
+                                    @option-selected="handleSelectedLedger"
+                                    @clearSearch="clearSelectedLedger"
+    
+                                />
+                                <button type="button" class="absolute ml-4 rounded px-2 bg-green-500 text-white" @click="saveDefaultSetting('PSS','Referral Token Payable A/c',ledgerID,ledgerName)"><i class="fa fa-check"></i></button>
                             </div>
                         </div>
                         <div class="flex mb-1.5">
@@ -770,6 +787,7 @@ export default defineComponent({
         const saleInterestIncome = ref("");
         const salesAgentAccount = ref("");
         const salesAgentExpenseAccount = ref("");
+        const referralTokenAccount = ref("");
 
 
         const showHMSSettings = () =>{
@@ -1089,6 +1107,8 @@ export default defineComponent({
                         salesAgentAccount.value = response.data[i].setting_value_name;
                     }else if(response.data[i].setting_name === 'Sales Agents Commission Expense A/c'){
                         salesAgentExpenseAccount.value = response.data[i].setting_value_name;
+                    }else if(response.data[i].setting_name === 'Referral Token Payable A/c'){
+                        referralTokenAccount.value = response.data[i].setting_value_name;
                     }
 
                     else if(response.data[i].setting_name === 'Default System Timeout'){
@@ -1186,7 +1206,7 @@ export default defineComponent({
             channelID,channelName,handleSelectedCounter, clearSelectedCounter, fetchCounterChannels,handleSelectedChannel, clearSelectedChannel,outletCounterArr,retailOutletArr,counterChannelArr,
             retailOutlet, outletCounter, counterChannel, salesIncome, invTakeOn, stockControl, stockType,directSaleOrder,updateBatchPrice,prodControl,defaultTimeout,
             mmsAutoPenalizeOption,mmsStrictGuarantorshipOption,mmsBalReminderOption,penaltyAutoTime,
-            saleAssetAccount,saleAssetCommission,assetSaleIncome,saleInterestIncome,salesAgentAccount,salesAgentExpenseAccount
+            saleAssetAccount,saleAssetCommission,assetSaleIncome,saleInterestIncome,salesAgentAccount,salesAgentExpenseAccount,referralTokenAccount
         }
     }
 });

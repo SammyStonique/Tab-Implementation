@@ -90,7 +90,8 @@ export default{
             {label: "Quote Currency", key:"to_currency",type: "text"},
             {label: "Ex Rate Inv", key:"ex_rate_invoice",type: "text"},
             {label: "Ex Rate Rcpt", key:"ex_rate_receipt",type: "text"},
-            {label: "Type", key: "gain_loss_type", type: "text"},
+            {label: "Rcpt#", key:"receipt_no",type: "text"},
+            {label: "Type", key: "gain_loss_type", type: "text", txtColor:"txtColor"},
             {label: "Amount", key:"gain_loss_amount",type: "number"},
         ])
         const showTotals = ref(true);

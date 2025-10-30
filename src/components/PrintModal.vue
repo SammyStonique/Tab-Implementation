@@ -1,7 +1,7 @@
 <template>
   <teleport to="body">
     <transition name="modal-zoom">
-      <div v-if="visible" class="modal-overlay" style="top: 20px; left: 20px; width: 95vw; height: 90vh">
+      <div v-if="visible" :class="['modal-overlay', { minimized: isMinimized }]" style="top: 20px; left: 20px; width: 95vw; height: 90vh">
         <div class="modal" :style="modalStyle">
             <header class="modal-header px-1 bg-orange-100 cursor-move" @mousedown="startDrag" @mousemove="onDrag" @mouseup="stopDrag">
               <div class="flex">
@@ -19,7 +19,7 @@
                 </div>
               </div>
             </header>
-            <div class="modal-content" v-show="!isMinimized">
+            <div class="modal-content" v-if="!isMinimized">
               <div ref="modalRef" class="modal-body">
                 <slot></slot>
               </div>
@@ -58,6 +58,15 @@ const modalRef = ref(null);
 const modalWidth = ref('0px');
 const modalHeight = ref('0px');
 
+const modalBaseHeight = ref(null);
+
+watch(isMinimized, (val) => {
+  if (val) {
+    // Save height before minimizing
+    modalBaseHeight.value = modalRef.value?.offsetHeight;
+  }
+});
+
 const close = () => {
     props.visible = false;
     emit('update:visible', false);
@@ -75,6 +84,7 @@ const minimize = () => {
 const modalStyle = computed(() => ({
   top: `${startTop.value}px`,
   left: `${startLeft.value}px`,
+  height: isMinimized.value ? '35px' : '100%',
   position: 'absolute',
 }));
 
@@ -135,8 +145,13 @@ onUnmounted(() => {
   justify-content: center;
   align-items: center;
   z-index: 1001;
+  pointer-events: auto;
 }
-
+.modal-overlay.minimized {
+  width: auto;
+  height: auto;
+  pointer-events: none; 
+}
 .modal {
   width: 100%;
   height: 100%;
@@ -152,13 +167,18 @@ onUnmounted(() => {
   /* padding: 1px; */
   /* background: #384659; */
   border-bottom: 1px solid #ddd;
+  pointer-events: auto !important;
 }
 
 .modal-content {
   width: 100%;
-  height: 100%;
-  /* padding: 10px; */
-  color: #1f2b37;
+  height: calc(100% - 35px); /* Header height */
+  overflow: auto;
+}
+
+.modal-content[style*="display: none"] {
+  height: 0 !important;
+  overflow: hidden;
 }
 
 .modal-body {

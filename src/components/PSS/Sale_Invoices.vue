@@ -295,7 +295,7 @@ export default{
             showNextBtn.value = false;
             showPreviousBtn.value = false;
             let formData = {
-                client_category: "Customers",
+                client_category: "Sale Clients",
                 txn_type: "INV",
                 client_name: client_name_search.value,
                 client_code: client_code_search.value,

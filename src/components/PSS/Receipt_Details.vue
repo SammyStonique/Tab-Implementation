@@ -104,17 +104,19 @@ export default defineComponent({
         const flex_basis_percentage_additional = ref('');
         const ledgerID = ref('');
         const clientID = ref('');
+        const saleCurrency = ref('');
         const ledgerArray = computed(() => store.state.Ledgers.cashbookLedgerArr);
         const clientArray = computed(() => store.state.Asset_Clients.customerArr);
         const receiptRows = computed(() => store.state.Asset_Clients.receiptItems);
         const receiptColumns = ref([
             {type: "checkbox"},
-            {label: "Description", key:"description", type: "text", editable: false},
-            {label: "Amount", key: "total_amount", type: "number", editable: false},
-            {label: "Paid", key: "total_paid", type: "number", editable: false},
-            {label: "Due Amnt", key: "due_amount", type: "number", editable: false},
+            {label: "Description", key:"description", type: "text"},
+            {label: "Currency", key: "sale_currency", type: "text"},
+            {label: "Amount", key: "total_amount", type: "number"},
+            {label: "Paid", key: "total_paid", type: "number"},
+            {label: "Due Amnt", key: "due_amount", type: "number"},
             {label: "Payment", key: "payment_allocation", type: "number", editable: true},
-            {label: "Balance", key: "bal_after_alloc", type: "text", editable: false},
+            {label: "Balance", key: "bal_after_alloc", type: "text"},
         ])
         const actionsRcptItems = ref([
             {name: 'delete', icon: 'fa fa-minus-circle', title: 'Delete Receipt Item',rightName: 'Adding Client Receipt'},
@@ -181,8 +183,11 @@ export default defineComponent({
                         receiptRows.value[i].payment_allocation = receiptRows.value[i].due_amount;
                         receiptRows.value[i].bal_after_alloc = receiptRows.value[i].due_amount - receiptRows.value[i].payment_allocation;
                         receiptTotals.value = receiptTotals.value - receiptRows.value[i].payment_allocation;
-                        receipt_memo.value += receiptRows.value[i].description + ', '
+                        receipt_memo.value += receiptRows.value[i].description + ', ';
                     }else{
+                        if(receiptTotals.value == 0){
+                            break
+                        }
                         receiptRows.value[i].payment_allocation = receiptTotals.value;
                         receiptRows.value[i].bal_after_alloc = receiptRows.value[i].due_amount - receiptRows.value[i].payment_allocation;
                         receipt_memo.value += receiptRows.value[i].description;
@@ -199,6 +204,9 @@ export default defineComponent({
                         // receiptTotals.value = (receiptTotals.value - receiptRows.value[i].payment_allocation).toFixed(2);
                         receipt_memo.value += receiptRows.value[i].description + ','
                     }else{
+                        if(receiptTotals.value == 0){
+                            break
+                        }
                         receiptRows.value[i].payment_allocation = receiptTotals.value;
                         receiptRows.value[i].bal_after_alloc = receiptRows.value[i].due_amount - receiptRows.value[i].payment_allocation;
                         receipt_memo.value += receiptRows.value[i].description;
@@ -265,6 +273,7 @@ export default defineComponent({
             formFields.value[2].value = formatDate(current_date);
             clientID.value = '';
             ledgerID.value = '';
+            saleCurrency.value = '';
             memComponentKey.value += 1;
             ledComponentKey.value += 1;
             receipt_totals.value = 0;
@@ -302,6 +311,10 @@ export default defineComponent({
                 }
                 formFields.value[7].value = rcptMemo;
             }
+            for(let i=0; i<receiptRows.value.length; i++){
+                saleCurrency.value = receiptRows.value[i]['sale_currency'];
+                break;
+            }
             let formData = {
                 company: companyID.value,
                 txn_type: "RCPT",
@@ -311,15 +324,16 @@ export default defineComponent({
                 description: formFields.value[7].value,
                 issue_date: formFields.value[1].value,
                 due_date: formFields.value[1].value,
-                client_category: "Customers",
+                client_category: "Sale Clients",
                 total_amount: formFields.value[5].value,
                 tax_amount: 0,
                 payment_method: formFields.value[3].value,
                 reference_no: formFields.value[4].value,
                 banking_date: formFields.value[2].value,
-                receipt_items: receiptRows.value
+                receipt_items: receiptRows.value,
+                sale_currency: saleCurrency.value
             }
-            
+
             errors.value = [];
             for(let i=1; i < (formFields.value.length); i++){
                 if(formFields.value[i].value =='' && formFields.value[i].required == true){
@@ -365,7 +379,8 @@ export default defineComponent({
                         toast.error('Failed to create receipt: ' + error.message);
                     } finally {
                         hideLoader();
-                    }              
+                    }
+                    hideLoader();              
                 }
             }
             
