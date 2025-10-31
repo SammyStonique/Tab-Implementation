@@ -70,6 +70,13 @@
             :displayButtons="displayButtons" @handleSubmit="approveSale" @handleReset="handleReset"
         />
     </MovableModal>
+    <MovableModal v-model:visible="refModalVisible" :title="refTitle" :modal_top="modal_top" :modal_left="modal_left" :modal_width="modal_width"
+        :loader="ref_modal_loader" @showLoader="showRefModalLoader" @hideLoader="hideRefModalLoader" @closeModal="closeRefModal">
+        <DynamicForm 
+            :fields="refFormFields" :flex_basis="flex_basis" :flex_basis_percentage="flex_basis_percentage" 
+            :displayButtons="displayButtons" @handleSubmit="dropSaleUnit" @handleReset="handleRefReset"
+        />
+    </MovableModal>
 
 </template>
 
@@ -79,6 +86,7 @@ import { ref, computed, onMounted, onBeforeMount} from 'vue';
 import PageComponent from '@/components/PageComponent.vue'
 import { useStore } from "vuex";
 import { useToast } from "vue-toastification";
+import { useDateFormatter } from '@/composables/DateFormatter';
 import PrintJS from 'print-js';
 import MovableModal from '@/components/MovableModal.vue';
 import DynamicForm from '@/components/NewDynamicForm.vue';
@@ -97,10 +105,14 @@ export default{
         const store = useStore();
         const toast = useToast();
         const loader = ref('');
+        const { formatDate } = useDateFormatter();
+        const current_date = new Date();
         const displayButtons = ref(true);
         const unitComponentKey = ref(0);
         const catSearchComponentKey = ref(0);
+        const prodComponentKey = ref(0);
         const trans_modal_loader = ref('none');
+        const ref_modal_loader = ref('none');
         const member_status = ref('');
         const exit_date = ref('');
         const idField = 'asset_sale_id';
@@ -122,17 +134,21 @@ export default{
         const showPreviousBtn = ref(false);
         const detailsTitle = ref('Sale Documents');
         const transTitle = ref('Approve/Reject Sale');
+        const refTitle = ref('Drop Sale Unit');
         const loanScheduleRows = ref([]);
         const saleItemsRows = ref([]);
         const showActions = ref(false);
         const tabs = ref(['Repayment Schedule','Sold Units']);
         const activeTab = ref(0);
         const appID = ref(null);
+        const saleItemID = ref('');
         const transModalVisible = ref(false);
+        const refModalVisible = ref(false);
+        const itemArray = computed(() => store.state.Asset_Units.itemArr);
         const dropdownWidth = ref("500px")
         const modal_top = ref('200px');
         const modal_left = ref('400px');
-        const modal_width = ref('45vw');
+        const modal_width = ref('30vw');
         const flex_basis = ref('');
         const flex_basis_percentage = ref('');
         const showModal = ref(false);
@@ -166,8 +182,11 @@ export default{
             {label: "Total", key:"sale_total_amount", type: "number"},
         ]);
         const companyID = computed(()=> store.state.userData.company_id);
+        const userID = computed(()=> store.state.userData.user_id);
         const saleID = ref("");
-        const saleAmount = ref(0);
+        const unitSaleAmnt = ref(0);
+        const approvedAmount = ref(0);
+        const computedApprovedAmount = computed(() => {return approvedAmount});
         const client_name_search = ref('');
         const client_code_search = ref("");
         const asset_name_search = ref('');
@@ -481,6 +500,7 @@ export default{
             {label: 'Exempt Penalty', action: 'exempt-penalty', icon: 'fa-ban', colorClass: 'text-yellow-600', rightName: 'Exempting Sale Penalty'},
             {label: 'Unexempt Penalty', action: 'unexempt-penalty', icon: 'fa-undo', colorClass: 'text-green-600' , rightName: 'Exempting Sale Penalty'},
             {label: 'Email Sale Statement', action: 'send-email', icon: 'fa-envelope', colorClass: 'text-indigo-500', rightName: 'Sending PSS Emails'},
+            {label: 'Drop Unit', action: 'drop-unit', icon: 'fa-unlink', colorClass: 'text-blue-500', rightName: 'Approving Asset Sales'},
         ]);
         const handleDynamicOption = async(option) =>{
             if( option == 'exempt-penalty'){
@@ -609,6 +629,30 @@ export default{
                 .finally(()=>{
                     hideLoader();
                 })
+            }else if(option == 'drop-unit'){
+               if(selectedIds.value.length == 1){
+                    let formData = {
+                        company: companyID.value,
+                        asset_sale: selectedIds.value[0],
+                    }
+                    await store.dispatch('Asset_Units/fetchSaleItems', formData);
+                    await axios.post(`api/v1/get-asset-sale-items/`,formData)
+                    .then((response)=>{
+                        if(response.data.length > 0){
+                            refModalVisible.value = true;
+                            flex_basis.value = '1/2';
+                            flex_basis_percentage.value = '50';
+                        }else{
+                            toast.error("No Sale Units Found")
+                        }
+                    })
+                    .catch((error)=>{
+                        console.log(error.message);
+                    })
+                                   
+                }else{
+                    toast.error("Please Select A Single Sale To Drop Unit")
+                }
             }
         };
         const handleShowDetails = async(row) =>{
@@ -687,6 +731,85 @@ export default{
             propModalVisible.value = false;
             handleReset1();
         }
+        const handleSelectedSaleItem = async(option) =>{
+            await store.dispatch('Asset_Units/handleSelectedItem', option)
+            saleItemID.value = store.state.Asset_Units.itemID;
+            unitSaleAmnt.value = store.state.Asset_Units.itemSellingPrice;
+            approvedAmount.value = store.state.Asset_Units.itemSellingPrice;
+        };
+        const clearSelectedSaleItem = async() =>{
+            await store.dispatch('Asset_Units/updateState', {itemID: ''});
+            saleItemID.value = store.state.Asset_Units.itemID;
+        };
+        const checkSaleUnitLimit = (value) =>{
+            if(parseFloat(unitSaleAmnt.value) < parseFloat(value)){
+                toast.error(`Unit Sale Amount is ${unitSaleAmnt.value}`)
+                refFormFields.value[2].value = unitSaleAmnt.value;
+            }
+        };
+        const refFormFields = ref([
+            {  
+                type:'search-dropdown', label:"Sale Unit", value: saleItemID.value, componentKey: prodComponentKey,
+                selectOptions: itemArray, optionSelected: handleSelectedSaleItem, required: true,
+                searchPlaceholder: 'Select Unit...', dropdownWidth: '500px',
+                clearSearch: clearSelectedSaleItem
+            },
+            { type: 'date', name: 'issue_date',label: "Date", value: formatDate(current_date), required: true, maxDate: formatDate(current_date) },
+            { type: 'number', name: 'total_amount',label: "Amount", value: computedApprovedAmount.value, required: true , method: checkSaleUnitLimit},
+            { type: 'number', name: 'installment',label: "Installment", value: 0, required: true },
+            { type: 'number', name: 'principal_amount',label: "Principal Amount", value: 0, required: true },
+            { type: 'number', name: 'interest_amount',label: "Interest Amount", value: 0, required: false},
+        ]);
+        const handleRefReset = () =>{
+            for(let i=0; i < refFormFields.value.length; i++){
+                refFormFields.value[i].value = '';
+            }
+            saleItemID.value = null;
+            prodComponentKey.value +=1;
+        }
+        const showRefModalLoader = () =>{
+            ref_modal_loader.value = "block";
+        }
+        const hideRefModalLoader = () =>{
+            ref_modal_loader.value = "none";
+        }
+        const dropSaleUnit = async() =>{
+            showRefModalLoader();
+            let formData = {
+                sale_item: saleItemID.value,
+                date: refFormFields.value[1].value,
+                amount: refFormFields.value[2].value,
+                installment: refFormFields.value[3].value,
+                principal_amount: refFormFields.value[4].value,
+                interest_amount: refFormFields.value[5].value,
+                user: userID.value,
+                company: companyID.value
+            }
+            axios.post(`api/v1/drop-asset-sale-unit/`,formData)
+            .then((response)=>{
+                if(response.data.msg == "Success"){
+                    toast.success("Success")
+                    closeRefModal();
+                    searchAssetSales();
+                }else{
+                    toast.error("Error Disbursing Loan")
+                }                   
+            })
+            .catch((error)=>{
+                console.log(error.message);
+                toast.error(error.message)
+                hideRefModalLoader();
+            })
+            .finally(()=>{
+                hideRefModalLoader();
+            })
+        
+        };
+        const closeRefModal = () =>{
+            refModalVisible.value = false;
+            handleRefReset();
+            hideRefModalLoader();
+        };
         onBeforeMount(()=>{
             searchAssetSales();
             
@@ -698,7 +821,8 @@ export default{
             submitButtonLabel, showModal, addNewSale, showLoader, loader, hideLoader, importMembers, removeAssetSale, removeAssetSales,
             handleSelectionChange,addingRight,removingRight,rightsModule,printSalesList,selectSearchQuantity,selectedValue,
             modal_left,modal_top,modal_width,trans_modal_loader,formFields,transModalVisible,transTitle,showTransModalLoader,hideTransModalLoader,approveSale,closeTransModal,
-            handleReset,dropdownOptions,handleDynamicOption,member_status,exit_date,handleShowDetails,loanScheduleRows,saleItemsRows,itemColumns,showActions,tabs,selectTab,activeTab
+            handleReset,dropdownOptions,handleDynamicOption,member_status,exit_date,handleShowDetails,loanScheduleRows,saleItemsRows,itemColumns,showActions,tabs,selectTab,activeTab,
+            refTitle,refFormFields,refModalVisible,ref_modal_loader,handleRefReset,showRefModalLoader,hideRefModalLoader,closeRefModal,dropSaleUnit
         }
     }
 };

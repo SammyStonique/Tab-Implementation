@@ -10,6 +10,7 @@ const state = {
   itemArr: [],
   itemArray: [],
   itemID: '',
+  itemSellingPrice: 0,
   unitNumber: '',
   unitPrice: 0,
   selectedUnit: null,
@@ -28,6 +29,7 @@ const mutations = {
     state.itemArr = [];
     state.itemArray = [];
     state.itemID = "";
+    state.itemSellingPrice = 0;
     state.unitNumber = "";
     state.unitPrice = 0;
     state.selectedAsset = null;
@@ -155,6 +157,7 @@ const actions = {
     const selectedItem = state.itemsList.find(unit => (unit.unit_number + " - " + unit.asset_sale.asset.name + " (" + unit.sale_total_amount+ ")") === option);
     if (selectedItem) {
         state.itemID = selectedItem.asset_sale_item_id;
+        state.itemSellingPrice = selectedItem.total_amount;
     }
       
   },
