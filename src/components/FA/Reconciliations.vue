@@ -87,7 +87,7 @@ export default{
             {type: "checkbox"},
             {label: "Date", key:"date"},
             {label: "Cashbook", key:"cashbook"},
-            {label: "Statement Bal.", key:"statement_balance"},
+            {label: "Statement Bal.", key:"formatted_statement_balance"},
             {label: "Cashbook Bal.", key:"cashbook_balance"},
             {label: "Variance", key:"variance"},
             {label: "Status", key:"status", textColor:"textColor"},
@@ -321,7 +321,7 @@ export default{
                     bank_reconciliation: reconID
                 }
                 await store.dispatch('Ledgers/fetchBankReconciliation',formData)
-                await store.dispatch('Ledgers/updateState',{reconciliationLedgerID: row['cashbook_id'], reconciliationLedgerName: row['cashbook'], cashbookArray: [], cbkArray:row['cashbook_txns'], cbkOpeningBalance:row['opening_cashbook_balance'], cbkRunningBalance:row['cashbook_balance'], bnkArray: row['bank_txns'],
+                await store.dispatch('Ledgers/updateState',{reconciliationLedgerID: row['cashbook_id'], reconciliationLedgerName: row['cashbook'], cashbookArray: [], cbkArray:row['cashbook_txns'], cbkOpeningBalance:row['statement_balance'], cbkRunningBalance:row['statement_balance'], bnkArray: row['bank_txns'],
                  cbkDebitTotal: Number(row['deposits_transit_amount']), cbkCreditTotal: Number(row['unpresented_cheques_amount']), cbkDebitCount: Number(row['deposits_transit_count']), cbkCreditCount: Number(row['unpresented_cheques_count'])});
                 store.commit('pageTab/ADD_PAGE', {'FA':'Bank_Reconciliation'});
                 store.state.pageTab.faActiveTab = 'Bank_Reconciliation'; 

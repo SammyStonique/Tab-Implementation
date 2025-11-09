@@ -179,7 +179,8 @@ export default{
             {label: "Selling Price", key:"unit_selling_price", type: "number"},
             {label: "Discount", key:"discount", type: "number"},
             {label: "Charges", key:"charges_amount", type: "number"},
-            {label: "Total", key:"sale_total_amount", type: "number"},
+            {label: "Total Amount", key:"sale_total_amount", type: "number"},
+            {label: "Transferred", key:"transfer_status", type: "text"},
         ]);
         const companyID = computed(()=> store.state.userData.company_id);
         const userID = computed(()=> store.state.userData.user_id);

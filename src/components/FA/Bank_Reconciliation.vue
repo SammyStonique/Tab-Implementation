@@ -94,6 +94,7 @@
             <div class="px-3 min-h-[50px]">
                 <DynamicTable :key="tableKey" :columns="journalColumns" :rows="journalRows" :actions="reconActions" :showActions="showActions" :idField="idField" @action-click="deleteReconLine"/>
             </div>
+            <p class="text-red-500 font-bold">Warning: Irreversible After Saving Reconciliation!</p>
         </template>
         </DynamicForm>
     </MovableModal>
@@ -103,6 +104,9 @@
             :fields="formFields3" :flex_basis="flex_basis1" :flex_basis_percentage="flex_basis_percentage1" 
             :displayButtons="displayButtons" @handleSubmit="postReconcilingItem" @handleReset="handleReset2"
         >
+        <template v-slot:additional-content> 
+            <p class="text-red-500 font-bold">Warning: Irreversible After Saving Reconciliation!</p>
+        </template>
         </DynamicForm>
     </MovableModal>
 </template>
@@ -220,8 +224,8 @@ export default defineComponent({
             {name: 'delete', icon: 'fa fa-minus-circle', title: 'Remove Journal Line', rightName: "Adding Journal"},
         ])
 
-        const deleteJournalLine = (rowIndex, action, row) =>{
-            if(row.journal_no != '-'){
+        const deleteJournalLine = async(rowIndex, action, row) =>{
+            if(row.journal_no != '-' && !row.quick_recon_txn){
                 toast.error('You Cannot Delete This Line!');
             }else{
                 if (row.debit_amount > 0) {
@@ -235,7 +239,7 @@ export default defineComponent({
                     let variance = parseFloat((formFields.value[4].value || '0').toString().replace(/,/g, ''));
                     formFields.value[4].value = Number(variance + Number(row.credit_amount)).toLocaleString();
                 }
-                store.dispatch('Ledgers/removeCbkLine', rowIndex);
+                await store.dispatch('Ledgers/removeCbkLine', rowIndex);
             }
             
         }
@@ -759,7 +763,8 @@ export default defineComponent({
                         "total_amount": formFields2.value[3].value,
                         "credit_amount": 0,
                         "reconciled": "Yes",
-                        "journal_txns": journalRows.value
+                        "journal_txns": journalRows.value,
+                        "quick_recon_txn": true,
                     }
                     await store.dispatch('Ledgers/addQuickReconJournal', obj1);  
                     markAsReconciled(obj1) 
@@ -778,7 +783,8 @@ export default defineComponent({
                         "formatted_debit_amount": 0,
                         "formatted_credit_amount": Number(formFields2.value[3].value).toLocaleString(),
                         "reconciled": "Yes",
-                        "journal_txns": journalRows.value
+                        "journal_txns": journalRows.value,
+                        "quick_recon_txn": true,
                     } 
                     await store.dispatch('Ledgers/addQuickReconJournal', obj2);  
                     markAsReconciled(obj2) 
@@ -808,6 +814,7 @@ export default defineComponent({
                     "reconciled": "Yes",
                     "reconciling_item": true,
                     "reconciling_item_id": null,
+                    "quick_recon_txn": true,
                 }
                 await store.dispatch('Ledgers/addQuickReconJournal', obj1);
                 markAsReconciled(obj1) 
@@ -826,6 +833,7 @@ export default defineComponent({
                     "reconciled": "Yes",
                     "reconciling_item": true,
                     "reconciling_item_id": null,
+                    "quick_recon_txn": true,
                 } 
                 await store.dispatch('Ledgers/addQuickReconJournal', obj2); 
                 markAsReconciled(obj2) 

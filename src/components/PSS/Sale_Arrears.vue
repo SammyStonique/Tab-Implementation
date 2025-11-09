@@ -122,6 +122,7 @@ export default{
         ])
         const client_name_search = ref("");
         const client_code_search = ref("");
+        const sale_code_search = ref("");
         const date_search = ref("");
         const assets_array = computed(()=> store.state.Sale_Assets.assetArr);
         const handleSelectedAsset = async(option) =>{
@@ -140,6 +141,7 @@ export default{
                 fetchData: store.dispatch('Sale_Assets/fetchSaleAssets', {company:companyID.value}),
                 clearSearch: clearSelectedAsset
             },
+            {type:'text', placeholder:"Sale Code...", value: sale_code_search, width:32},
             {type:'text', placeholder:"Client Code...", value: client_code_search, width:32},
             {type:'text', placeholder:"Client Name...", value: client_name_search, width:48},
             {type:'date', placeholder:"Date...", value: date_search, width:32, title: "As At Date Search"},
@@ -327,6 +329,7 @@ export default{
             selectedIds.value = [];
             showPreviousBtn.value = false;
             let formData = {
+                sale_code: sale_code_search.value,
                 client_code: client_code_search.value,
                 client_name: client_name_search.value,
                 date: date_search.value,
@@ -394,6 +397,7 @@ export default{
             selectedValue.value = 50;
             propComponentKey.value += 1;
             assetID.value = ""
+            sale_code_search.value = "";
             client_name_search.value = "";
             client_code_search.value = "";
             date_search.value = "";
@@ -403,6 +407,7 @@ export default{
             appModalVisible.value = false;
             showLoader();
             let formData = {
+                sale_code: sale_code_search.value,
                 client_code: client_code_search.value,
                 client_name: client_name_search.value,
                 date: date_search.value,

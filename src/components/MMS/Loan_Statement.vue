@@ -60,24 +60,7 @@
                             </div>
                         </div>
                     </div>
-                    <!-- <div v-if="activeTab == 2">
-                        <div class="relative w-[100%] bg-white z-50 px-6">
-                            <FilterBar 
-                                :showAddButton="showAddButton"
-                                :filters="searchFilters" 
-                                @search="searchLoanTransactions"
-                                @reset="resetFilters"
-                                @printList="printLoanTransactions"
-                                @printExcel="printExcel"
-                                @printCSV="printCSV"
-                                :dropdownOptions="dropdownOptions"
-                                @handleDynamicOption="handleDynamicOption"
-                            />
-                        </div>
-                        <div class="table w-[100%] top-[17.1rem] z-30 px-6">
-                            <DynamicTable :key="statementTableKey" :rightsModule="rightsModule" :columns="statementColumns" :rows="statementRows" :idField="idFieldStatement" :showActions="showActions" :actions="actionsStatement"/>
-                        </div>
-                    </div>           -->
+                              
                     <div v-if="activeTab == 1" class="text-left"> 
                         <button @click="printSchedule" class="rounded bg-green-400 cursor-pointer text-sm mr-2 mb-1.5  text-white px-2 py-1.5"><i class="fa fa-check-circle text-xs mr-1.5" aria-hidden="true"></i>Print Schedule</button>                                   
                         <DynamicTable :key="tableKey" :rightsModule="rightsModule" :columns="scheduleColumns" :rows="computedScheduleRows" :idField="idFieldSchedule" :showTotals="showTotals" :actions="actionsSchedule" @action-click="scheduleActionClick" />
@@ -120,6 +103,27 @@
                     </div>  
                     <div v-show="activeTab == 7">                  
                         <DynamicTable :key="documentTableKey" :columns="activityColumns" :rows="computedActivityRows" :showActions=false />
+                    </div>
+                    <div v-if="activeTab == 8">
+                        <div class="relative w-[100%] bg-white z-50 px-6">
+                            <FilterBar 
+                                :showAddButton="showAddButton"
+                                :filters="searchFilters" 
+                                @search="searchLoanTransactions"
+                                @reset="resetFilters"
+                                @printList="printLoanTransactions"
+                                @printExcel="printExcel"
+                                @printCSV="printCSV"
+                                :dropdownOptions="dropdownOptions"
+                                @handleDynamicOption="handleDynamicOption"
+                                v-model:printModalVisible="printModalVisible1"
+                                :printTitle="printTitle1"
+                                :pdfUrl="pdfUrl"
+                            />
+                        </div>
+                        <div class="table w-[100%] top-[17.1rem] z-30 px-6">
+                            <DynamicTable :key="statementTableKey" :rightsModule="rightsModule" :columns="statementColumns" :rows="statementRows" :idField="idFieldStatement" :showActions="showActions" :actions="actionsStatement"/>
+                        </div>
                     </div> 
                 </div>
             </div>
@@ -160,8 +164,10 @@ export default defineComponent({
         const allowedRights = ref([]);
         const depModalVisible = ref(false);
         const printModalVisible = ref(false);
+        const printModalVisible1 = ref(false);
         const pdfUrl = ref(null);
         const printTitle = ref('Print Loan Statement');
+        const printTitle1 = ref('Print Loan Ledger');
         const displayButtons = ref(true);
         const flex_basis = ref('');
         const flex_basis_percentage = ref('');
@@ -170,8 +176,7 @@ export default defineComponent({
         const modal_width = ref('30vw');
         const companyID = computed(()=> store.state.userData.company_id);
         const userID = computed(()=> store.state.userData.user_id);
-        // const tabs = ref(['Loan Details','Armotization Schedule','Loan Statement','Statement','Loan Repayment','Loan Guarantors','Loan Securities','Loan Documents']);
-        const tabs = ref(['Loan Details','Armotization Schedule','Statement','Loan Repayment','Loan Guarantors','Loan Securities','Loan Documents', 'Loan Activity Logs']);
+        const tabs = ref(['Loan Details','Armotization Schedule','Statement','Loan Repayment','Loan Guarantors','Loan Securities','Loan Documents', 'Loan Activity Logs','Loan Ledger']);
         const activeTab = ref(0);
         const mainComponentKey = ref(0);
         const tableKey = ref(0);
@@ -299,7 +304,7 @@ export default defineComponent({
         const searchLoanTransactions = async() =>{
             showLoader();
             let formData = {
-                client: loanDetails.value.loan_ledger_id,
+                posting_account: loanDetails.value.loan_ledger_id,
                 company: companyID.value,
                 date_from: from_date_search.value,
                 date_to: to_date_search.value,
@@ -417,7 +422,6 @@ export default defineComponent({
             let formData = {
                 client: loanDetails.value.loan_ledger_id,
                 loan_application: loanDetails.value.loan_application_id,
-                historical_loan: null,
                 company: companyID.value,
                 date_from: from_date_search.value,
                 date_to: to_date_search.value,
@@ -426,10 +430,11 @@ export default defineComponent({
             .post("api/v1/loan-transactions-pdf/", formData, { responseType: 'blob' })
             .then((response)=>{
                 if(response.status == 200){
-                    const blob1 = new Blob([response.data]);
-                    // Convert blob to URL
+                    const blob1 = new Blob([response.data], { type: 'application/pdf' });
                     const url = URL.createObjectURL(blob1);
-                    PrintJS({printable: url, type: 'pdf'});
+                    // PrintJS({printable: url, type: 'pdf'});
+                    pdfUrl.value = url;
+                    printModalVisible1.value = true;
                 }
             })
             .catch((error)=>{
@@ -513,13 +518,7 @@ export default defineComponent({
                 historical_loan: null,
                 page_size: "1000"
             }
-            // if(index == 2){
-            //     activeTab.value = index;
-            //     await store.dispatch('Loan_Applications/fetchLoanTransactions',formData1)
-            //     .then(()=>{
-            //         hideLoader();
-            //     })
-            // }
+            
             if(index == 2){
                 activeTab.value = index;
                 await store.dispatch('Loan_Applications/fetchLoanStatement',formData1)
@@ -550,6 +549,13 @@ export default defineComponent({
             else if( index == 5){
                 activeTab.value = index;
                 await store.dispatch('Loan_Applications/fetchLoanSecurities',formData)
+                .then(()=>{
+                    hideLoader();
+                })
+            }
+            else if(index == 8){
+                activeTab.value = index;
+                await store.dispatch('Loan_Applications/fetchLoanTransactions',formData1)
                 .then(()=>{
                     hideLoader();
                 })
@@ -925,7 +931,7 @@ export default defineComponent({
             statementColumns,statement1Columns, actionsStatement, loanDetails,loanProduct,loanMember, scheduleActionClick,showAddButton,searchLoanTransactions,printLoanTransactions,handleDynamicOption,
             scheduleActionClick,tnt_modal_loader, dep_modal_loader, util_modal_loader, depModalVisible, displayButtons,guarantorColumns,securityColumns, printLoanStatement,handleDynamicOption1,
             documentActionClick,documentColumns,documentTableKey,actionsDocument,computedDocumentRows,activityColumns,computedActivityRows,
-            modal_top, modal_left, modal_width, showDepModalLoader, hideDepModalLoader, handleDepReset,
+            modal_top, modal_left, modal_width, showDepModalLoader, hideDepModalLoader, handleDepReset,printModalVisible1, printTitle1,
             flex_basis, flex_basis_percentage, paymentActionClick,handleOpenLink,rightsModule,isDisabled,
         }
     }
