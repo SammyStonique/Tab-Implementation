@@ -251,7 +251,12 @@ export default{
                 formFields1.value[2].hidden = false;
                 formFields1.value[3].hidden = false;
                 formFields1.value[4].hidden = true;
+                formFields1.value[5].hidden = true;
+                formFields1.value[6].hidden = true;
+                formFields1.value[7].hidden = true;
                 formFields1.value[4].required = false;
+                formFields1.value[5].required = false;
+                formFields1.value[8].required = false;
                 formFields1.value[1].required = true;
                 formFields1.value[2].required = true;
                 formFields1.value[3].required = true;
@@ -259,8 +264,13 @@ export default{
                 formFields1.value[1].hidden = true;
                 formFields1.value[2].hidden = true;
                 formFields1.value[3].hidden = true;
-                formFields1.value[4].hidden = false;
+                formFields1.value[4].hidden = false; 
+                formFields1.value[5].hidden = false;
+                formFields1.value[6].hidden = false;
+                formFields1.value[7].hidden = false;              
                 formFields1.value[4].required = true;
+                formFields1.value[5].required = true;
+                formFields1.value[8].required = true;
                 formFields1.value[1].required = false;
                 formFields1.value[2].required = false;
                 formFields1.value[3].required = false;
@@ -274,6 +284,9 @@ export default{
                 { type: 'text', name: 'installment_from',label: "Installment From", value: 1, required: true, hidden: true },
                 { type: 'text', name: 'installment_to',label: "Installment To", value: 1, required: true, hidden: true },
                 { type: 'number', name: 'loan_amount',label: "Loan Amount", value: 0, required: false, hidden: true },
+                { type: 'number', name: 'installments',label: "Installments", value: 0, required: false, hidden: true },
+                { type: 'number', name: 'principal_amount',label: "Principal Amount", value: 0, required: false, hidden: true },
+                { type: 'number', name: 'interest_amount',label: "Interest Amount", value: 0, required: false, hidden: true },
                 { type: 'date', name: 'new_repayment_date',label: "New Date", value: '', required: false },
                 { type: 'text-area', name: 'loan_remarks',label: "Loan Remarks", value: null, required: false,textarea_rows: '3', textarea_cols: '56'}
             ]
@@ -304,8 +317,11 @@ export default{
                 installment_from: formFields1.value[2].value,
                 installment_to: formFields1.value[3].value,
                 loan_balance: formFields1.value[4].value,
-                new_repayment_date: formFields1.value[5].value,
-                loan_remarks: formFields1.value[6].value || null,
+                installments: formFields1.value[5].value,
+                principal_amount: formFields1.value[6].value,
+                interest_amount: formFields1.value[7].value,
+                new_repayment_date: formFields1.value[8].value,
+                loan_remarks: formFields1.value[9].value || null,
                 user: userID.value,
                 company: companyID.value
             }

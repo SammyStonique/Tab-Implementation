@@ -28,6 +28,7 @@
                                 <option value="Member Creation">Member Creation</option>
                                 <option value="Member Portal Invitation">Member Portal Invitation</option>
                                 <option value="Sale Client Receipt">Sale Client Receipt</option>
+                                <option value="Client Sale Reminder">Client Sale Reminder</option>
                             </select>
                         </div>
                         <div class="basis-1/3">

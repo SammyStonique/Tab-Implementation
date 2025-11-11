@@ -11,6 +11,7 @@
             @removeSelectedItems="removeTemplates"
             @printList="printList"
             :addingRight="addingRight"
+            :removingRight="removingRight"
             :rightsModule="rightsModule"
             :columns="tableColumns"
             :rows="templatesList"
@@ -41,7 +42,7 @@ import { useStore } from "vuex";
 import { useToast } from "vue-toastification";
 
 export default{
-    name: 'Email_Templates',
+    name: 'Templates',
     components:{
         PageComponent,
     },
@@ -50,10 +51,11 @@ export default{
         const toast = useToast();
         const loader = ref('none');
         const modal_loader = ref('none');
-        const idField = 'email_template_id';
+        const idField = 'asset_sale_template_id';
         const addButtonLabel = ref('New Template');
-        const addingRight = ref('Creating Email Template');
-        const rightsModule = ref('Settings');
+        const addingRight = ref('Creating Template');
+        const removingRight = ref('Deleting Template');
+        const rightsModule = ref('PSS');
         const submitButtonLabel = ref('Add');
         const editorComponentKey = ref(0);
         const selectedIds = ref([]);
@@ -67,8 +69,8 @@ export default{
         const showNextBtn = ref(false);
         const showPreviousBtn = ref(false);
         const propModalVisible = ref(false);
-        const isEditing = computed(()=> store.state.Email_Templates.isEditing);
-        const selectedTemplate = computed(()=> store.state.Email_Templates.selectedTemplate);
+        const isEditing = computed(()=> store.state.Asset_Templates.isEditing);
+        const selectedTemplate = computed(()=> store.state.Asset_Templates.selectedTemplate);
         const showModal = ref(false);
         const tableColumns = ref([
             {type: "checkbox"},
@@ -76,26 +78,23 @@ export default{
             {label: "Type", key:"template_type"},
         ])
         const actions = ref([
-            {name: 'edit', icon: 'fa fa-edit', title: 'Edit Template', rightName: 'Editing Email Template'},
-            {name: 'delete', icon: 'fa fa-trash', title: 'Delete Template', rightName: 'Deleting Email Template'},
+            {name: 'edit', icon: 'fa fa-edit', title: 'Edit Template', rightName: 'Editing Template'},
+            {name: 'delete', icon: 'fa fa-trash', title: 'Delete Template', rightName: 'Deleting Template'},
         ])
         const companyID = computed(()=> store.state.userData.company_id);
         const name_search = computed({
-            get: () => store.state.Email_Templates.name_search,
-            set: (value) => store.commit('Email_Templates/SET_SEARCH_FILTERS', {"name_search":value}),
+            get: () => store.state.Asset_Templates.name_search,
+            set: (value) => store.commit('Asset_Templates/SET_SEARCH_FILTERS', {"name_search":value}),
         });
         const type_search = computed({
-            get: () => store.state.Email_Templates.type_search,
-            set: (value) => store.commit('Email_Templates/SET_SEARCH_FILTERS', {"type_search":value}),
+            get: () => store.state.Asset_Templates.type_search,
+            set: (value) => store.commit('Asset_Templates/SET_SEARCH_FILTERS', {"type_search":value}),
         });
         const searchFilters = ref([
             {type:'text', placeholder:"Template Name...", value: name_search, width:56,},
             {
                 type:'dropdown', placeholder:"Template Type..", value: type_search, width:56,
-                options: [{text:'Customized',value:'Customized'},{text:'Tenant Invoice',value:'Tenant Invoice'},{text:'Tenant Receipt',value:'Tenant Receipt'},{text:'Tenant Balance Reminder',value:'Tenant Balance Reminder'},{text:'Tenant Creation',value:'Tenant Creation'},{text:'Tenant Portal Invitation',value:'Tenant Portal Invitation'},{text:'Tenant Meter Reading',value:'Tenant Meter Reading'},
-                            {text:'Tenant Statement',value:'Tenant Statement'},{text:'Employee Payslip',value:'Employee Payslip'},{text:'Customer Invoice',value:'Customer Invoice'},{text:'Customer Receipt',value:'Customer Receipt'},{text:'Member Receipt',value:'Member Receipt'},{text:'Customer Balance Reminder',value:'Customer Balance Reminder'},{text:'Member Creation',value:'Member Creation'},{text:'Member Portal Invitation',value:'Member Portal Invitation'},
-                            {text:'Member Loan Balance',value:'Member Loan Balance'},{text:'Member Loan Statement',value:'Member Loan Statement'},{text:'Sale Client Statement',value:'Sale Client Statement'},{text:'Sale Client Receipt',value:'Sale Client Receipt'},{text:'Client Sale Reminder',value:'Client Sale Reminder'}
-                ]
+                options: [{text:'Offer Letter',value:'Offer Letter'},{text:'Change of Ownership',value:'Change of Ownership'},{text:'Sale Agreement',value:'Sale Agreement'}]
             },
         ]);
         const handleSelectionChange = (ids) => {
@@ -117,10 +116,10 @@ export default{
             if(selectedIds.value.length == 1){
                 let formData = {
                     company: companyID.value,
-                    email_template: selectedIds.value
+                    asset_sale_template: selectedIds.value
                 }
                 try{
-                    const response = await store.dispatch('Email_Templates/deleteTemplate',formData)
+                    const response = await store.dispatch('Asset_Templates/deleteTemplate',formData)
                     if(response && response.status == 200){
                         toast.success("Template Removed Succesfully");
                         searchTemplates();
@@ -143,10 +142,10 @@ export default{
             if(selectedIds.value.length){
                 let formData = {
                     company: companyID.value,
-                    email_template: selectedIds.value
+                    asset_sale_template: selectedIds.value
                 }
                 try{
-                    const response = await store.dispatch('Email_Templates/deleteTemplate',formData)
+                    const response = await store.dispatch('Asset_Templates/deleteTemplate',formData)
                     if(response && response.status == 200){
                         toast.success("Template(s) Removed Succesfully");
                         searchTemplates();
@@ -172,6 +171,7 @@ export default{
         const searchTemplates = () =>{
             showLoader();
             showNextBtn.value = false;
+            selectedIds.value = [];
             showPreviousBtn.value = false;
             let formData = {
                 template_name: name_search.value,
@@ -180,10 +180,10 @@ export default{
                 page_size: selectedValue.value
             } 
             axios
-            .post(`api/v1/email-templates-search/?page=${currentPage.value}`,formData)
+            .post(`api/v1/asset-sale-templates-search/?page=${currentPage.value}`,formData)
             .then((response)=>{
                 templatesList.value = response.data.results;
-                store.commit('Email_Templates/LIST_TEMPLATES', templatesList.value)
+                store.commit('Asset_Templates/LIST_TEMPLATES', templatesList.value)
                 propResults.value = response.data;
                 propArrLen.value = templatesList.value.length;
                 propCount.value = propResults.value.count;
@@ -207,7 +207,7 @@ export default{
             searchTemplates(selectedValue.value);
         };
         const resetFilters = () =>{
-            store.commit('Email_Templates/RESET_SEARCH_FILTERS')
+            store.commit('Asset_Templates/RESET_SEARCH_FILTERS')
             searchTemplates();
         }
         const loadPrev = () =>{
@@ -241,32 +241,32 @@ export default{
             // scrollToTop();
         }
         const addNewTemplate = async() =>{
-            await store.dispatch("Email_Templates/updateState",{selectedTemplate:null, isEditing:false})
-            store.commit('pageTab/ADD_PAGE', {'SET':'Design_Email_Template'});
-            store.state.pageTab.setActiveTab = 'Design_Email_Template';    
+            await store.dispatch("Asset_Templates/updateState",{selectedTemplate:null, isEditing:false})
+            store.commit('pageTab/ADD_PAGE', {'PSS':'Design_Template'});
+            store.state.pageTab.pssActiveTab = 'Design_Template';    
             
         }
         const handleActionClick = async(rowIndex, action, row) =>{
             if( action == 'edit'){
-                const templateID = row['email_template_id'];
+                const templateID = row['asset_sale_template_id'];
                 let formData = {
                     company: companyID.value,
-                    email_template: templateID
+                    asset_sale_template: templateID
                 }
 
-                await store.dispatch('Email_Templates/fetchTemplate',formData)
+                await store.dispatch('Asset_Templates/fetchTemplate',formData)
                 .then(()=>{
-                    store.commit('pageTab/ADD_PAGE', {'SET':'Design_Email_Template'});
-                    store.state.pageTab.setActiveTab = 'Design_Email_Template'; 
+                    store.commit('pageTab/ADD_PAGE', {'PSS':'Design_Template'});
+                    store.state.pageTab.pssActiveTab = 'Design_Template'; 
                 })
 
             }else if(action == 'delete'){
-                const templateID = [row['email_template_id']];
+                const templateID = [row['asset_sale_template_id']];
                 let formData = {
                     company: companyID.value,
-                    email_template: templateID
+                    asset_sale_template: templateID
                 }
-                await store.dispatch('Email_Templates/deleteTemplate',formData).
+                await store.dispatch('Asset_Templates/deleteTemplate',formData).
                 then(()=>{
                     searchTemplates();
                 })
@@ -283,9 +283,9 @@ export default{
         })
         return{
             searchTemplates,resetFilters, addButtonLabel, searchFilters, tableColumns, templatesList,
-            propResults, propArrLen, propCount, pageCount, showNextBtn, showPreviousBtn,selectSearchQuantity,selectedValue,
+            currentPage,propResults, propArrLen, propCount, pageCount, showNextBtn, showPreviousBtn,selectSearchQuantity,selectedValue,
             loadPrev, loadNext, firstPage, lastPage, idField, actions, handleActionClick,
-            submitButtonLabel, addNewTemplate, showLoader, loader,handleSelectionChange,removeTemplate, removeTemplates,addingRight,rightsModule
+            submitButtonLabel, addNewTemplate, showLoader, loader,handleSelectionChange,removeTemplate, removeTemplates,addingRight,removingRight,rightsModule
         }
     }
 };

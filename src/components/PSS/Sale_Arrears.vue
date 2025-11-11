@@ -74,7 +74,7 @@ export default{
         const showAddButton = ref(false);
         const title = ref('');
         const companyID = computed(()=> store.state.userData.company_id);
-        const idField = 'tenant_lease_id';
+        const idField = 'asset_sale_id';
         const rightsModule = ref('PSS');
         const assetID = ref('');
         const selectedIds = ref([]);

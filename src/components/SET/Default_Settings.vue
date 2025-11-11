@@ -538,7 +538,7 @@
                             
                         </div>
                         <div class="flex mb-3">
-                            <div class="basis-1/4 mr-8 relative">
+                            <div class="basis-1/4 mr-3 relative">
                                 <label for="">Sale Asset Control A/c:<em>*</em></label><br />
                                 <SearchableDropdown
                                     :options="ledgerArr"
@@ -550,7 +550,7 @@
                                 />
                                 <button type="button" class="absolute ml-4 rounded px-2 bg-green-500 text-white" @click="saveDefaultSetting('PSS','Sale Asset Control A/c',ledgerID,ledgerName)"><i class="fa fa-check"></i></button>
                             </div>
-                            <div class="basis-1/4 mr-8 relative">
+                            <div class="basis-1/4 mr-3 relative">
                                 <label for="">Sales Agents Commission Payable A/c:<em>*</em></label><br />
                                 <SearchableDropdown
                                     :options="ledgerArr"
@@ -561,8 +561,14 @@
                                   
                                 />
                                 <button type="button" class="absolute ml-4 rounded px-2 bg-green-500 text-white" @click="saveDefaultSetting('PSS','Sales Agents Commission Payable A/c',ledgerID,ledgerName)"><i class="fa fa-check"></i></button>
-                            </div>
-                            <div class="basis-1/6 mr-3 relative">
+                            </div>                          
+                            <div class="basis-1/4 relative">
+                                <label for="">Sale Penalty Automation:<em>*</em></label><br />
+                                <select  v-model="pssAutoPenalizeOption" name="" class="bg-slate-50 rounded border border-gray-400 text-sm pl-2 pt-2 w-full">
+                                    <option value="Yes">Yes</option>
+                                    <option value="No">No</option>
+                                </select>
+                                <button type="button" class="absolute ml-2 rounded px-2 bg-green-500 text-white" @click="saveDefaultSetting('PSS','Sale Penalty Automation',pssAutoPenalizeOption,pssAutoPenalizeOption)"><i class="fa fa-check"></i></button>
                             </div>
                         </div>
                         <div class="flex mb-1.5">
@@ -578,7 +584,7 @@
                             </div>
                         </div>
                         <div class="flex mb-3">
-                            <div class="basis-1/4 mr-8 relative">
+                            <div class="basis-1/4 mr-3 relative">
                                 <label for="">Sale Asset Commission Income A/c:<em>*</em></label><br />
                                 <SearchableDropdown
                                     :options="incomeLedgerArr"
@@ -590,7 +596,7 @@
                                 />
                                 <button type="button" class="absolute ml-4 rounded px-2 bg-green-500 text-white" @click="saveDefaultSetting('PSS','Sale Asset Commission Income A/c',ledgerID,ledgerName)"><i class="fa fa-check"></i></button>
                             </div>
-                            <div class="basis-1/4 mr-8 relative">
+                            <div class="basis-1/4 mr-3 relative">
                                 <label for="">Sales Agents Commission Expense A/c:<em>*</em></label><br />
                                 <SearchableDropdown
                                     :options="expenseLedgerArr"
@@ -602,7 +608,10 @@
                                 />
                                 <button type="button" class="absolute ml-4 rounded px-2 bg-green-500 text-white" @click="saveDefaultSetting('PSS','Sales Agents Commission Expense A/c',ledgerID,ledgerName)"><i class="fa fa-check"></i></button>
                             </div>
-                            <div class="basis-1/6 relative mr-3">
+                            <div class="basis-1/4 relative">
+                                <label for="">Sale Penalty Automation Time( 0 or 12 ):<em>*</em></label><br />
+                                <input v-model="salePenaltyAutoTime" type="number" pattern="[0-9]*" oninput="this.value = this.value.replace(/[^0-9]/g, '')" :class="`bg-slate-50 rounded pl-3 border border-gray-400 text-base w-full`"/>
+                                <button type="button" class="absolute ml-2 rounded px-2 bg-green-500 text-white" @click="saveDefaultSetting('PSS','Sale Penalty Automation Time',salePenaltyAutoTime,salePenaltyAutoTime)"><i class="fa fa-check"></i></button>
                             </div>
                         </div>
                         <div class="flex mb-1.5">
@@ -641,6 +650,14 @@
     
                                 />
                                 <button type="button" class="absolute ml-4 rounded px-2 bg-green-500 text-white" @click="saveDefaultSetting('PSS','Referral Token Payable A/c',ledgerID,ledgerName)"><i class="fa fa-check"></i></button>
+                            </div>
+                            <div class="basis-1/4 relative">
+                                <label for="">Sale Balance Reminder Automation:<em>*</em></label><br />
+                                <select  v-model="pssBalReminderOption" name="" class="bg-slate-50 rounded border border-gray-400 text-sm pl-2 pt-2 w-full">
+                                    <option value="Yes">Yes</option>
+                                    <option value="No">No</option>
+                                </select>
+                                <button type="button" class="absolute ml-2 rounded px-2 bg-green-500 text-white" @click="saveDefaultSetting('PSS','Sale Balance Reminder Automation',pssBalReminderOption,pssBalReminderOption)"><i class="fa fa-check"></i></button>
                             </div>
                         </div>
                         <div class="flex mb-1.5">
@@ -788,6 +805,9 @@ export default defineComponent({
         const salesAgentAccount = ref("");
         const salesAgentExpenseAccount = ref("");
         const referralTokenAccount = ref("");
+        const pssAutoPenalizeOption = ref("");
+        const pssBalReminderOption = ref("");
+        const salePenaltyAutoTime = ref(0);
 
 
         const showHMSSettings = () =>{
@@ -1109,6 +1129,12 @@ export default defineComponent({
                         salesAgentExpenseAccount.value = response.data[i].setting_value_name;
                     }else if(response.data[i].setting_name === 'Referral Token Payable A/c'){
                         referralTokenAccount.value = response.data[i].setting_value_name;
+                    }else if(response.data[i].setting_name === 'Sale Penalty Automation'){
+                        pssAutoPenalizeOption.value = response.data[i].setting_value_name;
+                    }else if(response.data[i].setting_name === 'Sale Balance Reminder Automation'){
+                        pssBalReminderOption.value = response.data[i].setting_value_name;
+                    }else if(response.data[i].setting_name === 'Sale Penalty Automation Time'){
+                        salePenaltyAutoTime.value = response.data[i].setting_value_name;
                     }
 
                     else if(response.data[i].setting_name === 'Default System Timeout'){
@@ -1206,7 +1232,7 @@ export default defineComponent({
             channelID,channelName,handleSelectedCounter, clearSelectedCounter, fetchCounterChannels,handleSelectedChannel, clearSelectedChannel,outletCounterArr,retailOutletArr,counterChannelArr,
             retailOutlet, outletCounter, counterChannel, salesIncome, invTakeOn, stockControl, stockType,directSaleOrder,updateBatchPrice,prodControl,defaultTimeout,
             mmsAutoPenalizeOption,mmsStrictGuarantorshipOption,mmsBalReminderOption,penaltyAutoTime,
-            saleAssetAccount,saleAssetCommission,assetSaleIncome,saleInterestIncome,salesAgentAccount,salesAgentExpenseAccount,referralTokenAccount
+            saleAssetAccount,saleAssetCommission,assetSaleIncome,saleInterestIncome,salesAgentAccount,salesAgentExpenseAccount,referralTokenAccount,pssAutoPenalizeOption,pssBalReminderOption,salePenaltyAutoTime,
         }
     }
 });

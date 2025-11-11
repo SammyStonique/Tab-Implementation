@@ -24,6 +24,7 @@
             @handleActionClick="handleActionClick"
             @handleShowDetails="handleShowDetails"
             @handleOpenLink="handleOpenLink"
+            :groupingKey=true
             :count="propCount"
             :currentPage="currentPage"
             :result="propArrLen"
@@ -141,14 +142,17 @@ export default{
             {type: "checkbox"},
             {label: "Date", key:"date"},
             {label: "Code", key:"sale_code", type:"link"},
-            {label: "Asset Name", key:"asset"},
             {label: "Client Name", key: "customer"},
             {label: "Sales Plan", key:"payment_plan"},
+            {label: "Currency", key:"client_currency"},
             {label: "Amount", key:"formatted_total_amount"},
             {label: "Sale Balance", key:"sale_balance"},
             {label: "Notes", key:"notes"},
             {label: "Status", key:"approval_status", textColor: "textColor"},
             {label: "Exempt", key:"exempt_penalty"},
+            {label: "Posted", key:"posted"},
+            {label: "Due", key:"sale_due_date"},
+            {label: "Status", key:"sale_status", txtColor: "textStatusColor"},
         ])
         const actions = ref([
             {name: 'view', icon: 'fa fa-file-pdf-o', title: 'View Sale', rightName: 'Viewing Asset Sales'},
@@ -414,11 +418,13 @@ export default{
             }
         };
         const dropdownOptions = ref([
-            {label: 'Exempt Penalty', action: 'exempt-penalty'},
-            {label: 'Unexempt Penalty', action: 'unexempt-penalty'},
-            {label: 'Email Sale Statement', action: 'send-email'},
-            {label: 'Post Sale Balance', action: 'post-balance'},
-            {label: 'Unpost Sale Balance', action: 'unpost-balance'},
+            {label: 'Exempt Penalty', action: 'exempt-penalty', icon: 'fa-ban', colorClass: 'text-yellow-600', rightName: 'Exempting Sale Penalty'},
+            {label: 'Unexempt Penalty', action: 'unexempt-penalty', icon: 'fa-undo', colorClass: 'text-green-600' , rightName: 'Exempting Sale Penalty'},
+            {label: 'SMS Statement Link', action: 'send-sms', icon: 'fa-sms', colorClass: 'text-blue-500', rightName: 'Sending PSS SMS'},
+            {label: 'Email Sale Statement', action: 'send-email', icon: 'fa-envelope', colorClass: 'text-indigo-500', rightName: 'Sending PSS Emails'},
+            {label: 'Post Sale Balance', action: 'post-balance', icon: 'fa-check-circle',colorClass: 'text-green-600', rightName: 'Posting Sale Balance'},
+            {label: 'Unpost Sale Balance', action: 'unpost-balance', icon: 'fa-times-circle', colorClass: 'text-red-600', rightName: 'Posting Sale Balance'},
+            {label: 'Update Repayment Date', action: 'repayment-date', icon: 'fa-calendar-alt', colorClass: 'text-grey-700', rightName: 'Updating Sale Repayment Date'},
         ]);
         const handleDynamicOption = (option) =>{
             if( option == 'exempt-penalty'){

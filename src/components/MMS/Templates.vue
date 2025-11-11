@@ -116,7 +116,7 @@ export default{
             if(selectedIds.value.length == 1){
                 let formData = {
                     company: companyID.value,
-                    property_template: selectedIds.value
+                    membership_template: selectedIds.value
                 }
                 try{
                     const response = await store.dispatch('Member_Templates/deleteTemplate',formData)
@@ -142,7 +142,7 @@ export default{
             if(selectedIds.value.length){
                 let formData = {
                     company: companyID.value,
-                    property_template: selectedIds.value
+                    membership_template: selectedIds.value
                 }
                 try{
                     const response = await store.dispatch('Member_Templates/deleteTemplate',formData)

@@ -502,6 +502,7 @@ export default{
             {label: 'Unexempt Penalty', action: 'unexempt-penalty', icon: 'fa-undo', colorClass: 'text-green-600' , rightName: 'Exempting Sale Penalty'},
             {label: 'Email Sale Statement', action: 'send-email', icon: 'fa-envelope', colorClass: 'text-indigo-500', rightName: 'Sending PSS Emails'},
             {label: 'Drop Unit', action: 'drop-unit', icon: 'fa-unlink', colorClass: 'text-blue-500', rightName: 'Approving Asset Sales'},
+            {label: 'Update Repayment Date', action: 'repayment-date', icon: 'fa-calendar-alt', colorClass: 'text-grey-700', rightName: 'Updating Sale Repayment Date'},
         ]);
         const handleDynamicOption = async(option) =>{
             if( option == 'exempt-penalty'){
