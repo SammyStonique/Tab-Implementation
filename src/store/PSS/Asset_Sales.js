@@ -301,15 +301,15 @@ const actions = {
         axios.post(`api/v1/delete-asset-sale/`,formData)
         .then((response)=>{
           if(response.data.msg == "Success"){
-              Swal.fire("Poof! Sale removed succesfully!", {
+              Swal.fire("Poof! Sale(s) removed succesfully!", {
                 icon: "success",
               }); 
           }else{
             Swal.fire({
-              title: "Error Deleting Sale",
+              title: "Error Deleting Sale(s)",
               icon: "warning",
             });
-          }                   
+          }                  
         })
         .catch((error)=>{
           console.log(error.message);

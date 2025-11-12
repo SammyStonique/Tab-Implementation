@@ -77,6 +77,13 @@
             :displayButtons="displayButtons" @handleSubmit="dropSaleUnit" @handleReset="handleRefReset"
         />
     </MovableModal>
+    <MovableModal v-model:visible="appModalVisible" :title="title1" :modal_top="modal_top" :modal_left="modal_left" :modal_width="modal_width"
+        :loader="modal_loader1" @showLoader="showModalLoader1" @hideLoader="hideModalLoader1" @closeModal="closeModal1">
+        <DynamicForm 
+            :fields="formFields1" :flex_basis="flex_basis" :flex_basis_percentage="flex_basis_percentage" 
+            :displayButtons="displayButtons" @handleSubmit="updateRepaymentDate" @handleReset="handleReset1"
+        />
+    </MovableModal>
 
 </template>
 
@@ -113,6 +120,7 @@ export default{
         const prodComponentKey = ref(0);
         const trans_modal_loader = ref('none');
         const ref_modal_loader = ref('none');
+        const modal_loader1 = ref('none');
         const member_status = ref('');
         const exit_date = ref('');
         const idField = 'asset_sale_id';
@@ -135,6 +143,7 @@ export default{
         const detailsTitle = ref('Sale Documents');
         const transTitle = ref('Approve/Reject Sale');
         const refTitle = ref('Drop Sale Unit');
+        const title1 = ref('Update Repayment Date');
         const loanScheduleRows = ref([]);
         const saleItemsRows = ref([]);
         const showActions = ref(false);
@@ -144,6 +153,7 @@ export default{
         const saleItemID = ref('');
         const transModalVisible = ref(false);
         const refModalVisible = ref(false);
+        const appModalVisible = ref(false);
         const itemArray = computed(() => store.state.Asset_Units.itemArr);
         const dropdownWidth = ref("500px")
         const modal_top = ref('200px');
@@ -223,7 +233,109 @@ export default{
                 formFields.value[i].value = '';
             }
         }
-
+        const displayRecalculationOptions = (value) =>{
+            if(value == "Due Date"){
+                formFields1.value[1].hidden = false;
+                formFields1.value[2].hidden = false;
+                formFields1.value[3].hidden = false;
+                formFields1.value[4].hidden = true;
+                formFields1.value[5].hidden = true;
+                formFields1.value[6].hidden = true;
+                formFields1.value[7].hidden = true;
+                formFields1.value[4].required = false;
+                formFields1.value[5].required = false;
+                formFields1.value[8].required = false;
+                formFields1.value[1].required = true;
+                formFields1.value[2].required = true;
+                formFields1.value[3].required = true;
+            }else if(value == "Sale Amount"){
+                formFields1.value[1].hidden = true;
+                formFields1.value[2].hidden = true;
+                formFields1.value[3].hidden = true;
+                formFields1.value[4].hidden = false; 
+                formFields1.value[5].hidden = false;
+                formFields1.value[6].hidden = false;
+                formFields1.value[7].hidden = false;               
+                formFields1.value[4].required = true;
+                formFields1.value[5].required = true;
+                formFields1.value[8].required = true;
+                formFields1.value[1].required = false;
+                formFields1.value[2].required = false;
+                formFields1.value[3].required = false;
+            }
+        }
+        const formFields1 = ref([]);
+        const updateFormFields1 = () => {
+            formFields1.value = [
+                { type: 'dropdown', name: 'recalc_mode',label: "Recalculate On", value: '', placeholder: "", required: true, options: [{ text: 'Due Date', value: 'Due Date' }, { text: 'Sale Amount', value: 'Sale Amount' }], method: displayRecalculationOptions },
+                { type: 'number', name: 'day',label: "New Repayment Day", value: 1, required: true, hidden: true },
+                { type: 'text', name: 'installment_from',label: "Installment From", value: 1, required: true, hidden: true },
+                { type: 'text', name: 'installment_to',label: "Installment To", value: 1, required: true, hidden: true },
+                { type: 'number', name: 'sale_amount',label: "Sale Amount", value: 0, required: false, hidden: true },
+                { type: 'number', name: 'installments',label: "Installments", value: 0, required: false, hidden: true },
+                { type: 'number', name: 'principal_amount',label: "Principal Amount", value: 0, required: false, hidden: true },
+                { type: 'number', name: 'interest_amount',label: "Interest Amount", value: 0, required: false, hidden: true },
+                { type: 'date', name: 'new_repayment_date',label: "New Date", value: '', required: false },
+                { type: 'text-area', name: 'sale_remarks',label: "Sale Remarks", value: null, required: false,textarea_rows: '3', textarea_cols: '56'}
+            ]
+        };
+        const handleReset1 = () =>{
+            for(let i=0; i < formFields1.value.length; i++){
+                formFields1.value[i].value = '';
+            }
+        };
+        const showModalLoader1 = () =>{
+            modal_loader1.value = "block";
+        }
+        const hideModalLoader1 = () =>{
+            modal_loader1.value = "none";
+        };
+        const updateRepaymentDate = async() =>{
+            showModalLoader1();
+            if(formFields1.value[3].value < formFields1.value[2].value){
+                toast.error("Installment To Cannot Be Less Than Installment From");
+                hideModalLoader1();
+                return;
+            }
+            let formData = {
+                asset_sale: saleID.value,
+                recalculation_mode: formFields1.value[0].value,
+                new_day: formFields1.value[1].value,
+                installment_from: formFields1.value[2].value,
+                installment_to: formFields1.value[3].value,
+                sale_balance: formFields1.value[4].value,
+                installments: formFields1.value[5].value,
+                principal_amount: formFields1.value[6].value,
+                interest_amount: formFields1.value[7].value,
+                new_repayment_date: formFields1.value[8].value,
+                sale_remarks: formFields1.value[9].value || null,
+                user: userID.value,
+                company: companyID.value
+            }
+            axios.post(`api/v1/update-asset-sale-repayment-date/`,formData)
+            .then((response)=>{
+                if(response.data.msg == "Success"){
+                    toast.success("Success")
+                    closeModal1();
+                    searchAssetSales();
+                }else{
+                    toast.error("Error Updating Repayment Date");
+                }                   
+            })
+            .catch((error)=>{
+                toast.error(error.message)
+                hideModalLoader1();
+            })
+            .finally(()=>{
+                hideModalLoader1();
+            })
+        
+        };
+        const closeModal1 = () =>{
+            appModalVisible.value = false;
+            saleID.value = null;
+            hideModalLoader1();
+        };
         const removeAssetSale = async() =>{
             if(selectedIds.value.length == 1){
                 let formData = {
@@ -500,6 +612,7 @@ export default{
         const dropdownOptions = ref([
             {label: 'Exempt Penalty', action: 'exempt-penalty', icon: 'fa-ban', colorClass: 'text-yellow-600', rightName: 'Exempting Sale Penalty'},
             {label: 'Unexempt Penalty', action: 'unexempt-penalty', icon: 'fa-undo', colorClass: 'text-green-600' , rightName: 'Exempting Sale Penalty'},
+            {label: 'SMS Statement Link', action: 'send-sms', icon: 'fa-sms', colorClass: 'text-blue-500', rightName: 'Sending PSS SMS'},
             {label: 'Email Sale Statement', action: 'send-email', icon: 'fa-envelope', colorClass: 'text-indigo-500', rightName: 'Sending PSS Emails'},
             {label: 'Drop Unit', action: 'drop-unit', icon: 'fa-unlink', colorClass: 'text-blue-500', rightName: 'Approving Asset Sales'},
             {label: 'Update Repayment Date', action: 'repayment-date', icon: 'fa-calendar-alt', colorClass: 'text-grey-700', rightName: 'Updating Sale Repayment Date'},
@@ -655,6 +768,40 @@ export default{
                 }else{
                     toast.error("Please Select A Single Sale To Drop Unit")
                 }
+            }else if(option == 'send-sms'){
+                showLoader();
+                let formData = {
+                    company: companyID.value,
+                    asset_sale: selectedIds.value,
+                    company: companyID.value
+                }
+                await axios.post('api/v1/sale-client-statement-sms/',formData).
+                then((response)=>{
+                    if(response.data.msg == "Success"){
+                        toast.success("SMS Sent!")
+                    }else{
+                        toast.error(response.data.msg)
+                    }
+                })
+                .catch((error)=>{
+                    toast.error(error.message)
+                })
+                .finally(()=>{
+                    hideLoader();
+                })
+            }else if(option == 'repayment-date'){
+                if(selectedIds.value.length == 1){
+                    saleID.value = selectedIds.value[0];
+                    appModalVisible.value = true;
+                    updateFormFields1();
+                    flex_basis.value = '1/2';
+                    flex_basis_percentage.value = '50';
+            
+                }else if(selectedIds.value.length > 1){
+                    toast.error("You have selected more than 1 Sale")
+                }else{
+                    toast.error("Please Select A Sale")
+                }
             }
         };
         const handleShowDetails = async(row) =>{
@@ -729,10 +876,6 @@ export default{
                 hideLoader();
             })
         };
-        const closeModal1 = async() =>{
-            propModalVisible.value = false;
-            handleReset1();
-        }
         const handleSelectedSaleItem = async(option) =>{
             await store.dispatch('Asset_Units/handleSelectedItem', option)
             saleItemID.value = store.state.Asset_Units.itemID;
@@ -824,7 +967,8 @@ export default{
             handleSelectionChange,addingRight,removingRight,rightsModule,printSalesList,selectSearchQuantity,selectedValue,
             modal_left,modal_top,modal_width,trans_modal_loader,formFields,transModalVisible,transTitle,showTransModalLoader,hideTransModalLoader,approveSale,closeTransModal,
             handleReset,dropdownOptions,handleDynamicOption,member_status,exit_date,handleShowDetails,loanScheduleRows,saleItemsRows,itemColumns,showActions,tabs,selectTab,activeTab,
-            refTitle,refFormFields,refModalVisible,ref_modal_loader,handleRefReset,showRefModalLoader,hideRefModalLoader,closeRefModal,dropSaleUnit
+            refTitle,refFormFields,refModalVisible,ref_modal_loader,handleRefReset,showRefModalLoader,hideRefModalLoader,closeRefModal,dropSaleUnit,
+            appModalVisible,title1,modal_loader1,showModalLoader1,hideModalLoader1,updateFormFields,formFields1,handleReset1,closeModal1,updateRepaymentDate,
         }
     }
 };

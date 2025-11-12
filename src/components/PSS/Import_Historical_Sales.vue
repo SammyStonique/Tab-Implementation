@@ -78,11 +78,13 @@ export default defineComponent({
 
                 axios.post("api/v1/display-historical-asset-sales-import-excel/", formData)
                 .then((response)=>{
-                    excelSalesList.value = response.data.sales;
-                    console.log(excelSalesList.value);
+                    if(response.data.msg){
+                        toast.error(response.data.msg);
+                    }else{
+                        excelSalesList.value = response.data.sales;
+                    }           
                 })
                 .catch((error)=>{
-                    console.log(error.message);
                     toast.error(error.message)
                 })
                 .finally(()=>{
@@ -134,7 +136,7 @@ export default defineComponent({
                         const url = window.URL.createObjectURL(new Blob([response.data]));
                         const link = document.createElement('a');
                         link.href = url;
-                        link.setAttribute('download', 'Historical_Sales_Import.xls');
+                        link.setAttribute('download', 'Historical_Sales_Import.xlsx');
                         document.body.appendChild(link);
                         link.click();
                     }
