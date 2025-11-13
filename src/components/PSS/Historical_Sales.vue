@@ -22,6 +22,7 @@
             :idField="idField"
             @handleSelectionChange="handleSelectionChange"
             @handleActionClick="handleActionClick"
+            @handleRightClick="handleRightClick"
             @handleShowDetails="handleShowDetails"
             @handleOpenLink="handleOpenLink"
             :groupingKey=true
@@ -76,12 +77,22 @@
             :displayButtons="displayButtons" @handleSubmit="updateRepaymentDate" @handleReset="handleReset1"
         />
     </MovableModal>
+    <MovableModal v-model:visible="docModalVisible" :title="docTitle" :modal_top="modal_top" :modal_left="modal_left" :modal_width="modal_width"
+        :loader="doc_modal_loader" @showLoader="showDocModalLoader" @hideLoader="hideDocModalLoader" @closeModal="closeDocModal">
+        <DynamicForm 
+            :fields="docFormFields" :flex_basis="flex_basis" :flex_basis_percentage="flex_basis_percentage" 
+            :displayButtons="displayButtons" @handleSubmit="generateDocument" @handleReset="handleDocReset"
+        />
+    </MovableModal>
+    <PrintModal v-model:visible="printModalVisible" :title="printTitle" >
+      <iframe v-if="pdfUrl" :src="pdfUrl" width="100%" height="100%" type="application/pdf" style="border: none;"></iframe>
+    </PrintModal>
 
 </template>
 
 <script>
 import axios from "axios";
-import { ref, computed, onMounted, onBeforeMount} from 'vue';
+import { ref, computed, onMounted, onBeforeMount, watch} from 'vue';
 import PageComponent from '@/components/PageComponent.vue'
 import { useStore } from "vuex";
 import { useToast } from "vue-toastification";
@@ -94,11 +105,12 @@ import ShowDetailsTable from '@/components/ShowDetailsTable.vue';
 import SearchableDropdown from '@/components/SearchableDropdown.vue';
 import LoanSchedules from "@/components/LoanSchedules.vue";
 import Swal from 'sweetalert2';
+import PrintModal from '@/components/PrintModal.vue';
 
 export default{
     name: 'Historical_Sales',
     components:{
-        PageComponent,MovableModal,SearchableDropdown,DynamicForm,DynamicTable,LoanSchedules,ShowDetailsTable
+        PageComponent,MovableModal,SearchableDropdown,DynamicForm,DynamicTable,LoanSchedules,ShowDetailsTable,PrintModal
     },
     setup(){
         const store = useStore();
@@ -112,6 +124,7 @@ export default{
         const trans_modal_loader = ref('none');
         const ref_modal_loader = ref('none');
         const modal_loader1 = ref('none');
+        const doc_modal_loader = ref('none');
         const idField = 'asset_sale_id';
         const showAddButton = ref(false);
         const addButtonLabel = ref('New Sale');
@@ -135,9 +148,14 @@ export default{
         const transTitle = ref('Approve/Reject Sale');
         const refTitle = ref('Post Sale Balance');
         const title1 = ref('Update Repayment Date');
+        const docTitle = ref('Generate Sale Document');
         const transModalVisible = ref(false);
         const refModalVisible = ref(false);
         const appModalVisible = ref(false);
+        const docModalVisible = ref(false);
+        const printModalVisible = ref(false);
+        const pdfUrl = ref(null);
+        const printTitle = ref('Preview Sale Document');
         const dropdownWidth = ref("500px")
         const modal_top = ref('200px');
         const modal_left = ref('400px');
@@ -533,7 +551,36 @@ export default{
                 }else{
                     toast.error(`Cannot View ${applicationStatus} Sale`)
                 }
+            }else if(action == 'generate-document'){
+                flex_basis.value = "1/2";
+                flex_basis_percentage.value = "50";
+                hideDocModalLoader();
+                saleID.value = row['asset_sale_id'];
+                docModalVisible.value = true;
             }
+        };
+        watch(() => store.state.contextMenu.selectedAction, (actionPayload) => {
+            if (!actionPayload) return;
+
+            const { rowIndex, action, data } = actionPayload;
+
+            handleActionClick(rowIndex, action, data);
+
+            store.commit('contextMenu/CLEAR_SELECTED_ACTION');
+        });
+        
+        const handleRightClick = (row, rowIndex, event) => {
+
+            const menuOptions = [
+                { label: 'Generate Document', action: 'generate-document', rowIndex: rowIndex , icon: 'fa fa-edit', rightName: 'Adding Asset Sales'},
+            ];
+
+            store.commit('contextMenu/SHOW_CONTEXT_MENU', {
+                x: event.clientX,
+                y: event.clientY,
+                options: menuOptions,
+                contextData: row,
+            });
         };
         const dropdownOptions = ref([
             {label: 'Exempt Penalty', action: 'exempt-penalty', icon: 'fa-ban', colorClass: 'text-yellow-600', rightName: 'Exempting Sale Penalty'},
@@ -897,6 +944,56 @@ export default{
             handleRefReset();
             hideRefModalLoader();
         };
+        const docFormFields = ref([
+            { type: 'date', name: 'issue_date',label: "Date", value: formatDate(current_date), required: true, maxDate: formatDate(current_date) },
+            { type: 'dropdown', name: 'document_type',label: "Document Type", value: '', placeholder: "", required: true, options: [{ text: 'Offer Letter', value: 'Offer Letter' }, { text: 'Sale Agreement', value: 'Sale Agreement' }, { text: 'Change of Ownership', value: 'Change of Ownership' }] },
+        ]);
+        const handleDocReset = () =>{
+            for(let i=0; i < docFormFields.value.length; i++){
+                docFormFields.value[i].value = '';
+            }
+            saleID.value = "";
+        }
+        const showDocModalLoader = () =>{
+            doc_modal_loader.value = "block";
+        }
+        const hideDocModalLoader = () =>{
+            doc_modal_loader.value = "none";
+        }
+        const generateDocument = async() =>{
+            showDocModalLoader();
+            let formData = {
+                asset_sale: saleID.value,
+                date: docFormFields.value[0].value,
+                document_type: docFormFields.value[1].value,
+                user: userID.value,
+                company: companyID.value
+            }
+            axios.post(`api/v1/generate-asset-sale-document-pdf/`,formData, { responseType: 'blob' })
+            .then((response)=>{
+                if (response && response.status === 200) {
+                    handleDocReset();
+                    const blob1 = new Blob([response.data], { type: 'application/pdf' });
+                    const url = URL.createObjectURL(blob1);
+                    pdfUrl.value = url;
+                    printModalVisible.value = true;
+                    closeDocModal();
+                }                   
+            })
+            .catch((error)=>{
+                toast.error(error.message)
+                hideDocModalLoader();
+            })
+            .finally(()=>{
+                hideDocModalLoader();
+            })
+        
+        };
+        const closeDocModal = () =>{
+            docModalVisible.value = false;
+            handleDocReset();
+            hideDocModalLoader();
+        };
         onBeforeMount(()=>{
             searchAssetSales();
             
@@ -905,12 +1002,14 @@ export default{
             showAddButton,searchAssetSales,resetFilters, addButtonLabel, searchFilters, tableColumns, salesList,dropdownWidth,displayButtons,importSales,
             currentPage,propResults, propArrLen, propCount, pageCount, showNextBtn, showPreviousBtn,flex_basis,flex_basis_percentage,formFields,handleReset,
             loadPrev, loadNext, firstPage, lastPage, idField, actions, handleActionClick,handleOpenLink,showDetails,handleShowDetails,detailsTitle,hideDetails,
-            submitButtonLabel, showModal, showLoader, loader, hideLoader, removeAssetSale, removeAssetSales,showActions,
+            submitButtonLabel, showModal, showLoader, loader, hideLoader, removeAssetSale, removeAssetSales,showActions,handleRightClick,
             handleSelectionChange,addingRight,removingRight,rightsModule,printSalesList,selectSearchQuantity,selectedValue,
             modal_left,modal_top,modal_width,trans_modal_loader,transModalVisible,transTitle,showTransModalLoader,hideTransModalLoader,closeTransModal,
             dropdownOptions,handleDynamicOption,refTitle,refFormFields,refModalVisible,ref_modal_loader,handleRefReset,showRefModalLoader,hideRefModalLoader,closeRefModal,
             postSaleBalance,tabs,activeTab,loanScheduleRows,itemColumns,saleItemsRows,selectTab,
             appModalVisible,title1,modal_loader1,showModalLoader1,hideModalLoader1,updateFormFields,formFields1,handleReset1,closeModal1,updateRepaymentDate,
+            docTitle,docFormFields,docModalVisible,doc_modal_loader,handleDocReset,showDocModalLoader,hideDocModalLoader,closeDocModal,generateDocument,printModalVisible,pdfUrl, printTitle,
+        
         }
     }
 };
