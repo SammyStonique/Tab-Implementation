@@ -73,6 +73,7 @@ import Sale_Refunds from '@/components/PSS/Sale_Refunds.vue';
 import Referral_Tokens from '@/components/PSS/Referral_Tokens.vue';
 import Unit_Transfers from '@/components/PSS/Unit_Transfers.vue';
 import Unit_Transfer_Details from '@/components/PSS/Unit_Transfer_Details.vue';
+import Client_Profile from '@/components/PSS/Client_Profile.vue';
 
 import Default_Settings from '@/components/SET/Default_Settings.vue';
 
@@ -85,7 +86,7 @@ export default{
         Sale_Assets,Asset_Details,Asset_Profile,Asset_Types,Receipt_Details,Asset_Designs,Asset_Units,Unit_Categories,Clients,Vendors,Sales_Agents,Unit_Reservations,Reservation_Details,
         Sale_Invoices,Sale_Receipts,Asset_Sales,Sale_Details,Sale_Profile,Payment_Plans,Sales_Commissions,Agents_Commissions,Sale_Penalties,Penalty_Batches,Sale_Documents,Sale_Fees,Historical_Sales,Import_Historical_Sales,
         Sale_Arrears,Sale_Prepayments,Prepayment_Allocations,Templates,Design_Template,Sale_Transfers,Asset_Fees,Sale_Refunds,Asset_Documents,Invoice_Details,Referral_Tokens,Unit_Transfers,
-        Unit_Transfer_Details,
+        Unit_Transfer_Details,Client_Profile,
 
         Default_Settings
     },

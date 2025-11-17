@@ -24,6 +24,7 @@ const state = {
     selectedDocuments: [],
     selectedRepayments: [],
     selectedStatement: [],
+    saleActivities: [],
     saleClient: [],
     saleAsset: [],
 };
@@ -55,6 +56,7 @@ const mutations = {
     state.selectedDocuments = [];
     state.selectedRepayments = [];
     state.selectedStatement = [];
+    state.saleActivities = [];
   },
   SET_SELECTED_SALE(state, Sale) {
     state.selectedSale = Sale;
@@ -74,6 +76,9 @@ const mutations = {
   },
   SET_SELECTED_DOCUMENTS(state, documents) {
     state.selectedDocuments = documents;
+  },
+  SET_SELECTED_ACTIVITIES(state,activities){
+    state.saleActivities = activities;
   },
   SET_SELECTED_PLAN(state, plan) {
     state.selectedPlan = plan;
@@ -222,7 +227,8 @@ const actions = {
         commit('SET_SALE_CHARGES',(response.data.sale_charges != null) ? (response.data.sale_charges) : []);
         commit('SET_SELECTED_SCHEDULES',(response.data.sale_schedules != null) ? (response.data.sale_schedules) : []);
         commit('SET_SELECTED_REPAYMENTS',(response.data.sale_repayments != null) ? (response.data.sale_repayments) : []);
-        commit('SET_SALE_DOCUMENTS',(response.data.sale_documents != null) ? (response.data.sale_documents) : []);
+        commit('SET_SALE_DOCUMENTS',(response.data.sale_documents != null) ? (response.data.sale_documents) : []); 
+        commit('SET_SELECTED_ACTIVITIES',(response.data.sale_activities != null) ? (response.data.sale_activities) : []);
     })
     .catch((error)=>{
       console.log(error.message);

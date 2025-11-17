@@ -91,7 +91,10 @@
                     </div>   
                     <div v-show="activeTab == 4">                  
                         <DynamicTable :key="documentTableKey" :rightsModule="rightsModule" :columns="documentColumns" :rows="computedDocumentRows" :idField="idFieldDocument" :actions="actionsDocument" @action-click="documentActionClick"/>
-                    </div>  
+                    </div> 
+                    <div v-show="activeTab == 5">                  
+                        <DynamicTable :key="documentTableKey" :columns="activityColumns" :rows="computedActivityRows" :showActions=false />
+                    </div> 
                 </div>
             </div>
         </template>
@@ -141,7 +144,7 @@ export default defineComponent({
         const modal_width = ref('30vw');
         const companyID = computed(()=> store.state.userData.company_id);
         const userID = computed(()=> store.state.userData.user_id);
-        const tabs = ref(['Sale Details','Armotization Schedule','Statement','Sale Repayment','Sale Documents']);
+        const tabs = ref(['Sale Details','Armotization Schedule','Statement','Sale Repayment','Sale Documents','Sale Activities']);
         const activeTab = ref(0);
         const mainComponentKey = ref(0);
         const tableKey = ref(0);
@@ -156,6 +159,7 @@ export default defineComponent({
         const computedScheduleRows = computed(()=> store.state.Asset_Sales.selectedSchedules);
         const computedPaymentRows = computed(()=> store.state.Asset_Sales.selectedRepayments);
         const computedDocumentRows = computed(()=> store.state.Asset_Sales.selectedDocuments);
+        const computedActivityRows = computed(()=> store.state.Asset_Sales.saleActivities);
         const statementRows = computed(()=> store.state.Asset_Sales.selectedTransactions);
         const statement1Rows = computed(()=> store.state.Asset_Sales.selectedStatement);
         const saleDetails = computed(()=> store.state.Asset_Sales.saleDetails);
@@ -203,7 +207,12 @@ export default defineComponent({
         const actionsDocument = ref([
             {name: 'preview', icon: 'fa fa-paperclip', title: 'View Document',rightName: 'Adding Sale Documents'},
         ]);
-
+        const activityColumns = ref([
+            {label: "Date", key:"created_at", type: "text"},
+            {label: "Activity Type", key:"activity_type", type: "text"},
+            {label: "Description", key:"description", type: "text"},
+            {label: "Done By", key:"done_by", type: "text"},
+        ]);
         const actionsUtility = ref([
 
         ]);
@@ -757,7 +766,7 @@ export default defineComponent({
             statementColumns,statement1Columns, actionsStatement, saleDetails,saleAsset,saleClient, scheduleActionClick,showAddButton,searchLoanTransactions,
             scheduleActionClick,tnt_modal_loader, dep_modal_loader, util_modal_loader, depModalVisible, displayButtons, printSaleStatement,handleDynamicOption1,
             documentActionClick,documentColumns,documentTableKey,actionsDocument,computedDocumentRows,printModalVisible,pdfUrl, printTitle,
-            modal_top, modal_left, modal_width, showDepModalLoader, hideDepModalLoader, handleDepReset,
+            modal_top, modal_left, modal_width, showDepModalLoader, hideDepModalLoader, handleDepReset,computedActivityRows,activityColumns,
             flex_basis, flex_basis_percentage, paymentActionClick,rightsModule,isDisabled,
         }
     }

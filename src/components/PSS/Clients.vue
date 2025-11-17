@@ -140,6 +140,7 @@ export default{
         ])
         const actions = ref([
             {name: 'edit', icon: 'fa fa-edit', title: 'Edit Client', rightName: 'Editing Client'},
+            {name: 'view', icon: 'fa fa-file-pdf-o', title: 'View Profile', rightName: 'Viewing Sale Client Profile'},
             {name: 'delete', icon: 'fa fa-trash', title: 'Delete Client', rightName: 'Deleting Client'},
         ])
         const companyID = computed(()=> store.state.userData.company_id);
@@ -466,6 +467,17 @@ export default{
                 flex_basis.value = '1/3';
                 flex_basis_percentage.value = '33.333';
 
+            }else if(action == 'view'){
+                const clientID = row[idField];
+                let formData = {
+                    company: companyID.value,
+                    asset_sale_client: clientID
+                }
+                await store.dispatch('Asset_Clients/fetchClientDetails',formData).
+                then(()=>{
+                    store.commit('pageTab/ADD_PAGE', {'PSS':'Client_Profile'})
+                    store.state.pageTab.pssActiveTab = 'Client_Profile';
+                });
             }else if(action == 'delete'){
                 const clientID = [row[idField]];
                 let formData = {

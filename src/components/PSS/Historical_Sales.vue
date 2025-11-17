@@ -70,6 +70,13 @@
             :displayButtons="displayButtons" @handleSubmit="postSaleBalance" @handleReset="handleRefReset"
         />
     </MovableModal>
+    <MovableModal v-model:visible="transModalVisible" :title="transTitle" :modal_top="modal_top" :modal_left="modal_left" :modal_width="modal_width"
+        :loader="trans_modal_loader" @showLoader="showTransModalLoader" @hideLoader="hideTransModalLoader" @closeModal="closeTransModal">
+        <DynamicForm 
+            :fields="formFields" :flex_basis="flex_basis" :flex_basis_percentage="flex_basis_percentage" 
+            :displayButtons="displayButtons" @handleSubmit="dropSaleUnit" @handleReset="handleReset"
+        />
+    </MovableModal>
     <MovableModal v-model:visible="appModalVisible" :title="title1" :modal_top="modal_top" :modal_left="modal_left" :modal_width="modal_width"
         :loader="modal_loader1" @showLoader="showModalLoader1" @hideLoader="hideModalLoader1" @closeModal="closeModal1">
         <DynamicForm 
@@ -120,6 +127,7 @@ export default{
         const loader = ref('');
         const ledComponentKey = ref(0);
         const propComponentKey = ref(0);
+        const prodComponentKey = ref(0);
         const displayButtons = ref(true);
         const trans_modal_loader = ref('none');
         const ref_modal_loader = ref('none');
@@ -145,7 +153,7 @@ export default{
         const showNextBtn = ref(false);
         const showPreviousBtn = ref(false);
         const detailsTitle = ref('Sale Documents');
-        const transTitle = ref('Approve/Reject Sale');
+        const transTitle = ref('Drop Sale Unit');
         const refTitle = ref('Post Sale Balance');
         const title1 = ref('Update Repayment Date');
         const docTitle = ref('Generate Sale Document');
@@ -166,6 +174,8 @@ export default{
         const tabs = ref(['Repayment Schedule','Sold Units']);
         const activeTab = ref(0);
         const appID = ref(null);
+        const saleItemID = ref('');
+        const itemArray = computed(() => store.state.Asset_Units.itemArr);
         const loanScheduleRows = ref([]);
         const saleItemsRows = ref([]);
         const tableColumns = ref([
@@ -186,6 +196,7 @@ export default{
         ])
         const actions = ref([
             {name: 'view', icon: 'fa fa-file-pdf-o', title: 'View Sale', rightName: 'Viewing Asset Sales'},
+            {name: 'generate-document', icon: 'fa fa-cloud-upload', title: 'Generate Document', rightName: 'Adding Asset Sales'},
             {name: 'delete', icon: 'fa fa-trash', title: 'Delete Sale', rightName: 'Deleting Asset Sales'},
         ]);
         const itemColumns = ref([
@@ -202,6 +213,9 @@ export default{
         const cashbookArr = computed(() => store.state.Ledgers.ledgerArr);
         const cashbookID = ref("");
         const saleID = ref("");
+        const unitSaleAmnt = ref(0);
+        const approvedAmount = ref(0);
+        const computedApprovedAmount = computed(() => {return approvedAmount});
         const client_name_search = ref('');
         const client_code_search = ref("");
         const asset_name_search = ref('');
@@ -232,16 +246,84 @@ export default{
         const handleSelectionChange = (ids) => {
             selectedIds.value = ids;
         };
-        const formFields = ref([]);
-        const updateFormFields = () => {
-            formFields.value = [
-            ]
+        const handleSelectedSaleItem = async(option) =>{
+            await store.dispatch('Asset_Units/handleSelectedItem', option)
+            saleItemID.value = store.state.Asset_Units.itemID;
+            unitSaleAmnt.value = store.state.Asset_Units.itemSellingPrice;
+            approvedAmount.value = store.state.Asset_Units.itemSellingPrice;
         };
+        const clearSelectedSaleItem = async() =>{
+            await store.dispatch('Asset_Units/updateState', {itemID: ''});
+            saleItemID.value = store.state.Asset_Units.itemID;
+        };
+        const checkSaleUnitLimit = (value) =>{
+            if(parseFloat(unitSaleAmnt.value) < parseFloat(value)){
+                toast.error(`Unit Sale Amount is ${unitSaleAmnt.value}`)
+                formFields.value[2].value = unitSaleAmnt.value;
+            }
+        };
+        const formFields = ref([
+            {  
+                type:'search-dropdown', label:"Sale Unit", value: saleItemID.value, componentKey: prodComponentKey,
+                selectOptions: itemArray, optionSelected: handleSelectedSaleItem, required: true,
+                searchPlaceholder: 'Select Unit...', dropdownWidth: '500px',
+                clearSearch: clearSelectedSaleItem
+            },
+            { type: 'date', name: 'issue_date',label: "Date", value: formatDate(current_date), required: true, maxDate: formatDate(current_date) },
+            { type: 'number', name: 'total_amount',label: "Amount", value: computedApprovedAmount.value, required: true , method: checkSaleUnitLimit},
+            { type: 'number', name: 'installment',label: "Installment", value: 0, required: true },
+            { type: 'number', name: 'principal_amount',label: "Principal Amount", value: 0, required: true },
+            { type: 'number', name: 'interest_amount',label: "Interest Amount", value: 0, required: false},
+        ]);
         const handleReset = () =>{
             for(let i=0; i < formFields.value.length; i++){
                 formFields.value[i].value = '';
             }
+            saleItemID.value = null;
+            prodComponentKey.value +=1;
         }
+        const showTransModalLoader = () =>{
+            trans_modal_loader.value = "block";
+        }
+        const hideTransModalLoader = () =>{
+            trans_modal_loader.value = "none";
+        }
+        const dropSaleUnit = async() =>{
+            showTransModalLoader();
+            let formData = {
+                sale_item: saleItemID.value,
+                date: formFields.value[1].value,
+                amount: formFields.value[2].value,
+                installment: formFields.value[3].value,
+                principal_amount: formFields.value[4].value,
+                interest_amount: formFields.value[5].value,
+                user: userID.value,
+                company: companyID.value
+            }
+            axios.post(`api/v1/drop-asset-sale-unit/`,formData)
+            .then((response)=>{
+                if(response.data.msg == "Success"){
+                    toast.success("Success")
+                    closeTransModal();
+                    searchAssetSales();
+                }else{
+                    toast.error("Error Dropping Unit")
+                }                   
+            })
+            .catch((error)=>{
+                toast.error(error.message)
+                hideTransModalLoader();
+            })
+            .finally(()=>{
+                hideTransModalLoader();
+            })
+        
+        };
+        const closeTransModal = () =>{
+            transModalVisible.value = false;
+            saleItemID.value = null;
+            hideTransModalLoader();
+        };
         const displayRecalculationOptions = (value) =>{
             if(value == "Due Date"){
                 formFields1.value[1].hidden = false;
@@ -396,18 +478,7 @@ export default{
                 toast.error("Please Select A Sale To Remove")
             }
         };
-        const showTransModalLoader = () =>{
-            trans_modal_loader.value = "block";
-        }
-        const hideTransModalLoader = () =>{
-            trans_modal_loader.value = "none";
-        }
-
-        const closeTransModal = () =>{
-            transModalVisible.value = false;
-            saleID.value = null;
-            hideTransModalLoader();
-        };
+        
         const showLoader = () =>{
             loader.value = "block";
         }
@@ -572,7 +643,7 @@ export default{
         const handleRightClick = (row, rowIndex, event) => {
 
             const menuOptions = [
-                { label: 'Generate Document', action: 'generate-document', rowIndex: rowIndex , icon: 'fa fa-edit', rightName: 'Adding Asset Sales'},
+                { label: 'Generate Document', action: 'generate-document', rowIndex: rowIndex , icon: 'fa fa-cloud-upload', rightName: 'Adding Asset Sales'},
             ];
 
             store.commit('contextMenu/SHOW_CONTEXT_MENU', {
@@ -589,13 +660,15 @@ export default{
             {label: 'Email Sale Statement', action: 'send-email', icon: 'fa-envelope', colorClass: 'text-indigo-500', rightName: 'Sending PSS Emails'},
             {label: 'Post Sale Balance', action: 'post-balance', icon: 'fa-check-circle',colorClass: 'text-green-600', rightName: 'Posting Sale Balance'},
             {label: 'Unpost Sale Balance', action: 'unpost-balance', icon: 'fa-times-circle', colorClass: 'text-red-600', rightName: 'Posting Sale Balance'},
+            {label: 'Drop Unit', action: 'drop-unit', icon: 'fa-unlink', colorClass: 'text-blue-500', rightName: 'Approving Asset Sales'},
             {label: 'Update Repayment Date', action: 'repayment-date', icon: 'fa-calendar-alt', colorClass: 'text-grey-700', rightName: 'Updating Sale Repayment Date'},
         ]);
         const handleDynamicOption = async(option) =>{
             if( option == 'exempt-penalty'){
                 let formData = {
                     asset_sale: selectedIds.value,
-                    company: companyID.value
+                    company: companyID.value,
+                    user: userID.value
                 }
                 Swal.fire({
                     title: "Are you sure?",
@@ -646,7 +719,8 @@ export default{
             }else if( option == 'unexempt-penalty'){
                 let formData = {
                     asset_sale: selectedIds.value,
-                    company: companyID.value
+                    company: companyID.value,
+                    user: userID.value
                 }
                 Swal.fire({
                     title: "Are you sure?",
@@ -804,6 +878,30 @@ export default{
                     toast.error("You have selected more than 1 Sale")
                 }else{
                     toast.error("Please Select A Sale")
+                }
+            }else if(option == 'drop-unit'){
+               if(selectedIds.value.length == 1){
+                    let formData = {
+                        company: companyID.value,
+                        asset_sale: selectedIds.value[0],
+                    }
+                    await store.dispatch('Asset_Units/fetchSaleItems', formData);
+                    await axios.post(`api/v1/get-asset-sale-items/`,formData)
+                    .then((response)=>{
+                        if(response.data.length > 0){
+                            refModalVisible.value = true;
+                            flex_basis.value = '1/2';
+                            flex_basis_percentage.value = '50';
+                        }else{
+                            toast.error("No Sale Units Found")
+                        }
+                    })
+                    .catch((error)=>{
+                        console.log(error.message);
+                    })
+                                   
+                }else{
+                    toast.error("Please Select A Single Sale To Drop Unit")
                 }
             }
         };
@@ -1004,10 +1102,10 @@ export default{
             loadPrev, loadNext, firstPage, lastPage, idField, actions, handleActionClick,handleOpenLink,showDetails,handleShowDetails,detailsTitle,hideDetails,
             submitButtonLabel, showModal, showLoader, loader, hideLoader, removeAssetSale, removeAssetSales,showActions,handleRightClick,
             handleSelectionChange,addingRight,removingRight,rightsModule,printSalesList,selectSearchQuantity,selectedValue,
-            modal_left,modal_top,modal_width,trans_modal_loader,transModalVisible,transTitle,showTransModalLoader,hideTransModalLoader,closeTransModal,
+            modal_left,modal_top,modal_width,trans_modal_loader,transModalVisible,transTitle,showTransModalLoader,hideTransModalLoader,dropSaleUnit,closeTransModal,
             dropdownOptions,handleDynamicOption,refTitle,refFormFields,refModalVisible,ref_modal_loader,handleRefReset,showRefModalLoader,hideRefModalLoader,closeRefModal,
             postSaleBalance,tabs,activeTab,loanScheduleRows,itemColumns,saleItemsRows,selectTab,
-            appModalVisible,title1,modal_loader1,showModalLoader1,hideModalLoader1,updateFormFields,formFields1,handleReset1,closeModal1,updateRepaymentDate,
+            appModalVisible,title1,modal_loader1,showModalLoader1,hideModalLoader1,formFields1,handleReset1,closeModal1,updateRepaymentDate,
             docTitle,docFormFields,docModalVisible,doc_modal_loader,handleDocReset,showDocModalLoader,hideDocModalLoader,closeDocModal,generateDocument,printModalVisible,pdfUrl, printTitle,
         
         }

@@ -72,10 +72,8 @@ export default defineComponent({
                 axios.post("api/v1/display-share-accounts-import-excel/", formData)
                 .then((response)=>{
                     excelAccountsList.value = response.data.accounts;
-                    console.log(excelAccountsList.value);
                 })
                 .catch((error)=>{
-                    console.log(error.message);
                     toast.error(error.message)
                 })
                 .finally(()=>{
@@ -107,7 +105,6 @@ export default defineComponent({
                    
                 })
                 .catch((error)=>{
-                    console.log(error.message);
                     toast.error(error.message);
                 })
                 .finally(()=>{
@@ -127,7 +124,7 @@ export default defineComponent({
                         const url = window.URL.createObjectURL(new Blob([response.data]));
                         const link = document.createElement('a');
                         link.href = url;
-                        link.setAttribute('download', 'Share_Accounts_Import.xls');
+                        link.setAttribute('download', 'Share_Accounts_Import.xlsx');
                         document.body.appendChild(link);
                         link.click();
                     }

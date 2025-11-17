@@ -136,7 +136,7 @@ export default defineComponent({
                 { type: 'text', name: 'stk_process_url',label: "STK Push Process URL", value: selectedSetup.value?.stk_process_url || 'https://api.safaricom.co.ke/mpesa/stkpush/v1/processrequest', placeholder: "", required: false },
                 { type: 'dropdown', name: 'limit_group',label: "Limit To", value: selectedSetup.value?.limit_group || 'All', required: true, options: [{ text: 'All', value: 'All' }, { text: 'Tenants', value: 'Tenants' }, { text: 'Members', value: 'Members' }, { text: 'Customers', value: 'Customers' }, { text: 'Debtors', value: 'Debtors' }]  },
                 { type: 'dropdown', name: 'auto_receipt',label: "Auto Receipt", value: selectedSetup.value?.auto_receipt || 'Yes', required: true, options: [{ text: 'Yes', value: 'Yes' }, { text: 'No', value: 'No' }]  },
-                {required: false}
+                { type: 'dropdown', name: 'acc_no_option',label: "A/c No Option", value: selectedSetup.value?.acc_no_option || 'All', required: true, options: [{ text: 'Tenant Code', value: 'Tenant Code' }, { text: 'Member Number', value: 'Member Number' },{ text: 'Member ID', value: 'Member ID' }, { text: 'Customer Code', value: 'Customer Code' },{ text: 'Sale Client Code', value: 'Sale Client Code' }, { text: 'All', value: 'All' }]  },
             ];
         };
         watch([selectedSetup], () => {
@@ -167,6 +167,7 @@ export default defineComponent({
                 config_type: formFields.value[1].value,
                 limit_group: additionalFields.value[3].value,
                 auto_receipt: additionalFields.value[4].value,
+                acc_no_option: additionalFields.value[5].value,
                 cashbook: ledgerValue.value,
                 cashbook_id: ledgerValue.value,
                 authentication: keyValue.value,
@@ -242,6 +243,7 @@ export default defineComponent({
                     config_type: formFields.value[1].value,
                     limit_group: additionalFields.value[3].value,
                     auto_receipt: additionalFields.value[4].value,
+                    acc_no_option: additionalFields.value[5].value,
                     cashbook: ledgerValue.value,
                     cashbook_id: ledgerValue.value,
                     authentication: keyValue.value,

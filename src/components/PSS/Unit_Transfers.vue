@@ -136,7 +136,8 @@ export default{
             if(selectedIds.value.length == 1){
                 let formData = {
                     company: companyID.value,
-                    asset_unit_transfer: selectedIds.value
+                    asset_unit_transfer: selectedIds.value,
+                    user: userID.value
                 }
                 Swal.fire({
                     title: "Are you sure?",
@@ -188,7 +189,8 @@ export default{
             if(selectedIds.value.length){
                 let formData = {
                     company: companyID.value,
-                    asset_unit_transfer: selectedIds.value
+                    asset_unit_transfer: selectedIds.value,
+                    user: userID.value
                 }
                 Swal.fire({
                     title: "Are you sure?",
@@ -331,7 +333,8 @@ export default{
                 const transferID = [row[idField]];
                 let formData = {
                     company: companyID.value,
-                    asset_unit_transfer: transferID
+                    asset_unit_transfer: transferID,
+                    user: userID.value
                 }
                 Swal.fire({
                     title: "Are you sure?",

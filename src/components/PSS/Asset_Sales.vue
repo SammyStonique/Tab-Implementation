@@ -199,6 +199,7 @@ export default{
             {name: 'edit', icon: 'fa fa-edit', title: 'Edit Sale', rightName: 'Editing Asset Sales'},
             {name: 'view', icon: 'fa fa-file-pdf-o', title: 'View Sale', rightName: 'Viewing Asset Sales'},
             {name: 'approve/reject', icon: 'fa fa-check-circle', title: 'Approve/Reject Sale', rightName: 'Approving Asset Sales'},
+            {name: 'generate-document', icon: 'fa fa-cloud-upload', title: 'Generate Document', rightName: 'Adding Asset Sales'},
             {name: 'delete', icon: 'fa fa-trash', title: 'Delete Sale', rightName: 'Deleting Asset Sales'},
         ]);
         const itemColumns = ref([
@@ -417,6 +418,7 @@ export default{
                 asset_sale: saleID.value,
                 sale_amount: saleAmount.value,
                 approval_status: formFields.value[0].value,
+                user: userID.value,
                 company: companyID.value
             }
 
@@ -646,7 +648,7 @@ export default{
         const handleRightClick = (row, rowIndex, event) => {
 
             const menuOptions = [
-                { label: 'Generate Document', action: 'generate-document', rowIndex: rowIndex , icon: 'fa fa-edit', rightName: 'Adding Asset Sales'},
+                { label: 'Generate Document', action: 'generate-document', rowIndex: rowIndex , icon: 'fa fa-cloud-upload', rightName: 'Adding Asset Sales'},
             ];
 
             store.commit('contextMenu/SHOW_CONTEXT_MENU', {
@@ -668,7 +670,8 @@ export default{
             if( option == 'exempt-penalty'){
                 let formData = {
                     asset_sale: selectedIds.value,
-                    company: companyID.value
+                    company: companyID.value,
+                    user: userID.value
                 }
                 Swal.fire({
                     title: "Are you sure?",
@@ -719,7 +722,8 @@ export default{
             }else if( option == 'unexempt-penalty'){
                 let formData = {
                     asset_sale: selectedIds.value,
-                    company: companyID.value
+                    company: companyID.value,
+                    user: userID.value
                 }
                 Swal.fire({
                     title: "Are you sure?",
@@ -984,11 +988,10 @@ export default{
                     closeRefModal();
                     searchAssetSales();
                 }else{
-                    toast.error("Error Disbursing Loan")
+                    toast.error("Error Dropping Unit")
                 }                   
             })
             .catch((error)=>{
-                console.log(error.message);
                 toast.error(error.message)
                 hideRefModalLoader();
             })

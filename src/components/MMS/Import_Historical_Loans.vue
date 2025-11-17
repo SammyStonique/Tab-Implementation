@@ -61,8 +61,6 @@ export default defineComponent({
         const handleFileChange = (fileData) => {
             filePath.value = fileData.filePath;
             excel_file.value = fileData.file;
-            console.log("File path updated to: ", filePath.value);
-            console.log("Excel file updated to: ", excel_file.value);
         };
 
         const displayExcelData = () =>{
@@ -78,10 +76,8 @@ export default defineComponent({
                 axios.post("api/v1/display-historical-loans-import-excel/", formData)
                 .then((response)=>{
                     excelLoansList.value = response.data.applications;
-                    console.log(excelLoansList.value);
                 })
                 .catch((error)=>{
-                    console.log(error.message);
                     toast.error(error.message)
                 })
                 .finally(()=>{
@@ -133,7 +129,7 @@ export default defineComponent({
                         const url = window.URL.createObjectURL(new Blob([response.data]));
                         const link = document.createElement('a');
                         link.href = url;
-                        link.setAttribute('download', 'Historical_Loans_Import.xls');
+                        link.setAttribute('download', 'Historical_Loans_Import.xlsx');
                         document.body.appendChild(link);
                         link.click();
                     }

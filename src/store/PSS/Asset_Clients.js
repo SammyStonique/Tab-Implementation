@@ -16,6 +16,13 @@ const state = {
   isEditing: false,
   outstandingBalance: 0,
   receiptItems: [],
+  clientDetails: [],
+  selectedClientID: '',
+  selectedSales: [],
+  selectedDocuments: [],
+  selectedTokens: [],
+  selectedTransfers: [],
+  saleClient: [],
 };
   
 const mutations = {
@@ -33,6 +40,13 @@ const mutations = {
     state.selectedCurrency = null;
     state.isEditing = false;
     state.receiptItems = [];
+    state.clientDetails = [];
+    stste.selectedClientID = '';
+    state.selectedSales = [];
+    state.selectedDocuments = [];
+    state.selectedTokens = [];
+    state.selectedTransfers = [];
+    state.saleClient = [];
   },
   SET_SELECTED_CUSTOMER(state, customer) {
     state.selectedCustomer = customer;
@@ -49,6 +63,21 @@ const mutations = {
   },
   SET_CUSTOMER_DETAILS(state, details){
     state.customerDetails = details;
+  },
+  SET_CLIENT_DETAILS(state, details){
+    state.clientDetails = details;
+  },
+  SET_SELECTED_TOKENS(state, token) {
+    state.selectedTokens = token;
+  },
+  SET_SELECTED_SALES(state, sales) {
+    state.selectedSales = sales;
+  },
+  SET_SELECTED_DOCUMENTS(state, documents) {
+    state.selectedDocuments = documents;
+  },
+  SET_SELECTED_TRANSFERS(state, transfer) {
+    state.selectedTransfers = transfer;
   },
   LIST_RECEIPT_ITEMS(state, items) {
     state.receiptItems = items;
@@ -116,6 +145,23 @@ const actions = {
       commit('SET_SELECTED_CURRENCY',(response.data.client_currency != null) ? (response.data.client_currency.code + "-" + response.data.client_currency.name) : "");
       commit('SET_SELECTED_CUSTOMER',response.data);
       commit('SET_CUSTOMER_DETAILS',response.data);
+    })
+    .catch((error)=>{
+      console.log(error.message);
+    })
+    
+  },
+  fetchClientDetails({ commit,state }, formData) {
+    axios.post(`api/v1/get-asset-sale-clients/`,formData)
+    .then((response)=>{
+        state.clientDetails = response.data;
+        state.selectedClientID = response.data.asset_sale_client_id;
+        state.saleClient = response.data;
+        commit('SET_CLIENT_DETAILS',response.data);
+        commit('SET_SELECTED_SALES',response.data.client_sales);
+        commit('SET_SELECTED_DOCUMENTS',response.data.client_sale_documents);
+        commit('SET_SELECTED_TOKENS',response.data.referral_tokens);
+        commit('SET_SELECTED_TRANSFERS',response.data.unit_transfers);
     })
     .catch((error)=>{
       console.log(error.message);

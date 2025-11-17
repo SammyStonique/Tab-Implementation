@@ -753,6 +753,7 @@ export default defineComponent({
                 sale_units: unitRows.value,
                 sale_charges: saleChargeRows.value,
                 company: companyID.value,
+                user: userID.value
             }
             errors.value = [];
             for(let i=0; i < formFields.value.length; i++){
