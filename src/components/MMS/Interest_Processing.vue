@@ -62,7 +62,7 @@ export default{
         const prodComponentKey = ref(0);
         const prodSearchComponentKey = ref(0);
         const periodSearchComponentKey = ref(0);
-        const title = ref('Interest Rate Details');
+        const title = ref('Interest Processing Details');
         const addButtonLabel = ref('Process Interest');
         const addingRight = ref('Processing Savings Interest');
         const removingRight = ref('Deleting Processed Interests');

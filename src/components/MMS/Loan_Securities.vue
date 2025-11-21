@@ -17,6 +17,7 @@
         :idField="idField"
         @handleSelectionChange="handleSelectionChange"
         @handleActionClick="handleActionClick"
+        :enableContextMenu=true
         @handleRightClick="handleRightClick"
         :count="depCount"
         :currentPage="currentPage"
@@ -365,7 +366,7 @@ export default{
         const handleRightClick = (row, rowIndex, event) => {
             store.commit('contextMenu/CLEAR_SELECTED_ACTION');
             const menuOptions = [
-                { label: 'Delete Attachment', action: 'delete-attachment', rowIndex: rowIndex, icon: 'fa fa-trash' },
+                { label: 'Delete Attachment', action: 'delete-attachment', rowIndex: rowIndex, icon: 'fa fa-trash', rightName: 'Deleting Loan Securities' },
             ];
 
             store.commit('contextMenu/SHOW_CONTEXT_MENU', {

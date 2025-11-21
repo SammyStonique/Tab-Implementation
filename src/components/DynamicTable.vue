@@ -32,11 +32,11 @@
             </td>
           </tr>
           <template v-if="expandedGroups[groupKey] !== false">
-            <tr v-for="(row, rowIndex) in rows" :key="rowIndex" @dblclick="handleRowClick(row, rowIndex)" @contextmenu.prevent="handleRightClick(row, rowIndex, $event)" :style="shouldAddLine(row) ? { textDecoration: 'line-through' } : {}" :class="['cursor-pointer text-xxs sm:text-xs uppercase', `hover:bg-orange-50`, row.reconciled === 'Yes' ? 'bg-green-200': row.selected ? 'bg-orange-100' : (rowIndex % 2 === 0 ? 'bg-gray-100' : 'bg-white')]">
+            <tr v-for="(row, rowIndex) in rows" :key="rowIndex" @click="handleClick(row)" @dblclick="handleRowClick(row, rowIndex)" @contextmenu="handleRightClick(row, rowIndex, $event)" :style="shouldAddLine(row) ? { textDecoration: 'line-through' } : {}" :class="['cursor-pointer text-xxs sm:text-xs uppercase', `hover:bg-orange-50`, row.reconciled === 'Yes' ? 'bg-green-200': row.selected ? 'bg-orange-100' : (rowIndex % 2 === 0 ? 'bg-gray-100' : 'bg-white')]">
               <td v-for="(column, colIndex) in columns" :key="colIndex" :hidden="column.hidden" 
                   :class="[{'ellipsis': column.maxWidth}, { 'max-w-[300px]': column.maxWidth }, { 'min-w-[120px]': column.minWidth }]">
                 <template v-if="column.type === 'checkbox'">
-                  <input type="checkbox" v-model="row.selected" class="checkbox mt-0.5" @change="updateSelectedIds(row, rowIndex)"/>
+                  <input type="checkbox" v-model="row.selected" class="checkbox mt-0.5" @change.stop="updateSelectedIds(row, rowIndex)" @click.stop/>
                 </template>
                 <template v-else-if="column.type === 'dropdown'">
                   <select @change="handleChange($event, row)" v-model="row[column.key]" :name="row[column.key]" class="bg-inherit outline-none h-full text-xxs sm:text-xs w-full uppercase">
@@ -139,6 +139,10 @@ export default defineComponent({
       type: String,
       default: null,
     },
+    enableContextMenu: {
+      type: Boolean,
+      default: false
+    },
   },
   emits : ['row-db-click','link-db-click', 'action-click','selection-changed', 'update-receipt-amount'],
   setup(props, { emit }) {
@@ -153,6 +157,7 @@ export default defineComponent({
     const sortColumn = ref(null);
     const sortDirection = ref('asc');
     const showValidation = ref(false);
+    const enableContextMenu = computed(() => props.enableContextMenu);
 
     // Initialize selected state for each row
     props.rows.forEach(row => {
@@ -163,8 +168,11 @@ export default defineComponent({
     // Add your condition here based on the column value
       return row.reversed === 'Yes'; 
     };
-
+    let clickTimeout = null;
+    let isDoubleClick = false;
     const handleRowClick = (row, rowIndex) => {
+      isDoubleClick = true;
+      clearTimeout(clickTimeout);
       if( row.reconciled){
         row.rowColor = row.reconciled ? 'bg-green-200' : null;
         if(row.reconciled === 'Yes'){
@@ -175,8 +183,27 @@ export default defineComponent({
       }
       
       emit('row-db-click', row, rowIndex);
+      setTimeout(() => (isDoubleClick = false), 0);
+    };
+    const handleClick = (row) => {
+      if (isDoubleClick) return;
+  
+      clearTimeout(clickTimeout);
+      clickTimeout = setTimeout(() => {
+        if (isDoubleClick) return;
+
+        props.rows.forEach(r => {r.selected = false;});
+        row.selected = true;
+        selectedIds.value = [row[props.idField]];
+        emit('selection-changed', selectedIds.value);
+      }, 200);
+      
     };
     const handleRightClick = (row, rowIndex, event) => {
+      if (!enableContextMenu.value) {
+        return;
+      }
+      event.preventDefault();
       emit('right-click', row, rowIndex, event);
     };
 
@@ -192,7 +219,6 @@ export default defineComponent({
         row.selected = isSelected;
       });
       selectedIds.value = isSelected ? props.rows.map(row => row[props.idField]) : [];
-
       emit('selection-changed', selectedIds.value);
     };
 
@@ -525,10 +551,10 @@ export default defineComponent({
     })
 
     return {
-      handleRowClick,handleLinkDblClick,handleRightClick, handleAction, handleChange, getNestedValue, handleInputChange,
+      handleClick,handleRowClick,handleLinkDblClick,handleRightClick, handleAction, handleChange, getNestedValue, handleInputChange,
       tableRef, toggleSelectAll, selectedIds, allSelected, updateSelectedIds, calculateColumnTotal,isDisabled,
       shouldAddLine,sortedRows,sortColumn,sortDirection,handleSort,groupedRows,expandedGroups,toggleGroup,pluralize,
-      groupingKey,checkboxSelection,iconColor,showValidation
+      groupingKey,checkboxSelection,iconColor,showValidation,
     };
   }
 });

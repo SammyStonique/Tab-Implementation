@@ -58,7 +58,7 @@
                         </div>
                         <div class="table w-[99%] top-[17.1rem] z-30">
                             <DynamicTable :key="statementTableKey" :columns="statementColumns" :rows="statementRows" :idField="idField" :showActions="showActions" :actions="actionsStatement" 
-                            @selection-changed="handleSelectionChange" @row-db-click="handleShowDetails" @right-click="handleRightClick"/>
+                            @selection-changed="handleSelectionChange" @action-click="handleActionClick" @row-db-click="handleShowDetails" :enableContextMenu=true @right-click="handleRightClick"/>
                         </div>
                     </div>             
                 </div>
@@ -289,9 +289,7 @@ export default{
 
                 appModalVisible.value = true;
                 flex_basis.value = "1/2";
-                flex_basis_percentage.value = '50';
-                
-                searchJournalEntries();     
+                flex_basis_percentage.value = '50'; 
             }
         } 
         const dropdownOptions = ref([

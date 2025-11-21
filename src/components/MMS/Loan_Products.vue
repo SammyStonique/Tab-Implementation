@@ -114,6 +114,7 @@ export default{
         const tableColumns = ref([
             {type: "checkbox"},
             {label: "Date", key:"date"},
+            {label: "Seq.", key:"sequence"},
             {label: "Code", key:"product_code"},
             {label: "Product Name", key:"product_name"},
             {label: "Min Amnt", key: "min_amount"},

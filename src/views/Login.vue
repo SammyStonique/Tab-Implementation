@@ -1,6 +1,8 @@
 <template>
     <Loader 
       :loader="loader"
+      :containerWidth="modalWidth"
+      :containerHeight="modalHeight"
       @showLoader="showLoader"
       @hideLoader="hideLoader"
     />
@@ -59,6 +61,8 @@
       const errors = ref([]);
       const loader = ref('none');
       const logo = ref('');
+      const modalWidth = ref('100%');
+      const modalHeight = ref('100%');
   
       const showLoader = () => {
         loader.value = "block";
@@ -138,7 +142,7 @@
       });
   
       return {
-        email,password,errors,login,loader,showLoader,hideLoader
+        email,password,errors,login,loader,showLoader,hideLoader,modalWidth,modalHeight
       };
     }
   });

@@ -42,6 +42,7 @@
                     :showTotals="showTotals"
                     :showActions="showActions"
                     :groupingKey="groupingKey"
+                    :enableContextMenu="enableContextMenu"
                     @action-click="handleActionClick"
                     @row-db-click="handleShowDetails"
                     @link-db-click="handleOpenLink"
@@ -216,6 +217,10 @@ export default defineComponent({
         groupingKey: {
             type: String,
             default: null,
+        },
+        enableContextMenu: {
+            type: Boolean,
+            default: false
         },
         addingRight:{
             type: String,

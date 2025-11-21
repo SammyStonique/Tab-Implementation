@@ -24,6 +24,7 @@
             :idField="idField"
             @handleSelectionChange="handleSelectionChange"
             @handleActionClick="handleActionClick"
+            :enableContextMenu=true
             @handleRightClick="handleRightClick"
             @handleOpenLink="handleOpenLink"
             :groupingKey=true

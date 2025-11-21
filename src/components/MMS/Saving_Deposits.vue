@@ -19,6 +19,7 @@
         :idField="idField"
         @handleSelectionChange="handleSelectionChange"
         @handleActionClick="handleActionClick"
+        :groupingKey=true
         :count="depCount"
         :currentPage="currentPage"
         :result="depArrLen"
@@ -396,6 +397,7 @@ export default{
         }
         const resetFilters = () =>{
             selectedValue.value = 50;
+            currentPage.value = 1;
             name_search.value = "";
             account_number_search.value = "";
             member_number_search.value = "";
@@ -411,7 +413,7 @@ export default{
             searchDeposits();
         })
         return{
-            title,idField, searchDeposits, addButtonLabel, searchFilters, resetFilters, tableColumns, depositsList,
+            currentPage,title,idField, searchDeposits, addButtonLabel, searchFilters, resetFilters, tableColumns, depositsList,
             depResults, depArrLen, depCount, pageCount, showNextBtn, showPreviousBtn,modal_top, modal_left, modal_width,
             loadPrev, loadNext, firstPage, lastPage, actions, formFields, depModalVisible, addNewDeposit,showTotals,
             displayButtons,flex_basis,flex_basis_percentage, handleActionClick, handleReset, createDeposit,

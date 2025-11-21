@@ -181,7 +181,7 @@ export default defineComponent({
                 for(let i=0; i<receiptRows.value.length; i++){
                     if(receiptRows.value[i].due_amount <= receiptTotals.value && receiptTotals.value != 0){
                         receiptRows.value[i].payment_allocation = receiptRows.value[i].due_amount;
-                        receiptRows.value[i].bal_after_alloc = receiptRows.value[i].due_amount - receiptRows.value[i].payment_allocation;
+                        receiptRows.value[i].bal_after_alloc = +(receiptRows.value[i].due_amount - receiptRows.value[i].payment_allocation).toFixed(2);
                         receiptTotals.value = receiptTotals.value - receiptRows.value[i].payment_allocation;
                         receipt_memo.value += receiptRows.value[i].description + ', ';
                     }else{
@@ -189,7 +189,7 @@ export default defineComponent({
                             break
                         }
                         receiptRows.value[i].payment_allocation = receiptTotals.value;
-                        receiptRows.value[i].bal_after_alloc = receiptRows.value[i].due_amount - receiptRows.value[i].payment_allocation;
+                        receiptRows.value[i].bal_after_alloc = +(receiptRows.value[i].due_amount - receiptRows.value[i].payment_allocation).toFixed(2);
                         receipt_memo.value += receiptRows.value[i].description;
                         break
                     }
@@ -200,15 +200,14 @@ export default defineComponent({
                 for(let i=0; i<receiptRows.value.length; i++){
                     if((receiptRows.value[i].due_amount <= receiptTotals.value) && (receiptTotals.value != 0)){
                         receiptRows.value[i].payment_allocation = receiptRows.value[i].due_amount;
-                        receiptRows.value[i].bal_after_alloc = receiptRows.value[i].due_amount - receiptRows.value[i].payment_allocation;
-                        // receiptTotals.value = (receiptTotals.value - receiptRows.value[i].payment_allocation).toFixed(2);
+                        receiptRows.value[i].bal_after_alloc = +(receiptRows.value[i].due_amount - receiptRows.value[i].payment_allocation).toFixed(2);
                         receipt_memo.value += receiptRows.value[i].description + ','
                     }else{
                         if(receiptTotals.value == 0){
                             break
                         }
                         receiptRows.value[i].payment_allocation = receiptTotals.value;
-                        receiptRows.value[i].bal_after_alloc = receiptRows.value[i].due_amount - receiptRows.value[i].payment_allocation;
+                        receiptRows.value[i].bal_after_alloc = +(receiptRows.value[i].due_amount - receiptRows.value[i].payment_allocation).toFixed(2);
                         receipt_memo.value += receiptRows.value[i].description;
                         break
                     }

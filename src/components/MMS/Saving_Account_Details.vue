@@ -116,13 +116,13 @@ export default{
         const statementRows = computed(()=> store.state.Ledgers.jnlArray);
         const statementColumns = ref([
             {type: "checkbox"},
-            {label: "Date", key:"date", type: "text", editable: false},
-            {label: "Ref No", key:"reference_no", type: "text", editable: false},
-            {label: "Txn No", key: "journal_no", type: "text", editable: false},
-            {label: "Narration", key: "description", type: "text", editable: false, maxWidth:"700px"},
-            {label: "Debit", key: "debit_amount", type: "text", editable: false},
-            {label: "Credit", key: "credit_amount", type: "text", editable: false},
-            {label: "Balance", key: "running_balance", type: "text", editable: false},
+            {label: "Date", key:"date", type: "text"},
+            {label: "Ref No", key:"reference_no", type: "text"},
+            {label: "Txn No", key: "journal_no", type: "text"},
+            {label: "Narration", key: "description", type: "text", maxWidth:"700px"},
+            {label: "Debit", key: "formatted_debit_amount", type: "text"},
+            {label: "Credit", key: "formatted_credit_amount", type: "text"},
+            {label: "Balance", key: "running_balance", type: "text"},
         ]);
         const actions = ref([
             {name: 'delete', icon: 'fa fa-trash', title: 'Delete Allocation'},

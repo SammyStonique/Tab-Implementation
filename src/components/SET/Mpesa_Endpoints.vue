@@ -240,7 +240,7 @@ export default{
         }
         const addNewEndpoint = async() =>{
             store.commit('Mpesa_Integrations/initializeStore');
-            await store.dispatch('Mpesa_Integrations/updateState', {selectedSetup: null, isEditing: false, selectedCashbook: null, selectedKey: null, });
+            await store.dispatch('Mpesa_Integrations/updateState', {selectedSetup: null, isEditing: false, selectedCashbook: null, selectedKey: null, selectedProduct: null});
             store.commit('pageTab/ADD_PAGE', {'SET':'Mpesa_Setup_Details'});
             store.state.pageTab.setActiveTab = 'Mpesa_Setup_Details';          
         };

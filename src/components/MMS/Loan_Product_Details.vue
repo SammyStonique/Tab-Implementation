@@ -109,7 +109,9 @@ export default defineComponent({
         const actionCharges = ref([
             {name: 'delete', icon: 'fa fa-minus-circle', title: 'Remove Charge', rightName: 'Adding Loan Products'},
         ])
-
+        const fetchCategories = async() =>{
+            await store.dispatch('Member_Categories/fetchMemberCategories', {company:companyID.value})
+        };
         const handleSelectedCategory = async(option) =>{
             await store.dispatch('Member_Categories/handleSelectedCategory', option)
             categoryID.value = store.state.Member_Categories.categoryID;
@@ -194,7 +196,7 @@ export default defineComponent({
                     type:'search-dropdown', label:"Member Category", value: categoryValue.value, componentKey: catComponentKey,
                     selectOptions: categoryArray, optionSelected: handleSelectedCategory, required: false,
                     searchPlaceholder: 'Select Category...', dropdownWidth: '300px', updateValue: selectedCategory.value,
-                    fetchData: store.dispatch('Member_Categories/fetchMemberCategories', {company:companyID.value}), clearSearch: clearSelectedCategory
+                    clearSearch: clearSelectedCategory
                 },
                 { type: 'text', name: 'product_code',label: "Code", value: selectedProduct.value?.product_code || '', required: false },
                 { type: 'text', name: 'product_name',label: "Name", value: selectedProduct.value?.product_name || '', required: true },
@@ -247,7 +249,7 @@ export default defineComponent({
                 { type: 'dropdown', name: 'enable_reminders',label: "Enable Reminder", value: selectedProduct.value?.enable_reminders || 'No', placeholder: "", required: true, options: [{ text: 'Yes', value: 'Yes' }, { text: 'No', value: 'No' }] },
                 { type: 'dropdown', name: 'reminder_mode',label: "Reminder Mode", value: selectedProduct.value?.reminder_mode || 'On Schedule Day', placeholder: "", required: true, options: [{ text: 'On Schedule Day', value: 'On Schedule Day' }, { text: 'Day(s) Before and After Schedule Date', value: 'Before and After Schedule Date' },{ text: 'Day(s) Before Schedule Date', value: 'Before Schedule Date' }, { text: 'Day(s) After Schedule Date', value: 'After Schedule Date' },{ text: 'On Schedule Day and Day(s) Before Schedule Date', value: 'On Schedule Day and Before Schedule Date' }, { text: 'On Schedule Day and Day(s) After Schedule Date', value: 'On Schedule Day and After Schedule Date' }] },
                 { type: 'number', name: 'reminder_days',label: "Reminder Days", value: selectedProduct.value?.reminder_days || 1, required: false },
-                {required: false},
+                { type: 'number', name: 'sequence',label: "Product Sequence", value: selectedProduct.value?.sequence || 1, required: false },
                 {required: false},
                 {required: false},
                 {required: false},
@@ -356,6 +358,7 @@ export default defineComponent({
                 enable_reminders: formFields.value[29].value,
                 reminder_mode: formFields.value[30].value,
                 reminder_days: formFields.value[31].value,
+                sequence: formFields.value[32].value,
                 interest_posting_account: intLedgerID.value,
                 interest_posting_account_id: intLedgerID.value,
                 penalty_posting_account: penaltyLedgerID.value,
@@ -433,6 +436,7 @@ export default defineComponent({
                 enable_reminders: formFields.value[29].value,
                 reminder_mode: formFields.value[30].value,
                 reminder_days: formFields.value[31].value,
+                sequence: formFields.value[32].value,
                 interest_posting_account: intLedgerValue.value,
                 interest_posting_account_id: intLedgerValue.value,
                 penalty_posting_account: penaltyLedgerValue.value,
@@ -497,6 +501,7 @@ export default defineComponent({
         }
         
         onBeforeMount(()=>{ 
+            fetchCategories();
             fetchCharges();
             updateFormFields();
             updateAdditionalFormFields();

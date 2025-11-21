@@ -62,7 +62,7 @@ export default{
         const prodComponentKey = ref(0);
         const prodSearchComponentKey = ref(0);
         const periodSearchComponentKey = ref(0);
-        const title = ref('Dividend Rate Details');
+        const title = ref('Dividend Processing Details');
         const addButtonLabel = ref('Process Dividend');
         const addingRight = ref('Processing Shares Dividends');
         const removingRight = ref('Deleting Processed Dividends');
@@ -188,6 +188,7 @@ export default{
                 },
                 { type: 'date', name: 'date',label: "Processing Date", value: '', required: true },
                 { type: 'number', name: 'withholding_rate',label: "W.H.T Rate(%)", value: '0', required: true },
+                { type: 'dropdown', name: 'dividend_mode',label: "Dividend Payable Mode", value: 'Journalize', placeholder: "", required: true, options: [{ text: 'Journalize', value: 'Journalize' }, { text: 'Individual Bills', value: 'Individual Bills' }, { text: 'Single Bill', value: 'Single Bill' }] },
             ];
         };
 
@@ -215,6 +216,8 @@ export default{
             for(let i=0; i < formFields.value.length; i++){
                 if(formFields.value[i].name == "interest_rate" || formFields.value[i].name == "retention_rate"){
                     formFields.value[i].value = '0';
+                }else if(formFields.value[i].name == "dividend_mode"){
+                    formFields.value[i].value = 'Journalize';
                 }else{
                     formFields.value[i].value = '';
                 }
@@ -237,6 +240,7 @@ export default{
             let formData = {
                 date: formFields.value[2].value,
                 withholding_rate: formFields.value[3].value,
+                dividend_mode: formFields.value[4].value,
                 share_product: productID.value,
                 share_product_id: productID.value,
                 fiscal_period: periodID.value,

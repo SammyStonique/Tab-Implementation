@@ -8,7 +8,7 @@
           <div v-else>
             <label for="">{{ field.label }}:</label><br />
           </div>
-          <input v-model="field.value" @change="handleChange($event, field)" :disabled="field.disabled" :name="field.name" type="text" :class="[`bg-slate-50 rounded pl-3 border border-gray-400 text-sm w-full`,showValidation && field.required && !field.value ? 'zigzag-border' : '']" :placeholder="field.placeholder"/>
+          <input v-model="field.value" @blur="validateField($event, field)" @change="handleChange($event, field)" :disabled="field.disabled" :name="field.name" type="text" :class="[`bg-slate-50 rounded pl-3 border border-gray-400 text-sm w-full`,showValidation && field.required && !field.value ? 'zigzag-border' : '']" :placeholder="field.placeholder"/>
         </div>
         <div v-if="field.type === 'password'" class="text-left text-sm" :hidden="field.hidden">
           <div v-if="field.required">
@@ -26,7 +26,7 @@
           <div v-else>
             <label for="">{{ field.label }}:</label><br />
           </div>
-          <input v-model="field.value" @change="handleChange($event, field)" :disabled="field.disabled" :name="field.name" type="number" pattern="^\d+(\.\d{0,2})?$" oninput="this.value = this.value.replace(/[^0-9.]/g, '').replace(/(\.\d{2})\d+/g, '$1')" :class="[`bg-slate-50 rounded pl-3 border border-gray-400 text-sm`,field.inputWidth ? `w-${field.inputWidth}` : 'w-full',showValidation && field.required && !field.value ? 'zigzag-border' : '']" :placeholder="field.placeholder"/>
+          <input v-model="field.value" @blur="validateField($event, field)" @change="handleChange($event, field)" :disabled="field.disabled" :name="field.name" type="number" pattern="^\d+(\.\d{0,2})?$" oninput="this.value = this.value.replace(/[^0-9.]/g, '').replace(/(\.\d{2})\d+/g, '$1')" :class="[`bg-slate-50 rounded pl-3 border border-gray-400 text-sm`,field.inputWidth ? `w-${field.inputWidth}` : 'w-full',showValidation && field.required && !field.value ? 'zigzag-border' : '']" :placeholder="field.placeholder"/>
         </div>
         <div v-if="field.type === 'date'" class="mr-2 text-left text-sm" :hidden="field.hidden">
           <div v-if="field.required">
@@ -35,7 +35,7 @@
           <div v-else>
             <label for="">{{ field.label }}:</label><br />
           </div>
-          <input v-model="field.value" @change="handleChange($event, field)" :name="field.name" type="date" :disabled="field.disabled" :min="field.minDate" :max="field.maxDate" :class="[`bg-slate-50 rounded pl-3 border border-gray-400 text-sm w-full`,showValidation && field.required && !field.value ? 'zigzag-border' : '']" :placeholder="field.placeholder"/>
+          <input v-model="field.value" @blur="validateField($event, field)" @change="handleChange($event, field)" :name="field.name" type="date" :disabled="field.disabled" :min="field.minDate" :max="field.maxDate" :class="[`bg-slate-50 rounded pl-3 border border-gray-400 text-sm w-full`,showValidation && field.required && !field.value ? 'zigzag-border' : '']" :placeholder="field.placeholder"/>
         </div>
         <div v-if="field.type === 'time'" class="mr-2 text-left text-sm" :hidden="field.hidden">
           <div v-if="field.required">
@@ -53,7 +53,7 @@
           <div v-else>
             <label for="">{{ field.label }}:</label><br />
           </div>
-          <select @change="handleChange($event, field)" v-model="field.value" :name="field.name" :disabled="field.disabled" :class="['bg-slate-50 rounded border border-gray-400 text-sm pl-2 pt-1 w-full',showValidation && field.required && !field.value ? 'zigzag-border' : '']">
+          <select @blur="validateField($event, field)" @change="handleChange($event, field)" v-model="field.value" :name="field.name" :disabled="field.disabled" :class="['bg-slate-50 rounded border border-gray-400 text-sm pl-2 pt-1 w-full',showValidation && field.required && !field.value ? 'zigzag-border' : '']">
             <option value="" selected disabled>{{ field.placeholder }}</option>
             <option v-for="(option, index) in field.options" :key="index" :value="option.value" class="text-sm">{{ option.text }}</option>
           </select>
@@ -83,7 +83,7 @@
             <div v-else>
               <label for="">{{ field.label }}:</label><br />
             </div>
-            <textarea v-model="field.value" :name="field.name" :disabled="field.disabled" :class="['bg-slate-50 rounded border border-gray-400 text-sm pl-2 pt-2',showValidation && field.required && !field.value ? 'zigzag-border' : '']" :rows="field.textarea_rows" :cols="field.textarea_cols"></textarea>
+            <textarea v-model="field.value" @blur="validateField($event, field)" :name="field.name" :disabled="field.disabled" :class="['bg-slate-50 rounded border border-gray-400 text-sm pl-2 pt-2',showValidation && field.required && !field.value ? 'zigzag-border' : '']" :rows="field.textarea_rows" :cols="field.textarea_cols"></textarea>
         </div>
         <div v-if="field.type === 'file'" class="mr-2 text-left text-sm" :hidden="field.hidden">
           <div v-if="field.required">
@@ -207,11 +207,19 @@ export default{
       emit('handleReset');
     }
     const handleChange = (event, field) =>{
+      
       const selectedValue = event.target.value;
       if (field.method && typeof field.method === 'function') {
         field.method(selectedValue); 
       } else {
         console.warn('Field method is not defined or is not a function');
+      }
+    }
+    const validateField = (event, field) =>{
+      if(field.value == ''){
+        showValidation.value = true;
+      }else{
+        showValidation.value = false;
       }
     }
     const onFileChange = (event) =>{
@@ -233,7 +241,7 @@ export default{
     };
 
     return{
-      handleSubmit,handlePrintSubmit, handleReset, handleChange, onFileChange,localFilePath,checkboxSelection,showValidation
+      handleSubmit,handlePrintSubmit, handleReset, handleChange,validateField, onFileChange,localFilePath,checkboxSelection,showValidation
     }
   }
 

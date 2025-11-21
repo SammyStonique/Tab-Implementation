@@ -15,11 +15,11 @@ export default defineComponent({
         },
         containerWidth: {
             type: String,
-            default: '100vw' 
+            default: '100%' 
         },
         containerHeight: {
             type: String,
-            default: '100vh' 
+            default: '100%' 
         }
     },
     setup(props, {emit}){

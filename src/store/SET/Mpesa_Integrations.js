@@ -14,6 +14,7 @@ const state = {
     setupName: '',
     selectedMpesa: null,
     selectedCashbook: null,
+    selectedProduct: null,
     selectedKey: null,
     selectedSetup: null,
     isEditing: false,
@@ -38,6 +39,7 @@ const state = {
       state.selectedCashbook = null;
       state.selectedKey = null;
       state.selectedSetup = null;
+      state.selectedProduct = null;
     },
     LIST_MPESA(state, mpesa) {
       state.mpesaList = mpesa;
@@ -61,6 +63,9 @@ const state = {
     },
     SET_SELECTED_CASHBOOK(state, cashbook) {
         state.selectedCashbook = cashbook;
+    },
+    SET_SELECTED_PRODUCT(state, product) {
+        state.selectedProduct = product;
     },
     SETUPS_ARRAY(state, setup){
       state.setupArray = setup;
@@ -148,6 +153,7 @@ const state = {
       axios.post(`api/v1/fetch-mpesa-setups/`,formData)
       .then((response)=>{
         const selectedCashbook = response.data.cashbook.ledger_code + ' - ' + response.data.cashbook.ledger_name;
+        commit('SET_SELECTED_PRODUCT',(response.data.loan_product != null) ? (response.data.loan_product.product_code + " - " + response.data.loan_product.product_name) : null);
         commit('SET_SELECTED_CASHBOOK',selectedCashbook);
         const selectedKey = response.data.authentication.consumer_key;
         commit('SET_SELECTED_KEY',selectedKey);

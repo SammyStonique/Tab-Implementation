@@ -275,8 +275,8 @@ export default defineComponent({
             {label: "Ref No", key:"reference_no"},
             {label: "Txn No", key: "journal_no"},
             {label: "Narration", key: "description", maxWidth:"1200px"},
-            {label: "Charges", key: "debit_amount"},
-            {label: "Payments", key: "credit_amount"},
+            {label: "Charges", key: "formatted_debit_amount"},
+            {label: "Payments", key: "formatted_credit_amount"},
             {label: "Balance", key: "running_balance"},
         ]);
 

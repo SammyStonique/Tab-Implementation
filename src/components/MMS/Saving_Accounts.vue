@@ -16,8 +16,10 @@
         :rows="accountsList"
         :actions="actions"
         :idField="idField"
+        :showTotals="showTotals"
         @handleSelectionChange="handleSelectionChange"
         @handleActionClick="handleActionClick"
+        :groupingKey=true
         :count="depCount"
         :currentPage="currentPage"
         :result="depArrLen"
@@ -68,6 +70,7 @@ export default{
         const rightsModule = ref('MMS');
         const idField = 'saving_account_id';
         const depModalVisible = ref(false);
+        const showTotals = ref(true);
         const selectedIds = ref([]);
         const accountsList = ref([]);
         const depResults = ref([]);
@@ -95,12 +98,12 @@ export default{
         const computedProdMinAmnt = computed(() =>  productMinAmount);
         const tableColumns = ref([
             {type: "checkbox"},
-            {label: "Acc No", key: "account_number", type: "text", editable: false},
-            {label: "Member No", key: "member_number", type: "text", editable: false},
-            {label: "Member Name", key: "member_name", type: "text", editable: false},
-            {label: "Saving Product", key: "saving_product", type: "text", editable: false},
-            {label: "Min Amnt", key: "amount", type: "text", editable: false},
-            {label: "Saving Amount", key: "total_amount", type: "text", editable: false},
+            {label: "Acc No", key: "account_number", type: "text"},
+            {label: "Member No", key: "member_number", type: "text"},
+            {label: "Member Name", key: "member_name", type: "text"},
+            {label: "Saving Product", key: "saving_product", type: "text"},
+            {label: "Min Amnt", key: "amount", type: "text"},
+            {label: "Saving Amount", key: "total_amount", type: "number"},
         ])
         const actions = ref([
             {name: 'edit', icon: 'fa fa-edit', title: 'Edit Account', rightName: 'Editing Saving Accounts'},
@@ -490,6 +493,7 @@ export default{
         }
         const resetFilters = () =>{
             selectedValue.value = 50;
+            currentPage.value = 1;
             name_search.value = "";
             account_number_search.value = "";
             member_number_search.value = "";
@@ -505,9 +509,9 @@ export default{
             searchAccounts();
         })
         return{
-            title,idField, searchAccounts, addButtonLabel, searchFilters, resetFilters, tableColumns, accountsList,
+            currentPage,title,idField, searchAccounts, addButtonLabel, searchFilters, resetFilters, tableColumns, accountsList,
             depResults, depArrLen, depCount, pageCount, showNextBtn, showPreviousBtn,modal_top, modal_left, modal_width,
-            loadPrev, loadNext, firstPage, lastPage, actions, formFields, depModalVisible, addNewAccount,
+            loadPrev, loadNext, firstPage, lastPage, actions, formFields, depModalVisible, addNewAccount,showTotals,
             displayButtons,flex_basis,flex_basis_percentage, handleActionClick, handleReset, saveAccount,
             showLoader, loader, hideLoader, modal_loader, showModalLoader, hideModalLoader, removeAccount, removeAccounts,
             addingRight,removingRight,rightsModule, closeModal,handleSelectionChange,selectSearchQuantity,selectedValue,importAccounts

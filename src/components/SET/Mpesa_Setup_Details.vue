@@ -38,6 +38,7 @@ export default defineComponent({
         const componentKey = ref(0);
         const keyComponentKey = ref(0);
         const ledComponentKey = ref(0);
+        const prodComponentKey = ref(0);
         const errors = ref([]);
         const companyID = computed(()=> store.state.userData.company_id);
         const displayButtons = ref(true);
@@ -48,11 +49,14 @@ export default defineComponent({
         const additional_flex_basis_percentage = ref('');
         const selectedSetup = computed(()=> store.state.Mpesa_Integrations.selectedSetup);
         const selectedCashbook = computed(()=> store.state.Mpesa_Integrations.selectedCashbook);
+        const selectedProduct = computed(()=> store.state.Mpesa_Integrations.selectedProduct)
         const selectedKey = computed(()=> store.state.Mpesa_Integrations.selectedKey);
         const keyArray = computed(() => store.state.Mpesa_Integrations.mpesaArr);
         const ledgerArray = computed(() => store.state.Ledgers.ledgerArr);
+        const productArray = computed(() => store.state.Loan_Products.productArr);
         const ledgerID = ref('');
         const keyID = ref('');
+        const productID = ref('');
 
         const fetchLedgers = async() =>{
             await store.dispatch('Ledgers/fetchLedgers', {company:companyID.value, ledger_type: 'Cashbook'})
@@ -99,18 +103,18 @@ export default defineComponent({
                     type:'search-dropdown', label:"Consumer Key", value: keyValue.value, componentKey: keyComponentKey,
                     selectOptions: keyArray, optionSelected: handleSelectedKey, required: true,
                     searchPlaceholder: 'Select Consumer Key...', dropdownWidth: '450px', updateValue: selectedKey.value,
-                    fetchData: fetchKeys(), clearSearch: clearSelectedKey()  
+                    clearSearch: clearSelectedKey()  
                 },
                 {
                     type:'search-dropdown', label:"Cashbook", value: ledgerValue.value, componentKey: ledComponentKey,
                     selectOptions: ledgerArray, optionSelected: handleSelectedLedger, required: true,
                     searchPlaceholder: 'Select Cashbook...', dropdownWidth: '400px', updateValue: selectedCashbook.value,
-                    fetchData: fetchLedgers(), clearSearch: clearSelectedLedger()  
+                    clearSearch: clearSelectedLedger()  
                 },
             ];
         };
         const handleReset = () =>{
-            store.dispatch('Mpesa_Integrations/updateState',{selectedKey: null, selectedCashbook: null})
+            store.dispatch('Mpesa_Integrations/updateState',{selectedKey: null, selectedCashbook: null, selectedProduct: null})
             for(let i=0; i < formFields.value.length; i++){
                 formFields.value[i].value = '';
             }
@@ -118,16 +122,47 @@ export default defineComponent({
             for(let i=0; i < additionalFields.value.length; i++){
                 additionalFields.value[i].value = '';
             }
+            ledComponentKey.value += 1;
+            keyComponentKey.value += 1;
+            prodComponentKey.value += 1;
         }
 
-        watch([selectedSetup, selectedCashbook,selectedKey], () => {
-            if (selectedSetup.value && selectedCashbook.value && selectedKey.value) {
+        watch([selectedSetup, selectedCashbook,selectedKey,selectedProduct], () => {
+            if (selectedSetup.value && selectedCashbook.value && selectedKey.value && selectedProduct.value) {
+                ledComponentKey.value += 1;
+                keyComponentKey.value += 1;
+                prodComponentKey.value += 1;
+                updateFormFields();
+            }
+            else if (selectedSetup.value && selectedCashbook.value && selectedKey.value) {
                 ledComponentKey.value += 1;
                 keyComponentKey.value += 1;
                 updateFormFields();
             }
         }, { immediate: true });
+        const productValue = computed(() => {
+           return (selectedSetup.value && selectedSetup.value.loan_product && !productID.value) ? selectedSetup.value.loan_product.loan_product_id : productID.value;
 
+        });
+        const fetchLoanProducts = async() =>{
+            await store.dispatch('Loan_Products/fetchLoanProducts', {company:companyID.value})   
+        };
+        const handleSelectedProduct = async(option) =>{
+            await store.dispatch('Loan_Products/handleSelectedProduct', option)
+            productID.value = store.state.Loan_Products.productID;
+            if(selectedSetup.value && selectedSetup.value.loan_product){
+                selectedSetup.value.loan_product.loan_product_id = productID.value;
+                productValue.value = productID.value
+            }
+        };
+        const clearSelectedProduct = async() =>{
+            await store.dispatch('Loan_Products/updateState', {productID: ''});
+            productID.value = store.state.Loan_Products.productID;
+            if(selectedSetup.value && selectedSetup.value.loan_product != ""){
+                selectedSetup.value.loan_product.loan_product_id = productID.value;
+                productValue.value = productID.value;
+            } 
+        };
         const additionalFields = ref([]);
         const updateAdditionalFormFields = () => {
             additionalFields.value = [
@@ -136,7 +171,14 @@ export default defineComponent({
                 { type: 'text', name: 'stk_process_url',label: "STK Push Process URL", value: selectedSetup.value?.stk_process_url || 'https://api.safaricom.co.ke/mpesa/stkpush/v1/processrequest', placeholder: "", required: false },
                 { type: 'dropdown', name: 'limit_group',label: "Limit To", value: selectedSetup.value?.limit_group || 'All', required: true, options: [{ text: 'All', value: 'All' }, { text: 'Tenants', value: 'Tenants' }, { text: 'Members', value: 'Members' }, { text: 'Customers', value: 'Customers' }, { text: 'Debtors', value: 'Debtors' }]  },
                 { type: 'dropdown', name: 'auto_receipt',label: "Auto Receipt", value: selectedSetup.value?.auto_receipt || 'Yes', required: true, options: [{ text: 'Yes', value: 'Yes' }, { text: 'No', value: 'No' }]  },
-                { type: 'dropdown', name: 'acc_no_option',label: "A/c No Option", value: selectedSetup.value?.acc_no_option || 'All', required: true, options: [{ text: 'Tenant Code', value: 'Tenant Code' }, { text: 'Member Number', value: 'Member Number' },{ text: 'Member ID', value: 'Member ID' }, { text: 'Customer Code', value: 'Customer Code' },{ text: 'Sale Client Code', value: 'Sale Client Code' }, { text: 'All', value: 'All' }]  },
+                { type: 'dropdown', name: 'acc_no_option',label: "A/c No Option", value: selectedSetup.value?.acc_no_option || 'All', required: true, options: [{ text: 'Tenant Code', value: 'Tenant Code' }, { text: 'Member Number', value: 'Member Number' },{ text: 'Member ID', value: 'Member ID' }, { text: 'Member Number/Product Sequence', value: 'Member Number Product Sequence' },{ text: 'Member ID/Product Sequence', value: 'Member ID Product Sequence' },
+                 { text: 'Customer Code', value: 'Customer Code' },{ text: 'Sale Client Code', value: 'Sale Client Code' }, { text: 'All', value: 'All' }]  },
+                {  
+                    type:'search-dropdown', label:"Limit To Loan Product", value: productValue.value, componentKey: prodComponentKey,
+                    selectOptions: productArray, optionSelected: handleSelectedProduct, required: false,
+                    searchPlaceholder: 'Select Loan Product...', dropdownWidth: '450px', updateValue: selectedProduct.value,
+                    clearSearch: clearSelectedProduct
+                },
             ];
         };
         watch([selectedSetup], () => {
@@ -172,6 +214,8 @@ export default defineComponent({
                 cashbook_id: ledgerValue.value,
                 authentication: keyValue.value,
                 authentication_id: keyValue.value,
+                loan_product: productValue.value,
+                loan_product_id: productValue.value,
                 company: companyID.value,
             }
 
@@ -248,6 +292,8 @@ export default defineComponent({
                     cashbook_id: ledgerValue.value,
                     authentication: keyValue.value,
                     authentication_id: keyValue.value,
+                    loan_product: productValue.value,
+                    loan_product_id: productValue.value,
                     company: companyID.value,
                     mpesa_setup: selectedSetup.value.mpesa_setup_id
                 };
@@ -284,6 +330,9 @@ export default defineComponent({
         }
         
         onBeforeMount(()=>{ 
+            fetchLedgers();
+            fetchKeys();
+            fetchLoanProducts();
             updateFormFields();
             updateAdditionalFormFields();
             flex_basis.value = '1/3';
