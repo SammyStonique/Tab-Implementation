@@ -1,6 +1,6 @@
 <!-- ContextMenu.vue -->
 <template>
-    <div v-if="visible" class="absolute bg-white border border-gray-300 min-w-['50px'] rounded shadow-md z-50 text-xs" :style="{ top: `${y}px`, left: `${x}px` }"@click.stop>
+    <div v-if="visible" class="absolute bg-white border border-gray-300 min-w-['200px'] rounded shadow-md z-50 text-xs" :style="{ top: `${y}px`, left: `${x}px` }"@click.stop>
       <ul>
         <li
           v-for="(option, index) in options" :key="index" :class="{ 'disabled': isDisabled(`${option.rightName}`) }" class="border border-gray-100 px-3 py-1 text-left hover:bg-gray-100 cursor-pointer" @click="selectOption(option)"

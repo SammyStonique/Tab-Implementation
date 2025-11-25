@@ -734,11 +734,11 @@ export default{
         const handleRightClick = (row, rowIndex, event) => {
 
             const menuOptions = [
-                { label: 'Edit', action: 'edit', rowIndex: rowIndex , icon: 'fa fa-edit', rightName: 'Editing Loan Applications'},
-                { label: 'View', action: 'view', rowIndex: rowIndex, icon: 'fa fa-file-pdf-o', rightName: 'Viewing Loan Ledger' },
-                { label: 'Approve', action: 'approve', rowIndex: rowIndex, icon: 'fa fa-check-circle', rightName: 'Approving Loan Applications' },
-                { label: 'Disburse', action: 'disburse', rowIndex: rowIndex, icon: 'fa fa-credit-card', rightName: 'Disbursing Member Loan' },
-                { label: 'Delete', action: 'delete', rowIndex: rowIndex, icon: 'fa fa-trash', rightName: 'Deleting Loan Applications' },
+                { label: 'Edit Application', action: 'edit', rowIndex: rowIndex , icon: 'fa fa-edit', rightName: 'Editing Loan Applications'},
+                { label: 'View Application', action: 'view', rowIndex: rowIndex, icon: 'fa fa-file-pdf-o', rightName: 'Viewing Loan Ledger' },
+                { label: 'Approve Loan', action: 'approve', rowIndex: rowIndex, icon: 'fa fa-check-circle', rightName: 'Approving Loan Applications' },
+                { label: 'Disburse Loan', action: 'disburse', rowIndex: rowIndex, icon: 'fa fa-credit-card', rightName: 'Disbursing Member Loan' },
+                { label: 'Delete Loan', action: 'delete', rowIndex: rowIndex, icon: 'fa fa-trash', rightName: 'Deleting Loan Applications' },
             ];
 
             store.commit('contextMenu/SHOW_CONTEXT_MENU', {
@@ -986,7 +986,7 @@ export default{
         };
         const checkApprovedLimit = (value) =>{
             if(parseFloat(loanApprvAmnt.value) < parseFloat(value)){
-                toast.error(`Approved Amount is ${loanApprvAmnt.value}`)
+                toast.error(`Maximum Disbursal Amount is ${loanApprvAmnt.value}`)
                 refFormFields.value[6].value = loanApprvAmnt.value;
             }
         };

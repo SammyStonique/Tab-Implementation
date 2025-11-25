@@ -20,6 +20,7 @@
             @handleSelectionChange="handleSelectionChange"
             @handleActionClick="handleActionClick"
             @handleShowDetails="handleShowDetails"
+            :groupingKey=true
             :count="propCount"
             :currentPage="currentPage"
             :result="propArrLen"

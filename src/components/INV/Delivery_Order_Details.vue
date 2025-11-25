@@ -128,7 +128,6 @@ export default defineComponent({
             await store.dispatch('Items_Catalog/handleSelectedItem', option)
             itemID.value = store.state.Items_Catalog.itemID;
             itemComponentKey.value += 1;
-            console.log("THE ITEMS ROW IS ",itemRows.value)
         };
         const clearSelectedOutlet = async() =>{
             await store.dispatch('Retail_Outlets/updateState', {outletID: ''});
@@ -152,20 +151,20 @@ export default defineComponent({
                     type:'search-dropdown', label:"Outlet", value: outletID.value, componentKey: outComponentKey,
                     selectOptions: outletArray, optionSelected: handleSelectedOutlet, required: true,
                     searchPlaceholder: 'Select Outlet...', dropdownWidth: '500px', updateValue: defaultOutlet.value,
-                    fetchData: fetchOutlets(), clearSearch: clearSelectedOutlet()  
+                    clearSearch: clearSelectedOutlet()  
                 },
                 {
                     type:'search-dropdown', label:"Customer", value: customerID.value, componentKey: custComponentKey,
                     selectOptions: customerArray, optionSelected: handleSelectedCustomer, required: true,
                     searchPlaceholder: 'Select Customer...', dropdownWidth: '500px', updateValue: selectedCustomer.value,
-                    fetchData: fetchCustomers(), clearSearch: clearSelectedCustomer()  
+                    clearSearch: clearSelectedCustomer()  
                 },
                 { type: 'dropdown', name: 'stock_type',label: "Stock Type", value: defaultStockType.value, placeholder: "", required: true, method: fetchInventoryItems, options: [{ text: 'Stocked', value: 'Stocked' }, { text: 'Serialized', value: 'Serialized' },{ text: 'Non Stocked', value: 'Non Stocked' }, { text: 'Service', value: 'Service' }] },
                 {
                     type:'search-dropdown', label:"Item", value: itemID.value, componentKey: itemComponentKey,
                     selectOptions: itemArray, optionSelected: handleSelectedItem, required: true,
                     searchPlaceholder: 'Select Item...', dropdownWidth: '500px', updateValue: "",
-                    // fetchData: fetchItems(), clearSearch: clearSelectedItem()  
+ 
                 },     
                 {type: 'text', name: 'delivery_location', label: "Delivery Location", value: selectedSale.value?.delivery_location || '', placeholder: '', required: false,} ,
                 {required: false}        
@@ -331,6 +330,8 @@ export default defineComponent({
         };
 
         onBeforeMount(()=>{ 
+            fetchOutlets();
+            fetchCustomers();
             store.dispatch('Ledgers/updateState', { invoiceItemsArray: []})
             updateFormFields();
             flex_basis.value = '1/5';

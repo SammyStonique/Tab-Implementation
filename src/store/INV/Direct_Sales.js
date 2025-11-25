@@ -18,6 +18,7 @@ const state = {
   customer_search: '',
   selectedSale: null,
   selectedCustomer: null,
+  selectedOutlet: null,
   isEditing: false,
   isDelivering: false,
   defaultOutlet: null,
@@ -28,7 +29,8 @@ const state = {
   defaultChannelID: null,
   defaultCashbookID: null,
   defaultStockType: null,
-  saveButtonLabel: "Save"
+  saveButtonLabel: "Save",
+  saleLineItemsArray: []
 };
   
 const mutations = {
@@ -54,6 +56,9 @@ const mutations = {
     state.defaultChannelID = null;
     state.defaultCashbookID = null;
     state.defaultStockType = null;
+    state.saleLineItemsArray = null;
+    state.selectedCustomer = null;
+    state.selectedOutlet = null;
   },
   SET_SELECTED_SALE(state, sale) {
     state.selectedSale = sale;
@@ -67,6 +72,9 @@ const mutations = {
   },
   SET_SELECTED_CUSTOMER(state, customer){
     state.selectedCustomer = customer;
+  },
+  SET_SELECTED_OUTLET(state, Outlet){
+    state.selectedOutlet = Outlet;
   },
   LIST_SALES(state, sales) {
     state.salesList = sales;
@@ -165,12 +173,16 @@ const actions = {
     })
     
   },
-  fetchSale({ commit,state }, formData) {
-    axios.post(`api/v1/fetch-inventory-sales/`,formData)
+  async fetchSale({ commit,state }, formData) {
+    return axios.post(`api/v1/fetch-inventory-sales/`,formData)
     .then((response)=>{
       state.selectedSale = response.data;
+      state.saleLineItemsArray = response.data.sale_items;
+      state.defaultOutletID = response.data.outlet_id;
+      state.defaultOutlet = response.data.outlet;
       const selectedCustomer = response.data.client;
       commit('SET_SELECTED_CUSTOMER',selectedCustomer);
+      return response.data;
     })
     .catch((error)=>{
       console.log(error.message);

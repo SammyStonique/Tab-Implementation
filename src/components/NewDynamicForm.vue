@@ -105,6 +105,10 @@
             <label class="min-w-[150px]"  for="">{{ field.label }}</label>
           </div>
         </div>
+        <div v-if="field.type === 'color-picker'" class="text-left text-sm" :hidden="field.hidden">
+          <label>{{ field.label }}:</label>
+            <Sketch :model-value="field.value" @update:model-value="updateColor(field, $event)" />
+        </div>
       </div>
       
       <div class="flex-1 basis-full p-2">
@@ -127,7 +131,7 @@ import { ref } from 'vue';
 import { getCurrentInstance } from 'vue';
 import { useToast } from "vue-toastification";
 import SearchableDropdown from './SearchableDropdown.vue';
-
+import { Sketch } from '@ckpack/vue-color';
 
 export default{
   props:{
@@ -162,7 +166,7 @@ export default{
       },
   },
   components:{
-    SearchableDropdown
+    SearchableDropdown,Sketch
   },
   setup(props, {emit}){
     const toast = useToast();
@@ -239,9 +243,13 @@ export default{
         field.value = false;
       }
     };
+    const updateColor = (field, colorObj) => {
+        field.value = colorObj.hex;   // store only hex
+    };
 
     return{
-      handleSubmit,handlePrintSubmit, handleReset, handleChange,validateField, onFileChange,localFilePath,checkboxSelection,showValidation
+      handleSubmit,handlePrintSubmit, handleReset, handleChange,validateField, onFileChange,localFilePath,checkboxSelection,showValidation,
+      updateColor
     }
   }
 

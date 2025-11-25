@@ -462,7 +462,7 @@ export default{
         }
 
         const dropdownOptions = ref([
-            {label: 'Withholding Tax', action: 'withholding-tax'},
+            // {label: 'Withholding Tax', action: 'withholding-tax'},
         ]);
         const handleDynamicOption = (option) =>{
             if(option == 'batch-meter-reading'){

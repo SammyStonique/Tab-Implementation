@@ -84,7 +84,15 @@ export default defineComponent({
             }
 
             for(let i=0; i < additionalFields.value.length; i++){
-                additionalFields.value[i].value = '';
+                if(additionalFields.value[i].name == "primary_color"){
+                    additionalFields.value[i].value = '#FF5722';
+                }else if(additionalFields.value[i].name == "secondary_color"){
+                    additionalFields.value[i].value = '#FFA726';
+                }
+                else{
+                    additionalFields.value[i].value = 'Disabled';
+                }
+                
             }
             paymentInfo.value = "";
             paymentTerms.value = "";
@@ -111,6 +119,8 @@ export default defineComponent({
                 { type: 'dropdown', name: 'mms_module',label: "Membership Management", value: selectedCompany.value?.mms_module || 'Disabled', placeholder: "", required: true, options: [{ text: 'Enabled', value: 'Enabled' }, { text: 'Disabled', value: 'Disabled' }] },
                 { type: 'dropdown', name: 'pss_module',label: "Property Sales", value: selectedCompany.value?.pss_module || 'Disabled', placeholder: "", required: true, options: [{ text: 'Enabled', value: 'Enabled' }, { text: 'Disabled', value: 'Disabled' }] }, 
                 { type: 'dropdown', name: 'vss_module',label: "Vehicle Sales", value: selectedCompany.value?.vss_module || 'Disabled', placeholder: "", required: true, options: [{ text: 'Enabled', value: 'Enabled' }, { text: 'Disabled', value: 'Disabled' }] },
+                { type: 'color-picker', name: 'primary_color',label: "Company Primary Color", value: selectedCompany.value?.primary_color || '#FF5722', required: false },
+                { type: 'color-picker', name: 'secondary_color',label: "Company Secondary Color", value: selectedCompany.value?.secondary_color || '#FFA726', required: false },
                 {required: false},
                 {required: false},
             ];
@@ -170,6 +180,8 @@ export default defineComponent({
                     mms_module: additionalFields.value[7].value,
                     pss_module: additionalFields.value[8].value,
                     vss_module: additionalFields.value[9].value,
+                    primary_color: additionalFields.value[10].value,
+                    secondary_color: additionalFields.value[11].value,
                 };
 
                 try {

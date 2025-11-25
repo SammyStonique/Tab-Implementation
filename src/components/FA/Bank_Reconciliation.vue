@@ -279,7 +279,7 @@ export default defineComponent({
             formFields.value = [
                 { type: 'date', name: 'issue_date',label: "Reconciliation Date", value: selectedReconciliation.value?.reconciliation_date ||'', required: true, method: searchJournalEntries},
                 { type: 'number', name: 'journal_no',label: "Bank Statement Balance", value: selectedReconciliation.value?.statement_balance || 0, required: true, method: calculateVariance},                
-                { type: 'number', name: 'journal_no',label: "Open. Cashbook Balance", value: selectedReconciliation.value?.opening_cashbook_balance || 0, required: false, method: calculateVariance},
+                { type: 'number', name: 'journal_no',label: "Opening Bank Balance", value: selectedReconciliation.value?.opening_cashbook_balance || 0, required: false, method: calculateVariance},
                 { type: 'text', name: 'journal_no',label: "(+)Cashbook Balance", value: cbkRunningBalance, required: false, disabled:true},             
                 { type: 'text', name: 'journal_no',label: "Variance", value: selectedReconciliation.value?.variance ||0, required: false, disabled:true},        
             ]

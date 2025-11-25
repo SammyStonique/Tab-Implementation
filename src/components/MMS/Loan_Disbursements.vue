@@ -143,6 +143,9 @@ export default{
         const handleSelectionChange = (ids) => {
             selectedIds.value = ids;
         };
+        const fetchLoanApplications = async() =>{
+            await store.dispatch('Loan_Applications/fetchLoanApplications', {company:companyID.value, status:"Approved"})
+        };
         const handleSelectedApplication = async(option) =>{
             await store.dispatch('Loan_Applications/handleSelectedApplication', option)
             applicationID.value = store.state.Loan_Applications.applicationID;
@@ -162,6 +165,7 @@ export default{
         const fetchLedgers = async() =>{
             await store.dispatch('Ledgers/fetchCashbookLedgers', {company:companyID.value, ledger_type: 'Cashbook'})
         };
+        
         const formFields = ref([]);
         const applicationValue = computed(() => {
             return applicationID.value;
@@ -171,7 +175,7 @@ export default{
         });
         const checkApprovedLimit = (value) =>{
             if(parseFloat(loanApprvAmnt.value) < parseFloat(value)){
-                toast.error(`Approved Amount is ${loanApprvAmnt.value}`)
+                toast.error(`Maximum Disbursal Amount is ${loanApprvAmnt.value}`)
                 formFields.value[7].value = loanApprvAmnt.value;
             }
         };
@@ -181,7 +185,7 @@ export default{
                     type:'search-dropdown', label:"Application", value: applicationValue.value, componentKey: memComponentKey,
                     selectOptions: applicationArray, optionSelected: handleSelectedApplication, required: true,
                     searchPlaceholder: 'Select Application...', dropdownWidth: '400px', updateValue: selectedApplication.value,
-                    fetchData: store.dispatch('Loan_Applications/fetchLoanApplications', {company:companyID.value, status:"Approved"}), clearSearch: clearSelectedApplication
+                    clearSearch: clearSelectedApplication
                 },
                 {  
                     type:'search-dropdown', label:"Cashbook", value: ledgerValue.value, componentKey: prodComponentKey,
@@ -208,6 +212,7 @@ export default{
             }
         }, { immediate: true });
         const addNewDisbursement = () =>{
+            fetchLoanApplications();
             depModalVisible.value = true;
             handleReset();
             store.dispatch("Loan_Disbursements/updateState",{selectedDisbursement:null, selectedApplication:null, selectedLedger:null,isEditing:false})

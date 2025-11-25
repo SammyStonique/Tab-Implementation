@@ -20,6 +20,7 @@
             @handleSelectionChange="handleSelectionChange"
             @handleActionClick="handleActionClick"
             @handleShowDetails="handleShowDetails"
+            :groupingKey=true
             :count="propCount"
             :currentPage="currentPage"
             :result="propArrLen"
@@ -115,6 +116,7 @@ export default{
             {label: "Paid", key:"total_paid", type: "number", txtColor: "txtColorPaid"},
             {label: "Balance", key:"balance", type: "number", txtColor: "txtColorBal"},
             {label: "Invoice#", key:"txn_no"},
+            {label: "Location", key:"delivery_location"},
             {label: "Done By", key:"done_by"},
         ]);
         const showTotals = ref(true);
@@ -343,7 +345,7 @@ export default{
         };
         const selectTab = async(index) => {
             let formData = {
-                company: companyID.value,
+                company_id: companyID.value,
                 sale: saleID.value,
             }
             if(index == 1){

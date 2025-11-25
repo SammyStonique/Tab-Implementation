@@ -56,7 +56,6 @@ export default defineComponent({
         const errors = ref([]);
         const companyID = computed(()=> store.state.userData.company_id);
         const userID = computed(()=> store.state.userData.user_id);
-        const defaultSettings = computed(()=> store.state.userData.defaultSettings);
         const defaultOutlet = computed(()=> store.state.Direct_Sales.defaultOutlet);
         const defaultStockType = computed(()=> store.state.Direct_Sales.defaultStockType);
         const selectedSale = computed(()=> store.state.Direct_Sales.selectedSale);
@@ -69,7 +68,8 @@ export default defineComponent({
         const flex_basis = ref('');
         const flex_basis_percentage = ref('');
         const itemID = ref('');
-        const outletID = computed(()=> store.state.Direct_Sales.defaultOutletID);
+        const outletID = ref(null);
+        const defaultOutletID = computed(()=> store.state.Direct_Sales.defaultOutletID);
         const itemArray = computed(() => store.state.Items_Catalog.itemsArr);
         const outletArray = computed(() => store.state.Retail_Outlets.outletArr);
         const customerArray = computed(() => store.state.Customers.customerArr);
@@ -115,9 +115,7 @@ export default defineComponent({
         const fetchOutlets = async() =>{
             await store.dispatch('Retail_Outlets/fetchOutlets', {company:companyID.value})
         };
-        watch([outletID,], () => {
-            
-        }, { immediate: true });
+  
         const handleSelectedOutlet = async(option) =>{
             await store.dispatch('Retail_Outlets/handleSelectedOutlet', option)
             outletID.value = store.state.Retail_Outlets.outletID;
@@ -133,7 +131,7 @@ export default defineComponent({
         };
         const clearSelectedOutlet = async() =>{
             await store.dispatch('Retail_Outlets/updateState', {outletID: ''});
-            outletID.value = ""
+            outletID.value = null;
         };
         const clearSelectedCustomer = async() =>{
             await store.dispatch('Customers/updateState', {customerID: ''});
@@ -150,23 +148,22 @@ export default defineComponent({
             formFields.value = [
                 { type: 'date', name: 'issue_date',label: "Date", value: selectedSale.value?.date || formatDate(current_date), required: true, maxDate: formatDate(current_date) },                
                 {
-                    type:'search-dropdown', label:"Outlet", value: outletID.value, componentKey: outComponentKey,
+                    type:'search-dropdown', label:"Outlet", value: outletID.value || defaultOutletID.value, componentKey: outComponentKey,
                     selectOptions: outletArray, optionSelected: handleSelectedOutlet, required: true,
                     searchPlaceholder: 'Select Outlet...', dropdownWidth: '500px', updateValue: defaultOutlet.value,
-                    fetchData: fetchOutlets(), clearSearch: clearSelectedOutlet()  
+                    clearSearch: clearSelectedOutlet()  
                 },
                 {
                     type:'search-dropdown', label:"Customer", value: customerID.value, componentKey: custComponentKey,
                     selectOptions: customerArray, optionSelected: handleSelectedCustomer, required: true,
                     searchPlaceholder: 'Select Customer...', dropdownWidth: '500px', updateValue: selectedCustomer.value,
-                    fetchData: fetchCustomers(), clearSearch: clearSelectedCustomer()  
+                    clearSearch: clearSelectedCustomer()  
                 },
                 { type: 'dropdown', name: 'stock_type',label: "Stock Type", value: defaultStockType.value, placeholder: "", required: true, method: fetchInventoryItems, options: [{ text: 'Stocked', value: 'Stocked' }, { text: 'Serialized', value: 'Serialized' },{ text: 'Non Stocked', value: 'Non Stocked' }, { text: 'Service', value: 'Service' }] },
                 {
                     type:'search-dropdown', label:"Item", value: itemID.value, componentKey: itemComponentKey,
                     selectOptions: itemArray, optionSelected: handleSelectedItem, required: false,
                     searchPlaceholder: 'Select Item...', dropdownWidth: '500px', updateValue: "",
-                    // fetchData: fetchItems(), clearSearch: clearSelectedItem()  
                 }, 
                 {type: 'text', name: 'delivery_location', label: "Delivery Location", value: selectedSale.value?.delivery_location || '', placeholder: '', required: false,},
                 {required: false}            
@@ -186,12 +183,14 @@ export default defineComponent({
             mainComponentKey.value += 1;
             formFields.value[0].value = formatDate(current_date);
             formFields.value[3].value = defaultStockType.value;
+            formFields.value[5].value = "";
             receipt_totals.value = 0;
             receiptTotals.value = 0;
             discountTotals.value = 0;
             tax_totals.value = 0;
             custComponentKey.value += 1;
             customerID.value = null;
+            outletID.value = null;
         }
 
         const showLoader = () =>{
@@ -259,7 +258,7 @@ export default defineComponent({
                         "selling_price": parseFloat(itemRows.value[i].selling_price),
                         "quantity": itemRows.value[i].stock_after_adjustment,
                         "tax_type": "",
-                        "tax_inclusivity": "",
+                        "tax_inclusivity": "Inclusive",
                         "output_vat_id": ""
                     } 
                     saleItemsArray.value.push(saleItem);
@@ -267,7 +266,7 @@ export default defineComponent({
             }
 
             let formData = {
-                outlet: outletID.value,
+                outlet: outletID.value || defaultOutletID.value,
                 notes: "",
                 date: formFields.value[0].value,
                 sale_items_array: saleItemsArray.value,
@@ -288,7 +287,7 @@ export default defineComponent({
                     errors.value.push(formFields.value[i].label);
                 }
             }
-            if(outletID.value == '' || customerID.value == ''){
+            if((outletID.value == null && defaultOutletID.value == '') || customerID.value == ''){
                 errors.value.push('Error');
             }
 
@@ -349,6 +348,7 @@ export default defineComponent({
                         "discount": itemRows.value[i].discount,
                         "tax": parseFloat(itemRows.value[i].vat_amount),
                         "profit": itemRows.value[i].item_sales_income,
+                        "sub_total": itemRows.value[i].sub_total,
                         "item_total": itemRows.value[i].total_amount,
                         "batch_after_sale": itemRows.value[i].available_batch_count - itemRows.value[i].quantity,
                         "purchase_price": parseFloat(itemRows.value[i].purchase_price),
@@ -372,13 +372,14 @@ export default defineComponent({
                         "discount": itemRows.value[i].discount,
                         "tax": itemRows.value[i].vat_amount,
                         "profit": itemRows.value[i].item_sales_income,
+                        "sub_total": itemRows.value[i].sub_total,
                         "item_total": itemRows.value[i].total_amount,
                         "batch_after_sale": itemRows.value[i].available_batch_count - itemRows.value[i].quantity,
                         "purchase_price": parseFloat(itemRows.value[i].purchase_price),
                         "selling_price": parseFloat(itemRows.value[i].selling_price),
                         "quantity": itemRows.value[i].stock_after_adjustment,
                         "tax_type": "",
-                        "tax_inclusivity": "",
+                        "tax_inclusivity": "Inclusive",
                         "output_vat_id": ""
                     } 
                     saleItemsArray.value.push(saleItem);
@@ -409,7 +410,7 @@ export default defineComponent({
                     errors.value.push(formFields.value[i].label);
                 }
             }
-            if(outletID.value == '' || (customerID.value == '' && selectedSale.value.client_id == "")){
+            if((outletID.value == null && defaultOutletID.value == '') || (customerID.value == '' && selectedSale.value.client_id == "")){
                 errors.value.push('Error');
             }
 
@@ -467,16 +468,18 @@ export default defineComponent({
                         "inventory_item": itemRows.value[i].item,
                         "stock_at_hand": itemRows.value[i].stock_at_hand,
                         "adjusted_stock": itemRows.value[i].quantity,
+                        "stock_type": itemRows.value[i].stock_type,
                         "batch_before_sale": itemRows.value[i].stock_after_adjustment,
                         "batch_count": itemRows.value[i].batch_count,
                         "discount": itemRows.value[i].discount,
                         "tax": parseFloat(itemRows.value[i].vat_amount),
                         "profit": itemRows.value[i].item_sales_income,
+                        "sub_total": itemRows.value[i].sub_total,
                         "item_total": itemRows.value[i].total_amount,
                         "batch_after_sale": itemRows.value[i].available_batch_count - itemRows.value[i].quantity,
                         "purchase_price": parseFloat(itemRows.value[i].purchase_price),
                         "selling_price": parseFloat(itemRows.value[i].selling_price),
-                        "quantity": itemRows.value[i].stock_after_adjustment,
+                        "quantity": itemRows.value[i].quantity,
                         "tax_type": itemRows.value[i].vat_rate.tax_id,
                         "tax_inclusivity": itemRows.value[i].vat_inclusivity,
                         "output_vat_id": itemRows.value[i].vat_rate.tax_output_account.ledger_id
@@ -490,16 +493,18 @@ export default defineComponent({
                         "inventory_item": itemRows.value[i].item,
                         "stock_at_hand": itemRows.value[i].stock_at_hand,
                         "adjusted_stock": itemRows.value[i].quantity,
+                        "stock_type": itemRows.value[i].stock_type,
                         "batch_before_sale": itemRows.value[i].stock_after_adjustment,
                         "batch_count": itemRows.value[i].batch_count,
                         "discount": itemRows.value[i].discount,
                         "tax": itemRows.value[i].vat_amount,
                         "profit": itemRows.value[i].item_sales_income,
+                        "sub_total": itemRows.value[i].sub_total,
                         "item_total": itemRows.value[i].total_amount,
                         "batch_after_sale": itemRows.value[i].available_batch_count - itemRows.value[i].quantity,
                         "purchase_price": parseFloat(itemRows.value[i].purchase_price),
                         "selling_price": parseFloat(itemRows.value[i].selling_price),
-                        "quantity": itemRows.value[i].stock_after_adjustment,
+                        "quantity": itemRows.value[i].quantity,
                         "tax_type": "",
                         "tax_inclusivity": "",
                         "output_vat_id": ""
@@ -509,15 +514,17 @@ export default defineComponent({
             }
 
             let formData = {
-                outlet: outletID.value,
+                outlet: outletID.value || defaultOutletID.value,
+                inventory_sale: selectedSale.value.sale_id,
                 notes: "",
-                date: formFields.value[0].value,
-                sale_items_array: saleItemsArray.value,
-                total_amount: receiptTotals.value,
+                delivery_date: formFields.value[0].value,
+                delivery_location: formFields.value[5].value,
+                sale_items: saleItemsArray.value,
+                sales_totals: receiptTotals.value,
                 sale_type: "Credit",
                 sale_delivery: "Not Delivered",
-                customer: customerID.value,
-                tax: tax_totals.value,
+                customer: (customerID.value == "") ? selectedSale.value.client_id : customerID.value,
+                tax_amount: tax_totals.value,
                 discount: discountTotals.value,
                 company: companyID.value,
                 user: userID.value
@@ -529,7 +536,7 @@ export default defineComponent({
                     errors.value.push(formFields.value[i].label);
                 }
             }
-            if(outletID.value == '' || customerID.value == ''){
+            if((outletID.value == '' && defaultOutletID.value == '') || (customerID.value == '' && selectedSale.value.client_id == "")){
                 errors.value.push('Error');
             }
 
@@ -544,19 +551,19 @@ export default defineComponent({
                 }
                 else{            
                     try {
-                        const response = await store.dispatch('Direct_Sales/createSaleOrder', formData);
+                        const response = await store.dispatch('Direct_Sales/createDeliveryOrder', formData);
                         if (response && response.status === 200) {
                             hideLoader();
-                            toast.success('Sale Order created successfully!');
+                            toast.success('Delivery Successful!');
                             handleReset();
                             mainComponentKey.value += 1;
                         } else {
-                            toast.error('An error occurred while creating the Sale Order.');
+                            toast.error('An error occurred while Delivering the Sale Order.');
                             hideLoader();
                         }
                     } catch (error) {
                         console.error(error.message);
-                        toast.error('Failed to create Sale Order: ' + error.message);
+                        toast.error('Failed to create Delivery Order: ' + error.message);
                     } finally {
                         hideLoader();
                     }              
@@ -586,6 +593,8 @@ export default defineComponent({
         // };
 
         onBeforeMount(()=>{ 
+            fetchCustomers();
+            fetchOutlets();
             store.dispatch('Ledgers/updateState', { invoiceItemsArray: []})
             updateFormFields();
             flex_basis.value = '1/5';

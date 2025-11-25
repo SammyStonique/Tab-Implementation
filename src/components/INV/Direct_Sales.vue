@@ -321,7 +321,7 @@ export default{
             }
         };
         const addNewSale = () =>{
-            // store.commit('Direct_Sales/initializeStore');
+            store.commit('Direct_Sales/initializeStore');
             store.commit('pageTab/ADD_PAGE', {'INV':'Sale_Details'});
             store.state.pageTab.invActiveTab = 'Sale_Details';         
         }

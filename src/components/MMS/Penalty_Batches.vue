@@ -11,7 +11,6 @@
             @resetFilters="resetFilters"
             @removeItem="removeBatch"
             @removeSelectedItems="removeBatches"
-            @printList="printbatchesList"
             :addingRight="addingRight"
             :removingRight="removingRight"
             :rightsModule="rightsModule"

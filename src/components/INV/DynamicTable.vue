@@ -225,7 +225,6 @@
       };
   
       const calculateTaxAmount = (row) =>{
-        console.log("THE ROW IS ",row)
         const subTotal = (parseFloat(row.quantity) * parseFloat(row.cost)) || 0;
         const taxRate = parseFloat(row.vat_rate?.tax_rate) || 0;
         const taxIncl = row.vat_inclusivity || "Inclusive";

@@ -23,6 +23,7 @@
             @handleSelectionChange="handleSelectionChange"
             @handleActionClick="handleActionClick"
             @handleShowDetails="handleShowDetails"
+            :groupingKey=true
             :count="propCount"
             :currentPage="currentPage"
             :result="propArrLen"
@@ -117,6 +118,7 @@ export default{
             {label: "Outlet", key: "outlet_name"},
             {label: "Customer", key:"client"},
             {label: "Phone No", key:"client_phone_number"},
+            {label: "Location", key:"delivery_location"},
             {label: "Amount", key:"total_amount", type: "number"},
             {label: "Status", key:"status", textColor:"textColor"},
             {label: "Done By", key:"done_by"},
@@ -312,18 +314,10 @@ export default{
         };
         const addNewSale = async() =>{
             // store.commit('Direct_Sales/initializeStore');
-            await store.dispatch('Direct_Sales/updateState',{saveButtonLabel: 'Save', selectedCustomer: null, isEditing: false, isDelivering:false})
+            await store.dispatch('Direct_Sales/updateState',{saveButtonLabel: 'Save',selectedSale:null, selectedCustomer: null, isEditing: false, isDelivering:false, selectedOutlet:null,saleLineItemsArray:[]})
             await store.dispatch('Items_Catalog/updateState',{lineItemsArray:[]})
             store.commit('pageTab/ADD_PAGE', {'INV':'Sale_Order_Details'});
             store.state.pageTab.invActiveTab = 'Sale_Order_Details';         
-        };
-        const fetchSaleOrderItems = async(saleID) =>{
-            let formData = {
-                sale: saleID,
-                inventory_item: "",
-                company_id: companyID.value
-            }
-            await store.dispatch('Items_Catalog/fetchSaleOrderItems',formData)
         };
         const handleActionClick = async(rowIndex, action, row) =>{
             if(action == 'edit'){
@@ -331,17 +325,16 @@ export default{
                 if(order_delivery == "Delivered"){
                     toast.error("Cannot Edit Delivered Order")
                 }else{
-                    await store.dispatch('Direct_Sales/updateState',{saveButtonLabel: 'Save', isEditing: true})
-                    await store.dispatch('Items_Catalog/updateState',{lineItemsArray:[]})
+                    await store.dispatch('Direct_Sales/updateState',{saveButtonLabel: 'Save', isEditing: true, isDelivering: false})
                     const saleID = row[idField];
                     let formData = {
                         company: companyID.value,
                         inventory_sale: saleID
                     }
-                    fetchSaleOrderItems(saleID);
                     await store.dispatch('Direct_Sales/fetchSale',formData);
                     store.commit('pageTab/ADD_PAGE', {'INV':'Sale_Order_Details'});
                     store.state.pageTab.invActiveTab = 'Sale_Order_Details';
+                    await store.dispatch('Items_Catalog/updateState',{lineItemsArray: store.state.Direct_Sales.saleLineItemsArray})
                 }
             }
             else if(action == 'deliver'){
@@ -349,17 +342,16 @@ export default{
                 if(order_delivery == "Delivered"){
                     toast.error("Order Already Delivered")
                 }else{
-                    await store.dispatch('Direct_Sales/updateState',{saveButtonLabel: 'Deliver', isDelivering: true})
-                    await store.dispatch('Items_Catalog/updateState',{lineItemsArray:[]})
+                    await store.dispatch('Direct_Sales/updateState',{saveButtonLabel: 'Deliver', isDelivering: true, isEditing: false})
                     const saleID = row[idField];
                     let formData = {
                         company: companyID.value,
                         inventory_sale: saleID
                     }
-                    fetchSaleOrderItems(saleID);
                     await store.dispatch('Direct_Sales/fetchSale',formData);
                     store.commit('pageTab/ADD_PAGE', {'INV':'Sale_Order_Details'});
                     store.state.pageTab.invActiveTab = 'Sale_Order_Details';
+                    await store.dispatch('Items_Catalog/updateState',{lineItemsArray: store.state.Direct_Sales.saleLineItemsArray})
                 }             
             }
             else if(action == 'delete'){

@@ -140,7 +140,7 @@ export default defineComponent({
             if(outletID.value && counterID.value){
                 fetchChannels(counterID.value);
             }
-            if (outletID.value) {
+            else if (outletID.value) {
                 fetchCounters();
             }
             
@@ -197,19 +197,18 @@ export default defineComponent({
                     type:'search-dropdown', label:"Outlet", value: outletID.value, componentKey: outComponentKey,
                     selectOptions: outletArray, optionSelected: handleSelectedOutlet, required: true,
                     searchPlaceholder: 'Select Outlet...', dropdownWidth: '280px', updateValue: defaultOutlet.value,
-                    fetchData: fetchOutlets(), clearSearch: clearSelectedOutlet()  
+                    clearSearch: clearSelectedOutlet()  
                 },
                 {
                     type:'search-dropdown', label:"Counter", value: counterID.value, componentKey: countComponentKey,
                     selectOptions: counterArray, optionSelected: handleSelectedCounter, required: true,
                     searchPlaceholder: 'Select Counter...', dropdownWidth: '280px', updateValue: defaultCounter.value,
-                    fetchData: fetchCounters(), clearSearch: clearSelectedCounter()  
+                    clearSearch: clearSelectedCounter()  
                 },
                 {
                     type:'search-dropdown', label:"Channel", value: channelID.value, componentKey: chanComponentKey,
                     selectOptions: channelArray, optionSelected: handleSelectedChannel, required: true,
                     searchPlaceholder: 'Select Channel...', dropdownWidth: '250px', updateValue: defaultChannel.value,
-                    // fetchData: fetchChannels(), 
                     clearSearch: clearSelectedChannel()  
                 },
                 { type: 'dropdown', name: 'stock_type',label: "Stock Type", value: defaultStockType.value, placeholder: "", required: true, method: fetchInventoryItems, options: [{ text: 'Stocked', value: 'Stocked' }, { text: 'Serialized', value: 'Serialized' },{ text: 'Non Stocked', value: 'Non Stocked' }, { text: 'Service', value: 'Service' }] },
@@ -217,7 +216,7 @@ export default defineComponent({
                     type:'search-dropdown', label:"Item", value: itemID.value, componentKey: itemComponentKey,
                     selectOptions: itemArray, optionSelected: handleSelectedItem, required: true,
                     searchPlaceholder: 'Select Item...', dropdownWidth: '350px', updateValue: "",
-                    // fetchData: fetchItems(), clearSearch: clearSelectedItem()  
+
                 },
                 { type: 'text', name: 'customer',label: "Customer", value: 'Walk-In Customer', required: true,},
                 { type: 'text', name: 'phone_number',label: "Phone No", value: '0', required: true,},
@@ -453,6 +452,7 @@ export default defineComponent({
         });
 
         onBeforeMount(()=>{ 
+            fetchOutlets();
             store.dispatch('Items_Catalog/updateState', { lineItemsArray: []})
             updateFormFields();
             flex_basis.value = '1/6';
