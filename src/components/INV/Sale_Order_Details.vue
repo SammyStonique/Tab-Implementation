@@ -77,15 +77,15 @@ export default defineComponent({
         const itemRows = computed(() => store.state.Items_Catalog.lineItemsArray);
         const taxRates = computed(() => store.getters['Taxes/getFormatedTax']);
         const itemColumns = ref([
-            {label: "Item Name", key:"inventory_item_name", type: "text", editable: false},
-            {label: "Avail.", key:"batch_count", type: "text", editable: false},
-            {label: "Batch", key: "available_batch_count", type: "text", editable: false,},
+            {label: "Item Name", key:"inventory_item_name", type: "text"},
+            {label: "Avail.", key:"batch_count", type: "text"},
+            {label: "Batch", key: "available_batch_count", type: "text",},
             {label: "Qty", key: "quantity", type: "number", editable: true, minWidth:"50px", maxWidth:"50px"},
-            {label: "S.Price", key:"selling_price", type: "text", editable: false,},
-            {label: "Vat rate", key: "vat_rate", type: "select-dropdown", editable: false, options: taxRates, maxWidth:"50px"},
-            {label: "Incl.", key: "vat_inclusivity", type: "select-dropdown", editable: false, maxWidth:"20px", options: [{ text: 'Yes', value: 'Inclusive' }, { text: 'No', value: 'Exclusive' }]},
-            {label: "Vat Amnt", key: "vat_amount", type: "number", editable: false, maxWidth:"30px"},
-            {label: "Total", key: "total_amount", type: "number", editable: false},
+            {label: "S.Price", key:"selling_price", type: "text", editable: true},
+            {label: "Vat rate", key: "vat_rate", type: "select-dropdown", options: taxRates, maxWidth:"50px"},
+            {label: "Incl.", key: "vat_inclusivity", type: "select-dropdown", maxWidth:"20px", options: [{ text: 'Yes', value: 'Inclusive' }, { text: 'No', value: 'Exclusive' }]},
+            {label: "Vat", key: "vat_amount", type: "number", maxWidth:"30px"},
+            {label: "Total", key: "total_amount", type: "number"},
             {label: "Discount", key: "discount", type: "number", editable: true, minWidth:"50px", maxWidth:"50px"},
             
         ]);
@@ -303,12 +303,15 @@ export default defineComponent({
                 else{            
                     try {
                         const response = await store.dispatch('Direct_Sales/createSaleOrder', formData);
-                        if (response && response.status === 200) {
+                        if (response && response.data.msg === "Success") {
                             hideLoader();
                             toast.success('Sale Order created successfully!');
                             handleReset();
                             mainComponentKey.value += 1;
-                        } else {
+                        }else if(response.data.msg === 'Update Order'){
+                            toast.error(`Insufficient Items - ${response.data.item}`);
+                            hideLoader();
+                        }  else {
                             toast.error('An error occurred while creating the Sale Order.');
                             hideLoader();
                         }
@@ -552,11 +555,14 @@ export default defineComponent({
                 else{            
                     try {
                         const response = await store.dispatch('Direct_Sales/createDeliveryOrder', formData);
-                        if (response && response.status === 200) {
+                        if (response && response.data.msg === 'Success') {
                             hideLoader();
                             toast.success('Delivery Successful!');
                             handleReset();
                             mainComponentKey.value += 1;
+                        }else if(response.data.msg === 'Update Order'){
+                            toast.error(`Insufficient Items - ${response.data.item}`);
+                            hideLoader();
                         } else {
                             toast.error('An error occurred while Delivering the Sale Order.');
                             hideLoader();

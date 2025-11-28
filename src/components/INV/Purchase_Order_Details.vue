@@ -110,9 +110,6 @@ export default defineComponent({
         const fetchOutlets = async() =>{
             await store.dispatch('Retail_Outlets/fetchOutlets', {company:companyID.value})
         };
-        watch([outletID,], () => {
-            
-        }, { immediate: true });
         const handleSelectedOutlet = async(option) =>{
             await store.dispatch('Retail_Outlets/handleSelectedOutlet', option)
             outletID.value = store.state.Retail_Outlets.outletID;
@@ -148,25 +145,25 @@ export default defineComponent({
                     type:'search-dropdown', label:"Outlet", value: outletID.value, componentKey: outComponentKey,
                     selectOptions: outletArray, optionSelected: handleSelectedOutlet, required: true,
                     searchPlaceholder: 'Select Outlet...', dropdownWidth: '500px', updateValue: selectedOutlet.value,
-                    fetchData: fetchOutlets(), clearSearch: clearSelectedOutlet()  
+                    clearSearch: clearSelectedOutlet()  
                 },
                 {
                     type:'search-dropdown', label:"Vendor", value: vendorID.value, componentKey: custComponentKey,
                     selectOptions: vendorArray, optionSelected: handleSelectedVendor, required: true,
                     searchPlaceholder: 'Select Vendor...', dropdownWidth: '500px', updateValue: selectedVendor.value,
-                    fetchData: fetchVendors(), clearSearch: clearSelectedVendor()  
+                    clearSearch: clearSelectedVendor()  
                 },
                 {
                     type:'search-dropdown', label:"Item", value: itemID.value, componentKey: itemComponentKey,
                     selectOptions: itemArray, optionSelected: handleSelectedItem, required: false,
-                    searchPlaceholder: 'Select Item...', dropdownWidth: '500px', updateValue: "",
-                    // fetchData: fetchItems(), clearSearch: clearSelectedItem()  
+                    searchPlaceholder: 'Select Item...', dropdownWidth: '500px', updateValue: "", 
                 },    
             ]
         };
 
         watch([selectedPurchase,selectedVendor], () => {
             if(selectedPurchase.value && selectedVendor.value){
+                outletID.value = selectedPurchase.value.outlet_id;
                 custComponentKey.value += 1; 
                 updateFormFields();
             }
@@ -183,6 +180,7 @@ export default defineComponent({
             tax_totals.value = 0;
             custComponentKey.value += 1;
             vendorID.value = null;
+            outletID.value = null;
         }
 
         const showLoader = () =>{
@@ -358,12 +356,12 @@ export default defineComponent({
             }
 
             let formData = {
-                sale_order: selectedPurchase.value.sale_id,
+                purchase_order: selectedPurchase.value.sale_id,
                 outlet_counter: null,
-                outlet: outletID.value != null ? outletID.value : selectedPurchase.value.outlet_id,
+                outlet: (outletID.value == "")  ? selectedPurchase.value.outlet_id : outletID.value,
                 notes: "",
                 date: formFields.value[0].value,
-                sale_items_array: purchaseItemsArray.value,
+                purchase_items_array: purchaseItemsArray.value,
                 total_amount: receiptTotals.value,
                 sale_type: "Credit",
                 sale_delivery: "Not Delivered",
@@ -373,8 +371,6 @@ export default defineComponent({
                 company: companyID.value,
                 user: userID.value,
             }
-
-            console.log("THE FORM DATA IS ",formData)
        
             errors.value = [];
             for(let i=0; i < formFields.value.length ; i++){
@@ -382,7 +378,7 @@ export default defineComponent({
                     errors.value.push(formFields.value[i].label);
                 }
             }
-            if(outletID.value == '' || (vendorID.value == '' && selectedPurchase.value.client_id == "")){
+            if((outletID.value == '' && selectedPurchase.value.outlet_id == '')  || (vendorID.value == '' && selectedPurchase.value.client_id == "")){
                 errors.value.push('Error');
             }
 
@@ -444,15 +440,16 @@ export default defineComponent({
                         "batch_count": itemRows.value[i].batch_count,
                         "discount": itemRows.value[i].discount,
                         "tax": parseFloat(itemRows.value[i].vat_amount),
-                        "profit": itemRows.value[i].item_sales_income,
+                        "profit": 0,
                         "item_total": itemRows.value[i].total_amount,
+                        "item_sub_total": itemRows.value[i].sub_total,
                         "batch_after_sale": itemRows.value[i].available_batch_count - itemRows.value[i].quantity,
                         "purchase_price": parseFloat(itemRows.value[i].purchase_price),
                         "selling_price": parseFloat(itemRows.value[i].selling_price),
-                        "quantity": itemRows.value[i].stock_after_adjustment,
+                        "quantity": itemRows.value[i].quantity,
                         "tax_type": itemRows.value[i].vat_rate.tax_id,
                         "tax_inclusivity": itemRows.value[i].vat_inclusivity,
-                        "output_vat_id": itemRows.value[i].vat_rate.tax_output_account.ledger_id
+                        "input_vat_id": itemRows.value[i].vat_rate.tax_input_account.ledger_id
                     }        
                     purchaseItemsArray.value.push(purchaseItem);
                     
@@ -467,42 +464,43 @@ export default defineComponent({
                         "batch_count": itemRows.value[i].batch_count,
                         "discount": itemRows.value[i].discount,
                         "tax": itemRows.value[i].vat_amount,
-                        "profit": itemRows.value[i].item_sales_income,
+                        "profit": 0,
                         "item_total": itemRows.value[i].total_amount,
                         "batch_after_sale": itemRows.value[i].available_batch_count - itemRows.value[i].quantity,
                         "purchase_price": parseFloat(itemRows.value[i].purchase_price),
                         "selling_price": parseFloat(itemRows.value[i].selling_price),
-                        "quantity": itemRows.value[i].stock_after_adjustment,
+                        "quantity": itemRows.value[i].quantity,
                         "tax_type": "",
                         "tax_inclusivity": "",
-                        "output_vat_id": ""
+                        "input_vat_id": ""
                     } 
                     purchaseItemsArray.value.push(purchaseItem);
                 }
             }
 
             let formData = {
-                outlet: outletID.value,
+                inventory_purchase: selectedPurchase.value.sale_id,
+                outlet: (outletID.value == "")  ? selectedPurchase.value.outlet_id : outletID.value,
                 notes: "",
                 date: formFields.value[0].value,
-                sale_items_array: purchaseItemsArray.value,
-                total_amount: receiptTotals.value,
+                purchase_items: purchaseItemsArray.value,
+                purchase_totals: receiptTotals.value,
                 sale_type: "Credit",
                 sale_delivery: "Not Delivered",
-                vendor: vendorID.value,
-                tax: tax_totals.value,
+                vendor: (vendorID.value == "") ? selectedPurchase.value.client_id : vendorID.value,
+                tax_amount: tax_totals.value,
                 discount: discountTotals.value,
                 company: companyID.value,
                 user: userID.value
             }
-       
+            console.log("THE FORM DATA IS ",formData)
             errors.value = [];
             for(let i=0; i < formFields.value.length ; i++){
                 if(formFields.value[i].type != "search-dropdown" && formFields.value[i].value =='' && formFields.value[i].required == true){
                     errors.value.push(formFields.value[i].label);
                 }
             }
-            if(outletID.value == '' || vendorID.value == ''){
+            if((outletID.value == '' && selectedPurchase.value.outlet_id == '') || (vendorID.value == '' && selectedPurchase.value.client_id == "")){
                 errors.value.push('Error');
             }
 
@@ -517,19 +515,19 @@ export default defineComponent({
                 }
                 else{            
                     try {
-                        const response = await store.dispatch('Direct_Purchases/createPurchaseOrder', formData);
-                        if (response && response.status === 200) {
+                        const response = await store.dispatch('Direct_Purchases/receivePurchaseOrder', formData);
+                        if (response && response.data.msg === 'Success') {
                             hideLoader();
-                            toast.success('Purchase Order created successfully!');
+                            toast.success('Receipt Success!');
                             handleReset();
                             mainComponentKey.value += 1;
                         } else {
-                            toast.error('An error occurred while creating the Purchase Order.');
+                            toast.error('An error occurred while receiving the Purchase Order.');
                             hideLoader();
                         }
                     } catch (error) {
                         console.error(error.message);
-                        toast.error('Failed to create Purchase Order: ' + error.message);
+                        toast.error('Failed to receive Purchase Order: ' + error.message);
                     } finally {
                         hideLoader();
                     }              
@@ -553,9 +551,6 @@ export default defineComponent({
         const hideModalLoader = () =>{
             modal_loader.value = "none";
         }
-        const fetchDefaultSettings = async() =>{
-            await store.dispatch('Default_Settings/fetchDefaultSettings', {company:companyID.value})
-        };
         onBeforeMount(()=>{ 
             store.dispatch('Ledgers/updateState', { invoiceItemsArray: []})
             updateFormFields();
@@ -563,7 +558,8 @@ export default defineComponent({
             flex_basis_percentage.value = '20';
         })
         onMounted(async()=>{
-            fetchDefaultSettings();
+            fetchOutlets();
+            fetchVendors();
             fetchTaxes();
             fetchItems();
             if(isEditing.value == false){

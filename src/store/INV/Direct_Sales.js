@@ -30,7 +30,7 @@ const state = {
   defaultCashbookID: null,
   defaultStockType: null,
   saveButtonLabel: "Save",
-  saleLineItemsArray: []
+  saleLineItemsArray: [],
 };
   
 const mutations = {

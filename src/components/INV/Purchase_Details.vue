@@ -57,7 +57,7 @@ export default defineComponent({
         const errors = ref([]);
         const companyID = computed(()=> store.state.userData.company_id);
         const userID = computed(()=> store.state.userData.user_id);
-        const defaultSettings = computed(()=> store.state.Default_Settings.settingsList);
+        const defaultSettings = computed(()=> store.state.userData.defaultSettings);
         const defaultOutlet = computed(()=> store.state.Direct_Purchases.defaultOutlet);
         const defaultCounter = computed(()=> store.state.Direct_Purchases.defaultCounter);
         const defaultChannel = computed(()=> store.state.Direct_Purchases.defaultChannel);
@@ -152,19 +152,18 @@ export default defineComponent({
                     type:'search-dropdown', label:"Outlet", value: outletID.value, componentKey: outComponentKey,
                     selectOptions: outletArray, optionSelected: handleSelectedOutlet, required: true,
                     searchPlaceholder: 'Select Outlet...', dropdownWidth: '500px', updateValue: defaultOutlet.value,
-                    fetchData: fetchOutlets(), clearSearch: clearSelectedOutlet()  
+                    clearSearch: clearSelectedOutlet()  
                 },
                 {
                     type:'search-dropdown', label:"Cashbook", value: cashbookID.value, componentKey: ledComponentKey,
                     selectOptions: ledgerArray, optionSelected: handleSelectedCashbook, required: true,
                     searchPlaceholder: 'Select Cashbook...', dropdownWidth: '400px', updateValue: "",
-                    fetchData: fetchCashbooks(), clearSearch: clearSelectedCashbook()  
+                    clearSearch: clearSelectedCashbook()  
                 },
                 {
                     type:'search-dropdown', label:"Item", value: itemID.value, componentKey: itemComponentKey,
                     selectOptions: itemArray, optionSelected: handleSelectedItem, required: true,
                     searchPlaceholder: 'Select Item...', dropdownWidth: '500px', updateValue: "",
-                    // fetchData: fetchItems(), clearSearch: clearSelectedItem()  
                 },
                 { type: 'text', name: 'customer',label: "Vendor", value: '', required: true,},
                 { type: 'text', name: 'phone_number',label: "Phone No", value: '0', required: true,},
@@ -271,14 +270,14 @@ export default defineComponent({
                         "txn_type": "JNL",
                         "posting_account": itemRows.value[i].vat_rate.tax_input_account.ledger_id,
                         "credit_amount": 0,
-                        "description": "Purchase of "+ itemRows.value[i].item_name+", Tax payable",
+                        "description": "Purchase of "+ itemRows.value[i].item_name+", Tax receivable",
                         "debit_amount": Math.abs(itemRows.value[i].vat_amount),
                     }    
                     let taxTxn ={
                         "tax": itemRows.value[i].vat_rate.tax_id,
                         "client": formFields.value[4].value,
                         "amount": itemRows.value[i].vat_amount,
-                        "description": "Purchase of "+ itemRows.value[i].item_name+", Tax payable",
+                        "description": "Purchase of "+ itemRows.value[i].item_name+", Tax receivable",
                         "tax_inclusive": itemRows.value[i].vat_inclusivity,
                         "tax_category": 'Input'
                     }               
@@ -385,7 +384,6 @@ export default defineComponent({
         }
 
         const fetchDefaultSettings = async() =>{
-            await store.dispatch('Default_Settings/fetchDefaultSettings', {company:companyID.value})
             for(let i=0; i < defaultSettings.value.length; i++){
                 if(defaultSettings.value[i].setting_name === 'Inventory Stock Control A/c'){
                     stock_control_account.value = defaultSettings.value[i].setting_value;
@@ -403,6 +401,8 @@ export default defineComponent({
             flex_basis_percentage.value = '25';
         })
         onMounted(async()=>{
+            fetchCashbooks();
+            fetchOutlets();
             fetchDefaultSettings();
             fetchTaxes();
             fetchItems();

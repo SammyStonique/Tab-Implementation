@@ -29,7 +29,8 @@ const state = {
   defaultChannelID: null,
   defaultCashbookID: null,
   defaultStockType: null,
-  saveButtonLabel: "Save"
+  saveButtonLabel: "Save",
+  purchaseLineItemsArray: [],
 };
   
 const mutations = {
@@ -171,14 +172,16 @@ const actions = {
     })
     
   },
-  fetchPurchase({ commit,state }, formData) {
-    axios.post(`api/v1/fetch-inventory-sales/`,formData)
+  async fetchPurchase({ commit,state }, formData) {
+    return axios.post(`api/v1/fetch-inventory-sales/`,formData)
     .then((response)=>{
       state.selectedPurchase = response.data;
+      state.purchaseLineItemsArray = response.data.sale_items;
       const selectedVendor = response.data.client;
       const selectedOutlet = response.data.outlet;
       commit('SET_SELECTED_VENDOR',selectedVendor);
       commit('SET_SELECTED_OUTLET',selectedOutlet);
+      return response.data;
     })
     .catch((error)=>{
       console.log(error.message);
@@ -282,6 +285,14 @@ const actions = {
               Swal.fire("Poof! Purchase Order removed succesfully!", {
                 icon: "success",
               }); 
+          }else if(response.data.msg == "Paid"){
+              Swal.fire("Order Already Paid!", {
+                icon: "warning",
+              }); 
+          }else if(response.data.msg == "Sold"){
+              Swal.fire("Order Items Already Sold!", {
+                icon: "warning",
+              }); 
           }else{
             Swal.fire({
               title: "Error Deleting Purchase Order",
@@ -317,11 +328,19 @@ const actions = {
       showLoaderOnConfirm: true,
     }).then((result) => {
       if (result.value) {
-        axios.post(`api/v1/delete-inventory-purchase/`,formData)
+        axios.post(`api/v1/delete-inventory-purchase-order/`,formData)
         .then((response)=>{
           if(response.data.msg == "Success"){
               Swal.fire("Poof! Received Order removed succesfully!", {
                 icon: "success",
+              }); 
+          }else if(response.data.msg == "Paid"){
+              Swal.fire("Order Already Paid!", {
+                icon: "warning",
+              }); 
+          }else if(response.data.msg == "Sold"){
+              Swal.fire("Order Items Already Sold!", {
+                icon: "warning",
               }); 
           }else{
             Swal.fire({

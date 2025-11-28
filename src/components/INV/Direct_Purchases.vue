@@ -348,7 +348,7 @@ export default{
         };
         const selectTab = async(index) => {
             let formData = {
-                company: companyID.value,
+                company_id: companyID.value,
                 sale: saleID.value,
             }
             if(index == 1){

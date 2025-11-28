@@ -311,18 +311,12 @@ export default{
                 }
             }
         };
-        const addNewPurchase = () =>{
+        const addNewPurchase = async() =>{
             // store.commit('Direct_Sales/initializeStore');
+            await store.dispatch('Direct_Purchases/updateState',{saveButtonLabel: 'Save',selectedPurchase:null, selectedVendor: null, isEditing: false, isDelivering:false, selectedOutlet:null,purchaseLineItemsArray:[]})
+            await store.dispatch('Items_Catalog/updateState',{lineItemsArray:[]})
             store.commit('pageTab/ADD_PAGE', {'INV':'Purchase_Order_Details'});
             store.state.pageTab.invActiveTab = 'Purchase_Order_Details';         
-        };
-        const fetchPurchaseOrderItems = async(purchaseID) =>{
-            let formData = {
-                sale: purchaseID,
-                inventory_item: "",
-                company_id: companyID.value
-            }
-            await store.dispatch('Items_Catalog/fetchPurchaseOrderItems',formData)
         };
         const handleActionClick = async(rowIndex, action, row) =>{
             if(action == 'edit'){
@@ -330,17 +324,17 @@ export default{
                 if(order_delivery == "Delivered"){
                     toast.error("Cannot Edit Received Order")
                 }else{
-                    await store.dispatch('Direct_Purchases/updateState',{saveButtonLabel: 'Save', isEditing: true})
+                    await store.dispatch('Direct_Purchases/updateState',{saveButtonLabel: 'Save', isEditing: true, isDelivering: false})
                     await store.dispatch('Items_Catalog/updateState',{lineItemsArray:[]})
                     const purchaseID = row[idField];
                     let formData = {
                         company: companyID.value,
                         inventory_sale: purchaseID
                     }
-                    fetchPurchaseOrderItems(purchaseID);
                     await store.dispatch('Direct_Purchases/fetchPurchase',formData);
                     store.commit('pageTab/ADD_PAGE', {'INV':'Purchase_Order_Details'});
                     store.state.pageTab.invActiveTab = 'Purchase_Order_Details';
+                    await store.dispatch('Items_Catalog/updateState',{lineItemsArray: store.state.Direct_Purchases.purchaseLineItemsArray})
                 }
             }
             else if(action == 'receive'){
@@ -348,17 +342,18 @@ export default{
                 if(order_delivery == "Delivered"){
                     toast.error("Order Already Received")
                 }else{
-                    await store.dispatch('Direct_Purchases/updateState',{saveButtonLabel: 'Receive', isDelivering: true})
+                    await store.dispatch('Direct_Purchases/updateState',{saveButtonLabel: 'Receive', isDelivering: true, isEditing: false})
                     await store.dispatch('Items_Catalog/updateState',{lineItemsArray:[]})
                     const purchaseID = row[idField];
                     let formData = {
                         company: companyID.value,
                         inventory_sale: purchaseID
                     }
-                    fetchPurchaseOrderItems(purchaseID);
                     await store.dispatch('Direct_Purchases/fetchPurchase',formData);
                     store.commit('pageTab/ADD_PAGE', {'INV':'Purchase_Order_Details'});
                     store.state.pageTab.invActiveTab = 'Purchase_Order_Details';
+                    await store.dispatch('Items_Catalog/updateState',{lineItemsArray: store.state.Direct_Purchases.purchaseLineItemsArray})
+                    
                 }             
             }
             else if(action == 'delete'){

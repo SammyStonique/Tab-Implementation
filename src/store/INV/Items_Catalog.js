@@ -394,20 +394,11 @@ const actions = {
         selectedItem.batch_count = 10000000,
         selectedItem.input_vat_id = null;
         selectedItem.item_sales_income = (parseFloat(selectedItem.selling_price) - parseFloat(selectedItem.purchase_price)) * 1;
-
+        const exists = state.lineItemsArray.some(item => item.inventory_item_id === selectedItem.inventory_item_id);
+        if (!exists) {
+            state.lineItemsArray = [...state.lineItemsArray, selectedItem];
+        }
         state.itemsArray = [...state.itemsArray, selectedItem];
-    }
-    let itemExists = false;
-    for (let i=0; i< state.lineItemsArray.length; i++){
-      if(state.lineItemsArray[i] == selectedItem){
-        itemExists = true;
-        break;
-      }
-    }
-    if(itemExists == false){
-      state.lineItemsArray.push(selectedItem)
-    }else{
-      toast.error("Item Already Selected")
     }
     
     commit('ITEMS_ARRAY', state.itemsArray);

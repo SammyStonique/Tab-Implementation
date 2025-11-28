@@ -363,31 +363,33 @@
     text-align: left;
   }
   
-  .dynamic-table input{
-    text-align: left;
-    outline: none;
-    background-color: inherit;
-  }
-  .actions{
-    padding: 8px;
-  }
+.dynamic-table input{
+  width: 100%;
+  min-width: 0;
+  outline: none;
+  box-sizing: border-box;
+}
+.actions{
+  padding: 8px;
+}
   
-  /* Style for fixed header */
-  .table-container thead th {
-    position: sticky;
-    top: 0;
-    background: #3b4252;
-  }
-  
-  .table-body tr:nth-child(even) {
-    background-color: #f2f2f2;
-  }
-  .ellipsis {
-    max-width: 350px; /* Adjust the max-width as needed */
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
-  }
+/* Style for fixed header */
+.table-container thead th {
+  position: sticky;
+  top: 0;
+  background: #3b4252;
+}
+
+.table-body tr:nth-child(even) {
+  background-color: #f2f2f2;
+}
+.ellipsis {
+  max-width: 350px; /* Adjust the max-width as needed */
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  min-width: 0;
+}
   
   </style>
     

@@ -80,7 +80,7 @@ export default{
         const toast = useToast();
         const loader = ref('');
         const catComponentKey = ref('');
-        const defaultSettings = computed(()=> store.state.Default_Settings.settingsList);
+        const defaultSettings = computed(()=> store.state.userData.defaultSettings);
         const idField = 'sale_id';
         const addButtonLabel = ref('New Received Order');
         const addingRight = ref('Deliver Sale Order');
@@ -113,8 +113,8 @@ export default{
             {label: "Vendor", key:"client"},
             {label: "Phone No", key:"client_phone_number"},
             {label: "Amount", key:"total_amount", type: "number"},
-            {label: "Paid", key:"total_paid", type: "number"},
-            {label: "Balance", key:"balance", type: "number"},
+            {label: "Paid", key:"total_paid", type: "number", txtColor: "txtColorPaid"},
+            {label: "Balance", key:"balance", type: "number", txtColor: "txtColorBal"},
             {label: "Bill#", key:"txn_no"},
             {label: "Done By", key:"done_by"},
         ]);
@@ -151,7 +151,7 @@ export default{
             if(selectedIds.value.length == 1){
                 let formData = {
                     company: companyID.value,
-                    purchases_array: selectedIds.value
+                    purchase_array: selectedIds.value
                 }
                 try{
                     const response = await store.dispatch('Direct_Purchases/deleteReceivedOrder',formData)
@@ -177,7 +177,7 @@ export default{
             if(selectedIds.value.length){
                 let formData = {
                     company: companyID.value,
-                    purchases_array: selectedIds.value
+                    purchase_array: selectedIds.value
                 }
                 try{
                     const response = await store.dispatch('Direct_Purchases/deleteReceivedOrder',formData)
@@ -289,7 +289,6 @@ export default{
             // scrollToTop();
         };
         const fetchDefaultSettings = async() =>{
-            await store.dispatch('Default_Settings/fetchDefaultSettings', {company:companyID.value})
             for(let i=0; i < defaultSettings.value.length; i++){
                 if(defaultSettings.value[i].setting_name === 'Default Retail Outlet'){
                     store.dispatch('Direct_Sales/updateState', {defaultOutlet:defaultSettings.value[i].setting_value_name, defaultOutletID:defaultSettings.value[i].setting_value})
@@ -312,7 +311,7 @@ export default{
                 const saleID = [row[idField]];
                 let formData = {
                     company: companyID.value,
-                    sales_array: saleID
+                    purchase_array: saleID
                 }
                 await store.dispatch('Direct_Purchases/deleteReceivedOrder',formData).
                 then(()=>{
@@ -341,7 +340,7 @@ export default{
         };
         const selectTab = async(index) => {
             let formData = {
-                company: companyID.value,
+                company_id: companyID.value,
                 sale: saleID.value,
             }
             if(index == 1){
